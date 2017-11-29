@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -222,7 +223,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param gains the new set of gains to use. Not modified.
     */
-   public void setGains(PIDSE3Gains gains)
+   public void setGains(PIDSE3GainsReadOnly gains)
    {
       this.gains.set(gains);
    }
