@@ -4,10 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.ConstraintType;
 
-
 public class MotionQPInput
 {
-   
    public final DenseMatrix64F taskJacobian;
    public final DenseMatrix64F taskObjective;
    public final DenseMatrix64F taskWeightMatrix;
@@ -18,14 +16,18 @@ public class MotionQPInput
 
    /**
     * <p>
-    *    Motion objective input into the QP solver.
-    *    Must be in the form
+    * Motion objective input into the QP solver. Must be in the form
     * </p>
     * <p>
-    *    J*x - x
+    * A * x - b
     * </p>
+    * where:
+    * <ul>
+    * <li>A is {@code taskJacobian}
+    * <li>b is {@code taskObjective}
+    * <li>x is the vector of the problem variables, for instance joint accelerations.
     * <p>
-    *    where the overall desire is minimize the objective.
+    * where the overall desire is minimize the objective.
     * </p>
     */
    public MotionQPInput(int numberOfDoFs)
@@ -88,6 +90,16 @@ public class MotionQPInput
       return constraintType.isEqualityConstraint();
    }
 
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
+   }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
+   }
+
    @Override
    public String toString()
    {
@@ -101,15 +113,5 @@ public class MotionQPInput
       else
          ret += "Weight:\n" + taskWeightMatrix;
       return ret;
-   }
-
-   public void setConstraintType(ConstraintType constraintType)
-   {
-      this.constraintType = constraintType;
-   }
-
-   public ConstraintType getConstraintType()
-   {
-      return constraintType;
    }
 }
