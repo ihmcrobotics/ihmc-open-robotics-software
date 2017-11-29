@@ -1,7 +1,5 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.EjmlParameters;
-import org.ejml.alg.dense.mult.MatrixMultProduct;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.factory.DecompositionFactory;
@@ -9,7 +7,6 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.QRDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixDimensionException;
 import us.ihmc.commons.MathTools;
 
 public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
@@ -19,9 +16,6 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
 
    private final DenseMatrix64F nullspace;
    private final DenseMatrix64F Q;
-   private final DenseMatrix64F R;
-
-   private final DenseMatrix64F Q1;
    private final DenseMatrix64F R1;
 
    private final DenseMatrix64F nullspaceProjector;
@@ -42,8 +36,6 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
       decomposer = DecompositionFactory.qr(matrixSize, matrixSize);
       nullspace = new DenseMatrix64F(matrixSize, matrixSize);
       Q = new DenseMatrix64F(matrixSize, matrixSize);
-      R = new DenseMatrix64F(matrixSize, matrixSize);
-      Q1 = new DenseMatrix64F(matrixSize, matrixSize);
       R1 = new DenseMatrix64F(matrixSize, matrixSize);
    }
 
@@ -105,7 +97,6 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
    public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
    {
       int nullity = matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows();
-
       nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
 
       if (alpha == 0.0)
@@ -117,7 +108,6 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
       {
          int size = matrixToComputeNullspaceOf.getNumCols();
          int rank = matrixToComputeNullspaceOf.getNumRows();
-         R.reshape(size, rank);
          transposed.reshape(size, rank);
 
          R1.reshape(rank, rank);
@@ -126,14 +116,11 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
 
          CommonOps.transpose(matrixToComputeNullspaceOf, transposed);
          decomposer.decompose(transposed);
-         decomposer.getR(R, false);
+         decomposer.getR(R1, true);
 
-         CommonOps.extract(R, 0, rank, 0, rank, R1, 0, 0);
-
-         transposed.reshape(rank, rank);
-         CommonOps.transpose(R1, transposed);
-         multiplyLowerDiagonalByUpperDiagonal(R1, squared);
+         inner_small_upper_diagonal(R1, squared);
          MatrixTools.addDiagonal(squared, alpha * alpha);
+
          linearSolver.setA(squared);
          linearSolver.invert(inverse);
 
@@ -156,7 +143,6 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
       int rank = matrixToComputeNullspaceOf.getNumRows();
       nullspaceToPack.reshape(size, nullity);
       Q.reshape(size, size);
-      R.reshape(size, rank);
       transposed.reshape(size, rank);
 
       CommonOps.transpose(matrixToComputeNullspaceOf, transposed);
@@ -164,45 +150,6 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
       decomposer.getQ(Q, false);
 
       CommonOps.extract(Q, 0, Q.getNumRows(), Q.getNumCols() - nullity, Q.getNumCols(), nullspaceToPack, 0, 0);
-   }
-
-   private static void multiplyLowerDiagonalByUpperDiagonal( RowD1Matrix64F a , RowD1Matrix64F c)
-   {
-
-      /*
-      if( a.numCols >= EjmlParameters.MULT_COLUMN_SWITCH ) {
-         inner_reorder_upper_diagonal( a, c);
-      } else {
-         */
-         //inner_small( a, c);
-      inner_small_upper_diagonal( a, c);
-      //}
-   }
-
-   // TODO make this work for diagonal matrices
-   public static void inner_small(RowD1Matrix64F a, RowD1Matrix64F c) {
-
-      for( int i = 0; i < a.numCols; i++ )
-      {
-         for( int j = i; j < a.numCols; j++ )
-         {
-            int indexC1 = i*c.numCols+j;
-            int indexC2 = j*c.numCols+i;
-            int indexA = i;
-            int indexB = j;
-            double sum = 0;
-            int end = indexA + a.numRows*a.numCols;
-            for( ; indexA < end; indexA += a.numCols, indexB += a.numCols )
-            {
-               /*
-               if (indexA < i)
-                  continue;
-                  */
-               sum += a.data[indexA]*a.data[indexB];
-            }
-            c.data[indexC1] = c.data[indexC2] = sum;
-         }
-      }
    }
 
    static void inner_small_upper_diagonal(RowD1Matrix64F a, RowD1Matrix64F c) {
@@ -226,33 +173,5 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
             c.data[indexC1] = c.data[indexC2] = sum;
          }
       }
-   }
-
-   // TODO make this work for diagonal matrices
-   public static void inner_reorder_upper_diagonal(RowD1Matrix64F a, RowD1Matrix64F c) {
-
-      for( int i = 0; i < a.numCols; i++ ) {
-         int indexC = i*c.numCols+i;
-         double valAi = a.data[i];
-         for( int j = i; j < a.numCols; j++ ) {
-            c.data[indexC++] =  valAi*a.data[j];
-         }
-
-         for( int k = 1; k < a.numRows; k++ ) {
-            indexC = i*c.numCols+i;
-            int indexB = k*a.numCols+i;
-            valAi = a.data[indexB];
-            for( int j = i; j < a.numCols; j++ ) {
-               c.data[indexC++] +=  valAi*a.data[indexB++];
-            }
-         }
-
-         indexC = i*c.numCols+i;
-         int indexC2 = indexC;
-         for( int j = i; j < a.numCols; j++ , indexC2 += c.numCols) {
-            c.data[indexC2] = c.data[indexC++];
-         }
-      }
-
    }
 }

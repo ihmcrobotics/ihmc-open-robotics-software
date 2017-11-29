@@ -29,7 +29,7 @@ public class NullspaceCalculatorTimingTest
 
       NullspaceCalculator svdCalculator = new SVDNullspaceCalculator(100, true);
       NullspaceCalculator qrCalculator = new QRNullspaceCalculator(100);
-      NullspaceCalculator leastSquaresCalculator = new DampedLeastSquaresNullspaceCalculator(100, 0.0, registry);
+      NullspaceCalculator leastSquaresCalculator = new DampedLeastSquaresNullspaceCalculator(100, 0.0);
 
       Random random = new Random(10L);
       double[] Jvalues = RandomNumbers.nextDoubleArray(random, 200, 10.0);
