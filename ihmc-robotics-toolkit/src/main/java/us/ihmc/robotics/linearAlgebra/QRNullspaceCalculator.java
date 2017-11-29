@@ -81,7 +81,7 @@ public class QRNullspaceCalculator implements NullspaceCalculator
    @Override
    public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
    {
-      int nullity = matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows();
+      int nullity = Math.max(matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows(), 0);
       computeNullspace(nullspace, matrixToComputeNullspaceOf, nullity);
 
       nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
@@ -101,7 +101,6 @@ public class QRNullspaceCalculator implements NullspaceCalculator
       CommonOps.transpose(matrixToComputeNullspaceOf, transposed);
       decomposer.decompose(transposed);
       decomposer.getQ(Q, false);
-      //decomposer.getR(R, false);
 
       CommonOps.extract(Q, 0, Q.getNumRows(), Q.getNumCols() - nullity, Q.getNumCols(), nullspaceToPack, 0, 0);
    }

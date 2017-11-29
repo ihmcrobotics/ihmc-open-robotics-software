@@ -24,17 +24,40 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
 
       nullspaceCalculator.setPseudoInverseAlpha(0.1);
 
-      DenseMatrix64F jacobian = new DenseMatrix64F(2, 2);
+      DenseMatrix64F jacobian = new DenseMatrix64F(4, 2);
+      jacobian.set(0, 0, 1.0);
+      jacobian.set(0, 1, 5.0);
+      jacobian.set(1, 0, 2.0);
+      jacobian.set(1, 1, 6.0);
+      jacobian.set(2, 0, 3.0);
+      jacobian.set(2, 1, 7.0);
+      jacobian.set(3, 0, 4.0);
+      jacobian.set(3, 1, 8.0);
+
+      DenseMatrix64F nullspaceProjector = new DenseMatrix64F(2, 2);
+      nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
+
+      DenseMatrix64F nullspaceProjectorExpected = new DenseMatrix64F(2, 2);
+      nullspaceProjectorExpected.set(0, 0, 0.00540336);
+      nullspaceProjectorExpected.set(0, 1,-0.00217364);
+      nullspaceProjectorExpected.set(1, 0,-0.00217364);
+      nullspaceProjectorExpected.set(1, 1, 0.000931872);
+
+      for (int i = 0; i < nullspaceProjector.getNumElements(); i++)
+         assertEquals(nullspaceProjectorExpected.get(i), nullspaceProjector.get(i), 1e-7);
+
+
+      jacobian = new DenseMatrix64F(2, 2);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 1, 3.0);
       jacobian.set(1, 0, 7.0);
       jacobian.set(1, 1, 9.0);
 
 
-      DenseMatrix64F nullspaceProjector = new DenseMatrix64F(2, 2);
+      nullspaceProjector = new DenseMatrix64F(2, 2);
       nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
 
-      DenseMatrix64F nullspaceProjectorExpected = new DenseMatrix64F(2, 2);
+      nullspaceProjectorExpected = new DenseMatrix64F(2, 2);
 
       nullspaceProjectorExpected.set(0, 0, 0.0061905);
       nullspaceProjectorExpected.set(0, 1,-0.0045392);
@@ -43,6 +66,47 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
 
       for (int i = 0; i < nullspaceProjector.getNumElements(); i++)
          assertEquals(nullspaceProjectorExpected.get(i), nullspaceProjector.get(i), 1e-7);
+
+
+
+      jacobian = new DenseMatrix64F(2, 4);
+      jacobian.set(0, 0, 1.0);
+      jacobian.set(0, 1, 3.0);
+      jacobian.set(0, 3, 7.0);
+      jacobian.set(1, 0, 7.0);
+      jacobian.set(1, 2, 9.0);
+      jacobian.set(1, 3, 11.0);
+
+
+      nullspaceProjector = new DenseMatrix64F(4, 4);
+      nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
+
+      nullspaceProjectorExpected = new DenseMatrix64F(4, 4);
+
+      nullspaceProjectorExpected.set(0, 0, 0.746458);
+      nullspaceProjectorExpected.set(0, 1, 0.130345);
+      nullspaceProjectorExpected.set(0, 2,-0.381845);
+      nullspaceProjectorExpected.set(0, 3,-0.162561);
+
+      nullspaceProjectorExpected.set(1, 0, 0.130345);
+      nullspaceProjectorExpected.set(1, 1, 0.708734);
+      nullspaceProjectorExpected.set(1, 2, 0.292415);
+      nullspaceProjectorExpected.set(1, 3,-0.322225);
+
+      nullspaceProjectorExpected.set(2, 0,-0.381845);
+      nullspaceProjectorExpected.set(2, 1, 0.292415);
+      nullspaceProjectorExpected.set(2, 2, 0.383735);
+      nullspaceProjectorExpected.set(2, 3,-0.0709106);
+
+      nullspaceProjectorExpected.set(3, 0,-0.162561);
+      nullspaceProjectorExpected.set(3, 1,-0.322225);
+      nullspaceProjectorExpected.set(3, 2,-0.0709106);
+      nullspaceProjectorExpected.set(3, 3, 0.161473);
+
+      for (int i = 0; i < nullspaceProjector.getNumElements(); i++)
+         assertEquals(nullspaceProjectorExpected.get(i), nullspaceProjector.get(i), 1e-5);
+
+
 
 
       jacobian = new DenseMatrix64F(3, 4);
@@ -124,9 +188,10 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSimpleProjectOntoNullspace()
+   public void testSimpleProjectOntoNullspaceWithDamping()
    {
-      NullspaceCalculator nullspaceCalculator = getDampedNullspaceProjectorCalculator();
+      DampedNullspaceCalculator nullspaceCalculator = getDampedNullspaceProjectorCalculator();
+      nullspaceCalculator.setPseudoInverseAlpha(0.1);
 
       DenseMatrix64F jacobian = new DenseMatrix64F(2, 2);
       jacobian.set(0, 0, 1.0);
@@ -142,8 +207,11 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
 
       nullspaceCalculator.projectOntoNullspace(vectorToProject, jacobian, projectedVector);
 
-      assertEquals(0.0, projectedVector.get(0, 0), 1e-7);
-      assertEquals(0.0, projectedVector.get(0, 1), 1e-7);
+      assertEquals(0.00124037, projectedVector.get(0, 0), 1e-7);
+      assertEquals(-0.00040956, projectedVector.get(0, 1), 1e-7);
+
+
+
 
 
       jacobian = new DenseMatrix64F(2, 4);
@@ -168,16 +236,16 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
 
       nullspaceCalculator.projectOntoNullspace(matrixToProject, jacobian, projectedVector);
 
-      double epsilon = 1e-5;
-      assertEquals(0.0423707, projectedVector.get(0, 0), epsilon);
-      assertEquals(3.15904, projectedVector.get(0, 1), epsilon);
-      assertEquals(1.62918, projectedVector.get(0, 2), epsilon);
-      assertEquals(-1.35993, projectedVector.get(0, 3), epsilon);
+      double epsilon = 1e-4;
+      assertEquals(0.042359, projectedVector.get(0, 0), epsilon);
+      assertEquals(3.15933, projectedVector.get(0, 1), epsilon);
+      assertEquals(1.62903, projectedVector.get(0, 2), epsilon);
+      assertEquals(-1.35941, projectedVector.get(0, 3), epsilon);
 
-      assertEquals(1.37192, projectedVector.get(1, 0), epsilon);
-      assertEquals(6.39598, projectedVector.get(1, 1), epsilon);
-      assertEquals(2.52277, projectedVector.get(1, 2), epsilon);
-      assertEquals(-2.93712, projectedVector.get(1, 3), epsilon);
+      assertEquals(1.37194, projectedVector.get(1, 0), epsilon);
+      assertEquals(6.3964, projectedVector.get(1, 1), epsilon);
+      assertEquals(2.52261, projectedVector.get(1, 2), epsilon);
+      assertEquals(-2.93631, projectedVector.get(1, 3), epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -191,7 +259,7 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
       nullspaceCalculator.setPseudoInverseAlpha(alpha);
       LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.pseudoInverse(true);
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < 100; i++)
       {
          int JCols = RandomNumbers.nextInt(random, 1, 100);
          int JRows = RandomNumbers.nextInt(random, 1, 100);
@@ -213,7 +281,7 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
 
          nullspaceCalculator.computeNullspaceProjector(jacobian, projector);
 
-         /** I - J<sup>+</sup> J */
+         // I - J<sup>+</sup> J
          MatrixTools.setDiagonal(inverse, alpha * alpha);
          CommonOps.multAddTransB(jacobian, jacobian, inverse);
          linearSolver.setA(inverse);
@@ -250,5 +318,6 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
             }
          }
       }
+
    }
 }
