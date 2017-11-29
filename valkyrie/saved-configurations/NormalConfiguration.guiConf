@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.highLevelState,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.timeInStandprep</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.highLevelControllerName,root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.timeInStandprep</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -126,7 +126,7 @@
 <Title>
 Startup
 </Title>
-<Entry Boxes>requestedHighLevelState,calibrateFootForceSensors</Entry Boxes>
+<Entry Boxes>requestedHighLevelControllerName,calibrateFootForceSensors</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>

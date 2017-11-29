@@ -175,7 +175,6 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
                                 estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
-      sensorReader.setDoIHMCControlRatio(1.0);
       SensorOutputMapReadOnly sensorOutputMap = sensorReader.getSensorOutputMapReadOnly();
 
       /*

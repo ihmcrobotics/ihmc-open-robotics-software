@@ -30,7 +30,7 @@
 <Title>
 Tab
 </Title>
-<Entry Boxes>enableOutput,startStandprep,requestedHighLevelState,controlRatio</Entry Boxes>
+<Entry Boxes>enableOutput,startStandprep,requestedHighLevelControllerName,controlRatio</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import java.util.Comparator;
-
 import us.ihmc.communication.controllerAPI.command.Command;
+
+import java.util.Comparator;
 
 /**
  * Compares the execution times of two commands
