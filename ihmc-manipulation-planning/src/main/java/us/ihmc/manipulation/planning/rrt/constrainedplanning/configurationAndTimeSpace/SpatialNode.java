@@ -75,6 +75,15 @@ public class SpatialNode
       return distance;
    }
 
+   public double computeDistanceWOTime(double positionWeight, double orientationWeight, SpatialNode other)
+   {
+      double positionDistance = positionWeight * getPositionDistance(other);
+      double orientationDistance = orientationWeight * getOrientationDistance(other);
+
+      double distance = positionDistance + orientationDistance;
+      return distance;
+   }
+
    public void interpolate(SpatialNode nodeOne, SpatialNode nodeTwo, double alpha)
    {
       time = TupleTools.interpolate(nodeOne.time, nodeTwo.time, alpha);
