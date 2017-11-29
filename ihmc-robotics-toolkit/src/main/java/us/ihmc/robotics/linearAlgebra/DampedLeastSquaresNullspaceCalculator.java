@@ -53,7 +53,6 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
       pseudoInverseSolver.invert(pseudoInverseMatrix);
 
       // I - J^* J
-      nullspaceProjectorToPack.reshape(nullspaceMatrixSize, nullspaceMatrixSize);
       CommonOps.mult(-1.0, pseudoInverseMatrix, matrixToComputeNullspaceOf, nullspaceProjectorToPack);
       MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
    }
