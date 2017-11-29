@@ -809,7 +809,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
-      HighLevelHumanoidControllerToolbox controllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
+      HighLevelHumanoidControllerToolbox controllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory()
                                                                                           .getHighLevelHumanoidControllerToolbox();
 
       int numberOfChanges = 4;

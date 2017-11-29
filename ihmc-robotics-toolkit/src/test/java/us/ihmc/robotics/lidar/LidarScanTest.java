@@ -88,10 +88,10 @@ public class LidarScanTest
       float[] ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
       float[] ranges2 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
 
-      RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      RigidBodyTransform randomTransform3 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      RigidBodyTransform randomTransform4 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      RigidBodyTransform randomTransform3 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      RigidBodyTransform randomTransform4 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges2);
@@ -120,8 +120,8 @@ public class LidarScanTest
 
       float[] ranges1Shortened = ArrayUtils.subarray(ranges1, 0, 3000);
 
-      RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1Shortened);
@@ -165,8 +165,8 @@ public class LidarScanTest
       {
     	  ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
 
-          RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-          RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+          RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+          RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
           lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
       }

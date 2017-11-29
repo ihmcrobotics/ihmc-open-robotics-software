@@ -216,7 +216,7 @@ public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
    @Override
    public boolean hasDamping()
    {
-      return damping.isNaN();
+      return !damping.isNaN();
    }
 
    @Override

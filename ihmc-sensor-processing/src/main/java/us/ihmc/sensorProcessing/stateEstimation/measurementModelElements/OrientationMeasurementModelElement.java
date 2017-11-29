@@ -7,18 +7,18 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class OrientationMeasurementModelElement extends AbstractMeasurementModelElement
 {
    private static final int SIZE = 3;
-   private final ControlFlowOutputPort<FrameOrientation> orientationStatePort;
+   private final ControlFlowOutputPort<FrameQuaternion> orientationStatePort;
    private final ControlFlowInputPort<RotationMatrix> orientationMeasurementInputPort;
 
    private final ReferenceFrame estimationFrame;
@@ -27,7 +27,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
    // temp stuff:
-   private final FrameOrientation orientationOfMeasurementFrameInEstimationFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion orientationOfMeasurementFrameInEstimationFrame = new FrameQuaternion(ReferenceFrame.getWorldFrame());
    private final RotationMatrix tempMatrix3d = new RotationMatrix();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    
@@ -40,7 +40,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    private final AxisAngle tempAxisAngle = new AxisAngle();
    private final Vector3D rotationVectorResidual = new Vector3D();
 
-   public OrientationMeasurementModelElement(ControlFlowOutputPort<FrameOrientation> orientationStatePort,
+   public OrientationMeasurementModelElement(ControlFlowOutputPort<FrameQuaternion> orientationStatePort,
            ControlFlowInputPort<RotationMatrix> orientationMeasurementInputPort, ReferenceFrame estimationFrame, ReferenceFrame measurementFrame, String name,
            YoVariableRegistry registry)
    {
@@ -70,19 +70,19 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       tempMatrix3d.get(orientationStateOutputBlock);
    }
 
-   private final FrameOrientation tempMeasuredOrientationFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion tempMeasuredOrientationFrameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
    
    public DenseMatrix64F computeResidual()
    {
-      orientationStatePort.getData().getQuaternion(estimatedOrientationQuaternion);
+      estimatedOrientationQuaternion.set(orientationStatePort.getData());
 
       orientationOfMeasurementFrameInEstimationFrame.setToZero(measurementFrame);
       orientationOfMeasurementFrameInEstimationFrame.changeFrame(estimationFrame);
-      orientationOfMeasurementFrameInEstimationFrame.getQuaternion(measurmentFrameToEstimationFrame);
+      measurmentFrameToEstimationFrame.set(orientationOfMeasurementFrameInEstimationFrame);
       
       // Compute orientationResidual as a quaternion
       tempMeasuredOrientationFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
-      tempMeasuredOrientationFrameOrientation.getQuaternion(actualOrientationMeasurement);
+      actualOrientationMeasurement.set(tempMeasuredOrientationFrameOrientation);
      
       // Compute the estimated measurement
       estimatedOrientationMeasurement.set(estimatedOrientationQuaternion);

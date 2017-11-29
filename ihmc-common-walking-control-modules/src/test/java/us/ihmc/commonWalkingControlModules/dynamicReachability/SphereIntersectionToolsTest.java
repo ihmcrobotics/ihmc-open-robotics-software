@@ -21,10 +21,10 @@ public class SphereIntersectionToolsTest
 
       for (int i = 0; i < iters; i++)
       {
-         double radius1 = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, 5.0);
-         double radius2 = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, 5.0);
+         double radius1 = EuclidCoreRandomTools.nextDouble(random, 0.0, 5.0);
+         double radius2 = EuclidCoreRandomTools.nextDouble(random, 0.0, 5.0);
 
-         double sphereSeparation = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, radius1 + radius2);
+         double sphereSeparation = EuclidCoreRandomTools.nextDouble(random, 0.0, radius1 + radius2);
 
          double distanceToIntersection = SphereIntersectionTools.computeDistanceToIntersectingPlane(sphereSeparation, radius1, radius2);
          double distanceToEllipseCenter = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(sphereSeparation, 0.0, radius1, radius2);
@@ -45,10 +45,10 @@ public class SphereIntersectionToolsTest
 
       for (int i = 0; i < iters; i ++)
       {
-         double radius1 = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, 5.0);
-         double radius2 = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, 5.0);
+         double radius1 = EuclidCoreRandomTools.nextDouble(random, 0.0, 5.0);
+         double radius2 = EuclidCoreRandomTools.nextDouble(random, 0.0, 5.0);
 
-         double sphereSeparationZ = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, 1.0);
+         double sphereSeparationZ = EuclidCoreRandomTools.nextDouble(random, 0.0, 1.0);
          double sphereSeparationX = EuclidCoreRandomTools
                .generateRandomDouble(random, 0.0, Math.sqrt(Math.pow(radius1 + radius2, 2.0) - Math.pow(sphereSeparationZ, 2.0)));
 
@@ -100,10 +100,10 @@ public class SphereIntersectionToolsTest
 
       for (int i = 0; i < iters; i++)
       {
-         double radius1 = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, 5.0);
-         double radius2 = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, 5.0);
+         double radius1 = EuclidCoreRandomTools.nextDouble(random, 0.0, 5.0);
+         double radius2 = EuclidCoreRandomTools.nextDouble(random, 0.0, 5.0);
 
-         double sphereSeparation = EuclidCoreRandomTools.generateRandomDouble(random, 0.0, radius1 + radius2);
+         double sphereSeparation = EuclidCoreRandomTools.nextDouble(random, 0.0, radius1 + radius2);
 
          double distanceToIntersection = SphereIntersectionTools.computeDistanceToIntersectingPlane(sphereSeparation, radius1, radius2);
 

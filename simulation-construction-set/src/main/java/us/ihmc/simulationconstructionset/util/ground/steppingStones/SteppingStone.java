@@ -188,7 +188,7 @@ public class SteppingStone
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2D randomPoint = EuclidCoreRandomTools.generateRandomPoint2D(random, xMin, xMax, yMin, yMax);
+         Point2D randomPoint = EuclidCoreRandomTools.nextPoint2D(random, xMin, xMax, yMin, yMax);
 
          if (randomPoint.distance(zeroFramePoint) > radius)
             continue;

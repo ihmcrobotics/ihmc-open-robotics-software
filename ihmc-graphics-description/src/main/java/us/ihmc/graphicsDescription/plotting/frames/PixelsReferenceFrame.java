@@ -4,7 +4,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-@SuppressWarnings("serial")
 public abstract class PixelsReferenceFrame extends PlotterReferenceFrame
 {
    public PixelsReferenceFrame(String frameName, PlotterSpaceConverter spaceConverter)

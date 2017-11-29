@@ -12,6 +12,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -61,6 +62,7 @@ public class WandererRobotModel implements DRCRobotModel
    private final DRCRobotSensorInformation sensorInformation;
    private final WandererCapturePointPlannerParameters capturePointPlannerParameters;
    private final WandererWalkingControllerParameters walkingControllerParameters;
+   private final WandererHighLevelControllerParameters highLevelControllerParameters;
 
    private final RobotDescription robotDescription;
 
@@ -78,6 +80,7 @@ public class WandererRobotModel implements DRCRobotModel
 
       capturePointPlannerParameters = new WandererCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new WandererWalkingControllerParameters(jointMap, runningOnRealRobot);
+      highLevelControllerParameters = new WandererHighLevelControllerParameters();
       robotDescription = createRobotDescription();
    }
 
@@ -101,6 +104,12 @@ public class WandererRobotModel implements DRCRobotModel
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   @Override
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
    }
 
    @Override

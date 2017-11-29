@@ -1,9 +1,12 @@
 package us.ihmc.simulationconstructionset;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
+
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 /**
  * Title:        Simulation Construction Set<p>
@@ -19,12 +22,12 @@ public final class SpatialVector implements java.io.Serializable
    public Vector3D top = new Vector3D(), bottom = new Vector3D();
 
 
-   public void getTop(Vector3D topToPack)
+   public void getTop(Vector3DBasics topToPack)
    {
       topToPack.set(top);
    }
    
-   public void getBottom(Vector3D bottomToPack)
+   public void getBottom(Vector3DBasics bottomToPack)
    {
       bottomToPack.set(bottom);
    }
@@ -59,7 +62,7 @@ public final class SpatialVector implements java.io.Serializable
       return bottom.getZ();
    }
 
-   public void setFromVector3d(Vector3D v1, Vector3D v2)
+   public void setFromVector3d(Vector3DReadOnly v1, Vector3DReadOnly v2)
    {
       top.setX(v1.getX());
       top.setY(v1.getY());
@@ -153,7 +156,7 @@ public final class SpatialVector implements java.io.Serializable
     * }
     */
 
-   public void setInitArticulatedZeroAccel(double mass, Vector3D w_i, Matrix3D Inertia, RotationMatrix Ri_0, double gX, double gY, double gZ)
+   public void setInitArticulatedZeroAccel(double mass, Vector3DReadOnly w_i, Matrix3DReadOnly Inertia, RotationMatrixReadOnly Ri_0, double gX, double gY, double gZ)
    {
       top.setX(-gX * mass);
       top.setY(-gY * mass);

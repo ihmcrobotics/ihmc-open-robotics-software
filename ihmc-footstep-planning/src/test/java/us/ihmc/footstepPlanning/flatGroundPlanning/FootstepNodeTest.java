@@ -33,9 +33,9 @@ public class FootstepNodeTest
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
          // test for exact same transform
-         double x = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
-         double y = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
-         double yaw = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
+         double x = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double y = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double yaw = EuclidCoreRandomTools.nextDouble(random, 1.0);
 
          nodeA = new FootstepNode(x, y, yaw, robotSide);
          nodeB = new FootstepNode(x, y, yaw, robotSide);

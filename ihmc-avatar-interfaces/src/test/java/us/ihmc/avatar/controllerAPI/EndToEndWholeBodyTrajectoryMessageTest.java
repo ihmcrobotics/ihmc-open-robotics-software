@@ -10,6 +10,8 @@ import org.junit.Before;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessage
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,7 +36,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -124,10 +124,9 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
       wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
-      FrameOrientation desiredChestOrientation = new FrameOrientation(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(worldFrame);
-      desiredOrientation = new Quaternion();
-      desiredChestOrientation.getQuaternion(desiredOrientation);
+      desiredOrientation = new Quaternion(desiredChestOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame);
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
@@ -158,7 +157,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
          desiredHandPoses.get(robotSide).changeFrame(worldFrame);
          Point3D desiredHandPosition = desiredHandPoses.get(robotSide).getFramePointCopy().getPoint();
-         Quaternion desiredHandOrientation = desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion();
+         Quaternion desiredHandOrientation = new Quaternion(desiredHandPoses.get(robotSide).getFrameOrientationCopy());
 
          EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(handName, desiredHandPosition, desiredHandOrientation, scs);
       }
@@ -245,10 +244,9 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
       messageOfMessages.addPacket(new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
-      FrameOrientation desiredChestOrientation = new FrameOrientation(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(worldFrame);
-      desiredOrientation = new Quaternion();
-      desiredChestOrientation.getQuaternion(desiredOrientation);
+      desiredOrientation = new Quaternion(desiredChestOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame);
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       messageOfMessages.addPacket(chestTrajectoryMessage);
@@ -279,7 +277,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
          desiredHandPoses.get(robotSide).changeFrame(worldFrame);
          Point3D desiredHandPosition = desiredHandPoses.get(robotSide).getFramePointCopy().getPoint();
-         Quaternion desiredHandOrientation = desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion();
+         Quaternion desiredHandOrientation = new Quaternion(desiredHandPoses.get(robotSide).getFrameOrientationCopy());
 
          EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(handName, desiredHandPosition, desiredHandOrientation, scs);
       }
@@ -367,10 +365,9 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
       messageOfMessages.addPacket(new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
-      FrameOrientation desiredChestOrientation = new FrameOrientation(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(worldFrame);
-      desiredOrientation = new Quaternion();
-      desiredChestOrientation.getQuaternion(desiredOrientation);
+      desiredOrientation = new Quaternion(desiredChestOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame);
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       messageOfMessages.addPacket(chestTrajectoryMessage);
@@ -403,7 +400,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
          desiredHandPoses.get(robotSide).changeFrame(worldFrame);
          Point3D desiredHandPosition = desiredHandPoses.get(robotSide).getFramePointCopy().getPoint();
-         Quaternion desiredHandOrientation = desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion();
+         Quaternion desiredHandOrientation = new Quaternion(desiredHandPoses.get(robotSide).getFrameOrientationCopy());
 
          EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(handName, desiredHandPosition, desiredHandOrientation, scs);
       }
