@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
-
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -36,6 +32,10 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.commons.FormattingTools;
+
+import java.util.Collection;
+
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 /**
  * @author twan

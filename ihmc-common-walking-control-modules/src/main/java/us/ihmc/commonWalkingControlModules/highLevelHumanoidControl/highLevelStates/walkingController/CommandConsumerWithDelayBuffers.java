@@ -1,18 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.lists.PriorityQueue;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Pulls commands from the CommandInputManager and checks the delay time, If there is no delay or the delay is negative, it is available to be consumed

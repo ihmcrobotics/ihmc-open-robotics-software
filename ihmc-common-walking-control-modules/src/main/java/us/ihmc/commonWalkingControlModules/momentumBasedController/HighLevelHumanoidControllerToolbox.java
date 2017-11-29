@@ -158,6 +158,8 @@ public class HighLevelHumanoidControllerToolbox
 
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
    private WalkingMessageHandler walkingMessageHandler;
+   
+   private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
@@ -371,8 +373,27 @@ public class HighLevelHumanoidControllerToolbox
       filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha,
                                                                                               yoAngularMomentum);
       momentumGain.set(0.0);
+      
+      attachControllerFailureListener(new ControllerFailureListener()
+      {
+         @Override
+         public void controllerFailed(FrameVector2D fallingDirection)
+         {
+            reportControllerFailed();
+         }
+      });
    }
 
+   public void reportControllerFailed()
+   {
+      controllerFailed.set(true);
+   }
+   
+   public YoBoolean getControllerFailedBoolean()
+   {
+      return controllerFailed;
+   }
+   
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
    {
       List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
@@ -818,6 +839,11 @@ public class HighLevelHumanoidControllerToolbox
    public SideDependentList<ContactableFoot> getContactableFeet()
    {
       return feet;
+   }
+
+   public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
+   {
+      return contactableBodies;
    }
 
    public ContactablePlaneBody getContactableBody(RigidBody body)

@@ -17,6 +17,9 @@ import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HandCompliantControlHelper
 {

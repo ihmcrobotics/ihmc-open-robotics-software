@@ -2,7 +2,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftHipYaw</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftHipYaw</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,7 +14,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightHipYaw</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightHipYaw</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -26,7 +26,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftHipRoll</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightHipRoll</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,7 +50,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftHipPitch</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightHipPitch</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftKneePitch</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightKneePitch</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftAnklePitch</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftAnklePitch</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,7 +110,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightAnklePitch</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightAnklePitch</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,7 +122,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftAnkleRoll</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_leftAnkleRoll</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -134,7 +134,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightAnkleRoll</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_rightAnkleRoll</Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -146,7 +146,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_torsoYaw</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_torsoYaw</Variables>
 		<GraphConfiguration>
 			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -158,7 +158,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_torsoRoll</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_torsoRoll</Variables>
 		<GraphConfiguration>
 			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -170,7 +170,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_torsoPitch</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_torsoPitch</Variables>
 		<GraphConfiguration>
 			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
