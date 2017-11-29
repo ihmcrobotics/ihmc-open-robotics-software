@@ -103,7 +103,8 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       }
    }
 
-   private static void createDampingUpdaters(Map<Axis, DoubleParameter> kpMap, Map<Axis, YoDouble> kdMap, Map<Axis, DoubleParameter> zetaMap, GainCoupling gainCoupling)
+   private static void createDampingUpdaters(Map<Axis, DoubleParameter> kpMap, Map<Axis, YoDouble> kdMap, Map<Axis, DoubleParameter> zetaMap,
+                                             GainCoupling gainCoupling)
    {
       switch (gainCoupling)
       {
@@ -136,8 +137,13 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       YoDouble kd = kdMap.get(axis);
       DoubleParameter zeta = zetaMap.get(axis);
 
-      ParameterChangedListener updater = (parameter) -> kd.set(GainCalculator.computeDerivativeGain(kp.getValue(), zeta.getValue())); 
-      
+      ParameterChangedListener updater = (parameter) -> {
+         if (kp.isLoaded() && zeta.isLoaded())
+         {
+            kd.set(GainCalculator.computeDerivativeGain(kp.getValue(), zeta.getValue()));
+         }
+      };
+
       kp.addParameterChangedListener(updater);
       zeta.addParameterChangedListener(updater);
    }
