@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * This is a parameterized implementation of the {@link JointAccelerationIntegrationParametersReadOnly} interface.
  * <p>
  * Each parameter will be represented by a {@link DoubleParameter}. Default values can be provided at construction time.
- * After that the only way to set these parameters in through a tuning application. If a parameter file is loaded that
+ * After that the only way to set these parameters is through a tuning application. If a parameter file is loaded that
  * defines the parameters created by this class the default values will be overwritten.
  * </p>
  */
