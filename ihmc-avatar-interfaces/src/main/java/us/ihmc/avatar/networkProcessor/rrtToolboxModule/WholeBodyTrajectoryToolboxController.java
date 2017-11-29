@@ -43,7 +43,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final boolean VERBOSE = true;
-   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 20;
+   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 5;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 3000;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
@@ -302,16 +302,31 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // filtering out too short time gap node.
       // TODO : for changed parent after filtering, few nodes are changed into invalid nodes.
       int currentIndex = 0;
-      for (int j = 0; j < revertedPathSize - 2; j++)
+      int latestAddedIndexOfRevertedPath = revertedPathSize - 1;
+      for (int j = revertedPathSize - 2; j > 0; j--)
       {
-         int i = revertedPathSize - 1 - j;
+         double timeGapWithLatestNode = revertedPath.get(j).getTime() - path.get(currentIndex).getTime();
 
-         double generalizedTimeGap = revertedPath.get(i - 1).getTime() - path.get(currentIndex).getTime();
-
-         if (generalizedTimeGap > minTimeInterval)
+         if (timeGapWithLatestNode > minTimeInterval)
          {
-            path.add(new SpatialNode(revertedPath.get(i - 1)));
-            currentIndex++;
+            SpatialNode dummyNode = new SpatialNode(revertedPath.get(j));
+            dummyNode.setParent(path.get(currentIndex));
+            updateValidity(dummyNode);
+            if (dummyNode.isValid())
+            {
+               path.add(new SpatialNode(revertedPath.get(j)));
+               latestAddedIndexOfRevertedPath = j;
+               currentIndex++;
+            }
+            else
+            {
+               j = latestAddedIndexOfRevertedPath - 1;
+
+               path.add(new SpatialNode(revertedPath.get(j)));
+               latestAddedIndexOfRevertedPath = j;
+
+               currentIndex++;
+            }
          }
       }
       path.add(new SpatialNode(revertedPath.get(0)));
@@ -320,6 +335,13 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       for (int i = 0; i < path.size() - 1; i++)
          path.get(i + 1).setParent(path.get(i));
 
+      for (int i = 0; i < path.size(); i++)
+      {
+         updateValidity(path.get(i));
+         if (!path.get(i).isValid())
+            PrintTools.info("wrong " + " " + i);
+      }
+
       // plotting before smoothing.
       for (int i = 0; i < path.size(); i++)
          nodePlotter.update(path.get(i), 2);
@@ -327,7 +349,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // smoothing over one mile stone node.
       for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
       {
-         if (updateShortcutPath(path) < 0.0005)
+         PrintTools.info("shortcut try" + i);
+         if (updateShortcutPath(path) < 0.001)
          {
             if (VERBOSE)
                PrintTools.info("shortcut is early terminal " + i);
@@ -343,9 +366,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       motionGenerationStartTime = updateTimer(shortcutPathComputationTime, shortcutStartTime);
 
       if (VERBOSE)
-      {
          PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);
-      }
 
       /*
        * terminate state
@@ -388,7 +409,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
          {
             if (VERBOSE)
-               PrintTools.info("Successfully finished tree expansion. "+currentExpansionSize.getIntegerValue());
+               PrintTools.info("Successfully finished tree expansion. " + currentExpansionSize.getIntegerValue());
             currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
          }
       }
@@ -469,7 +490,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          else
          {
             if (VERBOSE)
-               PrintTools.info("Successfully finished initial guess stage. "+currentNumberOfInitialGuesses.getIntegerValue());
+               PrintTools.info("Successfully finished initial guess stage. " + currentNumberOfInitialGuesses.getIntegerValue() + " "
+                     + currentNumberOfValidInitialGuesses.getIntegerValue());
             state.set(CWBToolboxState.EXPAND_TREE);
 
             tree = new SpatialNodeTree(rootNode);
@@ -754,10 +776,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       double distance = 0.0;
       for (int i = 0; i < path.size(); i++)
       {
-         double positionDistance = tree.getPositionWeight() * pathBeforeShortcut.get(i).getPositionDistance(path.get(i));
-         double orientationDistance = tree.getOrientationWeight() * pathBeforeShortcut.get(i).getOrientationDistance(path.get(i));
-
-         distance = distance + positionDistance + orientationDistance;
+         distance += pathBeforeShortcut.get(i).computeDistanceWOTime(tree.getPositionWeight(), tree.getOrientationWeight(), path.get(i));
       }
 
       return distance / path.size();
