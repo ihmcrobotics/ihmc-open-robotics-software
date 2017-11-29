@@ -600,10 +600,9 @@ public class MatrixTools
     */
    public static void setMatrixDiag(Matrix3D matrix, double diagValue)
    {
-      for (int i = 0; i < 3; i++)
-      {
-         matrix.setElement(i, i, diagValue);
-      }
+      matrix.setM00(diagValue);
+      matrix.setM11(diagValue);
+      matrix.setM22(diagValue);
    }
 
    /**
