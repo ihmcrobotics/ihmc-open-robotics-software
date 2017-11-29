@@ -1,8 +1,14 @@
 package us.ihmc.robotics.linearAlgebra;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.ops.CommonOps;
 import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -172,5 +178,77 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
       assertEquals(6.39598, projectedVector.get(1, 1), epsilon);
       assertEquals(2.52277, projectedVector.get(1, 2), epsilon);
       assertEquals(-2.93712, projectedVector.get(1, 3), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRandomProblemsAgainstTrueDampedLeastSquaresProjection()
+   {
+      Random random = new Random(12345L);
+
+      DampedNullspaceCalculator nullspaceCalculator = getDampedNullspaceProjectorCalculator();
+      double alpha = RandomNumbers.nextDouble(random, 0.01, 2.0);
+      nullspaceCalculator.setPseudoInverseAlpha(alpha);
+      LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.pseudoInverse(true);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         int JCols = RandomNumbers.nextInt(random, 1, 100);
+         int JRows = RandomNumbers.nextInt(random, 1, 100);
+
+         int ARows = RandomNumbers.nextInt(random, 1, 100);
+
+         double[] JValues = RandomNumbers.nextDoubleArray(random, JRows * JCols, 10.0);
+         double[] AValues = RandomNumbers.nextDoubleArray(random, ARows * JCols, 10.0);
+
+         DenseMatrix64F jacobian = new DenseMatrix64F(JRows, JCols, false, JValues);
+         DenseMatrix64F jacobianInverse = new DenseMatrix64F(JCols, JRows);
+         DenseMatrix64F inverse = new DenseMatrix64F(JRows, JRows);
+         DenseMatrix64F matrixToProject = new DenseMatrix64F(ARows, JCols, false, AValues);
+         DenseMatrix64F projectedMatrixExpected = new DenseMatrix64F(ARows, JCols);
+         DenseMatrix64F projectedMatrix = new DenseMatrix64F(ARows, JCols);
+
+         DenseMatrix64F projectorExpected = new DenseMatrix64F(JCols, JCols);
+         DenseMatrix64F projector = new DenseMatrix64F(JCols, JCols);
+
+         nullspaceCalculator.computeNullspaceProjector(jacobian, projector);
+
+         /** I - J<sup>+</sup> J */
+         MatrixTools.setDiagonal(inverse, alpha * alpha);
+         CommonOps.multAddTransB(jacobian, jacobian, inverse);
+         linearSolver.setA(inverse);
+         linearSolver.invert(jacobianInverse);
+
+         DenseMatrix64F tempMatrix = new DenseMatrix64F(JCols, JRows);
+         CommonOps.multTransA(jacobian, jacobianInverse, tempMatrix);
+         CommonOps.mult(tempMatrix, jacobian, projectorExpected);
+         CommonOps.scale(-1.0, projectorExpected);
+         MatrixTools.addDiagonal(projectorExpected, 1.0);
+
+         for (int j = 0; j < projectorExpected.getNumRows(); j++)
+         {
+            for (int k = 0; k < projectorExpected.getNumCols(); k++)
+            {
+               assertEquals("Iteration " + i + " failed on index " + " (" + j + ", " + k + ").", projectorExpected.get(j, k), projector.get(j, k), 1e-7);
+            }
+         }
+
+
+
+
+         // compute the projection
+         CommonOps.mult(matrixToProject, projectorExpected, projectedMatrixExpected);
+         nullspaceCalculator.projectOntoNullspace(matrixToProject, jacobian, projectedMatrix);
+         nullspaceCalculator.projectOntoNullspace(matrixToProject, jacobian);
+
+         for (int j = 0; j < projectedMatrixExpected.getNumRows(); j++)
+         {
+            for (int k = 0; k < projectedMatrixExpected.getNumCols(); k++)
+            {
+               assertEquals("Iteration " + i + " failed on index " + " (" + j + ", " + k + ").", projectedMatrixExpected.get(j, k), projectedMatrix.get(j, k), 1e-7);
+               assertEquals("Iteration " + i + " failed on index " + " (" + j + ", " + k + ").", projectedMatrixExpected.get(j, k), matrixToProject.get(j, k), 1e-7);
+            }
+         }
+      }
    }
 }
