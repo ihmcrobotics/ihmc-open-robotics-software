@@ -156,7 +156,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       planarRegionFootstepPlannerParameters = new AtlasPlanarRegionFootstepPlannerParameters();
 
-      highLevelControllerParameters = new AtlasHighLevelControllerParameters();
+      highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
 
