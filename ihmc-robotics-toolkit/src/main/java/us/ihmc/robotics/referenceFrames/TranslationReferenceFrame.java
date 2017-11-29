@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public class TranslationReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = -6741627181585210414L;
    public final FrameVector3D originVector;
 
    public TranslationReferenceFrame(String frameName, ReferenceFrame parentFrame)

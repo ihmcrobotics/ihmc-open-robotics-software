@@ -36,6 +36,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
    public PlaneContactStateCommand()
    {
+      clearContactPoints();
    }
 
    public void setHasContactStateChanged(boolean hasContactStateChanged)

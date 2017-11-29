@@ -337,4 +337,24 @@ public interface FootstepPlannerParameters
    {
       return 0.25;
    }
+
+   /**
+    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+    * this parameter.
+    */
+   public default double getMinXClearanceFromStance()
+   {
+      return 0.0;
+   }
+
+   /**
+    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+    * this parameter.
+    */
+   public default double getMinYClearanceFromStance()
+   {
+      return 0.0;
+   }
 }

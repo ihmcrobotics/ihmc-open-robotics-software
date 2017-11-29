@@ -829,4 +829,15 @@ public abstract class WalkingControllerParameters
    {
       return true;
    }
+
+   /**
+    * When taking steps that cause the swing foot to collide with the support leg this parameter can
+    * be used to increase the clearance that the swing trajectory will have from the swing foot. More
+    * specifically, when a straight line from swing start (at sole frame) to swing end point is closer
+    * to the stance foot (sole frame) then this distance the swing trajectory will be adjusted.
+    */
+   public double getMinSwingTrajectoryClearanceFromStanceFoot()
+   {
+      return Double.NEGATIVE_INFINITY;
+   }
 }

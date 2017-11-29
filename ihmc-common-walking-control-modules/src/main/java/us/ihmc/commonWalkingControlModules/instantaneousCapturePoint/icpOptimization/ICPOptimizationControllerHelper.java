@@ -73,7 +73,6 @@ public class ICPOptimizationControllerHelper
 
    private class Vector2dZUpFrame extends ReferenceFrame
    {
-      private static final long serialVersionUID = -1810366869361449743L;
       private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();

@@ -1,8 +1,6 @@
 package us.ihmc.footstepPlanning.occlusion;
 
 import java.awt.Color;
-import java.io.File;
-import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,6 +14,8 @@ import org.junit.rules.TestName;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -32,7 +32,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -79,6 +78,7 @@ public class SimpleOcclusionTests
    public TestName name = new TestName();
 
    @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testSimpleOcclusions()
    {
       FramePose startPose = new FramePose();
@@ -88,6 +88,7 @@ public class SimpleOcclusionTests
    }
 
    @Test(timeout = 300000)
+   @Ignore // Resource file does not seem to exist.
    public void testOcclusionsFromData()
    {
       FramePose startPose = new FramePose(worldFrame);

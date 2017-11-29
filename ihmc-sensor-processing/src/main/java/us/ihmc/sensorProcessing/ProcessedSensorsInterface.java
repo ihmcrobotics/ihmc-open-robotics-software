@@ -4,11 +4,11 @@ import java.util.HashMap;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -32,7 +32,7 @@ public interface ProcessedSensorsInterface extends FingerForceSensors
    public abstract Twist getTwistOfPelvisWithRespectToWorld();
    public abstract SpatialAccelerationVector getAccelerationOfPelvisWithRespectToWorld();
 
-   public abstract FrameOrientation getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
+   public abstract FrameQuaternion getPelvisOrientationInFrame(ReferenceFrame referenceFrame);
 
    public abstract FramePoint3D getCenterOfMassGroundProjectionInFrame(ReferenceFrame referenceFrame);
 
@@ -49,7 +49,7 @@ public interface ProcessedSensorsInterface extends FingerForceSensors
 
    public abstract String getLegJointVelocityName(RobotSide robotSide, LegJointName jointName);
 
-   public abstract FrameOrientation getChestOrientationInFrame(ReferenceFrame desiredHeadingFrame);
+   public abstract FrameQuaternion getChestOrientationInFrame(ReferenceFrame desiredHeadingFrame);
    public abstract FrameVector3D getChestAngularVelocityInChestFrame();
 
    public abstract double getSpineJointPosition(SpineJointName spineJointName);

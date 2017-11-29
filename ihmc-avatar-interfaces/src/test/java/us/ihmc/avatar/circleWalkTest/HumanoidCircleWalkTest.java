@@ -14,6 +14,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,7 +34,6 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,7 +43,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    Random random = new Random();
-   
+
    @After
    public void tearDown()
    {
@@ -107,7 +107,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       // create simulation test helper
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
-      
+
       DRCStartingLocation startingLocation = new DRCStartingLocation()
       {
          @Override
@@ -118,13 +118,12 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       };
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
-      
+
       setupCameraSideView();
       double radius = getRadiusForCircle();
       double stepLength = getStepLength();
@@ -195,7 +194,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       int numberOfFootsteps = footMessage.footstepDataList.size();
       double defaultSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double defaultTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      
+
       double simulationTime = numberOfFootsteps * defaultSwingTime + numberOfFootsteps * defaultTransferTime + 2.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
@@ -209,7 +208,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       {
          assertTrue(armCheckPointFlags.get(i).getBooleanValue());
       }
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -220,11 +219,6 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       footstepData.setOrientation(orient);
       footstepData.setRobotSide(robotSide);
       message.add(footstepData);
-   }
-
-   protected boolean keepSCSUp()
-   {
-      return false;
    }
 
    private void setupCameraBackView()

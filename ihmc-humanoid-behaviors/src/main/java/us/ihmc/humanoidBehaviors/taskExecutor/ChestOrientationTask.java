@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
 {
@@ -17,7 +17,7 @@ public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
       this(null, chestTrajectoryMessage, chestOrientationBehavior);
    }
 
-   public ChestOrientationTask(FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime, ReferenceFrame trajectoryFrame)
+   public ChestOrientationTask(FrameQuaternion desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime, ReferenceFrame trajectoryFrame)
    {
       this(null, desiredChestOrientation, chestOrientationBehavior, trajectoryTime, trajectoryFrame);
 
@@ -30,13 +30,12 @@ public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
       this.chestOrientationPacket = chestTrajectoryMessage;
    }
 
-   public ChestOrientationTask(E stateEnum, FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime, ReferenceFrame trajectoryFrame)
+   public ChestOrientationTask(E stateEnum, FrameQuaternion desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime, ReferenceFrame trajectoryFrame)
    {
 
       super(stateEnum, chestOrientationBehavior);
       this.chestOrientationBehavior = chestOrientationBehavior;
-      Quaternion chestOrientation = new Quaternion();
-      desiredChestOrientation.getQuaternion(chestOrientation);
+      Quaternion chestOrientation = new Quaternion(desiredChestOrientation);
       chestOrientationPacket = new ChestTrajectoryMessage(trajectoryTime, chestOrientation, ReferenceFrame.getWorldFrame(), trajectoryFrame);
    }
 

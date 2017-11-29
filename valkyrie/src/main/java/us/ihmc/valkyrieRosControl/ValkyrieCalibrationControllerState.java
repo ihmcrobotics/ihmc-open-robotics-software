@@ -145,11 +145,6 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void warmup(int iterations)
-   {
-   }
-
-   @Override
    public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
    {
       return stateMachine.getCurrentState().getOutputForLowLevelController();

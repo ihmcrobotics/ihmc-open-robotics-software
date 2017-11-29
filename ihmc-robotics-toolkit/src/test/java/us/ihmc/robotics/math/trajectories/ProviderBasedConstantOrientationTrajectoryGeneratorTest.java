@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -26,7 +26,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
    private ReferenceFrame referenceFrame;
    private OrientationProvider orientationProvider;
    private double finalTime;
-   private FrameOrientation frameOrientation;
+   private FrameQuaternion frameOrientation;
 
    private ProviderBasedConstantOrientationTrajectoryGenerator provider;
    private static int globalCounter = 0;
@@ -35,7 +35,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
    public void setUp()
    {
       referenceFrame = ReferenceFrame.constructARootFrame("rootFrame!");
-      frameOrientation = new FrameOrientation(referenceFrame);
+      frameOrientation = new FrameQuaternion(referenceFrame);
       orientationProvider = new ConstantOrientationProvider(frameOrientation);
    }
 
@@ -97,7 +97,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
    public void testGet()
    {
       provider = new ProviderBasedConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame, orientationProvider, finalTime, createRegistry());
-      FrameOrientation orientationToPack = new FrameOrientation();
+      FrameQuaternion orientationToPack = new FrameQuaternion();
 
       provider.getOrientation(orientationToPack);
       
@@ -142,8 +142,8 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
 	@Test(timeout = 30000)
    public void testPackAngularData()
    {
-      FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
-      orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+      FrameQuaternion orientationToPack = new FrameQuaternion(referenceFrame);
+      orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       provider = new ProviderBasedConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame, orientationProvider, finalTime,
             createRegistry());

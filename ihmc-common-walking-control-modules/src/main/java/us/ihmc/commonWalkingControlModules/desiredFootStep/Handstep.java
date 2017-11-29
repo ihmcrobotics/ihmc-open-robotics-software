@@ -5,13 +5,13 @@ import java.util.Arrays;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -96,7 +96,7 @@ public class Handstep
       poseReferenceFrame.setPoseAndUpdate(newHandstepPose);
    }
 
-   public void setPose(FramePoint3D newPosition, FrameOrientation newOrientation)
+   public void setPose(FramePoint3D newPosition, FrameQuaternion newOrientation)
    {
       poseReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
@@ -161,7 +161,7 @@ public class Handstep
       poseReferenceFrame.getPose(transformToPack);
    }
 
-   public void getPose(FramePoint3D positionToPack, FrameOrientation orientationToPack)
+   public void getPose(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
    {
       poseReferenceFrame.getPoseIncludingFrame(positionToPack, orientationToPack);
    }
@@ -211,7 +211,7 @@ public class Handstep
       poseReferenceFrame.getOrientation(matrixToPack);
    }
 
-   public void getOrientationIncludingFrame(FrameOrientation frameOrientationToPack)
+   public void getOrientationIncludingFrame(FrameQuaternion frameOrientationToPack)
    {
       poseReferenceFrame.getOrientationIncludingFrame(frameOrientationToPack);
    }
@@ -246,10 +246,11 @@ public class Handstep
 
    public String toString()
    {
-      FrameOrientation frameOrientation = new FrameOrientation(poseReferenceFrame);
+      FrameQuaternion frameOrientation = new FrameQuaternion(poseReferenceFrame);
       frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double[] ypr = frameOrientation.getYawPitchRoll();
+      double[] ypr = new double[3];
+      frameOrientation.getYawPitchRoll(ypr);
       String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
 
       return "id: " + id + " - pose: " + poseReferenceFrame + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";

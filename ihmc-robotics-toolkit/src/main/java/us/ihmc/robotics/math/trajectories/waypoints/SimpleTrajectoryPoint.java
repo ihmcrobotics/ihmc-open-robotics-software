@@ -93,6 +93,14 @@ public class SimpleTrajectoryPoint<W extends GeometryObject<W>, T extends Simple
    }
 
    @Override
+   public boolean geometricallyEquals(T other, double epsilon)
+   {
+      if (!MathTools.epsilonEquals(time, other.getTime(), epsilon))
+         return false;
+      return waypointData.geometricallyEquals(other.waypointData, epsilon);
+   }
+
+   @Override
    public void applyTransform(Transform transform)
    {
       waypointData.applyTransform(transform);

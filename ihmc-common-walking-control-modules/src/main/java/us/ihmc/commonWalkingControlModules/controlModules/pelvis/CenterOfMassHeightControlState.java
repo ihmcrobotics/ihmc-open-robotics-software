@@ -304,6 +304,6 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    @Override
    public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
-      positionToPack.set(desiredCenterOfMassHeightPoint);
+      positionToPack.setIncludingFrame(desiredCenterOfMassHeightPoint);
    }
 }

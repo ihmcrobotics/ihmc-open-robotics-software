@@ -11,6 +11,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,7 +21,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.Ray3d;
 
@@ -129,7 +129,7 @@ public class JMEDataTypeUtils
       target.set((float) original.getX(), (float) original.getY(), (float) original.getZ());
    }
 
-   public static void packFrameOrientationInJMEQuaternion(FrameOrientation original, Quaternion target)
+   public static void packFrameOrientationInJMEQuaternion(FrameQuaternion original, Quaternion target)
    {
       us.ihmc.euclid.tuple4D.Quaternion quat4d = new us.ihmc.euclid.tuple4D.Quaternion();
       packVectMathQuat4dInJMEQuaternion(original.getQuaternion(), target);

@@ -8,6 +8,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -51,7 +52,7 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed in World.
     */
-   public ChestTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long trajectoryReferenceFrameID)
+   public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameID)
    {
       super(trajectoryTime, desiredOrientation, trajectoryReferenceFrameID);
    }
@@ -61,12 +62,12 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed the supplied frame.
     */
-   public ChestTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame trajectoryFrame)
+   public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       super(trajectoryTime, desiredOrientation, trajectoryFrame);
    }
 
-   public ChestTrajectoryMessage(double trajectoryTime, Quaternion quaternion, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
+   public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly quaternion, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
       this(trajectoryTime, quaternion, trajectoryFrame);
       getFrameInformation().setDataReferenceFrame(dataFrame);

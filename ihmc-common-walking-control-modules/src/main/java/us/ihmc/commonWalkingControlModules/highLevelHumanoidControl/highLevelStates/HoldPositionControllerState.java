@@ -93,8 +93,4 @@ public class HoldPositionControllerState extends HighLevelControllerState
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }
-
-   @Override
-   public void warmup(int iterations)
-   {}
 }

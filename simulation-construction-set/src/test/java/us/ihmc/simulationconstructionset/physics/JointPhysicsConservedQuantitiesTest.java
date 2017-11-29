@@ -65,7 +65,7 @@ public class JointPhysicsConservedQuantitiesTest
 
       for (int i = 0; i < numberOfAxes; i++)
       {
-         jointAxes[i] = EuclidCoreRandomTools.generateRandomVector3DWithFixedLength(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
       }
 
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);

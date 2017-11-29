@@ -35,7 +35,7 @@ public class TimeStampedTransform3DTest
    public void testConstructor()
    {
       Random random = new Random(3213620L);
-      RigidBodyTransform expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform expectedTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       long expectedTimestamp = RandomNumbers.nextInt(random, 132, 51568418);
       
 
@@ -66,14 +66,14 @@ public class TimeStampedTransform3DTest
       assertEquals("Timestamp is different from what was expected", expectedTimestamp, toBeTested.getTimeStamp());
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
 
-      expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      expectedTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       toBeTested.setTransform3D(expectedTransform);
 
       assertEquals("Timestamp is different from what was expected", expectedTimestamp, toBeTested.getTimeStamp());
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
 
       expectedTimestamp = RandomNumbers.nextInt(random, 132, 51568418);
-      expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      expectedTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       TimeStampedTransform3D expectedTimeStampedTransform = new TimeStampedTransform3D(expectedTransform, expectedTimestamp);
 
       toBeTested.set(expectedTimeStampedTransform);

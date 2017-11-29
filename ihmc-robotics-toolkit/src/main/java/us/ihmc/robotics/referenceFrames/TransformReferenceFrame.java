@@ -5,7 +5,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class TransformReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = -6741627181585210414L;
    public final RigidBodyTransform transform3D = new RigidBodyTransform();
 
    public TransformReferenceFrame(String frameName, ReferenceFrame parentFrame)
