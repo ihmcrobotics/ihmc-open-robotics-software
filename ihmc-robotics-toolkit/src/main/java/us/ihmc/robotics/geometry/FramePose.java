@@ -667,6 +667,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)
    {
-      return pose.epsilonEquals(other.pose, positionErrorMargin, orientationErrorMargin);
+      return pose.getOrientation().epsilonEquals(other.pose.getOrientation(), orientationErrorMargin) && pose.getPosition().epsilonEquals(other.pose.getPosition(), positionErrorMargin);
    }
 }

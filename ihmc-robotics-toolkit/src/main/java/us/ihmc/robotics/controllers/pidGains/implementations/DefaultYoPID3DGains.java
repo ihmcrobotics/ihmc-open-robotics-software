@@ -88,7 +88,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
 
-   private static void populateMap(Map<Axis, YoDouble> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
+   static void populateMap(Map<Axis, YoDouble> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
    {
       switch (gainCoupling)
       {
@@ -189,7 +189,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       return tempIntegralGains;
    }
 
-   private static void fillFromMap(Map<Axis, YoDouble> map, double[] arrayToFill)
+   static void fillFromMap(Map<Axis, YoDouble> map, double[] arrayToFill)
    {
       arrayToFill[0] = map.get(Axis.X).getDoubleValue();
       arrayToFill[1] = map.get(Axis.Y).getDoubleValue();
