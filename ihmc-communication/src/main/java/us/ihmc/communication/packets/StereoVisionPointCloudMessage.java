@@ -172,6 +172,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       return colors;
    }
+  
 
    @Override
    public boolean epsilonEquals(StereoVisionPointCloudMessage other, double epsilon)
