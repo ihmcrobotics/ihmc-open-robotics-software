@@ -654,21 +654,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    /**
-    * Finds if this command is to be considered as a hard constraint during the optimization.
-    * <p>
-    * This command is considered to be a hard constraint if at least one of the weights is equal to
-    * {@link SolverWeightLevels#HARD_CONSTRAINT}.
-    * </p>
-    * 
-    * @return {@code true} if this command should be considered as a hard constraint, {@code false}
-    *         is it should be part of the optimization objective.
-    */
-   public boolean isHardConstraint()
-   {
-      return constraintType.isHardConstraint();
-   }
-
-   /**
     * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with
     * this command.
     * 

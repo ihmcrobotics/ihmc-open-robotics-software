@@ -335,10 +335,11 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
+      ConstraintType constraintType = commandToConvert.getConstraintType();
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setConstraintType(commandToConvert.getConstraintType());
+      motionQPInputToPack.setConstraintType(constraintType);
       // If the task is setup as a hard constraint, there is no need for a weight matrix.
-      if (!commandToConvert.isHardConstraint())
+      if (constraintType != ConstraintType.OBJECTIVE)
       {
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
