@@ -38,6 +38,15 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 120000)
+   public void testMovingPaintDrum() throws Exception, UnreasonableAccelerationException
+   {
+      handControlFrames = WholeBodyTrajectoryToolboxSettings.getValkyrieHandControlFrames();
+      super.testMovingPaintDrum();
+   }
+
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 120000)
    public void testHandCirclePositionAndYaw() throws Exception, UnreasonableAccelerationException
    {
       handControlFrames = WholeBodyTrajectoryToolboxSettings.getValkyrieHandControlFrames();

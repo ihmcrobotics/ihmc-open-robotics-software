@@ -83,7 +83,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(visualize);
+      simulationTestingParameters.setKeepSCSUp(false);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -201,6 +201,70 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          scs.closeAndDispose();
          scs = null;
       }
+   }
+   
+   @Test
+   public void testMovingPaintDrum() throws Exception, UnreasonableAccelerationException
+   {
+      
+      
+      
+      
+//      double trajectoryTime = 5.0;
+//      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
+//      WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
+//      configuration.setInitialConfigration(fullRobotModel);
+//      configuration.setMaximumExpansionSize(2000);
+//
+//      List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
+//      List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
+//
+//      double timeResolution = trajectoryTime / 100.0;
+//
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+//         RigidBody hand = fullRobotModel.getHand(robotSide);
+//
+//         // orientation is defined
+//         boolean ccw;
+//         if (robotSide == RobotSide.RIGHT)
+//            ccw = false;
+//         else
+//            ccw = true;
+////         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
+////                                                                           handOrientation, ccw, 0.0);
+//
+//         SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+//         selectionMatrix.resetSelection();
+//         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
+//
+//         trajectory.setControlFramePose(handControlFrames.get(robotSide));
+//
+//         handTrajectories.add(trajectory);
+//
+//         ConfigurationSpaceName[] spaces = {YAW, PITCH, ROLL};
+//
+//         rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+//      }
+//      ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
+//      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
+//                                                                                                                         pelvisConfigurations,
+//                                                                                                                         new double[] {0.75},
+//                                                                                                                         new double[] {0.90});
+//      ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
+//      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
+//                                                                                                                        chestConfigurations,
+//                                                                                                                        new double[] {-0.1 * Math.PI,
+//                                                                                                                              -0.1 * Math.PI, -0.1 * Math.PI},
+//                                                                                                                        new double[] {0.1 * Math.PI,
+//                                                                                                                              0.1 * Math.PI, 0.1 * Math.PI});
+//      rigidBodyConfigurations.add(pelvisConfigurationMessage);
+//      rigidBodyConfigurations.add(chestConfigurationMessage);
+//
+//      int maxNumberOfIterations = 10000;
+//      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
+//
+//      runTest(message, maxNumberOfIterations);
    }
 
    @Test
