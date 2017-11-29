@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -20,12 +20,12 @@ public class YoQuaternionProvider implements OrientationProvider
       orientation = new YoFrameQuaternion(namePrefix + "Orientation", referenceFrame, registry);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void setOrientation(FrameOrientation orientation)
+   public void setOrientation(FrameQuaternion orientation)
    {
       this.orientation.set(orientation);
    }

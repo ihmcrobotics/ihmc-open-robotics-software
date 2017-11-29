@@ -8,8 +8,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class XYPlaneFrom3PointsFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 8615028266128433328L;
-
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
    private final FramePoint3D p1 = new FramePoint3D(world);

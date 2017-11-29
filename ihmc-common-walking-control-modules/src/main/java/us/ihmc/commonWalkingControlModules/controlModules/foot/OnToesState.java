@@ -13,12 +13,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -38,7 +38,7 @@ public class OnToesState extends AbstractFootControlState
 
    private final Twist footTwist = new Twist();
 
-   private final FrameOrientation startOrientation = new FrameOrientation();
+   private final FrameQuaternion startOrientation = new FrameQuaternion();
    private final double[] tempYawPitchRoll = new double[3];
 
    private final FramePoint3D contactPointPosition = new FramePoint3D();
@@ -181,7 +181,7 @@ public class OnToesState extends AbstractFootControlState
          toeSlippingDetector.update();
    }
 
-   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
+   public void getDesireds(FrameQuaternion desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
    {
       desiredOrientationToPack.setIncludingFrame(desiredOrientation);
       desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocity);

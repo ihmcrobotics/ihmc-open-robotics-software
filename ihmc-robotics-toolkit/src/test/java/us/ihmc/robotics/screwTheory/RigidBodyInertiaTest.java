@@ -42,8 +42,6 @@ public class RigidBodyInertiaTest
       worldFrame = ReferenceFrame.constructARootFrame("worldFrame");
       frameB = new ReferenceFrame("B", worldFrame)
       {
-         private static final long serialVersionUID = 1L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -56,8 +54,6 @@ public class RigidBodyInertiaTest
 
       frameC = new ReferenceFrame("C", frameB)
       {
-         private static final long serialVersionUID = 1L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -70,8 +66,6 @@ public class RigidBodyInertiaTest
 
       rotatedOnlyFrame = new ReferenceFrame("rotatedOnly", worldFrame)
       {
-         private static final long serialVersionUID = 1L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

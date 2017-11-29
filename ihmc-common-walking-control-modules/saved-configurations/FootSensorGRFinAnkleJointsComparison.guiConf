@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedHighLevelState,offsetHeightAboveGround,v1RightUpperFootNegGRFWrenchInbeforeRightAnkle,sliderBoardMode,walk</Entry Boxes>
+<Entry Boxes>requestedHighLevelControllerName,offsetHeightAboveGround,v1RightUpperFootNegGRFWrenchInbeforeRightAnkle,sliderBoardMode,walk</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

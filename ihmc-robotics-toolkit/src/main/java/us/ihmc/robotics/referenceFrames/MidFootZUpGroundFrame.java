@@ -14,7 +14,6 @@ import us.ihmc.robotics.geometry.FramePose;
  */
 public class MidFootZUpGroundFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = -8299445128076938283L;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final ReferenceFrame frameOne, frameTwo;

@@ -5,9 +5,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.SymmetricQRAlgorithmDecomposition_D64GCFree;
 
 /**
@@ -47,11 +47,11 @@ public class AverageQuaternionCalculator
       quaternions.set(lastIndex, 3, quaternion.getS());
    }
 
-   public void queueFrameOrientation(FrameOrientation frameOrientation)
+   public void queueFrameOrientation(FrameQuaternion frameOrientation)
    {
       if (referenceFrame != null)
          referenceFrame.checkReferenceFrameMatch(frameOrientation);
-      frameOrientation.getQuaternion(tempQuaternion);
+      tempQuaternion.set(frameOrientation);
       queueQuaternion(tempQuaternion);
    }
 
@@ -99,7 +99,7 @@ public class AverageQuaternionCalculator
       averageQuaternionToPack.set(averageQuaternion);
    }
 
-   public void getAverageFrameOrientation(FrameOrientation averageFrameOrientationToPack)
+   public void getAverageFrameOrientation(FrameQuaternion averageFrameOrientationToPack)
    {
       if (referenceFrame != null)
          referenceFrame.checkReferenceFrameMatch(averageFrameOrientationToPack);

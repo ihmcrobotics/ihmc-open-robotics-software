@@ -1,6 +1,7 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -8,7 +9,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -59,12 +59,12 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       yoFramePoint.set(position);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       this.yoFrameOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void setOrientation(FrameOrientation orientation)
+   public void setOrientation(FrameQuaternion orientation)
    {
       this.yoFrameOrientation.set(orientation);
    }
@@ -81,9 +81,10 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       transformToWorld.getTranslation(translationToWorld);
 
       this.yoFramePoint.set(translationToWorld);
-      FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), transformToWorld);
+      FrameQuaternion orientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), transformToWorld.getRotationMatrix());
 
-      double[] yawPitchRoll = orientation.getYawPitchRoll();
+      double[] yawPitchRoll = new double[3];
+      orientation.getYawPitchRoll(yawPitchRoll);
       yoFrameOrientation.setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
    }
 

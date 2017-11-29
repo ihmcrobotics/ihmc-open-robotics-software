@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,7 +14,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -249,7 +249,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * @param desiredOrientation the orientation the control frame should reach. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
     */
-   public void setDesiredOrientation(FrameOrientation desiredOrientation)
+   public void setDesiredOrientation(FrameQuaternion desiredOrientation)
    {
       desiredOrientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       setDesiredOrientation(desiredOrientation.getQuaternion());
@@ -292,7 +292,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * @throws ReferenceFrameMismatchException if any of the arguments is not expressed in world
     *            frame.
     */
-   public void setDesiredPose(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
+   public void setDesiredPose(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation)
    {
       setDesiredPosition(desiredPosition);
       setDesiredOrientation(desiredOrientation);

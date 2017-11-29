@@ -23,7 +23,6 @@ import us.ihmc.robotics.screwTheory.Twist;
  */
 public class MovingWalkingReferenceFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = 9059204972061702373L;
    private final MovingReferenceFrame pelvisFrame;
    private final MovingMidFootZUpGroundFrame midFootZUpGroundFrame;
 

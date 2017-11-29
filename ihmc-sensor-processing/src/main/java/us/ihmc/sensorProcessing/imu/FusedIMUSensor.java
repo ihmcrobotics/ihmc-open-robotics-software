@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.imu;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,7 +13,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -60,9 +60,9 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final RigidBodyTransform transformFromFusedIMUToIMU = new RigidBodyTransform();
    private final RigidBodyTransform transformFromFusedIMUToWorld = new RigidBodyTransform();
 
-   private final FrameOrientation fusedFrameOrientation = new FrameOrientation();
-   private final FrameOrientation firstFrameOrientation = new FrameOrientation();
-   private final FrameOrientation secondFrameOrientation = new FrameOrientation();
+   private final FrameQuaternion fusedFrameOrientation = new FrameQuaternion();
+   private final FrameQuaternion firstFrameOrientation = new FrameQuaternion();
+   private final FrameQuaternion secondFrameOrientation = new FrameQuaternion();
 
    private final Vector3D firstVector = new Vector3D();
    private final Vector3D secondVector = new Vector3D();
@@ -213,8 +213,8 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       quaternion.set(fusedFrameOrientation);
    }
 
-   private void estimateYawDriftAndCorrectOrientation(FrameOrientation firstFrameOrientation, FrameOrientation secondFrameOrientation,
-                                                      FrameOrientation fusedFrameOrientation)
+   private void estimateYawDriftAndCorrectOrientation(FrameQuaternion firstFrameOrientation, FrameQuaternion secondFrameOrientation,
+                                                      FrameQuaternion fusedFrameOrientation)
    {
       firstFrameOrientation.checkReferenceFrameMatch(fusedMeasurementFrame);
       secondFrameOrientation.checkReferenceFrameMatch(fusedMeasurementFrame);
@@ -247,7 +247,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       secondFrameOrientation.setYawPitchRoll(tempYawPitchRoll);
    }
 
-   private void measureOrientationInFusedFrame(FrameOrientation orientationToPack, IMUSensorReadOnly imu)
+   private void measureOrientationInFusedFrame(FrameQuaternion orientationToPack, IMUSensorReadOnly imu)
    {
       // R_{IMU}^{world}
       imu.getOrientationMeasurement(rotationFromIMUToWorld);

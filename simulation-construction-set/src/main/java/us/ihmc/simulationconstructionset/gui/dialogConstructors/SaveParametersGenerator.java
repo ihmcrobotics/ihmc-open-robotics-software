@@ -24,7 +24,7 @@ public class SaveParametersGenerator implements SaveParametersConstructor
    public void constructDialog()
    {
 
-      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), scs.getParameterRootPath(), true))
+      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), scs.getParameterRootPath(), scs.getDefaultParameterFile(), true))
       {
          XmlParameterWriter writer = new XmlParameterWriter();
          for(YoVariableRegistry child : fileChooser.getRegistries())
