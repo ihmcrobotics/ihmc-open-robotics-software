@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
@@ -24,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
@@ -40,8 +42,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -57,7 +57,8 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DRCSimulationTestHelper
 {
@@ -96,9 +97,18 @@ public class DRCSimulationTestHelper
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
+      this(simulationTestParameters, robotModel, null);
+   }
+
+   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel, CommonAvatarEnvironmentInterface testEnvironment)
+   {
       this.robotModel = robotModel;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.simulationTestingParameters = simulationTestParameters;
+
+      if (testEnvironment != null)
+         this.testEnvironment = testEnvironment;
+      simulationStarter = new DRCSimulationStarter(robotModel, this.testEnvironment);
 
       fullRobotModel = robotModel.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -110,6 +120,16 @@ public class DRCSimulationTestHelper
       networkProcessorParameters.enableNetworkProcessor(false);
    }
 
+   /**
+    * Use {@link #DRCSimulationTestHelper(SimulationTestingParameters, DRCRobotModel, CommonAvatarEnvironmentInterface)} instead.
+    */
+   @Deprecated
+   public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
+   {
+      this.testEnvironment = testEnvironment;
+      simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
+   }
+
    public void createSimulation(String name)
    {
       createSimulation(name, true, true);
@@ -117,7 +137,6 @@ public class DRCSimulationTestHelper
 
    public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
    {
-      simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
       if (controllerStateFactory != null)
@@ -178,6 +197,11 @@ public class DRCSimulationTestHelper
    {
       ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
       scriptBasedControllerCommandGenerator.loadScriptFile(scriptInputStream, referenceFrame);
+   }
+
+   public DRCSCSInitialSetup getSCSInitialSetup()
+   {
+      return simulationStarter.getSCSInitialSetup();
    }
 
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
@@ -537,11 +561,6 @@ public class DRCSimulationTestHelper
    public void setWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       this.walkingScriptParameters = walkingScriptParameters;
-   }
-
-   public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
-   {
-      this.testEnvironment = testEnvironment;
    }
 
    public void setNetworkProcessorParameters(DRCNetworkModuleParameters networkProcessorParameters)
