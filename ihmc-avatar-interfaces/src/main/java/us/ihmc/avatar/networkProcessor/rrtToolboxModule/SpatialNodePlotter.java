@@ -20,6 +20,8 @@ public class SpatialNodePlotter
    private double[] lowerLimits;
 
    private int cnt;
+   
+   private boolean isFrameEnabled;
 
    public SpatialNodePlotter(WholeBodyTrajectoryToolboxData toolboxData, boolean enabled)
    {
@@ -45,11 +47,21 @@ public class SpatialNodePlotter
          lowerLimits[i] = Double.POSITIVE_INFINITY;
 
          String plotterName = toolboxData.createRandomSpatialData().getConfigurationNames().get(i);
-
+         isFrameEnabled = enabled;
          if (enabled)
             plotter.showInNewWindow(plotterName, false);
       }
       cnt = 0;
+   }
+
+   public void closeAll()
+   {
+      for (int i = 0; i < plotters.size(); i++)
+      {
+         // TODO : close panels.
+         if(isFrameEnabled)
+            plotters.get(i).getJFrame().dispose();
+      }
    }
 
    /**
@@ -62,7 +74,7 @@ public class SpatialNodePlotter
       double normalizedTime = node.getTime() / trajectoryTime;
       Color color;
       double diameter = 0.005;
-      
+
       for (int nodeIndex = 0; nodeIndex < dimensionOfConfigurations; nodeIndex++)
       {
          String prefix;
@@ -78,7 +90,7 @@ public class SpatialNodePlotter
             {
                prefix = "" + cnt + "_invalid_" + nodeIndex;
                diameter = 0.005;
-               color = Color.red;                              
+               color = Color.red;
             }
             break;
          case 2:
@@ -109,8 +121,6 @@ public class SpatialNodePlotter
             lineArtifact.setColor(color);
             plotters.get(nodeIndex).addArtifact(lineArtifact);
          }
-
-         
 
          CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_node", normalizedTime, configurationData, diameter, true);
          nodeArtifact.setColor(color);

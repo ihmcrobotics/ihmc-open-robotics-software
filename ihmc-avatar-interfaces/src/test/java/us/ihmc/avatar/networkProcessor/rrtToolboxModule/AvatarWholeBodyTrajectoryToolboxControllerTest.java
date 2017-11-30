@@ -82,7 +82,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(false);
+      simulationTestingParameters.setKeepSCSUp(visualize);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -279,7 +279,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    {
       // Trajectory parameters
       double trajectoryTime = 10.0;
-      double circleRadius = 0.40;
+      double circleRadius = 0.45;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.55, 0.2, 1.1), new Point3D(0.55, -0.1, 1.1));
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.0);
@@ -504,42 +504,57 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
    private void runTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
    {
-      List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
-      double t0 = Double.POSITIVE_INFINITY;
-      double tf = Double.NEGATIVE_INFINITY;
-
-      if (endEffectorTrajectories != null)
+      try
       {
-         for (WaypointBasedTrajectoryMessage trajectoryMessage : endEffectorTrajectories)
+         List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
+         double t0 = Double.POSITIVE_INFINITY;
+         double tf = Double.NEGATIVE_INFINITY;
+
+         if (endEffectorTrajectories != null)
          {
-            t0 = Math.min(t0, trajectoryMessage.getWaypointTime(0));
-            tf = Math.max(t0, trajectoryMessage.getLastWaypointTime());
+            for (WaypointBasedTrajectoryMessage trajectoryMessage : endEffectorTrajectories)
+            {
+               t0 = Math.min(t0, trajectoryMessage.getWaypointTime(0));
+               tf = Math.max(t0, trajectoryMessage.getLastWaypointTime());
 
-            SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-            // Visualize the position part if it is commanded
-            trajectoryMessage.getSelectionMatrix(selectionMatrix);
+               SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+               // Visualize the position part if it is commanded
+               trajectoryMessage.getSelectionMatrix(selectionMatrix);
 
-            if (!selectionMatrix.isLinearXSelected() && !selectionMatrix.isLinearYSelected() && !selectionMatrix.isLinearZSelected())
-               continue; // The position part is not dictated by trajectory, let's not visualize.
+               if (!selectionMatrix.isLinearXSelected() && !selectionMatrix.isLinearYSelected() && !selectionMatrix.isLinearZSelected())
+                  continue; // The position part is not dictated by trajectory, let's not visualize.
 
-            if (visualize)
-               scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue()));
+               if (visualize)
+                  scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue()));
+            }
+         }
+
+         double trajectoryTime = tf - t0;
+
+         commandInputManager.submitMessage(message);
+
+         WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
+
+         if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
+            assertNotNull("The toolbox is done but did not report a solution.", solution);
+         else
+            fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
+
+         if (visualize)
+            visualizeSolution(solution, trajectoryTime / 1000.0);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         if (simulationTestingParameters.getKeepSCSUp())
+         {
+            ThreadTools.sleepForever();
+         }
+         else
+         {
+            fail(e.getMessage());
          }
       }
-
-      double trajectoryTime = tf - t0;
-
-      commandInputManager.submitMessage(message);
-
-      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
-
-      if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
-         assertNotNull("The toolbox is done but did not report a solution.", solution);
-      else
-         fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
-
-      if (visualize)
-         visualizeSolution(solution, trajectoryTime / 1000.0);
    }
 
    private SideDependentList<Pose3D> computePrivilegedHandPosesAtPositions(SideDependentList<Point3D> desiredPositions)

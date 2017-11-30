@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final boolean VERBOSE = true;
-   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 5;
+   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 10;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 3000;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
@@ -59,7 +59,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private final WholeBodyTrajectoryToolboxOutputStatus toolboxSolution;
 
    private WholeBodyTrajectoryToolboxData toolboxData;
-   
+
    /*
     * YoVariables
     */
@@ -177,7 +177,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
       toolboxSolution.setDestination(-1);
-      
+
       configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
    }
 
@@ -243,14 +243,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          setOutputStatus(toolboxSolution, 4);
          setOutputStatus(toolboxSolution, path);
 
-         toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
-
-         reportMessage(toolboxSolution);
-
          terminateToolboxController();
-
-         if (VERBOSE)
-            PrintTools.info("Solution out ");
       }
    }
 
@@ -344,15 +337,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          nodePlotter.update(path.get(i), 2);
 
       // smoothing over one mile stone node.
+      int numberOfShortcut = 0;
       for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
       {
+         numberOfShortcut = i;
          if (updateShortcutPath(path) < 0.001)
-         {
-            if (VERBOSE)
-               PrintTools.info("shortcut is early terminal " + i);
             break;
-         }
-
       }
 
       // plotting final result.
@@ -362,7 +352,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       motionGenerationStartTime = updateTimer(shortcutPathComputationTime, shortcutStartTime);
 
       if (VERBOSE)
-         PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);
+         PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize + " shortcut " + numberOfShortcut);
 
       /*
        * terminate state
@@ -424,6 +414,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
             if (VERBOSE)
                PrintTools.info("Failed to complete trajectory.");
 
+            setOutputStatus(toolboxSolution, 2);
             terminateToolboxController();
          }
          else
@@ -481,6 +472,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          {
             if (VERBOSE)
                PrintTools.info("Did not find a single valid root node.");
+            setOutputStatus(toolboxSolution, 1);
             terminateToolboxController();
          }
          else
@@ -535,11 +527,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          return false;
       }
-      
-      configurationConverter.updateFullRobotModel(initialConfiguration);    
+
+      configurationConverter.updateFullRobotModel(initialConfiguration);
 
       toolboxData = new WholeBodyTrajectoryToolboxData(configurationConverter.getFullRobotModel(), trajectoryCommands, rigidBodyCommands);
-      
 
       bestScoreInitialGuess.set(0.0);
 
@@ -612,12 +603,17 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       int length = currentRobotConfiguration.jointAngles.length;
       initialConfiguration.desiredJointAngles = new float[length];
       System.arraycopy(currentRobotConfiguration.jointAngles, 0, initialConfiguration.desiredJointAngles, 0, length);
-      
+
       return true;
    }
 
    private void terminateToolboxController()
    {
+      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
+
+      reportMessage(toolboxSolution);
+
+      nodePlotter.closeAll();
       state.set(CWBToolboxState.DO_NOTHING);
 
       double totalTime = 0.0;
