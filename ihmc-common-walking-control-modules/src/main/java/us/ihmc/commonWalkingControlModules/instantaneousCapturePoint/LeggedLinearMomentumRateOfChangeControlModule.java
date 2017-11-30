@@ -10,7 +10,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public abstract class BipedLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
+public abstract class LeggedLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
 
    
@@ -19,7 +19,7 @@ public abstract class BipedLinearMomentumRateOfChangeControlModule extends Linea
    protected final YoEnum<RobotSide> supportLegPreviousTick;
 
    
-   public BipedLinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
+   public LeggedLinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
                                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                                                        boolean use2dProjection)
    {
