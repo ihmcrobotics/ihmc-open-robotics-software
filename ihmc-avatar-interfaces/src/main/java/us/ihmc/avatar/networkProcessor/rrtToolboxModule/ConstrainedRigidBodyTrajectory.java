@@ -38,16 +38,16 @@ public class ConstrainedRigidBodyTrajectory
    private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
 
    private final Pose3D controlFramePose = new Pose3D();
-   
-   //private final Pose3D initialpose; 
+
+   private final Pose3D initialPose = new Pose3D();
 
    // For given trajectory and appending exploration transform.
-   public ConstrainedRigidBodyTrajectory(WaypointBasedTrajectoryCommand trajectoryCommand, RigidBodyExplorationConfigurationCommand explorationCommand)
+   public ConstrainedRigidBodyTrajectory(RigidBody rigidBody, WaypointBasedTrajectoryCommand trajectoryCommand,
+                                         RigidBodyExplorationConfigurationCommand explorationCommand)
    {
+      this.rigidBody = rigidBody;
       if (trajectoryCommand != null)
       {
-         rigidBody = trajectoryCommand.getEndEffector();
-
          for (int i = 0; i < trajectoryCommand.getNumberOfWaypoints(); i++)
          {
             waypointTimes.add(trajectoryCommand.getWaypointTime(i));
@@ -56,12 +56,11 @@ public class ConstrainedRigidBodyTrajectory
          trajectorySelectionMatrix.set(trajectoryCommand.getSelectionMatrix());
 
          FramePose controlFramePose = new FramePose(trajectoryCommand.getControlFramePose());
-         controlFramePose.changeFrame(rigidBody.getBodyFixedFrame());
+         controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
          this.controlFramePose.set(controlFramePose.getGeometryObject());
       }
       else
       {
-         rigidBody = explorationCommand.getRigidBody();
          waypointTimes.add(0.0);
          waypointTimes.add(Double.MAX_VALUE);
          Pose3D originOfRigidBody = new Pose3D(rigidBody.getBodyFixedFrame().getTransformToWorldFrame());
@@ -71,6 +70,7 @@ public class ConstrainedRigidBodyTrajectory
 
          controlFramePose.setToZero();
       }
+      initialPose.set(rigidBody.getBodyFixedFrame().getTransformToWorldFrame());
 
       explorationSelectionMatrix.clearSelection();
       explorationConfigurationSpaces.clear();

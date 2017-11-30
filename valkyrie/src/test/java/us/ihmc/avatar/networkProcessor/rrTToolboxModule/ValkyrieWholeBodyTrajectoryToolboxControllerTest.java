@@ -34,7 +34,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
    {
       return ghostRobotModel;
    }
-
+   
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 120000)
@@ -44,6 +44,15 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       super.testMovingPaintDrum();
    }
 
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 120000)
+   public void testOneBigCircle() throws Exception, UnreasonableAccelerationException
+   {
+      handControlFrames = WholeBodyTrajectoryToolboxSettings.getValkyrieHandControlFrames();
+      super.testOneBigCircle();
+   }
+   
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 120000)
