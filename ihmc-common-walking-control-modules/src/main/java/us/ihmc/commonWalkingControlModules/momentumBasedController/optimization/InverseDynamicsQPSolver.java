@@ -17,6 +17,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class InverseDynamicsQPSolver
 {
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
+   private static final boolean tryNewFastSolve = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -254,10 +255,20 @@ public class InverseDynamicsQPSolver
       int taskSize = taskJ.getNumRows();
 
       // J^T W
-      tempJtW.reshape(numberOfDoFs, taskSize);
-      MatrixTools.scaleTranspose(taskWeight, taskJ, tempJtW);
+      if (!tryNewFastSolve)
+      {
+         tempJtW.reshape(numberOfDoFs, taskSize);
+         MatrixTools.scaleTranspose(taskWeight, taskJ, tempJtW);
 
-      addMotionTaskInternal(tempJtW, taskJ, taskObjective);
+         addMotionTaskInternal(tempJtW, taskJ, taskObjective);
+      }
+      else
+      {
+         tempJtW.reshape(numberOfDoFs, taskSize);
+         CommonOps.transpose(taskJ, tempJtW);
+
+         addMotionTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
+      }
    }
 
    public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
@@ -269,6 +280,18 @@ public class InverseDynamicsQPSolver
       CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
 
       addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
+   }
+
+   // new, and hopefully faster
+   private void addMotionTaskInternal(double weight, DenseMatrix64F taskJt, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      // Compute: H += J^T W J
+      CommonOps.multInner(taskJacobian, tempMotionTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, weight);
+
+      // Compute: f += - J^T W Objective
+      CommonOps.mult(taskJt, taskObjective, tempMotionTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -weight);
    }
 
    private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
@@ -386,16 +409,14 @@ public class InverseDynamicsQPSolver
          MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, centroidalMomentumMatrix, 0, 0, Wrench.SIZE, numberOfDoFs, -1.0);
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
 
-         tempWrenchConstraintJtW.reshape(problemSize, Wrench.SIZE);
-         CommonOps.transpose(tempWrenchConstraint_J, tempWrenchConstraintJtW);
          double weight = 150.0;
-         CommonOps.scale(weight, tempWrenchConstraintJtW);
          tempWrenchConstraint_H.reshape(problemSize, problemSize);
-         CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_J, tempWrenchConstraint_H);
+         CommonOps.multInner(tempWrenchConstraint_J, tempWrenchConstraint_H);
+         CommonOps.scale(weight, tempWrenchConstraint_H);
          CommonOps.addEquals(solverInput_H, tempWrenchConstraint_H);
 
          tempWrenchConstraint_f.reshape(problemSize, 1);
-         CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_RHS, tempWrenchConstraint_f);
+         CommonOps.multTransA(weight, tempWrenchConstraint_J, tempWrenchConstraint_RHS, tempWrenchConstraint_f);
          CommonOps.subtractEquals(solverInput_f, tempWrenchConstraint_f);
       }
       else
@@ -419,7 +440,6 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F tempWrenchConstraint_H = new DenseMatrix64F(200, 200);
    private final DenseMatrix64F tempWrenchConstraint_J = new DenseMatrix64F(Wrench.SIZE, 200);
    private final DenseMatrix64F tempWrenchConstraint_f = new DenseMatrix64F(Wrench.SIZE, 200);
-   private final DenseMatrix64F tempWrenchConstraintJtW = new DenseMatrix64F(200, Wrench.SIZE);
    private final DenseMatrix64F tempWrenchConstraint_LHS = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tempWrenchConstraint_RHS = new DenseMatrix64F(Wrench.SIZE, 1);
 
