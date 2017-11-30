@@ -20,7 +20,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -43,8 +42,6 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean setupVirtualModelControlSolver = false;
 
    private final JointDesiredOutputList jointStiffnessAndDamping;
-
-   private final JointPositionControlHelper positionControlHelper;
 
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -93,9 +90,6 @@ public class WalkingControllerState extends HighLevelControllerState
          jointDesiredOutput.setStiffness(highLevelControllerParameters.getDesiredJointStiffness(controlledJoint.getName(), controllerState));
          jointDesiredOutput.setDamping(highLevelControllerParameters.getDesiredJointDamping(controlledJoint.getName(), controllerState));
       }
-
-      OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
-      positionControlHelper = new JointPositionControlHelper(walkingControllerParameters, controlledOneDofJoints, registry);
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -157,12 +151,9 @@ public class WalkingControllerState extends HighLevelControllerState
    public void doAction()
    {
       walkingController.doAction();
+
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
       controllerCoreCommand.completeLowLevelJointData(jointStiffnessAndDamping);
-
-      positionControlHelper.update();
-      controllerCoreCommand.addInverseDynamicsCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
-      controllerCoreCommand.completeLowLevelJointData(positionControlHelper.getLowLevelOneDoFJointDesiredDataHolder());
 
       controllerCoreTimer.startMeasurement();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
