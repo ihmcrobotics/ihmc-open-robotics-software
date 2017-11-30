@@ -31,7 +31,7 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -491,7 +491,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
       return jointspaceFeedbackControlCommand;
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
+   public JointDesiredOutputListReadOnly getLowLevelJointDesiredData()
    {
       return lowLevelJointDesiredData;
    }

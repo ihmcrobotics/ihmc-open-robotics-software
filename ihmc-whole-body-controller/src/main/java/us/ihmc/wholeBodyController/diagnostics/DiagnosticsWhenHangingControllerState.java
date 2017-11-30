@@ -39,7 +39,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -263,7 +263,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }

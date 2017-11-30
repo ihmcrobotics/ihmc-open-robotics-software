@@ -12,7 +12,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMac
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
@@ -45,11 +45,11 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private final YoDouble timeToMoveForCalibration = new YoDouble("timeToMoveForCalibration", registry);
    private final YoDouble timeForEstimatingOffset = new YoDouble("timeForEstimatingOffset", registry);
 
-   private final LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControlOutput;
+   private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
    public ValkyrieCalibrationControllerState(HighLevelHumanoidControllerToolbox highLevelControllerToolbox,
                                              HighLevelControllerParameters highLevelControllerParameters,
-                                             LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControlOutput,
+                                             JointDesiredOutputListReadOnly highLevelControlOutput,
                                              ValkyrieCalibrationParameters calibrationParameters, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(controllerState);
@@ -145,7 +145,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return stateMachine.getCurrentState().getOutputForLowLevelController();
    }
@@ -164,7 +164,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+      public JointDesiredOutputListReadOnly getOutputForLowLevelController()
       {
          return lowLevelOneDoFJointDesiredDataHolder;
       }
@@ -282,7 +282,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+      public JointDesiredOutputListReadOnly getOutputForLowLevelController()
       {
          return jointTorqueOffsetEstimatorController.getOutputForLowLevelController();
       }
@@ -296,7 +296,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+      public JointDesiredOutputListReadOnly getOutputForLowLevelController()
       {
          return lowLevelOneDoFJointDesiredDataHolder;
       }

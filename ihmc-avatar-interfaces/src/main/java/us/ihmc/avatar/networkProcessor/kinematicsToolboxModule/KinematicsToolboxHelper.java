@@ -35,7 +35,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public class KinematicsToolboxHelper
 {
@@ -100,7 +100,7 @@ public class KinematicsToolboxHelper
          rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
       }
 
-      LowLevelOneDoFJointDesiredDataHolderReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+      JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
       for (OneDoFJoint joint : oneDoFJoints)
       {
          if (output.hasDataForJoint(joint))

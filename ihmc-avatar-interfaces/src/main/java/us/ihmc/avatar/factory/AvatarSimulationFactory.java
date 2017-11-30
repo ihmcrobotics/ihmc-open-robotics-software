@@ -26,8 +26,8 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -87,7 +87,7 @@ public class AvatarSimulationFactory
    private SimulationConstructionSet simulationConstructionSet;
    private ThreadDataSynchronizerInterface threadDataSynchronizer;
    private SensorReaderFactory sensorReaderFactory;
-   private LowLevelOutputWriter simulationOutputWriter;
+   private JointDesiredOutputWriter simulationOutputWriter;
    private DRCOutputProcessor simulationOutputProcessor;
    private DRCEstimatorThread stateEstimationThread;
    private DRCControllerThread controllerThread;
@@ -315,7 +315,7 @@ public class AvatarSimulationFactory
             OneDegreeOfFreedomJoint simulatedJoint = humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoint(positionControlledJointName);
             FullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
-            LowLevelOneDoFJointDesiredDataHolderList controllerLowLevelDataList = threadDataSynchronizer.getControllerDesiredJointDataHolder();
+            JointDesiredOutputList controllerLowLevelDataList = threadDataSynchronizer.getControllerDesiredJointDataHolder();
             JointDesiredOutput controllerDesiredOutput = controllerLowLevelDataList.getJointDesiredOutput(controllerJoint);
 
             JointRole jointRole = robotModel.get().getJointMap().getJointRole(positionControlledJointName);
