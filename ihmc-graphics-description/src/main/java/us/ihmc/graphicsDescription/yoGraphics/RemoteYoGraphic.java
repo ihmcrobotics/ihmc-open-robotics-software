@@ -35,7 +35,8 @@ public interface RemoteYoGraphic
       POLYGON_ARTIFACT,
       LINE_ARTIFACT,
       PLANAR_REGIONS_LIST_DGO,
-      POLYNOMIAL_3D_DGO
+      POLYNOMIAL_3D_DGO,
+      POLYGON_3D
    }
 
    public String getName();
