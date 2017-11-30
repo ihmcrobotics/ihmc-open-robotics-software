@@ -122,4 +122,41 @@ public class DiagonalMatrixTools
          }
       }
    }
+
+   /**
+    * <p>Performs the following operation:<br>
+    * <br>
+    * c = a<sup>T</sup> * b
+    * </br>
+    * </p>
+    * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified. Assumed to be diagonal.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void postMultTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c)
+   {
+      if (a == c || b == c)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numRows != b.numRows)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      else if (a.numCols != c.numRows || b.numCols != c.numCols)
+         throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
+
+      int index = 0;
+      int bIndex = 0;
+      int maxValue = Math.min(b.numRows, b.numCols);
+      for( int i = 0; i < maxValue; i++ )
+      {
+         int index2 = i;
+
+         int end = index + a.numCols;
+         while( index < end )
+         {
+            c.data[index2] = b.data[bIndex] * a.data[index++];
+            index2 += c.numCols;
+         }
+         bIndex += b.numCols + 1;
+      }
+   }
 }
