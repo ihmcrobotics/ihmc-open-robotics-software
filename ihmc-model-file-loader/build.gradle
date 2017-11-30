@@ -16,6 +16,10 @@ ihmc {
    configurePublications()
 }
 
+compileJava {
+   options.compilerArgs += ["--add-modules", "java.xml.bind"]
+}
+
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
