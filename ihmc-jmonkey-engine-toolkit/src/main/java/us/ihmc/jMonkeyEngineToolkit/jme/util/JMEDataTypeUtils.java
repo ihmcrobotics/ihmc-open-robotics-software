@@ -3,13 +3,9 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 import java.awt.Color;
 import java.util.List;
 
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Ray;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
+import com.jme3.math.*;
 
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -77,6 +73,15 @@ public class JMEDataTypeUtils
       Quaternion target = new Quaternion();
       packVectMathQuat4dInJMEQuaternion(original, target);
 
+      return target;
+   }
+
+   public static Matrix3f vecMathMatrixToJMEMatrix3f(Matrix3D original)
+   {
+      Matrix3f target = new Matrix3f();
+      for (int i = 0; i < 3; i++)
+         for (int j = 0; j < 3; j++)
+            target.set(i, j, (float) original.getElement(i, j));
       return target;
    }
 

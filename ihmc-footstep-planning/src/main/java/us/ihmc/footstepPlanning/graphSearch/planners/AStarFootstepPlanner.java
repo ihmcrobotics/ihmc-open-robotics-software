@@ -243,13 +243,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       while (!stack.isEmpty())
       {
          iterations++;
-
-         if(debug)
-         {
-            if(iterations % 150 == 0)
-               PrintTools.info("A* planner is on iteration " + iterations);            
-         }
-
+         
          FootstepNode nodeToExpand = stack.poll();
          if (expandedNodes.contains(nodeToExpand))
             continue;
