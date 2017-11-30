@@ -49,7 +49,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -68,10 +67,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WalkingHighLevelHumanoidController extends HighLevelBehavior
+public class WalkingHighLevelHumanoidController
 {
-   private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
-
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -125,8 +122,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      super(controllerState);
-
       this.managerFactory = managerFactory;
 
       // Getting parameters from the HighLevelHumanoidControllerToolbox
@@ -402,7 +397,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       });
    }
 
-   @Override
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
@@ -499,7 +493,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
-   @Override
    public void doAction()
    {
       controllerToolbox.update();
@@ -698,21 +691,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       pelvisOrientationManager.initialize();
    }
 
-   @Override
-   public void doTransitionIntoAction()
-   {
-      for (int i = 0; i < allOneDoFjoints.length; i++)
-      {
-         allOneDoFjoints[i].resetDesiredAccelerationIntegrator();
-         allOneDoFjoints[i].setQddDesired(0.0);
-         allOneDoFjoints[i].setTau(0.0);
-      }
-
-      initialize();
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
+   public void resetJointIntegrators()
    {
       for (int i = 0; i < allOneDoFjoints.length; i++)
       {
@@ -722,13 +701,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       }
    }
 
-   @Override
    public ControllerCoreCommand getControllerCoreCommand()
    {
       return controllerCoreCommand;
    }
 
-   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;

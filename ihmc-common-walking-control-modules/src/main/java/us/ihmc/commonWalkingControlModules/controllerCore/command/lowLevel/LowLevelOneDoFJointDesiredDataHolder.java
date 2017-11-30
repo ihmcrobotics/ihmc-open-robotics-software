@@ -8,8 +8,8 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListReadOnly
 {
@@ -100,20 +100,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       }
    }
 
-   public void extractAllDataFromJoints(OneDoFJoint[] joints, JointDesiredControlMode controlMode)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         setJointControlMode(joint, controlMode);
-         setDesiredJointTorque(joint, joint.getTau());
-         setDesiredJointPosition(joint, joint.getqDesired());
-         setDesiredJointVelocity(joint, joint.getQdDesired());
-         setDesiredJointAcceleration(joint, joint.getQddDesired());
-         setResetJointIntegrators(joint, joint.getResetDesiredAccelerationIntegrator());
-      }
-   }
-
    public void setJointsControlMode(OneDoFJoint[] joints, JointDesiredControlMode controlMode)
    {
       for (int i = 0; i < joints.length; i++)
@@ -165,15 +151,6 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       {
          OneDoFJoint joint = joints[i];
          setDesiredJointAcceleration(joint, joint.getQddDesired());
-      }
-   }
-
-   public void setResetIntegratorsFromJoints(OneDoFJoint[] joints)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJoint joint = joints[i];
-         setResetJointIntegrators(joint, joint.getResetDesiredAccelerationIntegrator());
       }
    }
 
