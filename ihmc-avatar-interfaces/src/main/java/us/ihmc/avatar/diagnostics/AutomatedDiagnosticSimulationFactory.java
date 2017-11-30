@@ -34,8 +34,8 @@ import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -67,7 +67,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private SensorReader sensorReader;
    private DiagnosticParameters diagnosticParameters;
    private AutomatedDiagnosticAnalysisController automatedDiagnosticAnalysisController;
-   private LowLevelOutputWriter lowLevelOutputWriter;
+   private JointDesiredOutputWriter lowLevelOutputWriter;
 
    private final Point3D scsCameraPosition = new Point3D(0.0, -8.0, 1.8);
    private final Point3D scsCameraFix = new Point3D(0.0, 0.0, 1.35);
@@ -111,7 +111,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       if (diagnosticParameters == null)
          diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, false);
 
-      LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
+      JointDesiredOutputList lowLevelOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters, lowLevelOutput);
 
       SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
@@ -124,7 +124,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
       lowLevelOutputWriter = new SimulatedLowLevelOutputWriter(simulatedRobot, false); 
-      lowLevelOutputWriter.setLowLevelOneDoFJointDesiredDataHolderList(lowLevelOutput);
+      lowLevelOutputWriter.setJointDesiredOutputList(lowLevelOutput);
 
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       simulatedRobot.setController(this, simulationTicksPerControlTick);
@@ -140,7 +140,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = null;
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = null;
-      LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder = null;
+      JointDesiredOutputList estimatorDesiredJointDataHolder = null;
 
       ForceSensorDataHolder forceSensorDataHolderToUpdate = new ForceSensorDataHolder(Arrays.asList(forceSensorDefinitions));
       CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();

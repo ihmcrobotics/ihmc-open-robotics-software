@@ -32,7 +32,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -532,7 +532,7 @@ public class RigidBodyControlManager
       return stateMachine.getCurrentState().getFeedbackControlCommand();
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
+   public JointDesiredOutputListReadOnly getLowLevelJointDesiredData()
    {
       return positionControlHelper.getLowLevelOneDoFJointDesiredDataHolder();
    }
