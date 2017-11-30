@@ -12,8 +12,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelControllerFactoryHelper
@@ -26,11 +26,11 @@ public class HighLevelControllerFactoryHelper
    private ICPTrajectoryPlannerParameters icpPlannerParameters;
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
-   private LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
+   private JointDesiredOutputList lowLevelControllerOutput;
    private YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
 
-   public void setLowLevelControllerOutput(LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+   public void setLowLevelControllerOutput(JointDesiredOutputList lowLevelControllerOutput)
    {
       this.lowLevelControllerOutput = lowLevelControllerOutput;
    }
@@ -118,7 +118,7 @@ public class HighLevelControllerFactoryHelper
       return statusMessageOutputManager;
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelControllerOutput()
+   public JointDesiredOutputListReadOnly getLowLevelControllerOutput()
    {
       return lowLevelControllerOutput;
    }

@@ -22,7 +22,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -317,7 +317,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       }
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }

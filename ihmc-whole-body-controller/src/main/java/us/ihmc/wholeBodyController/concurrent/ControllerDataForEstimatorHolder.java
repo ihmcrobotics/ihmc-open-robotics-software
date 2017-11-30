@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
 public class ControllerDataForEstimatorHolder
 {
@@ -32,8 +32,8 @@ public class ControllerDataForEstimatorHolder
 
    public ControllerDataForEstimatorHolder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder,
          CenterOfPressureDataHolder controllerCenterOfPressureDataHolder, RobotMotionStatusHolder estimatorRobotMotionStatusHolder,
-         RobotMotionStatusHolder controllerRobotMotionStatusHolder, LowLevelOneDoFJointDesiredDataHolderList estimatorJointDataHolder,
-         LowLevelOneDoFJointDesiredDataHolderList controllerJointDataHolder)
+         RobotMotionStatusHolder controllerRobotMotionStatusHolder, JointDesiredOutputList estimatorJointDataHolder,
+         JointDesiredOutputList controllerJointDataHolder)
    {      
       this.controllerFeet = new ArrayList<>(controllerCenterOfPressureDataHolder.getRigidBodies());
       this.estimatorFeet = new ArrayList<>(estimatorCenterOfPressureDataHolder.getRigidBodies());
@@ -88,12 +88,12 @@ public class ControllerDataForEstimatorHolder
       private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
       private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
 
-      private final LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder;
-      private final LowLevelOneDoFJointDesiredDataHolderList controllerDesiredJointDataHolder;
+      private final JointDesiredOutputList estimatorDesiredJointDataHolder;
+      private final JointDesiredOutputList controllerDesiredJointDataHolder;
 
       public Builder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder, CenterOfPressureDataHolder controllerCenterOfPressureDataHolder,
             RobotMotionStatusHolder estimatorRobotMotionStatusHolder, RobotMotionStatusHolder controllerRobotMotionStatusHolder,
-            LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder, LowLevelOneDoFJointDesiredDataHolderList controllerDesiredJointDataHolder)
+            JointDesiredOutputList estimatorDesiredJointDataHolder, JointDesiredOutputList controllerDesiredJointDataHolder)
       {
          this.estimatorCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
          this.controllerCenterOfPressureDataHolder = controllerCenterOfPressureDataHolder;

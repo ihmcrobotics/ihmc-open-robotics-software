@@ -7,6 +7,13 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class AtlasHighLevelControllerParameters implements HighLevelControllerParameters
 {
+   private boolean runningOnRealRobot;
+
+   public AtlasHighLevelControllerParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+   }
+
    @Override
    public WholeBodySetpointParameters getStandPrepParameters()
    {
@@ -34,7 +41,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    @Override
    public HighLevelControllerName getDefaultInitialControllerState()
    {
-      return HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+      return runningOnRealRobot ? HighLevelControllerName.DO_NOTHING_BEHAVIOR : HighLevelControllerName.WALKING;
    }
 
    @Override

@@ -69,7 +69,7 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -143,7 +143,7 @@ public class WalkingControllerTest
 
    private WalkingHighLevelHumanoidController walkingController;
    private WholeBodyControllerCore controllerCore;
-   private LowLevelOneDoFJointDesiredDataHolderList controllerOutput;
+   private JointDesiredOutputList controllerOutput;
 
    private static final double maxDriftRate = 0.2;
 
@@ -410,7 +410,7 @@ public class WalkingControllerTest
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
 
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      controllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getControllableOneDoFJoints());
+      controllerOutput = new JointDesiredOutputList(fullRobotModel.getControllableOneDoFJoints());
       controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, registry);
    }
 

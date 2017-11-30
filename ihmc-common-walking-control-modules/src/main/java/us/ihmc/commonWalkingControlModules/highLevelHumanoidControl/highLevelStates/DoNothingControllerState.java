@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class DoNothingControllerState extends HighLevelControllerState
@@ -67,7 +67,7 @@ public class DoNothingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }

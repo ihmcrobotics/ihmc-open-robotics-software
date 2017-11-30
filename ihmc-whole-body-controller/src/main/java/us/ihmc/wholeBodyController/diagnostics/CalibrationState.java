@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public abstract class CalibrationState<E extends Enum<E>> extends FinishableState<E>
 {
@@ -11,5 +11,5 @@ public abstract class CalibrationState<E extends Enum<E>> extends FinishableStat
       super(stateEnum);
    }
    
-   public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController();
+   public abstract JointDesiredOutputListReadOnly getOutputForLowLevelController();
 }
