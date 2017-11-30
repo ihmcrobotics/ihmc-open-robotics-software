@@ -179,13 +179,13 @@ public class WalkingControllerState extends HighLevelControllerState
    public void doTransitionIntoAction()
    {
       initialize();
-      walkingController.doTransitionIntoAction();
+      walkingController.resetJointIntegrators();
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
-      walkingController.doTransitionOutOfAction();
+      walkingController.resetJointIntegrators();
    }
 
    @Override
