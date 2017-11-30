@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
+   private static final boolean debug = true;
    private final boolean visualize = true;
    private HumanoidRobotDataReceiver robotDataReceiver;
 
@@ -240,6 +241,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planId.set(request.planId);
       FootstepPlanningRequestPacket.FootstepPlannerType requestedPlannerType = request.requestedPlannerType;
 
+      if (debug)
+      {
+         PrintTools.info("Starting to plan. Plan id: " + request.planId + ". Timeout: " + request.timeout);
+      }
+
       if (requestedPlannerType != null)
       {
          activePlanner.set(requestedPlannerType);
@@ -267,6 +273,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (timeout > 0.0 && Double.isFinite(timeout))
       {
          planner.setTimeout(timeout);
+
+         if(debug)
+         {
+            PrintTools.info("Setting timeout to " + timeout);
+         }
       }
       else
       {
@@ -328,6 +339,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private FootstepPlanningToolboxOutputStatus packResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
    {
+      if (debug)
+      {
+         PrintTools.info("Finished planning. Result: " + status);
+      }
+
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
       if (footstepPlan == null)
       {
