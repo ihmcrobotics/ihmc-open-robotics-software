@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class ICPBasedLinearMomentumRateOfChangeControlModule extends BipedLinearMomentumRateOfChangeControlModule
+public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinearMomentumRateOfChangeControlModule
 {
    private final ICPProportionalController icpProportionalController;
    private final BipedSupportPolygons bipedSupportPolygons;

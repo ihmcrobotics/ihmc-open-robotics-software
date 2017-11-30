@@ -25,7 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
-public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends BipedLinearMomentumRateOfChangeControlModule
+public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LeggedLinearMomentumRateOfChangeControlModule
 {
    private final ICPOptimizationController icpOptimizationController;
    private final YoDouble yoTime;
