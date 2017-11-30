@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.outputData;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public interface LowLevelOneDoFJointDesiredDataHolderReadOnly
+public interface JointDesiredOutputListReadOnly
 {
    public abstract boolean hasDataForJoint(OneDoFJoint joint);
 

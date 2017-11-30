@@ -297,6 +297,25 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       }
    }
 
+   public Point3D[][] getNavigableRegions()
+   {
+      return navigableRegionsManager.getNavigableExtrusions();
+   }
+
+   public List<Point2D> getBodyPathWaypoints()
+   {
+      return waypoints;
+   }
+
+   public Pose2D getLowLevelPlannerGoal()
+   {
+      Pose2D goalPose2d = new Pose2D();
+      double pathLength = bodyPath.computePathLength(0.0);
+      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
+      bodyPath.getPointAlongPath(alpha, goalPose2d);
+      return goalPose2d;
+   }
+
    public BodyPathPlanner getBodyPathPlanner()
    {
       return bodyPath;

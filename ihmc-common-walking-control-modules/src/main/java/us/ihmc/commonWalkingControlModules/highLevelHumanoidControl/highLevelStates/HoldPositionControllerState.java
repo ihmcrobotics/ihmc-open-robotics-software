@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -15,13 +15,13 @@ public class HoldPositionControllerState extends HighLevelControllerState
 {
    private final YoVariableRegistry registry;
 
-   private final LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControllerOutput;
+   private final JointDesiredOutputListReadOnly highLevelControllerOutput;
    protected final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PairList<OneDoFJoint, YoDouble> jointSetpoints = new PairList<>();
 
    public HoldPositionControllerState(HighLevelControllerName stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                      LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControllerOutput)
+                                      JointDesiredOutputListReadOnly highLevelControllerOutput)
    {
       super(stateEnum);
 
@@ -89,7 +89,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }

@@ -522,10 +522,28 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    /**
     * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
     * be treated as a hard inequality constraint.
+    * <p>
+    * The optimization will then ensure that the spatial velocity of the end-effector is <b>less</b>
+    * than or equal to the specified desired spatial velocity.
+    * </p>
     */
-   public void setAsHardInequalityConstraint()
+   public void setAsLessOrEqualInequalityConstraint()
    {
-      this.constraintType = ConstraintType.INEQUALITY;
+      this.constraintType = ConstraintType.LEQ_INEQUALITY;
+      setWeight(HARD_CONSTRAINT);
+   }
+
+   /**
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
+    * be treated as a hard inequality constraint.
+    * <p>
+    * The optimization will then ensure that the spatial velocity of the end-effector is
+    * <b>greater</b> than or equal to the specified desired spatial velocity.
+    * </p>
+    */
+   public void setAsGreaterOrEqualInequalityConstraint()
+   {
+      this.constraintType = ConstraintType.GEQ_INEQUALITY;
       setWeight(HARD_CONSTRAINT);
    }
 
