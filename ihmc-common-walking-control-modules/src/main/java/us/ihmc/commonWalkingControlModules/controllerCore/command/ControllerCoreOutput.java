@@ -8,17 +8,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 {
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
    private final FrameVector3D linearMomentumRate = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
-   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelOneDoFJointDesiredDataHolder;
+   private final JointDesiredOutputList lowLevelOneDoFJointDesiredDataHolder;
 
-   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, OneDoFJoint[] controlledOneDoFJoints, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, OneDoFJoint[] controlledOneDoFJoints, JointDesiredOutputList lowLevelControllerOutput)
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
@@ -64,13 +64,13 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       return rootJointDesiredConfigurationData;
    }
 
-   public void setLowLevelOneDoFJointDesiredDataHolder(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   public void setLowLevelOneDoFJointDesiredDataHolder(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
       this.lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelOneDoFJointDesiredDataHolder()
+   public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }

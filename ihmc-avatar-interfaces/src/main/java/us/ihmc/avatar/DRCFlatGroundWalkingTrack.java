@@ -64,7 +64,7 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
-      controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
+      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
       HeightMap heightMapForFootstepZ = null;

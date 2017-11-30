@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 /**
  * Class that contains the different lists that are submitted the whole body controller core. All
@@ -109,7 +109,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * 
     * @param lowLevelJointData data to bypass the controller core with.
     */
-   public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelJointData)
+   public void completeLowLevelJointData(JointDesiredOutputListReadOnly lowLevelJointData)
    {
       if (lowLevelJointData != null)
          lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);

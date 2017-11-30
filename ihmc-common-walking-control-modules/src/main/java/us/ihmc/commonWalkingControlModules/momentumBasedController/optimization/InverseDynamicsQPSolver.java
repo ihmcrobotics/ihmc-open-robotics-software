@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.convexOptimization.quadraticProgram.*;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -238,8 +238,11 @@ public class InverseDynamicsQPSolver
       case EQUALITY:
          addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
          break;
-      case INEQUALITY:
-         addMotionInequalityConstraint(input.taskJacobian, input.taskObjective);
+      case LEQ_INEQUALITY:
+         addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      case GEQ_INEQUALITY:
+         addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
          break;
       default:
          throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
@@ -292,7 +295,17 @@ public class InverseDynamicsQPSolver
       CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
-   public void addMotionInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionLesserOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
+   }
+
+   public void addMotionGreaterOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      addMotionInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
+   }
+
+   private void addMotionInequalityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double sign)
    {
       int taskSize = taskJacobian.getNumRows();
       int previousSize = solverInput_bin.getNumRows();
@@ -301,8 +314,8 @@ public class InverseDynamicsQPSolver
       solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps.insert(taskJacobian, solverInput_Ain, previousSize, 0);
-      CommonOps.insert(taskObjective, solverInput_bin, previousSize, 0);
+      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, problemSize, sign);
+      MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueJacobian, DenseMatrix64F torqueObjective)

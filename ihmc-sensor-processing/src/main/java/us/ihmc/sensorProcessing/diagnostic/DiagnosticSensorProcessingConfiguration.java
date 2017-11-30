@@ -5,8 +5,8 @@ import java.util.Map;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
@@ -25,23 +25,23 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
    private Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
    private Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
    
-   private final LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder;
+   private final JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder;
 
    private final double dt;
    private final DiagnosticParameters diagnosticParameters;
    private final boolean enableLogging;
 
-   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, double dt, LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, double dt, JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
       this(diagnosticParameters, null, dt, lowLevelOneDoFJointDesiredDataHolder);
    }
 
-   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
       this(diagnosticParameters, sensorProcessingConfiguration, sensorProcessingConfiguration.getEstimatorDT(), lowLevelOneDoFJointDesiredDataHolder);
    }
 
-   private DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, double dt, LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   private DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, double dt, JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
       this.dt = dt;

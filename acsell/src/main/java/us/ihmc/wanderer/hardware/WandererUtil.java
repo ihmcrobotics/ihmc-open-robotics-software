@@ -6,7 +6,7 @@ import java.util.List;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
 public class WandererUtil
 {
@@ -31,7 +31,7 @@ public class WandererUtil
       return wandererJoints;
    }
 
-   public static EnumMap<WandererJoint, JointDesiredOutput> createOutputMap(LowLevelOneDoFJointDesiredDataHolderList lowLevelOutuput)
+   public static EnumMap<WandererJoint, JointDesiredOutput> createOutputMap(JointDesiredOutputList lowLevelOutuput)
    {
       EnumMap<WandererJoint, JointDesiredOutput> wandererJoints = new EnumMap<>(WandererJoint.class);
       for (int i = 0; i < lowLevelOutuput.getNumberOfJointsWithDesiredOutput(); i++)
