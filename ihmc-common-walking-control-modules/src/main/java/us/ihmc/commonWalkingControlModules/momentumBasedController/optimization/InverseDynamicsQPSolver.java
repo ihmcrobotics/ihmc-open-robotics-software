@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -17,7 +18,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class InverseDynamicsQPSolver
 {
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
-   private static final boolean tryNewFastSolve = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -255,29 +255,28 @@ public class InverseDynamicsQPSolver
       int taskSize = taskJ.getNumRows();
 
       // J^T W
-      if (!tryNewFastSolve)
-      {
-         tempJtW.reshape(numberOfDoFs, taskSize);
-         MatrixTools.scaleTranspose(taskWeight, taskJ, tempJtW);
+      tempJtW.reshape(numberOfDoFs, taskSize);
+      CommonOps.transpose(taskJ, tempJtW);
 
-         addMotionTaskInternal(tempJtW, taskJ, taskObjective);
-      }
-      else
-      {
-         tempJtW.reshape(numberOfDoFs, taskSize);
-         CommonOps.transpose(taskJ, tempJtW);
-
-         addMotionTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
-      }
+      addMotionTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
    }
 
+   /**
+    * Sets up a motion objective for the joint accelerations (qddot).
+    * <p>
+    *    min (J qddot - b)^T * W * (J qddot - b)
+    * </p>
+    * @param taskJacobian jacobian to map qddot to the objective space. J in the above equation.
+    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    */
    public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
 
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
-      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
+      DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
 
       addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
@@ -443,20 +442,37 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F tempWrenchConstraint_LHS = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tempWrenchConstraint_RHS = new DenseMatrix64F(Wrench.SIZE, 1);
 
+   /**
+    * Sets up a motion objective for the generalized contact forces (rhos).
+    * <p>
+    *    min (rho - b)^T * W * (rho - b)
+    * </p>
+    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    */
    public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, taskWeight, 0, 0, rhoSize, rhoSize, 1.0);
 
-      CommonOps.mult(taskWeight, taskObjective, tempRhoTask_f);
+      DiagonalMatrixTools.preMult(taskWeight, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
+   /**
+    * Sets up a motion objective for the generalized contact forces (rhos).
+    * <p>
+    *    min (J rho - b)^T * W * (J rho - b)
+    * </p>
+    * @param taskJacobian jacobian to map rho to the objective space. J in the above equation.
+    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    */
    public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
       // J^T W
       tempJtW.reshape(rhoSize, taskSize);
-      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
+      DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
 
       // Compute: H += J^T W J
       CommonOps.mult(tempJtW, taskJacobian, tempRhoTask_H);
