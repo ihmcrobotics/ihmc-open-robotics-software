@@ -48,6 +48,15 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 120000)
+   public void testOneBigCircle() throws Exception, UnreasonableAccelerationException
+   {
+      handControlFrames = WholeBodyTrajectoryToolboxSettings.getAtlasRobotiQHandControlFrames();
+      super.testOneBigCircle();
+   }
+   
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 120000)
    public void testHandCirclePositionAndYaw() throws Exception, UnreasonableAccelerationException
    {
       handControlFrames = WholeBodyTrajectoryToolboxSettings.getAtlasRobotiQHandControlFrames();

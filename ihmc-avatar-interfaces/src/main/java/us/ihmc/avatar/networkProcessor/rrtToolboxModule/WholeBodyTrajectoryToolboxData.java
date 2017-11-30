@@ -9,8 +9,10 @@ import java.util.Set;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
@@ -19,6 +21,7 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 /**
  * This class is for packing input of the controller as like as a packet
@@ -48,6 +51,7 @@ public class WholeBodyTrajectoryToolboxData
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
    FullHumanoidRobotModel fullRobotModel;
+
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
@@ -91,7 +95,22 @@ public class WholeBodyTrajectoryToolboxData
                message += " an exploration request";
             PrintTools.info(message);
          }
-         rigidBodyDataMap.put(rigidBody, new ConstrainedRigidBodyTrajectory(trajectory, exploration));
+
+         ConstrainedRigidBodyTrajectory constrainedRigidBodyTrajectory = null;
+         for (RigidBody candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
+         {
+            if (candidateRigidBody.getName() == rigidBody.getName())
+            {
+               constrainedRigidBodyTrajectory = new ConstrainedRigidBodyTrajectory(candidateRigidBody, trajectory, exploration);
+               break;
+            }
+         }
+
+         if (constrainedRigidBodyTrajectory == null)
+            if (VERBOSE)
+               PrintTools.info("fullrobot model has no " + rigidBody);
+
+         rigidBodyDataMap.put(rigidBody, constrainedRigidBodyTrajectory);
          dimensionOfExploration = dimensionOfExploration + exploration.getNumberOfDegreesOfFreedomToExplore();
       }
 
@@ -100,20 +119,14 @@ public class WholeBodyTrajectoryToolboxData
    }
 
    public SpatialData createRandomSpatialData()
-   {  
+   {
       SpatialData spatialData = new SpatialData();
 
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
          RigidBody rigidBody = allRigidBodies.get(i);
-         
-         
+
          rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
-         
-         if(rigidBody == fullRobotModel.getHand(RobotSide.RIGHT))
-         {
-            
-         }
       }
 
       return spatialData;

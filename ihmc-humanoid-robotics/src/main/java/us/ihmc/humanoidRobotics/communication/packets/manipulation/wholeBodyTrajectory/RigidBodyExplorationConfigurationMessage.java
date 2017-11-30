@@ -28,6 +28,12 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    {
       this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
 
+      ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
+            ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
+      double[] upperLimit = new double[] {0, 0, 0, 0, 0, 0};
+      double[] lowerLimit = new double[] {0, 0, 0, 0, 0, 0};
+      setExplorationConfigurationSpaces(configurations, lowerLimit, upperLimit);
+
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -50,10 +56,21 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
                + explorationRangeUpperLimits.length);
 
       this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
+      setExplorationConfigurationSpaces(degreesOfFreedomToExplore, explorationRangeLowerLimits, explorationRangeUpperLimits);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeLowerLimits,
+                                                 double[] explorationRangeUpperLimits)
+   {
+      if (degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length || degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length)
+         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
+               + ", explorationRangeLowerLimits.length = " + explorationRangeLowerLimits.length + ", explorationRangeUpperLimits.length = "
+               + explorationRangeUpperLimits.length);
+
       this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
       this.explorationRangeLowerLimits = explorationRangeLowerLimits;
       this.explorationRangeUpperLimits = explorationRangeUpperLimits;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public long getRigidBodyNameBasedHashCode()

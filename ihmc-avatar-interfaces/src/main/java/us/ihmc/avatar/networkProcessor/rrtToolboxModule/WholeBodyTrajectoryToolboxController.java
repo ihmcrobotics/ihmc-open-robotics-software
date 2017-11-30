@@ -18,6 +18,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxSettings;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
@@ -57,6 +58,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final WholeBodyTrajectoryToolboxOutputStatus toolboxSolution;
 
+   private WholeBodyTrajectoryToolboxData toolboxData;
+   
    /*
     * YoVariables
     */
@@ -82,6 +85,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private SpatialNode visualizedNode;
 
+   private final KinematicsToolboxOutputConverter configurationConverter;
    private final KinematicsToolboxOutputStatus initialConfiguration = new KinematicsToolboxOutputStatus();
    private final AtomicReference<RobotConfigurationData> currentRobotConfigurationDataReference = new AtomicReference<>(null);
 
@@ -173,6 +177,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
       toolboxSolution.setDestination(-1);
+      
+      configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
    }
 
    @Override
@@ -497,8 +503,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       return endTime;
    }
 
-   private WholeBodyTrajectoryToolboxData toolboxData;
-
    @Override
    protected boolean initialize()
    {
@@ -518,7 +522,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // Convert command into WholeBodyTrajectoryToolboxData.
       // ******************************************************************************** //
 
-      toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, trajectoryCommands, rigidBodyCommands);
+      //toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, trajectoryCommands, rigidBodyCommands);
 
       if (VERBOSE)
          PrintTools.info("initialize CWB toolbox");
@@ -531,6 +535,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          return false;
       }
+      
+      configurationConverter.updateFullRobotModel(initialConfiguration);    
+
+      toolboxData = new WholeBodyTrajectoryToolboxData(configurationConverter.getFullRobotModel(), trajectoryCommands, rigidBodyCommands);
+      
 
       bestScoreInitialGuess.set(0.0);
 
@@ -603,7 +612,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       int length = currentRobotConfiguration.jointAngles.length;
       initialConfiguration.desiredJointAngles = new float[length];
       System.arraycopy(currentRobotConfiguration.jointAngles, 0, initialConfiguration.desiredJointAngles, 0, length);
-
+      
       return true;
    }
 

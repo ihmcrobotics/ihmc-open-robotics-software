@@ -90,7 +90,6 @@ public class WholeBodyTrajectoryToolboxSettings
             orientation.appendRollRotation(0.5 * Math.PI);
          }
 
-         PrintTools.info("" + robotSide + " " + new Pose3D(position, orientation));
          frames.put(robotSide, new Pose3D(position, orientation));
       }
 
