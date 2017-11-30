@@ -39,8 +39,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -136,7 +136,7 @@ public class FixedBaseRobotArmController implements RobotController
       allPossibleCommands.addCommand(handOrientationCommand);
       allPossibleCommands.addCommand(handSpatialCommand);
 
-      LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput = new LowLevelOneDoFJointDesiredDataHolderList(ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class));
+      JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class));
       
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, allPossibleCommands, lowLevelControllerCoreOutput, registry);
 
@@ -227,7 +227,7 @@ public class FixedBaseRobotArmController implements RobotController
       controllerCore.compute();
 
       ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
-      LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
 
       if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.OFF
             || controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)

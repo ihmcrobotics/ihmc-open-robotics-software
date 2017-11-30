@@ -44,7 +44,7 @@ import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -92,7 +92,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private final String diagnosticGainsFilePath = "diagnostic/realRobotPDGains.yaml";
    private final String diagnosticSetPointsFilePath = "diagnostic/diagnosticSetPoints.yaml";
 
-   private LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder;
+   private JointDesiredOutputList estimatorDesiredJointDataHolder;
    private ValkyrieRosControlSensorReader sensorReader;
    private DRCKinematicsBasedStateEstimator stateEstimator;
    private AutomatedDiagnosticAnalysisController diagnosticController;
@@ -151,7 +151,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        */
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
+      estimatorDesiredJointDataHolder = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
 
       ValkyrieDiagnosticParameters diagnosticParameters = new ValkyrieDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, true);
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,

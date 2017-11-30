@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -74,8 +74,8 @@ public class StandTransitionControllerState extends HighLevelControllerState
       double gainRatio = walkingControlRatioTrajectory.getPosition();
       standTransitionGainRatio.set(gainRatio);
 
-      LowLevelOneDoFJointDesiredDataHolderReadOnly standReadyJointCommand = standReadyControllerState.getOutputForLowLevelController();
-      LowLevelOneDoFJointDesiredDataHolderReadOnly walkingJointCommand = walkingControllerState.getOutputForLowLevelController();
+      JointDesiredOutputListReadOnly standReadyJointCommand = standReadyControllerState.getOutputForLowLevelController();
+      JointDesiredOutputListReadOnly walkingJointCommand = walkingControllerState.getOutputForLowLevelController();
 
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
@@ -107,7 +107,7 @@ public class StandTransitionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }
