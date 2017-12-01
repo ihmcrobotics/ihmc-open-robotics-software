@@ -103,6 +103,21 @@ public abstract class WalkingControllerParameters
    }
 
    /**
+    * This method is similar to {@link #getJointAccelerationIntegrationParameters()}. The controller will
+    * apply the acceleration integration parameters defined here only to leg joints that are in swing. This
+    * allows to use different acceleration integration settings for the legs when loaded and non-loaded.
+    * If this list does not specify settings for a particular joint the controller will not switch parameters
+    * when in swing.
+    *
+    * @return list containing acceleration integration parameters to be used in swing and the corresponding
+    * leg joints
+    */
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
+   {
+      return null;
+   }
+
+   /**
     * Returns the value of sqrt(g / z0) which corresponds to omega0 in the Linear Inverted Pendulum
     * Model that the ICP is based on. Note, that this value is a tuning parameter for each robot and
     * is not computed from the actual CoM height.
