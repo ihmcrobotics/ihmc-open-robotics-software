@@ -27,6 +27,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -46,6 +47,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
@@ -103,6 +105,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
    protected SideDependentList<Pose3D> handControlFrames;
 
+   private WholeBodyTrajectoryToolboxCommandConverter commandConversionHelper;
+   private KinematicsToolboxOutputConverter converter;
+
    /**
     * Returns a separate instance of the robot model that will be modified in this test to create a
     * ghost robot.
@@ -121,7 +126,10 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(WholeBodyTrajectoryToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new WholeBodyTrajectoryToolboxCommandConverter(desiredFullRobotModel));
+      commandConversionHelper = new WholeBodyTrajectoryToolboxCommandConverter(desiredFullRobotModel);
+      commandInputManager.registerConversionHelper(commandConversionHelper);
+
+      converter = new KinematicsToolboxOutputConverter(robotModel);
 
       statusOutputManager = new StatusMessageOutputManager(WholeBodyTrajectoryToolboxModule.supportedStatus());
 
@@ -540,8 +548,19 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          else
             fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
 
-         if (visualize)
-            visualizeSolution(solution, trajectoryTime / 1000.0);
+         if (solution.getPlanningResult() == 4)
+         {
+            if (visualize)
+               visualizeSolution(solution, trajectoryTime / 1000.0);
+
+            PrintTools.info("assert start");
+            trackingTrajectoryWithOutput(message, solution);
+            PrintTools.info("assert end");
+         }
+         else
+         {
+            assert (false);
+         }
       }
       catch (Exception e)
       {
@@ -557,6 +576,73 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
    }
 
+   public void trackingTrajectoryWithOutput(WholeBodyTrajectoryToolboxMessage message, WholeBodyTrajectoryToolboxOutputStatus solution)
+   {
+
+      List<WaypointBasedTrajectoryMessage> wayPointBasedTrajectoryMessages = message.getEndEffectorTrajectories();
+
+      // for every configurations in solution.
+      int numberOfConfigurations = solution.getRobotConfigurations().length;
+      for (int j = 0; j < numberOfConfigurations; j++)
+      {
+         // get full robot model.
+         KinematicsToolboxOutputStatus configuration = solution.getRobotConfigurations()[j];
+         converter.updateFullRobotModel(configuration);
+         FullHumanoidRobotModel outputFullRobotModel = converter.getFullRobotModel();
+
+         double configurationTime = solution.getTrajectoryTimes()[j];
+
+         // for all way point based trajectory messages.
+         for (int i = 0; i < wayPointBasedTrajectoryMessages.size(); i++)
+         {
+            WaypointBasedTrajectoryMessage trajectory = wayPointBasedTrajectoryMessages.get(i);
+            RigidBody rigidBodyOftrajectory = commandConversionHelper.getRigidBody(trajectory.getEndEffectorNameBasedHashCode());
+
+            RigidBody rigidBodyOfOutputFullRobotModel = getRigidBodyHasSameName(outputFullRobotModel, rigidBodyOftrajectory);
+
+            if (rigidBodyOfOutputFullRobotModel == null)
+            {
+               assert (false);
+            }
+            else
+            {
+               RigidBodyTransform solutionRigidBodyTransform = rigidBodyOfOutputFullRobotModel.getBodyFixedFrame().getTransformToWorldFrame();
+               Pose3D solutionRigidBodyPose = new Pose3D(solutionRigidBodyTransform);
+
+               // TODO : what a heck.......... append hand control frame.
+               if (rigidBodyOftrajectory.getName().contains("left"))
+                  solutionRigidBodyPose.appendTransform(new RigidBodyTransform(handControlFrames.get(RobotSide.LEFT).getOrientation(),
+                                                                               handControlFrames.get(RobotSide.LEFT).getPosition()));
+               else if (rigidBodyOftrajectory.getName().contains("right"))
+                  solutionRigidBodyPose.appendTransform(new RigidBodyTransform(handControlFrames.get(RobotSide.RIGHT).getOrientation(),
+                                                                               handControlFrames.get(RobotSide.RIGHT).getPosition()));
+               else
+                  ;
+
+               Pose3D givenRigidBodyPose = trajectory.getPose(configurationTime);
+
+               //               System.out.println(solutionRigidBodyPose);               
+               //               System.out.println(givenRigidBodyPose);
+               
+               // TODO : considering selection matrix.
+               //EuclidCoreTestTools.assertRigidBodyTransformEquals(givenRigidBodyPose, solutionRigidBodyPose, epsilon);
+            }
+         }
+      }
+
+   }
+
+   private RigidBody getRigidBodyHasSameName(FullHumanoidRobotModel fullRobotModel, RigidBody givenRigidBody)
+   {
+      RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
+      RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
+      for (RigidBody rigidBody : allRigidBodies)
+         if (givenRigidBody.getName() == rigidBody.getName())
+            return rigidBody;
+      return null;
+   }
+
+   // Is this for testing ahead put message on planner?
    private SideDependentList<Pose3D> computePrivilegedHandPosesAtPositions(SideDependentList<Point3D> desiredPositions)
    {
       CommandInputManager commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
@@ -609,6 +695,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return handPoses;
    }
 
+   // TODO
    private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
                                                  Quaternion circleRotation, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
    {

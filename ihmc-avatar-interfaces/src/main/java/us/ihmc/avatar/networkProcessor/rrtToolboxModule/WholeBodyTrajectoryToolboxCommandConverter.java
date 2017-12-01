@@ -62,6 +62,11 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
          rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
    }
 
+   public RigidBody getRigidBody(long hashMap)
+   {
+      return rigidBodyNamedBasedHashMap.get(hashMap);
+   }
+
    /**
     * Only converting {@link KinematicsToolboxRigidBodyMessage}.
     */

@@ -264,6 +264,46 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return waypoints;
    }
 
+   public Pose3D getPose(double time)
+   {
+      if (time <= 0.0)
+         return waypoints[0];
+
+      else if (time >= waypointTimes[waypointTimes.length - 1])
+         return waypoints[waypoints.length - 1];
+
+      else
+      {
+         double timeGap = 0.0;
+
+         int indexOfFrame = 0;
+         int numberOfTrajectoryTimes = waypointTimes.length;
+
+         for (int i = 0; i < numberOfTrajectoryTimes; i++)
+         {
+            timeGap = time - waypointTimes[i];
+            if (timeGap < 0)
+            {
+               indexOfFrame = i;
+               break;
+            }
+         }
+
+         Pose3D poseOne = waypoints[indexOfFrame - 1];
+         Pose3D poseTwo = waypoints[indexOfFrame];
+
+         double timeOne = waypointTimes[indexOfFrame - 1];
+         double timeTwo = waypointTimes[indexOfFrame];
+
+         double alpha = (time - timeOne) / (timeTwo - timeOne);
+
+         Pose3D ret = new Pose3D();
+         ret.interpolate(poseOne, poseTwo, alpha);
+
+         return ret;
+      }
+   }
+
    public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
       selectionMatrixToPack.resetSelection();

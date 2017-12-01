@@ -37,18 +37,27 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<Whole
    {
       setPlanningResult(other.planningResult);
 
-      int numberOfConfigurations = other.robotConfigurations.length;
-
-      trajectoryTimes = new double[numberOfConfigurations];
-      robotConfigurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
-
-      for (int i = 0; i < numberOfConfigurations; i++)
+      if(other.robotConfigurations != null)
       {
-         trajectoryTimes[i] = other.trajectoryTimes[i];
-         robotConfigurations[i] = new KinematicsToolboxOutputStatus(other.robotConfigurations[i]);
-      }
+         int numberOfConfigurations = other.robotConfigurations.length;
 
-      wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage(other.wholeBodyTrajectoryMessage);
+         trajectoryTimes = new double[numberOfConfigurations];
+         robotConfigurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
+
+         for (int i = 0; i < numberOfConfigurations; i++)
+         {
+            trajectoryTimes[i] = other.trajectoryTimes[i];
+            robotConfigurations[i] = new KinematicsToolboxOutputStatus(other.robotConfigurations[i]);
+         }
+
+         wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage(other.wholeBodyTrajectoryMessage);   
+      }
+      else
+      {
+         trajectoryTimes = null;
+         robotConfigurations = null;
+         wholeBodyTrajectoryMessage = null;
+      }
    }
 
    public int getPlanningResult()
