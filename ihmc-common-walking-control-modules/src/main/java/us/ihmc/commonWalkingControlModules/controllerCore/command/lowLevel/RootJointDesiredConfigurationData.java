@@ -6,8 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
@@ -55,7 +55,7 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
       sixDoFJoint.getDesiredAccelerationMatrix(desiredAcceleration, 0);
    }
 
-   public void setDesiredConfiguration(FrameOrientation orientation, FramePoint3D position)
+   public void setDesiredConfiguration(FrameQuaternion orientation, FramePoint3D position)
    {
       desiredConfiguration.reshape(7, 1);
       orientation.getQuaternion().get(0, desiredConfiguration);

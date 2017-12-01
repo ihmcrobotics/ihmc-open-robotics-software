@@ -11,11 +11,11 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
@@ -87,7 +87,7 @@ public class ComposableOrientationEstimatorCreator
    {
       private final ControlFlowGraph controlFlowGraph;
       
-      private final ControlFlowOutputPort<FrameOrientation> orientationStatePort;
+      private final ControlFlowOutputPort<FrameQuaternion> orientationStatePort;
       private final ControlFlowOutputPort<FrameVector3D> angularVelocityStatePort;
 
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
@@ -187,7 +187,7 @@ public class ComposableOrientationEstimatorCreator
          controlFlowGraph.connectElements(angularVelocitySensorConfiguration.getOutputPort(), angularVelocityMeasurementPort);
       }
 
-      public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)
+      public void getEstimatedOrientation(FrameQuaternion estimatedOrientationToPack)
       {
          estimatedOrientationToPack.setIncludingFrame(orientationStatePort.getData());
       }
@@ -207,7 +207,7 @@ public class ComposableOrientationEstimatorCreator
          // Do nothing.
       }
 
-      public void setEstimatedOrientation(FrameOrientation orientation)
+      public void setEstimatedOrientation(FrameQuaternion orientation)
       {
          orientationStatePort.setData(orientation);
       }
@@ -251,15 +251,15 @@ public class ComposableOrientationEstimatorCreator
 
          // R^M_E
          ReferenceFrame measurementFrame = firstOrientationSensorConfiguration.getMeasurementFrame();
-         FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
+         FrameQuaternion estimationFrameOrientation = new FrameQuaternion(estimationFrame);
          estimationFrameOrientation.changeFrame(measurementFrame);
-         RotationMatrix estimationToMeasurement = estimationFrameOrientation.getMatrix3dCopy();
+         RotationMatrix estimationToMeasurement = new RotationMatrix(estimationFrameOrientation);
 
          // R^W_E
          RotationMatrix estimationToWorld = new RotationMatrix();
          estimationToWorld.set(measurementToWorld);
          estimationToWorld.multiply(estimationToMeasurement);
-         FrameOrientation initialOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), estimationToWorld);
+         FrameQuaternion initialOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), estimationToWorld);
          setEstimatedOrientation(initialOrientation);
       }
 

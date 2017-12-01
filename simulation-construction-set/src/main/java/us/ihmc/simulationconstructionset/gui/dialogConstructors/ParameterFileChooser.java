@@ -3,6 +3,9 @@ package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,13 +27,13 @@ public class ParameterFileChooser
 
    private List<YoVariableRegistry> registries;
    private File parameterFile;
-   
+
    private NameSpace defaultRoot = null;
+   private File parameterFilePath = null;
 
    public ParameterFileChooser()
    {
       rootPath = new JTextField("", 30);
-
 
       JPanel extraPanel = new JPanel();
       extraPanel.setLayout(new GridLayout(2, 1));
@@ -47,9 +50,15 @@ public class ParameterFileChooser
       fileChooser.setAccessory(extraPanel);
    }
 
-   public boolean showDialog(Component parent, YoVariableRegistry registry, NameSpace newDefaultRoot, boolean save)
+   public boolean showDialog(Component parent, YoVariableRegistry registry, NameSpace newDefaultRoot, File file, boolean save)
    {
-      if(newDefaultRoot != defaultRoot)
+      if (file != null && file != parameterFilePath) // Default path changed. Browse to this file
+      {
+         parameterFilePath = file;
+         fileChooser.setSelectedFile(parameterFilePath);
+      }
+
+      if (newDefaultRoot != defaultRoot)
       {
          if (newDefaultRoot == null)
          {
@@ -61,7 +70,6 @@ public class ParameterFileChooser
          }
          defaultRoot = newDefaultRoot;
       }
-      
 
       int returnVal;
 
@@ -124,7 +132,8 @@ public class ParameterFileChooser
             }
             if (parameterFile.exists())
             {
-               return JOptionPane.showOptionDialog(parent, "File exists, overwrite?", "Overwrite?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null) == JOptionPane.YES_OPTION;
+               return JOptionPane.showOptionDialog(parent, "File exists, overwrite?", "Overwrite?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+                                                   null, null, null) == JOptionPane.YES_OPTION;
             }
             return true;
          }

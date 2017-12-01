@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -57,7 +58,7 @@ public class LaunchedBall extends FloatingJoint
       return currentPosition.epsilonEquals(finalPosition, collisionDistance);
    }
 
-   public void launch(Point3D initialPosition, Point3D finalPosition, double mass, double velocityMagnitude)
+   public void launch(Point3DReadOnly initialPosition, Point3DReadOnly finalPosition, double mass, double velocityMagnitude)
    {
       updateBallSize(mass);
       updatePointsAndVectors(initialPosition, finalPosition, velocityMagnitude);
@@ -76,7 +77,7 @@ public class LaunchedBall extends FloatingJoint
       setVelocity(velocityVector);
    }
 
-   private void updatePointsAndVectors(Point3D initialPosition, Point3D finalPosition, double velocityMagnitude)
+   private void updatePointsAndVectors(Point3DReadOnly initialPosition, Point3DReadOnly finalPosition, double velocityMagnitude)
    {
       this.finalPosition.set(finalPosition);
 

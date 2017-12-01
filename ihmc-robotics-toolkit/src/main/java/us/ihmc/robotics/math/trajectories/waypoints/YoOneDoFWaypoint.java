@@ -118,6 +118,12 @@ public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoin
    }
 
    @Override
+   public boolean geometricallyEquals(YoOneDoFWaypoint other, double epsilon)
+   {
+      return epsilonEquals(other, epsilon);
+   }
+
+   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");

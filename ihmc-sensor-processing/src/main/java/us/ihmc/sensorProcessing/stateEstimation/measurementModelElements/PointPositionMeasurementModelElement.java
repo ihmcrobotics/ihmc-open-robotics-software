@@ -8,11 +8,11 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 
@@ -21,7 +21,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    public static final int SIZE = 3;
 
    private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
-   private final ControlFlowOutputPort<FrameOrientation> orientationPort;
+   private final ControlFlowOutputPort<FrameQuaternion> orientationPort;
 
    private final ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort;
 
@@ -40,7 +40,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    private final boolean assumePerfectIMU;
    
    public PointPositionMeasurementModelElement(String name, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort,
-         ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
+         ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameQuaternion> orientationPort, ReferenceFrame estimationFrame,
          AfterJointReferenceFrameNameMap referenceFrameMap, boolean assumePerfectIMU, YoVariableRegistry registry)
    {
       super(SIZE, name, registry);

@@ -565,22 +565,29 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    public void testWalkingAroundHole()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(0.75, 0.0, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(1.5, 5.0, 0.001);
-      generator.translate(2.5, 0.0, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(1.5, 5.0, 0.001);
-      generator.translate(-1.25, 1.5, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(1.0, 2.0, 0.001);
-      generator.translate(0.0, -3.0, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(1.0, 2.0, 0.001);
+      generator.translate(0.0, 0.0, -0.5);
+      generator.addRectangle(10.0, 10.0);
+      generator.addCubeReferencedAtBottomMiddle(0.5, 0.5, 0.5);
+
+      generator.translate(0.7, 0.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(0.3, 0.5, 0.5);
+
+      generator.translate(0.0, 0.5, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(1.9, 0.5, 0.5);
+      generator.translate(0.0, -0.5, 0.0);
+
+      generator.translate(0.7, 0.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(0.5, 0.5, 0.5);
+
+
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
       // define start and goal conditions
       FramePose initialStanceFootPose = new FramePose(worldFrame);
-      initialStanceFootPose.setPosition(0.5, 0.15, 0.0);
+      initialStanceFootPose.setPosition(0.0, 0.15, 0.0);
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose goalPose = new FramePose(worldFrame);
-      goalPose.setPosition(3.5, 0.0, 0.0);
+      goalPose.setPosition(1.3, 0.0, 0.0);
 
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList,
             !visualize());

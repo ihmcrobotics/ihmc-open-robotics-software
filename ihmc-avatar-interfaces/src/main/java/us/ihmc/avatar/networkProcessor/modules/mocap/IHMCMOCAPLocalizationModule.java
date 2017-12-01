@@ -61,8 +61,6 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final Quaternion32 pelvisOrientationFromRobotConfigurationData = new Quaternion32(0.0f, 0.0f, 0.0f, 1.0f);
    private final ReferenceFrame pelvisFrameFromRobotConfigurationDataPacket = new ReferenceFrame("pelvisFrameFromRobotConfigurationDataPacket", ReferenceFrame.getWorldFrame())
    {
-      private static final long serialVersionUID = 116774591450076114L;
-
       @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
@@ -74,8 +72,6 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private RigidBodyTransform pelvisToWorldFromMocapData = new RigidBodyTransform();
    private final ReferenceFrame pelvisFrameFromMocap = new ReferenceFrame("pelvisFrameFromMocap", ReferenceFrame.getWorldFrame())
    {
-      private static final long serialVersionUID = 116774591450076114L;
-
       @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {

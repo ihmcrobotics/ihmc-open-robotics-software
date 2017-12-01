@@ -11,10 +11,10 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -26,7 +26,7 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
    private WrapperForPositionAndOrientationTrajectoryGenerators generator;
    private PositionTrajectoryGenerator positionTrajectoryGenerator;
    private OrientationTrajectoryGenerator orientationTrajectoryGenerator;
-   private FrameOrientation orientation;
+   private FrameQuaternion orientation;
    private YoVariableRegistry parentRegistry;
    private OrientationProvider orientationProvider;
    private static double finalTime = 10.0;
@@ -37,7 +37,7 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
 
-      orientation = new FrameOrientation(referenceFrame);
+      orientation = new FrameQuaternion(referenceFrame);
       positionTrajectoryGenerator = new ConstantPoseTrajectoryGenerator("positionTGenPrefix", referenceFrame, parentRegistry);
       orientationProvider = new ConstantOrientationProvider(orientation);
       orientationTrajectoryGenerator = new ConstantOrientationTrajectoryGenerator("orientationPrefix", referenceFrame, orientationProvider, finalTime,
@@ -110,7 +110,7 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
    public void testGet_Orientation()
    {
       generator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
-      FrameOrientation orientationToPack = new FrameOrientation();
+      FrameQuaternion orientationToPack = new FrameQuaternion();
 
       generator.getOrientation(orientationToPack);
 
@@ -232,8 +232,8 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
 	@Test(timeout = 30000)
    public void testPackAngularData()
    {
-      FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
-      orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+      FrameQuaternion orientationToPack = new FrameQuaternion(referenceFrame);
+      orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
       generator.getOrientation(orientationToPack);

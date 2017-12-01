@@ -36,7 +36,7 @@ public class GeoregressionConversionToolsTest
          
          Se3_F64 georegressionTransform = new Se3_F64();
          RigidBodyTransform vecmathTransform = new RigidBodyTransform();
-         RotationMatrix rotationMatrix = EuclidCoreRandomTools.generateRandomRotationMatrix(rand);
+         RotationMatrix rotationMatrix = EuclidCoreRandomTools.nextRotationMatrix(rand);
          
          georegressionTransform.setTranslation(rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
          georegressionTransform.setRotation(new DenseMatrix64F(new double[][]
@@ -74,7 +74,7 @@ public class GeoregressionConversionToolsTest
          Point3D_F64 georegressionPoint = new Point3D_F64(x,y,z);
          
          Se3_F64 georegressionTransform = new Se3_F64();
-         RigidBodyTransform vecmathTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform vecmathTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          
          
          GeoregressionConversionTools.setGeoregressionTransformFromVecmath(vecmathTransform, georegressionTransform);

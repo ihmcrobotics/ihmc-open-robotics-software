@@ -22,7 +22,8 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -68,7 +69,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
-   private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
+   private List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final LegConfigurationParameters legConfigurationParameters;
@@ -562,50 +563,78 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
    {
       if (integrationSettings != null)
          return integrationSettings;
 
-      integrationSettings = new HashMap<String, JointAccelerationIntegrationSettings>();
+      integrationSettings = new ArrayList<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>>();
 
-      JointAccelerationIntegrationSettings neckJointSettings = new JointAccelerationIntegrationSettings();
+      // Neck joints:
+      JointAccelerationIntegrationParameters neckJointSettings = new JointAccelerationIntegrationParameters();
       neckJointSettings.setAlphaPosition(0.9996);
       neckJointSettings.setAlphaVelocity(0.95);
       neckJointSettings.setMaxPositionError(0.2);
       neckJointSettings.setMaxVelocity(2.0);
 
+      List<String> neckJointNames = new ArrayList<>();
       for (NeckJointName name : jointMap.getNeckJointNames())
-         integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
+         neckJointNames.add(jointMap.getNeckJointName(name));
+      integrationSettings.add(new ImmutableTriple<>("NeckAccelerationIntegration", neckJointSettings, neckJointNames));
 
-      JointAccelerationIntegrationSettings shoulderJointSettings = new JointAccelerationIntegrationSettings();
+      // Shoulder joints:
+      JointAccelerationIntegrationParameters shoulderJointSettings = new JointAccelerationIntegrationParameters();
       shoulderJointSettings.setAlphaPosition(0.9998);
       shoulderJointSettings.setAlphaVelocity(0.95);
       shoulderJointSettings.setMaxPositionError(0.2);
       shoulderJointSettings.setMaxVelocity(2.0);
 
-      JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
+      ArmJointName[] shoulderJoints = new ArmJointName[]{ArmJointName.SHOULDER_YAW, ArmJointName.SHOULDER_ROLL};
+      List<String> shoulderJointNames = new ArrayList<>();
+      for (ArmJointName name : shoulderJoints)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            shoulderJointNames.add(jointMap.getArmJointName(robotSide, name));
+         }
+      }
+      integrationSettings.add(new ImmutableTriple<>("ShoulderAccelerationIntegration", shoulderJointSettings, shoulderJointNames));
+
+      // Elbow joints:
+      JointAccelerationIntegrationParameters elbowJointSettings = new JointAccelerationIntegrationParameters();
       elbowJointSettings.setAlphaPosition(0.9996);
       elbowJointSettings.setAlphaVelocity(0.95);
       elbowJointSettings.setMaxPositionError(0.2);
       elbowJointSettings.setMaxVelocity(2.0);
 
-      JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
+      ArmJointName[] elbowJoints = new ArmJointName[]{ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL};
+      List<String> elbowJointNames = new ArrayList<>();
+      for (ArmJointName name : elbowJoints)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            elbowJointNames.add(jointMap.getArmJointName(robotSide, name));
+         }
+      }
+      integrationSettings.add(new ImmutableTriple<>("ElbowAccelerationIntegration", elbowJointSettings, elbowJointNames));
+
+      // Wrist joints:
+      JointAccelerationIntegrationParameters wristJointSettings = new JointAccelerationIntegrationParameters();
       wristJointSettings.setAlphaPosition(0.9999);
       wristJointSettings.setAlphaVelocity(0.95);
       wristJointSettings.setMaxPositionError(0.2);
       wristJointSettings.setMaxVelocity(2.0);
 
-      for (RobotSide robotSide : RobotSide.values)
+      ArmJointName[] wristJoints = new ArmJointName[]{ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL, ArmJointName.SECOND_WRIST_PITCH};
+      List<String> wristJointNames = new ArrayList<>();
+      for (ArmJointName name : wristJoints)
       {
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), shoulderJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), shoulderJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), elbowJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), elbowJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), wristJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), wristJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH), wristJointSettings);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            wristJointNames.add(jointMap.getArmJointName(robotSide, name));
+         }
       }
+      integrationSettings.add(new ImmutableTriple<>("WristAccelerationIntegration", wristJointSettings, wristJointNames));
 
       return integrationSettings;
    }
@@ -913,5 +942,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public boolean alwaysAllowMomentum()
    {
       return false;
+   }
+
+   @Override
+   public double getMinSwingTrajectoryClearanceFromStanceFoot()
+   {
+      return 0.18;
    }
 }

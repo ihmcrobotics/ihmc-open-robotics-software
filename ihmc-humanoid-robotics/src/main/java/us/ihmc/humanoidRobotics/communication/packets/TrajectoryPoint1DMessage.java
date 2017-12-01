@@ -153,6 +153,12 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
    }
 
    @Override
+   public boolean geometricallyEquals(TrajectoryPoint1DMessage other, double epsilon)
+   {
+      return epsilonEquals(other, epsilon);
+   }
+
+   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");

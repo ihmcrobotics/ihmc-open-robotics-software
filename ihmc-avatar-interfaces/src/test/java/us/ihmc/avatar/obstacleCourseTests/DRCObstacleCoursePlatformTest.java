@@ -14,6 +14,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -404,11 +404,10 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   ThreadTools.sleep(1000);
 	   boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-	   FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+	   FrameQuaternion desiredChestFrameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
 	   double leanAngle = 30.0;
-	   desiredChestFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(leanAngle), Math.toRadians(0.0));
-      Quaternion desiredChestQuat = new Quaternion();
-      desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
+	   desiredChestFrameOrientation.setYawPitchRollIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(leanAngle), Math.toRadians(0.0));
+      Quaternion desiredChestQuat = new Quaternion(desiredChestFrameOrientation);
 
       double trajectoryTime = 0.5;
       drcSimulationTestHelper.send(new ChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));

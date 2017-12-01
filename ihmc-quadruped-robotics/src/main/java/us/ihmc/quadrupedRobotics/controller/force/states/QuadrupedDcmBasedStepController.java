@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -22,7 +23,6 @@ import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
@@ -107,7 +107,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final YoFrameVector instantaneousStepAdjustment;
    private final YoFrameVector accumulatedStepAdjustment;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
-   private final FrameOrientation bodyOrientationReference;
+   private final FrameQuaternion bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
    private final FramePoint3D stepGoalPosition;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
@@ -170,7 +170,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
-      bodyOrientationReference = new FrameOrientation();
+      bodyOrientationReference = new FrameQuaternion();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
       stepGoalPosition = new FramePoint3D();
       stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE,

@@ -5,17 +5,18 @@ import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -23,7 +24,6 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
@@ -74,6 +74,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    /**
+    * The command type describes the nature of the constraint that is being imposed on the the end-effector
+    * <p> If the command type is not set it defaults to a {@code ConstraintType#OBJECTIVE} constraint
+    */
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
+
+   /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
     */
@@ -109,7 +115,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public SpatialVelocityCommand()
    {
-      setAsHardConstraint();
+      setAsHardEqualityConstraint();
    }
 
    /**
@@ -501,14 +507,43 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
    /**
     * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
-    * be treated as a hard constraint.
+    * be treated as a hard equality constraint.
     * <p>
     * This is usually undesired as with improper commands setup as hard constraints the optimization
     * problem can simply be impossible to solve.
     * </p>
     */
-   public void setAsHardConstraint()
+   public void setAsHardEqualityConstraint()
    {
+      this.constraintType = ConstraintType.EQUALITY;
+      setWeight(HARD_CONSTRAINT);
+   }
+
+   /**
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
+    * be treated as a hard inequality constraint.
+    * <p>
+    * The optimization will then ensure that the spatial velocity of the end-effector is <b>less</b>
+    * than or equal to the specified desired spatial velocity.
+    * </p>
+    */
+   public void setAsLessOrEqualInequalityConstraint()
+   {
+      this.constraintType = ConstraintType.LEQ_INEQUALITY;
+      setWeight(HARD_CONSTRAINT);
+   }
+
+   /**
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
+    * be treated as a hard inequality constraint.
+    * <p>
+    * The optimization will then ensure that the spatial velocity of the end-effector is
+    * <b>greater</b> than or equal to the specified desired spatial velocity.
+    * </p>
+    */
+   public void setAsGreaterOrEqualInequalityConstraint()
+   {
+      this.constraintType = ConstraintType.GEQ_INEQUALITY;
       setWeight(HARD_CONSTRAINT);
    }
 
@@ -524,6 +559,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double weight)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(weight, weight, weight);
       weightMatrix.setAngularWeights(weight, weight, weight);
    }
@@ -541,6 +577,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double angular, double linear)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear, linear, linear);
       weightMatrix.setAngularWeights(angular, angular, angular);
    }
@@ -558,9 +595,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       this.weightMatrix.set(weightMatrix);
    }
-
 
    /**
     * Sets the weights to use in the optimization problem for each rotational degree of freedom.
@@ -589,6 +626,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeights(Tuple3DReadOnly linear)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
    }
 
@@ -605,6 +643,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
       weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
    }
@@ -633,20 +672,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
-   /**
-    * Finds if this command is to be considered as a hard constraint during the optimization.
-    * <p>
-    * This command is considered to be a hard constraint if at least one of the weights is equal to
-    * {@link SolverWeightLevels#HARD_CONSTRAINT}.
-    * </p>
-    * 
-    * @return {@code true} if this command should be considered as a hard constraint, {@code false}
-    *         is it should be part of the optimization objective.
-    */
-   public boolean isHardConstraint()
-   {
-      return weightMatrix.containsHardConstraint();
-   }
    /**
     * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with
     * this command.
@@ -679,7 +704,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       weightMatrixToPack.set(weightMatrix);
    }
-
 
    /**
     * Packs the control frame and desired spatial velocity held in this command.
@@ -755,7 +779,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameOrientation orientationToPack)
+   public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
    {
       controlFramePose.getPositionIncludingFrame(positionToPack);
       controlFramePose.getOrientationIncludingFrame(orientationToPack);
@@ -919,6 +943,14 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.TASKSPACE;
+   }
+
+   /**
+    * Get the type of spatial velocity constraint that should be imposed
+    */
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
    }
 
    @Override
