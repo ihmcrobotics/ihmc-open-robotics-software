@@ -12,13 +12,10 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -27,7 +24,6 @@ import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters
@@ -45,77 +41,6 @@ public abstract class WalkingControllerParameters
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
       legConfigurationParameters = new LegConfigurationParameters();
-   }
-
-   /**
-    * Specifies if the controller should compute desired positions and velocities for all the robot
-    * joints from the desired acceleration. This will enable acceleration integration for all joints
-    * that have their integration settings defined in {@link #getJointAccelerationIntegrationParametersNoLoad()}.
-    * If this is set to false acceleration integration can still be enabled for select upper body joints
-    * using the setting in {@link #getOrCreatePositionControlledJoints()}.
-    * <p>
-    * It is {@code false} by default and this method should be overridden to return otherwise.
-    * </p>
-    *
-    * @return {@code true} if the desired acceleration should be integrated into desired velocity
-    *         and position for all the joints.
-    */
-   public boolean enableJointAccelerationIntegrationForAllJoints()
-   {
-      return false;
-   }
-
-   /**
-    * The list of strings returned contains all joint names that are position controlled. The names
-    * of the joints are defined in the robots joint map. Note, that this list will only affect
-    * joint chains that are controlled using a {@link RigidBodyControlManager}. This means only
-    * upper body joints can be specified here.
-    * <p>
-    * This setting will enable acceleration integration for these joint and also set the joint control
-    * mode to be {@link JointDesiredControlMode#POSITION}.
-    * </p>
-    *
-    * @return list of position controlled joint names
-    */
-   public List<String> getOrCreatePositionControlledJoints()
-   {
-      return new ArrayList<String>();
-   }
-
-   /**
-    * Returns a list with triples of joint acceleration integration parameters and the names of the joints
-    * that the parameter will be used for. The triple also contains the name of the joint set for the specific
-    * parameters. The name will be used to create tunable parameters in the controller. E.g. the left and
-    * right arm joints could be grouped this way so only a single parameter for tuning is created that affects
-    * both sides.
-    * <p>
-    * If a joint is not contained in this map the controller will not create tunable parameters and use
-    * default acceleration integration settings defined in {@link JointAccelerationIntegrationCalculator}.
-    * </p>
-    * <p>
-    * As long as a joint is not part of a loaded joint chain these acceleration integration settings will be
-    * used for that joint. E.g. all joints of a leg in support will be considered loaded. If a joint is loaded
-    * the parameters defined here can be overwritten (this is optional) by defining integration parameters
-    * in {@link #getJointAccelerationIntegrationParametersLoaded()}.
-    * </p>
-    * @return list containing acceleration integration parameters and the corresponding joints
-    */
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
-   {
-      return null;
-   }
-
-   /**
-    * This method is similar to {@link #getJointAccelerationIntegrationParametersNoLoad()}. The controller will
-    * apply the acceleration integration parameters defined here only to joints that are part of a loaded chain.
-    * This can be used if, for example, a different set of acceleration integration parameters should be used for
-    * joints that are part of a leg that is swinging versus a leg that supporting weight.
-    *
-    * @return list containing acceleration integration parameters to be used if a joint is loaded
-    */
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersLoaded()
-   {
-      return null;
    }
 
    /**
