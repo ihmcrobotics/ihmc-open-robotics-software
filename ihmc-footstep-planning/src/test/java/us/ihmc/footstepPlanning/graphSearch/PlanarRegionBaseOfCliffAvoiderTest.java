@@ -7,7 +7,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -18,6 +20,7 @@ import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -27,6 +30,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
    private final boolean visualize = false;
@@ -38,8 +42,10 @@ public class PlanarRegionBaseOfCliffAvoiderTest
    {
       double stepHeight = 0.2;
       double boxSize = 1.0;
+      double edgeOfBoxX = 1.0;
+
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(1.0 + boxSize / 2.0, 0.0, 0.0);
+      generator.translate(edgeOfBoxX + boxSize / 2.0, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(boxSize, boxSize, stepHeight);
       generator.translate(0.0, 0.0, 0.001);
       generator.addRectangle(5.0, 5.0); // floor plane
@@ -48,11 +54,12 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       YoVariableRegistry registry = new YoVariableRegistry("Test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      double minimumDistanceFromCliffBottom = 0.2;
+      double epsilon = 1e-6;
+      double minimumDistanceFromCliffBottom = 0.2 - epsilon;
       YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
       {
          @Override
-         public double getCliffHeightToShiftAwayFrom()
+         public double getCliffHeightToAvoid()
          {
             return 0.01;
          }
@@ -84,87 +91,22 @@ public class PlanarRegionBaseOfCliffAvoiderTest
          ThreadTools.sleepForever();
       }
 
-      double closestNodeDistanceToCliff = 0.5 * footLength + minimumDistanceFromCliffBottom;
+      double closestNodeDistanceToCliff = edgeOfBoxX - 0.5 * footLength - minimumDistanceFromCliffBottom;
 
       RobotSide footstepSide = RobotSide.LEFT;
       double x = closestNodeDistanceToCliff;
       double y = 0.0;
       FootstepNode node = new FootstepNode(x, y, 0.0, footstepSide);
-//      assertTrue(avoider.isNodeValid(node, null));
-
-      x = closestNodeDistanceToCliff - FootstepNode.gridSizeXY;
-      node = new FootstepNode(x, y, 0.0, footstepSide);
       assertTrue(avoider.isNodeValid(node, null));
 
       x = closestNodeDistanceToCliff + FootstepNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
       assertFalse(avoider.isNodeValid(node, null));
-   }
 
-//   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-//   @Test(timeout = 300000)
-//   public void testBaseOfCliffAvoider()
-//   {
-//      double stepHeight = 0.2;
-//      double boxSize = 1.0;
-//      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-//      generator.translate(1.0 + boxSize / 2.0, 0.0, 0.0);
-//      generator.addCubeReferencedAtBottomMiddle(boxSize, boxSize, stepHeight);
-//      generator.translate(0.0, 0.0, 0.001);
-//      generator.addRectangle(5.0, 5.0); // floor plane
-//      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-//
-//      YoVariableRegistry registry = new YoVariableRegistry("Test");
-//      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-//
-//      double minimumDistanceFromCliffBottom = 0.22;
-//
-//      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
-//      {
-//         @Override
-//         public double getCliffHeightToShiftAwayFrom()
-//         {
-//            return 0.01;
-//         }
-//
-//         @Override
-//         public double getMinimumDistanceFromCliffBottoms()
-//         {
-//            return minimumDistanceFromCliffBottom;
-//         }
-//      });
-//
-//      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
-//      PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(parameters, footPolygons);
-//
-//      SimulationConstructionSet scs = null;
-//      if (visualize)
-//      {
-//         scs = new SimulationConstructionSet(new Robot("TestRobot"));
-//         scs.addYoVariableRegistry(registry);
-//         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-//         Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-//         staticLinkGraphics.addCoordinateSystem(1.0);
-//         staticLinkGraphics.addPlanarRegionsList(planarRegionsList, YoAppearance.Green(), YoAppearance.Beige(), YoAppearance.Yellow(), YoAppearance.Orange());
-//         scs.addStaticLinkGraphics(staticLinkGraphics);
-//         scs.startOnAThread();
-//      }
-//
-//      RobotSide footstepSide = RobotSide.LEFT;
-//
-//      for (double x = 0.0; x < 2.0; x = x + 0.025)
-//      {
-//         for (double y = -1.0; y < 1.0; y = y + 0.025)
-//         {
-//            doAQuery(planarRegionsList, avoider, parameters, minimumDistanceFromCliffBottom, scs, footstepSide, x, y);
-//         }
-//      }
-//
-//      if (visualize)
-//      {
-//         ThreadTools.sleepForever();
-//      }
-//   }
+      x = closestNodeDistanceToCliff - FootstepNode.gridSizeXY;
+      node = new FootstepNode(x, y, 0.0, footstepSide);
+      assertTrue(avoider.isNodeValid(node, null));
+   }
 
    public static void main(String[] args)
    {
