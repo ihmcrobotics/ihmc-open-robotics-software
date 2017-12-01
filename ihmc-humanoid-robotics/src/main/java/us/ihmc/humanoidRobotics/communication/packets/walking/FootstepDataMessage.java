@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -168,11 +168,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       robotSide = footstep.getRobotSide();
 
       FramePoint3D location = new FramePoint3D();
-      FrameOrientation orientation = new FrameOrientation();
+      FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.location = location.getPoint();
-      this.orientation = orientation.getQuaternion();
+      this.orientation = new Quaternion(orientation);
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
@@ -381,8 +381,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       String ret = "";
 
-      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), this.orientation);
-      double[] ypr = frameOrientation.getYawPitchRoll();
+      FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), this.orientation);
+      double[] ypr = new double[3];
+      frameOrientation.getYawPitchRoll(ypr);
       ret = location.toString();
       ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
       ret += "Predicted Contact Points: ";

@@ -1,12 +1,12 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -23,7 +23,7 @@ public class SE3PIDController
    private final ReferenceFrame bodyFrame;
 
    private final AxisAngleOrientationController orientationController;
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
    private final FrameVector3D currentAngularVelocity = new FrameVector3D();

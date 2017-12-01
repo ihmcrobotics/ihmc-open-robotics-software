@@ -3,7 +3,6 @@ package us.ihmc.graphicsDescription.plotting.frames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
-@SuppressWarnings("serial")
 public abstract class PlotterReferenceFrame extends ReferenceFrame
 {
    private final PlotterFrameSpace frameSpace;

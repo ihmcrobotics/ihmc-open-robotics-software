@@ -12,11 +12,11 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -44,7 +44,7 @@ public class OrientationMeasurementModelElementTest
 
       ControlFlowElement controlFlowElement = new NullControlFlowElement();
 
-      final ControlFlowOutputPort<FrameOrientation> orientationPort = new ControlFlowOutputPort<FrameOrientation>("orientationPort", controlFlowElement);
+      final ControlFlowOutputPort<FrameQuaternion> orientationPort = new ControlFlowOutputPort<FrameQuaternion>("orientationPort", controlFlowElement);
       ControlFlowInputPort<RotationMatrix> orientationMeasurementInputPort = new ControlFlowInputPort<RotationMatrix>("orientationMeasurementInputPort", controlFlowElement);
       String name = "test";
       YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -54,7 +54,7 @@ public class OrientationMeasurementModelElementTest
 
       RotationMatrix orientation = new RotationMatrix();
       orientation.set(RandomGeometry.nextAxisAngle(random));
-      orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
+      orientationPort.setData(new FrameQuaternion(ReferenceFrame.getWorldFrame(), orientation));
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
 
@@ -63,7 +63,7 @@ public class OrientationMeasurementModelElementTest
 
          public void run()
          {
-            rootJoint.setRotation(orientationPort.getData().getMatrix3dCopy());
+            rootJoint.setRotation(orientationPort.getData());
             elevator.updateFramesRecursively();
          }
       };
@@ -83,7 +83,7 @@ public class OrientationMeasurementModelElementTest
       modelElement.computeMatrixBlocks();
 
       // orientation perturbations
-      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameOrientation(orientationPort.getData()),
+      MeasurementModelTestTools.assertOutputMatrixCorrectUsingPerturbation(orientationPort, modelElement, new FrameQuaternion(orientationPort.getData()),
             perturbation, tol, orientationUpdater);
    }
 }

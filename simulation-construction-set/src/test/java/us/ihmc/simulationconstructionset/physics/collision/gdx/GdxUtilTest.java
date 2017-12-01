@@ -24,7 +24,7 @@ public class GdxUtilTest
 	public void convert_t2m()
 	{
       Random random = new Random(234234L);
-      RotationMatrix randomRotation = EuclidCoreRandomTools.generateRandomRotationMatrix(random);
+      RotationMatrix randomRotation = EuclidCoreRandomTools.nextRotationMatrix(random);
 		float[] m = new float[]{
 				(float) randomRotation.getM00(), (float) randomRotation.getM01(), (float) randomRotation.getM02(), 4,
 				(float) randomRotation.getM10(), (float) randomRotation.getM11(), (float) randomRotation.getM12(), 8,
@@ -57,7 +57,7 @@ public class GdxUtilTest
 	public void convert_m2t()
 	{
 	   Random random = new Random(234234L);
-      RotationMatrix randomRotation = EuclidCoreRandomTools.generateRandomRotationMatrix(random);
+      RotationMatrix randomRotation = EuclidCoreRandomTools.nextRotationMatrix(random);
 		float[] m = new float[]{
 		      (float) randomRotation.getM00(), (float) randomRotation.getM01(), (float) randomRotation.getM02(), 0,
 		      (float) randomRotation.getM10(), (float) randomRotation.getM11(), (float) randomRotation.getM12(), 0,

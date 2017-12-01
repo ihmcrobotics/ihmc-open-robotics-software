@@ -168,18 +168,26 @@ public class CenterOfMassHeightManager
     */
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
-      stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-
-      tempPose.setToZero(tempPosition.getReferenceFrame());
-      tempPose.setPosition(tempPosition);
-
-      if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
+      if(command.isEnableUserPelvisControl())
       {
-         requestState(pelvisHeightControlState.getStateEnum());
+         enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
+         stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
+         
+         tempPose.setToZero(tempPosition.getReferenceFrame());
+         tempPose.setPosition(tempPosition);
+         
+         if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
+         {
+            requestState(pelvisHeightControlState.getStateEnum());
+            return;
+         }
+
+         PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
          return;
       }
-      PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
+
+      centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
+      requestState(centerOfMassHeightControlState.getStateEnum());
    }
 
    /**

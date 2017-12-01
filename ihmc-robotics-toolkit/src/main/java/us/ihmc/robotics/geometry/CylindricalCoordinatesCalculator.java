@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
@@ -17,7 +18,7 @@ public class CylindricalCoordinatesCalculator
    private FramePoint3D position = new FramePoint3D();
    private final RotationMatrix preRotation = new RotationMatrix();
    private final RotationMatrix rotation = new RotationMatrix();
-   private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion orientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
 
    public FramePose getPoseFromCylindricalCoordinates(RobotSide robotSide, ReferenceFrame frame, double radiansFromYAxis, double radius, double z,
                                                               double outwardRotation, double pitchRotation)

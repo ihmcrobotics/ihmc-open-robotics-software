@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameEuclideanWaypoint;
@@ -55,7 +55,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.orientation.set(orientation);
    }
 
-   public void setOrientation(FrameOrientation orientation)
+   public void setOrientation(FrameQuaternion orientation)
    {
       this.orientation.set(orientation);
    }
@@ -98,7 +98,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(double time, FramePoint3D position, FrameOrientation orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
+   public void set(double time, FramePoint3D position, FrameQuaternion orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       this.time.set(time);
       this.position.set(position);
@@ -219,7 +219,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       position.getFrameTuple(positionToPack);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientation.getFrameOrientation(orientationToPack);
    }
@@ -239,7 +239,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       position.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getOrientationIncludingFrame(FrameOrientation orientationToPack)
+   public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }

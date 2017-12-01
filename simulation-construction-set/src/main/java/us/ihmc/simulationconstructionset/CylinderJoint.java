@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class CylinderJoint extends PinJoint
 {
@@ -11,7 +12,7 @@ public class CylinderJoint extends PinJoint
    private static final long serialVersionUID = -1979031212754263175L;
    private SliderJoint joint2;
 
-   public CylinderJoint(String rotName, String transName, Vector3D offset, Robot rob, Axis jaxis)
+   public CylinderJoint(String rotName, String transName, Vector3DReadOnly offset, Robot rob, Axis jaxis)
    {
       super(rotName, offset, rob, jaxis);
 

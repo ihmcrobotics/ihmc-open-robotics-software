@@ -152,10 +152,10 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
          FootstepNodeTools.getNodeTransform(node, nodeToWorldTransform);
 
          RigidBodyTransform regionToWorld = new RigidBodyTransform(nodeToWorldTransform);
-         double xRotation = EuclidCoreRandomTools.generateRandomDouble(random, 0.15 * Math.PI);
-         double yRotation = EuclidCoreRandomTools.generateRandomDouble(random, 0.15 * Math.PI);
+         double xRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
+         double yRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
          regionToWorld.setRotationEuler(xRotation, yRotation, 0.0);
-         regionToWorld.setTranslationZ(EuclidCoreRandomTools.generateRandomDouble(random, 2.0));
+         regionToWorld.setTranslationZ(EuclidCoreRandomTools.nextDouble(random, 2.0));
 
          doAFullFootholdTest(regionToWorld, node);
       }
@@ -235,8 +235,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
          partialFootholdPolygonToPack.addVertex(footPolygon.getVertex(0));
          partialFootholdPolygonToPack.addVertex(footPolygon.getVertex(1));
 
-         double percentageAlongLine1 = EuclidCoreRandomTools.generateRandomDouble(random, 0.1, 0.9);
-         double percentageAlongLine2 = EuclidCoreRandomTools.generateRandomDouble(random, 0.1, 0.9);
+         double percentageAlongLine1 = EuclidCoreRandomTools.nextDouble(random, 0.1, 0.9);
+         double percentageAlongLine2 = EuclidCoreRandomTools.nextDouble(random, 0.1, 0.9);
          partialFootholdPolygonToPack.addVertex(getPointAlongLineSegment(footPolygon.getVertex(1), footPolygon.getVertex(2), percentageAlongLine1));
          partialFootholdPolygonToPack.addVertex(getPointAlongLineSegment(footPolygon.getVertex(0), footPolygon.getVertex(3), percentageAlongLine2));
          break;
@@ -246,8 +246,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
          partialFootholdPolygonToPack.addVertex(footPolygon.getVertex(0));
          partialFootholdPolygonToPack.addVertex(footPolygon.getVertex(3));
 
-         percentageAlongLine1 = EuclidCoreRandomTools.generateRandomDouble(random, 0.1, 0.9);
-         percentageAlongLine2 = EuclidCoreRandomTools.generateRandomDouble(random, 0.1, 0.9);
+         percentageAlongLine1 = EuclidCoreRandomTools.nextDouble(random, 0.1, 0.9);
+         percentageAlongLine2 = EuclidCoreRandomTools.nextDouble(random, 0.1, 0.9);
          partialFootholdPolygonToPack.addVertex(getPointAlongLineSegment(footPolygon.getVertex(0), footPolygon.getVertex(1), percentageAlongLine1));
          partialFootholdPolygonToPack.addVertex(getPointAlongLineSegment(footPolygon.getVertex(2), footPolygon.getVertex(3), percentageAlongLine2));
          break;

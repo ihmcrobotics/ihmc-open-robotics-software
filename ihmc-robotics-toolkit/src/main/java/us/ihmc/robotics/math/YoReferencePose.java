@@ -11,8 +11,6 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 
 public class YoReferencePose extends ReferenceFrame
 {
-   private static final long serialVersionUID = -7908261385108357220L;
-
    private final YoFramePose yoFramePose;
 
    //Below are used for interpolation only

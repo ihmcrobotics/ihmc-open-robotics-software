@@ -456,8 +456,8 @@ public class SphereICPPlannerVisualizer
       double minY = 0.5 * randomSupportPolygon.getMinY();
       double maxX = 0.5 * randomSupportPolygon.getMaxX();
       double maxY = 0.5 * randomSupportPolygon.getMaxY();
-      FramePoint2D randomLineOrigin = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, maxX, minY, maxY);
-      FrameVector2D randomLineVector = EuclidFrameRandomTools.generateRandomFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
+      FramePoint2D randomLineOrigin = EuclidFrameRandomTools.nextFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, maxX, minY, maxY);
+      FrameVector2D randomLineVector = EuclidFrameRandomTools.nextFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2d randomLine = new FrameLine2d(randomLineOrigin, randomLineVector);
 
       ConvexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
@@ -465,7 +465,7 @@ public class SphereICPPlannerVisualizer
 
       while (randomSupportPolygon.getNumberOfVertices() < 4)
       {
-         FramePoint2D duplicate = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
+         FramePoint2D duplicate = EuclidFrameRandomTools.nextFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
          duplicate.add(randomSupportPolygon.getFrameVertexCopy(0));
          randomSupportPolygon.addVertex(duplicate);
          randomSupportPolygon.update();

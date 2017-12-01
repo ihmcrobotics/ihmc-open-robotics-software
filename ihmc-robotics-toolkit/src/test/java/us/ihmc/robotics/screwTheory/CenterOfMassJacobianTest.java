@@ -109,7 +109,7 @@ public class CenterOfMassJacobianTest
 
       CenterOfMassJacobian jacobian = new CenterOfMassJacobian(elevator);
 
-      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
       sixDoFJointTwist.setLinearPart(RandomGeometry.nextVector3D(random));

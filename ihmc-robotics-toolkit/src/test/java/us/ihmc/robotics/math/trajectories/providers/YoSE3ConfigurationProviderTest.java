@@ -9,9 +9,9 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class YoSE3ConfigurationProviderTest
@@ -50,7 +50,7 @@ public class YoSE3ConfigurationProviderTest
    public void testGet()
    {
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, registry);
-      FrameOrientation orientationToPack = new FrameOrientation();
+      FrameQuaternion orientationToPack = new FrameQuaternion();
       provider.getOrientation(orientationToPack);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());

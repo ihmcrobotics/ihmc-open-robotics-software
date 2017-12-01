@@ -10,9 +10,9 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -31,7 +31,7 @@ public class GroundTruthinatorTest
       FramePose objectPose = new FramePose(worldFrame);
 
       FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
-      FrameOrientation orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
+      FrameQuaternion orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
       objectPose.setPose(position, orientation);
 
       double[] sensedCableLengths = new double[12];
@@ -57,7 +57,7 @@ public class GroundTruthinatorTest
       assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
 
       position = new FramePoint3D(worldFrame, 0.1, 0.0, 0.0);
-      orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
+      orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
       objectPose.setPose(position, orientation);
 
       groundTruthinator.computeEstimatedCableLengthsFromObjectPose(objectPose);
@@ -74,7 +74,7 @@ public class GroundTruthinatorTest
       for (int i=0; i<numberOfTests; i++)
       {
          position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
-         orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
+         orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.setPose(position, orientation);
 
          groundTruthinator.computeEstimatedCableLengthsFromObjectPose(objectPose);
@@ -101,7 +101,7 @@ public class GroundTruthinatorTest
       FramePose objectPose = new FramePose(worldFrame);
 
       FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
-      FrameOrientation orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
+      FrameQuaternion orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
       objectPose.setPose(position, orientation);
 
       double[] sensedCableLengths = new double[12];
@@ -127,7 +127,7 @@ public class GroundTruthinatorTest
       assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
 
       position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
-      orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
+      orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
       orientation.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
       objectPose.setPose(position, orientation);
 
@@ -145,7 +145,7 @@ public class GroundTruthinatorTest
       for (int i=0; i<numberOfTests; i++)
       {
          position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
-         orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
+         orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.setPose(position, orientation);
 
          groundTruthinator.computeEstimatedCableLengthsFromObjectPose(objectPose);

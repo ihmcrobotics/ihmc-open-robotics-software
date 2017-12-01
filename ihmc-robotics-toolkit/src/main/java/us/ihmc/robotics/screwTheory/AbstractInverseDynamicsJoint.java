@@ -111,7 +111,6 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    {
       return new MovingReferenceFrame("after" + StringUtils.capitalize(name), beforeJointFrame)
       {
-         private static final long serialVersionUID = 4779423307372501426L;
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -25,7 +26,6 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
@@ -198,7 +198,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       FramePoint3D supportCentroid = new FramePoint3D();
       supportCentroid.setToZero(supportFrame);
       supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameOrientation supportOrientation = new FrameOrientation();
+      FrameQuaternion supportOrientation = new FrameQuaternion();
       supportOrientation.setToZero(supportFrame);
       supportOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       double supportYaw = supportOrientation.getYaw();
