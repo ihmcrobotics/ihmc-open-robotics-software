@@ -24,6 +24,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
 {
    private static final long WORLD_FRAME_HASH_CODE = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
+   public boolean enableUserPelvisControl = false;
    public boolean enableUserPelvisControlDuringWalking = false;
 
    /**
@@ -47,6 +48,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    public PelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
       super(pelvisTrajectoryMessage);
+      setEnableUserPelvisControl(pelvisTrajectoryMessage.isEnableUserPelvisControl());
       setEnableUserPelvisControlDuringWalking(pelvisTrajectoryMessage.isEnableUserPelvisControlDuringWalking());
    }
 
@@ -81,6 +83,16 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
+   }
+
+   public boolean isEnableUserPelvisControl()
+   {
+      return enableUserPelvisControl;
+   }
+
+   public void setEnableUserPelvisControl(boolean enableUserPelvisControl)
+   {
+      this.enableUserPelvisControl = enableUserPelvisControl;
    }
 
    @Override
