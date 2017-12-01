@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -49,7 +50,7 @@ public abstract class WalkingControllerParameters
    /**
     * Specifies if the controller should compute desired positions and velocities for all the robot
     * joints from the desired acceleration. This will enable acceleration integration for all joints
-    * that have their integration settings defined in {@link #getJointAccelerationIntegrationParameters()}.
+    * that have their integration settings defined in {@link #getJointAccelerationIntegrationParametersNoLoad()}.
     * If this is set to false acceleration integration can still be enabled for select upper body joints
     * using the setting in {@link #getOrCreatePositionControlledJoints()}.
     * <p>
@@ -88,31 +89,31 @@ public abstract class WalkingControllerParameters
     * right arm joints could be grouped this way so only a single parameter for tuning is created that affects
     * both sides.
     * <p>
-    * If a joint is not contained in the map, position control is not supported for that joint.
+    * If a joint is not contained in this map the controller will not create tunable parameters and use
+    * default acceleration integration settings defined in {@link JointAccelerationIntegrationCalculator}.
     * </p>
     * <p>
-    * This method is called by the controller to know the set of joints for which specific parameters are to
-    * be used. Joints listed in {@link #getOrCreatePositionControlledJoints()} must be contained in this map.
-    * For other joints the controller will use default integration settings.
+    * As long as a joint is not part of a loaded joint chain these acceleration integration settings will be
+    * used for that joint. E.g. all joints of a leg in support will be considered loaded. If a joint is loaded
+    * the parameters defined here can be overwritten (this is optional) by defining integration parameters
+    * in {@link #getJointAccelerationIntegrationParametersLoaded()}.
     * </p>
     * @return list containing acceleration integration parameters and the corresponding joints
     */
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
    {
       return null;
    }
 
    /**
-    * This method is similar to {@link #getJointAccelerationIntegrationParameters()}. The controller will
-    * apply the acceleration integration parameters defined here only to leg joints that are in swing. This
-    * allows to use different acceleration integration settings for the legs when loaded and non-loaded.
-    * If this list does not specify settings for a particular joint the controller will not switch parameters
-    * when in swing.
+    * This method is similar to {@link #getJointAccelerationIntegrationParametersNoLoad()}. The controller will
+    * apply the acceleration integration parameters defined here only to joints that are part of a loaded chain.
+    * This can be used if, for example, a different set of acceleration integration parameters should be used for
+    * joints that are part of a leg that is swinging versus a leg that supporting weight.
     *
-    * @return list containing acceleration integration parameters to be used in swing and the corresponding
-    * leg joints
+    * @return list containing acceleration integration parameters to be used if a joint is loaded
     */
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersLoaded()
    {
       return null;
    }
@@ -195,7 +196,7 @@ public abstract class WalkingControllerParameters
    {
       return 0.04;
    }
-   
+
    /**
     * This parameter sets the buffer around the support polygon to constrain the offset ICP used in {@link PelvisICPBasedTranslationManager}. It's defined in meters.
     */
@@ -389,10 +390,10 @@ public abstract class WalkingControllerParameters
     * swing foot to the next foothold.
     */
    public abstract double getDefaultSwingTime();
-   
+
 
    /**
-    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state 
+    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state
     * @return
     */
    public double getDefaultTouchdownTime()
@@ -677,7 +678,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return whether the z-component swing initial angular velocity should be zeroed out or not.
     */
    public boolean ignoreSwingInitialAngularVelocityZ()
@@ -691,7 +692,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return the swing initial linear velocity maximum magnitude.
     */
    public double getMaxSwingInitialLinearVelocityMagnitude()
@@ -705,7 +706,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return the swing initial angular velocity maximum magnitude.
     */
    public double getMaxSwingInitialAngularVelocityMagnitude()
