@@ -1,12 +1,12 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -15,7 +15,7 @@ public class QuadrupedBodyOrientationController
 {
    public static class Setpoints
    {
-      private final FrameOrientation bodyOrientation = new FrameOrientation();
+      private final FrameQuaternion bodyOrientation = new FrameQuaternion();
       private final FrameVector3D bodyAngularVelocity = new FrameVector3D();
       private final FrameVector3D comTorqueFeedforward = new FrameVector3D();
 
@@ -27,7 +27,7 @@ public class QuadrupedBodyOrientationController
          comTorqueFeedforward.setToZero();
       }
 
-      public FrameOrientation getBodyOrientation()
+      public FrameQuaternion getBodyOrientation()
       {
          return bodyOrientation;
       }
@@ -78,7 +78,7 @@ public class QuadrupedBodyOrientationController
 
    public void compute(FrameVector3D comTorqueCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
-      FrameOrientation bodyOrientationSetpoint = setpoints.getBodyOrientation();
+      FrameQuaternion bodyOrientationSetpoint = setpoints.getBodyOrientation();
       FrameVector3D bodyAngularVelocitySetpoint = setpoints.getBodyAngularVelocity();
       FrameVector3D bodyAngularVelocityEstimate = estimates.getBodyAngularVelocity();
       FrameVector3D comTorqueFeedforwardSetpoint = setpoints.getComTorqueFeedforward();

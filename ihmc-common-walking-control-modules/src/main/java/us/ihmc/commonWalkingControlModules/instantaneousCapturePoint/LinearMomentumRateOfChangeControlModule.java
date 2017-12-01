@@ -5,6 +5,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,49 +16,44 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
-   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final YoVariableRegistry registry;
 
-   protected final YoFrameVector defaultLinearMomentumRateWeight;
-   protected final YoFrameVector defaultAngularMomentumRateWeight;
-   protected final YoFrameVector highLinearMomentumRateWeight;
-   protected final YoFrameVector angularMomentumRateWeight;
-   protected final YoFrameVector linearMomentumRateWeight;
+   private final YoFrameVector defaultLinearMomentumRateWeight;
+   private final YoFrameVector defaultAngularMomentumRateWeight;
+   private final YoFrameVector highLinearMomentumRateWeight;
+   private final YoFrameVector angularMomentumRateWeight;
+   private final YoFrameVector linearMomentumRateWeight;
 
-   protected final YoEnum<RobotSide> supportLegPreviousTick;
-   protected final YoBoolean minimizeAngularMomentumRateZ;
 
-   protected final YoFrameVector controlledCoMAcceleration;
+   private final YoBoolean minimizeAngularMomentumRateZ;
 
-   protected final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   protected final SelectionMatrix6D linearAndAngularZSelectionMatrix = new SelectionMatrix6D();
-   protected final SelectionMatrix6D linearXYSelectionMatrix = new SelectionMatrix6D();
-   protected final SelectionMatrix6D linearXYAndAngularZSelectionMatrix = new SelectionMatrix6D();
+   private final YoFrameVector controlledCoMAcceleration;
+
+   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   private final SelectionMatrix6D linearAndAngularZSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D linearXYSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D linearXYAndAngularZSelectionMatrix = new SelectionMatrix6D();
 
    protected double omega0 = 0.0;
-   protected double totalMass;
-   protected double gravityZ;
+   private double totalMass;
+   private double gravityZ;
 
-   protected final ReferenceFrame centerOfMassFrame;
-   protected final FramePoint3D centerOfMass;
-   protected final FramePoint2D centerOfMass2d = new FramePoint2D();
+   private final ReferenceFrame centerOfMassFrame;
+   private final FramePoint3D centerOfMass;
+   private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
    protected final FramePoint2D capturePoint = new FramePoint2D();
    protected final FramePoint2D desiredCapturePoint = new FramePoint2D();
@@ -67,25 +63,21 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D perfectCMP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
 
-   protected final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
 
-   protected final CMPProjector cmpProjector;
+   protected final CMPProjector cmpProjector;   //TODO: Not used in this class, push down (?)
    protected final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
-   protected final YoBoolean desiredCMPinSafeArea;
 
    private boolean controlHeightWithMomentum;
 
-   protected final YoFramePoint2d yoUnprojectedDesiredCMP;
-   protected final YoFrameConvexPolygon2d yoSafeAreaPolygon;
-   protected final YoFrameConvexPolygon2d yoProjectionPolygon;
+   protected final YoFramePoint2d yoUnprojectedDesiredCMP; // TODO: Not used in this class, push down (?)
+   private final YoFrameConvexPolygon2d yoSafeAreaPolygon;
+   private final YoFrameConvexPolygon2d yoProjectionPolygon;
 
-   protected final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
-   protected double desiredCoMHeightAcceleration = 0.0;
+   private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
+   private double desiredCoMHeightAcceleration = 0.0;
 
-   protected RobotSide supportSide = null;
-   protected RobotSide transferToSide = null;
 
    public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ,
          double totalMass, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
@@ -113,10 +105,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight = new YoFrameVector(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight = new YoFrameVector(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
-      supportLegPreviousTick = YoEnum.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
       minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-      desiredCMPinSafeArea = new YoBoolean("DesiredCMPinSafeArea", registry);
 
       yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
       yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
@@ -178,21 +168,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       highLinearMomentumRateWeight.set(highLinearWeight);
    }
 
-   public void setSupportLeg(RobotSide newSupportSide)
-   {
-      supportSide = newSupportSide;
-   }
-
-   public void setTransferToSide(RobotSide transferToSide)
-   {
-      this.transferToSide = transferToSide;
-   }
-
-   public void setTransferFromSide(RobotSide robotSide)
-   {
-      if (robotSide != null)
-         this.transferToSide = robotSide.getOppositeSide();
-   }
 
 
    public void setOmega0(double omega0)
@@ -294,7 +269,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       desiredCMPToPack.setIncludingFrame(desiredCMP);
       desiredCMPToPack.changeFrame(worldFrame);
 
-      supportLegPreviousTick.set(supportSide);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       FrameVector3D linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
@@ -365,25 +339,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
 
-   public abstract void clearPlan();
-
-   public abstract void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
-
-   public abstract void setFinalTransferDuration(double finalTransferDuration);
-
-   public abstract void initializeForStanding();
-
-   public abstract void initializeForSingleSupport();
-
-   public abstract void initializeForTransfer();
-
-   public abstract boolean getUpcomingFootstepSolution(Footstep footstepToPack);
-
-   public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
-
-   public abstract ICPOptimizationController getICPOptimizationController();
-
-   public abstract double getOptimizedTimeRemaining();
 
    public abstract void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
 }

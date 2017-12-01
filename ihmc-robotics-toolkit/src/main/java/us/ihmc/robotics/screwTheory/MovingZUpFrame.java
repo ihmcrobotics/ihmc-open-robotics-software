@@ -6,7 +6,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class MovingZUpFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = 2228394703194703367L;
 
    private final ReferenceFrame rootFrame;
    private final MovingReferenceFrame nonZUpFrame;

@@ -9,9 +9,9 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class YoFrameQuaternionControlFlowOutputPortTest
@@ -37,11 +37,11 @@ public class YoFrameQuaternionControlFlowOutputPortTest
       
       for (int i = 0; i < 1000; i++)
       {
-         FrameOrientation dataIn = new FrameOrientation(frame, RandomGeometry.nextQuaternion(rand));
+         FrameQuaternion dataIn = new FrameQuaternion(frame, RandomGeometry.nextQuaternion(rand));
          controlFlowOutputPort.setData(dataIn);
-         FrameOrientation dataOut = controlFlowOutputPort.getData();
+         FrameQuaternion dataOut = controlFlowOutputPort.getData();
 
-         assertTrue("Expected: " + dataIn + ", but was: " + dataOut, dataIn.getQuaternionCopy().epsilonEquals(dataOut.getQuaternionCopy(), EPS));
+         assertTrue("Expected: " + dataIn + ", but was: " + dataOut, dataIn.epsilonEquals(dataOut, EPS));
       }
    }
 

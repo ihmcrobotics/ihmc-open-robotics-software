@@ -98,7 +98,7 @@ public class ConvexPolygon2dCalculatorTest
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       while (polygon.getNumberOfVertices() < 6)
       {
-         polygon.addVertex(EuclidCoreRandomTools.generateRandomPoint2D(random));
+         polygon.addVertex(EuclidCoreRandomTools.nextPoint2D(random));
          polygon.update();
       }
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 3);
@@ -141,7 +141,7 @@ public class ConvexPolygon2dCalculatorTest
       polygon.clearAndUpdate();
       while (polygon.getNumberOfVertices() < 3)
       {
-         polygon.addVertex(EuclidCoreRandomTools.generateRandomPoint2D(random));
+         polygon.addVertex(EuclidCoreRandomTools.nextPoint2D(random));
          polygon.update();
       }
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 2);
@@ -157,7 +157,7 @@ public class ConvexPolygon2dCalculatorTest
       polygon.clearAndUpdate();
       while (polygon.getNumberOfVertices() < 1)
       {
-         polygon.addVertex(EuclidCoreRandomTools.generateRandomPoint2D(random));
+         polygon.addVertex(EuclidCoreRandomTools.nextPoint2D(random));
          polygon.update();
       }
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 0);

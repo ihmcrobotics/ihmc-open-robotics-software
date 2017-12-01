@@ -6,23 +6,27 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -142,6 +146,52 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
       
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+   }
+
+   public void testSingleWaypointThenManualChange() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      String namespace = LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName();
+      YoDouble offsetHeight = (YoDouble) scs.getVariable(namespace, "offsetHeightAboveGround");
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      MovingReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
+
+      FramePoint3D pelvisPosition = new FramePoint3D(pelvisFrame);
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      double initialPelvisHeight = pelvisPosition.getZ();
+
+      Random random = new Random(4929L);
+      for (int i = 0; i < 10; i++)
+      {
+         double offset1 = 0.06 * 2.0 * (random.nextDouble() - 0.5);
+         double offset2 = 0.06 * 2.0 * (random.nextDouble() - 0.5);
+
+         // Move pelvis using YoVariable
+         offsetHeight.set(offset1);
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
+         pelvisPosition.setToZero(pelvisFrame);
+         pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         Assert.assertEquals(initialPelvisHeight + offset1, pelvisPosition.getZ(), 0.01);
+
+         // Move pelvis through message
+         double desiredHeight = initialPelvisHeight + offset2;
+         PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(0.5, desiredHeight);
+         drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
+         pelvisPosition.setToZero(pelvisFrame);
+         pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         Assert.assertEquals(desiredHeight, pelvisPosition.getZ(), 0.01);
+      }
    }
 
    @Before

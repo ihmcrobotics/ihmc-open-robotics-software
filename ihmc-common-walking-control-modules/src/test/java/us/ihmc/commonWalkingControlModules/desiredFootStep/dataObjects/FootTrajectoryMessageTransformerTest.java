@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,22 +62,24 @@ public class FootTrajectoryMessageTransformerTest
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending");
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D);
 
-      FrameOrientation start = new FrameOrientation(starting, orientationStart);
-      FrameOrientation end = new FrameOrientation(ending, orientationEnd);
+      FrameQuaternion start = new FrameQuaternion(starting, orientationStart);
+      FrameQuaternion end = new FrameQuaternion(ending, orientationEnd);
 
       end.changeFrame(starting);
 
       return equalsFrameOrientation(start, end);
    }
 
-   private static boolean equalsFrameOrientation(FrameOrientation frameOrientation1, FrameOrientation frameOrientation2)
+   private static boolean equalsFrameOrientation(FrameQuaternion frameOrientation1, FrameQuaternion frameOrientation2)
    {
       // Check reference frame first
       if (frameOrientation1.getReferenceFrame() != frameOrientation2.getReferenceFrame())
          return false;
 
-      double[] rpyThis = frameOrientation1.getYawPitchRoll();
-      double[] rpyThat = frameOrientation2.getYawPitchRoll();
+      double[] rpyThis = new double[3];
+      frameOrientation1.getYawPitchRoll(rpyThis);
+      double[] rpyThat = new double[3];
+      frameOrientation2.getYawPitchRoll(rpyThat);
 
       for (int i = 0; i < rpyThat.length; i++)
       {

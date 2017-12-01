@@ -35,8 +35,6 @@ public class WrenchTest
       frameA = ReferenceFrame.constructARootFrame("A");
       frameB = new ReferenceFrame("B", frameA)
       {
-         private static final long serialVersionUID = 1L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -49,8 +47,6 @@ public class WrenchTest
 
       frameC = new ReferenceFrame("C", frameB)
       {
-         private static final long serialVersionUID = 1L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

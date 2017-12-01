@@ -13,6 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,7 +23,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -449,7 +449,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
          // Now, check the position and velocity kinematics of the last joint:
          ReferenceFrame spinningFrame = lastInverseDynamicsJoint.getFrameAfterJoint();
-         FrameOrientation orientation = new FrameOrientation(spinningFrame);
+         FrameQuaternion orientation = new FrameQuaternion(spinningFrame);
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
          lastFrameOrientationID.set(orientation);
 
@@ -461,10 +461,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          
          transformToWorld.invert();
          orientation.applyTransform(transformToWorld);
-         double[] yawPitchRoll = orientation.getYawPitchRoll();
-         assertEquals(0.0, yawPitchRoll[0], 1e-7);
-         assertEquals(0.0, yawPitchRoll[1], 1e-7);
-         assertEquals(0.0, yawPitchRoll[2], 1e-7);
+         assertEquals(0.0, orientation.getYaw(), 1e-7);
+         assertEquals(0.0, orientation.getPitch(), 1e-7);
+         assertEquals(0.0, orientation.getRoll(), 1e-7);
       }
    }
 

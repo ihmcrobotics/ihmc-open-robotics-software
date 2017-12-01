@@ -25,8 +25,8 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    public HandTrajectoryCommand(Random random)
    {
       this(RobotSide.generateRandomRobotSide(random),
-            EuclidFrameRandomTools.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
-            EuclidFrameRandomTools.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+            EuclidFrameRandomTools.nextReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
    }
 
    @Override

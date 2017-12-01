@@ -1,26 +1,25 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class OrientationFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 6465943952628127959L;
    private static int orientationNumber = 0;
-   private final FrameOrientation frameOrientation;
+   private final FrameQuaternion frameOrientation;
 
-   public OrientationFrame(FrameOrientation orientation)
+   public OrientationFrame(FrameQuaternion orientation)
    {
       super("Orientation_" + orientationNumber, orientation.getReferenceFrame());
 
       orientationNumber++;
 
-      frameOrientation = new FrameOrientation(orientation);
+      frameOrientation = new FrameQuaternion(orientation);
       this.update();
    }
 
-   public void setOrientationAndUpdate(FrameOrientation orientation)
+   public void setOrientationAndUpdate(FrameQuaternion orientation)
    {
       this.parentFrame.checkReferenceFrameMatch(orientation.getReferenceFrame());
       this.frameOrientation.set(orientation);
@@ -30,6 +29,6 @@ public class OrientationFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      frameOrientation.getTransform3D(transformToParent);
+      transformToParent.setRotation(frameOrientation);
    }
 }

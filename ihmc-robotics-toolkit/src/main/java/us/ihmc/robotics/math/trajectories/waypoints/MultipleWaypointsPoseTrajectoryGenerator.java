@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 
@@ -20,7 +20,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    private ReferenceFrame activeFrame;
    
    private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
 
    public MultipleWaypointsPoseTrajectoryGenerator(String namePrefix, int maxNumberOfWaypoints, YoVariableRegistry parentRegistry)
    {
@@ -84,7 +84,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
       positionTrajectory.appendWaypoint(positionWaypoint);
    }
    
-   public void appendOrientationWaypoint(double timeAtWaypoint, FrameOrientation orientation, FrameVector3D angularVelocity)
+   public void appendOrientationWaypoint(double timeAtWaypoint, FrameQuaternion orientation, FrameVector3D angularVelocity)
    {
       orientation.changeFrame(activeFrame);
       angularVelocity.changeFrame(activeFrame);
@@ -142,7 +142,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    }
 
    @Override
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationTrajectory.getOrientation(orientationToPack);
    }
