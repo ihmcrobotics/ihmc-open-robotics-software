@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -10,9 +9,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
@@ -28,7 +25,8 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
 
    public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
-                                        boolean startYoVariableServer) throws IOException
+                                        boolean startYoVariableServer)
+         throws IOException
    {
       super(fullHumanoidRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
@@ -59,5 +57,5 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       status.add(FootstepPlanningToolboxOutputStatus.class);
       return status;
    }
-}
 
+}
