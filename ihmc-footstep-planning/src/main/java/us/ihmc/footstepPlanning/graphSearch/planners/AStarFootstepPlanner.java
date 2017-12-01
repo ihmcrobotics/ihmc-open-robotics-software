@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -26,6 +27,7 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuris
 import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
@@ -368,13 +370,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters, null);
 
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
+      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, footPolygons);
+      FootstepNodeCheckerOfCheckers checkerOfCheckers = new FootstepNodeCheckerOfCheckers(Arrays.asList(nodeChecker, cliffAvoider));
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
 
       heuristics.setWeight(1.5);
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, viz,
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, checkerOfCheckers, heuristics, expansion, stepCostCalculator, postProcessingSnapper, viz,
                                                               registry);
       return planner;
    }
