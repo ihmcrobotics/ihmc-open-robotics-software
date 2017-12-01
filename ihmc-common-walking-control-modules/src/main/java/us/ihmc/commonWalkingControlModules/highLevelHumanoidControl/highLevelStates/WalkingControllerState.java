@@ -95,7 +95,7 @@ public class WalkingControllerState extends HighLevelControllerState
       }
 
       OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
-      positionControlHelper = new JointPositionControlHelper(walkingControllerParameters, controlledOneDofJoints, fullRobotModel, registry);
+      positionControlHelper = new JointPositionControlHelper(walkingControllerParameters, controlledOneDofJoints, walkingController, registry);
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -157,7 +157,7 @@ public class WalkingControllerState extends HighLevelControllerState
    public void doAction()
    {
       walkingController.doAction();
-      positionControlHelper.update(walkingController.getWalkingStateEnum());
+      positionControlHelper.update();
 
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
       controllerCoreCommand.addInverseDynamicsCommand(positionControlHelper.getJointAccelerationIntegrationCommand());

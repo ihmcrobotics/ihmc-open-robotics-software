@@ -5,60 +5,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class JointPositionControlHelper
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final JointAccelerationIntegrationParametersReadOnly[] accelerationIntegrationSettings;
+   private final String[] jointNames;
+   private final YoBoolean[] jointsLoaded;
    private final JointAccelerationIntegrationParametersReadOnly[] accelerationIntegrationSettingsNoLoad;
-   private final SideDependentList<TIntArrayList> legJointIndices = new SideDependentList<>();
+   private final JointAccelerationIntegrationParametersReadOnly[] accelerationIntegrationSettingsLoaded;
 
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   public JointPositionControlHelper(WalkingControllerParameters walkingControllerParameters, OneDoFJoint[] joints, FullHumanoidRobotModel fullRobotModel,
-                                     YoVariableRegistry parentRegistry)
+   private final WalkingHighLevelHumanoidController walkingController;
+
+   public JointPositionControlHelper(WalkingControllerParameters walkingControllerParameters, OneDoFJoint[] joints,
+                                     WalkingHighLevelHumanoidController walkingController, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-
-      Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMap = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("", walkingControllerParameters.getJointAccelerationIntegrationParameters(),
-                                                                parameterJointNameMap, registry);
+      this.walkingController = walkingController;
 
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapNoLoad = new HashMap<>();
       ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", walkingControllerParameters.getJointAccelerationIntegrationParametersNoLoad(),
                                                                 parameterJointNameMapNoLoad, registry);
 
+      Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapLoaded = new HashMap<>();
+      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", walkingControllerParameters.getJointAccelerationIntegrationParametersLoaded(),
+                                                                parameterJointNameMapLoaded, registry);
+
       Map<String, OneDoFJoint> jointNameMap = new HashMap<>();
       for (OneDoFJoint joint : joints)
       {
          jointNameMap.put(joint.getName(), joint);
-      }
-
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      SideDependentList<OneDoFJoint[]> legJoints = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         legJointIndices.put(robotSide, new TIntArrayList());
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         legJoints.put(robotSide, ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), OneDoFJoint.class));
       }
 
       List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
@@ -76,11 +65,16 @@ public class JointPositionControlHelper
 
       boolean integrateAllJoints = walkingControllerParameters.enableJointAccelerationIntegrationForAllJoints();
       List<String> integratingJoints = getJointsWithAccelerationIntegration(positionControlledJoints, integrateAllJoints, joints);
-      accelerationIntegrationSettings = new JointAccelerationIntegrationParametersReadOnly[integratingJoints.size()];
+      jointNames = new String[integratingJoints.size()];
+      jointsLoaded = new YoBoolean[integratingJoints.size()];
       accelerationIntegrationSettingsNoLoad = new JointAccelerationIntegrationParametersReadOnly[integratingJoints.size()];
+      accelerationIntegrationSettingsLoaded = new JointAccelerationIntegrationParametersReadOnly[integratingJoints.size()];
+
       for (int jointIdx = 0; jointIdx < integratingJoints.size(); jointIdx++)
       {
          String jointName = integratingJoints.get(jointIdx);
+         jointNames[jointIdx] = jointName;
+         jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
 
          OneDoFJoint joint = jointNameMap.get(jointName);
          if (joint == null)
@@ -89,46 +83,39 @@ public class JointPositionControlHelper
          }
          jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
 
-         JointAccelerationIntegrationParametersReadOnly integrationParameters = parameterJointNameMap.get(jointName);
-         if (integrationParameters == null)
+         JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = parameterJointNameMapNoLoad.get(jointName);
+         if (integrationParametersNoLoad == null)
          {
-            PrintTools.warn("Integrating the desired acceleration for " + jointName + " but no integration parameters are defined - using defaults.");
+            PrintTools.warn("(NoLoad) No integration parameters for joint " + jointName + " defined. Using default values.");
          }
-         accelerationIntegrationSettings[jointIdx] = integrationParameters;
-         accelerationIntegrationSettingsNoLoad[jointIdx] = parameterJointNameMapNoLoad.get(jointName);
+         accelerationIntegrationSettingsNoLoad[jointIdx] = integrationParametersNoLoad;
 
-         // find the indices of the leg joints
-         for (RobotSide robotSide : RobotSide.values)
+         JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = parameterJointNameMapLoaded.get(jointName);
+         if (integrationParametersLoaded == null)
          {
-            for (OneDoFJoint legJoint : legJoints.get(robotSide))
-            {
-               if (legJoint.getName().equals(jointName))
-               {
-                  legJointIndices.get(robotSide).add(jointIdx);
-               }
-            }
+            PrintTools.warn("(Loaded) No integration parameters for joint " + jointName + " defined. Using No-Load parameters.");
          }
+         accelerationIntegrationSettingsLoaded[jointIdx] = integrationParametersLoaded;
       }
    }
 
-   public void update(WalkingStateEnum walkingStateEnum)
+   public void update()
    {
-      for (int jointIdx = 0; jointIdx < accelerationIntegrationSettings.length; jointIdx++)
+      for (int jointIdx = 0; jointIdx < jointNames.length; jointIdx++)
       {
-         JointAccelerationIntegrationParametersReadOnly integrationParameters = accelerationIntegrationSettings[jointIdx];
-         if (walkingStateEnum.isSingleSupport())
-         {
-            boolean isLegJoint = legJointIndices.get(walkingStateEnum.getSupportSide().getOppositeSide()).contains(jointIdx);
-            if (isLegJoint && accelerationIntegrationSettingsNoLoad[jointIdx] != null)
-            {
-               // we have a leg joint that is not loaded!
-               integrationParameters = accelerationIntegrationSettingsNoLoad[jointIdx];
-            }
-         }
+         boolean isLoaded = walkingController.isJointLoaded(jointNames[jointIdx]);
+         jointsLoaded[jointIdx].set(isLoaded);
 
-         if (integrationParameters != null)
+         JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];
+         JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = accelerationIntegrationSettingsLoaded[jointIdx];
+
+         if (isLoaded && integrationParametersLoaded != null)
          {
-            jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParameters);
+            jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersLoaded);
+         }
+         else if (integrationParametersNoLoad != null)
+         {
+            jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersNoLoad);
          }
       }
    }
