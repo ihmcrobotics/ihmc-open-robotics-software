@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 {
    @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
-   public HighLevelControllerName highLevelControllerName;
+   public HighLevelControllerName highLevelState;
 
    public HighLevelStateMessage()
    {
@@ -24,22 +24,24 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
    public HighLevelStateMessage(HighLevelControllerName highLevelControllerName)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.highLevelControllerName = highLevelControllerName;
+      this.highLevelState = highLevelControllerName;
    }
 
    public HighLevelControllerName getHighLevelControllerName()
    {
-      return highLevelControllerName;
+      return highLevelState;
    }
 
+   @Override
    public boolean equals(Object obj)
    {
       return ((obj instanceof HighLevelStateMessage) && this.epsilonEquals((HighLevelStateMessage) obj, 0));
    }
 
+   @Override
    public String toString()
    {
-      return "State= " + highLevelControllerName.toString();
+      return "State= " + highLevelState.toString();
    }
 
    @Override
@@ -57,6 +59,6 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
       else if (value == 2)
          highLevelControllerName = HighLevelControllerName.DIAGNOSTICS;
 
-      this.highLevelControllerName = highLevelControllerName;
+      this.highLevelState = highLevelControllerName;
    }
 }

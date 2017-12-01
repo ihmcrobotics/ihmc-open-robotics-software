@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 /**
  * {@link ControllerCoreOutputReadOnly} is a read-only access to the controller core output.
@@ -61,5 +61,5 @@ public interface ControllerCoreOutputReadOnly
     * 
     * @return the desired state of the robot joints.
     */
-   public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelOneDoFJointDesiredDataHolder();
+   public abstract JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder();
 }
