@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -39,7 +40,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
@@ -278,7 +278,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FramePoint3D circleCenter = new FramePoint3D(ankleFrame);
          circleCenter.set(getCircleCenterFromAnkle(robotSide));
 
-         FrameOrientation tempOrientation = new FrameOrientation(ankleFrame);
+         FrameQuaternion tempOrientation = new FrameQuaternion(ankleFrame);
          tempOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
          RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = createTrajectory(robotSide, foot, firstTrajectoryPointTime, numberOfTrajectoryPoints, 1, trajectoryTime);
@@ -408,7 +408,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 12.0;
 
       ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-      FrameOrientation tempOrientation = new FrameOrientation(ankleFrame);
+      FrameQuaternion tempOrientation = new FrameQuaternion(ankleFrame);
       tempOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = createTrajectory(robotSide, foot, firstTrajectoryPointTime, numberOfTrajectoryPointsPerMessage, numberOfMessages, trajectoryTime);
@@ -566,7 +566,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          double trajectoryTime = 12.0;
          
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-         FrameOrientation tempOrientation = new FrameOrientation(ankleFrame);
+         FrameQuaternion tempOrientation = new FrameQuaternion(ankleFrame);
          tempOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
          RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = createTrajectory(robotSide, foot, firstTrajectoryPointTime,
@@ -601,7 +601,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       circleCenter.set(getCircleCenterFromAnkle(robotSide));
       
       FramePoint3D tempPoint = new FramePoint3D();
-      FrameOrientation tempOrientation1 = new FrameOrientation(ankleFrame);
+      FrameQuaternion tempOrientation1 = new FrameQuaternion(ankleFrame);
       tempOrientation1.changeFrame(ReferenceFrame.getWorldFrame());
       Vector3D circleRadius = getCircleRadius();
 

@@ -39,7 +39,7 @@ public class YoPointPositionDataObjectListOutputPortTest
       int nFrames = 10;
       for (int i = 0; i < nFrames; i++)
       {
-         RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame" + i, ReferenceFrame.getWorldFrame(), transformToParent);
          frame.update();
          frames.add(frame);

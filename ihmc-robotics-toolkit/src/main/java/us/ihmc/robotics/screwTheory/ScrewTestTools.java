@@ -502,7 +502,7 @@ public class ScrewTestTools
 
    public static void setRandomPositionAndOrientation(FloatingInverseDynamicsJoint rootJoint, Random random)
    {
-      rootJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      rootJoint.setPositionAndRotation(EuclidCoreRandomTools.nextRigidBodyTransform(random));
    }
 
    public static void setRandomVelocity(FloatingInverseDynamicsJoint rootJoint, Random random)

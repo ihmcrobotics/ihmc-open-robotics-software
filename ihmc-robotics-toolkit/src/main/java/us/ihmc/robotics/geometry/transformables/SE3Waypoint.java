@@ -212,6 +212,16 @@ public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInte
       return true;
    }
 
+   @Override
+   public boolean geometricallyEquals(SE3Waypoint other, double epsilon)
+   {
+      if (!euclideanWaypoint.geometricallyEquals(other.euclideanWaypoint, epsilon))
+         return false;
+      if (!so3Waypoint.geometricallyEquals(other.so3Waypoint, epsilon))
+         return false;
+      return true;
+   }
+
    public EuclideanWaypoint getEuclideanWaypoint()
    {
       return euclideanWaypoint;

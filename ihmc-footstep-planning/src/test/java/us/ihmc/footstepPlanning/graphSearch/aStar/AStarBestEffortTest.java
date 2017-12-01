@@ -43,7 +43,7 @@ public class AStarBestEffortTest
       planner.setTimeout(5.0);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testBestEffort()
    {
       ConvexPolygon2D groundPlane = new ConvexPolygon2D();

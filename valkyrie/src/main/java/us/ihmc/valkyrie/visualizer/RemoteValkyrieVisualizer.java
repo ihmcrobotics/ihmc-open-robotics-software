@@ -6,20 +6,20 @@ import java.util.Arrays;
 
 import javax.swing.JComboBox;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlLowLevelController;
 
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
 {
@@ -45,10 +45,10 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       // TODO The sliderboard throws an NPE when scrubbing, at least in Sim. If this is okay on the real robot then feel free to uncomment. -- Doug
       createSliderBoard(scs, registry);
 
-      final YoEnum<?> requestLowlLevelControlMode = (YoEnum<?>) scs.getVariable(ValkyrieRosControlLowLevelController.class.getSimpleName(),
-                                                                                                "requestedLowLevelControlMode");
+      final YoEnum<?> requestHighLevelControlMode = (YoEnum<?>) scs.getVariable(HighLevelHumanoidControllerFactory.class.getSimpleName(),
+                                                                                "requestedHighLevelControllerState");
 
-      final String[] enumValuesAsString = requestLowlLevelControlMode.getEnumValuesAsString();
+      final String[] enumValuesAsString = requestHighLevelControlMode.getEnumValuesAsString();
       for (int i = 0; i < enumValuesAsString.length; i++)
       {
          enumValuesAsString[i] = enumValuesAsString[i].replaceAll("_", " _");
@@ -56,31 +56,31 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       }
       final String[] comboBoxValues = new String[enumValuesAsString.length + 1];
       System.arraycopy(enumValuesAsString, 0, comboBoxValues, 1, enumValuesAsString.length);
-      comboBoxValues[0] = "Low-Level Control Mode";
+      comboBoxValues[0] = "High-Level Control Mode";
       System.out.println(Arrays.deepToString(enumValuesAsString));
       final JComboBox<String> requestControlModeComboBox = new JComboBox<>(comboBoxValues);
-      requestControlModeComboBox.setSelectedIndex(requestLowlLevelControlMode.getOrdinal() % enumValuesAsString.length);
+      requestControlModeComboBox.setSelectedIndex(requestHighLevelControlMode.getOrdinal() % enumValuesAsString.length);
       requestControlModeComboBox.addActionListener(new ActionListener()
       {
          @Override
          public void actionPerformed(ActionEvent e)
          {
             int selectedIndex = requestControlModeComboBox.getSelectedIndex() - 1;
-            int ordinal = requestLowlLevelControlMode.getOrdinal();
+            int ordinal = requestHighLevelControlMode.getOrdinal();
             if (selectedIndex != ordinal)
             {
-               requestLowlLevelControlMode.set(selectedIndex);
+               requestHighLevelControlMode.set(selectedIndex);
             }
          }
       });
 
-      requestLowlLevelControlMode.addVariableChangedListener(new VariableChangedListener()
+      requestHighLevelControlMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
             int selectedIndex = requestControlModeComboBox.getSelectedIndex();
-            int ordinal = requestLowlLevelControlMode.getOrdinal() + 1;
+            int ordinal = requestHighLevelControlMode.getOrdinal() + 1;
             if (selectedIndex != ordinal)
                requestControlModeComboBox.setSelectedIndex(ordinal);
          }

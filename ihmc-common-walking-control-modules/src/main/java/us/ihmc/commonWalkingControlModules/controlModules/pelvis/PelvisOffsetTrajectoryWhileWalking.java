@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -10,7 +11,6 @@ import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -89,8 +89,6 @@ public class PelvisOffsetTrajectoryWhileWalking
 
       nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
       {
-         private static final long serialVersionUID = 8082360349132384241L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -213,7 +211,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       limitedDesiredWalkingPelvisOffsetOrientation.update();
    }
 
-   public void addAngularOffset(FrameOrientation orientationToPack)
+   public void addAngularOffset(FrameQuaternion orientationToPack)
    {
       orientationToPack.preMultiply(limitedDesiredWalkingPelvisOffsetOrientation.getFrameOrientation());
    }

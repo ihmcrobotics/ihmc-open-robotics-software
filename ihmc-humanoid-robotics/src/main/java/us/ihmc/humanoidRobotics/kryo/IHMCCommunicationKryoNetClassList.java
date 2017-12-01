@@ -9,6 +9,7 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.*;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -59,11 +60,8 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallTaskBehavior
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingSpeed;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.*;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
@@ -211,6 +209,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(byte[].class);
       registerPacketField(Point3D.class);
       registerPacketField(Quaternion.class);
+      registerPacketField(RotationMatrix.class);
       registerPacketField(TimeStampedTransform3D.class);
 
       registerPacketField(PacketDestination.class);
@@ -389,7 +388,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // high levle state
       registerPacketClass(HighLevelStateMessage.class);
-      registerPacketClass(HighLevelState.class);
+      registerPacketClass(HighLevelControllerName.class);
       registerPacketClass(HighLevelStateChangeStatusMessage.class);
 
       // Recording

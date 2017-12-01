@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariableList;
@@ -24,7 +25,7 @@ public class FreeJoint extends Joint
 
    YoVariableList freeJointVars;
 
-   public FreeJoint(String jname, Vector3D offset, Robot rob, String xName, String yName, String zName, String yawName, String rollName, String pitchName)
+   public FreeJoint(String jname, Vector3DReadOnly offset, Robot rob, String xName, String yName, String zName, String yawName, String rollName, String pitchName)
    {
       super(jname, offset, rob, 6);
 
@@ -111,7 +112,7 @@ public class FreeJoint extends Joint
       System.err.println("Error!!!! FreeJoint.jointDependentSet_d_i should never be called!!!");
    }
 
-   public void jointDependentFeatherstonePassTwo(Vector3D w_h)
+   public void jointDependentFeatherstonePassTwo(Vector3DReadOnly w_h)
    {
    }
 

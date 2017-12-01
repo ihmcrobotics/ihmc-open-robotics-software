@@ -156,7 +156,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          ReferenceFrame copFrame = new ReferenceFrame("copFrame", soleFrame)
          {
-            private static final long serialVersionUID = -1926704435608610401L;
             private final Vector3D copOffset = new Vector3D();
             @Override
             protected void updateTransformToParent(RigidBodyTransform transformToParent)

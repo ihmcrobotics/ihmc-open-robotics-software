@@ -34,11 +34,6 @@ public class ViconFrames
       {
          viconWorldFrame = new ReferenceFrame(worldFrameName, parentReferenceFrame, true, false)
          {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = 8016047182514159403L;
-
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
             }

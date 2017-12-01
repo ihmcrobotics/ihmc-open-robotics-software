@@ -10,11 +10,12 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class OrientationInterpolationCalculatorTest
 {
@@ -33,8 +34,8 @@ public class OrientationInterpolationCalculatorTest
 
       for (int i = 0; i < 50000; i++)
       {
-         FrameOrientation startOrientation = FrameOrientation.generateRandomFrameOrientation(random, world);
-         FrameOrientation endOrientation = FrameOrientation.generateRandomFrameOrientation(random, world);
+         FrameQuaternion startOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, world);
+         FrameQuaternion endOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, world);
 
          double alpha = random.nextDouble();
          double alphaDot = random.nextDouble();
@@ -43,19 +44,19 @@ public class OrientationInterpolationCalculatorTest
          double alphaNew = alpha + deltaAlpha;
 
          // compute angular velocity by numerical differentiation
-         FrameOrientation interpolatedOrientation0 = new FrameOrientation(startOrientation.getReferenceFrame());
+         FrameQuaternion interpolatedOrientation0 = new FrameQuaternion(startOrientation.getReferenceFrame());
          interpolatedOrientation0.interpolate(startOrientation, endOrientation, alpha);
 
-         FrameOrientation interpolatedOrientationDt = new FrameOrientation(startOrientation.getReferenceFrame());
+         FrameQuaternion interpolatedOrientationDt = new FrameQuaternion(startOrientation.getReferenceFrame());
          interpolatedOrientationDt.interpolate(startOrientation, endOrientation, alphaNew);
 
          Matrix3D interpolatedOrientationMatrixDot = new Matrix3D();
          RigidBodyTransform transformationAtDt = new RigidBodyTransform();
-         interpolatedOrientationDt.getTransform3D(transformationAtDt);
+         transformationAtDt.setRotation(interpolatedOrientationDt);
          transformationAtDt.getRotation(interpolatedOrientationMatrixDot);
          RotationMatrix interpolatedOrientation0Matrix = new RotationMatrix();
          RigidBodyTransform transformationAt0 = new RigidBodyTransform();
-         interpolatedOrientation0.getTransform3D(transformationAt0);
+         transformationAt0.setRotation(interpolatedOrientation0);
          transformationAt0.getRotation(interpolatedOrientation0Matrix);
          interpolatedOrientationMatrixDot.sub(interpolatedOrientation0Matrix);
          interpolatedOrientationMatrixDot.scale(1.0 / dt);

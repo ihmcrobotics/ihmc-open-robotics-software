@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,7 +31,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -47,8 +45,6 @@ public class RigidBodyControlManager
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
    private final YoEnum<RigidBodyControlMode> defaultControlMode;
-
-   private final RigidBodyPositionControlHelper positionControlHelper;
 
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
@@ -68,9 +64,9 @@ public class RigidBodyControlManager
    private final YoBoolean stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
-         Pose3D homePose, List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
-         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody,
-         YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  Pose3D homePose, List<String> positionControlledJointNames, Collection<ReferenceFrame> trajectoryFrames,
+                                  ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody, YoDouble yoTime,
+                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -87,7 +83,6 @@ public class RigidBodyControlManager
 
       initialJointPositions = new double[jointsToControl.length];
 
-      positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
       RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
@@ -95,7 +90,7 @@ public class RigidBodyControlManager
                                                                  jointControlHelper, graphicsListRegistry, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
-      if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
+      if (contactableBody != null)
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, jointControlHelper,
                                                                         graphicsListRegistry, registry);
       else
@@ -192,8 +187,6 @@ public class RigidBodyControlManager
       }
 
       stateMachine.doAction();
-
-      positionControlHelper.update();
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -515,7 +508,6 @@ public class RigidBodyControlManager
    {
       inverseDynamicsCommandList.clear();
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
-      inverseDynamicsCommandList.addCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
 
       if (stateSwitched.getBooleanValue())
       {
@@ -530,11 +522,6 @@ public class RigidBodyControlManager
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
-   }
-
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
-   {
-      return positionControlHelper.getLowLevelOneDoFJointDesiredDataHolder();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

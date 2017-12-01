@@ -10,13 +10,19 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
+public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinearMomentumRateOfChangeControlModule
 {
    private final ICPProportionalController icpProportionalController;
    private final BipedSupportPolygons bipedSupportPolygons;
+   private final YoBoolean desiredCMPinSafeArea;
+   
+   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, YoICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
@@ -31,6 +37,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
    {
       super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
       this.bipedSupportPolygons = bipedSupportPolygons;
+      this.desiredCMPinSafeArea = new YoBoolean("DesiredCMPinSafeArea", registry);
 
 
       icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry);

@@ -3,16 +3,16 @@ package us.ihmc.robotics.math.frames;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class YoFrameOrientationInMultipleFrames extends YoFrameOrientation implements YoMultipleFramesHolder
 {
    private final YoMultipleFramesHelper multipleFramesHelper;
 
-   private final FrameOrientation frameOrientation = new FrameOrientation();
+   private final FrameQuaternion frameOrientation = new FrameQuaternion();
    private final Quaternion quaternion = new Quaternion();
 
    public YoFrameOrientationInMultipleFrames(String namePrefix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
@@ -35,7 +35,7 @@ public class YoFrameOrientationInMultipleFrames extends YoFrameOrientation imple
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       frameOrientation.setIncludingFrame(currentReferenceFrame, quaternion);
       frameOrientation.changeFrame(desiredFrame);
-      frameOrientation.getQuaternion(quaternion);
+      quaternion.set(frameOrientation);
       set(quaternion);
    }
 
@@ -93,7 +93,7 @@ public class YoFrameOrientationInMultipleFrames extends YoFrameOrientation imple
    {
       getFrameOrientationIncludingFrame(frameOrientation);
       frameOrientation.changeFrame(referenceFrame);
-      return frameOrientation.toStringAsQuaternion();
+      return frameOrientation.toString();
    }
 
    @Override

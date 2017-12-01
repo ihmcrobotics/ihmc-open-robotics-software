@@ -3,8 +3,8 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractEuclideanTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
@@ -173,7 +173,7 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
     * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
     * {@link #getTrajectoryPointList()}.
     */
-   public void addTrajectoryPoint(double time, Point3D position, Vector3D linearVelocity)
+   public void addTrajectoryPoint(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       trajectoryPointList.addTrajectoryPoint(time, position, linearVelocity);
    }
