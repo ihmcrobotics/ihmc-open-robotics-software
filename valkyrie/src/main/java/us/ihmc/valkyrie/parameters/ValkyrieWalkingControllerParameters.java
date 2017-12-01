@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -33,7 +31,6 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -495,109 +492,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       return bodyHomeConfiguration;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public List<String> getOrCreatePositionControlledJoints()
-   {
-      if (positionControlledJoints != null)
-         return positionControlledJoints;
-
-      positionControlledJoints = new ArrayList<String>();
-
-      if (target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO)
-      {
-         for (NeckJointName name : jointMap.getNeckJointNames())
-            positionControlledJoints.add(jointMap.getNeckJointName(name));
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL));
-            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH));
-            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL));
-         }
-      }
-
-      return positionControlledJoints;
-   }
-
-   @Override
-   public boolean enableJointAccelerationIntegrationForAllJoints()
-   {
-      return true;
-   }
-
-   @Override
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
-   {
-      List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> ret = new ArrayList<>();
-
-      for (LegJointName legJointName : new LegJointName[]{LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.HIP_ROLL})
-      { // Hip joints
-         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphas(0.9992, 0.85);
-         List<String> jointNames = new ArrayList<>();
-         for (RobotSide robotSide : RobotSide.values)
-            jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
-         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
-      }
-
-      for (LegJointName legJointName : new LegJointName[]{LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL})
-      { // Knee and ankle joints
-         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         List<String> jointNames = new ArrayList<>();
-         for (RobotSide robotSide : RobotSide.values)
-            jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
-         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
-      }
-
-      for (SpineJointName spineJointName : jointMap.getSpineJointNames())
-      { // Spine joints
-         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphas(0.9996, 0.85);
-         List<String> jointNames = Collections.singletonList(jointMap.getSpineJointName(spineJointName));
-         ret.add(new ImmutableTriple<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
-      }
-
-      for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.ELBOW_ROLL})
-      { // Forearm elbow joint
-         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphaPosition(0.9998);
-         parameters.setAlphaVelocity(0.84);
-         parameters.setMaxPositionError(0.2);
-         parameters.setMaxVelocity(2.0);
-         List<String> jointNames = new ArrayList<>();
-         for (RobotSide robotSide : RobotSide.values)
-            jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
-         ret.add(new ImmutableTriple<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
-      }
-
-      for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL})
-      { // Forearm wrist joints
-         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphaPosition(0.9995);
-         parameters.setAlphaVelocity(0.83);
-         parameters.setMaxPositionError(0.2);
-         parameters.setMaxVelocity(2.0);
-         List<String> jointNames = new ArrayList<>();
-         for (RobotSide robotSide : RobotSide.values)
-            jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
-         ret.add(new ImmutableTriple<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
-      }
-
-      for (NeckJointName neckJointName : jointMap.getNeckJointNames())
-      { // Neck joints
-         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
-         parameters.setAlphaPosition(0.9996);
-         parameters.setAlphaVelocity(0.95);
-         parameters.setMaxPositionError(0.2);
-         parameters.setMaxVelocity(2.0);
-         List<String> jointNames = Collections.singletonList(jointMap.getNeckJointName(neckJointName));
-         ret.add(new ImmutableTriple<>(neckJointName.getCamelCaseName(), parameters, jointNames));
-      }
-
-      return ret;
    }
 
    @Override

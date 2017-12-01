@@ -5,14 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -26,22 +24,21 @@ public class JointPositionControlHelper
    private final JointAccelerationIntegrationParametersReadOnly[] accelerationIntegrationSettingsLoaded;
 
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final WalkingHighLevelHumanoidController walkingController;
 
-   public JointPositionControlHelper(WalkingControllerParameters walkingControllerParameters, OneDoFJoint[] joints,
+   public JointPositionControlHelper(HighLevelControllerParameters parameters, List<String> positionControlledJoints, OneDoFJoint[] joints,
                                      WalkingHighLevelHumanoidController walkingController, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.walkingController = walkingController;
 
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapNoLoad = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", walkingControllerParameters.getJointAccelerationIntegrationParametersNoLoad(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", parameters.getJointAccelerationIntegrationParametersNoLoad(),
                                                                 parameterJointNameMapNoLoad, registry);
 
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapLoaded = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", walkingControllerParameters.getJointAccelerationIntegrationParametersLoaded(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", parameters.getJointAccelerationIntegrationParametersLoaded(),
                                                                 parameterJointNameMapLoaded, registry);
 
       Map<String, OneDoFJoint> jointNameMap = new HashMap<>();
@@ -50,20 +47,7 @@ public class JointPositionControlHelper
          jointNameMap.put(joint.getName(), joint);
       }
 
-      List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
-      for (int jointIdx = 0; jointIdx < positionControlledJoints.size(); jointIdx++)
-      {
-         String jointName = positionControlledJoints.get(jointIdx);
-         OneDoFJoint joint = jointNameMap.get(jointName);
-         if (joint == null)
-         {
-            throw new RuntimeException("Joint " + jointName + " is not a " + OneDoFJoint.class.getSimpleName() + " on the robot.");
-         }
-         lowLevelOneDoFJointDesiredDataHolder.registerJointWithEmptyData(joint);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(joint, JointDesiredControlMode.POSITION);
-      }
-
-      boolean integrateAllJoints = walkingControllerParameters.enableJointAccelerationIntegrationForAllJoints();
+      boolean integrateAllJoints = parameters.enableJointAccelerationIntegrationForAllJoints();
       List<String> integratingJoints = getJointsWithAccelerationIntegration(positionControlledJoints, integrateAllJoints, joints);
       jointNames = new String[integratingJoints.size()];
       jointsLoaded = new YoBoolean[integratingJoints.size()];
@@ -123,11 +107,6 @@ public class JointPositionControlHelper
    public JointAccelerationIntegrationCommand getJointAccelerationIntegrationCommand()
    {
       return jointAccelerationIntegrationCommand;
-   }
-
-   public LowLevelOneDoFJointDesiredDataHolder getLowLevelOneDoFJointDesiredDataHolder()
-   {
-      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    public static List<String> getJointsWithAccelerationIntegration(List<String> positionControlledJoints, boolean enableForAllJoints, OneDoFJoint[] joints)
