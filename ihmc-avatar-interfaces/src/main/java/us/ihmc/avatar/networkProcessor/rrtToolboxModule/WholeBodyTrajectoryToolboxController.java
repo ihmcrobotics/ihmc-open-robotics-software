@@ -228,25 +228,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
    }
 
-   /**
-    * state == GENERATE_MOTION
-    */
-   private void generateMotion()
-   {
-      updateTimer(motionGenerationComputationTime, motionGenerationStartTime);
-
-      /*
-       * terminate generateMotion.
-       */
-      if (true)
-      {
-         setOutputStatus(toolboxSolution, 4);
-         setOutputStatus(toolboxSolution, path);
-
-         terminateToolboxController();
-      }
-   }
-
    private void setOutputStatus(WholeBodyTrajectoryToolboxOutputStatus outputStatusToPack, int planningResult)
    {
       outputStatusToPack.setPlanningResult(planningResult);
@@ -268,6 +249,25 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          if (VERBOSE)
             PrintTools.info("Planning has Failed.");
+      }
+   }
+
+   /**
+    * state == GENERATE_MOTION
+    */
+   private void generateMotion()
+   {
+      updateTimer(motionGenerationComputationTime, motionGenerationStartTime);
+
+      /*
+       * terminate generateMotion.
+       */
+      if (true)
+      {
+         setOutputStatus(toolboxSolution, 4);
+         setOutputStatus(toolboxSolution, path);
+
+         terminateToolboxController();
       }
    }
 
@@ -613,7 +613,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       reportMessage(toolboxSolution);
 
-      nodePlotter.closeAll();
+      //nodePlotter.closeAll();
       state.set(CWBToolboxState.DO_NOTHING);
 
       double totalTime = 0.0;

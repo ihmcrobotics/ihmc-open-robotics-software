@@ -73,7 +73,7 @@ public class SpatialNodePlotter
    {
       double normalizedTime = node.getTime() / trajectoryTime;
       Color color;
-      double diameter = 0.005;
+      double diameter = 0.01;
 
       for (int nodeIndex = 0; nodeIndex < dimensionOfConfigurations; nodeIndex++)
       {
@@ -89,7 +89,7 @@ public class SpatialNodePlotter
             else
             {
                prefix = "" + cnt + "_invalid_" + nodeIndex;
-               diameter = 0.005;
+               diameter = 0.01;
                color = Color.red;
             }
             break;

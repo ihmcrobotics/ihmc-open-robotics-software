@@ -79,6 +79,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements MultiRobotTestInterface
 {
+   protected static final boolean VERBOSE = true;
+   
    private static final AppearanceDefinition ghostApperance = YoAppearance.DarkGreen();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
@@ -113,6 +115,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
     * ghost robot.
     */
    public abstract DRCRobotModel getGhostRobotModel();
+
+   private static final double TRACKING_TRAJECTORY_POSITION_ERROR_THRESHOLD = 0.05;
+   private static final double TRACKING_TRAJECTORY_ORIENTATION_ERROR_THRESHOLD = 0.05;
 
    @Before
    public void setup()
@@ -208,78 +213,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          scs.closeAndDispose();
          scs = null;
       }
-   }
-
-   @Test
-   public void testMovingPaintDrum() throws Exception, UnreasonableAccelerationException
-   {
-      //      // Trajectory parameters
-      //      double trajectoryTime = 5.0;
-      //
-      //      Point3D initialCenterPosition = new Point3D();
-      //      Vector3D initialHandleConfiguration = new Vector3D();
-      //
-      //      Point3D goalCenterPosition = new Point3D();
-      //
-      //      double heightOfLiftUp = 0.2;
-      //
-      //      // WBT toolbox configuration message
-      //      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
-      //      WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
-      //      configuration.setInitialConfigration(fullRobotModel);
-      //      configuration.setMaximumExpansionSize(2000);
-      //
-      //      // trajectory message, exploration message
-      //      List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
-      //      List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
-      //
-      //      double timeResolution = trajectoryTime / 100.0;
-      //
-      //      for (RobotSide robotSide : RobotSide.values)
-      //      {
-      //         RigidBody hand = fullRobotModel.getHand(robotSide);
-      //
-      //         // orientation is defined
-      //         boolean ccw;
-      //         if (robotSide == RobotSide.RIGHT)
-      //            ccw = false;
-      //         else
-      //            ccw = true;
-      //         //         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
-      //         //                                                                           handOrientation, ccw, 0.0);
-      //
-      //         SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-      //         selectionMatrix.resetSelection();
-      //         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
-      //
-      //         trajectory.setControlFramePose(handControlFrames.get(robotSide));
-      //
-      //         handTrajectories.add(trajectory);
-      //
-      //         ConfigurationSpaceName[] spaces = {YAW, PITCH, ROLL};
-      //
-      //         rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
-      //      }
-      //      ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      //      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
-      //                                                                                                                         pelvisConfigurations,
-      //                                                                                                                         new double[] {0.75},
-      //                                                                                                                         new double[] {0.90});
-      //      ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-      //      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-      //                                                                                                                        chestConfigurations,
-      //                                                                                                                        new double[] {-0.1 * Math.PI,
-      //                                                                                                                              -0.1 * Math.PI, -0.1 * Math.PI},
-      //                                                                                                                        new double[] {0.1 * Math.PI,
-      //                                                                                                                              0.1 * Math.PI, 0.1 * Math.PI});
-      //      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      //      rigidBodyConfigurations.add(chestConfigurationMessage);
-      //
-      //      int maxNumberOfIterations = 10000;
-      //      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
-      //
-      //      // run toolbox
-      //      runTest(message, maxNumberOfIterations);
    }
 
    @Test
@@ -512,73 +445,57 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
    private void runTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
    {
-      try
+      List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
+      double t0 = Double.POSITIVE_INFINITY;
+      double tf = Double.NEGATIVE_INFINITY;
+
+      if (endEffectorTrajectories != null)
       {
-         List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
-         double t0 = Double.POSITIVE_INFINITY;
-         double tf = Double.NEGATIVE_INFINITY;
-
-         if (endEffectorTrajectories != null)
+         for (WaypointBasedTrajectoryMessage trajectoryMessage : endEffectorTrajectories)
          {
-            for (WaypointBasedTrajectoryMessage trajectoryMessage : endEffectorTrajectories)
-            {
-               t0 = Math.min(t0, trajectoryMessage.getWaypointTime(0));
-               tf = Math.max(t0, trajectoryMessage.getLastWaypointTime());
+            t0 = Math.min(t0, trajectoryMessage.getWaypointTime(0));
+            tf = Math.max(t0, trajectoryMessage.getLastWaypointTime());
 
-               SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-               // Visualize the position part if it is commanded
-               trajectoryMessage.getSelectionMatrix(selectionMatrix);
+            SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+            // Visualize the position part if it is commanded
+            trajectoryMessage.getSelectionMatrix(selectionMatrix);
 
-               if (!selectionMatrix.isLinearXSelected() && !selectionMatrix.isLinearYSelected() && !selectionMatrix.isLinearZSelected())
-                  continue; // The position part is not dictated by trajectory, let's not visualize.
+            if (!selectionMatrix.isLinearXSelected() && !selectionMatrix.isLinearYSelected() && !selectionMatrix.isLinearZSelected())
+               continue; // The position part is not dictated by trajectory, let's not visualize.
 
-               if (visualize)
-                  scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue()));
-            }
-         }
-
-         double trajectoryTime = tf - t0;
-
-         commandInputManager.submitMessage(message);
-
-         WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
-
-         if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
-            assertNotNull("The toolbox is done but did not report a solution.", solution);
-         else
-            fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
-
-         if (solution.getPlanningResult() == 4)
-         {
             if (visualize)
-               visualizeSolution(solution, trajectoryTime / 1000.0);
-
-            PrintTools.info("assert start");
-            trackingTrajectoryWithOutput(message, solution);
-            PrintTools.info("assert end");
-         }
-         else
-         {
-            assert (false);
+               scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue()));
          }
       }
-      catch (Exception e)
+
+      double trajectoryTime = tf - t0;
+
+      commandInputManager.submitMessage(message);
+
+      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
+
+      if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
+         assertNotNull("The toolbox is done but did not report a solution.", solution);
+      else
+         fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
+
+      if (solution.getPlanningResult() == 4)
       {
-         e.printStackTrace();
-         if (simulationTestingParameters.getKeepSCSUp())
-         {
-            ThreadTools.sleepForever();
-         }
-         else
-         {
-            fail(e.getMessage());
-         }
+         if (visualize)
+            visualizeSolution(solution, trajectoryTime / 1000.0);
+
+         PrintTools.info("assert start");
+         trackingTrajectoryWithOutput(message, solution);
+         PrintTools.info("assert end");
+      }
+      else
+      {
+         fail("planning result " + solution.getPlanningResult());
       }
    }
 
    public void trackingTrajectoryWithOutput(WholeBodyTrajectoryToolboxMessage message, WholeBodyTrajectoryToolboxOutputStatus solution)
    {
-
       List<WaypointBasedTrajectoryMessage> wayPointBasedTrajectoryMessages = message.getEndEffectorTrajectories();
 
       // for every configurations in solution.
@@ -596,40 +513,42 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          for (int i = 0; i < wayPointBasedTrajectoryMessages.size(); i++)
          {
             WaypointBasedTrajectoryMessage trajectory = wayPointBasedTrajectoryMessages.get(i);
+            RigidBodyExplorationConfigurationMessage explorationMessage = getRigidBodyExplorationConfigurationMessageHasSameHashCode(message.getExplorationConfigurations(),
+                                                                                                                                     trajectory);
             RigidBody rigidBodyOftrajectory = commandConversionHelper.getRigidBody(trajectory.getEndEffectorNameBasedHashCode());
 
             RigidBody rigidBodyOfOutputFullRobotModel = getRigidBodyHasSameName(outputFullRobotModel, rigidBodyOftrajectory);
 
             if (rigidBodyOfOutputFullRobotModel == null)
             {
-               assert (false);
+               fail("there is no rigid body");
             }
             else
             {
                RigidBodyTransform solutionRigidBodyTransform = rigidBodyOfOutputFullRobotModel.getBodyFixedFrame().getTransformToWorldFrame();
                Pose3D solutionRigidBodyPose = new Pose3D(solutionRigidBodyTransform);
 
-               // TODO : what a heck.......... append hand control frame.
-               if (rigidBodyOftrajectory.getName().contains("left"))
-                  solutionRigidBodyPose.appendTransform(new RigidBodyTransform(handControlFrames.get(RobotSide.LEFT).getOrientation(),
-                                                                               handControlFrames.get(RobotSide.LEFT).getPosition()));
-               else if (rigidBodyOftrajectory.getName().contains("right"))
-                  solutionRigidBodyPose.appendTransform(new RigidBodyTransform(handControlFrames.get(RobotSide.RIGHT).getOrientation(),
-                                                                               handControlFrames.get(RobotSide.RIGHT).getPosition()));
-               else
-                  ;
+               solutionRigidBodyPose.appendTransform(new RigidBodyTransform(trajectory.controlFrameOrientationInEndEffector,
+                                                                            trajectory.controlFramePositionInEndEffector));
 
                Pose3D givenRigidBodyPose = trajectory.getPose(configurationTime);
 
-               //               System.out.println(solutionRigidBodyPose);               
-               //               System.out.println(givenRigidBodyPose);
-               
-               // TODO : considering selection matrix.
-               //EuclidCoreTestTools.assertRigidBodyTransformEquals(givenRigidBodyPose, solutionRigidBodyPose, epsilon);
+               SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+               trajectory.getSelectionMatrix(selectionMatrix);
+
+               double positionError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryPositionError(solutionRigidBodyPose, givenRigidBodyPose,
+                                                                                                      explorationMessage);
+
+               double orientationError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryOrientationError(solutionRigidBodyPose, givenRigidBodyPose,
+                                                                                                            explorationMessage);
+               if (VERBOSE)
+                  PrintTools.info("" + positionError + " " + orientationError);
+
+               if (positionError > TRACKING_TRAJECTORY_POSITION_ERROR_THRESHOLD || orientationError > TRACKING_TRAJECTORY_ORIENTATION_ERROR_THRESHOLD)
+                  fail("rigid body of the solution is far from the given trajectory");
             }
          }
       }
-
    }
 
    private RigidBody getRigidBodyHasSameName(FullHumanoidRobotModel fullRobotModel, RigidBody givenRigidBody)
@@ -637,8 +556,17 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
-         if (givenRigidBody.getName() == rigidBody.getName())
+         if (givenRigidBody.getName().equals(rigidBody.getName()))
             return rigidBody;
+      return null;
+   }
+
+   private RigidBodyExplorationConfigurationMessage getRigidBodyExplorationConfigurationMessageHasSameHashCode(List<RigidBodyExplorationConfigurationMessage> rigidBodyExplorationConfigurationMessages,
+                                                                                                               WaypointBasedTrajectoryMessage trajectory)
+   {
+      for (RigidBodyExplorationConfigurationMessage message : rigidBodyExplorationConfigurationMessages)
+         if (trajectory.getEndEffectorNameBasedHashCode() == message.getRigidBodyNameBasedHashCode())
+            return message;
       return null;
    }
 
@@ -695,7 +623,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return handPoses;
    }
 
-   // TODO
    private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
                                                  Quaternion circleRotation, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
    {
