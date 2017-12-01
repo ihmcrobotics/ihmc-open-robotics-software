@@ -5,12 +5,12 @@ import java.util.HashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.lists.PairList;
 
-public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJointDesiredDataHolderReadOnly
+public class JointDesiredOutputList implements JointDesiredOutputListReadOnly
 {
    private final PairList<OneDoFJoint, JointDesiredOutput> jointsAndData = new PairList<>();
    private final HashMap<OneDoFJoint, JointDesiredOutput> jointMap = new HashMap<>();
 
-   public LowLevelOneDoFJointDesiredDataHolderList(OneDoFJoint[] joints)
+   public JointDesiredOutputList(OneDoFJoint[] joints)
    {
       for (OneDoFJoint joint : joints)
       {
@@ -68,7 +68,7 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
 //      }
 //   }
 
-   public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
+   public void overwriteWith(JointDesiredOutputListReadOnly other)
    {
       for (int i = 0; i < jointsAndData.size(); i++)
       {

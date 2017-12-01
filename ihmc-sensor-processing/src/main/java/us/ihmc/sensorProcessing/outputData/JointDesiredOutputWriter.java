@@ -9,14 +9,14 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * @author jesper
  *
  */
-public interface LowLevelOutputWriter
+public interface JointDesiredOutputWriter
 {
    /**
     * Set the holder for the desired output values of all joints 
     * 
-    * @param lowLevelDataHolder
+    * @param jointDesiredOutputList
     */
-   void setLowLevelOneDoFJointDesiredDataHolderList(LowLevelOneDoFJointDesiredDataHolderList lowLevelDataHolder);
+   void setJointDesiredOutputList(JointDesiredOutputList jointDesiredOutputList);
    
    /**
     * Set the holder for the force sensor data holder.

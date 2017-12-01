@@ -12,8 +12,8 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -26,6 +26,7 @@ import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters
@@ -46,8 +47,11 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Specifies if the controller should by default compute for all the robot joints desired
-    * position and desired velocity from the desired acceleration.
+    * Specifies if the controller should compute desired positions and velocities for all the robot
+    * joints from the desired acceleration. This will enable acceleration integration for all joints
+    * that have their integration settings defined in {@link #getJointAccelerationIntegrationParameters()}.
+    * If this is set to false acceleration integration can still be enabled for select upper body joints
+    * using the setting in {@link #getOrCreatePositionControlledJoints()}.
     * <p>
     * It is {@code false} by default and this method should be overridden to return otherwise.
     * </p>
@@ -61,16 +65,35 @@ public abstract class WalkingControllerParameters
    }
 
    /**
+    * The list of strings returned contains all joint names that are position controlled. The names
+    * of the joints are defined in the robots joint map. Note, that this list will only affect
+    * joint chains that are controlled using a {@link RigidBodyControlManager}. This means only
+    * upper body joints can be specified here.
+    * <p>
+    * This setting will enable acceleration integration for these joint and also set the joint control
+    * mode to be {@link JointDesiredControlMode#POSITION}.
+    * </p>
+    *
+    * @return list of position controlled joint names
+    */
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      return new ArrayList<String>();
+   }
+
+   /**
     * Returns a list with triples of joint acceleration integration parameters and the names of the joints
     * that the parameter will be used for. The triple also contains the name of the joint set for the specific
-    * parameters. The name will be used to create YoVariables in the controller.
+    * parameters. The name will be used to create tunable parameters in the controller. E.g. the left and
+    * right arm joints could be grouped this way so only a single parameter for tuning is created that affects
+    * both sides.
     * <p>
-    * Note that this method is only called if
-    * {@link #enableJointAccelerationIntegrationForAllJoints()} returns {@code true}.
+    * If a joint is not contained in the map, position control is not supported for that joint.
     * </p>
     * <p>
-    * This method is called by the controller to know the set of joints for which specific
-    * parameters are to be used. If a joint is not added to this map, the default parameters will be used.
+    * This method is called by the controller to know the set of joints for which specific parameters are to
+    * be used. Joints listed in {@link #getOrCreatePositionControlledJoints()} must be contained in this map.
+    * For other joints the controller will use default integration settings.
     * </p>
     * @return list containing acceleration integration parameters and the corresponding joints
     */
@@ -279,30 +302,6 @@ public abstract class WalkingControllerParameters
    public Map<String, Pose3D> getOrCreateBodyHomeConfiguration()
    {
       return new HashMap<String, Pose3D>();
-   }
-
-   /**
-    * The list of strings returned contains all joint names that are position controlled. The names
-    * of the joints are defined in the robots joint map.
-    *
-    * @return list of position controlled joint names
-    */
-   public List<String> getOrCreatePositionControlledJoints()
-   {
-      return new ArrayList<String>();
-   }
-
-   /**
-    * The map returned contains the integration settings for position controlled joints. The settings
-    * define how the controller core integrated desired accelerations to find desired joint positions
-    * and velocities. The key of the map is the joint name as defined in the robot joint map. If a
-    * joint is not contained in the map, position control is not supported for that joint.
-    *
-    * @return map containing acceleration integration settings by joint name
-    */
-   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
-   {
-      return new HashMap<String, JointAccelerationIntegrationSettings>();
    }
 
    /**

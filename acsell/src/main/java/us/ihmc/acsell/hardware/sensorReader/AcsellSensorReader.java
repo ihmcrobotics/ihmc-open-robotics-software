@@ -17,7 +17,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -52,12 +52,12 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
 
    private final YoLong corruptedPackets;
    
-   private final LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder;
+   private final JointDesiredOutputList estimatorDesiredJointDataHolder;
 
    public AcsellSensorReader(AcsellState<?, JOINT> state, JOINT[] jointNames, EnumMap<JOINT, OneDoFJoint> acsellJoints,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
          DRCRobotSensorInformation sensorInformation, StateEstimatorParameters stateEstimatorParameters,
-         LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder, YoVariableRegistry sensorReaderRegistry)
+         JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry sensorReaderRegistry)
    {
       this.state = state;
       reader = new UDPAcsellStateReader(state);

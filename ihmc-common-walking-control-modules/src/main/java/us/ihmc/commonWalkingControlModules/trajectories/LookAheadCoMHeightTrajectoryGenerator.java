@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.communication.packets.Packet.*;
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -23,7 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.StringStretcher2d;
@@ -757,6 +757,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
             initializeOffsetTrajectoryGenerator(command, firstTrajectoryPointTime);
             offsetHeightTrajectoryGenerator.compute(deltaTime);
          }
+         else if (offsetHeightTrajectoryGenerator.isDone())
+         {
+            offsetHeightAboveGround.set(offsetHeightTrajectoryGenerator.getValue());
+         }
       }
       offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightTrajectoryGenerator.getValue());
 
@@ -803,7 +807,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
          double heightOffset = desiredPosition.getZ() - spline.getY();
 
          offsetHeightAboveGround.set(heightOffset);
-         offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
          offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
 
          offsetHeightTrajectoryGenerator.clear();
@@ -963,6 +966,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       isTrajectoryOffsetStopped.set(command.isStopAllTrajectory());
+      offsetHeightAboveGround.set(offsetHeightAboveGroundPrevValue.getDoubleValue());
    }
 
    public void initializeDesiredHeightToCurrent()
