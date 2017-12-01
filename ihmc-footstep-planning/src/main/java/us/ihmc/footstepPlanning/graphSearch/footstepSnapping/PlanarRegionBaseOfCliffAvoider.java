@@ -8,23 +8,15 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
 {
@@ -60,13 +52,13 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
       if(planarRegionsList == null)
          return true;
 
-      if(parameters.getMinimumDistanceFromCliffBottoms() <= 0.0 || Double.isInfinite(parameters.getCliffHeightToShiftAwayFrom()))
+      if(parameters.getMinimumDistanceFromCliffBottoms() <= 0.0 || Double.isInfinite(parameters.getCliffHeightToAvoid()))
          return true;
 
-      double cliffHeightToShiftAwayFrom = parameters.getCliffHeightToShiftAwayFrom();
+      double cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
       double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
 
-      if ((cliffHeightToShiftAwayFrom <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
+      if ((cliffHeightToAvoid <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
          return true;
 
       RigidBodyTransform soleTransform = new RigidBodyTransform();
@@ -92,7 +84,7 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
       LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
 
       double maximumCliffZInSoleFrame = findHighestPointInOriginalSoleFrame(planarRegionsList, soleTransform, inverseSoleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame);
-      return maximumCliffZInSoleFrame > cliffHeightToShiftAwayFrom;
+      return maximumCliffZInSoleFrame < cliffHeightToAvoid;
    }
    
    private double findHighestPointInOriginalSoleFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, RigidBodyTransform inverseSoleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
@@ -103,7 +95,7 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
         LineSegment2D lineSegmentInWorldFrame = new LineSegment2D();
         Point3D pointOneInWorldFrame = new Point3D();
         Point3D pointTwoInWorldFrame = new Point3D();
-   
+
         for (LineSegment2D lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
         {
            pointOneInWorldFrame.set(lineSegmentInSoleFrame.getFirstEndpointX(), lineSegmentInSoleFrame.getFirstEndpointY(), 0.0);
