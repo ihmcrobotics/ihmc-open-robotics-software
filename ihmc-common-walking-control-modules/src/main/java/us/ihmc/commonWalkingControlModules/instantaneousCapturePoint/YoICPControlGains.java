@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoICPControlGains
+public class YoICPControlGains implements ICPControlGainsProvider
 {
    private final String suffix;
    private final YoVariableRegistry registry;

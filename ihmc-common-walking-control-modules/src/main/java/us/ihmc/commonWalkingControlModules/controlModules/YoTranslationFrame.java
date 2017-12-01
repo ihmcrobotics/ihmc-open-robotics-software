@@ -9,8 +9,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class YoTranslationFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = -7104467007470188012L;
-
    private final Vector3D tempVector = new Vector3D();
    private final YoFrameVector translationToParent;
 

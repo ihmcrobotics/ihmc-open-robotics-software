@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 
 public class FrameEuclideanTrajectoryPointList extends FrameTrajectoryPointList<FrameEuclideanTrajectoryPointList, FrameEuclideanTrajectoryPoint, SimpleEuclideanTrajectoryPoint>
@@ -11,7 +11,7 @@ public class FrameEuclideanTrajectoryPointList extends FrameTrajectoryPointList<
       super(FrameEuclideanTrajectoryPoint.class);
    }
 
-   public void addTrajectoryPoint(double time, Point3D position, Vector3D linearVelocity)
+   public void addTrajectoryPoint(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();
       newTrajectoryPoint.set(time, position, linearVelocity);

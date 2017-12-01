@@ -4,6 +4,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.PinJointPhysics;
 import us.ihmc.simulationconstructionset.torqueSpeedCurve.TorqueSpeedCurve;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -50,7 +51,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param rob Robot to which this joint will belong
     * @param jaxis int representing the axis
     */
-   public PinJoint(String jname, Vector3D offset, Robot rob, Axis jaxis)
+   public PinJoint(String jname, Vector3DReadOnly offset, Robot rob, Axis jaxis)
    {
       super(jname, offset, rob);
       physics = new PinJointPhysics(this);
@@ -59,24 +60,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 
       initializeYoVariables(jname, registry);
 
-      this.physics.u_i = new Vector3D();
-
-      if (jaxis == Axis.X)
-      {
-         physics.u_i.setX(1.0);
-      }
-      else if (jaxis == Axis.Y)
-      {
-         physics.u_i.setY(1.0);
-      }
-      else if (jaxis == Axis.Z)
-      {
-         physics.u_i.setZ(1.0);
-      }
-      else
-      {
-         throw new RuntimeException("Undefined jaxis value!");
-      }
+      this.physics.u_i = new Vector3D(jaxis);
 
       this.setPinTransform3D(this.jointTransform3D, physics.u_i);
    }
@@ -90,7 +74,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param rob Robot to which this joint will belong
     * @param u_hat Vector3d representing the axis of rotation
     */
-   public PinJoint(String jname, Vector3D offset, Robot rob, Vector3D u_hat)
+   public PinJoint(String jname, Vector3DReadOnly offset, Robot rob, Vector3DReadOnly u_hat)
    {
       super(jname, offset, rob);
       physics = new PinJointPhysics(this);
@@ -413,7 +397,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param t1 Transform3D in which the transform is to be stored
     * @param u_i Vector3d representing the joint axis
     */
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i)    // int rotAxis)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3DReadOnly u_i)    // int rotAxis)
    {
       setPinTransform3D(t1, u_i, 0.0);    // rotAxis, 0.0);
    }
@@ -425,7 +409,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param u_i Vector3d representing the joint axis
     * @param rotAng double specified rotation angle.
     */
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i, double rotAng)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3DReadOnly u_i, double rotAng)
    {
       t1.setIdentity();
       axisAngle.set(u_i, rotAng);

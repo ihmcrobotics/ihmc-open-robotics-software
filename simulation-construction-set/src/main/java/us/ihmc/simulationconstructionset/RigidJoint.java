@@ -21,7 +21,7 @@ public class RigidJoint extends Joint
    private final Vector3D rigidTranslation = new Vector3D();
    private final RotationMatrix rigidRotation = new RotationMatrix();
 
-   public RigidJoint(String jname, Vector3D offset, Robot rob)
+   public RigidJoint(String jname, Vector3DReadOnly offset, Robot rob)
    {
       super(jname, offset, rob, 0);
       physics = new RigidJointPhysics(this);
@@ -35,12 +35,12 @@ public class RigidJoint extends Joint
       this.jointTransform3D.setRotation(rigidRotation);
    }
 
-   public void setRigidTranslation(Vector3D jointTranslation)
+   public void setRigidTranslation(Vector3DReadOnly jointTranslation)
    {
       this.rigidTranslation.set(jointTranslation);
    }
 
-   public void setRigidRotation(RotationMatrix jointRotation)
+   public void setRigidRotation(RotationMatrixReadOnly jointRotation)
    {
       this.rigidRotation.set(jointRotation);
    }

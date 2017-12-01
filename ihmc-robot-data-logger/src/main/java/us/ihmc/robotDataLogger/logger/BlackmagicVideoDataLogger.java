@@ -51,7 +51,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
          capture.setOption("coder", "vlc");
          break;
       case AV_CODEC_ID_MJPEG:
-         capture = new Capture(this, CodecID.AV_CODEC_ID_H264);
+         capture = new Capture(this, CodecID.AV_CODEC_ID_MJPEG);
          capture.setMJPEGQuality(options.getVideoQuality());
          break;
          default: throw new RuntimeException();

@@ -531,8 +531,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGround);
+      drcSimulationTestHelper.getSCSInitialSetup().enableGroundSlipping(0.7, 0.7);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();

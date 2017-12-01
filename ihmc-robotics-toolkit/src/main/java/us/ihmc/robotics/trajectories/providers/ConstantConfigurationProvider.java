@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class ConstantConfigurationProvider implements SE3ConfigurationProvider
@@ -16,7 +16,7 @@ public class ConstantConfigurationProvider implements SE3ConfigurationProvider
 
    public ConstantConfigurationProvider(FramePoint3D framePoint)
    {
-      configuration = new FramePose(framePoint, new FrameOrientation(framePoint.getReferenceFrame()));
+      configuration = new FramePose(framePoint, new FrameQuaternion(framePoint.getReferenceFrame()));
    }
 
    public ConstantConfigurationProvider(FramePose framePose)
@@ -29,7 +29,7 @@ public class ConstantConfigurationProvider implements SE3ConfigurationProvider
       configuration.getPositionIncludingFrame(positionToPack);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       configuration.getOrientationIncludingFrame(orientationToPack);
    }

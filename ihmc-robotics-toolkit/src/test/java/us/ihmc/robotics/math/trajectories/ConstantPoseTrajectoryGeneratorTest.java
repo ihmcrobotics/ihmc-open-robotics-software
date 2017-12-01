@@ -11,12 +11,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -177,7 +177,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       generator.getPosition(positionToPack);
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      FrameOrientation orientationToPack = new FrameOrientation();
+      FrameQuaternion orientationToPack = new FrameQuaternion();
       generator.getOrientation(orientationToPack);
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
@@ -292,8 +292,8 @@ public class ConstantPoseTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackAngularData()
    {
-      FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
-      orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+      FrameQuaternion orientationToPack = new FrameQuaternion(referenceFrame);
+      orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator.getOrientation(orientationToPack);
 

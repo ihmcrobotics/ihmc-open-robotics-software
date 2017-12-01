@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -31,13 +31,13 @@ public class ConstantOrientationTrajectoryGeneratorTest
    private static double finalTime = 10.0;
    private YoVariableRegistry parentRegistry;
 
-   private FrameOrientation orientation;
+   private FrameQuaternion orientation;
 
    @Before
    public void setUp()
    {
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
-      orientation = new FrameOrientation(referenceFrame);
+      orientation = new FrameQuaternion(referenceFrame);
       orientationProvider = new ConstantOrientationProvider(orientation);
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
    }
@@ -85,7 +85,7 @@ public class ConstantOrientationTrajectoryGeneratorTest
    public void testGet()
    {
       generator = new ConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame, orientationProvider, finalTime, parentRegistry);
-      FrameOrientation orientationToPack = new FrameOrientation();
+      FrameQuaternion orientationToPack = new FrameQuaternion();
 
       generator.getOrientation(orientationToPack);
 
@@ -130,8 +130,8 @@ public class ConstantOrientationTrajectoryGeneratorTest
 	@Test(timeout=300000)
    public void testPackAngularData()
    {
-      FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
-      orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+      FrameQuaternion orientationToPack = new FrameQuaternion(referenceFrame);
+      orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new ConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame, orientationProvider, finalTime, parentRegistry);
       generator.getOrientation(orientationToPack);
