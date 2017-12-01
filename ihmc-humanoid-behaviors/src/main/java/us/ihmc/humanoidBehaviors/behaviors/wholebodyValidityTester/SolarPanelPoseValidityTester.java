@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -13,7 +14,6 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -73,7 +73,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       
       // Hand
       FramePoint3D desiredHandFramePoint = new FramePoint3D(midFeetFrame, desiredHandPose.getPosition());
-      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
+      FrameQuaternion desiredHandFrameOrientation = new FrameQuaternion(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
       
@@ -82,7 +82,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       // Chest Orientation
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(chestYaw);
-      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
+      FrameQuaternion desiredChestFrameOrientation = new FrameQuaternion(midFeetFrame, desiredChestOrientation);
       this.setDesiredChestOrientation(desiredChestFrameOrientation);
       
       // Pelvis Orientation
@@ -99,7 +99,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       
       // Hand
       FramePoint3D desiredHandFramePoint = new FramePoint3D(midFeetFrame, desiredHandPose.getPosition());
-      FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
+      FrameQuaternion desiredHandFrameOrientation = new FrameQuaternion(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
       
@@ -109,7 +109,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(chestYaw);
       desiredChestOrientation.appendPitchRotation(chestPitch);
-      FrameOrientation desiredChestFrameOrientation = new FrameOrientation(midFeetFrame, desiredChestOrientation);
+      FrameQuaternion desiredChestFrameOrientation = new FrameQuaternion(midFeetFrame, desiredChestOrientation);
       this.setDesiredChestOrientation(desiredChestFrameOrientation);
       
       // Pelvis Orientation

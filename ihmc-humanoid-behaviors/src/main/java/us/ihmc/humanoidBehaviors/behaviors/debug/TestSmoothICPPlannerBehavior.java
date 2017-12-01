@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -19,7 +20,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -208,7 +208,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
    {
       FramePoint3D position = new FramePoint3D(frame, point3d);
       position.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameOrientation orientation = new FrameOrientation(frame, quat4d);
+      FrameQuaternion orientation = new FrameQuaternion(frame, quat4d);
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
             
       framePoseToPack.setPoseIncludingFrame(position, orientation);

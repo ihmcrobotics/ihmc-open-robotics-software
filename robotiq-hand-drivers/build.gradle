@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.5"
+      classpath "us.ihmc:ihmc-build:0.11.2"
    }
 }
 plugins {
@@ -28,8 +28,8 @@ mainDependencies {
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'net.wimpi', name: 'jamod', version: '1.2'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
@@ -41,9 +41,9 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: 'junit', name: 'junit', version: '4.11'
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
+   compile group: "junit", name: "junit", version: "4.12"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
 }
 applicationName = 'RobotiqControlThread'

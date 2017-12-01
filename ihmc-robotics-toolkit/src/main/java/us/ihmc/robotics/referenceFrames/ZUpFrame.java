@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ZUpFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 8615028266128433328L;
    private final Vector3D euler = new Vector3D();
    private final Vector3D translation = new Vector3D();
    private final ReferenceFrame worldFrame;

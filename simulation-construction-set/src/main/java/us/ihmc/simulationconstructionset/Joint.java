@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.kinematics.CommonJoint;
@@ -73,7 +76,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     * @param rob Robot which this joint is a member of.
     * @param numDOF Number of degrees of freedom held by this joint.
     */
-   protected Joint(String name, Vector3D offsetVec, Robot rob, int numDOF)
+   protected Joint(String name, Vector3DReadOnly offsetVec, Robot rob, int numDOF)
    {
       this.name = name;
       this.rob = rob;
@@ -632,13 +635,13 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param offset New offset vector.
     */
-   private void setOffset(Vector3D offset)
+   private void setOffset(Vector3DReadOnly offset)
    {
       this.offset.set(offset);
       this.offsetTransform3D.setTranslation(offset);
    }
 
-   public void getOffset(Vector3D offsetToPack)
+   public void getOffset(Vector3DBasics offsetToPack)
    {
       offsetToPack.set(offset);
    }
@@ -763,7 +766,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     * @param rotation Quat4d representation of the rotational component.
     * @param translation Vector3d representation of the traslational component.
     */
-   public void getTransformToWorld(Quaternion rotation, Vector3D translation)
+   public void getTransformToWorld(QuaternionBasics rotation, Vector3DBasics translation)
    {
       transformToNext.get(rotation, translation);
    }
@@ -796,7 +799,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param translation Vector3d representing the translation between world and joint space.
     */
-   public void getTranslationToWorld(Vector3D translation)
+   public void getTranslationToWorld(Vector3DBasics translation)
    {
       transformToNext.getTranslation(translation);
    }
@@ -880,7 +883,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       return rob;
    }
 
-   public void getJointAxis(Vector3D axisToPack)
+   public void getJointAxis(Vector3DBasics axisToPack)
    {
       physics.getJointAxis(axisToPack);
    }
