@@ -36,7 +36,6 @@ public class EuclideanTangentialDampingCalculator
 
       bodyFrameTangentToControl = new ReferenceFrame(prefix + "BodyFrameTangentToControl", bodyFrame)
       {
-         private static final long serialVersionUID = 8992154939350877111L;
          private final AxisAngle rotationToControlFrame = new AxisAngle();
 
          @Override

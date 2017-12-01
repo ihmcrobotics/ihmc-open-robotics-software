@@ -64,7 +64,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
                currentPose.changeFrame(referenceFrame);
 
                userDesiredHandPose.setPosition(new Point3D(currentPose.getFramePointCopy()));
-               userDesiredHandPose.setOrientation(currentPose.getFrameOrientationCopy().getQuaternionCopy());
+               userDesiredHandPose.setOrientation(currentPose.getFrameOrientationCopy());
 
                userDesiredSetHandPoseToActual.set(false);
             }

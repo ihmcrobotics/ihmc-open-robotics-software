@@ -198,7 +198,7 @@ public class ConvexPolygonToolsTest
 
       for (int i = 0; i < 100; i++)
       {
-         List<Point2D> pointList = EuclidGeometryRandomTools.generateRandomPointCloud2D(random, 0.0, 1.0, 100);
+         List<Point2D> pointList = EuclidGeometryRandomTools.nextPointCloud2D(random, 0.0, 1.0, 100);
 
          Point2D offset1 = new Point2D(-1.0, 0.0);
          Point2D offset2 = new Point2D(1.0, 0.0);

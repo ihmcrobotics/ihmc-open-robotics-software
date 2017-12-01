@@ -6,7 +6,6 @@ import us.ihmc.robotics.geometry.FramePose;
 
 public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = -4290437020026636187L;
    private final MovingZUpFrame frameOne, frameTwo;
    private final FramePose pose = new FramePose();
    private final FramePose poseOne = new FramePose();

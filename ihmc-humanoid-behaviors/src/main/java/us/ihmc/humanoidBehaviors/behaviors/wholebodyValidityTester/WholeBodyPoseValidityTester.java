@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -21,7 +22,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -173,13 +173,13 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    public void setDesiredHandPose(RobotSide robotSide, FramePose desiredHandPose)
    {
       FramePoint3D desiredPosition = new FramePoint3D();
-      FrameOrientation desiredOrientation = new FrameOrientation();
+      FrameQuaternion desiredOrientation = new FrameQuaternion();
       
       desiredHandPose.getPoseIncludingFrame(desiredPosition, desiredOrientation);
       setDesiredHandPose(robotSide, desiredPosition, desiredOrientation);
    }
 
-   public void setDesiredHandPose(RobotSide robotSide, FramePoint3D desiredHandPosition, FrameOrientation desiredHandOrientation)
+   public void setDesiredHandPose(RobotSide robotSide, FramePoint3D desiredHandPosition, FrameQuaternion desiredHandOrientation)
    {
       yoDesiredHandPositions.get(robotSide).setAndMatchFrame(desiredHandPosition);
       yoDesiredHandOrientations.get(robotSide).setAndMatchFrame(desiredHandOrientation);
@@ -193,13 +193,13 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    // Chest ---------------------------------------------------
    public void holdCurrentChestOrientation()
    {
-      FrameOrientation currentChestOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion currentChestOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
       //FrameOrientation currentChestOrientation = new FrameOrientation(referenceFrames.getChestFrame());
       yoDesiredChestOrientation.setAndMatchFrame(currentChestOrientation);
       chestSelectionMatrix.setToAngularSelectionOnly();      
    }
 
-   public void setDesiredChestOrientation(FrameOrientation desiredChestOrientation)
+   public void setDesiredChestOrientation(FrameQuaternion desiredChestOrientation)
    {
       yoDesiredChestOrientation.setAndMatchFrame(desiredChestOrientation);
    }
@@ -212,13 +212,13 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    public void holdCurrentPelvisOrientation()
    {      
-      FrameOrientation currentPelvisOrientation = new FrameOrientation(fullRobotModel.getPelvis().getBodyFixedFrame());
+      FrameQuaternion currentPelvisOrientation = new FrameQuaternion(fullRobotModel.getPelvis().getBodyFixedFrame());
       //FrameOrientation currentPelvisOrientation = new FrameOrientation(referenceFrames.getPelvisFrame());      
       yoDesiredPelvisOrientation.setAndMatchFrame(currentPelvisOrientation);
       pelvisSelectionMatrix.setToAngularSelectionOnly();      
    }
 
-   public void setDesiredPelvisOrientation(FrameOrientation desiredPelvisOrientation)
+   public void setDesiredPelvisOrientation(FrameQuaternion desiredPelvisOrientation)
    {
       yoDesiredPelvisOrientation.setAndMatchFrame(desiredPelvisOrientation);
    }

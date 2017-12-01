@@ -1,16 +1,19 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
 
@@ -124,12 +127,12 @@ public class KinematicPoint implements java.io.Serializable
       this.offsetYoFrameVector.set(x, y, z);
    }
 
-   public void setOffsetJoint(Vector3D newOffset)
+   public void setOffsetJoint(Vector3DReadOnly newOffset)
    {
       this.offsetYoFrameVector.set(newOffset);
    }
 
-   public void setOffsetWorld(Tuple3DBasics offsetInWorld)
+   public void setOffsetWorld(Tuple3DReadOnly offsetInWorld)
    {
       setOffsetWorld(offsetInWorld.getX(), offsetInWorld.getY(), offsetInWorld.getZ());
    }
@@ -149,7 +152,7 @@ public class KinematicPoint implements java.io.Serializable
       this.positionInWorld.set(x, y, z);
    }
 
-   public void updatePointVelocity(RotationMatrix R0_i, Vector3D comOffset, Vector3D v_i, Vector3D w_i)
+   public void updatePointVelocity(RotationMatrixReadOnly R0_i, Vector3DReadOnly comOffset, Vector3DReadOnly v_i, Vector3DReadOnly w_i)
    {
       this.getOffset(tempVectorForOffsetFromCOM);
       tempVectorForOffsetFromCOM.sub(comOffset);
@@ -240,7 +243,7 @@ public class KinematicPoint implements java.io.Serializable
       return pointToReturn;
    }
 
-   public void getVelocity(Vector3D velocityToPack)
+   public void getVelocity(Vector3DBasics velocityToPack)
    {
       velocityInWorld.get(velocityToPack);
    }
@@ -253,22 +256,22 @@ public class KinematicPoint implements java.io.Serializable
       return velocityToReturn;
    }
 
-   public void setVelocity(Vector3D velocity)
+   public void setVelocity(Vector3DReadOnly velocity)
    {
       this.velocityInWorld.set(velocity);
    }
 
-   public void getAngularVelocity(Vector3D angularVelocityInWorldToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityInWorldToPack)
    {
       this.angularVelocityInWorld.get(angularVelocityInWorldToPack);
    }
 
-   public void setAngularVelocity(Vector3D angularVelocityInWorld)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocityInWorld)
    {
       this.angularVelocityInWorld.set(angularVelocityInWorld);
    }
 
-   public void setPosition(Point3D position)
+   public void setPosition(Point3DReadOnly position)
    {
       this.positionInWorld.set(position);
    }

@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.exampleSimulations.controllerCore.ControllerCoreModeChangedListener;
@@ -26,7 +27,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -37,8 +37,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -131,7 +131,7 @@ public class MovingBaseRobotArmController implements RobotController
       allPossibleCommands.addCommand(basePointCommand);
       allPossibleCommands.addCommand(handSpatialCommand);
 
-      LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput = new LowLevelOneDoFJointDesiredDataHolderList(ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class));
+      JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class));
       
       
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, allPossibleCommands, lowLevelControllerCoreOutput, registry);
@@ -175,7 +175,7 @@ public class MovingBaseRobotArmController implements RobotController
 
       FramePoint3D initialHandPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialHandPosition.changeFrame(worldFrame);
-      FrameOrientation initialHandOrientation = new FrameOrientation(robotArm.getHandControlFrame());
+      FrameQuaternion initialHandOrientation = new FrameQuaternion(robotArm.getHandControlFrame());
       initialHandOrientation.changeFrame(worldFrame);
 
       handTargetPosition.setAndMatchFrame(initialHandPosition);
@@ -205,7 +205,7 @@ public class MovingBaseRobotArmController implements RobotController
    private final FramePoint3D position = new FramePoint3D();
    private final FrameVector3D linearVelocity = new FrameVector3D();
    private final FrameVector3D linearAcceleration = new FrameVector3D();
-   private final FrameOrientation orientation = new FrameOrientation();
+   private final FrameQuaternion orientation = new FrameQuaternion();
    private final FrameVector3D angularVelocity = new FrameVector3D();
    private final FrameVector3D angularAcceleration = new FrameVector3D();
 
@@ -231,7 +231,7 @@ public class MovingBaseRobotArmController implements RobotController
       controllerCore.compute();
 
       ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
-      LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
 
       if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.OFF
             || controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
@@ -293,11 +293,11 @@ public class MovingBaseRobotArmController implements RobotController
       {
          FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
          initialPosition.changeFrame(worldFrame);
-         FrameOrientation initialOrientation = new FrameOrientation(robotArm.getHandControlFrame());
+         FrameQuaternion initialOrientation = new FrameQuaternion(robotArm.getHandControlFrame());
          initialOrientation.changeFrame(worldFrame);
          trajectory.setInitialPose(initialPosition, initialOrientation);
          FramePoint3D finalPosition = new FramePoint3D();
-         FrameOrientation finalOrientation = new FrameOrientation();
+         FrameQuaternion finalOrientation = new FrameQuaternion();
          handTargetPosition.getFrameTupleIncludingFrame(finalPosition);
          handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);
          trajectory.setFinalPose(finalPosition, finalOrientation);

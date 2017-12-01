@@ -19,17 +19,23 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
-public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
+public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LeggedLinearMomentumRateOfChangeControlModule
 {
    private final ICPOptimizationController icpOptimizationController;
    private final YoDouble yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
+   
+   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+   private final YoBoolean desiredCMPinSafeArea;
+
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
    private final boolean useSimpleAdjustment;
@@ -52,6 +58,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
 
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.yoTime = yoTime;
+      this.desiredCMPinSafeArea = new YoBoolean("DesiredCMPinSafeArea", registry);
+
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
       

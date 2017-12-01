@@ -12,10 +12,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
@@ -163,8 +162,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is expressed in world frame.
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
-         Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
+         Vector3DReadOnly angularVelocity, ReferenceFrame expressedInReferenceFrame)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -186,8 +185,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is expressed in world frame.
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
-         Vector3D angularVelocity, long expressedInReferenceFrameId)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
+         Vector3DReadOnly angularVelocity, long expressedInReferenceFrameId)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -474,14 +473,14 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       this.useCustomControlFrame = useCustomControlFrame;
    }
 
-   public void setControlFramePosition(Point3D controlFramePosition)
+   public void setControlFramePosition(Point3DReadOnly controlFramePosition)
    {
       if (controlFramePose == null)
          controlFramePose = new QuaternionBasedTransform();
       controlFramePose.setTranslation(controlFramePosition);
    }
 
-   public void setControlFrameOrientation(Quaternion controlFrameOrientation)
+   public void setControlFrameOrientation(QuaternionReadOnly controlFrameOrientation)
    {
       if (controlFramePose == null)
          controlFramePose = new QuaternionBasedTransform();

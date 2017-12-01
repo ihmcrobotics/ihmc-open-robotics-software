@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -132,7 +133,7 @@ public class MotionQPInputCalculator
 
       privilegedConfigurationHandler.computePrivilegedJointAccelerations();
 
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       motionQPInputToPack.setUseWeightScalar(false);
 
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
@@ -168,7 +169,7 @@ public class MotionQPInputCalculator
 
       privilegedConfigurationHandler.computePrivilegedJointVelocities();
 
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       motionQPInputToPack.setUseWeightScalar(false);
 
       DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
@@ -218,7 +219,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
       // If the task is setup as a hard constraint, there is no need for a weight matrix.
       if (!commandToConvert.isHardConstraint())
       {
@@ -335,10 +336,11 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
+      ConstraintType constraintType = commandToConvert.getConstraintType();
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(constraintType);
       // If the task is setup as a hard constraint, there is no need for a weight matrix.
-      if (!commandToConvert.isHardConstraint())
+      if (constraintType == ConstraintType.OBJECTIVE)
       {
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
@@ -441,7 +443,7 @@ public class MotionQPInputCalculator
 
       motionQPInputToPack.reshape(taskSize);
       motionQPInputToPack.setUseWeightScalar(false);
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -485,7 +487,7 @@ public class MotionQPInputCalculator
 
       motionQPInputToPack.reshape(taskSize);
       motionQPInputToPack.setUseWeightScalar(false);
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -525,7 +527,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY :ConstraintType.OBJECTIVE);
       motionQPInputToPack.taskJacobian.zero();
       motionQPInputToPack.taskWeightMatrix.zero();
       motionQPInputToPack.setUseWeightScalar(false);
@@ -565,7 +567,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY :ConstraintType.OBJECTIVE);
       motionQPInputToPack.taskJacobian.zero();
       motionQPInputToPack.taskWeightMatrix.zero();
       motionQPInputToPack.setUseWeightScalar(false);

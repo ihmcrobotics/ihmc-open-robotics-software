@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
@@ -14,7 +15,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
@@ -124,7 +124,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
    {
       FramePoint3D point1 = new FramePoint3D(referenceFrames.getChestFrame(), x, y, z);
       point1.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameOrientation orient = new FrameOrientation(referenceFrames.getChestFrame(), yaw, pitch, roll);
+      FrameQuaternion orient = new FrameQuaternion(referenceFrames.getChestFrame(), yaw, pitch, roll);
       orient.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose pose = new FramePose(point1, orient);

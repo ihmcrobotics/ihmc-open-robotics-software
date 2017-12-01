@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.5"
+      classpath "us.ihmc:ihmc-build:0.11.2"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,10 +22,10 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
    compile "net.sf.trove4j:trove4j:3.0.3"
-   compile "org.apache.commons:commons-lang3:3.4"
+   compile "org.apache.commons:commons-lang3:3.7"
    compile("org.fxyz3d:fxyz3d:0.1.1") {
       exclude group: 'java3d', module: 'vecmath'
    }

@@ -103,8 +103,6 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
 
       distortedPlane = new ReferenceFrame("tangentialPlane", ReferenceFrame.getWorldFrame())
       {
-         private static final long serialVersionUID = -6071552109268422430L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

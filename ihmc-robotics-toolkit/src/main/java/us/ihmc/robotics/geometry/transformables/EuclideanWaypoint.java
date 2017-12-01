@@ -148,6 +148,16 @@ public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, Euc
       return true;
    }
 
+   @Override
+   public boolean geometricallyEquals(EuclideanWaypoint other, double epsilon)
+   {
+      if (!position.geometricallyEquals(other.position, epsilon))
+         return false;
+      if (!linearVelocity.geometricallyEquals(other.linearVelocity, epsilon))
+         return false;
+      return true;
+   }
+
    public Point3DReadOnly getPosition()
    {
       return position;

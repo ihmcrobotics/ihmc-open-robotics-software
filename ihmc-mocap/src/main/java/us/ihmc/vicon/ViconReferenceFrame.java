@@ -7,7 +7,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class ViconReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 7818344761817957064L;
    private final ViconClient viconClient;
    private final String bodyName;
    private boolean dataValid = false;

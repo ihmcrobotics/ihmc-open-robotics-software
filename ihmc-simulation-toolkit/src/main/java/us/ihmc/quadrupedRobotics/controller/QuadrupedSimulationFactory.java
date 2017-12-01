@@ -46,7 +46,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -161,7 +161,7 @@ public class QuadrupedSimulationFactory
          ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.get().getForceSensorDefinitions();
          ContactSensorHolder contactSensorHolder = null;
          RawJointSensorDataHolderMap rawJointSensorDataHolderMap = null;
-         LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder = null;
+         JointDesiredOutputList estimatorDesiredJointDataHolder = null;
 
          SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory;
          sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(sdfRobot.get(), stateEstimatorParameters.get());

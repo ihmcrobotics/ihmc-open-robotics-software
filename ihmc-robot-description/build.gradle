@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.5"
+      classpath "us.ihmc:ihmc-build:0.11.2"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-geometry", version: groupDependencyVersion
@@ -30,8 +30,8 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: 'junit', name: 'junit', version: '4.11'
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
+   compile group: "junit", name: "junit", version: "4.12"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
 }

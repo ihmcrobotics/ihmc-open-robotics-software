@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -13,7 +14,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -76,7 +76,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
    private FrameVector3D desiredOffset;
    private FramePoint3D desiredPosition;
-   private FrameOrientation desiredOrientation;
+   private FrameQuaternion desiredOrientation;
 
    private final FootstepDataCommand desiredFootstepCommand = new FootstepDataCommand();
    private final FootstepDataListCommand footstepCommandList = new FootstepDataListCommand();
@@ -92,7 +92,7 @@ public class UserDesiredFootstepDataMessageGenerator
       ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide.getOppositeSide()).getSoleFrame();
       desiredOffset = new FrameVector3D(stanceFootFrame);
       desiredPosition = new FramePoint3D(stanceFootFrame);
-      desiredOrientation = new FrameOrientation(stanceFootFrame);
+      desiredOrientation = new FrameQuaternion(stanceFootFrame);
 
       firstStepSide.set(supportSide);
       minimumWidth.set(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
