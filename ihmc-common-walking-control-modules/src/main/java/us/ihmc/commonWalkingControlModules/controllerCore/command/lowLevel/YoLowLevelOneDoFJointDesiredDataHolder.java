@@ -10,11 +10,11 @@ import java.util.Map;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderReadOnly
+public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListReadOnly
 {
    private final List<OneDoFJoint> jointsWithDesiredData;
    private final Map<String, YoJointDesiredOutput> lowLevelJointDataMap;
@@ -145,7 +145,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
-   public void completeWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
+   public void completeWith(JointDesiredOutputListReadOnly other)
    {
       for (int i = 0; i < other.getNumberOfJointsWithDesiredOutput(); i++)
       {
@@ -164,7 +164,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
    /**
     * Clear this and copy the data held in other.
     */
-   public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
+   public void overwriteWith(JointDesiredOutputListReadOnly other)
    {
       clear();
 

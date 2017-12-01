@@ -21,12 +21,9 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
 
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
-   private final RigidBodyTransform cylinderConsistencyTransform = new RigidBodyTransform();
-
    private final BoundingBox3D boundingBox = new BoundingBox3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private boolean boundingBoxNeedsUpdating = true;
 
-   //TODO: Get rid of this redundancy. Make cylinder definitions consistent...
    private final Cylinder3D cylinder3d;
 
    public CylinderShapeDescription(double radius, double height)
@@ -38,9 +35,6 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
 
       cylinder3d = new Cylinder3D(height, radius);
 
-      cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
-      cylinder3d.setPose(cylinderConsistencyTransform);
-      
       boundingBoxNeedsUpdating = true;
    }
 
@@ -78,7 +72,6 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    {
       supportingVertexHolder.setTransform(transform);
       this.cylinder3d.setPose(this.transform);
-      this.cylinder3d.appendTransform(cylinderConsistencyTransform);
       boundingBoxNeedsUpdating = true;
    }
 
@@ -99,7 +92,6 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    {
       this.radius = cylinder.getRadius();
       this.height = cylinder.getHeight();
-      cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
 
       cylinder.getTransform(this.transform);
 

@@ -12,7 +12,7 @@ public class DrillPacket extends Packet<DrillPacket>
    
    public DrillPacket(Random random)
    {
-      drillTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      drillTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
    }
 
    public DrillPacket()

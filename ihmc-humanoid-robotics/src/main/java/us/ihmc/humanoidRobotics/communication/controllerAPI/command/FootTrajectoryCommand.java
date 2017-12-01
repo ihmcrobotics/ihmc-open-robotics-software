@@ -18,8 +18,8 @@ public class FootTrajectoryCommand extends SE3TrajectoryControllerCommand<FootTr
 
    public FootTrajectoryCommand(Random random)
    {
-      super(EuclidFrameRandomTools.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
-            EuclidFrameRandomTools.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+      super(EuclidFrameRandomTools.nextReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
    }
 
    @Override

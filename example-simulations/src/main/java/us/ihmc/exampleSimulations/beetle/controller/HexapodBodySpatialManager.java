@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.beetle.controller;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -33,7 +33,7 @@ public class HexapodBodySpatialManager
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
    private final YoFrameOrientation yoDesiredBodyOrientation;

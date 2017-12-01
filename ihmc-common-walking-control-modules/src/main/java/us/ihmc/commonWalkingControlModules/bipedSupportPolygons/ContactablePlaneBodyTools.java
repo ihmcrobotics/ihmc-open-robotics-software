@@ -33,7 +33,7 @@ public class ContactablePlaneBodyTools
       //TODO: Use a better frame than just world here.
       ReferenceFrame endEffectorFrame = ReferenceFrame.getWorldFrame(); //rigidBody.getParentJoint().getFrameAfterJoint();
 
-      RigidBodyTransform transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transform3D = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       ReferenceFrame soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame,
             transform3D);

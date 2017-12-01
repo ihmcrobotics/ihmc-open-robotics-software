@@ -135,6 +135,52 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
       this.maxVelocity = maxVelocity;
    }
 
+   /**
+    * Sets the leak ratio for the integration of the joint position.
+    * @see JointAccelerationIntegrationParameters#setAlphas(double, double)
+    *
+    * @param alphaPosition the leak ratio &alpha;<sub>P</sup> used to compute the desired position.
+    */
+   public void setAlphaPosition(double alphaPosition)
+   {
+      this.alphaPosition = alphaPosition;
+   }
+
+   /**
+    * Sets the leak ratio for the integration of the joint velocity.
+    * @see JointAccelerationIntegrationParameters#setAlphas(double, double)
+    *
+    * @param alphaVelocity the leak ratio &alpha;<sub>V</sup> used to compute the desired velocity.
+    */
+   public void setAlphaVelocity(double alphaVelocity)
+   {
+      this.alphaVelocity = alphaVelocity;
+   }
+
+   /**
+    * Sets the safety parameter that limits the position error between the actual joint position
+    * and the integrated desired.
+    * @see JointAccelerationIntegrationParameters#setMaxima(double, double)
+    *
+    * @param maxPositionError limits the gap between the desired joint position and the actual joint
+    *           position.
+    */
+   public void setMaxPositionError(double maxPositionError)
+   {
+      this.maxPositionError = maxPositionError;
+   }
+
+   /**
+    * Sets the safety parameter that limits the integrated velocity.
+    * @see JointAccelerationIntegrationParameters#setMaxima(double, double)
+    *
+    * @param maxVelocity limits the maximum value of the desired joint velocity.
+    */
+   public void setMaxVelocity(double maxVelocity)
+   {
+      this.maxVelocity = maxVelocity;
+   }
+
    /** {@inheritDoc} */
    @Override
    public double getAlphaPosition()

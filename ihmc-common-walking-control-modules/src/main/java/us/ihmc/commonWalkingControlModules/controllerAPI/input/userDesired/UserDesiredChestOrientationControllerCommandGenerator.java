@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
@@ -9,7 +10,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 
 public class UserDesiredChestOrientationControllerCommandGenerator
@@ -21,7 +21,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
    private final YoBoolean userDoChestOrientation = new YoBoolean("userDoChestOrientation", registry);
    private final YoFrameOrientation userDesiredChestOrientation;
 
-   private final FrameOrientation frameOrientation = new FrameOrientation();
+   private final FrameQuaternion frameOrientation = new FrameQuaternion();
 
    public UserDesiredChestOrientationControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
@@ -36,7 +36,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
                userDesiredChestOrientation.getFrameOrientationIncludingFrame(frameOrientation);
 
                ChestTrajectoryCommand chestTrajectoryControllerCommand = new ChestTrajectoryCommand();
-               chestTrajectoryControllerCommand.addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation.getQuaternionCopy(), new Vector3D());
+               chestTrajectoryControllerCommand.addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation, new Vector3D());
                controllerCommandInputManager.submitCommand(chestTrajectoryControllerCommand);
 
                userDoChestOrientation.set(false);

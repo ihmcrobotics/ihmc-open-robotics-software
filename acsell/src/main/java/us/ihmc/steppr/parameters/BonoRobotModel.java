@@ -13,6 +13,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -29,16 +30,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
-import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
-import us.ihmc.steppr.controlParameters.BonoUIParameters;
-import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
+import us.ihmc.steppr.controlParameters.*;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -60,6 +58,7 @@ public class BonoRobotModel implements DRCRobotModel
    private final DRCRobotSensorInformation sensorInformation;
    private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
+   private final BonoHighLevelControllerParameters highLevelControllerParameters;
 
    private final RobotDescription robotDescription;
 
@@ -77,6 +76,7 @@ public class BonoRobotModel implements DRCRobotModel
 
       capturePointPlannerParameters = new BonoCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
+      highLevelControllerParameters = new BonoHighLevelControllerParameters();
       robotDescription = createRobotDescription();
    }
 
@@ -101,6 +101,12 @@ public class BonoRobotModel implements DRCRobotModel
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   @Override
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
    }
 
    @Override
@@ -280,7 +286,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
    
    @Override
-   public LowLevelOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   public JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return null;
    }

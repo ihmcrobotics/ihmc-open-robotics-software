@@ -156,7 +156,7 @@ public class FramePoseTest
    public void testGetTransform()
    {
       Random random = new Random(1179L);
-      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform);
 
       RigidBodyTransform transformCheck = new RigidBodyTransform();

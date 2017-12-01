@@ -13,12 +13,12 @@ import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import java.util.ArrayList;
@@ -179,7 +179,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    }
 
    @Override
-   public void getBodyOrientation(FrameOrientation bodyOrientation)
+   public void getBodyOrientation(FrameQuaternion bodyOrientation)
    {
       bodyOrientation.setIncludingFrame(this.bodyOrientation.getFrameOrientation());
    }

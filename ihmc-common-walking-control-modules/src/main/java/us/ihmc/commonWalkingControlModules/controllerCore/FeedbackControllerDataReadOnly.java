@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public interface FeedbackControllerDataReadOnly
@@ -116,13 +116,13 @@ public interface FeedbackControllerDataReadOnly
     * </p>
     * 
     * @param endEffector the end-effector for which the data is requested.
-    * @param orientationDataToPack the {@link FrameOrientation} in which the orientation data is
+    * @param orientationDataToPack the {@link FrameQuaternion} in which the orientation data is
     *           stored. Data is expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
     * @param type whether the current or desired orientation is requested, the other values in
     *           {@link Type} are not applicable.
     * @return whether the data is available or not.
     */
-   boolean getOrientationData(RigidBody endEffector, FrameOrientation orientationDataToPack, Type type);
+   boolean getOrientationData(RigidBody endEffector, FrameQuaternion orientationDataToPack, Type type);
 
    /**
     * Retrieves if possible the vector data about a specific end-effector.

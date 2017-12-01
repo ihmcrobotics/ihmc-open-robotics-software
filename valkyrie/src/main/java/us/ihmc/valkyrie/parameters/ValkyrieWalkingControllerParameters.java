@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -52,7 +51,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
-   private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
+   private Map<String, JointAccelerationIntegrationParameters> integrationSettings = null;
 
    private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
@@ -471,13 +470,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.2));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), -0.2);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.7);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfRightSide(-1.5));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 1.3);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.4);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.0));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.1);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfRightSide(-1.3));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 1.0);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
       }
 
       return jointHomeConfiguration;
@@ -523,46 +522,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return positionControlledJoints;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
-   {
-      if (integrationSettings != null)
-         return integrationSettings;
-
-      integrationSettings = new HashMap<String, JointAccelerationIntegrationSettings>();
-
-      JointAccelerationIntegrationSettings neckJointSettings = new JointAccelerationIntegrationSettings();
-      neckJointSettings.setAlphaPosition(0.9996);
-      neckJointSettings.setAlphaVelocity(0.95);
-      neckJointSettings.setMaxPositionError(0.2);
-      neckJointSettings.setMaxVelocity(2.0);
-
-      for (NeckJointName name : jointMap.getNeckJointNames())
-         integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
-
-      JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
-      elbowJointSettings.setAlphaPosition(0.9998);
-      elbowJointSettings.setAlphaVelocity(0.84);
-      elbowJointSettings.setMaxPositionError(0.2);
-      elbowJointSettings.setMaxVelocity(2.0);
-
-      JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
-      wristJointSettings.setAlphaPosition(0.9995);
-      wristJointSettings.setAlphaVelocity(0.83);
-      wristJointSettings.setMaxPositionError(0.2);
-      wristJointSettings.setMaxVelocity(2.0);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), elbowJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), wristJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), wristJointSettings);
-      }
-
-      return integrationSettings;
-   }
-
    @Override
    public boolean enableJointAccelerationIntegrationForAllJoints()
    {
@@ -594,11 +553,48 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       for (SpineJointName spineJointName : jointMap.getSpineJointNames())
-      {
+      { // Spine joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
          parameters.setAlphas(0.9996, 0.85);
          List<String> jointNames = Collections.singletonList(jointMap.getSpineJointName(spineJointName));
          ret.add(new ImmutableTriple<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+      }
+
+      for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.ELBOW_ROLL})
+      { // Forearm elbow joint
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setAlphaPosition(0.9998);
+         parameters.setAlphaVelocity(0.84);
+         parameters.setMaxPositionError(0.2);
+         parameters.setMaxVelocity(2.0);
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
+         ret.add(new ImmutableTriple<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+      }
+
+      for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL})
+      { // Forearm wrist joints
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setAlphaPosition(0.9995);
+         parameters.setAlphaVelocity(0.83);
+         parameters.setMaxPositionError(0.2);
+         parameters.setMaxVelocity(2.0);
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
+         ret.add(new ImmutableTriple<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+      }
+
+      for (NeckJointName neckJointName : jointMap.getNeckJointNames())
+      { // Neck joints
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setAlphaPosition(0.9996);
+         parameters.setAlphaVelocity(0.95);
+         parameters.setMaxPositionError(0.2);
+         parameters.setMaxVelocity(2.0);
+         List<String> jointNames = Collections.singletonList(jointMap.getNeckJointName(neckJointName));
+         ret.add(new ImmutableTriple<>(neckJointName.getCamelCaseName(), parameters, jointNames));
       }
 
       return ret;
@@ -866,5 +862,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public SteppingParameters getSteppingParameters()
    {
       return steppingParameters;
+   }
+
+   @Override
+   public double getMinSwingTrajectoryClearanceFromStanceFoot()
+   {
+      return 0.18;
    }
 }

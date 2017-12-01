@@ -12,13 +12,14 @@ import org.junit.Before;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -54,11 +55,10 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
       ScrewTestTools.setRandomPositionsWithinJointLimits(neckJoints, random);
       RigidBody headClone = neckJoints[numberOfJoints - 1].getSuccessor();
-      FrameOrientation desiredRandomChestOrientation = new FrameOrientation(headClone.getBodyFixedFrame());
+      FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(headClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Quaternion desiredOrientation = new Quaternion();
-      desiredRandomChestOrientation.getQuaternion(desiredOrientation);
+      Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
       ReferenceFrame chestCoMFrame = chest.getBodyFixedFrame();
       HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation, chestCoMFrame);
       headTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
@@ -92,21 +92,21 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       humanoidReferenceFrames.updateFrames();
 
       double trajectoryTime = 1.0;
-      FrameOrientation lookStraightAhead = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), new Quaternion());
+      FrameQuaternion lookStraightAhead = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), new Quaternion());
       lookStraightAhead.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion lookLeftQuat = new Quaternion();
       lookLeftQuat.appendYawRotation(Math.PI / 4.0);
       lookLeftQuat.appendPitchRotation(Math.PI / 16.0);
       lookLeftQuat.appendRollRotation(-Math.PI / 16.0);
-      FrameOrientation lookLeft = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), lookLeftQuat);
+      FrameQuaternion lookLeft = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), lookLeftQuat);
       lookLeft.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion lookRightQuat = new Quaternion();
       lookRightQuat.appendYawRotation(-Math.PI / 4.0);
       lookRightQuat.appendPitchRotation(-Math.PI / 16.0);
       lookRightQuat.appendRollRotation(Math.PI / 16.0);
-      FrameOrientation lookRight = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
+      FrameQuaternion lookRight = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
@@ -164,7 +164,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       return ((YoInteger) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
-   public static void assertSingleWaypointExecuted(Quaternion desiredOrientation, String bodyName, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(QuaternionReadOnly desiredOrientation, String bodyName, SimulationConstructionSet scs)
    {
       assertEquals(2, findNumberOfWaypoints(bodyName, scs));
       Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(bodyName, scs);

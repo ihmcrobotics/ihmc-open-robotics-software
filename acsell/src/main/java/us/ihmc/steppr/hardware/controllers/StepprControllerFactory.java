@@ -11,15 +11,16 @@ import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -41,8 +42,9 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithAccelerationIntegration;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerStateFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 public class StepprControllerFactory
 {
@@ -77,7 +79,7 @@ public class StepprControllerFactory
       /*
        * Create controllers
        */
-      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
+      HighLevelHumanoidControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
 
       /*
        * Create sensors
@@ -165,20 +167,34 @@ public class StepprControllerFactory
       System.exit(0);
    }
 
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
+   private HighLevelHumanoidControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
          DRCRobotSensorInformation sensorInformation)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
-      final HighLevelState initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
+      HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames , walkingControllerParamaters, capturePointPlannerParameters, initialBehavior);
+
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames,
+                                                                                                feetContactSensorNames, wristForceSensorNames,
+                                                                                                    highLevelControllerParameters, walkingControllerParamaters,
+                                                                                                    capturePointPlannerParameters);
+
+      controllerFactory.useDefaultDoNothingControlState();
+      controllerFactory.useDefaultWalkingControlState();
+
+      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
+      controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
+
+      HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
+      controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
+      controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
+      controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
 
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();
@@ -186,10 +202,10 @@ public class StepprControllerFactory
       boolean useArms = false;
       boolean robotIsHanging = true;
 
-      DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
-      // Configure the MomentumBasedControllerFactory so we start with the diagnostic controller
+      DiagnosticsWhenHangingControllerStateFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerStateFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
+      // Configure the HighLevelHumanoidController so we start with the diagnostic controller
       diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
-      controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
+      controllerFactory.addCustomControlState(diagnosticsWhenHangingHighLevelBehaviorFactory);
       controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), packetCommunicator);
 
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
