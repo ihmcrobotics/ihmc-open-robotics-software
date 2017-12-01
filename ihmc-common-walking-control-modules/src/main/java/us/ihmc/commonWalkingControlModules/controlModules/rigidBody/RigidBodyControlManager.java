@@ -536,4 +536,8 @@ public class RigidBodyControlManager
       return ret;
    }
 
+   public OneDoFJoint[] getControlledJoints()
+   {
+      return jointsToControl;
+   }
 }
