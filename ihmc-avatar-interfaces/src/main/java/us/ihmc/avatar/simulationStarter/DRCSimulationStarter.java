@@ -162,7 +162,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       this.highLevelControllerFactories.add(controllerFactory);
    }
 
-   public void registerControllerStateTransition(ControllerStateTransitionFactory controllerStateTransitionFactory)
+   public void registerControllerStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory)
    {
       this.controllerTransitionFactories.add(controllerStateTransitionFactory);
    }
