@@ -137,20 +137,9 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       }
    }
 
-   public boolean isDone(double timeInState)
+   public double getFinalTime()
    {
-      int segmentIndex = 0;
-      if (getNumberOfSegments() == 0) // standing
-         return true;
-
-      if (MathTools.isGreaterThanOrEqualToWithPrecision(timeInState, segments.get(0).getInitialTime(), Epsilons.ONE_TEN_THOUSANDTH))
-      {
-         for (; segmentIndex < getNumberOfSegments() - 1; segmentIndex++)
-            if (segments.get(segmentIndex).timeIntervalContains(timeInState, Epsilons.ONE_TEN_THOUSANDTH))
-               return false;
-      }
-
-      return true;
+      return segments.getLast().getFinalTime();
    }
 
    public FrameTrajectory3D add()
