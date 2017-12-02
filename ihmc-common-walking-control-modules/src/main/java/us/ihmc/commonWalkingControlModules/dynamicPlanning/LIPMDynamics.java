@@ -9,8 +9,8 @@ import org.ejml.data.DenseMatrix64F;
  */
 public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
 {
-   private static final int stateVectorSize = 6;
-   private static final int controlVectorSize = 3;
+   static final int stateVectorSize = 6;
+   static final int controlVectorSize = 3;
 
    private double deltaT;
    private double deltaT2;
