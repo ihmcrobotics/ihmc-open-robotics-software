@@ -32,12 +32,12 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       deltaT2 = deltaT * deltaT;
    }
 
-   public double getStateVectorSize()
+   public int getStateVectorSize()
    {
       return stateVectorSize;
    }
 
-   public double getControlVectorSize()
+   public int getControlVectorSize()
    {
       return controlVectorSize;
    }
