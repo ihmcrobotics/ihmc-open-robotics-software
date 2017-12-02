@@ -597,7 +597,7 @@ public class MotionQPInputCalculator
    private void recordTaskJacobian(DenseMatrix64F taskJacobian)
    {
       int taskSize = taskJacobian.getNumRows();
-      allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs);
+      allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs, true);
       CommonOps.insert(taskJacobian, allTaskJacobian, allTaskJacobian.getNumRows() - taskSize, 0);
    }
 
