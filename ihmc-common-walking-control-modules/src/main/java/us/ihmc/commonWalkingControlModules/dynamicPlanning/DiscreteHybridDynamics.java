@@ -5,8 +5,8 @@ import org.ejml.data.DenseMatrix64F;
 public interface DiscreteHybridDynamics<E extends Enum>
 {
    void setTimeStepSize(double deltaT);
-   double getStateVectorSize();
-   double getControlVectorSize();
+   int getStateVectorSize();
+   int getControlVectorSize();
 
    /** f */
    void getDynamics(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack);
