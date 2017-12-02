@@ -947,6 +947,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
-      return 0.18;
+      return 0.15;
    }
 }
