@@ -22,8 +22,8 @@ public class LIPMTerminalCostFunction implements DDPCostFunction
       Q.set(5, 5, 10000);
 
       R.set(0, 0, 100);
-      R.set(0, 0, 100);
-      R.set(0, 0, 1e-6);
+      R.set(1, 1, 100);
+      R.set(2, 2, 1e-6);
    }
 
    private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);

@@ -22,8 +22,8 @@ public class LIPMSimpleCostFunction implements DDPCostFunction
       Q.set(5, 5, 1e-2);
 
       R.set(0, 0, 1);
-      R.set(0, 0, 1);
-      R.set(0, 0, 1e-6);
+      R.set(1, 1, 1);
+      R.set(2, 2, 1e-6);
    }
 
    private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);
@@ -52,10 +52,10 @@ public class LIPMSimpleCostFunction implements DDPCostFunction
    }
 
    /** L_u(X_k, U_k) */
-   public void getCostControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVecotr,
-                               DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                                      DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
    {
-      CommonOps.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
+      CommonOps.subtract(controlVector, desiredControlVector, tempControlMatrix);
       DiagonalMatrixTools.preMult(R, tempControlMatrix, matrixToPack);
    }
 

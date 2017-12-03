@@ -1,10 +1,11 @@
 package us.ihmc.exampleSimulations.sphereICPControl;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.BasicCoPPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDDPCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -25,8 +26,8 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -38,6 +39,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.awt.*;
@@ -54,8 +56,10 @@ public class LIPMDDPCalculatorVisualizer
    private static final int BUFFER_SIZE = 16000;
    private final double dt = 0.006;
 
-   private static final double singleSupportDuration = 1.5; /// 0.7;
-   private static final double doubleSupportDuration = 0.5; // 0.4; //0.25;
+   private static final double singleSupportDuration = 0.6; /// 0.7;
+   private static final double doubleSupportDuration = 0.1; // 0.4; //0.25;
+
+   private static final double nominalComHeight = 1.0;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
@@ -77,18 +81,25 @@ public class LIPMDDPCalculatorVisualizer
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
+   private final YoBoolean computeNextPass = new YoBoolean("computeNextPass", registry);
+
    private final int simulatedTicksPerGraphicUpdate = 1;
    private final double trailingDuration = 4.0 * (singleSupportDuration + doubleSupportDuration);
    private final int numberOfBalls = (int) (trailingDuration / dt / simulatedTicksPerGraphicUpdate);
 
    private BipedSupportPolygons bipedSupportPolygons;
    private final BagOfBalls copTrack;
+   private final BagOfBalls modifiedCopTrack;
+   private final BagOfBalls comTrack;
 
    private final BasicCoPPlanner copPlanner;
+   private final LIPMDDPCalculator ddp = new LIPMDDPCalculator(0.01, 10.0, 9.81);
 
    public LIPMDDPCalculatorVisualizer()
    {
       copTrack = new BagOfBalls(numberOfBalls, 0.005, "CoP", YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL, registry, yoGraphicsListRegistry);
+      modifiedCopTrack = new BagOfBalls(numberOfBalls, 0.005, "ModifiedCoP", YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL, registry, yoGraphicsListRegistry);
+      comTrack = new BagOfBalls(numberOfBalls, 0.005, "CoM", YoAppearance.Black(), YoGraphicPosition.GraphicType.BALL, registry, yoGraphicsListRegistry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -170,21 +181,21 @@ public class LIPMDDPCalculatorVisualizer
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);
+      scs.setCameraPosition(-5.0, 5.0, 5.0);
       scs.setCameraFix(0.0, 0.0, 0.5);
-      scs.setCameraPosition(-0.5, 0.0, 1.0);
 
+      /*
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
+      */
+
+      computeNextPass.set(true);
 
       scs.startOnAThread();
       simulate(footsteps, timings);
       ThreadTools.sleepForever();
    }
-
-   private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d tempFootstepPolygonForShrinking = new FrameConvexPolygon2d();
-   private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
    private void simulate(List<Footstep> footsteps, List<FootstepTiming> timings)
    {
@@ -206,7 +217,31 @@ public class LIPMDDPCalculatorVisualizer
       copPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
       double trajectoryTime = nextFootstepTiming.getStepTime() + nextNextFootstepTiming.getStepTime() + nextNextNextFootstepTiming.getStepTime();
+
       plotCoPPlan(trajectoryTime);
+
+      DenseMatrix64F currentCoMState = new DenseMatrix64F(6, 1);
+      currentCoMState.set(2, 0, nominalComHeight);
+      DenseMatrix64F currentControlState = new DenseMatrix64F(3, 1);
+      currentControlState.set(2, 0, 10 * 9.81);
+
+      ddp.initialize(currentCoMState, currentControlState, copPlanner.getCoPTrajectory());
+
+      while(true)
+      {
+         if (computeNextPass.getBooleanValue())
+         {
+            computeNextPass.set(false);
+
+            ddp.backwardDDPPass();
+            ddp.forwardDDPPass();
+
+            plotCoMPlan();
+         }
+
+         scs.tickAndUpdate();
+         yoTime.add(dt);
+      }
    }
 
    private int counter = 0;
@@ -232,9 +267,28 @@ public class LIPMDDPCalculatorVisualizer
          }
          time += dt;
       }
-
-      scs.tickAndUpdate();
    }
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private void plotCoMPlan()
+   {
+      RecyclingArrayList<DenseMatrix64F> controlVector = ddp.getControlVector();
+      RecyclingArrayList<DenseMatrix64F> stateVector = ddp.getStateVector();
+
+      for (int i = 0; i < controlVector.size(); i++)
+      {
+         DenseMatrix64F control = controlVector.get(i);
+         DenseMatrix64F state = stateVector.get(i);
+
+         tempPoint.set(control.get(0), control.get(1), 0.0);
+         modifiedCopTrack.setBallLoop(tempPoint);
+
+         tempPoint.set(state.get(0), state.get(1), state.get(2));
+         comTrack.setBallLoop(tempPoint);
+      }
+   }
+
+
 
    private void updateFootViz()
    {
@@ -253,6 +307,10 @@ public class LIPMDDPCalculatorVisualizer
       updateFootstepViz(nextNextFootstep, yoNextNextFootstepPolygon, yoNextNextFootstepPose, polygonShrinkAmount);
       updateFootstepViz(nextNextNextFootstep, yoNextNextNextFootstepPolygon, yoNextNextNextFootstepPose, polygonShrinkAmount);
    }
+
+   private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempFootstepPolygonForShrinking = new FrameConvexPolygon2d();
+   private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
    private void updateFootstepViz(Footstep footstep, YoFrameConvexPolygon2d convexPolygon2d, YoFramePose framePose, double polygonShrinkAmount)
    {

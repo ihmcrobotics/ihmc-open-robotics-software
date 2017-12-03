@@ -50,7 +50,7 @@ public class BasicCoPPlanner
 
       timeInCurrentStateRemaining = new YoDouble("timeInCurrentStateRemaining", registry);
 
-      desiredCoPPosition.setToZero(midFootZUpGroundFrame);
+      desiredCoPPosition.setToZero();
       copTrajectory = new SegmentedFrameTrajectory3D(10, 5);
    }
 
@@ -211,6 +211,11 @@ public class BasicCoPPlanner
          return upcomingTimings.get(0).getTransferTime();
       else
          return upcomingTimings.get(0).getSwingTime();
+   }
+
+   public SegmentedFrameTrajectory3D getCoPTrajectory()
+   {
+      return copTrajectory;
    }
 
    public void getDesiredCoPData(FramePoint3D desiredCoPPosition, FrameVector3D desiredCoPVelocity, FrameVector3D desiredCoPAcceleration)

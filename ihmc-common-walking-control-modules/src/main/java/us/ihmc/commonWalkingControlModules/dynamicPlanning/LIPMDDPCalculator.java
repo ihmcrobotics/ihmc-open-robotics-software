@@ -6,6 +6,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
@@ -17,6 +19,7 @@ public class LIPMDDPCalculator
    private final DDPCostFunction terminalCostFunction;
 
    private double deltaT;
+   private double modifiedDeltaT;
 
    private final RecyclingArrayList<DenseMatrix64F> stateVector;
    private final RecyclingArrayList<DenseMatrix64F> controlVector;
@@ -44,6 +47,9 @@ public class LIPMDDPCalculator
    private final DenseMatrix64F Q_UX;
    private final DenseMatrix64F Q_UU;
    private final DenseMatrix64F Q_UU_inv;
+   private final DenseMatrix64F Q_XX_col;
+   private final DenseMatrix64F Q_UX_col;
+   private final DenseMatrix64F Q_UU_col;
 
    private final DenseMatrix64F V_X;
    private final DenseMatrix64F V_XX;
@@ -72,19 +78,23 @@ public class LIPMDDPCalculator
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
 
-      VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize);
-      VariableVectorBuilder stateBuilder = new VariableVectorBuilder(stateSize);
+      VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize, 1);
+      VariableVectorBuilder stateBuilder = new VariableVectorBuilder(stateSize, 1);
+      VariableVectorBuilder gainBuilder = new VariableVectorBuilder(controlSize, stateSize);
 
       stateVector = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
       controlVector = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
       desiredStateVector = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
       desiredControlVector = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
-      gainVector = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
+      gainVector = new RecyclingArrayList<DenseMatrix64F>(1000, gainBuilder);
       deltaUVector = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
 
       stateVector.clear();
       controlVector.clear();
       gainVector.clear();
+      deltaUVector.clear();
+      desiredStateVector.clear();
+      desiredControlVector.clear();
 
       L_X = new DenseMatrix64F(stateSize, 1);
       L_U = new DenseMatrix64F(controlSize, 1);
@@ -110,6 +120,9 @@ public class LIPMDDPCalculator
       Q_UU = new DenseMatrix64F(controlSize, controlSize);
       Q_UU_inv = new DenseMatrix64F(controlSize, controlSize);
       Q_UX = new DenseMatrix64F(controlSize, stateSize);
+      Q_XX_col = new DenseMatrix64F(stateSize, 1);
+      Q_UX_col = new DenseMatrix64F(controlSize, 1);
+      Q_UU_col = new DenseMatrix64F(controlSize, 1);
 
       V_X = new DenseMatrix64F(1, stateSize);
       V_XX = new DenseMatrix64F(stateSize, stateSize);
@@ -119,45 +132,81 @@ public class LIPMDDPCalculator
    {
       dynamics.setTimeStepSize(deltaT);
       this.deltaT = deltaT;
+      this.modifiedDeltaT = deltaT;
    }
 
-   private final FramePoint3D tempState = new FramePoint3D();
-   private final FrameVector3D tempStateVelocity = new FrameVector3D();
-   private final FramePoint3D tempControl = new FramePoint3D();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
 
-   public void initialize(DenseMatrix64F currentState, DenseMatrix64F currentControl, SegmentedFrameTrajectory3D desiredStates,
-                          SegmentedFrameTrajectory3D desiredControls, double trajectoryLength)
+   public void initialize(DenseMatrix64F currentState, DenseMatrix64F currentControl, SegmentedFrameTrajectory3D copDesiredPlan)
    {
-      double modifiedDeltaT = computeDeltaT(trajectoryLength);
+      modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
       dynamics.setTimeStepSize(modifiedDeltaT);
 
+      stateVector.clear();
+      controlVector.clear();
+      desiredControlVector.clear();
+      desiredStateVector.clear();
+      gainVector.clear();
+      deltaUVector.clear();
+
+      double height = currentState.get(2);
+
       double time = 0.0;
-      for (int i = 0; i < numberOfTimeSteps; i++)
+      stateVector.add().set(currentState);
+      controlVector.add().set(currentControl);
+
+      copDesiredPlan.update(time, tempPoint, tempVector);
+      DenseMatrix64F desiredState = desiredStateVector.add();
+
+      desiredState.set(0, tempPoint.getX());
+      desiredState.set(1, tempPoint.getY());
+      desiredState.set(2, tempPoint.getZ() + height);
+      desiredState.set(3, tempVector.getX());
+      desiredState.set(4, tempVector.getY());
+      desiredState.set(5, tempVector.getZ());
+
+      DenseMatrix64F desiredControl = desiredControlVector.add();
+      desiredControl.set(0, tempPoint.getX());
+      desiredControl.set(1, tempPoint.getY());
+      desiredControl.set(2, mass * gravityZ);
+
+      gainVector.add().zero();
+      deltaUVector.add().zero();
+
+      time += modifiedDeltaT;
+
+      for (int i = 1; i < numberOfTimeSteps; i++)
       {
-         stateVector.add().set(currentState);
-         controlVector.add().set(currentControl);
+         copDesiredPlan.update(time, tempPoint, tempVector);
+         desiredState = desiredStateVector.add();
 
-         desiredStates.update(time, tempState, tempStateVelocity);
-         DenseMatrix64F desiredState = desiredStateVector.add();
-         desiredState.set(0, tempState.getX());
-         desiredState.set(1, tempState.getY());
-         desiredState.set(2, tempState.getZ());
-         desiredState.set(3, tempStateVelocity.getX());
-         desiredState.set(4, tempStateVelocity.getY());
-         desiredState.set(5, tempStateVelocity.getZ());
+         desiredState.set(0, tempPoint.getX());
+         desiredState.set(1, tempPoint.getY());
+         desiredState.set(2, tempPoint.getZ() + height);
+         desiredState.set(3, tempVector.getX());
+         desiredState.set(4, tempVector.getY());
+         desiredState.set(5, tempVector.getZ());
 
-         desiredControls.update(time, tempControl);
-         DenseMatrix64F desiredControl = desiredControlVector.add();
-         desiredControl.set(0, tempControl.getX());
-         desiredControl.set(1, tempControl.getY());
+         desiredControl = desiredControlVector.add();
+         desiredControl.set(0, tempPoint.getX());
+         desiredControl.set(1, tempPoint.getY());
          desiredControl.set(2, mass * gravityZ);
+
+         DenseMatrix64F state = stateVector.add();
+         DenseMatrix64F control = controlVector.add();
+
+         state.set(desiredState);
+         control.set(desiredControl);
 
          gainVector.add().zero();
          deltaUVector.add().zero();
+
+         time += modifiedDeltaT;
       }
    }
 
-   public void backwardPass()
+   public void backwardDDPPass()
    {
       int i = numberOfTimeSteps - 1;
       DenseMatrix64F state = stateVector.get(i);
@@ -192,6 +241,7 @@ public class LIPMDDPCalculator
       Q_UX.set(L_UX);
       Q_UU.set(L_UU);
 
+      //DiagonalMatrixTools.invertDiagonalMatrix(Q_UU, Q_UU_inv);
       solver.setA(Q_UU);
       solver.invert(Q_UU_inv);
 
@@ -201,8 +251,10 @@ public class LIPMDDPCalculator
       V_X.set(Q_X);
       V_XX.set(Q_XX);
 
-      CommonOps.multAdd(Q_U, gainMatrix, V_X);
-      CommonOps.multAdd(Q_UX, gainMatrix, V_XX);
+      CommonOps.multAddTransA(-1.0, gainMatrix, Q_U, V_X);
+      CommonOps.multAddTransA(-1.0, Q_UX, gainMatrix, V_XX);
+
+      sanityCheck(gainMatrix, deltaUMatrix);
 
       for (i = numberOfTimeSteps - 2; i >= 0; i--)
       {
@@ -223,11 +275,16 @@ public class LIPMDDPCalculator
          dynamics.getDynamicsStateGradient(LIPMState.NORMAL, state, control, f_X);
          dynamics.getDynamicsControlGradient(LIPMState.NORMAL, state, control, f_U);
 
+         if (isAnyInvalid(L_X) || isAnyInvalid(L_U) || isAnyInvalid(L_XX) || isAnyInvalid(L_UU) || isAnyInvalid(L_UX))
+            throw new RuntimeException("poor condition cost matrix");
+         if (isAnyInvalid(f_X) || isAnyInvalid(f_U))
+            throw new RuntimeException("poor condition dynamic matrix");
+
          Q_X.set(L_X);
-         CommonOps.multAdd(V_X, f_X, Q_X);
+         CommonOps.multAddTransA(f_X, V_X, Q_X);
 
          Q_U.set(L_U);
-         CommonOps.multAdd(V_X, f_U, Q_U);
+         CommonOps.multAddTransA(f_U, V_X, Q_U);
 
          Q_XX.set(L_XX);
          Q_UX.set(L_UX);
@@ -237,17 +294,22 @@ public class LIPMDDPCalculator
             dynamics.getDynamicsStateHessian(LIPMState.NORMAL, stateIndex, state, control, f_XX);
             dynamics.getDynamicsStateGradientOfControlGradient(LIPMState.NORMAL, stateIndex, state, control, f_UX);
 
-            CommonOps.multAdd(V_X, f_XX, Q_XX);
-            CommonOps.multAdd(V_X, f_UX, Q_UX);
+            CommonOps.multTransA(f_XX, V_X, Q_XX_col);
+            MatrixTools.addMatrixBlock(Q_XX, 0, stateIndex, Q_XX_col, 0, 0, dynamics.getStateVectorSize(), 1, 1.0);
+
+            CommonOps.multTransA(f_UX, V_X, Q_UX_col);
+            MatrixTools.addMatrixBlock(Q_UX, 0, stateIndex, Q_UX_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
          }
          addSquareVector(f_X, V_XX, f_X, Q_XX);
          addSquareVector(f_U, V_XX, f_X, Q_UX);
 
          Q_UU.set(L_UU);
-         for (int controlIndex = 0; controlIndex < dynamics.getStateVectorSize(); controlIndex++)
+         for (int controlIndex = 0; controlIndex < dynamics.getControlVectorSize(); controlIndex++)
          {
             dynamics.getDynamicsControlHessian(LIPMState.NORMAL, controlIndex, state, control, f_UU);
-            CommonOps.multAdd(V_X, f_UU, Q_UU);
+
+            CommonOps.multTransA(f_UU, V_X, Q_UU_col);
+            MatrixTools.addMatrixBlock(Q_UU, 0, controlIndex, Q_UU_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
          }
          addSquareVector(f_U, V_XX, f_U, Q_UU);
 
@@ -260,48 +322,89 @@ public class LIPMDDPCalculator
          V_X.set(Q_X);
          V_XX.set(Q_XX);
 
-         CommonOps.multAdd(Q_U, gainMatrix, V_X);
-         CommonOps.multAdd(Q_UX, gainMatrix, V_XX);
+         CommonOps.multAddTransA(-1.0, gainMatrix, Q_U, V_X);
+         CommonOps.multAddTransA(-1.0, Q_UX, gainMatrix, V_XX);
+
+         sanityCheck(gainMatrix, deltaUMatrix);
       }
+   }
+
+   private void sanityCheck(DenseMatrix64F gainMatrix, DenseMatrix64F deltaUMatrix)
+   {
+      if (isAnyInvalid(gainMatrix))
+         throw new RuntimeException("Gain matrix contains NaN.");
+      if (isAnyInvalid(deltaUMatrix))
+         throw new RuntimeException("Feed forward dynamics contains NaN.");
    }
 
    private final DenseMatrix64F tempStateVector = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F x_hat = new DenseMatrix64F(6, 1);
 
-   public void forwardPass()
+   public void forwardDDPPass()
    {
       DenseMatrix64F state = stateVector.get(0);
-      DenseMatrix64F control = stateVector.get(0);
+      DenseMatrix64F control = controlVector.get(0);
       DenseMatrix64F deltaU = deltaUVector.get(0);
 
       CommonOps.addEquals(control, deltaU);
 
-      dynamics.getDynamics(LIPMState.NORMAL, state, control, x_hat);
+      dynamics.getNextState(LIPMState.NORMAL, state, control, x_hat);
 
       for (int i = 1; i < stateVector.size() - 1; i++)
       {
          state = stateVector.get(i);
-         control = stateVector.get(i);
+         control = controlVector.get(i);
          deltaU = deltaUVector.get(i);
          DenseMatrix64F gain = gainVector.get(i);
 
-         CommonOps.addEquals(control, deltaU);
+
+         CommonOps.subtractEquals(control, deltaU);
          CommonOps.subtract(x_hat, state, tempStateVector);
-         CommonOps.multAdd(gain, tempStateVector, control);
+         CommonOps.multAdd(-1.0, gain, tempStateVector, control);
 
          state.set(x_hat);
 
-         dynamics.getDynamics(LIPMState.NORMAL, state, control, x_hat);
+         dynamics.getNextState(LIPMState.NORMAL, state, control, x_hat);
+
+         if (isAnyInvalid(state) || isAnyInvalid(control) || isAnyInvalid(x_hat))
+            throw new RuntimeException("Dynamics error");
       }
+
+      stateVector.getLast().set(x_hat);
+   }
+
+   private boolean isAnyInvalid(DenseMatrix64F matrix)
+   {
+      for (int i = 0; i < matrix.getNumElements(); i++)
+      {
+         if (!Double.isFinite(matrix.get(i)))
+            return true;
+      }
+      return false;
    }
 
    private double computeDeltaT(double trajectoryLength)
    {
-      numberOfTimeSteps = (int) Math.floorDiv((long) trajectoryLength, (long) deltaT);
+      numberOfTimeSteps = (int) Math.floor(trajectoryLength / deltaT);
       return trajectoryLength / numberOfTimeSteps;
    }
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F();
+   public double getDT()
+   {
+      return modifiedDeltaT;
+   }
+
+   public RecyclingArrayList<DenseMatrix64F> getControlVector()
+   {
+      return controlVector;
+   }
+
+   public RecyclingArrayList<DenseMatrix64F> getStateVector()
+   {
+      return stateVector;
+   }
+
+   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
 
    /**
     * D = D + A^T *  B * C
@@ -315,17 +418,19 @@ public class LIPMDDPCalculator
 
    private class VariableVectorBuilder extends GenericTypeBuilder
    {
-      private final int size;
+      private final int rows;
+      private final int cols;
 
-      public VariableVectorBuilder(int size)
+      public VariableVectorBuilder(int rows, int cols)
       {
-         this.size = size;
+         this.rows = rows;
+         this.cols = cols;
       }
 
       @Override
       public Object newInstance()
       {
-         return new DenseMatrix64F(size, 1);
+         return new DenseMatrix64F(rows, cols);
       }
    }
 }

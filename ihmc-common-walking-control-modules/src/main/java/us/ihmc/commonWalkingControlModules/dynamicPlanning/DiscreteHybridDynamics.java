@@ -9,7 +9,7 @@ public interface DiscreteHybridDynamics<E extends Enum>
    int getControlVectorSize();
 
    /** f */
-   void getDynamics(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack);
+   void getNextState(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack);
    /** f_x */
    void getDynamicsStateGradient(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack);
    /** f_u */
