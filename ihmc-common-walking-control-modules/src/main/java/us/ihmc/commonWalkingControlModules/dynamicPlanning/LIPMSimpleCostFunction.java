@@ -12,6 +12,10 @@ public class LIPMSimpleCostFunction implements DDPCostFunction
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);
 
+   /**
+    * This is a cost of the form 0.5 (X - X_d)^T Q (X - X_d) + 0.5 (U - U_d)^T R (U - U_d)
+    */
+
    public LIPMSimpleCostFunction()
    {
       Q.set(0, 0, 1e-4);
