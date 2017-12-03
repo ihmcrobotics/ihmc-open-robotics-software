@@ -49,7 +49,7 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
     * @param currentControl U_k in the above equation
     * @param matrixToPack f(X_k, U_k) in the above equation
     */
-   public void getDynamics(LIPMState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   public void getNextState(LIPMState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -100,23 +100,26 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
 
       matrixToPack.zero();
 
-      matrixToPack.set(0, 0, 1 + deltaT2 * fz_k / (2.0 * pendulumMass * z_k));
-      matrixToPack.set(0, 2, deltaT2 * (px_k - x_k) * fz_k / (2.0 * pendulumMass * z_k * z_k));
+      double value1 = deltaT2 / (2.0 * pendulumMass * z_k);
+      double value2 = deltaT / (pendulumMass * z_k);
+
+      matrixToPack.set(0, 0, 1 + fz_k * value1);
+      matrixToPack.set(0, 2, (px_k - x_k) * fz_k / z_k * value1);
       matrixToPack.set(0, 3, deltaT);
 
       matrixToPack.set(1, 1, matrixToPack.get(0, 0));
-      matrixToPack.set(1, 2, deltaT2 * (py_k - y_k) * fz_k / (2.0 * pendulumMass * z_k * z_k));
+      matrixToPack.set(1, 2, (py_k - y_k) * fz_k / z_k * value1);
       matrixToPack.set(1, 4, deltaT);
 
       matrixToPack.set(2, 2, 1.0);
       matrixToPack.set(2, 5, deltaT);
 
-      matrixToPack.set(3, 0, deltaT * fz_k / (pendulumMass * z_k));
-      matrixToPack.set(3, 2, deltaT * (px_k - x_k) * fz_k / (pendulumMass * z_k * z_k));
+      matrixToPack.set(3, 0, fz_k * value2);
+      matrixToPack.set(3, 2, (px_k - x_k) * fz_k / z_k * value2);
       matrixToPack.set(3, 3, 1.0);
 
-      matrixToPack.set(4, 1, deltaT * fz_k / (pendulumMass * z_k));
-      matrixToPack.set(4, 2, deltaT * (py_k - y_k) * fz_k / (pendulumMass * z_k * z_k));
+      matrixToPack.set(4, 1, matrixToPack.get(3, 0));
+      matrixToPack.set(4, 2, (py_k - y_k) * fz_k / z_k * value2);
       matrixToPack.set(4, 4, 1.0);
 
       matrixToPack.set(5, 5, 1.0);
@@ -129,6 +132,8 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       if (matrixToPack.numCols != controlVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
 
+      double x_k = currentState.get(0);
+      double y_k = currentState.get(1);
       double z_k = currentState.get(2);
 
       double px_k = currentControl.get(0);
@@ -137,24 +142,24 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
 
       matrixToPack.zero();
 
-      double value = -deltaT / (pendulumMass * z_k);
-      double value2 = -deltaT2 / (2 * pendulumMass * z_k);
+      double value = deltaT / (pendulumMass * z_k);
+      double value2 = deltaT2 / (2 * pendulumMass * z_k);
 
-      matrixToPack.set(0, 0, value2 * fz_k);
-      matrixToPack.set(0, 2, value2 * px_k);
+      matrixToPack.set(0, 0, value2 * -fz_k);
+      matrixToPack.set(0, 2, value2 * (x_k - px_k));
 
-      matrixToPack.set(1, 1, value2 * fz_k);
-      matrixToPack.set(1, 2, value2 * py_k);
+      matrixToPack.set(1, 1, value2 * -fz_k);
+      matrixToPack.set(1, 2, value2 * (y_k - py_k));
 
-      matrixToPack.set(2, 2, 0.5 * deltaT2 / pendulumMass);
+      matrixToPack.set(2, 2, value2 * z_k);
 
-      matrixToPack.set(3, 0, value * fz_k);
-      matrixToPack.set(3, 2, value * px_k);
+      matrixToPack.set(3, 0, value * -fz_k);
+      matrixToPack.set(3, 2, value * (x_k - px_k));
 
-      matrixToPack.set(4, 1, value * fz_k);
-      matrixToPack.set(4, 2, value * py_k);
+      matrixToPack.set(4, 1, value * -fz_k);
+      matrixToPack.set(4, 2, value * (y_k - py_k));
 
-      matrixToPack.set(5, 2, deltaT / pendulumMass);
+      matrixToPack.set(5, 2, value * z_k);
    }
 
    public void getDynamicsStateHessian(LIPMState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
@@ -191,16 +196,16 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
          break;
       case 2:
          matrixToPack.set(0, 0, value2);
-         matrixToPack.set(0, 2, value2 * (px_k - x_k) / z_k);
+         matrixToPack.set(0, 2, 2.0 * value2 * (px_k - x_k) / z_k);
 
          matrixToPack.set(1, 1, value2);
-         matrixToPack.set(1, 2, value2 * (py_k - y_k) / z_k);
+         matrixToPack.set(1, 2, 2.0 * value2 * (py_k - y_k) / z_k);
 
          matrixToPack.set(3, 0, value);
-         matrixToPack.set(3, 2, value * (px_k - x_k) / z_k);
+         matrixToPack.set(3, 2, 2.0 * value * (px_k - x_k) / z_k);
 
          matrixToPack.set(4, 1, value);
-         matrixToPack.set(4, 2, value * (py_k - y_k) / z_k);
+         matrixToPack.set(4, 2, 2.0 * value * (py_k - y_k) / z_k);
          break;
       }
    }
@@ -250,6 +255,8 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       if (stateVariable >= stateVectorSize)
          throw new RuntimeException("Too big a state variable.");
 
+      double x_k = currentState.get(0);
+      double y_k = currentState.get(1);
       double z_k = currentState.get(2);
 
       double px_k = currentControl.get(0);
@@ -261,19 +268,29 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double value = deltaT / (pendulumMass * z_k * z_k);
       double value2 = deltaT2 / (2 * pendulumMass * z_k * z_k);
 
-      if (stateVariable == 2)
+      switch (stateVariable)
       {
+      case 0:
+         matrixToPack.set(0, 2, value2 * z_k);
+         matrixToPack.set(3, 2, value * z_k);
+         break;
+      case 1:
+         matrixToPack.set(1, 2, value2 * z_k);
+         matrixToPack.set(4, 2, value * z_k);
+         break;
+      case 2:
          matrixToPack.set(0, 0, value2 * fz_k);
-         matrixToPack.set(0, 2, value2 * px_k);
+         matrixToPack.set(0, 2, value2 * (px_k - x_k));
 
          matrixToPack.set(1, 1, value2 * fz_k);
-         matrixToPack.set(1, 2, value2 * py_k);
+         matrixToPack.set(1, 2, value2 * (py_k - y_k));
 
          matrixToPack.set(3, 0, value * fz_k);
-         matrixToPack.set(3, 2, value * px_k);
+         matrixToPack.set(3, 2, value * (px_k - x_k));
 
          matrixToPack.set(4, 1, value * fz_k);
-         matrixToPack.set(4, 2, value * py_k);
+         matrixToPack.set(4, 2, value * (py_k - y_k));
+         break;
       }
    }
 
