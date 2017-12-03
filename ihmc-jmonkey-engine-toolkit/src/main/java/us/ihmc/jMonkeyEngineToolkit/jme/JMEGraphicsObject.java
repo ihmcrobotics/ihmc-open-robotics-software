@@ -411,14 +411,18 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       AppearanceDefinition appearance = graphics3dObjectAddMeshData.getAppearance();
 
       Mesh mesh = JMEMeshDataInterpreter.interpretMeshData(meshData);
-      Geometry geometry = new Geometry(meshData.getName()+"_Geometry", mesh);
-      setGeometryMaterialBasedOnAppearance(geometry, appearance);
-
       final Node meshHolder = new Node();
-      meshHolder.attachChild(geometry);
+
+      if (meshData != null)
+      {
+         Geometry geometry = new Geometry(meshData.getName() + "_Geometry", mesh);
+         setGeometryMaterialBasedOnAppearance(geometry, appearance);
+         meshHolder.attachChild(geometry);
+         addAppearanceChangedListener(graphics3dObjectAddMeshData, geometry);
+      }
+
       currentNode.attachChild(meshHolder);
 
-      addAppearanceChangedListener(graphics3dObjectAddMeshData, geometry);
 
       graphics3dObjectAddMeshData.setMeshChangedListener(new MeshChangedListener()
       {
