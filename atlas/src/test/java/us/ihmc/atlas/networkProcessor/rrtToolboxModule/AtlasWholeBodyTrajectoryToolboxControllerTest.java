@@ -77,7 +77,7 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
-      configuration.setMaximumExpansionSize(2000);
+      configuration.setMaximumExpansionSize(300);
 
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -112,10 +112,10 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
                                                                                                                         chestConfigurations,
-                                                                                                                        new double[] {-0.1 * Math.PI,
-                                                                                                                              -0.1 * Math.PI, -0.1 * Math.PI},
-                                                                                                                        new double[] {0.1 * Math.PI,
-                                                                                                                              0.1 * Math.PI, 0.1 * Math.PI});
+                                                                                                                        new double[] {-0.2 * Math.PI,
+                                                                                                                              -0.2 * Math.PI, -0.2 * Math.PI},
+                                                                                                                        new double[] {0.2 * Math.PI,
+                                                                                                                              0.2 * Math.PI, 0.2 * Math.PI});
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
       rigidBodyConfigurations.add(chestConfigurationMessage);
 

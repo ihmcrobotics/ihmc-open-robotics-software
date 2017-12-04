@@ -367,41 +367,49 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       currentExpansionSize.increment();
 
-      SpatialNode randomNode;
-
-      SpatialData randomData = toolboxData.createRandomSpatialData();
-      double nextDouble = WholeBodyTrajectoryToolboxSettings.randomManager.nextDouble();
-      double randomTime = nextDouble * (1.0 + WholeBodyTrajectoryToolboxSettings.timeCoefficient * tree.getMostAdvancedTime());
-
-      randomNode = new SpatialNode(randomTime, randomData);
-
-      tree.setRandomNode(randomNode);
-      tree.findNearestValidNodeToCandidate(true);
-      tree.limitCandidateDistanceFromParent(toolboxData.getTrajectoryTime());
-
-      SpatialNode candidate = tree.getCandidate();
-      updateValidity(candidate);
-
-      /*
-       * visualize
-       */
-      visualizedNode = new SpatialNode(candidate);
-      nodePlotter.update(candidate, 1);
-
-      if (candidate.isValid())
+      boolean randomNodeHasParentNode = false;
+      while (!randomNodeHasParentNode)
       {
-         tree.attachCandidate();
+         SpatialNode randomNode;
 
-         if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
+         SpatialData randomData = toolboxData.createRandomSpatialData();
+         double nextDouble = WholeBodyTrajectoryToolboxSettings.randomManager.nextDouble();
+         double randomTime = nextDouble * (1.0 + WholeBodyTrajectoryToolboxSettings.timeCoefficient * tree.getMostAdvancedTime());
+
+         randomNode = new SpatialNode(randomTime, randomData);
+
+         tree.setRandomNode(randomNode);
+         randomNodeHasParentNode = tree.findNearestValidNodeToCandidate(true);
+
+         if (randomNodeHasParentNode)
          {
-            if (VERBOSE)
-               PrintTools.info("Successfully finished tree expansion. " + currentExpansionSize.getIntegerValue());
-            currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
+            tree.limitCandidateDistanceFromParent(toolboxData.getTrajectoryTime());
+            SpatialNode candidate = tree.getCandidate();
+            updateValidity(candidate);
+
+            /*
+             * visualize
+             */
+            visualizedNode = new SpatialNode(candidate);
+            nodePlotter.update(candidate, 1);
+
+            if (candidate.isValid())
+            {
+               tree.attachCandidate();
+
+               if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
+               {
+                  if (VERBOSE)
+                     PrintTools.info("Successfully finished tree expansion. " + currentExpansionSize.getIntegerValue());
+                  currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
+               }
+            }
+            else
+            {
+               tree.dismissCandidate();
+            }
          }
-      }
-      else
-      {
-         tree.dismissCandidate();
+
       }
 
       /*
