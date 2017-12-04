@@ -1,7 +1,5 @@
 package us.ihmc.atlas.networkProcessor.rrtToolboxModule;
 
-import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName.PITCH;
-import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName.ROLL;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName.YAW;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage;
 
@@ -31,7 +29,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
@@ -101,9 +98,9 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
 
       ConfigurationSpaceName[] spaces = {YAW};
 
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));      
+      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
-      
+
       ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
       RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
                                                                                                                          pelvisConfigurations,

@@ -39,6 +39,18 @@ public class SpatialData
       configurationNames.addAll(other.getConfigurationNames());
       configurationData.addAll(other.getConfigurationData());
    }
+   
+   public void initializeData()
+   {
+      for (int i = 0; i < configurationData.size(); i++)
+      {
+         configurationData.set(i, 0.0);
+      }
+      for (int i = 0; i < rigidBodySpatials.size(); i++)
+      {
+         rigidBodySpatials.set(i, new Pose3D());
+      }   
+   }
 
    public void appendSpatial(String rigidBodyName, String[] configurationNames, double[] configurationData, Pose3D pose)
    {

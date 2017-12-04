@@ -80,7 +80,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements MultiRobotTestInterface
 {
    protected static final boolean VERBOSE = false;
-   
+
    private static final AppearanceDefinition ghostApperance = YoAppearance.DarkGreen();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
@@ -220,7 +220,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    {
       // Trajectory parameters
       double trajectoryTime = 10.0;
-      double circleRadius = 0.45;
+      double circleRadius = 0.550;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.55, 0.2, 1.1), new Point3D(0.55, -0.1, 1.1));
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.0);

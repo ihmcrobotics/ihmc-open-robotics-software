@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
@@ -24,7 +23,6 @@ public class ConstrainedRigidBodyTrajectory
 {
    private static final boolean VERBOSE = false;
 
-   private final Random randomManager = new Random();
    private final RigidBody rigidBody;
 
    private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
@@ -40,6 +38,8 @@ public class ConstrainedRigidBodyTrajectory
    private final Pose3D controlFramePose = new Pose3D();
 
    private final Pose3D initialPose = new Pose3D();
+   
+   private final boolean hasTrajectoryCommand;
 
    // For given trajectory and appending exploration transform.
    public ConstrainedRigidBodyTrajectory(RigidBody rigidBody, WaypointBasedTrajectoryCommand trajectoryCommand,
@@ -58,6 +58,7 @@ public class ConstrainedRigidBodyTrajectory
          FramePose controlFramePose = new FramePose(trajectoryCommand.getControlFramePose());
          controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
          this.controlFramePose.set(controlFramePose.getGeometryObject());
+         this.hasTrajectoryCommand = true;
       }
       else
       {
@@ -69,6 +70,7 @@ public class ConstrainedRigidBodyTrajectory
          trajectorySelectionMatrix.clearSelection();
 
          controlFramePose.setToZero();
+         this.hasTrajectoryCommand = false;
       }
       initialPose.set(rigidBody.getBodyFixedFrame().getTransformToWorldFrame());
 
@@ -87,6 +89,23 @@ public class ConstrainedRigidBodyTrajectory
             explorationConfigurationSpaces.add(explorationCommand.getDegreeOfFreedomToExplore(i));
          }
       }
+   }
+   
+   public void setInitialPose(RigidBody rigidBody)
+   {
+      Pose3D originOfRigidBody = new Pose3D(rigidBody.getBodyFixedFrame().getTransformToWorldFrame());
+      
+      initialPose.set(originOfRigidBody);
+      if(!hasTrajectoryCommand)
+      {
+         waypoints.set(0, new Pose3D(originOfRigidBody));
+         waypoints.set(1, new Pose3D(originOfRigidBody));
+      }
+   }
+   
+   public boolean hasTrajectoryCommand()
+   {
+      return hasTrajectoryCommand;
    }
 
    public RigidBody getRigidBody()

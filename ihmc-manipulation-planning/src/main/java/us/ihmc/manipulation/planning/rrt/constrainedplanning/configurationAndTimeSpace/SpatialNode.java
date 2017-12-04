@@ -1,6 +1,5 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
@@ -45,6 +44,11 @@ public class SpatialNode
          configuration = new KinematicsToolboxOutputStatus(other.configuration);
    }
 
+   public void initializeSpatialData()
+   {
+      spatialData.initializeData();
+   }
+      
    public double getTimeGap(SpatialNode other)
    {
       if (getTime() > other.getTime())
@@ -214,7 +218,7 @@ public class SpatialNode
 
    public void setConfiguration(KinematicsToolboxOutputStatus configuration)
    {
-      this.configuration = configuration;
+      this.configuration = new KinematicsToolboxOutputStatus(configuration);
    }
 
    public KinematicsToolboxOutputStatus getConfiguration()

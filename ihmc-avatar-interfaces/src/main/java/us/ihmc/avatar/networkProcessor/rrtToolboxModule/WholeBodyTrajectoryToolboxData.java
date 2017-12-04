@@ -9,17 +9,14 @@ import java.util.Set;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -44,14 +41,15 @@ public class WholeBodyTrajectoryToolboxData
 {
    private static final boolean VERBOSE = false;
 
+   private final FullHumanoidRobotModel fullRobotModel;
+   
    private double trajectoryTime;
    private int dimensionOfExploration = 0;
 
    private final List<RigidBody> allRigidBodies = new ArrayList<>();
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
-   FullHumanoidRobotModel fullRobotModel;
-
+   
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
@@ -117,6 +115,30 @@ public class WholeBodyTrajectoryToolboxData
       if (VERBOSE)
          PrintTools.info("Total exploration dimension is " + dimensionOfExploration);
    }
+   
+   public SpatialData createRandomInitialSpatialData()
+   {
+      SpatialData spatialData = new SpatialData();
+      
+      List<RigidBody> rigidBodiesHasTrajectoryCommand = new ArrayList<>();
+      
+      for (int i = 0; i < allRigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = allRigidBodies.get(i);
+
+         if(rigidBodyDataMap.get(rigidBody).hasTrajectoryCommand())
+            rigidBodiesHasTrajectoryCommand.add(rigidBody);
+      }
+      
+      for(int i=0;i<rigidBodiesHasTrajectoryCommand.size();i++)
+      {         
+         RigidBody rigidBody = rigidBodiesHasTrajectoryCommand.get(i);
+         
+         rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
+      }
+
+      return spatialData;      
+   }
 
    public SpatialData createRandomSpatialData()
    {
@@ -139,11 +161,29 @@ public class WholeBodyTrajectoryToolboxData
       for (int i = 0; i < node.getSize(); i++)
       {
          RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
-         Pose3D poseToAppend = node.getSpatial(i);
+         
+         Pose3D poseToAppend = node.getSpatial(i);         
+         
          messages.add(rigidBodyDataMap.get(rigidBody).createMessage(timeInTrajectory, poseToAppend));
       }
-
+      
       return messages;
+   }
+   
+   public void updateInitialConfiguration(FullHumanoidRobotModel fullRobotModel)
+   {
+      for (int i = 0; i < allRigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = allRigidBodies.get(i);
+         
+         for (RigidBody candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
+         {
+            if (candidateRigidBody.getName() == rigidBody.getName())
+            {
+               rigidBodyDataMap.get(rigidBody).setInitialPose(candidateRigidBody);
+            }
+         }
+      }
    }
 
    public double getTrajectoryTime()
