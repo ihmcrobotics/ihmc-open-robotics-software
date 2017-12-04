@@ -1,7 +1,9 @@
 package us.ihmc.wanderer.hardware.controllers;
 
 import java.io.IOException;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
@@ -29,7 +31,6 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.tools.io.logging.LogTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -218,7 +219,10 @@ public class WandererControllerFactory
 
    public static void main(String args[]) throws JSAPException, IOException, JAXBException
    {
-      LogTools.setGlobalLogLevel(Level.CONFIG);
+      Logger.getLogger("").setLevel(Level.CONFIG);
+      ConsoleHandler handler = new ConsoleHandler();
+      handler.setLevel(Level.CONFIG);
+      Logger.getLogger("").addHandler(handler);
       new WandererControllerFactory();
    }
 }
