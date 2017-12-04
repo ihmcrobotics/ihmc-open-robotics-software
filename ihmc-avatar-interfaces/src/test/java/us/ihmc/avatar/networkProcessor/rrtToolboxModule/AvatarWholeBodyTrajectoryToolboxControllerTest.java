@@ -278,7 +278,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
                                                                                                                          pelvisConfigurations,
                                                                                                                          new double[] {-0.2},
-                                                                                                                         new double[] {0.0});
+                                                                                                                         new double[] {0.1});
       ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
                                                                                                                         chestConfigurations,

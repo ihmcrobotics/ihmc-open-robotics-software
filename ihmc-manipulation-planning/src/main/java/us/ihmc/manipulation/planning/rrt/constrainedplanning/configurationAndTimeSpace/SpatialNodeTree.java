@@ -3,6 +3,8 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
+
 public class SpatialNodeTree
 {
    private SpatialNode rootNode;
@@ -17,8 +19,10 @@ public class SpatialNodeTree
 
    public double dismissableTimeStep = 0.05;
    private double maxTimeInterval = 0.2;
-   private double maxPositionDistance = 0.01;
-   private double maxOrientationDistance = Math.toRadians(5);
+   private double maxPositionDistance = 0.05;
+   private double maxOrientationDistance = Math.toRadians(20);
+//   private double maxPositionDistance = 0.02;
+//   private double maxOrientationDistance = Math.toRadians(9);
 
    private SpatialNode currentCandidate = null;
    private SpatialNode currentCandidateParent = null;
@@ -46,9 +50,9 @@ public class SpatialNodeTree
       return nodeOne.computeDistance(timeWeight, positionWeight, orientationWeight, nodeTwo);
    }
 
-   public void findNearestValidNodeToCandidate(boolean includeTimeComparison)
+   public boolean findNearestValidNodeToCandidate(boolean includeTimeComparison)
    {
-      double distanceToNearestNode = Double.POSITIVE_INFINITY;
+      double distanceToNearestNode = Double.MAX_VALUE;
       SpatialNode nearestNode = null;
 
       for (SpatialNode candidateForParent : validNodes)
@@ -59,9 +63,13 @@ public class SpatialNodeTree
          double distance;
 
          if (includeTimeComparison)
-            distance = candidateForParent.computeDistance(timeWeight, positionWeight, orientationWeight, randomNode);
+            //distance = candidateForParent.computeDistance(timeWeight, positionWeight, orientationWeight, randomNode);
+            distance = candidateForParent.computeDistanceWithinMaxDistance(timeWeight, positionWeight, orientationWeight, randomNode, maxTimeInterval,
+                                                                           maxPositionDistance, maxOrientationDistance);
          else
-            distance = candidateForParent.computeDistance(0.0, positionWeight, orientationWeight, randomNode);
+            //distance = candidateForParent.computeDistance(0.0, positionWeight, orientationWeight, randomNode);
+            distance = candidateForParent.computeDistanceWithinMaxDistance(0.0, positionWeight, orientationWeight, randomNode, maxTimeInterval,
+                                                                           maxPositionDistance, maxOrientationDistance);
 
          if (distance < distanceToNearestNode)
          {
@@ -70,12 +78,21 @@ public class SpatialNodeTree
          }
       }
 
-      currentCandidateParent = nearestNode;
+      if (nearestNode == null)
+      {
+         return false;
+      }
+      else
+      {
+         currentCandidateParent = nearestNode;
+         return true;
+      }
    }
 
    public void limitCandidateDistanceFromParent(double trajectoryTime)
    {
-      currentCandidate = currentCandidateParent.createNodeWithinMaxDistance(maxTimeInterval, maxPositionDistance, maxOrientationDistance, randomNode);
+      //currentCandidate = currentCandidateParent.createNodeWithinMaxDistance(maxTimeInterval, maxPositionDistance, maxOrientationDistance, randomNode);
+      currentCandidate = currentCandidateParent.createNodeWithinTimeStep(maxTimeInterval, randomNode);
       if (currentCandidate.getTime() > trajectoryTime)
          currentCandidate.setTime(trajectoryTime);
       currentCandidate.setParent(currentCandidateParent);

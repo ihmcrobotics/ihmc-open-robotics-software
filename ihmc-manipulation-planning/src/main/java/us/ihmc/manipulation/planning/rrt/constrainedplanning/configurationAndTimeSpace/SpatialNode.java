@@ -1,5 +1,6 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
@@ -75,6 +76,31 @@ public class SpatialNode
       return distance;
    }
 
+   /**
+    * Compute distance within maximum distance
+    */
+   public double computeDistanceWithinMaxDistance(double timeWeight, double positionWeight, double orientationWeight, SpatialNode other, double maxTimeInterval,
+                                                  double maxPositionDistance, double maxOrientationDistance)
+   {
+      double timeDistance = timeWeight * getTimeGap(other);
+      double positionDistance = positionWeight * getPositionDistance(other);
+      double orientationDistance = orientationWeight * getOrientationDistance(other);
+
+      double greatestPositionDistance = spatialData.getMaximumPositionDistance(other.getSpatialData());
+      double greatestOrientationDistance = spatialData.getMaximumOrientationDistance(other.getSpatialData());
+
+      if (greatestPositionDistance / timeDistance > maxPositionDistance / maxTimeInterval)
+         return Double.MAX_VALUE;
+      if (greatestOrientationDistance / timeDistance > maxOrientationDistance / maxTimeInterval)
+         return Double.MAX_VALUE;
+
+      double distance = timeDistance + positionDistance + orientationDistance;
+      return distance;
+   }
+
+   /**
+    * To measure displacement between two paths.
+    */
    public double computeDistanceWOTime(double positionWeight, double orientationWeight, SpatialNode other)
    {
       double positionDistance = positionWeight * getPositionDistance(other);
@@ -129,6 +155,21 @@ public class SpatialNode
          spatialNode.interpolate(this, query, alpha);
          return spatialNode;
       }
+   }
+
+   public SpatialNode createNodeWithinTimeStep(double maxTimeInterval, SpatialNode query)
+   {
+      SpatialNode spatialNode = new SpatialNode(this);
+
+      double alpha = 1.0;
+      double timeGap = getTimeGap(query);
+      if (timeGap > maxTimeInterval)
+      {
+         alpha = Math.min(alpha, maxTimeInterval / timeGap);
+      }
+      spatialNode.interpolate(this, query, alpha);
+
+      return spatialNode;
    }
 
    public double getConfigurationData(int index)
