@@ -70,6 +70,17 @@ public class LIPMDynamicsTest
 
       JUnitTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
 
+      assertEquals(x, currentState.get(0), 1e-10);
+      assertEquals(y, currentState.get(1), 1e-10);
+      assertEquals(z, currentState.get(2), 1e-10);
+      assertEquals(xDot, currentState.get(3), 1e-10);
+      assertEquals(yDot, currentState.get(4), 1e-10);
+      assertEquals(zDot, currentState.get(5), 1e-10);
+
+      assertEquals(pX, currentControl.get(0), 1e-10);
+      assertEquals(pY, currentControl.get(1), 1e-10);
+      assertEquals(fz, currentControl.get(2), 1e-10);
+
       Random random = new Random(10L);
       for (int i = 0; i < 100; i++)
       {
@@ -198,6 +209,17 @@ public class LIPMDynamicsTest
       expectedDynamicsStateGradient.set(5, 5, f55);
 
       JUnitTools.assertMatrixEquals(expectedDynamicsStateGradient, dynamicsStateGradient, 1e-10);
+
+      assertEquals(x, currentState.get(0), 1e-10);
+      assertEquals(y, currentState.get(1), 1e-10);
+      assertEquals(z, currentState.get(2), 1e-10);
+      assertEquals(xDot, currentState.get(3), 1e-10);
+      assertEquals(yDot, currentState.get(4), 1e-10);
+      assertEquals(zDot, currentState.get(5), 1e-10);
+
+      assertEquals(pX, currentControl.get(0), 1e-10);
+      assertEquals(pY, currentControl.get(1), 1e-10);
+      assertEquals(fz, currentControl.get(2), 1e-10);
 
       Random random = new Random(10L);
       for (int i = 0; i < 100; i++)
@@ -333,6 +355,17 @@ public class LIPMDynamicsTest
       expectedDynamicsControlGradient.set(5, 2, f52);
 
       JUnitTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
+
+      assertEquals(x, currentState.get(0), 1e-10);
+      assertEquals(y, currentState.get(1), 1e-10);
+      assertEquals(z, currentState.get(2), 1e-10);
+      assertEquals(xDot, currentState.get(3), 1e-10);
+      assertEquals(yDot, currentState.get(4), 1e-10);
+      assertEquals(zDot, currentState.get(5), 1e-10);
+
+      assertEquals(pX, currentControl.get(0), 1e-10);
+      assertEquals(pY, currentControl.get(1), 1e-10);
+      assertEquals(fz, currentControl.get(2), 1e-10);
 
       Random random = new Random(10L);
       for (int i = 0; i < 100; i++)
@@ -505,6 +538,18 @@ public class LIPMDynamicsTest
       dynamics.getDynamicsStateHessian(LIPMState.NORMAL, 5, currentState, currentControl, dynamicsStateHessian);
       expectedDynamicsStateHessian.zero();
       JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+
+
+      assertEquals(x, currentState.get(0), 1e-10);
+      assertEquals(y, currentState.get(1), 1e-10);
+      assertEquals(z, currentState.get(2), 1e-10);
+      assertEquals(xDot, currentState.get(3), 1e-10);
+      assertEquals(yDot, currentState.get(4), 1e-10);
+      assertEquals(zDot, currentState.get(5), 1e-10);
+
+      assertEquals(pX, currentControl.get(0), 1e-10);
+      assertEquals(pY, currentControl.get(1), 1e-10);
+      assertEquals(fz, currentControl.get(2), 1e-10);
 
       Random random = new Random(10L);
       for (int i = 0; i < 100; i++)
@@ -691,6 +736,17 @@ public class LIPMDynamicsTest
       expectedDynamicsControlHessian.set(4, 1, f41);
 
       JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+
+      assertEquals(x, currentState.get(0), 1e-10);
+      assertEquals(y, currentState.get(1), 1e-10);
+      assertEquals(z, currentState.get(2), 1e-10);
+      assertEquals(xDot, currentState.get(3), 1e-10);
+      assertEquals(yDot, currentState.get(4), 1e-10);
+      assertEquals(zDot, currentState.get(5), 1e-10);
+
+      assertEquals(pX, currentControl.get(0), 1e-10);
+      assertEquals(pY, currentControl.get(1), 1e-10);
+      assertEquals(fz, currentControl.get(2), 1e-10);
 
       Random random = new Random(10L);
       for (int i = 0; i < 100; i++)
@@ -885,6 +941,17 @@ public class LIPMDynamicsTest
       dynamics.getDynamicsStateGradientOfControlGradient(LIPMState.NORMAL, 5, currentState, currentControl, dynamicsControlHessian);
       expectedDynamicsControlHessian.zero();
       JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+
+      assertEquals(x, currentState.get(0), 1e-10);
+      assertEquals(y, currentState.get(1), 1e-10);
+      assertEquals(z, currentState.get(2), 1e-10);
+      assertEquals(xDot, currentState.get(3), 1e-10);
+      assertEquals(yDot, currentState.get(4), 1e-10);
+      assertEquals(zDot, currentState.get(5), 1e-10);
+
+      assertEquals(pX, currentControl.get(0), 1e-10);
+      assertEquals(pY, currentControl.get(1), 1e-10);
+      assertEquals(fz, currentControl.get(2), 1e-10);
 
       Random random = new Random(10L);
       for (int i = 0; i < 100; i++)
