@@ -1,7 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -83,6 +88,8 @@ public class WalkingHighLevelHumanoidController
    private final CenterOfMassHeightManager comHeightManager;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
+   private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
+   private final SideDependentList<Set<String>> legJointNames = new SideDependentList<>();
 
    private final OneDoFJoint[] allOneDoFjoints;
 
@@ -165,6 +172,20 @@ public class WalkingHighLevelHumanoidController
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
          RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
          bodyManagers.add(handManager);
+      }
+
+      for (RigidBodyControlManager manager : bodyManagers)
+      {
+         Arrays.asList(manager.getControlledJoints()).stream().forEach(joint -> bodyManagerByJointName.put(joint.getName(), manager));
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         OneDoFJoint[] legJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), OneDoFJoint.class);
+         Set<String> jointNames = new HashSet<>();
+         Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
+         legJointNames.put(robotSide, jointNames);
       }
 
       this.walkingControllerParameters = walkingControllerParameters;
@@ -718,5 +739,25 @@ public class WalkingHighLevelHumanoidController
    public WalkingStateEnum getWalkingStateEnum()
    {
       return stateMachine.getCurrentStateEnum();
+   }
+
+   public boolean isJointLoaded(String jointName)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         boolean legLoaded = feetManager.getCurrentConstraintType(robotSide).isLoaded();
+         if (legLoaded && legJointNames.get(robotSide).contains(jointName))
+         {
+            return true;
+         }
+      }
+
+      RigidBodyControlManager manager = bodyManagerByJointName.get(jointName);
+      if (manager != null && manager.isLoadBearing())
+      {
+         return true;
+      }
+
+      return false;
    }
 }

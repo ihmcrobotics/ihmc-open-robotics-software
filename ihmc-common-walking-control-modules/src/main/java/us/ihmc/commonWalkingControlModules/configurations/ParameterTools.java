@@ -35,16 +35,21 @@ public class ParameterTools
       }
    }
 
-   public static void extractAccelerationIntegrationParameterMap(List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> parameterList,
-                                                                  Map<String, JointAccelerationIntegrationParametersReadOnly> parameterMapToPack,
-                                                                  YoVariableRegistry registry)
+   public static void extractAccelerationIntegrationParameterMap(String prefix, List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> parameterList,
+                                                                 Map<String, JointAccelerationIntegrationParametersReadOnly> parameterMapToPack,
+                                                                 YoVariableRegistry registry)
    {
       parameterMapToPack.clear();
+      if (parameterList == null)
+      {
+         return;
+      }
+
       for (ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>> parameterTripple : parameterList)
       {
          String name = parameterTripple.getLeft();
          JointAccelerationIntegrationParametersReadOnly defaultParameters = parameterTripple.getMiddle();
-         TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name, registry, defaultParameters);
+         TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
 
          for (String jointName : parameterTripple.getRight())
          {
