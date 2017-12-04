@@ -79,7 +79,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements MultiRobotTestInterface
 {
-   protected static final boolean VERBOSE = true;
+   protected static final boolean VERBOSE = false;
    
    private static final AppearanceDefinition ghostApperance = YoAppearance.DarkGreen();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -443,7 +443,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       runTest(message, maxNumberOfIterations);
    }
 
-   private void runTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
+   protected void runTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
    {
       List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
       double t0 = Double.POSITIVE_INFINITY;
@@ -484,9 +484,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          if (visualize)
             visualizeSolution(solution, trajectoryTime / 1000.0);
 
-         PrintTools.info("assert start");
          trackingTrajectoryWithOutput(message, solution);
-         PrintTools.info("assert end");
       }
       else
       {
@@ -727,7 +725,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
    }
 
-   private FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration()
+   protected FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration()
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
