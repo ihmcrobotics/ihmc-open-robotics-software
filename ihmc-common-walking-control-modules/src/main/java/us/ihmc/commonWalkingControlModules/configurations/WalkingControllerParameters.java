@@ -12,9 +12,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -26,7 +24,6 @@ import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters
@@ -44,62 +41,6 @@ public abstract class WalkingControllerParameters
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
       legConfigurationParameters = new LegConfigurationParameters();
-   }
-
-   /**
-    * Specifies if the controller should compute desired positions and velocities for all the robot
-    * joints from the desired acceleration. This will enable acceleration integration for all joints
-    * that have their integration settings defined in {@link #getJointAccelerationIntegrationParameters()}.
-    * If this is set to false acceleration integration can still be enabled for select upper body joints
-    * using the setting in {@link #getOrCreatePositionControlledJoints()}.
-    * <p>
-    * It is {@code false} by default and this method should be overridden to return otherwise.
-    * </p>
-    *
-    * @return {@code true} if the desired acceleration should be integrated into desired velocity
-    *         and position for all the joints.
-    */
-   public boolean enableJointAccelerationIntegrationForAllJoints()
-   {
-      return false;
-   }
-
-   /**
-    * The list of strings returned contains all joint names that are position controlled. The names
-    * of the joints are defined in the robots joint map. Note, that this list will only affect
-    * joint chains that are controlled using a {@link RigidBodyControlManager}. This means only
-    * upper body joints can be specified here.
-    * <p>
-    * This setting will enable acceleration integration for these joint and also set the joint control
-    * mode to be {@link JointDesiredControlMode#POSITION}.
-    * </p>
-    *
-    * @return list of position controlled joint names
-    */
-   public List<String> getOrCreatePositionControlledJoints()
-   {
-      return new ArrayList<String>();
-   }
-
-   /**
-    * Returns a list with triples of joint acceleration integration parameters and the names of the joints
-    * that the parameter will be used for. The triple also contains the name of the joint set for the specific
-    * parameters. The name will be used to create tunable parameters in the controller. E.g. the left and
-    * right arm joints could be grouped this way so only a single parameter for tuning is created that affects
-    * both sides.
-    * <p>
-    * If a joint is not contained in the map, position control is not supported for that joint.
-    * </p>
-    * <p>
-    * This method is called by the controller to know the set of joints for which specific parameters are to
-    * be used. Joints listed in {@link #getOrCreatePositionControlledJoints()} must be contained in this map.
-    * For other joints the controller will use default integration settings.
-    * </p>
-    * @return list containing acceleration integration parameters and the corresponding joints
-    */
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
-   {
-      return null;
    }
 
    /**
@@ -180,7 +121,7 @@ public abstract class WalkingControllerParameters
    {
       return 0.04;
    }
-   
+
    /**
     * This parameter sets the buffer around the support polygon to constrain the offset ICP used in {@link PelvisICPBasedTranslationManager}. It's defined in meters.
     */
@@ -374,10 +315,10 @@ public abstract class WalkingControllerParameters
     * swing foot to the next foothold.
     */
    public abstract double getDefaultSwingTime();
-   
+
 
    /**
-    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state 
+    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state
     * @return
     */
    public double getDefaultTouchdownTime()
@@ -662,7 +603,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return whether the z-component swing initial angular velocity should be zeroed out or not.
     */
    public boolean ignoreSwingInitialAngularVelocityZ()
@@ -676,7 +617,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return the swing initial linear velocity maximum magnitude.
     */
    public double getMaxSwingInitialLinearVelocityMagnitude()
@@ -690,7 +631,7 @@ public abstract class WalkingControllerParameters
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
     * resulting in an undesired trajectory.
     * </p>
-    * 
+    *
     * @return the swing initial angular velocity maximum magnitude.
     */
    public double getMaxSwingInitialAngularVelocityMagnitude()
