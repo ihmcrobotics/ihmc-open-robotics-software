@@ -441,13 +441,14 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void findInitialGuess()
    {
-      SpatialData initialGuessData = toolboxData.createRandomSpatialData();
+      //SpatialData initialGuessData = toolboxData.createRandomSpatialData();
+      SpatialData initialGuessData = toolboxData.createRandomInitialSpatialData();
 
-      SpatialNode initialGuessNode = new SpatialNode(0.0, initialGuessData);
+      SpatialNode initialGuessNode = new SpatialNode(initialGuessData);
       updateValidity(initialGuessNode);
 
       visualizedNode = initialGuessNode;
-      nodePlotter.update(visualizedNode, 1);
+      //nodePlotter.update(visualizedNode, 1);
 
       double jointScore;
       if (visualizedNode.isValid())
@@ -461,8 +462,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          bestScoreInitialGuess.set(jointScore);
 
-         rootNode = new SpatialNode(initialGuessNode);
-         rootNode.setValidity(initialGuessNode.isValid());
+         SpatialData dummyData = toolboxData.createRandomSpatialData();
+         rootNode = new SpatialNode(dummyData);
+         rootNode.setConfiguration(initialGuessNode.getConfiguration());
+         rootNode.initializeSpatialData();
+         toolboxData.updateInitialConfiguration(getSolverFullRobotModel());
       }
 
       if (initialGuessNode.isValid())
@@ -677,9 +681,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        */
       boolean success = humanoidKinematicsSolver.solve();
 
-      node.setConfiguration(new KinematicsToolboxOutputStatus(humanoidKinematicsSolver.getSolution()));
+      //node.setConfiguration(new KinematicsToolboxOutputStatus(humanoidKinematicsSolver.getSolution()));
+      node.setConfiguration(humanoidKinematicsSolver.getSolution());
       node.setValidity(success);
-
       return success;
    }
 
@@ -694,7 +698,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private void updateVisualizerRobotConfiguration()
    {
-      updateVisualizerRobotConfiguration(visualizedNode.getConfiguration());
+      //      updateVisualizerRobotConfiguration(visualizedNode.getConfiguration());
+
+      visualizedNode.getConfiguration().getDesiredJointState(visualizedFullRobotModel.getRootJoint(),
+                                                             FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
    }
 
    /**
