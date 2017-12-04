@@ -14,7 +14,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class JointPositionControlHelper
+public class AccelerationIntegrationParameterHelper
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -27,8 +27,8 @@ public class JointPositionControlHelper
 
    private final WalkingHighLevelHumanoidController walkingController;
 
-   public JointPositionControlHelper(HighLevelControllerParameters parameters, List<String> positionControlledJoints, OneDoFJoint[] joints,
-                                     WalkingHighLevelHumanoidController walkingController, YoVariableRegistry parentRegistry)
+   public AccelerationIntegrationParameterHelper(HighLevelControllerParameters parameters, List<String> positionControlledJoints, OneDoFJoint[] joints,
+                                                 WalkingHighLevelHumanoidController walkingController, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.walkingController = walkingController;

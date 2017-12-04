@@ -48,7 +48,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
    private final JointDesiredOutputList jointStiffnessAndDamping;
 
-   private final JointPositionControlHelper positionControlHelper;
+   private final AccelerationIntegrationParameterHelper accelerationIntegrationParameterHelper;
 
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -110,8 +110,8 @@ public class WalkingControllerState extends HighLevelControllerState
       }
 
       OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
-      positionControlHelper = new JointPositionControlHelper(highLevelControllerParameters, positionControlledJoints, controlledOneDofJoints, walkingController,
-                                                             registry);
+      accelerationIntegrationParameterHelper = new AccelerationIntegrationParameterHelper(highLevelControllerParameters, positionControlledJoints,
+                                                                                          controlledOneDofJoints, walkingController, registry);
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -173,10 +173,10 @@ public class WalkingControllerState extends HighLevelControllerState
    public void doAction()
    {
       walkingController.doAction();
-      positionControlHelper.update();
+      accelerationIntegrationParameterHelper.update();
 
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
-      controllerCoreCommand.addInverseDynamicsCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationParameterHelper.getJointAccelerationIntegrationCommand());
       controllerCoreCommand.completeLowLevelJointData(jointStiffnessAndDamping);
 
       controllerCoreTimer.startMeasurement();
