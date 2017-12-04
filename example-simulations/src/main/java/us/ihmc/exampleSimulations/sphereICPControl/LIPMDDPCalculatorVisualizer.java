@@ -190,7 +190,7 @@ public class LIPMDDPCalculatorVisualizer
       simulationOverheadPlotterFactory.createOverheadPlotter();
       */
 
-      computeNextPass.set(true);
+      //computeNextPass.set(true);
 
       scs.startOnAThread();
       simulate(footsteps, timings);
@@ -226,6 +226,7 @@ public class LIPMDDPCalculatorVisualizer
       currentControlState.set(2, 0, 10 * 9.81);
 
       ddp.initialize(currentCoMState, currentControlState, copPlanner.getCoPTrajectory());
+      plotCoMPlan();
 
       while(true)
       {
@@ -274,6 +275,8 @@ public class LIPMDDPCalculatorVisualizer
    {
       RecyclingArrayList<DenseMatrix64F> controlVector = ddp.getControlVector();
       RecyclingArrayList<DenseMatrix64F> stateVector = ddp.getStateVector();
+
+      comTrack.reset();
 
       for (int i = 0; i < controlVector.size(); i++)
       {
