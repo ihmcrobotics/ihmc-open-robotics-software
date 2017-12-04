@@ -176,6 +176,10 @@ public class WalkingHighLevelHumanoidController
 
       for (RigidBodyControlManager manager : bodyManagers)
       {
+         if (manager == null)
+         {
+            continue;
+         }
          Arrays.asList(manager.getControlledJoints()).stream().forEach(joint -> bodyManagerByJointName.put(joint.getName(), manager));
       }
 
