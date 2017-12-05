@@ -12,6 +12,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.SceneProcessor;
+import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue;
@@ -455,5 +456,12 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    {
       // TODO Auto-generated method stub
 
+   }
+
+   @Override
+   public void setProfiler(AppProfiler profiler)
+   {
+      // TODO Auto-generated method stub
+      
    }
 }
