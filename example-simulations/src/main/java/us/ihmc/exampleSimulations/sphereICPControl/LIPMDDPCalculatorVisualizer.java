@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.BasicCoPPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDDPCalculator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.SimpleLIPMDDPCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -38,9 +39,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -56,8 +60,8 @@ public class LIPMDDPCalculatorVisualizer
    private static final int BUFFER_SIZE = 16000;
    private final double dt = 0.006;
 
-   private static final double singleSupportDuration = 0.6; /// 0.7;
-   private static final double doubleSupportDuration = 0.1; // 0.4; //0.25;
+   private static final double singleSupportDuration = 0.5; /// 0.7;
+   private static final double doubleSupportDuration = 0.05; // 0.4; //0.25;
 
    private static final double nominalComHeight = 1.0;
 
@@ -93,7 +97,11 @@ public class LIPMDDPCalculatorVisualizer
    private final BagOfBalls comTrack;
 
    private final BasicCoPPlanner copPlanner;
-   private final LIPMDDPCalculator ddp = new LIPMDDPCalculator(0.01, 10.0, 9.81);
+   private final SimpleLIPMDDPCalculator ddp = new SimpleLIPMDDPCalculator(0.01, 1.0, 9.81);
+
+   private final YoDouble lineSearchGain = new YoDouble("lineSearchGain", registry);
+   private final YoInteger updatesPerRequest = new YoInteger("updatesPerRequest", registry);
+   private final YoDouble trajectoryDT = new YoDouble("trajectoryDT", registry);
 
    public LIPMDDPCalculatorVisualizer()
    {
@@ -138,6 +146,26 @@ public class LIPMDDPCalculatorVisualizer
          yoPlaneContactState.setFullyConstrained();
          contactStates.put(robotSide, yoPlaneContactState);
       }
+
+      updatesPerRequest.set(1);
+      lineSearchGain.set(0.2);
+      lineSearchGain.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            ddp.setLineSearchGain(lineSearchGain.getDoubleValue());
+         }
+      });
+      trajectoryDT.set(0.01);
+      trajectoryDT.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            ddp.setDeltaT(trajectoryDT.getDoubleValue());
+         }
+      });
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -197,6 +225,7 @@ public class LIPMDDPCalculatorVisualizer
       ThreadTools.sleepForever();
    }
 
+
    private void simulate(List<Footstep> footsteps, List<FootstepTiming> timings)
    {
       Footstep nextFootstep = footsteps.remove(0);
@@ -213,17 +242,15 @@ public class LIPMDDPCalculatorVisualizer
 
       copPlanner.submitFootstep(nextFootstep, nextFootstepTiming);
       copPlanner.submitFootstep(nextNextFootstep, nextNextFootstepTiming);
-      copPlanner.submitFootstep(nextNextNextFootstep, nextNextNextFootstepTiming);
+      //copPlanner.submitFootstep(nextNextNextFootstep, nextNextNextFootstepTiming);
       copPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
       double trajectoryTime = nextFootstepTiming.getStepTime() + nextNextFootstepTiming.getStepTime() + nextNextNextFootstepTiming.getStepTime();
 
       plotCoPPlan(trajectoryTime);
 
-      DenseMatrix64F currentCoMState = new DenseMatrix64F(6, 1);
-      currentCoMState.set(2, 0, nominalComHeight);
-      DenseMatrix64F currentControlState = new DenseMatrix64F(3, 1);
-      currentControlState.set(2, 0, 10 * 9.81);
+      DenseMatrix64F currentCoMState = new DenseMatrix64F(4, 1);
+      DenseMatrix64F currentControlState = new DenseMatrix64F(2, 1);
 
       ddp.initialize(currentCoMState, currentControlState, copPlanner.getCoPTrajectory());
       plotCoMPlan();
@@ -234,8 +261,11 @@ public class LIPMDDPCalculatorVisualizer
          {
             computeNextPass.set(false);
 
-            ddp.backwardDDPPass();
-            ddp.forwardDDPPass();
+            for (int i = 0; i < updatesPerRequest.getIntegerValue(); i++)
+            {
+               ddp.backwardDDPPass();
+               ddp.forwardDDPPass();
+            }
 
             plotCoMPlan();
          }
@@ -286,7 +316,7 @@ public class LIPMDDPCalculatorVisualizer
          tempPoint.set(control.get(0), control.get(1), 0.0);
          modifiedCopTrack.setBallLoop(tempPoint);
 
-         tempPoint.set(state.get(0), state.get(1), state.get(2));
+         tempPoint.set(state.get(0), state.get(1), 1.0);
          comTrack.setBallLoop(tempPoint);
       }
    }
