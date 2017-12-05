@@ -43,6 +43,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-kalman-project", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
 }
