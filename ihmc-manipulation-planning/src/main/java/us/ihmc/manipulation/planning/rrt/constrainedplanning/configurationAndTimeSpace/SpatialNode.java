@@ -68,7 +68,7 @@ public class SpatialNode
    }
 
    /**
-    * Distance from this to other.
+    * Compute distance from this to other.
     */
    public double computeDistance(double timeWeight, double positionWeight, double orientationWeight, SpatialNode other)
    {
@@ -93,24 +93,12 @@ public class SpatialNode
       double greatestPositionDistance = spatialData.getMaximumPositionDistance(other.getSpatialData());
       double greatestOrientationDistance = spatialData.getMaximumOrientationDistance(other.getSpatialData());
 
-      if (greatestPositionDistance / timeDistance > maxPositionDistance / maxTimeInterval)
+      if (greatestPositionDistance / getTimeGap(other) > maxPositionDistance / maxTimeInterval)
          return Double.MAX_VALUE;
-      if (greatestOrientationDistance / timeDistance > maxOrientationDistance / maxTimeInterval)
+      if (greatestOrientationDistance / getTimeGap(other) > maxOrientationDistance / maxTimeInterval)
          return Double.MAX_VALUE;
 
       double distance = timeDistance + positionDistance + orientationDistance;
-      return distance;
-   }
-
-   /**
-    * To measure displacement between two paths.
-    */
-   public double computeDistanceWOTime(double positionWeight, double orientationWeight, SpatialNode other)
-   {
-      double positionDistance = positionWeight * getPositionDistance(other);
-      double orientationDistance = orientationWeight * getOrientationDistance(other);
-
-      double distance = positionDistance + orientationDistance;
       return distance;
    }
 

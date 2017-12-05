@@ -66,19 +66,11 @@ public class WholeBodyTrajectoryToolboxMessageTools
       return new WaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints, selectionMatrix);
    }
 
-   public static double[] createDefaultExplorationUpperLimitArray(ConfigurationSpaceName... configurationSpaceNames)
-   {
-      double[] upperLimit = new double[configurationSpaceNames.length];
-      for (int i = 0; i < configurationSpaceNames.length; i++)
-         upperLimit[i] = configurationSpaceNames[i].getDefaultExplorationUpperLimit();
-      return upperLimit;
-   }
-
-   public static double[] createDefaultExplorationLowerLimitArray(ConfigurationSpaceName... configurationSpaceNames)
+   public static double[] createDefaultExplorationAmplitudeArray(ConfigurationSpaceName... configurationSpaceNames)
    {
       double[] lowerLimit = new double[configurationSpaceNames.length];
       for (int i = 0; i < configurationSpaceNames.length; i++)
-         lowerLimit[i] = configurationSpaceNames[i].getDefaultExplorationLowerLimit();
+         lowerLimit[i] = configurationSpaceNames[i].getDefaultExplorationAmplitude();
       return lowerLimit;
    }
 }

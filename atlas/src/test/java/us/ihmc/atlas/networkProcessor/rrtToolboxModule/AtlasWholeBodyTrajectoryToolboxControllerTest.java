@@ -104,15 +104,10 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
       RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
                                                                                                                          pelvisConfigurations,
-                                                                                                                         new double[] {-0.2},
-                                                                                                                         new double[] {0.0});
+                                                                                                                         new double[] {0.15});
       ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-                                                                                                                        chestConfigurations,
-                                                                                                                        new double[] {-0.2 * Math.PI,
-                                                                                                                              -0.2 * Math.PI, -0.2 * Math.PI},
-                                                                                                                        new double[] {0.2 * Math.PI,
-                                                                                                                              0.2 * Math.PI, 0.2 * Math.PI});
+                                                                                                                        chestConfigurations);
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
       rigidBodyConfigurations.add(chestConfigurationMessage);
 

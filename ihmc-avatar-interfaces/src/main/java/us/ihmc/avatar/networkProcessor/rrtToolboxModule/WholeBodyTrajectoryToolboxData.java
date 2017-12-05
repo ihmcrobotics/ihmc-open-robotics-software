@@ -125,7 +125,10 @@ public class WholeBodyTrajectoryToolboxData
          RigidBody rigidBody = allRigidBodies.get(i);
 
          if (rigidBodyDataMap.get(rigidBody).hasTrajectoryCommand())
-            rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);            
+         {
+            rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
+         }
+                        
       }
 
       return spatialData;

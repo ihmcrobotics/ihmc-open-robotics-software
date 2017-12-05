@@ -13,16 +13,20 @@ public class SpatialNodeTree
 
    private List<SpatialNode> invalidNodes = new ArrayList<>();
 
-   private double timeWeight = 0.5;
+   private double timeWeight = 1.0;
    private double positionWeight = 1.0;
-   private double orientationWeight = 0.5;
+   private double orientationWeight = 1.0;
 
-   public double dismissableTimeStep = 0.05;
-   private double maxTimeInterval = 0.2;
+   private double maxTimeInterval = 0.2;   
    private double maxPositionDistance = 0.05;
    private double maxOrientationDistance = Math.toRadians(20);
-//   private double maxPositionDistance = 0.02;
-//   private double maxOrientationDistance = Math.toRadians(9);
+   
+//   private double timeWeight = 1.0;
+//   private double positionWeight = 1.0;
+//   private double orientationWeight = 1.0;
+//   private double maxTimeInterval = 0.2;
+//   private double maxPositionDistance = 0.05;
+//   private double maxOrientationDistance = Math.toRadians(20);
 
    private SpatialNode currentCandidate = null;
    private SpatialNode currentCandidateParent = null;
@@ -43,11 +47,6 @@ public class SpatialNodeTree
    public SpatialNode getCandidate()
    {
       return currentCandidate;
-   }
-
-   public double getDistance(SpatialNode nodeOne, SpatialNode nodeTwo)
-   {
-      return nodeOne.computeDistance(timeWeight, positionWeight, orientationWeight, nodeTwo);
    }
 
    public boolean findNearestValidNodeToCandidate(boolean includeTimeComparison)

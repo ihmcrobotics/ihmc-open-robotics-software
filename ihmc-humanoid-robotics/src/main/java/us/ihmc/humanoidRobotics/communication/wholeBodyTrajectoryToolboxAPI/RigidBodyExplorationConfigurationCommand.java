@@ -13,27 +13,27 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>, WholeBodyTrajectoryToolboxAPI<RigidBodyExplorationConfigurationMessage>
+public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>,
+      WholeBodyTrajectoryToolboxAPI<RigidBodyExplorationConfigurationMessage>
 {
    private long rigidBodyNameBasedashCode;
    private RigidBody rigidBody;
    private final List<ConfigurationSpaceName> degreesOfFreedomToExplore = new ArrayList<>();
-   private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
-   private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
+
+   private final TDoubleArrayList explorationRangeAmplitudes = new TDoubleArrayList();
 
    public RigidBodyExplorationConfigurationCommand()
    {
    }
-   
+
    public RigidBodyExplorationConfigurationCommand(RigidBody rigidBody, ConfigurationSpaceName... configurationSpaces)
    {
       clear();
       this.rigidBody = rigidBody;
-      this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();      
-      for(int i=0;i<configurationSpaces.length;i++)
-         this.degreesOfFreedomToExplore.add(configurationSpaces[i]);            
-      this.explorationRangeLowerLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(configurationSpaces));
-      this.explorationRangeUpperLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(configurationSpaces));
+      this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();
+      for (int i = 0; i < configurationSpaces.length; i++)
+         this.degreesOfFreedomToExplore.add(configurationSpaces[i]);
+      this.explorationRangeAmplitudes.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationAmplitudeArray(configurationSpaces));
    }
 
    @Override
@@ -42,8 +42,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       rigidBodyNameBasedashCode = NameBasedHashCodeTools.NULL_HASHCODE;
       rigidBody = null;
       degreesOfFreedomToExplore.clear();
-      explorationRangeLowerLimits.reset();
-      explorationRangeUpperLimits.reset();
+      explorationRangeAmplitudes.reset();
    }
 
    @Override
@@ -57,8 +56,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       for (int i = 0; i < other.getNumberOfDegreesOfFreedomToExplore(); i++)
       {
          degreesOfFreedomToExplore.add(other.degreesOfFreedomToExplore.get(i));
-         explorationRangeLowerLimits.add(other.explorationRangeLowerLimits.get(i));
-         explorationRangeUpperLimits.add(other.explorationRangeUpperLimits.get(i));
+         explorationRangeAmplitudes.add(other.explorationRangeAmplitudes.get(i));
       }
    }
 
@@ -83,8 +81,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       for (int i = 0; i < message.getNumberOfDegreesOfFreedomToExplore(); i++)
       {
          degreesOfFreedomToExplore.add(message.getDegreeOfFreedomToExplore(i));
-         explorationRangeLowerLimits.add(message.getExplorationLowerLimit(i));
-         explorationRangeUpperLimits.add(message.getExplorationUpperLimit(i));
+         explorationRangeAmplitudes.add(message.getExplorationAmplitude(i));
       }
    }
 
@@ -103,14 +100,9 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       return degreesOfFreedomToExplore.get(i);
    }
 
-   public double getExplorationLowerLimit(int i)
+   public double getExplorationAmplitude(int i)
    {
-      return explorationRangeLowerLimits.get(i);
-   }
-
-   public double getExplorationUpperLimit(int i)
-   {
-      return explorationRangeUpperLimits.get(i);
+      return explorationRangeAmplitudes.get(i);
    }
 
    @Override
