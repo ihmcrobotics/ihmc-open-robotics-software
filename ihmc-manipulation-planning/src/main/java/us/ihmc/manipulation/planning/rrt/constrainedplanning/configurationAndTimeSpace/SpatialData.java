@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.AngleTools;
 
 /**
@@ -39,7 +40,7 @@ public class SpatialData
       configurationNames.addAll(other.getConfigurationNames());
       configurationData.addAll(other.getConfigurationData());
    }
-   
+
    public void initializeData()
    {
       for (int i = 0; i < configurationData.size(); i++)
@@ -49,13 +50,13 @@ public class SpatialData
       for (int i = 0; i < rigidBodySpatials.size(); i++)
       {
          rigidBodySpatials.set(i, new Pose3D());
-      }   
+      }
    }
 
-   public void appendSpatial(String rigidBodyName, String[] configurationNames, double[] configurationData, Pose3D pose)
+   public void appendSpatial(String rigidBodyName, String[] configurationNames, double[] configurationData, RigidBodyTransform pose)
    {
       this.rigidBodyNames.add(rigidBodyName);
-      this.rigidBodySpatials.add(pose);
+      this.rigidBodySpatials.add(new Pose3D(pose));
       for (int i = 0; i < configurationNames.length; i++)
          this.configurationNames.add(configurationNames[i]);
       for (int i = 0; i < configurationData.length; i++)
