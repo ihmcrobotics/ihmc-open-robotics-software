@@ -9,6 +9,7 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.post.SceneProcessor;
+import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.Renderer;
 import com.jme3.renderer.ViewPort;
@@ -135,6 +136,13 @@ public class JMEZBufferGrabber extends AbstractAppState implements SceneProcesso
       }
 
       return depthBuffer;
+   }
+
+   @Override
+   public void setProfiler(AppProfiler profiler)
+   {
+      // TODO Auto-generated method stub
+      
    }
 
 }
