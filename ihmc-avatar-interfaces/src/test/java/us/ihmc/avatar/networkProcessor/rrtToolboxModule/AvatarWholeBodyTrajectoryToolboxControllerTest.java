@@ -220,7 +220,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    {
       // Trajectory parameters
       double trajectoryTime = 10.0;
-      double circleRadius = 0.550;
+      double circleRadius = 0.37;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.55, 0.2, 1.1), new Point3D(0.55, -0.1, 1.1));
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.0);
@@ -534,6 +534,10 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
                trajectory.getSelectionMatrix(selectionMatrix);
 
+//               PrintTools.info("" + rigidBodyOfOutputFullRobotModel);
+//               PrintTools.info("" + solutionRigidBodyPose);
+//               PrintTools.info("" + givenRigidBodyPose);
+               
                double positionError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryPositionError(solutionRigidBodyPose, givenRigidBodyPose,
                                                                                                       explorationMessage);
 
@@ -543,7 +547,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                   PrintTools.info("" + positionError + " " + orientationError);
 
                if (positionError > TRACKING_TRAJECTORY_POSITION_ERROR_THRESHOLD || orientationError > TRACKING_TRAJECTORY_ORIENTATION_ERROR_THRESHOLD)
+               {
+                  PrintTools.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                   fail("rigid body of the solution is far from the given trajectory");
+               }
+                  
             }
          }
       }

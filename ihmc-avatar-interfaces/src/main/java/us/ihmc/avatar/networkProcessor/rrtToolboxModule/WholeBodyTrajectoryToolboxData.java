@@ -42,14 +42,14 @@ public class WholeBodyTrajectoryToolboxData
    private static final boolean VERBOSE = false;
 
    private final FullHumanoidRobotModel fullRobotModel;
-   
+
    private double trajectoryTime;
    private int dimensionOfExploration = 0;
 
    private final List<RigidBody> allRigidBodies = new ArrayList<>();
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
-   
+
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
@@ -115,29 +115,20 @@ public class WholeBodyTrajectoryToolboxData
       if (VERBOSE)
          PrintTools.info("Total exploration dimension is " + dimensionOfExploration);
    }
-   
+
    public SpatialData createRandomInitialSpatialData()
    {
       SpatialData spatialData = new SpatialData();
-      
-      List<RigidBody> rigidBodiesHasTrajectoryCommand = new ArrayList<>();
-      
+
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
          RigidBody rigidBody = allRigidBodies.get(i);
 
-         if(rigidBodyDataMap.get(rigidBody).hasTrajectoryCommand())
-            rigidBodiesHasTrajectoryCommand.add(rigidBody);
-      }
-      
-      for(int i=0;i<rigidBodiesHasTrajectoryCommand.size();i++)
-      {         
-         RigidBody rigidBody = rigidBodiesHasTrajectoryCommand.get(i);
-         
-         rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
+         if (rigidBodyDataMap.get(rigidBody).hasTrajectoryCommand())
+            rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);            
       }
 
-      return spatialData;      
+      return spatialData;
    }
 
    public SpatialData createRandomSpatialData()
@@ -161,28 +152,38 @@ public class WholeBodyTrajectoryToolboxData
       for (int i = 0; i < node.getSize(); i++)
       {
          RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
-         
-         Pose3D poseToAppend = node.getSpatial(i);         
-         
-         messages.add(rigidBodyDataMap.get(rigidBody).createMessage(timeInTrajectory, poseToAppend));
+
+         Pose3D poseToAppend = node.getSpatial(i);
+
+         KinematicsToolboxRigidBodyMessage message = rigidBodyDataMap.get(rigidBody).createMessage(timeInTrajectory, poseToAppend);
+         messages.add(message);
       }
-      
+
       return messages;
    }
-   
-   public void updateInitialConfiguration(FullHumanoidRobotModel fullRobotModel)
+
+   public void holdConfiguration(FullHumanoidRobotModel fullRobotModel)
    {
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
          RigidBody rigidBody = allRigidBodies.get(i);
-         
+
          for (RigidBody candidateRigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(ScrewTools.getRootBody(fullRobotModel.getElevator())))
          {
             if (candidateRigidBody.getName() == rigidBody.getName())
             {
-               rigidBodyDataMap.get(rigidBody).setInitialPose(candidateRigidBody);
+               rigidBodyDataMap.get(rigidBody).holdConfiguration(candidateRigidBody);
             }
          }
+      }
+   }
+
+   public void updateInitialConfiguration()
+   {
+      for (int i = 0; i < allRigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = allRigidBodies.get(i);
+         rigidBodyDataMap.get(rigidBody).updateInitialResult();
       }
    }
 

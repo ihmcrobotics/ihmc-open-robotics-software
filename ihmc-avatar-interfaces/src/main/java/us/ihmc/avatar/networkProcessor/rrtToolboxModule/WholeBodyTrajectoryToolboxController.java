@@ -409,7 +409,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                tree.dismissCandidate();
             }
          }
-
       }
 
       /*
@@ -441,14 +440,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void findInitialGuess()
    {
-      //SpatialData initialGuessData = toolboxData.createRandomSpatialData();
       SpatialData initialGuessData = toolboxData.createRandomInitialSpatialData();
 
       SpatialNode initialGuessNode = new SpatialNode(initialGuessData);
       updateValidity(initialGuessNode);
 
       visualizedNode = initialGuessNode;
-      //nodePlotter.update(visualizedNode, 1);
 
       double jointScore;
       if (visualizedNode.isValid())
@@ -462,11 +459,13 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          bestScoreInitialGuess.set(jointScore);
 
+         toolboxData.holdConfiguration(getSolverFullRobotModel());
+         
          SpatialData dummyData = toolboxData.createRandomSpatialData();
          rootNode = new SpatialNode(dummyData);
          rootNode.setConfiguration(initialGuessNode.getConfiguration());
          rootNode.initializeSpatialData();
-         toolboxData.updateInitialConfiguration(getSolverFullRobotModel());
+         
       }
 
       if (initialGuessNode.isValid())
@@ -494,6 +493,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                      + currentNumberOfValidInitialGuesses.getIntegerValue());
             state.set(CWBToolboxState.EXPAND_TREE);
 
+            toolboxData.updateInitialConfiguration();
             tree = new SpatialNodeTree(rootNode);
          }
       }
@@ -756,6 +756,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       if (nodeDummy.isValid())
       {
          path.get(index + 1).interpolate(path.get(index), path.get(index + 2), 0.5);
+         path.get(index + 1).setConfiguration(nodeDummy.getConfiguration());
 
          return true;
       }
