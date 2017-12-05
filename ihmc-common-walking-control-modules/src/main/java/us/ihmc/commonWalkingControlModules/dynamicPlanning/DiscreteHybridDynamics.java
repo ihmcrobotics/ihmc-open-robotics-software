@@ -22,4 +22,6 @@ public interface DiscreteHybridDynamics<E extends Enum>
    void getDynamicsStateGradientOfControlGradient(E hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack);
    /** f_xu */
    void getDynamicsControlGradientOfStateGradient(E hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack);
+   void getContinuousAMatrix(DenseMatrix64F A);
+   void getContinuousBMatrix(DenseMatrix64F A);
 }

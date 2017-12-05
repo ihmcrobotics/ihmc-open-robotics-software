@@ -341,4 +341,18 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
          matrixToPack.set(4, 2, value * (py_k - y_k));
       }
    }
+
+   public void getContinuousAMatrix(DenseMatrix64F matrixToPack)
+   {
+      matrixToPack.set(0, 2, 1.0);
+      matrixToPack.set(1, 3, 1.0);
+      matrixToPack.set(2, 0, gravityZ / 1.0);
+      matrixToPack.set(3, 1, gravityZ / 1.0);
+   }
+
+   public void getContinuousBMatrix(DenseMatrix64F matrixToPack)
+   {
+      matrixToPack.set(2, 0, -gravityZ / 1.0);
+      matrixToPack.set(3, 1, -gravityZ / 1.0);
+   }
 }
