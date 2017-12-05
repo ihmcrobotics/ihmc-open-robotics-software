@@ -32,8 +32,8 @@ public class ConstrainedRigidBodyTrajectory
    private final SelectionMatrix6D explorationSelectionMatrix = new SelectionMatrix6D();
 
    private final List<ConfigurationSpaceName> explorationConfigurationSpaces = new ArrayList<>();
-   private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
-   private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
+
+   private final TDoubleArrayList explorationRangeAmplitudes = new TDoubleArrayList();
 
    private final Pose3D controlFramePose = new Pose3D();
 
@@ -77,16 +77,16 @@ public class ConstrainedRigidBodyTrajectory
 
       explorationSelectionMatrix.clearSelection();
       explorationConfigurationSpaces.clear();
-      explorationRangeUpperLimits.reset();
-      explorationRangeLowerLimits.reset();
+
+      explorationRangeAmplitudes.reset();
 
       if (explorationCommand != null && explorationCommand.getNumberOfDegreesOfFreedomToExplore() > 0)
       {
          for (int i = 0; i < explorationCommand.getNumberOfDegreesOfFreedomToExplore(); i++)
          {
             WholeBodyTrajectoryToolboxHelper.setSelectionMatrix(explorationSelectionMatrix, explorationCommand.getDegreeOfFreedomToExplore(i), true);
-            explorationRangeUpperLimits.add(explorationCommand.getExplorationUpperLimit(i));
-            explorationRangeLowerLimits.add(explorationCommand.getExplorationLowerLimit(i));
+
+            explorationRangeAmplitudes.add(explorationCommand.getExplorationAmplitude(i));
             explorationConfigurationSpaces.add(explorationCommand.getDegreeOfFreedomToExplore(i));
          }
       }
@@ -194,8 +194,8 @@ public class ConstrainedRigidBodyTrajectory
       {
          ConfigurationSpaceName configurationSpaceName = explorationConfigurationSpaces.get(i);
 
-         double lowerBound = explorationRangeLowerLimits.get(i);
-         double upperBound = explorationRangeUpperLimits.get(i);
+         double lowerBound = -1.0 * explorationRangeAmplitudes.get(i);
+         double upperBound =  1.0* explorationRangeAmplitudes.get(i);
          double value = RandomNumbers.nextDouble(WholeBodyTrajectoryToolboxSettings.randomManager, lowerBound, upperBound);
 
          configurationNames[i] = rigidBody + "_" + configurationSpaceName.name();

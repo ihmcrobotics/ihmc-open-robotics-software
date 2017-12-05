@@ -40,6 +40,23 @@ public enum ConfigurationSpaceName
       }
    }
 
+   public double getDefaultExplorationAmplitude()
+   {
+      switch (this)
+      {
+      case X:
+      case Y:
+      case Z:
+         return 0.5;
+      case ROLL:
+      case PITCH:
+      case YAW:
+         return 0.25*Math.PI;
+      default:
+         throw new RuntimeException("Unexpected value: " + this);
+      }
+   }
+   
    public RigidBodyTransform getLocalRigidBodyTransform(double configuration)
    {
       RigidBodyTransform ret = new RigidBodyTransform();

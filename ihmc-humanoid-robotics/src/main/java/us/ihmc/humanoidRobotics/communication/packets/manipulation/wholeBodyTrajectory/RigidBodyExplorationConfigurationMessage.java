@@ -10,8 +10,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 {
    public long rigidBodyNameBasedHashCode;
    public ConfigurationSpaceName[] degreesOfFreedomToExplore;
-   public double[] explorationRangeLowerLimits;
-   public double[] explorationRangeUpperLimits;
+   public double[] explorationRangeAmplitudes;
 
    /**
     * To set enable exploration for all degree of freedom, do not send this message.
@@ -30,9 +29,8 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
       ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
             ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-      double[] upperLimit = new double[] {0, 0, 0, 0, 0, 0};
-      double[] lowerLimit = new double[] {0, 0, 0, 0, 0, 0};
-      setExplorationConfigurationSpaces(configurations, lowerLimit, upperLimit);
+      double[] regionAmplitude = new double[] {0, 0, 0, 0, 0, 0};
+      setExplorationConfigurationSpaces(configurations, regionAmplitude);
 
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -42,35 +40,28 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
     */
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore)
    {
-      this(rigidBody, degreesOfFreedomToExplore, WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore),
-           WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore));
+      this(rigidBody, degreesOfFreedomToExplore, WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationAmplitudeArray(degreesOfFreedomToExplore));
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore,
-                                                   double[] explorationRangeLowerLimits, double[] explorationRangeUpperLimits)
+   public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
    {
-      if (degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length || degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length)
-         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
-               + ", explorationRangeLowerLimits.length = " + explorationRangeLowerLimits.length + ", explorationRangeUpperLimits.length = "
-               + explorationRangeUpperLimits.length);
+      if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
+         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
       this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      setExplorationConfigurationSpaces(degreesOfFreedomToExplore, explorationRangeLowerLimits, explorationRangeUpperLimits);
+      setExplorationConfigurationSpaces(degreesOfFreedomToExplore, explorationRangeAmplitudes);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeLowerLimits,
-                                                 double[] explorationRangeUpperLimits)
+   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
    {
-      if (degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length || degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length)
+      if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
-               + ", explorationRangeLowerLimits.length = " + explorationRangeLowerLimits.length + ", explorationRangeUpperLimits.length = "
-               + explorationRangeUpperLimits.length);
+               + ", explorationRangeLowerLimits.length = ");
 
       this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
-      this.explorationRangeLowerLimits = explorationRangeLowerLimits;
-      this.explorationRangeUpperLimits = explorationRangeUpperLimits;
+      this.explorationRangeAmplitudes = explorationRangeAmplitudes;
    }
 
    public long getRigidBodyNameBasedHashCode()
@@ -89,15 +80,10 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    {
       return degreesOfFreedomToExplore[i];
    }
-
-   public double getExplorationLowerLimit(int i)
+   
+   public double getExplorationAmplitude(int i)
    {
-      return explorationRangeLowerLimits[i];
-   }
-
-   public double getExplorationUpperLimit(int i)
-   {
-      return explorationRangeUpperLimits[i];
+      return explorationRangeAmplitudes[i];
    }
 
    @Override
@@ -107,9 +93,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
          return false;
       if (!Arrays.equals(degreesOfFreedomToExplore, other.degreesOfFreedomToExplore))
          return false;
-      if (!ArrayTools.deltaEquals(explorationRangeUpperLimits, other.explorationRangeUpperLimits, epsilon))
-         return false;
-      if (!ArrayTools.deltaEquals(explorationRangeLowerLimits, other.explorationRangeLowerLimits, epsilon))
+      if (!ArrayTools.deltaEquals(explorationRangeAmplitudes, other.explorationRangeAmplitudes, epsilon))
          return false;
       return true;
    }

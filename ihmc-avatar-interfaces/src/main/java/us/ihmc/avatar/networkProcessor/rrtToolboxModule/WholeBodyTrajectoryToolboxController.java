@@ -368,6 +368,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       currentExpansionSize.increment();
 
       boolean randomNodeHasParentNode = false;
+      int maximumPatientCounter = 100;
       while (!randomNodeHasParentNode)
       {
          SpatialNode randomNode;
@@ -409,6 +410,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                tree.dismissCandidate();
             }
          }
+         else
+         {
+            maximumPatientCounter--;
+            if(maximumPatientCounter == 0)
+               break;
+         }
       }
 
       /*
@@ -440,7 +447,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void findInitialGuess()
    {
-      SpatialData initialGuessData = toolboxData.createRandomInitialSpatialData();
+      //SpatialData initialGuessData = toolboxData.createRandomInitialSpatialData();
+      SpatialData initialGuessData = toolboxData.createRandomSpatialData();
 
       SpatialNode initialGuessNode = new SpatialNode(initialGuessData);
       updateValidity(initialGuessNode);
@@ -460,12 +468,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          bestScoreInitialGuess.set(jointScore);
 
          toolboxData.holdConfiguration(getSolverFullRobotModel());
-         
+
          SpatialData dummyData = toolboxData.createRandomSpatialData();
          rootNode = new SpatialNode(dummyData);
          rootNode.setConfiguration(initialGuessNode.getConfiguration());
          rootNode.initializeSpatialData();
-         
+
       }
 
       if (initialGuessNode.isValid())
@@ -787,7 +795,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       double distance = 0.0;
       for (int i = 0; i < path.size(); i++)
       {
-         distance += pathBeforeShortcut.get(i).computeDistanceWOTime(tree.getPositionWeight(), tree.getOrientationWeight(), path.get(i));
+         distance += pathBeforeShortcut.get(i).computeDistance(0.0, tree.getPositionWeight(), tree.getOrientationWeight(), path.get(i));
       }
 
       return distance / path.size();
