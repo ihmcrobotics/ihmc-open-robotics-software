@@ -40,24 +40,6 @@ public interface HighLevelControllerParameters
    }
 
    /**
-    * Specifies if the controller should compute desired positions and velocities for all the robot
-    * joints from the desired acceleration. This will enable acceleration integration for all joints
-    * that have their integration settings defined in {@link #getJointAccelerationIntegrationParametersNoLoad()}.
-    * If this is set to false acceleration integration can still be enabled for select upper body joints
-    * using the setting in {@link #getOrCreatePositionControlledJoints()}.
-    * <p>
-    * It is {@code false} by default and this method should be overridden to return otherwise.
-    * </p>
-    *
-    * @return {@code true} if the desired acceleration should be integrated into desired velocity
-    *         and position for all the joints.
-    */
-   public default boolean enableJointAccelerationIntegrationForAllJoints()
-   {
-      return false;
-   }
-
-   /**
     * Returns a list with triples of joint acceleration integration parameters and the names of the joints
     * that the parameter will be used for. The triple also contains the name of the joint set for the specific
     * parameters. The name will be used to create tunable parameters in the controller. E.g. the left and
