@@ -1,12 +1,28 @@
 package us.ihmc.steppr.controlParameters;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.steppr.parameters.BonoJointMap;
 
 public class BonoHighLevelControllerParameters implements HighLevelControllerParameters
 {
+   private final BonoJointMap jointMap;
+
+   public BonoHighLevelControllerParameters(BonoJointMap jointMap)
+   {
+      this.jointMap = jointMap;
+   }
+
    @Override
    public WholeBodySetpointParameters getStandPrepParameters()
    {
@@ -14,21 +30,14 @@ public class BonoHighLevelControllerParameters implements HighLevelControllerPar
    }
 
    @Override
-   public JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelControllerName state)
+   public List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
-      return JointDesiredControlMode.EFFORT;
-   }
+      JointDesiredBehavior allJointBehaviors = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
 
-   @Override
-   public double getDesiredJointStiffness(String joint, HighLevelControllerName state)
-   {
-      return 0;
-   }
-
-   @Override
-   public double getDesiredJointDamping(String joint, HighLevelControllerName state)
-   {
-      return 0;
+      List<String> allJoints = Arrays.asList(jointMap.getOrderedJointNames());
+      List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
+      behaviors.add(new ImmutableTriple<>("", allJointBehaviors, allJoints));
+      return behaviors;
    }
 
    @Override
