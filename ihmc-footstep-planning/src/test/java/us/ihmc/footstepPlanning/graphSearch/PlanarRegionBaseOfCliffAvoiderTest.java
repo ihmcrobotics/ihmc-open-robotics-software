@@ -165,10 +165,11 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       Vector2D sideNearNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom - FootstepNode.gridSizeXY);
       Vector2D sideFarNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom + FootstepNode.gridSizeXY);
 
-      new AxisAngle(rotation, 0.0, 0.0).transform(frontNearNodeOffset);
-      new AxisAngle(rotation, 0.0, 0.0).transform(frontFarNodeOffset);
-      new AxisAngle(rotation, 0.0, 0.0).transform(sideNearNodeOffset);
-      new AxisAngle(rotation, 0.0, 0.0).transform(sideFarNodeOffset);
+      AxisAngle rotationTransform = new AxisAngle(rotation, 0.0, 0.0);
+      rotationTransform.transform(frontNearNodeOffset);
+      rotationTransform.transform(frontFarNodeOffset);
+      rotationTransform.transform(sideNearNodeOffset);
+      rotationTransform.transform(sideFarNodeOffset);
 
       frontNearNodeOffset.add(centerX, centerY);
       frontFarNodeOffset.add(centerX, centerY);
