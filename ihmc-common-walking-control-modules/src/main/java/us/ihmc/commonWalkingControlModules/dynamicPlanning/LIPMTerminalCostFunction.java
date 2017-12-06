@@ -14,16 +14,16 @@ public class LIPMTerminalCostFunction implements LQCostFunction
 
    public LIPMTerminalCostFunction()
    {
-      Q.set(0, 0, 1000);
-      Q.set(1, 1, 1000);
-      Q.set(2, 2, 1000);
-      Q.set(3, 3, 10000);
-      Q.set(4, 4, 10000);
-      Q.set(5, 5, 10000);
+      Q.set(0, 0, 1e2);
+      Q.set(1, 1, 1e2);
+      Q.set(2, 2, 1e2);
+      Q.set(3, 3, 1e1);
+      Q.set(4, 4, 1e1);
+      Q.set(5, 5, 1e1);
 
-      R.set(0, 0, 100);
-      R.set(1, 1, 100);
-      R.set(2, 2, 1e-6);
+      R.set(0, 0, 0.0);
+      R.set(1, 1, 0.0);
+      R.set(2, 2, 0.0);
    }
 
    private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);

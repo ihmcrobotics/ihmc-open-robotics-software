@@ -67,6 +67,8 @@ public class LIPMDDPCalculator
    private final double mass;
    private final double gravityZ;
 
+   private final LQRSolverInterface<LIPMState> lqrSolver;
+
    public LIPMDDPCalculator(double deltaT, double mass, double gravityZ)
    {
       this.dynamics = new LIPMDynamics(deltaT, mass, gravityZ);
@@ -75,6 +77,9 @@ public class LIPMDDPCalculator
       this.deltaT = deltaT;
       this.mass = mass;
       this.gravityZ = gravityZ;
+
+      //this.lqrSolver = new DiscreteTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction, true);
+      this.lqrSolver = new DiscreteTimeVaryingTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction, true);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -225,6 +230,11 @@ public class LIPMDDPCalculator
 
          time += modifiedDeltaT;
       }
+
+      lqrSolver.setDesiredTrajectories(desiredStateVector, desiredControlVector, currentState);
+      lqrSolver.solveRiccatiEquation(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      lqrSolver.computeOptimalTrajectories(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      lqrSolver.getOptimalTrajectories(stateVector, controlVector);
    }
 
    public void backwardDDPPass()
