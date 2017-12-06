@@ -128,12 +128,6 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public boolean enableJointAccelerationIntegrationForAllJoints()
-   {
-      return true;
-   }
-
-   @Override
    public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
    {
       List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> ret = new ArrayList<>();
