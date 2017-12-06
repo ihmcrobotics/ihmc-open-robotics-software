@@ -18,13 +18,21 @@ public class SimpleLIPMSimpleCostFunction implements LQCostFunction
 
    public SimpleLIPMSimpleCostFunction()
    {
-      Q.set(0, 0, 1e-5);
-      Q.set(1, 1, 1e-5);
-      Q.set(2, 2, 1e-5);
-      Q.set(3, 3, 1e-5);
+      this(1.0);
+   }
 
-      R.set(0, 0, 1e2);
-      R.set(1, 1, 1e2);
+   public SimpleLIPMSimpleCostFunction(double deltaT)
+   {
+      Q.set(0, 0, 1e-3);
+      Q.set(1, 1, 1e-3);
+      Q.set(2, 2, 1e-3);
+      Q.set(3, 3, 1e-3);
+
+      R.set(0, 0, 1e1);
+      R.set(1, 1, 1e1);
+
+      CommonOps.scale(deltaT * deltaT, Q);
+      CommonOps.scale(deltaT * deltaT, R);
    }
 
    private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);

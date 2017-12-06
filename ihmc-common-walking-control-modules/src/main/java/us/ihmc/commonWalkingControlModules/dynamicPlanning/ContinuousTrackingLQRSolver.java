@@ -2,11 +2,10 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class ContinuousTimeTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
+public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
 {
    private final RecyclingArrayList<DenseMatrix64F> optimalStateTrajectory;
    private final RecyclingArrayList<DenseMatrix64F> optimalControlTrajectory;
@@ -38,13 +37,13 @@ public class ContinuousTimeTrackingLQRSolver<E extends Enum> implements LQRSolve
 
    private final boolean debug;
 
-   public ContinuousTimeTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
-                                          double deltaT)
+   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
+                                      double deltaT)
    {
       this(dynamics, costFunction, terminalCostFunction, deltaT, false);
    }
-   public ContinuousTimeTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
-                                          double deltaT, boolean debug)
+   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
+                                      double deltaT, boolean debug)
    {
       this.dynamics = dynamics;
       this.costFunction = costFunction;

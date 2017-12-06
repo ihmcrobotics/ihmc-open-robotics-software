@@ -18,15 +18,15 @@ public class LIPMSimpleCostFunction implements LQCostFunction
 
    public LIPMSimpleCostFunction()
    {
-      Q.set(0, 0, 1e-4);
-      Q.set(1, 1, 1e-4);
-      Q.set(2, 2, 10);
-      Q.set(3, 3, 1e-2);
-      Q.set(4, 4, 1e-2);
-      Q.set(5, 5, 1e-2);
+      Q.set(0, 0, 1e-5);
+      Q.set(1, 1, 1e-5);
+      Q.set(2, 2, 1e-1);
+      Q.set(3, 3, 1e-5);
+      Q.set(4, 4, 1e-5);
+      Q.set(5, 5, 1e-5);
 
-      R.set(0, 0, 1);
-      R.set(1, 1, 1);
+      R.set(0, 0, 1e2);
+      R.set(1, 1, 1e2);
       R.set(2, 2, 1e-6);
    }
 

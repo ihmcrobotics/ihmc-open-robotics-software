@@ -5,12 +5,9 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 
@@ -83,8 +80,9 @@ public class SimpleLIPMDDPCalculator
       this.mass = mass;
       this.gravityZ = gravityZ;
 
-      //lqrSolver = new DiscreteTimeTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction, deltaT);
-      lqrSolver = new DiscreteTimeTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
+      //lqrSolver = new DiscreteTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
+      lqrSolver = new DiscreteTimeVaryingTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
+      //lqrSolver = new ContinuousTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction, deltaT);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -293,6 +291,8 @@ public class SimpleLIPMDDPCalculator
 
       DenseMatrix64F currentValueGradient = valueGradient.getLast();
       DenseMatrix64F currentValueHessian = valueHessian.getLast();
+      currentValueHessian.set(L_XX);
+      currentValueGradient.set(L_X);
 
       Q_X.set(L_X);
       CommonOps.multAddTransA(f_X, currentValueGradient, Q_X);
@@ -303,7 +303,6 @@ public class SimpleLIPMDDPCalculator
       Q_UX.set(L_UX);
       Q_UU.set(L_UU);
 
-      /*
       for (int stateIndex = 0; stateIndex < dynamics.getStateVectorSize(); stateIndex++)
       {
          dynamics.getDynamicsStateHessian(LIPMState.NORMAL, stateIndex, state, control, f_XX);
@@ -315,12 +314,10 @@ public class SimpleLIPMDDPCalculator
          CommonOps.multTransA(f_UX, currentValueGradient, Q_UX_col);
          MatrixTools.addMatrixBlock(Q_UX, 0, stateIndex, Q_UX_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
       }
-      */
       addSquareVector(f_X, currentValueHessian, f_X, Q_XX);
       addSquareVector(f_U, currentValueHessian, f_X, Q_UX);
 
       Q_UU.set(L_UU);
-      /*
       for (int controlIndex = 0; controlIndex < dynamics.getControlVectorSize(); controlIndex++)
       {
          dynamics.getDynamicsControlHessian(LIPMState.NORMAL, controlIndex, state, control, f_UU);
@@ -328,7 +325,6 @@ public class SimpleLIPMDDPCalculator
          CommonOps.multTransA(f_UU, currentValueGradient, Q_UU_col);
          MatrixTools.addMatrixBlock(Q_UU, 0, controlIndex, Q_UU_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
       }
-      */
       addSquareVector(f_U, currentValueHessian, f_U, Q_UU);
 
       computeFeedbackGainAndFeedForwardTerms(gainMatrix, deltaUMatrix, Q_U, Q_UU, Q_UX);
@@ -367,7 +363,6 @@ public class SimpleLIPMDDPCalculator
          Q_XX.set(L_XX);
          Q_UX.set(L_UX);
 
-         /*
          for (int stateIndex = 0; stateIndex < dynamics.getStateVectorSize(); stateIndex++)
          {
             dynamics.getDynamicsStateHessian(LIPMState.NORMAL, stateIndex, state, control, f_XX);
@@ -379,12 +374,10 @@ public class SimpleLIPMDDPCalculator
             CommonOps.multTransA(f_UX, currentValueGradient, Q_UX_col);
             MatrixTools.addMatrixBlock(Q_UX, 0, stateIndex, Q_UX_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
          }
-         */
          addSquareVector(f_X, currentValueHessian, f_X, Q_XX);
          addSquareVector(f_U, currentValueHessian, f_X, Q_UX);
 
          Q_UU.set(L_UU);
-         /*
          for (int controlIndex = 0; controlIndex < dynamics.getControlVectorSize(); controlIndex++)
          {
             dynamics.getDynamicsControlHessian(LIPMState.NORMAL, controlIndex, state, control, f_UU);
@@ -392,7 +385,6 @@ public class SimpleLIPMDDPCalculator
             CommonOps.multTransA(f_UU, currentValueGradient, Q_UU_col);
             MatrixTools.addMatrixBlock(Q_UU, 0, controlIndex, Q_UU_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
          }
-         */
          addSquareVector(f_U, currentValueHessian, f_U, Q_UU);
 
          computeFeedbackGainAndFeedForwardTerms(gainMatrix, deltaUMatrix, Q_U, Q_UU, Q_UX);

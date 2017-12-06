@@ -14,10 +14,10 @@ public class SimpleLIPMTerminalCostFunction implements LQCostFunction
 
    public SimpleLIPMTerminalCostFunction()
    {
-      Q.set(0, 0, 1e2);
-      Q.set(1, 1, 1e2);
-      Q.set(2, 2, 1e1);
-      Q.set(3, 3, 1e1);
+      Q.set(0, 0, 1e3);
+      Q.set(1, 1, 1e3);
+      Q.set(2, 2, 1e6);
+      Q.set(3, 3, 1e6);
 
       R.set(0, 0, 0.0);
       R.set(1, 1, 0.0);

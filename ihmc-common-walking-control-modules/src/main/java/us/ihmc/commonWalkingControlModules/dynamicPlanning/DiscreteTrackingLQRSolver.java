@@ -8,7 +8,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
+public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
 {
    private final RecyclingArrayList<DenseMatrix64F> optimalStateTrajectory;
    private final RecyclingArrayList<DenseMatrix64F> optimalControlTrajectory;
@@ -28,7 +28,6 @@ public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverI
    private final DenseMatrix64F R;
    private final DenseMatrix64F Qf;
 
-
    private final DenseMatrix64F A;
    private final DenseMatrix64F B;
 
@@ -43,11 +42,19 @@ public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverI
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F tempMatrix2 = new DenseMatrix64F(0, 0);
 
-   public DiscreteTimeTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction)
+   private final boolean debug;
+
+   public DiscreteTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction)
+   {
+      this(dynamics, costFunction, terminalCostFunction, false);
+   }
+
+   public DiscreteTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction, boolean debug)
    {
       this.dynamics = dynamics;
       this.costFunction = costFunction;
       this.terminalCostFunction = terminalCostFunction;
+      this.debug = debug;
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -121,7 +128,8 @@ public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverI
       optimalStateTrajectory.getFirst().set(initialState);
    }
 
-   public void solveRiccatiEquation(E dynamicState, int startIndex, int endIndex) // backwards pass
+   // backwards pass
+   public void solveRiccatiEquation(E dynamicState, int startIndex, int endIndex)
    {
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -137,6 +145,20 @@ public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverI
 
       dynamics.getDynamicsStateGradient(dynamicState, initialDesiredState, initialDesiredControl, A);
       dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, B);
+
+      if (debug)
+      {
+         if (isAnyInvalid(A))
+            throw new RuntimeException("The A matrix is invalid.");
+         if (isAnyInvalid(B))
+            throw new RuntimeException("The B matrix is invalid.");
+         if (isAnyInvalid(Q))
+            throw new RuntimeException("The state Hessian is invalid.");
+         if (isAnyInvalid(R))
+            throw new RuntimeException("The control Hessian is invalid.");
+         if (isAnyInvalid(Qf))
+            throw new RuntimeException("The final state Hessian is invalid.");
+      }
 
       DenseMatrix64F initialS1 = s1Trajectory.get(i);
       DenseMatrix64F initialS2 = s2Trajectory.get(i);
@@ -188,19 +210,25 @@ public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverI
          CommonOps.multAdd(B, currentGainMatrix, H);
          addMultQuad(H, nextS1Matrix, H, currentS1Matrix);
 
-         // S2_k = (S2_k+1 + 2 (B F)^T S1_k+1) (A + B K) - 2(x_d^T Q + u_d^T R K)
+         // S2_k = 2 (B F)^T S1_k+1 (A + B K) + S2_k+1 (A + B K) + 2 (F - u_d)^T R K - 2 x_d^T Q
          tempMatrix.reshape(stateSize, 1);
-         CommonOps.mult(B, currentFeedForwardMatrix, tempMatrix);
-         tempMatrix2.set(nextS2Matrix);
-         CommonOps.multAddTransA(2.0, tempMatrix, nextS1Matrix, tempMatrix2);
 
+         // (S2_k+1 + 2 (B F)^T S1_k+1) (A + B K)
+         tempMatrix2.set(nextS2Matrix);
+         CommonOps.mult(B, currentFeedForwardMatrix, tempMatrix);
+         CommonOps.multAddTransA(2.0, tempMatrix, nextS1Matrix, tempMatrix2);
          CommonOps.mult(tempMatrix2, H, currentS2Matrix);
 
          CommonOps.multAddTransA(-2.0, currentDesiredState, Q, currentS2Matrix);
 
+         // 2 (F - u_d)^T R K
          tempMatrix.reshape(controlSize, stateSize);
          CommonOps.mult(R, currentGainMatrix, tempMatrix);
          CommonOps.multAddTransA(-2.0, currentDesiredControl, tempMatrix, currentS2Matrix);
+         CommonOps.multAddTransA(2.0, currentFeedForwardMatrix, tempMatrix, currentS2Matrix);
+
+         if (debug && (isAnyInvalid(currentS2Matrix) || isAnyInvalid(currentS1Matrix)))
+            throw new RuntimeException("The computed Riccati equation solutions are ill-conditioned.");
       }
    }
 
@@ -233,8 +261,13 @@ public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverI
          CommonOps.mult(A, currentState, nextState);
          CommonOps.multAdd(B, optimalControl, nextState);
 
-         if (isAnyInvalid(optimalControl) || isAnyInvalid(nextState))
-            throw new RuntimeException("bad");
+         if (debug)
+         {
+            if (isAnyInvalid(nextState))
+               throw new RuntimeException("The computed optimal state is ill-conditioned.");
+            if (isAnyInvalid(optimalControl))
+               throw new RuntimeException("The computed optimal control is ill-conditioned.");
+         }
       }
    }
 
@@ -265,8 +298,6 @@ public class DiscreteTimeTrackingLQRSolver<E extends Enum> implements LQRSolverI
       for (int i = 0; i < matrix.getNumElements(); i++)
       {
          if (!Double.isFinite(matrix.get(i)))
-            return true;
-         if (!MathTools.intervalContains(matrix.get(i), 1e8))
             return true;
       }
       return false;
