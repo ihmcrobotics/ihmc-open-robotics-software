@@ -73,7 +73,7 @@ public class ParameterTools
       {
          String name = parameterTripple.getLeft();
          JointDesiredBehaviorReadOnly defaultParameters = parameterTripple.getMiddle();
-         JointDesiredBehaviorReadOnly tunableParameters = new TunableJointDesiredBehavior(name + prefix, defaultParameters, registry);
+         JointDesiredBehaviorReadOnly tunableParameters = new TunableJointDesiredBehavior(prefix + name, defaultParameters, registry);
 
          for (String jointName : parameterTripple.getRight())
          {
