@@ -7,7 +7,7 @@ import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDynamics.controlVectorSize;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDynamics.stateVectorSize;
 
-public class LIPMTerminalCostFunction implements DDPCostFunction
+public class LIPMTerminalCostFunction implements LQCostFunction
 {
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);

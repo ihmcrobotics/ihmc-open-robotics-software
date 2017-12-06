@@ -1,0 +1,22 @@
+package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+
+import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
+
+public class VariableVectorBuilder extends GenericTypeBuilder
+{
+   private final int rows;
+   private final int cols;
+
+   public VariableVectorBuilder(int rows, int cols)
+   {
+      this.rows = rows;
+      this.cols = cols;
+   }
+
+   @Override
+   public Object newInstance()
+   {
+      return new DenseMatrix64F(rows, cols);
+   }
+}
