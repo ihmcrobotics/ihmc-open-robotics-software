@@ -29,7 +29,6 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    private PlanarRegionsList planarRegionsList;
    private FootstepNodeSnapAndWiggler snapAndWiggler;
    private YoFootstepPlannerParameters parameters;
-   private final PlanarRegionBaseOfCliffAvoider baseOfCliffAvoider;
    private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
    private final ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
 
@@ -51,7 +50,6 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    {
       this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, parameters, listener);
       this.parameters = parameters;
-      this.baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, graphicsListRegistry);
    }
 
    @Override
@@ -88,7 +86,6 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
 
       RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
       FootstepNodeTools.getSnappedNodeTransform(nodeToExpand, snapTransform, snappedSoleTransform);
-      baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, snappedSoleTransform);
 
       boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, footholdIntersection);
       if (!isEnoughArea)
