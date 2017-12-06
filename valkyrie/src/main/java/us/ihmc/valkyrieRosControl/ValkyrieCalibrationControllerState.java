@@ -9,17 +9,15 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.wholeBodyController.diagnostics.CalibrationState;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorController;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieCalibrationControllerState extends HighLevelControllerState
@@ -32,8 +30,6 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    }
 
    private static final double timeToMove = 3.0;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private ForceSensorCalibrationModule forceSensorCalibrationModule;
    private final GenericStateMachine<CalibrationStates, CalibrationState<CalibrationStates>> stateMachine;
@@ -52,7 +48,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
                                              JointDesiredOutputListReadOnly highLevelControlOutput,
                                              ValkyrieCalibrationParameters calibrationParameters, TorqueOffsetPrinter torqueOffsetPrinter)
    {
-      super(controllerState);
+      super(controllerState, highLevelControllerParameters, highLevelControllerToolbox);
       this.highLevelControlOutput = highLevelControlOutput;
 
       OneDoFJoint[] controlledJoints = highLevelControllerToolbox.getFullRobotModel().getOneDoFJoints();
@@ -77,13 +73,6 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
 
       OneDoFJoint[] jointArray = highLevelControllerToolbox.getFullRobotModel().getOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
-      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, JointDesiredControlMode.EFFORT);
-      for (OneDoFJoint joint : jointArray)
-      {
-         JointDesiredOutput jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
-         jointDesiredOutput.setStiffness(highLevelControllerParameters.getDesiredJointStiffness(joint.getName(), controllerState));
-         jointDesiredOutput.setDamping(highLevelControllerParameters.getDesiredJointDamping(joint.getName(), controllerState));
-      }
 
       CalibrationEntry calibrationEntry = new CalibrationEntry();
       Calibration calibration = new Calibration();
@@ -139,12 +128,6 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-
-   @Override
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return stateMachine.getCurrentState().getOutputForLowLevelController();
@@ -184,6 +167,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             transitionToDefaultNextState();
 
          jointTorqueOffsetEstimatorController.doControl();
+         lowLevelOneDoFJointDesiredDataHolder.clear();
 
          for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
          {
@@ -208,6 +192,8 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
                lowLevelJointData.setDesiredTorque(desiredTorque);
             }
          }
+
+         lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
       }
 
       @Override
@@ -311,6 +297,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       public void doAction()
       {
          double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToMoveForCalibration.getDoubleValue());
+         lowLevelOneDoFJointDesiredDataHolder.clear();
 
          for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
          {
@@ -335,6 +322,8 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
                lowLevelJointData.setDesiredTorque(desiredTorque);
             }
          }
+
+         lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
       }
 
       @Override
