@@ -36,7 +36,11 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.steppr.controlParameters.*;
+import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
+import us.ihmc.steppr.controlParameters.BonoHighLevelControllerParameters;
+import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
+import us.ihmc.steppr.controlParameters.BonoUIParameters;
+import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -76,7 +80,7 @@ public class BonoRobotModel implements DRCRobotModel
 
       capturePointPlannerParameters = new BonoCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
-      highLevelControllerParameters = new BonoHighLevelControllerParameters();
+      highLevelControllerParameters = new BonoHighLevelControllerParameters(jointMap);
       robotDescription = createRobotDescription();
    }
 
@@ -277,14 +281,14 @@ public class BonoRobotModel implements DRCRobotModel
       System.err.println("Need to add access to stand prep joint angles.");
       return 0;
    }
-   
+
 
    @Override
    public DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return new DRCSimulationOutputWriterForControllerThread(humanoidFloatingRootJointRobot);
    }
-   
+
    @Override
    public JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
