@@ -13,6 +13,8 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
@@ -54,6 +56,28 @@ public class ParameterTools
          for (String jointName : parameterTripple.getRight())
          {
             parameterMapToPack.put(jointName, yoParameters);
+         }
+      }
+   }
+
+   public static void extractJointBehaviorMap(String prefix, List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> parameterList,
+                                              Map<String, JointDesiredBehaviorReadOnly> parameterMapToPack, YoVariableRegistry registry)
+   {
+      parameterMapToPack.clear();
+      if (parameterList == null)
+      {
+         return;
+      }
+
+      for (ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>> parameterTripple : parameterList)
+      {
+         String name = parameterTripple.getLeft();
+         JointDesiredBehaviorReadOnly defaultParameters = parameterTripple.getMiddle();
+         JointDesiredBehaviorReadOnly tunableParameters = new TunableJointDesiredBehavior(name + prefix, defaultParameters, registry);
+
+         for (String jointName : parameterTripple.getRight())
+         {
+            parameterMapToPack.put(jointName, tunableParameters);
          }
       }
    }

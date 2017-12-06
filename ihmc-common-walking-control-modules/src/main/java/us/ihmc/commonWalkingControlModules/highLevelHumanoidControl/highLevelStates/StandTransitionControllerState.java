@@ -7,7 +7,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
@@ -33,7 +32,7 @@ public class StandTransitionControllerState extends HighLevelControllerState
    public StandTransitionControllerState(HighLevelControllerState standReadyControllerState, HighLevelControllerState walkingControllerState,
                                          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(controllerState);
+      super(controllerState, highLevelControllerParameters, controllerToolbox);
 
       this.standReadyControllerState = standReadyControllerState;
       this.walkingControllerState = walkingControllerState;
@@ -46,12 +45,6 @@ public class StandTransitionControllerState extends HighLevelControllerState
       {
          JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registry);
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
-
-         String jointName = controlledJoint.getName();
-         JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(jointName, controllerState);
-
-         JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
-         lowLevelJointData.setControlMode(jointControlMode);
       }
    }
 
@@ -77,6 +70,8 @@ public class StandTransitionControllerState extends HighLevelControllerState
       JointDesiredOutputListReadOnly standReadyJointCommand = standReadyControllerState.getOutputForLowLevelController();
       JointDesiredOutputListReadOnly walkingJointCommand = walkingControllerState.getOutputForLowLevelController();
 
+      lowLevelOneDoFJointDesiredDataHolder.clear();
+
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
          OneDoFJoint joint = jointCommandBlenders.get(jointIndex).getLeft();
@@ -86,6 +81,8 @@ public class StandTransitionControllerState extends HighLevelControllerState
          jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getJointDesiredOutput(joint),
                                                           walkingJointCommand.getJointDesiredOutput(joint), gainRatio);
       }
+
+      lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
    @Override

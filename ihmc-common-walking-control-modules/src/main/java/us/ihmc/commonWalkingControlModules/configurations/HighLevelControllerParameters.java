@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
@@ -28,6 +29,23 @@ public interface HighLevelControllerParameters
    double getMinimumTimeInStandReady();
    double getTimeInStandTransition();
    double getCalibrationDuration();
+
+   /**
+    * Returns a list with triples of joint behavior parameters and the names of the joints that the parameters
+    * will be used for. The triple also contains the name of the joint set for the specific parameters. The
+    * name will be used to create tunable parameters in the controller. E.g. the left and right arm joints could
+    * be grouped this way so only a single parameter for tuning is created that affects both sides.
+    * <p>
+    * The joint behavior parameters for a joint specify parameters that describe how the low level joint control
+    * should behave. The implementation of this is usually robot specific. In general this method allows to
+    * specify things like a desired joint stiffness or a desired joint control mode (position or effort).
+    * </p>
+    * @return list containing joint behavior parameters and the corresponding joints
+    */
+   public default List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviors(HighLevelControllerName state)
+   {
+      return null;
+   }
 
    /**
     * Parameter that allows to scale desired joint velocities in the joint level control. This
