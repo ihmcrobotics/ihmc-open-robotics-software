@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import org.ejml.data.DenseMatrix64F;
 
-public interface DDPCostFunction
+public interface LQCostFunction
 {
    /** L(X_k, U_k) */
    double getCost(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector, DenseMatrix64F desiredStateVector);

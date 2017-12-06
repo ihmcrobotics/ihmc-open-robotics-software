@@ -4,12 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import org.omg.CORBA.COMM_FAILURE;
 import us.ihmc.commons.MathTools;
-import us.ihmc.convexOptimization.qpOASES.DenseMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -19,8 +16,8 @@ public class LIPMDDPCalculator
 {
    private double lineSearchGain = 0.5;
    private final DiscreteHybridDynamics<LIPMState> dynamics;
-   private final DDPCostFunction costFunction;
-   private final DDPCostFunction terminalCostFunction;
+   private final LQCostFunction costFunction;
+   private final LQCostFunction terminalCostFunction;
 
    private double deltaT;
    private double modifiedDeltaT;

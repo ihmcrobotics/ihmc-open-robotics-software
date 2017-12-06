@@ -18,8 +18,8 @@ public class SimpleLIPMDDPCalculator
 {
    private double lineSearchGain = 0.0;
    private final DiscreteHybridDynamics<LIPMState> dynamics;
-   private final DDPCostFunction costFunction;
-   private final DDPCostFunction terminalCostFunction;
+   private final LQCostFunction costFunction;
+   private final LQCostFunction terminalCostFunction;
 
    private double deltaT;
    private double modifiedDeltaT;
@@ -62,6 +62,8 @@ public class SimpleLIPMDDPCalculator
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
+   private final LQRSolverInterface<LIPMState> lqrSolver;
+
    private final DenseMatrix64F temp_X;
    private final DenseMatrix64F temp_XX;
    private final DenseMatrix64F temp_U;
@@ -80,6 +82,8 @@ public class SimpleLIPMDDPCalculator
       this.deltaT = deltaT;
       this.mass = mass;
       this.gravityZ = gravityZ;
+
+      lqrSolver = new ContinuousTimeTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction, deltaT);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -141,152 +145,6 @@ public class SimpleLIPMDDPCalculator
       Q_XX_col = new DenseMatrix64F(stateSize, 1);
       Q_UX_col = new DenseMatrix64F(controlSize, 1);
       Q_UU_col = new DenseMatrix64F(controlSize, 1);
-   }
-
-   private final DenseMatrix64F Q = new DenseMatrix64F(4, 4);
-   private final DenseMatrix64F R = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F R_inv = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F Qf = new DenseMatrix64F(4, 4);
-   private final DenseMatrix64F S2Dot = new DenseMatrix64F(4, 4);
-   private final DenseMatrix64F S1Dot = new DenseMatrix64F(4, 1);
-
-   private final DenseMatrix64F A = new DenseMatrix64F(4, 4);
-   private final DenseMatrix64F B = new DenseMatrix64F(4, 2);
-   private final DenseMatrix64F XDot = new DenseMatrix64F(4, 1);
-
-   private final DenseMatrix64F S2BR_invBT = new DenseMatrix64F(4, 4);
-   private final DenseMatrix64F R_invBT = new DenseMatrix64F(2, 4);
-
-   public void solveLQRProblem()
-   {
-      int i = stateVector.size() - 1;
-      DenseMatrix64F state = stateVector.get(i);
-      DenseMatrix64F control = controlVector.get(i);
-      DenseMatrix64F desiredState = desiredStateVector.get(i);
-      DenseMatrix64F desiredControl = desiredControlVector.get(i);
-
-      costFunction.getCostStateHessian(state, control, Q);
-      costFunction.getCostControlHessian(state, control, R);
-      terminalCostFunction.getCostStateHessian(state, control, Qf);
-
-      DenseMatrix64F S2 = this.S2Vector.get(i);
-      DenseMatrix64F S1 = this.S1Vector.get(i);
-      S2.set(Qf);
-      CommonOps.mult(-2.0, Qf, desiredState, S1);
-
-      dynamics.getContinuousAMatrix(A);
-      dynamics.getContinuousBMatrix(B);
-
-      DiagonalMatrixTools.invertDiagonalMatrix(R, R_inv);
-      CommonOps.multTransB(R_inv, B, R_invBT);
-
-      // compute S2 dot
-      S2Dot.set(Q);
-      CommonOps.multAdd(S2, A, S2Dot);
-      CommonOps.multAddTransA(A, S2, S2Dot);
-
-      tempMatrix.reshape(4, 2);
-      CommonOps.multTransA(S2, B, tempMatrix);
-      CommonOps.mult(tempMatrix, R_invBT, S2BR_invBT);
-
-      CommonOps.multAdd(-1.0, S2BR_invBT, S2, S2Dot);
-
-
-      // compute S1 dot
-      CommonOps.mult(-2.0, Q, desiredState, S1Dot);
-      CommonOps.multAddTransA(A, S1, S1Dot);
-      CommonOps.multAdd(-1.0, S2BR_invBT, S1, S1Dot);
-
-      tempMatrix.reshape(4, 1);
-      CommonOps.mult(B, desiredControl, tempMatrix);
-      CommonOps.multAdd(2.0, S2, tempMatrix, S1Dot);
-
-
-      // compute previous S2 and S1
-      DenseMatrix64F previousS2 = this.S2Vector.get(i - 1);
-      DenseMatrix64F previousS1 = this.S1Vector.get(i - 1);
-
-      previousS2.set(S2);
-      previousS1.set(S1);
-
-      CommonOps.addEquals(previousS2, deltaT, S2Dot);
-      CommonOps.addEquals(previousS1, deltaT, S1Dot);
-
-      i--;
-
-      // backward pass
-      for (; i > 0; i--)
-      {
-         desiredState = desiredStateVector.get(i);
-         desiredControl = desiredControlVector.get(i);
-
-         S2 = this.S2Vector.get(i);
-         S1 = this.S1Vector.get(i);
-
-         // compute S2 dot
-         S2Dot.set(Q);
-         CommonOps.multAdd(S2, A, S2Dot);
-         CommonOps.multAddTransA(A, S2, S2Dot);
-
-         tempMatrix.reshape(4, 2);
-         CommonOps.multTransA(S2, B, tempMatrix);
-         CommonOps.mult(tempMatrix, R_invBT, S2BR_invBT);
-
-         CommonOps.multAdd(-1.0, S2BR_invBT, S2, S2Dot);
-
-         // compute S1 dot
-         CommonOps.mult(-2.0, Q, desiredState, S1Dot);
-         CommonOps.multAddTransA(A, S1, S1Dot);
-         CommonOps.multAdd(-1.0, S2BR_invBT, S1, S1Dot);
-
-         tempMatrix.reshape(4, 1);
-         CommonOps.mult(B, desiredControl, tempMatrix);
-         CommonOps.multAdd(2.0, S2, tempMatrix, S1Dot);
-
-         // compute previous S2 and S1
-         previousS2 = this.S2Vector.get(i - 1);
-         previousS1 = this.S1Vector.get(i - 1);
-
-         previousS2.set(S2);
-         previousS1.set(S1);
-
-         CommonOps.addEquals(previousS2, deltaT, S2Dot);
-         CommonOps.addEquals(previousS1, deltaT, S1Dot);
-
-         if (isAnyInvalid(S2) || isAnyInvalid(S1))
-            throw new RuntimeException("bad");
-      }
-
-
-      // forward pass
-      for (i = 0; i < stateVector.size() - 1; i++)
-      {
-         desiredControl = desiredControlVector.get(i);
-         state = stateVector.get(i);
-         control = controlVector.get(i);
-
-         DenseMatrix64F nextState = stateVector.get(i + 1);
-         S2 = this.S2Vector.get(i);
-         S1 = this.S1Vector.get(i);
-
-         control.set(desiredControl);
-
-         tempMatrix.reshape(4, 1);
-         CommonOps.mult(S2, state, tempMatrix);
-         CommonOps.addEquals(tempMatrix, 0.5, S1);
-         CommonOps.multAdd(-1.0, R_invBT, tempMatrix, control);
-
-         CommonOps.mult(A, state, XDot);
-         CommonOps.multAdd(B, control, XDot);
-
-         nextState.set(state);
-         CommonOps.addEquals(nextState, deltaT, XDot);
-
-         if (isAnyInvalid(state) || isAnyInvalid(control))
-            throw new RuntimeException("bad");
-      }
-
-      PrintTools.info("done");
    }
 
    public void setLineSearchGain(double lineSearchGain)
@@ -380,7 +238,10 @@ public class SimpleLIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      solveLQRProblem();
+      lqrSolver.setDesiredTrajectories(desiredStateVector, desiredControlVector, currentState);
+      lqrSolver.solveRicattiEquation(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      lqrSolver.computeOptimalTrajectories(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      lqrSolver.getOptimalTrajectories(stateVector, controlVector);
    }
 
    public void backwardDDPPass()
@@ -671,23 +532,5 @@ public class SimpleLIPMDDPCalculator
       tempMatrix.reshape(A.numCols, B.numCols);
       CommonOps.multTransA(A, B, tempMatrix);
       CommonOps.multAdd(tempMatrix, C, DToPack);
-   }
-
-   private class VariableVectorBuilder extends GenericTypeBuilder
-   {
-      private final int rows;
-      private final int cols;
-
-      public VariableVectorBuilder(int rows, int cols)
-      {
-         this.rows = rows;
-         this.cols = cols;
-      }
-
-      @Override
-      public Object newInstance()
-      {
-         return new DenseMatrix64F(rows, cols);
-      }
    }
 }
