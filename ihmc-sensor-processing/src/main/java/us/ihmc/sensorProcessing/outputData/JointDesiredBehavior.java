@@ -9,13 +9,16 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
    private double stiffness;
    private double damping;
    private double masterGain;
+   private double velocityScaling;
 
-   public JointDesiredBehavior(JointDesiredControlMode controlMode, double stiffness, double damping, double masterGain)
+   public JointDesiredBehavior(JointDesiredControlMode controlMode, double stiffness, double damping, double masterGain,
+                               double velocityScaling)
    {
       this.controlMode = controlMode;
       this.stiffness = stiffness;
       this.damping = damping;
       this.masterGain = masterGain;
+      this.velocityScaling = velocityScaling;
    }
 
    public void set(JointDesiredBehaviorReadOnly other)
@@ -24,6 +27,7 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
       setStiffness(other.getStiffness());
       setDamping(other.getDamping());
       setMasterGain(other.getMasterGain());
+      setVelocityScaling(other.getVelocityScaling());
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -44,6 +48,11 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
    public void setMasterGain(double masterGain)
    {
       this.masterGain = masterGain;
+   }
+
+   public void setVelocityScaling(double velocityScaling)
+   {
+      this.velocityScaling = velocityScaling;
    }
 
    @Override
@@ -68,6 +77,12 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
    public double getMasterGain()
    {
       return masterGain;
+   }
+
+   @Override
+   public double getVelocityScaling()
+   {
+      return velocityScaling;
    }
 
 }
