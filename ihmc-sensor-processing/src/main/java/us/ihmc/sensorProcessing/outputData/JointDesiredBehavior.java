@@ -11,6 +11,16 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
    private double masterGain;
    private double velocityScaling;
 
+   public JointDesiredBehavior(JointDesiredControlMode controlMode)
+   {
+      this(controlMode, 0.0, 0.0, 1.0, 1.0);
+   }
+
+   public JointDesiredBehavior(JointDesiredControlMode controlMode, double stiffness, double damping)
+   {
+      this(controlMode, stiffness, damping, 1.0, 1.0);
+   }
+
    public JointDesiredBehavior(JointDesiredControlMode controlMode, double stiffness, double damping, double masterGain,
                                double velocityScaling)
    {
