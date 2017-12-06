@@ -85,7 +85,7 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<LIPMState>
 
       matrixToPack.zero();
 
-      double value1 = deltaT2 * gravityZ /  pendulumHeight;
+      double value1 = 0.5 * deltaT2 * gravityZ /  pendulumHeight;
       double value2 = deltaT * gravityZ / pendulumHeight;
 
       matrixToPack.set(0, 0, 1 + value1);
@@ -111,9 +111,12 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       matrixToPack.zero();
 
       double value2 = -deltaT2  * gravityZ / (2 * pendulumHeight);
+      double value1 = -deltaT  * gravityZ / pendulumHeight;
 
       matrixToPack.set(0, 0, value2);
       matrixToPack.set(1, 1, value2);
+      matrixToPack.set(2, 0, value1);
+      matrixToPack.set(3, 1, value1);
    }
 
    public void getDynamicsStateHessian(LIPMState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)

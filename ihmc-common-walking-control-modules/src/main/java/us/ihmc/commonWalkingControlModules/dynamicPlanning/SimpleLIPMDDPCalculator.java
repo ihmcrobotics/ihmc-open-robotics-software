@@ -77,13 +77,14 @@ public class SimpleLIPMDDPCalculator
    public SimpleLIPMDDPCalculator(double deltaT, double mass, double gravityZ)
    {
       this.dynamics = new SimpleLIPMDynamics(deltaT, 1.0, gravityZ);
-      this.costFunction = new SimpleLIPMSimpleCostFunction();
+      this.costFunction = new SimpleLIPMSimpleCostFunction(); // discrete, so we need to take that into account
       this.terminalCostFunction = new SimpleLIPMTerminalCostFunction();
       this.deltaT = deltaT;
       this.mass = mass;
       this.gravityZ = gravityZ;
 
-      lqrSolver = new ContinuousTimeTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction, deltaT);
+      //lqrSolver = new DiscreteTimeTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction, deltaT);
+      lqrSolver = new DiscreteTimeTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -239,7 +240,7 @@ public class SimpleLIPMDDPCalculator
       }
 
       lqrSolver.setDesiredTrajectories(desiredStateVector, desiredControlVector, currentState);
-      lqrSolver.solveRicattiEquation(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      lqrSolver.solveRiccatiEquation(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
       lqrSolver.computeOptimalTrajectories(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
       lqrSolver.getOptimalTrajectories(stateVector, controlVector);
    }
