@@ -16,6 +16,7 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
    private final DoubleParameter stiffness;
    private final DoubleParameter damping;
    private final DoubleParameter masterGain;
+   private final DoubleParameter velocityScaling;
 
    public TunableJointDesiredBehavior(String namePrefix, YoVariableRegistry registry)
    {
@@ -23,6 +24,7 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
       stiffness = new DoubleParameter(namePrefix + "Stiffness", registry, 0.0, 10.0);
       damping = new DoubleParameter(namePrefix + "Damping", registry, 0.0, 10.0);
       masterGain = new DoubleParameter(namePrefix + "MasterGain", registry, 0.0, 1.0);
+      velocityScaling = new DoubleParameter(namePrefix + "VelocityScaling", registry, 0.0, 1.0);
    }
 
    public TunableJointDesiredBehavior(String namePrefix, JointDesiredBehaviorReadOnly other, YoVariableRegistry registry)
@@ -31,6 +33,7 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
       stiffness = new DoubleParameter(namePrefix + "Stiffness", registry, other.getStiffness(), 0.0, 10.0);
       damping = new DoubleParameter(namePrefix + "Damping", registry, other.getDamping(), 0.0, 10.0);
       masterGain = new DoubleParameter(namePrefix + "MasterGain", registry, other.getMasterGain(), 0.0, 1.0);
+      velocityScaling = new DoubleParameter(namePrefix + "VelocityScaling", registry, other.getVelocityScaling(), 0.0, 1.0);
    }
 
    @Override
@@ -55,6 +58,12 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
    public double getMasterGain()
    {
       return masterGain.getValue();
+   }
+
+   @Override
+   public double getVelocityScaling()
+   {
+      return velocityScaling.getValue();
    }
 
 }

@@ -16,4 +16,6 @@ public interface JointDesiredBehaviorReadOnly
    public double getDamping();
 
    public double getMasterGain();
+
+   public double getVelocityScaling();
 }
