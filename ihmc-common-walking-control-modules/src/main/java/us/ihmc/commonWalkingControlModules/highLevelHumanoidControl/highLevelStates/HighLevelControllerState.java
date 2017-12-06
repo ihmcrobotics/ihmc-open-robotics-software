@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
@@ -37,7 +38,7 @@ public abstract class HighLevelControllerState extends FinishableState<HighLevel
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMap = new HashMap<>();
       ParameterTools.extractJointBehaviorMap(stateName, desiredJointBehaviors, jointBehaviorMap, registry);
 
-      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       jointBehaviors = new JointDesiredBehaviorReadOnly[controlledJoints.length];
       stateSpecificJointLevelSettings = new JointDesiredOutputList(controlledJoints);
 
