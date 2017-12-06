@@ -9,16 +9,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 public interface HighLevelControllerParameters
 {
    WholeBodySetpointParameters getStandPrepParameters();
-
-   JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelControllerName state);
-   double getDesiredJointStiffness(String joint, HighLevelControllerName state);
-   double getDesiredJointDamping(String joint, HighLevelControllerName state);
 
    HighLevelControllerName getDefaultInitialControllerState();
    HighLevelControllerName getFallbackControllerState();

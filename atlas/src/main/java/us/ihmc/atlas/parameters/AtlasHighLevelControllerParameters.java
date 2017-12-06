@@ -1,6 +1,7 @@
 package us.ihmc.atlas.parameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -14,6 +15,8 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class AtlasHighLevelControllerParameters implements HighLevelControllerParameters
@@ -34,54 +37,51 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    }
 
    @Override
-   public JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelControllerName state)
+   public List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
       switch (state)
       {
       case WALKING:
-         return getJointDesiredControlModeWalking(joint);
+         return getDesiredJointBehaviorForWalking();
+      case DO_NOTHING_BEHAVIOR:
+         return getDesiredJointBehaviorForDoNothing();
       default:
-         return JointDesiredControlMode.EFFORT;
+         throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
       }
    }
 
-   private JointDesiredControlMode getJointDesiredControlModeWalking(String joint)
+   private List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviorForWalking()
    {
-      if (runningOnRealRobot)
-      {
-         for (NeckJointName name : jointMap.getNeckJointNames())
-         {
-            if (jointMap.getNeckJointName(name).equals(joint))
-            {
-               return JointDesiredControlMode.POSITION;
-            }
-         }
+      List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
+      JointDesiredControlMode positionControlMode = runningOnRealRobot ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
 
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            for (ArmJointName name : jointMap.getArmJointNames())
-            {
-               if (jointMap.getArmJointName(robotSide, name).equals(joint))
-               {
-                  return JointDesiredControlMode.POSITION;
-               }
-            }
-         }
-      }
+      // neck
+      JointDesiredBehavior neckJointBehavior = new JointDesiredBehavior(positionControlMode);
+      behaviors.add(new ImmutableTriple<>("Neck", neckJointBehavior, jointMap.getNeckJointNamesAsStrings()));
 
-      return JointDesiredControlMode.EFFORT;
+      // arms
+      JointDesiredBehavior armJointBehavior = new JointDesiredBehavior(positionControlMode);
+      behaviors.add(new ImmutableTriple<>("Arms", armJointBehavior, jointMap.getArmJointNamesAsStrings()));
+
+      // spine
+      JointDesiredBehavior spineJointBehavior = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
+      behaviors.add(new ImmutableTriple<>("Spine", spineJointBehavior, jointMap.getSpineJointNamesAsStrings()));
+
+      // legs
+      JointDesiredBehavior legJointBehavior = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
+      behaviors.add(new ImmutableTriple<>("Legs", legJointBehavior, jointMap.getLegJointNamesAsStrings()));
+
+      return behaviors;
    }
 
-   @Override
-   public double getDesiredJointStiffness(String joint, HighLevelControllerName state)
+   private List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviorForDoNothing()
    {
-      return 0.0;
-   }
+      List<String> allJoints = Arrays.asList(jointMap.getOrderedJointNames());
+      JointDesiredBehavior allJointBehaviors = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
 
-   @Override
-   public double getDesiredJointDamping(String joint, HighLevelControllerName state)
-   {
-      return 0.0;
+      List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
+      behaviors.add(new ImmutableTriple<>("", allJointBehaviors, allJoints));
+      return behaviors;
    }
 
    @Override
