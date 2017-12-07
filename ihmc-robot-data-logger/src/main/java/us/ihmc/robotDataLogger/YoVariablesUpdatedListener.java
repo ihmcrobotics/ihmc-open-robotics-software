@@ -17,14 +17,15 @@ public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogL
 
    void setShowOverheadView(boolean showOverheadView);
 
-   void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser);
+   void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser);
 
    /**
-    * Called when a timeout is detected on the logger
+    * Called when a timeout is detected on the logger.
+    * 
+    * A reconnect is possible after being disconnected
+    * 
     */
    void disconnected();
-
-   void setYoVariableClient(YoVariableClient client);
 
    /**
     * On connect, the return value of this function is send to the server. The server will only send

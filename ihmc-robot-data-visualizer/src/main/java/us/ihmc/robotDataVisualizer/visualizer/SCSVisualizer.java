@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
@@ -49,7 +50,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private volatile boolean recording = true;
-   private YoVariableClient yoVariableClient;
+   private YoVariableClientInterface yoVariableClientInterface;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
    private int displayOneInNPackets = 1;
@@ -119,17 +120,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.setScrollGraphsEnabled(true);
    }
 
-   @Override
-   public void setYoVariableClient(final YoVariableClient client)
-   {
-
-      this.yoVariableClient = client;
-   }
-
    private void disconnect(final JButton disconnectButton)
    {
       disconnectButton.setEnabled(false);
-      yoVariableClient.requestStop();
+      yoVariableClientInterface.stop();
    }
 
    public void addButton(String yoVariableName, double newValue)
@@ -169,9 +163,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void exitActionPerformed()
    {
       recording = false;
-      if (yoVariableClient != null)
+      if (yoVariableClientInterface != null)
       {
-         yoVariableClient.requestStop();
+         yoVariableClientInterface.stop();
       }
    }
 
@@ -208,8 +202,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public final void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
+   public final void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
+      this.yoVariableClientInterface = yoVariableClientInterface;
+      
       Robot robot = new Robot("DummyRobot");
       if (handshake.getModelLoaderClass() != null)
       {
@@ -238,7 +234,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.setGroundVisible(false);
       scs.attachExitActionListener(this);
       scs.attachPlaybackListener(createYoGraphicsUpdater());
-      scs.setRunName(yoVariableClient.getServerName());
+      scs.setRunName(yoVariableClientInterface.getServerName());
       //scs.setFastSimulate(true, 50);
 
       scs.addButton(disconnectButton);
@@ -258,9 +254,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            if (yoVariableClient != null)
+            if (yoVariableClientInterface != null)
             {
-               yoVariableClient.sendClearLogRequest();
+               yoVariableClientInterface.sendClearLogRequest();
             }
          }
       });
@@ -271,7 +267,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
-      this.registry.addChild(yoVariableClient.getDebugRegistry());
+      this.registry.addChild(yoVariableClientInterface.getDebugRegistry());
       scs.setParameterRootPath(yoVariableRegistry);
       
       List<JointState> jointStates = handshakeParser.getJointStates();

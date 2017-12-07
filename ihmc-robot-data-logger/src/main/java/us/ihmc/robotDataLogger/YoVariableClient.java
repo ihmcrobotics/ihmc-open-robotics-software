@@ -10,7 +10,15 @@ import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoVariableClient
+/**
+ * Client for the logger 
+ * 
+ * This is a general client for a logging sessions. A listener can be attached to provide desired functionality.
+ * 
+ * @author jesper
+ *
+ */
+public class YoVariableClient implements YoVariableClientInterface
 {
    private String serverName;
 
@@ -24,16 +32,8 @@ public class YoVariableClient
    // Internal values
    private final IDLYoVariableHandshakeParser handshakeParser;
    private final RTPSDebugRegistry debugRegistry = new RTPSDebugRegistry();
-   
-
    private final LogProducerDisplay.LogSessionFilter[] sessionFilters;
-   
-   private ClientState state = ClientState.WAITING;
-
-   private enum ClientState
-   {
-      WAITING, RUNNING, STOPPED
-   }
+   private Announcement handshakeAnnouncement;
 
    private static DataConsumerParticipant createParticipant()
    {
@@ -83,24 +83,25 @@ public class YoVariableClient
       }
 
       this.handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR);
-      this.yoVariablesUpdatedListener.setYoVariableClient(this);
    }
 
+   @Override
    public String getServerName()
    {
       return serverName;
    }
 
+   /**
+    * Callback function from the RegistryConsumer. 
+    * 
+    * Gets called when the connection is closed, either by timeout or by user request.
+    * 
+    */
    public void connectionClosed()
    {
-      if (state == ClientState.RUNNING)
-      {
-         System.out.println("Disconnected, closing client.");
-         dataConsumerParticipant.remove();
-         yoVariablesUpdatedListener.disconnected();
-
-         state = ClientState.STOPPED;
-      }
+      System.out.println("Disconnected, closing client.");
+      dataConsumerParticipant.disconnectSession();
+      yoVariablesUpdatedListener.disconnected();
    }
 
    public void start()
@@ -115,9 +116,9 @@ public class YoVariableClient
       }
    }
 
-   public synchronized void start(int timeout) throws IOException
+   public void start(int timeout) throws IOException
    {
-      if (state != ClientState.WAITING)
+      if(handshakeAnnouncement != null)
       {
          throw new RuntimeException("Client already started");
       }
@@ -126,11 +127,20 @@ public class YoVariableClient
       start(timeout, announcement);
    }
    
+   /**
+    * Start a new session and request the handshake and robot model.
+    * 
+    * This can only be called once for a client. To restart, use reconnect()
+    * 
+    * @param timeout
+    * @param announcement
+    * @throws IOException
+    */
    public synchronized void start(int timeout, Announcement announcement) throws IOException
    {
       this.serverName = announcement.getNameAsString();
 
-      if (state != ClientState.WAITING)
+      if (handshakeAnnouncement != null)
       {
          throw new RuntimeException("Client already started");
       }
@@ -158,27 +168,52 @@ public class YoVariableClient
 
       }
 
-      yoVariablesUpdatedListener.start(logHandshake, handshakeParser);
+      yoVariablesUpdatedListener.start(this, logHandshake, handshakeParser);
 
+      handshakeAnnouncement = announcement;
+      
       connectToSession(announcement);
-      state = ClientState.RUNNING;
    }
    
-   public void connectToSession(Announcement announcement) throws IOException
+   /**
+    * Internal function to connect to a session
+    * 
+    * Throws a runtimeexception if you are already connected or when the client has closed to connection
+    * 
+    * @param announcement
+    * @throws IOException
+    */
+   void connectToSession(Announcement announcement) throws IOException
    {
+      if(dataConsumerParticipant.isSessionActive())
+      {
+         throw new RuntimeException("Client already connected");
+      }
+      if(!dataConsumerParticipant.isConnectedToDomain())
+      {
+         throw new RuntimeException("Client has closed completly");
+      }
       dataConsumerParticipant.createSession(announcement, handshakeParser, this, variableChangedProducer, yoVariablesUpdatedListener, yoVariablesUpdatedListener, debugRegistry);
    }
 
-   public void requestStop()
+   /**
+    * Stops the client completely. 
+    * 
+    * The participant leaves the domain and a reconnect is not possible.
+    */
+   @Override
+   public synchronized void stop()
    {
       dataConsumerParticipant.remove();
    }
-
-   public synchronized boolean isRunning()
-   {
-      return state == ClientState.RUNNING;
-   }
-
+   
+   
+   /**
+    * Broadcast a clear log request for the current session
+    * 
+    * If no session is available, this request gets silently ignored.
+    */
+   @Override
    public void sendClearLogRequest()
    {
       try
@@ -191,14 +226,45 @@ public class YoVariableClient
       }
    }
 
+   /**
+    * 
+    * @return YoVariableRegistry with debug variables for this instance of the YoVariableClient
+    */
+   @Override
    public YoVariableRegistry getDebugRegistry()
    {
       return debugRegistry.getYoVariableRegistry();
    }
 
+   /**
+    * Callback from the timestamp topic. Gets called immediately when a new timestamp has arrived from the logger.
+    * 
+    * @param timestamp
+    */
    public void receivedTimestampAndData(long timestamp)
    {
       yoVariablesUpdatedListener.receivedTimestampAndData(timestamp);
+   }
+
+   @Override
+   public void disconnect()
+   {
+      dataConsumerParticipant.disconnectSession();
+   }
+
+   @Override
+   public synchronized boolean reconnect() throws IOException
+   {
+      Announcement newAnnouncement = dataConsumerParticipant.getReconnectableSession(handshakeAnnouncement);
+      if(newAnnouncement == null)
+      {
+         return false;
+      }
+      else
+      {
+         connectToSession(newAnnouncement);
+         return true;
+      }
    }
 
 }

@@ -54,10 +54,4 @@ public class YoVariableLogger
          throw e;
       }
    }
-
-   public boolean isRunning()
-   {
-      return client.isRunning();
-   }
-
 }
