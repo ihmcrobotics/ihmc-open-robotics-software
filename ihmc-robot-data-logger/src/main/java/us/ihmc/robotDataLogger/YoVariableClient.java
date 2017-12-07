@@ -1,7 +1,6 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
-import java.util.List;
 
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
@@ -10,14 +9,12 @@ import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataLogger.rtps.RTPSDebugRegistry;
 import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableClient
 {
-   private final String serverName;
+   private String serverName;
 
    //DDS
-   private final Announcement announcement;
    private final DataConsumerParticipant dataConsumerParticipant;
    private final VariableChangedProducer variableChangedProducer;
 
@@ -29,6 +26,8 @@ public class YoVariableClient
    private final RTPSDebugRegistry debugRegistry = new RTPSDebugRegistry();
    
 
+   private final LogProducerDisplay.LogSessionFilter[] sessionFilters;
+   
    private ClientState state = ClientState.WAITING;
 
    private enum ClientState
@@ -56,7 +55,7 @@ public class YoVariableClient
     */
    public YoVariableClient(YoVariablesUpdatedListener listener, LogProducerDisplay.LogSessionFilter... filters)
    {
-      this(createParticipant(), null, listener, filters);
+      this(createParticipant(), listener, filters);
    }
 
    /**
@@ -64,25 +63,19 @@ public class YoVariableClient
     * @param request
     * @param yoVariablesUpdatedListener
     */
-   public YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
+   public YoVariableClient(DataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener)
    {
-      this(participant, request, yoVariablesUpdatedListener, null);
+      this(participant, yoVariablesUpdatedListener, null);
    }
 
-   private YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, LogProducerDisplay.LogSessionFilter[] filters)
+   private YoVariableClient(DataConsumerParticipant participant, final YoVariablesUpdatedListener yoVariablesUpdatedListener, LogProducerDisplay.LogSessionFilter[] filters)
    {
       this.dataConsumerParticipant = participant;
-      if (request == null)
-      {
-         request = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, filters);
-      }
-
-      this.serverName = request.getNameAsString();
-      this.announcement = request;
       this.yoVariablesUpdatedListener = yoVariablesUpdatedListener;
+      this.sessionFilters = filters;
       if (yoVariablesUpdatedListener.changesVariables())
       {
-         this.variableChangedProducer = new VariableChangedProducer(dataConsumerParticipant);
+         this.variableChangedProducer = new VariableChangedProducer();
       }
       else
       {
@@ -103,11 +96,6 @@ public class YoVariableClient
       if (state == ClientState.RUNNING)
       {
          System.out.println("Disconnected, closing client.");
-         if (variableChangedProducer != null)
-         {
-            variableChangedProducer.disconnect();
-         }
-
          dataConsumerParticipant.remove();
          yoVariablesUpdatedListener.disconnected();
 
@@ -133,7 +121,20 @@ public class YoVariableClient
       {
          throw new RuntimeException("Client already started");
       }
+      
+      Announcement announcement = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, sessionFilters);
+      start(timeout, announcement);
+   }
+   
+   public synchronized void start(int timeout, Announcement announcement) throws IOException
+   {
+      this.serverName = announcement.getNameAsString();
 
+      if (state != ClientState.WAITING)
+      {
+         throw new RuntimeException("Client already started");
+      }
+      
       System.out.println("Requesting handshake");
       Handshake handshake = dataConsumerParticipant.getHandshake(announcement, timeout);
 
@@ -158,28 +159,19 @@ public class YoVariableClient
       }
 
       yoVariablesUpdatedListener.start(logHandshake, handshakeParser);
-      if (yoVariablesUpdatedListener.changesVariables())
-      {
-         List<YoVariable<?>> variablesList = handshakeParser.getYoVariablesList();
-         variableChangedProducer.startVariableChangedProducers(announcement, variablesList);
-      }
 
-      dataConsumerParticipant.createClearLogPubSub(announcement, yoVariablesUpdatedListener);
-      dataConsumerParticipant.createTimestampListener(announcement, yoVariablesUpdatedListener);
-
-      dataConsumerParticipant.createDataConsumer(announcement, handshakeParser, this, debugRegistry);
-
+      connectToSession(announcement);
       state = ClientState.RUNNING;
+   }
+   
+   public void connectToSession(Announcement announcement) throws IOException
+   {
+      dataConsumerParticipant.createSession(announcement, handshakeParser, this, variableChangedProducer, yoVariablesUpdatedListener, yoVariablesUpdatedListener, debugRegistry);
    }
 
    public void requestStop()
    {
       dataConsumerParticipant.remove();
-   }
-
-   public void setSendingVariableChanges(boolean sendVariableChanges)
-   {
-      variableChangedProducer.setSendingChangesEnabled(sendVariableChanges);
    }
 
    public synchronized boolean isRunning()
@@ -191,7 +183,7 @@ public class YoVariableClient
    {
       try
       {
-         dataConsumerParticipant.sendClearLogRequest(announcement);
+         dataConsumerParticipant.sendClearLogRequest();
       }
       catch (IOException e)
       {
