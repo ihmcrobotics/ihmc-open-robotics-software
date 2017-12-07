@@ -2,7 +2,9 @@ package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import us.ihmc.pubsub.Domain;
@@ -43,11 +45,11 @@ import us.ihmc.robotDataLogger.listeners.TimestampListener;
 public class DataConsumerParticipant
 {
 
-   private final ReentrantLock lock = new ReentrantLock();
+   private final ReentrantLock announcementLock = new ReentrantLock();
    private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
    private Participant participant;
    private LogAnnouncementListener logAnnouncementListener;
-   private final HashMap<GuidPrefix, Announcement> announcements = new HashMap<>();
+   private final LinkedHashMap<GuidPrefix, Announcement> announcements = new LinkedHashMap<>();
 
    private DataConsumerSession session;
 
@@ -58,7 +60,7 @@ public class DataConsumerParticipant
       {
          if (info.getStatus() == DiscoveryStatus.REMOVED_RTPSPARTICIPANT)
          {
-            lock.lock();
+            announcementLock.lock();
             Announcement removed = announcements.remove(info.getGuid().getGuidPrefix());
             if (removed != null)
             {
@@ -67,7 +69,7 @@ public class DataConsumerParticipant
                   logAnnouncementListener.logSessionWentOffline(removed);
                }
             }
-            lock.unlock();
+            announcementLock.unlock();
          }
       }
 
@@ -85,7 +87,7 @@ public class DataConsumerParticipant
          {
             if (subscriber.takeNextData(announcement, info))
             {
-               lock.lock();
+               announcementLock.lock();
                GuidPrefix guid = info.getSampleIdentity().getGuid().getGuidPrefix();
                if (announcements.containsKey(guid))
                {
@@ -99,7 +101,7 @@ public class DataConsumerParticipant
                      logAnnouncementListener.logSessionCameOnline(announcement);
                   }
                }
-               lock.unlock();
+               announcementLock.unlock();
             }
          }
          catch (IOException e)
@@ -113,6 +115,29 @@ public class DataConsumerParticipant
       {
       }
 
+   }
+
+   /**
+    * Get the first matching announcement that is compatible with the original announcement.
+    * 
+    * It iterates in reverse order over the announcements, such that the newest session is connected to.
+    * 
+    * @param originalAnnouncement
+    */
+   public Announcement getReconnectableSession(Announcement originalAnnouncement)
+   {
+      Announcement newAnnouncement = null;
+      
+      announcementLock.lock();
+      List<Announcement> announcementList =  new ArrayList<>(announcements.values());
+      for(int i = announcementList.size() - 1; i >= 0; i--)
+      {
+         Announcement announcement = announcementList.get(i);
+         System.out.println("Trying announcement " + announcement);
+      }
+      announcementLock.unlock();
+      
+      return newAnnouncement;
    }
 
    /**
@@ -256,28 +281,99 @@ public class DataConsumerParticipant
       return getData(new Handshake(), handshakePubSubType, announcement, LogParticipantSettings.handshakeTopic, timeout);
    }
 
+   /**
+    * Create a new variable receiver session
+    * 
+    * Will throw an error if the session is already running or if the participant has been removed from the domain.
+    * 
+    * @param announcement
+    * @param parser
+    * @param yoVariableClient
+    * @param variableChangedProducer
+    * @param timeStampListener
+    * @param clearLogListener
+    * @param rtpsDebugRegistry
+    * @return
+    * @throws IOException
+    */
    public synchronized DataConsumerSession createSession(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient,
                                                          VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener,
                                                          ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry)
          throws IOException
    {
+      if (session != null)
+      {
+         throw new IOException("Session is already connected");
+      }
+
+      if(participant == null)
+      {
+         throw new IOException("Participant has been removed from the domain. Cannot create a new session");
+      }
+      
       session = new DataConsumerSession(domain, participant, announcement, parser, yoVariableClient, variableChangedProducer, timeStampListener,
                                         clearLogListener, rtpsDebugRegistry);
       return session;
    }
 
+   /**
+    * Disconnect the current sessions, if connected.
+    * 
+    * After disconnecting the sessions it is still possible to reconnect to another session.
+    * 
+    */
+   public synchronized void disconnectSession()
+   {
+      if (session != null)
+      {
+         session.remove();
+         session = null;
+      }
+   }
+
+   /**
+    * Remove the participant from the domain.
+    * 
+    * After calling this function 
+    */
    public synchronized void remove()
    {
       if (participant != null)
       {
-         session.remove();
-         session = null;
+         disconnectSession();
          domain.removeParticipant(participant);
          participant = null;
 
       }
    }
 
+   /**
+    * 
+    * @return true if the participant is connected to the domain
+    */
+   public synchronized boolean isConnectedToDomain()
+   {
+      return participant != null;
+   }
+   
+   /**
+    * 
+    * @return true if a session is currently active
+    */
+   public synchronized boolean isSessionActive()
+   {
+      return session != null;
+   }
+   
+   
+   
+   /**
+    * Broadcast a clear log request for the current session
+    * 
+    * If no session is available, this request gets silently ignored.
+    * 
+    * @throws IOException
+    */
    public synchronized void sendClearLogRequest() throws IOException
    {
       if (session != null)
