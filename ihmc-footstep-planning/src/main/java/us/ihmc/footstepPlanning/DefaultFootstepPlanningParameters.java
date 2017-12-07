@@ -72,7 +72,7 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public double getCliffHeightToShiftAwayFrom()
+   public double getCliffHeightToAvoid()
    {
       return 0.03;
    }
