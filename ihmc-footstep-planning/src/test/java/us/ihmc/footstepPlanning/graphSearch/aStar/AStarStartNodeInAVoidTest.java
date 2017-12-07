@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AStarStartNodeInAVoidTest
 {
-   private static final boolean visualize = true;
+   private boolean visualize = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
    private AStarFootstepPlanner planner;
@@ -31,6 +31,8 @@ public class AStarStartNodeInAVoidTest
    @Before
    public void setup()
    {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
       DefaultFootstepPlanningParameters parameters = new DefaultFootstepPlanningParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
