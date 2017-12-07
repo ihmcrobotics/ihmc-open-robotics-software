@@ -104,7 +104,6 @@ public class EmergencyValveEnvironment implements CommonAvatarEnvironmentInterfa
    @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
-      // TODO Auto-generated method stub
 
    }
 }

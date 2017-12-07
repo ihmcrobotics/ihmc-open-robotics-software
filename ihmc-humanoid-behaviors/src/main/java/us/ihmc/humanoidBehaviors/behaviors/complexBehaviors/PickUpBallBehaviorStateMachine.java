@@ -72,7 +72,6 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    @Override
    public void doControl()
    {
-      // TODO Auto-generated method stub
       super.doControl();
    }
 

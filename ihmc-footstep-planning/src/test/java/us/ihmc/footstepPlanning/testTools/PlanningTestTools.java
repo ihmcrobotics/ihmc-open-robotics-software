@@ -46,11 +46,11 @@ public class PlanningTestTools
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final AppearanceDefinition[] appearances = {YoAppearance.LightGray(), YoAppearance.Grey(), YoAppearance.DarkGray()};
 
-   public static ConvexPolygon2D createDefaultFootPolygon()
-   {
-      double footLength = 0.2;
-      double footWidth = 0.1;
+   private static final double footLength = 0.2;
+   private static final double footWidth = 0.1;
 
+   public static ConvexPolygon2D createFootPolygon(double footLength, double footWidth)
+   {
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();
       footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
       footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
@@ -61,11 +61,21 @@ public class PlanningTestTools
       return footPolygon;
    }
 
+   public static ConvexPolygon2D createDefaultFootPolygon()
+   {
+      return createFootPolygon(footLength, footWidth);
+   }
+
    public static SideDependentList<ConvexPolygon2D> createDefaultFootPolygons()
+   {
+      return createFootPolygons(footLength, footWidth);
+   }
+
+   public static SideDependentList<ConvexPolygon2D> createFootPolygons(double footLength, double footWidth)
    {
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
-         footPolygons.put(side, PlanningTestTools.createDefaultFootPolygon());
+         footPolygons.put(side, PlanningTestTools.createFootPolygon(footLength, footWidth));
       return footPolygons;
    }
 

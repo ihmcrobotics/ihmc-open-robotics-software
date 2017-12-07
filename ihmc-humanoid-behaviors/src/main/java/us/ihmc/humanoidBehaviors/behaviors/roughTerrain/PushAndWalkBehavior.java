@@ -297,42 +297,36 @@ public class PushAndWalkBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorAborted()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 }

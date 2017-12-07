@@ -149,12 +149,10 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    @Override
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

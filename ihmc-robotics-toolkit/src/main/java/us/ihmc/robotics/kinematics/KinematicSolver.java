@@ -318,7 +318,6 @@ public class KinematicSolver implements InverseKinematicsCalculator
    @Override
    public void setLimitJointAngles(boolean limitJointAngles)
    {
-      // TODO Auto-generated method stub
       
    }
 }

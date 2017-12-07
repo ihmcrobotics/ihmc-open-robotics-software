@@ -306,7 +306,6 @@ public class AcsellAnkleFullComputation implements AcsellAnkleAngleCalculator
    public void updateAnkleState(double motorAngleRight, double motorAngleLeft, double motorVelocityRight, double motorVelocityLeft,
          double tauMeasureAnkleRight, double tauMeasureAnkleLeft)
    {
-      // TODO Auto-generated method stub
       
    }
 
