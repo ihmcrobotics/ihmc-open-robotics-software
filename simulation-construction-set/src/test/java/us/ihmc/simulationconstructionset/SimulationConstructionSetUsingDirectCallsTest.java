@@ -1331,7 +1331,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
          @Override
          public void initializeProcessing()
          {
-            // TODO Auto-generated method stub
 
          }
       };

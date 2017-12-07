@@ -99,7 +99,6 @@ public class RobotiqHandTesting
 			@Override
 			public void stateChanged(ChangeEvent e)
 			{
-				// TODO Auto-generated method stub
 				JSlider slider = (JSlider) e.getSource();
 				System.out.println(slider.getValue());
 			}
@@ -110,7 +109,6 @@ public class RobotiqHandTesting
 			@Override
 			public void stateChanged(ChangeEvent e)
 			{
-				// TODO Auto-generated method stub
 				JSlider slider = (JSlider) e.getSource();
 				System.out.println(slider.getValue());
 			}
@@ -138,7 +136,6 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -150,7 +147,6 @@ public class RobotiqHandTesting
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				// TODO Auto-generated method stub
 				
 			}
 		});

@@ -97,7 +97,6 @@ public class JMEZBufferGrabber extends AbstractAppState implements SceneProcesso
 
    public void cleanup()
    {
-      // TODO Auto-generated method stub
 
    }
 

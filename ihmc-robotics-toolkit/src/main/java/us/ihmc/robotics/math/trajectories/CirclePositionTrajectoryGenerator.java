@@ -153,11 +153,9 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
 
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

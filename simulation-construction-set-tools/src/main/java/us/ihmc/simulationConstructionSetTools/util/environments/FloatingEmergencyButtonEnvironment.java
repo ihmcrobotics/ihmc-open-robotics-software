@@ -105,7 +105,6 @@ public class FloatingEmergencyButtonEnvironment implements CommonAvatarEnvironme
 	@Override
 	public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
 	{
-		// TODO Auto-generated method stub
 
 	}
 }

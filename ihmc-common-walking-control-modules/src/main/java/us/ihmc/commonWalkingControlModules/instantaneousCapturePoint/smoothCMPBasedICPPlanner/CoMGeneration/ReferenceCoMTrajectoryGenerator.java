@@ -359,7 +359,6 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 

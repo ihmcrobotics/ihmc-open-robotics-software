@@ -261,7 +261,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public void cleanup()
    {
-      // TODO Auto-generated method stub
 
    }
 
