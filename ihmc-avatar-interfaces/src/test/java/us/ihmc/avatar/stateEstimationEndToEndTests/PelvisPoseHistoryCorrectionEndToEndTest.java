@@ -923,7 +923,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       @Override
       public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
       {
-         // TODO Auto-generated method stub
 
       }
    }

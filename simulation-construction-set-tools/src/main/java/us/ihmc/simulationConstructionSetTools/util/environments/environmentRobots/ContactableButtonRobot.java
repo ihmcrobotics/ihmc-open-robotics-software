@@ -242,7 +242,6 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
 
    @Override
    public void getBodyTransformToWorld(RigidBodyTransform transformToWorld) {
-      // TODO Auto-generated method stub
    }
 
    @Override
