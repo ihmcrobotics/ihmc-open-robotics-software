@@ -274,7 +274,6 @@ public class TestRenderToMemory extends SimpleApplication implements SceneProces
    @Override
    public void setProfiler(AppProfiler profiler)
    {
-      // TODO Auto-generated method stub
       
    }
 

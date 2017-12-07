@@ -429,7 +429,6 @@ public class PBOAwtPanel extends Canvas implements SceneProcessor
    @Override
    public void setProfiler(AppProfiler profiler)
    {
-      // TODO Auto-generated method stub
       
    }
 }

@@ -471,7 +471,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    @Override
    public void setProfiler(AppProfiler profiler)
    {
-      // TODO Auto-generated method stub
       
    }
 }
