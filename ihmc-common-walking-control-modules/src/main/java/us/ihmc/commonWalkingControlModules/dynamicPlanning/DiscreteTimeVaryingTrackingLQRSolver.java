@@ -244,7 +244,7 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
    public void computeOptimalTrajectories(E dynamicState, int startIndex, int endIndex) // forward pass
    {
       // the first index is the initial state
-      for (int i = startIndex; i < endIndex - 1; i++)
+      for (int i = startIndex; i < endIndex; i++)
       {
          DenseMatrix64F currentDesiredState = desiredStateTrajectory.get(i);
          DenseMatrix64F currentDesiredControl = desiredControlTrajectory.get(i);

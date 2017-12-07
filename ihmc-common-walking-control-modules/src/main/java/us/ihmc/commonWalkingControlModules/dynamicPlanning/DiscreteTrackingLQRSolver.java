@@ -243,7 +243,7 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, B);
 
       // the first index is the initial state
-      for (int i = startIndex; i < endIndex - 1; i++)
+      for (int i = startIndex; i < endIndex; i++)
       {
          DenseMatrix64F optimalControl = optimalControlTrajectory.get(i);
 
