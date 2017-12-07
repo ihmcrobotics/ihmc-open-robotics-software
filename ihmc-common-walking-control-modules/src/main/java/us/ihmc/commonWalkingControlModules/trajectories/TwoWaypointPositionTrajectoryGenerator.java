@@ -675,13 +675,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    @Override
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void informDone()

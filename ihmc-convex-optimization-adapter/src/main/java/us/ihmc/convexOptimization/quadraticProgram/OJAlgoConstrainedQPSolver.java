@@ -33,14 +33,12 @@ public class OJAlgoConstrainedQPSolver extends ConstrainedQPSolver
    public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F lb,
          DenseMatrix64F ub, DenseMatrix64F x, boolean initialize) throws NoConvergenceException
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public boolean supportBoxConstraints()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
