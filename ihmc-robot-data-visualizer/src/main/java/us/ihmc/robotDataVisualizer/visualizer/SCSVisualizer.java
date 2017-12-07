@@ -9,7 +9,6 @@ import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commons.Conversions;
@@ -23,11 +22,16 @@ import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.ExitActionListener;
+import us.ihmc.simulationconstructionset.PlaybackListener;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.RobotFromDescription;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
 /**
  * Main entry point for the visualizer. 
@@ -39,8 +43,8 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
  */
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
-   protected YoVariableRegistry registry;
-   protected SimulationConstructionSet scs;
+   private YoVariableRegistry registry;
+   private SimulationConstructionSet scs;
 
    
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
