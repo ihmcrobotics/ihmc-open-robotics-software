@@ -1,0 +1,3 @@
+<Start,-2.419, 0.312, 0.001,Start>
+<Goal,0.792, 0.257, 0.001,Goal>
+<PathSize,2,PathSize>
