@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
@@ -29,13 +28,13 @@ public class WandererHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviors(HighLevelControllerName state)
+   public List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
       JointDesiredBehavior allJointBehaviors = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
 
       List<String> allJoints = Arrays.asList(jointMap.getOrderedJointNames());
-      List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
-      behaviors.add(new ImmutableTriple<>("", allJointBehaviors, allJoints));
+      List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
+      behaviors.add(new JointGroupParameter<>("", allJointBehaviors, allJoints));
       return behaviors;
    }
 

@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
@@ -37,7 +35,7 @@ public interface HighLevelControllerParameters
     * </p>
     * @return list containing joint behavior parameters and the corresponding joints
     */
-   public default List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviors(HighLevelControllerName state)
+   public default List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
       return null;
    }
@@ -70,7 +68,7 @@ public interface HighLevelControllerParameters
     * </p>
     * @return list containing acceleration integration parameters and the corresponding joints
     */
-   public default List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
+   public default List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
    {
       return null;
    }
@@ -83,7 +81,7 @@ public interface HighLevelControllerParameters
     *
     * @return list containing acceleration integration parameters to be used if a joint is loaded
     */
-   public default List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersLoaded()
+   public default List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersLoaded()
    {
       return null;
    }

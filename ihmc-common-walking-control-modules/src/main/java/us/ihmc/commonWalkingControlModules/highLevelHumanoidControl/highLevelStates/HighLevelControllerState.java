@@ -4,11 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import com.google.common.base.CaseFormat;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -34,7 +33,7 @@ public abstract class HighLevelControllerState extends FinishableState<HighLevel
       super(stateEnum);
 
       String stateName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, stateEnum.toString());
-      List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> desiredJointBehaviors = parameters.getDesiredJointBehaviors(stateEnum);
+      List<JointGroupParameter<JointDesiredBehaviorReadOnly>> desiredJointBehaviors = parameters.getDesiredJointBehaviors(stateEnum);
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMap = new HashMap<>();
       ParameterTools.extractJointBehaviorMap(stateName, desiredJointBehaviors, jointBehaviorMap, registry);
 

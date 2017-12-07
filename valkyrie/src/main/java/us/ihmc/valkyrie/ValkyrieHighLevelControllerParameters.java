@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
@@ -43,7 +42,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviors(HighLevelControllerName state)
+   public List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
       switch (state)
       {
@@ -60,9 +59,9 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       }
    }
 
-   private List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviorForWalking()
+   private List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalking()
    {
-      List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
+      List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
       // Can go up to kp = 30.0, kd = 3.0
       configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
@@ -98,9 +97,9 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return behaviors;
    }
 
-   private List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> getDesiredJointBehaviorForHangingAround()
+   private List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForHangingAround()
    {
-      List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
+      List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
       configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
       configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
@@ -132,36 +131,36 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return behaviors;
    }
 
-   private static void configureBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, DRCRobotJointMap jointMap,
+   private static void configureBehavior(List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
                                          SpineJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
-      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, names));
+      behaviors.add(new JointGroupParameter<>(jointName.toString(), jointBehavior, names));
    }
 
-   private static void configureBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, DRCRobotJointMap jointMap,
+   private static void configureBehavior(List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
                                          NeckJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
-      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, names));
+      behaviors.add(new JointGroupParameter<>(jointName.toString(), jointBehavior, names));
    }
 
-   private static void configureSymmetricBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors,
+   private static void configureSymmetricBehavior(List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
                                                   DRCRobotJointMap jointMap, LegJointName jointName, JointDesiredControlMode controlMode, double stiffness,
                                                   double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
+      behaviors.add(new JointGroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
-   private static void configureSymmetricBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors,
+   private static void configureSymmetricBehavior(List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
                                                   DRCRobotJointMap jointMap, ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness,
                                                   double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
+      behaviors.add(new JointGroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
    private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, LegJointName legJointName)
@@ -227,9 +226,9 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParametersNoLoad()
+   public List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
    {
-      List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> ret = new ArrayList<>();
+      List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
       for (LegJointName legJointName : new LegJointName[]{LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.HIP_ROLL})
       { // Hip joints
@@ -238,7 +237,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          List<String> jointNames = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
-         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
+         ret.add(new JointGroupParameter<>(legJointName.getCamelCaseName(), parameters, jointNames));
       }
 
       for (LegJointName legJointName : new LegJointName[]{LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL})
@@ -247,7 +246,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          List<String> jointNames = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
-         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
+         ret.add(new JointGroupParameter<>(legJointName.getCamelCaseName(), parameters, jointNames));
       }
 
       for (SpineJointName spineJointName : jointMap.getSpineJointNames())
@@ -255,7 +254,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
          parameters.setAlphas(0.9996, 0.85);
          List<String> jointNames = Collections.singletonList(jointMap.getSpineJointName(spineJointName));
-         ret.add(new ImmutableTriple<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+         ret.add(new JointGroupParameter<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
       }
 
       for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.ELBOW_ROLL})
@@ -268,7 +267,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          List<String> jointNames = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
-         ret.add(new ImmutableTriple<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+         ret.add(new JointGroupParameter<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
       }
 
       for (ArmJointName armJointName : new ArmJointName[]{ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL})
@@ -281,7 +280,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          List<String> jointNames = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
-         ret.add(new ImmutableTriple<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+         ret.add(new JointGroupParameter<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
       }
 
       for (NeckJointName neckJointName : jointMap.getNeckJointNames())
@@ -292,7 +291,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          parameters.setMaxPositionError(0.2);
          parameters.setMaxVelocity(2.0);
          List<String> jointNames = Collections.singletonList(jointMap.getNeckJointName(neckJointName));
-         ret.add(new ImmutableTriple<>(neckJointName.getCamelCaseName(), parameters, jointNames));
+         ret.add(new JointGroupParameter<>(neckJointName.getCamelCaseName(), parameters, jointNames));
       }
 
       return ret;

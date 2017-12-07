@@ -37,7 +37,7 @@ public class ParameterTools
       }
    }
 
-   public static void extractAccelerationIntegrationParameterMap(String prefix, List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> parameterList,
+   public static void extractAccelerationIntegrationParameterMap(String prefix, List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> parameterList,
                                                                  Map<String, JointAccelerationIntegrationParametersReadOnly> parameterMapToPack,
                                                                  YoVariableRegistry registry)
    {
@@ -47,20 +47,20 @@ public class ParameterTools
          return;
       }
 
-      for (ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>> parameterTripple : parameterList)
+      for (JointGroupParameter<JointAccelerationIntegrationParametersReadOnly> jointGroupParameter : parameterList)
       {
-         String name = parameterTripple.getLeft();
-         JointAccelerationIntegrationParametersReadOnly defaultParameters = parameterTripple.getMiddle();
+         String name = jointGroupParameter.getJointGroupName();
+         JointAccelerationIntegrationParametersReadOnly defaultParameters = jointGroupParameter.getParameter();
          TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
 
-         for (String jointName : parameterTripple.getRight())
+         for (String jointName : jointGroupParameter.getJointNames())
          {
             parameterMapToPack.put(jointName, yoParameters);
          }
       }
    }
 
-   public static void extractJointBehaviorMap(String prefix, List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> parameterList,
+   public static void extractJointBehaviorMap(String prefix, List<JointGroupParameter<JointDesiredBehaviorReadOnly>> parameterList,
                                               Map<String, JointDesiredBehaviorReadOnly> parameterMapToPack, YoVariableRegistry registry)
    {
       parameterMapToPack.clear();
@@ -69,13 +69,13 @@ public class ParameterTools
          return;
       }
 
-      for (ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>> parameterTripple : parameterList)
+      for (JointGroupParameter<JointDesiredBehaviorReadOnly> jointGroupParameter : parameterList)
       {
-         String name = parameterTripple.getLeft();
-         JointDesiredBehaviorReadOnly defaultParameters = parameterTripple.getMiddle();
+         String name = jointGroupParameter.getJointGroupName();
+         JointDesiredBehaviorReadOnly defaultParameters = jointGroupParameter.getParameter();
          JointDesiredBehaviorReadOnly tunableParameters = new TunableJointDesiredBehavior(prefix + name, defaultParameters, registry);
 
-         for (String jointName : parameterTripple.getRight())
+         for (String jointName : jointGroupParameter.getJointNames())
          {
             parameterMapToPack.put(jointName, tunableParameters);
          }
