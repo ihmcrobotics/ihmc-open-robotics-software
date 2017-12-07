@@ -1,13 +1,5 @@
 package us.ihmc.robotDataLogger;
 
-import java.io.IOException;
-
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.common.SerializedPayload;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.IDLSequence;
-
 /**
 * 
 * Topic data type of the struct "CameraAnnouncement" defined in "Announcement.idl". Use this class to provide the TopicDataType to a Participant. 
@@ -16,9 +8,9 @@ import us.ihmc.idl.IDLSequence;
 * Do not update this file directly, edit Announcement.idl instead.
 *
 */
-public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLogger.CameraAnnouncement>
+public class CameraAnnouncementPubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.CameraAnnouncement>
 {
-	public static final String name = "us::ihmc::robotDataLogger::CameraAnnouncement";
+	public static final java.lang.String name = "us::ihmc::robotDataLogger::CameraAnnouncement";
 	
 	
 	
@@ -27,19 +19,19 @@ public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robot
         
     }
 
-	private final CDR serializeCDR = new CDR();
-	private final CDR deserializeCDR = new CDR();
+	private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
+	private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
     
     @Override
-   public void serialize(us.ihmc.robotDataLogger.CameraAnnouncement data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(us.ihmc.robotDataLogger.CameraAnnouncement data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
       serializeCDR.finishSerialize();
    }
    @Override
-   public void deserialize(SerializedPayload serializedPayload, us.ihmc.robotDataLogger.CameraAnnouncement data) throws IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.CameraAnnouncement data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -55,11 +47,11 @@ public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robot
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	
 	    return current_alignment - initial_alignment;
@@ -75,17 +67,17 @@ public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robot
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
 
 	
 	    return current_alignment - initial_alignment;
 	}
 	
-   public static void write(us.ihmc.robotDataLogger.CameraAnnouncement data, CDR cdr)
+   public static void write(us.ihmc.robotDataLogger.CameraAnnouncement data, us.ihmc.idl.CDR cdr)
    {
 
 	    cdr.write_type_c(data.getType().ordinal());
@@ -100,7 +92,7 @@ public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robot
 	        throw new RuntimeException("identifier field exceeds the maximum length");
    }
 
-   public static void read(us.ihmc.robotDataLogger.CameraAnnouncement data, CDR cdr)
+   public static void read(us.ihmc.robotDataLogger.CameraAnnouncement data, us.ihmc.idl.CDR cdr)
    {
 
 	    	data.setType(us.ihmc.robotDataLogger.CameraType.values[cdr.read_type_c()]);
@@ -112,7 +104,7 @@ public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robot
    }
    
 	@Override
-	public final void serialize(us.ihmc.robotDataLogger.CameraAnnouncement data, InterchangeSerializer ser)
+	public final void serialize(us.ihmc.robotDataLogger.CameraAnnouncement data, us.ihmc.idl.InterchangeSerializer ser)
 	{
 			    ser.write_type_c("type", data.getType());
 			    
@@ -123,7 +115,7 @@ public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robot
 	}
 	
 	@Override
-	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.CameraAnnouncement data)
+	public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.CameraAnnouncement data)
 	{
 	    			data.setType((us.ihmc.robotDataLogger.CameraType)ser.read_type_c("type", us.ihmc.robotDataLogger.CameraType.class));
 	    	
@@ -150,21 +142,21 @@ public class CameraAnnouncementPubSubType implements TopicDataType<us.ihmc.robot
    @Override
    public int getTypeSize()
    {
-      return CDR.getTypeSize(getMaxCdrSerializedSize());
+      return us.ihmc.idl.CDR.getTypeSize(getMaxCdrSerializedSize());
    }
 
    @Override
-   public String getName()
+   public java.lang.String getName()
    {
       return name;
    }
    
-   public void serialize(us.ihmc.robotDataLogger.CameraAnnouncement data, CDR cdr)
+   public void serialize(us.ihmc.robotDataLogger.CameraAnnouncement data, us.ihmc.idl.CDR cdr)
 	{
 		write(data, cdr);
 	}
 
-   public void deserialize(us.ihmc.robotDataLogger.CameraAnnouncement data, CDR cdr)
+   public void deserialize(us.ihmc.robotDataLogger.CameraAnnouncement data, us.ihmc.idl.CDR cdr)
    {
         read(data, cdr);
    }
