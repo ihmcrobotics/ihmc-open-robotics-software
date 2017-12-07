@@ -312,7 +312,6 @@ boolean alreadyDestroying = false;
    @Override
    public Context getOpenCLContext()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

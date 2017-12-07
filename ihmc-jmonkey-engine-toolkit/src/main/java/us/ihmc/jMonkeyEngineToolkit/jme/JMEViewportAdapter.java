@@ -453,7 +453,6 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    @Override
    public void setProfiler(AppProfiler profiler)
    {
-      // TODO Auto-generated method stub
       
    }
 }

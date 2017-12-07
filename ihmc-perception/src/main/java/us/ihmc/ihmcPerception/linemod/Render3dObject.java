@@ -514,7 +514,6 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
    @Override
    public void setProfiler(AppProfiler profiler)
    {
-      // TODO Auto-generated method stub
       
    }
    

@@ -140,7 +140,6 @@ public class JMEZBufferGrabber extends AbstractAppState implements SceneProcesso
    @Override
    public void setProfiler(AppProfiler profiler)
    {
-      // TODO Auto-generated method stub
       
    }
 
