@@ -30,7 +30,7 @@ import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
-import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
@@ -296,7 +296,7 @@ public class DataConsumerParticipant
     * @return
     * @throws IOException
     */
-   public synchronized DataConsumerSession createSession(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient,
+   public synchronized DataConsumerSession createSession(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient,
                                                          VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener,
                                                          ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry)
          throws IOException

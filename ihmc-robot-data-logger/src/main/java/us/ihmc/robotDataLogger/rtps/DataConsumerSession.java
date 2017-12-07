@@ -20,7 +20,7 @@ import us.ihmc.robotDataLogger.Timestamp;
 import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
-import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
@@ -73,7 +73,7 @@ public class DataConsumerSession
       registryConsumer.stopImmediatly();
    }
    
-   DataConsumerSession(Domain domain, Participant participant, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
+   DataConsumerSession(Domain domain, Participant participant, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
    {
       this.domain = domain;
       

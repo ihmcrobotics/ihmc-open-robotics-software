@@ -13,7 +13,7 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.robotDataLogger.LogDataType;
-import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryDecompressor;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
@@ -30,10 +30,11 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final SampleInfo sampleInfo = new SampleInfo();
    private volatile boolean running = true;
    
+   private boolean firstSample = true;
 
    private final IDLYoVariableHandshakeParser parser;
    private final RegistryDecompressor registryDecompressor;
-   private final YoVariableClient listener;
+   private final YoVariableClientImplementation listener;
    
    private final TIntLongHashMap lastRegistryUid = new TIntLongHashMap();
    private final TObjectLongHashMap<Guid> sampleIdentities = new TObjectLongHashMap<>();
@@ -55,7 +56,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    
    private final RTPSDebugRegistry debugRegistry;
    
-   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, RTPSDebugRegistry debugRegistry)
+   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, RTPSDebugRegistry debugRegistry)
    {
       this.parser = parser;
       this.registryDecompressor = new RegistryDecompressor(parser.getYoVariablesList(), parser.getJointStates());
@@ -176,8 +177,15 @@ public class RegistryConsumer extends Thread implements SubscriberListener
          }
          previousTimestamp = buffer.getTimestamp();
          
-         listener.receivedTimestampAndData(timestamp);
-      
+         if(firstSample)
+         {
+            listener.connected();
+            firstSample = false;
+         }
+         else
+         {
+            listener.receivedTimestampAndData(timestamp);
+         }
       }
       else
       {
