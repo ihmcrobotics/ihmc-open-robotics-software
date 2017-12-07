@@ -42,11 +42,11 @@ public class YoVariableLogger
       }
 
       YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options);
-      client = new YoVariableClient(participant, request, logger);
+      client = new YoVariableClient(participant, logger);
 
       try
       {
-         client.start(timeout);
+         client.start(timeout, request);
       }
       catch (SocketTimeoutException e)
       {

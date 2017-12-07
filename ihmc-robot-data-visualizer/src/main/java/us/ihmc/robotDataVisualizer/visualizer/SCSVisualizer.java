@@ -286,36 +286,36 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          stateListener.starting(scs, robot, this.registry);
       }
 
-      final JToggleButton record = new JToggleButton("Pause recording");
-      scs.addButton(record);
-      record.addActionListener(new ActionListener()
-      {
-         @Override
-         public void actionPerformed(ActionEvent e)
-         {
-            if(record.isSelected())
-            {
-               synchronized (this)
-               {
-                  yoVariableClient.setSendingVariableChanges(false);
-                  recording = false;
-                  record.setText("Resume recording");
-                  scs.setScrollGraphsEnabled(true);
-               }
-            }
-            else
-            {
-               synchronized (this)
-               {
-                  scs.gotoOutPointNow();
-                  recording = true;
-                  record.setText("Pause recording");
-                  scs.setScrollGraphsEnabled(false);
-                  yoVariableClient.setSendingVariableChanges(true);
-               }
-            }
-         }
-      });
+//      final JToggleButton record = new JToggleButton("Pause recording");
+//      scs.addButton(record);
+//      record.addActionListener(new ActionListener()
+//      {
+//         @Override
+//         public void actionPerformed(ActionEvent e)
+//         {
+//            if(record.isSelected())
+//            {
+//               synchronized (this)
+//               {
+//                  yoVariableClient.setSendingVariableChanges(false);
+//                  recording = false;
+//                  record.setText("Resume recording");
+//                  scs.setScrollGraphsEnabled(true);
+//               }
+//            }
+//            else
+//            {
+//               synchronized (this)
+//               {
+//                  scs.gotoOutPointNow();
+//                  recording = true;
+//                  record.setText("Pause recording");
+//                  scs.setScrollGraphsEnabled(false);
+//                  yoVariableClient.setSendingVariableChanges(true);
+//               }
+//            }
+//         }
+//      });
 
       for (String yoVariableName : buttons.keySet())
       {
