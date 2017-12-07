@@ -66,6 +66,7 @@ public class DataConsumerParticipant
                {
                   logAnnouncementListener.logSessionWentOffline(removed);
                }
+               disconnectIfActiveSession(removed);
             }
             announcementLock.unlock();
          }
@@ -386,4 +387,15 @@ public class DataConsumerParticipant
       }
    }
 
+   
+   synchronized void disconnectIfActiveSession(Announcement announcement)
+   {
+      if(session != null)
+      {
+         if(session.getAnnouncement().equals(announcement))
+         {
+            disconnectSession();
+         }
+      }
+   }
 }
