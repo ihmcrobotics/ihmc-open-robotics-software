@@ -62,6 +62,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<>();
 
+   private final Object disconnectLock = new Object();
    private final JButton disconnectButton = new JButton("Waiting for connection...");
    private final JButton clearLogButton = new JButton("Clear log");
 
@@ -118,7 +119,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void disconnected()
    {
-      synchronized(disconnectButton)
+      synchronized(disconnectLock)
       {
          System.out.println("Disconnected. Sliders now enabled.");
          disconnectButton.setText(DISCONNECT_RECONNECT);
@@ -130,12 +131,12 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void connected()
    {
-      synchronized(disconnectButton)
+      synchronized(disconnectLock)
       {
          System.out.println("Connected. Disabling sliders.");
          disconnectButton.setText(DISCONNECT_DISCONNECT);
          disconnectButton.setEnabled(true);
-         scs.gotoOutPoint();
+         scs.gotoOutPointNow();
          scs.setScrollGraphsEnabled(false);
       }
    }
@@ -258,14 +259,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          {
             if(disconnectButton.getText().equals(DISCONNECT_DISCONNECT))
             {
-               synchronized(this)
+               synchronized(disconnectLock)
                {
                   yoVariableClientInterface.disconnect();
                }
             }
             else
             {
-               synchronized(this)
+               synchronized(disconnectLock)
                {
                   try
                   {
