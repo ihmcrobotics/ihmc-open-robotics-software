@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 public interface HighLevelControllerParameters
@@ -24,16 +25,15 @@ public interface HighLevelControllerParameters
    double getCalibrationDuration();
 
    /**
-    * Returns a list with triples of joint behavior parameters and the names of the joints that the parameters
-    * will be used for. The triple also contains the name of the joint set for the specific parameters. The
-    * name will be used to create tunable parameters in the controller. E.g. the left and right arm joints could
-    * be grouped this way so only a single parameter for tuning is created that affects both sides.
+    * Returns a list of joint behaviors for groups of joints. In each {@link JointGroupParameter} a set
+    * of joints can be specified that will share a common tunable parameter. In this way joints can
+    * be grouped together and tuned using a single parameter (e.g. left elbow and right elbow).
     * <p>
-    * The joint behavior parameters for a joint specify parameters that describe how the low level joint control
-    * should behave. The implementation of this is usually robot specific. In general this method allows to
-    * specify things like a desired joint stiffness or a desired joint control mode (position or effort).
+    * The joint behavior defines parameters for the control law used by a joint level controller to
+    * track the desired values of the whole body controller. It contains information such as stiffness
+    * and {@link JointDesiredControlMode}. The implementation of this is usually robot specific.
     * </p>
-    * @return list containing joint behavior parameters and the corresponding joints
+    * @return list containing joint behavior parameters and the corresponding joint groups
     */
    public default List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
@@ -51,13 +51,12 @@ public interface HighLevelControllerParameters
    }
 
    /**
-    * Returns a list with triples of joint acceleration integration parameters and the names of the joints
-    * that the parameter will be used for. The triple also contains the name of the joint set for the specific
-    * parameters. The name will be used to create tunable parameters in the controller. E.g. the left and
-    * right arm joints could be grouped this way so only a single parameter for tuning is created that affects
-    * both sides.
+    * Returns a list of acceleration integration parameters for groups of joints. In each
+    * {@link JointGroupParameter} a set of joints can be specified that will share a common tunable
+    * parameter. In this way joints can be grouped together and tuned using a single parameter (e.g.
+    * left elbow and right elbow).
     * <p>
-    * If a joint is not contained in this map the controller will not create tunable parameters and use
+    * If a joint is not contained in this list the controller will not create tunable parameters and use
     * default acceleration integration settings defined in {@link JointAccelerationIntegrationCalculator}.
     * </p>
     * <p>
@@ -66,7 +65,7 @@ public interface HighLevelControllerParameters
     * the parameters defined here can be overwritten (this is optional) by defining integration parameters
     * in {@link #getJointAccelerationIntegrationParametersLoaded()}.
     * </p>
-    * @return list containing acceleration integration parameters and the corresponding joints
+    * @return list containing acceleration integration parameters and the corresponding joint groups
     */
    public default List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
    {
