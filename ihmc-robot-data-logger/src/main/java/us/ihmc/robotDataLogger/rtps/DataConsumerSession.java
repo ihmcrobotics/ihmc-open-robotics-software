@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.attributes.DurabilityKind;
+import us.ihmc.pubsub.attributes.ParticipantAttributes;
 import us.ihmc.pubsub.attributes.PublisherAttributes;
 import us.ihmc.pubsub.attributes.ReliabilityKind;
 import us.ihmc.pubsub.attributes.SubscriberAttributes;
@@ -36,17 +37,16 @@ import us.ihmc.robotDataLogger.listeners.TimestampListener;
 public class DataConsumerSession
 {
    private final Domain domain;
-
+   private final Participant participant;
+   
    private final VariableChangedProducer variableChangedProducer;
    private final Publisher variableChangeDataPublisher;
 
    private final ClearLogRequest clearLogRequest = new ClearLogRequest();
    private final Publisher clearLogPublisher;
    
-   private final Subscriber timestampSubscriber;
 
    private final RegistryConsumer registryConsumer;
-   private final Subscriber registrySubscriber;
    
 
 
@@ -56,25 +56,17 @@ public class DataConsumerSession
       if(variableChangeDataPublisher != null)
       {
          variableChangedProducer.setSession(null);
-         domain.removePublisher(variableChangeDataPublisher);
       }
       
-      if(clearLogPublisher != null)
-      {
-         domain.removePublisher(clearLogPublisher);
-      }
-      
-      if(timestampSubscriber != null)
-      {
-         domain.removeSubscriber(timestampSubscriber);
-      }
-      
-      domain.removeSubscriber(registrySubscriber);
+      domain.removeParticipant(participant);
       registryConsumer.stopImmediatly();
+      
    }
    
-   DataConsumerSession(Domain domain, Participant participant, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
+   DataConsumerSession(Domain domain, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
    {
+      ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, "DataConsumerSession");
+      this.participant = domain.createParticipant(att);
       this.domain = domain;
       
       this.variableChangedProducer = variableChangedProducer;
@@ -110,18 +102,14 @@ public class DataConsumerSession
       {
          TimestampPubSubType pubSubType = new TimestampPubSubType();
          SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.timestampTopic, ReliabilityKind.BEST_EFFORT, DataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
-         timestampSubscriber = domain.createSubscriber(participant, attributes, new TimestampListenerImpl(timeStampListener));
+         domain.createSubscriber(participant, attributes, new TimestampListenerImpl(timeStampListener));
 
-      }
-      else
-      {
-         timestampSubscriber = null;
       }
       
       CustomLogDataSubscriberType pubSubType = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables());
       SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, DataConsumerParticipant.getPartition(announcement.getIdentifierAsString()));
       registryConsumer = new RegistryConsumer(parser, yoVariableClient,rtpsDebugRegistry);
-      registrySubscriber = domain.createSubscriber(participant, attributes, registryConsumer);
+      domain.createSubscriber(participant, attributes, registryConsumer);
    }
    
    /**

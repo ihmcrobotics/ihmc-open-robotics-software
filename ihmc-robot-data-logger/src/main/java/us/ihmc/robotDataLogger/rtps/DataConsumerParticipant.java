@@ -311,7 +311,7 @@ public class DataConsumerParticipant
          throw new IOException("Participant has been removed from the domain. Cannot create a new session");
       }
       
-      session = new DataConsumerSession(domain, participant, announcement, parser, yoVariableClient, variableChangedProducer, timeStampListener,
+      session = new DataConsumerSession(domain, announcement, parser, yoVariableClient, variableChangedProducer, timeStampListener,
                                         clearLogListener, rtpsDebugRegistry);
       return session;
    }

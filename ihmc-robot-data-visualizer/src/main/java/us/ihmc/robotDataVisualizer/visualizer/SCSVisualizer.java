@@ -261,6 +261,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             {
                synchronized(disconnectLock)
                {
+                  disconnectButton.setEnabled(false);
                   yoVariableClientInterface.disconnect();
                }
             }
@@ -270,7 +271,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                {
                   try
                   {
-                     yoVariableClientInterface.reconnect();
+                     if(yoVariableClientInterface.reconnect())
+                     {
+                        disconnectButton.setEnabled(false);
+                     }
                   }
                   catch (IOException reconnectError)
                   {
