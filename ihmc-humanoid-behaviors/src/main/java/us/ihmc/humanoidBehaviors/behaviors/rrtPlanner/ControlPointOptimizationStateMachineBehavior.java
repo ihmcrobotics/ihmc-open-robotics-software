@@ -233,7 +233,6 @@ public class ControlPointOptimizationStateMachineBehavior extends StateMachineBe
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
    }
 
    private class CandidateBehavior extends AbstractBehavior

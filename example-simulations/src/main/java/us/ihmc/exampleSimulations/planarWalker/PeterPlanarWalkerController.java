@@ -100,7 +100,6 @@ public class PeterPlanarWalkerController implements RobotController
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -142,14 +141,12 @@ public class PeterPlanarWalkerController implements RobotController
       @Override
       public void doTransitionIntoAction()
       {
-         // TODO Auto-generated method stub
          
       }
 
       @Override
       public void doTransitionOutOfAction()
       {
-         // TODO Auto-generated method stub
          
       }
       
@@ -322,14 +319,12 @@ public class PeterPlanarWalkerController implements RobotController
    @Override
    public String getName()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public String getDescription()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

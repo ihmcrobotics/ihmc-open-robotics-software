@@ -246,28 +246,24 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation,
          QuaternionReadOnly cameraRotation)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void select()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void unSelect(boolean reset)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void addSelectedListeners(SelectableObjectListener selectedListener)
    {
-      // TODO Auto-generated method stub
 
    }
    

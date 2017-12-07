@@ -238,14 +238,12 @@ public class ComposableStateEstimatorEvaluator
          @Override
          public void configureSensorProcessing(SensorProcessing newSensorProcessing)
          {
-            // TODO Auto-generated method stub
 
          }
 
          @Override
          public double getContactThresholdHeight()
          {
-            // TODO Auto-generated method stub
             return 0;
          }
 
@@ -258,21 +256,18 @@ public class ComposableStateEstimatorEvaluator
          @Override
          public boolean requestFootForceSensorCalibrationAtStart()
          {
-            // TODO Auto-generated method stub
             return false;
          }
 
          @Override
          public SideDependentList<String> getFootForceSensorNames()
          {
-            // TODO Auto-generated method stub
             return null;
          }
 
          @Override
          public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
          {
-            // TODO Auto-generated method stub
             return false;
          }
 

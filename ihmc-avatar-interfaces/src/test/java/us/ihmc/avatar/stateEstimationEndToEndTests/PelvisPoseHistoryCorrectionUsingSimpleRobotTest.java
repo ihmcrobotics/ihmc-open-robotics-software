@@ -804,7 +804,6 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       @Override
       public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
       {
-         // TODO Auto-generated method stub
          
       }
    }

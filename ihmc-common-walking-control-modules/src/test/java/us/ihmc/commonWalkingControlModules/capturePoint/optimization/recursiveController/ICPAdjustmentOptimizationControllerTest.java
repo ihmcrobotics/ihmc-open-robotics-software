@@ -353,49 +353,42 @@ public class ICPAdjustmentOptimizationControllerTest
       @Override
       public boolean useOptimizationBasedICPController()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
       @Override
       public double nominalHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double minimumHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double maximumHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getSecondContactThresholdForceIgnoringCoP()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getOmega0()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public MomentumOptimizationSettings getMomentumOptimizationSettings()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
@@ -408,161 +401,138 @@ public class ICPAdjustmentOptimizationControllerTest
       @Override
       public double getMinimumSwingTimeForDisturbanceRecovery()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getMaxICPErrorBeforeSingleSupportY()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getMaxICPErrorBeforeSingleSupportX()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getMaximumLegLengthForSingularityAvoidance()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public String[] getJointsToIgnoreInController()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public double getICPErrorThresholdToSpeedUpSwing()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getHighCoPDampingDurationToPreventFootShakies()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public FootSwitchType getFootSwitchType()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public double getDefaultTransferTime()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getDefaultSwingTime()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getContactThresholdHeight()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getContactThresholdForce()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getCoPThresholdFraction()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getCoPErrorThresholdForHighCoPDamping()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public boolean finishSingleSupportWhenICPPlannerIsDone()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
       @Override
       public double defaultOffsetHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public PIDSE3Gains getToeOffFootControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public PIDSE3Gains getSwingFootControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public ICPControlGains createICPControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public PIDSE3Gains getHoldPositionFootControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public PDGains getCoMHeightControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
       @Override
       public boolean allowAutomaticManipulationAbort()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
@@ -673,7 +643,6 @@ public class ICPAdjustmentOptimizationControllerTest
       @Override
       public SteppingParameters getSteppingParameters()
       {
-         // TODO Auto-generated method stub
          return null;
       }
    };

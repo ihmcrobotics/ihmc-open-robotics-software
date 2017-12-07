@@ -101,7 +101,6 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    @Override
    public double getTransferTime()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 }
