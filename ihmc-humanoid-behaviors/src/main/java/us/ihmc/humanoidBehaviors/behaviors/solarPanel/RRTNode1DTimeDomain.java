@@ -42,7 +42,6 @@ public class RRTNode1DTimeDomain extends RRTNode
    @Override
    public void setRandomNodeData()
    {
-      // TODO Auto-generated method stub
       
    }
 }
