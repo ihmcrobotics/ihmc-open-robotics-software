@@ -41,7 +41,6 @@ import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.listeners.ClearLogListener;
 import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * This class implements all communication for a data consumer inside a DDS logging network
@@ -448,7 +447,7 @@ public class DataConsumerParticipant
     * @param loggerMainRegistry
     * @throws IOException
     */
-   public void createDataConsumer(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, YoVariableRegistry loggerMainRegistry) throws IOException
+   public void createDataConsumer(Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, RTPSDebugRegistry loggerDebugRegistry) throws IOException
    {
       if(registryConsumer != null)
       {
@@ -457,9 +456,22 @@ public class DataConsumerParticipant
       
       CustomLogDataSubscriberType pubSubType = new CustomLogDataSubscriberType(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables());
       SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.dataTopic, ReliabilityKind.BEST_EFFORT, getPartition(announcement.getIdentifierAsString()));
-      registryConsumer = new RegistryConsumer(parser, yoVariableClient,loggerMainRegistry);
+      registryConsumer = new RegistryConsumer(parser, yoVariableClient,loggerDebugRegistry);
       domain.createSubscriber(participant, attributes, registryConsumer);
 
+   }
+   
+   /**
+    * Disconnect but do not remove participant from the domain.
+    * 
+    * This allows a reconnect later.
+    */
+   public synchronized void disconnect()
+   {
+      if(participant != null)
+      {
+         registryConsumer.stopImmediatly();
+      }
    }
 
    public synchronized void remove()
