@@ -21,8 +21,8 @@ public class HumanoidKinematicsSolver
 {
    private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 200;
    private static final double DEFAULT_QUALITY_THRESHOLD = 0.005;
-   private static final double DEFAULT_STABILITY_THRESHOLD = 0.00001;
-   private static final double DEFAULT_MIN_PROGRESSION = 0.002;
+   private static final double DEFAULT_STABILITY_THRESHOLD = 0.00002;
+   private static final double DEFAULT_MIN_PROGRESSION = 0.005;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -111,6 +111,7 @@ public class HumanoidKinematicsSolver
       boolean isSolverStuck = false;
       solutionQuality.set(Double.NaN);
       double solutionQualityPrevious = Double.NaN;
+      double solutionQualityDoublePrevious = Double.NaN;
       int iteration = 0;
 
       while (!isSolutionGood && iteration < maximumNumberOfIterations.getIntegerValue())
@@ -123,18 +124,26 @@ public class HumanoidKinematicsSolver
          if (!Double.isNaN(solutionQualityPrevious))
          {
             double deltaSolutionQuality = Math.abs(solutionQuality.getDoubleValue() - solutionQualityPrevious);
+
+            double deltaDoubleSolutionQuality = Math.abs(solutionQuality.getDoubleValue() - solutionQualityDoublePrevious);
+
             boolean isSolutionStable = deltaSolutionQuality < solutionStabilityThreshold.getDoubleValue();
             boolean isSolutionQualityHigh = solutionQuality.getDoubleValue() < solutionQualityThreshold.getDoubleValue();
             isSolutionGood = isSolutionStable && isSolutionQualityHigh;
 
             if (!isSolutionQualityHigh)
-               isSolverStuck = (deltaSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+            {
+               boolean stuckPrevious = (deltaSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+               boolean stuckDoublePrevious = (deltaDoubleSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+               isSolverStuck = stuckPrevious || stuckDoublePrevious;
+            }
             else
                isSolverStuck = false;
-
          }
 
+         solutionQualityDoublePrevious = solutionQualityPrevious;
          solutionQualityPrevious = solutionQuality.getDoubleValue();
+
          iteration++;
 
          if (isSolverStuck)
