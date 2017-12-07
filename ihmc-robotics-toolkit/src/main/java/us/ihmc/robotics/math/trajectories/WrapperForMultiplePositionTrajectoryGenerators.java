@@ -88,11 +88,9 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
 
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

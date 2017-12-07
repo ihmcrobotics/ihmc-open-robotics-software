@@ -252,7 +252,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    @Override
    public TObjectDoubleHashMap<String> getJointspaceWeights()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -267,7 +266,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    @Override
    public TObjectDoubleHashMap<String> getUserModeWeights()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -275,7 +273,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    @Override
    public Map<String, Vector3D> getTaskspaceAngularWeights()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -283,7 +280,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    @Override
    public Map<String, Vector3D> getTaskspaceLinearWeights()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

@@ -42,7 +42,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   Random random = new Random();
+   Random random = new Random(42);
 
    @After
    public void tearDown()

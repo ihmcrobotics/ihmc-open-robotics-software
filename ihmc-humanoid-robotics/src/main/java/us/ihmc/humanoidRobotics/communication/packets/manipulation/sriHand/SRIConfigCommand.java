@@ -61,7 +61,6 @@ public class SRIConfigCommand extends Packet<SRIConfigCommand>
    @Override
    public boolean epsilonEquals(SRIConfigCommand other, double epsilon)
    {
-      // TODO Auto-generated method stub
       return false;
    }
 

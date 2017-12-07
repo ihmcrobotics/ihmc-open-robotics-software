@@ -308,14 +308,12 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    @Override
    public void play(double realTimeRate)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void stop()
    {
-      // TODO Auto-generated method stub
 
    }
 

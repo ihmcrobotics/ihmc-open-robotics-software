@@ -22,49 +22,42 @@ public class ValkyrieRosControlOutputWriter implements DRCOutputProcessor, Contr
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public void processAfterController(long timestamp)
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController)
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public YoVariableRegistry getControllerYoVariableRegistry()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public void controllerFailed(FrameVector2D fallingDirection)
    {
-      // TODO Auto-generated method stub
       
    }
 

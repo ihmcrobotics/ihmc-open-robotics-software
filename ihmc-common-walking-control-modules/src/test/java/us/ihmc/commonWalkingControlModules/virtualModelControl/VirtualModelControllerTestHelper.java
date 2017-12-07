@@ -2327,7 +2327,6 @@ public class VirtualModelControllerTestHelper
       @Override
       public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
       {
-         // TODO Auto-generated method stub
          return null;
       }
    }
