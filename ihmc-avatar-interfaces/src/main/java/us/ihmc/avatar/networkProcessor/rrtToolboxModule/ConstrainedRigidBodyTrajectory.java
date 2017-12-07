@@ -178,7 +178,7 @@ public class ConstrainedRigidBodyTrajectory
       message.setDesiredPose(desiredEndEffectorPose);
       message.setControlFramePose(controlFramePose);
       message.setSelectionMatrix(getSelectionMatrix());
-      message.setWeight(50.0); // Sylvain's value :: 0.5
+      message.setWeight(20.0); // Sylvain's value :: 0.5
 
       return message;
    }
