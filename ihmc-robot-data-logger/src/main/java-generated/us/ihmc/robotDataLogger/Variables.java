@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "Variables" defined in LogProperties.idl. 
@@ -14,10 +11,10 @@ public class Variables
 {
     public Variables()
     {
-        	handshake_ = new StringBuilder(255); 
-        	data_ = new StringBuilder(255); 
-        	summary_ = new StringBuilder(255); 
-        	index_ = new StringBuilder(255); 
+        	handshake_ = new java.lang.StringBuilder(255); 
+        	data_ = new java.lang.StringBuilder(255); 
+        	summary_ = new java.lang.StringBuilder(255); 
+        	index_ = new java.lang.StringBuilder(255); 
         
         
     }
@@ -55,12 +52,12 @@ public class Variables
         	handshake_.append(handshake);
         }
         
-        public String getHandshakeAsString()
+        public java.lang.String getHandshakeAsString()
         {
         	return getHandshake().toString();
         }
 
-    public StringBuilder getHandshake()
+    public java.lang.StringBuilder getHandshake()
     {
         return handshake_;
     }
@@ -72,12 +69,12 @@ public class Variables
         	data_.append(data);
         }
         
-        public String getDataAsString()
+        public java.lang.String getDataAsString()
         {
         	return getData().toString();
         }
 
-    public StringBuilder getData()
+    public java.lang.StringBuilder getData()
     {
         return data_;
     }
@@ -89,12 +86,12 @@ public class Variables
         	summary_.append(summary);
         }
         
-        public String getSummaryAsString()
+        public java.lang.String getSummaryAsString()
         {
         	return getSummary().toString();
         }
 
-    public StringBuilder getSummary()
+    public java.lang.StringBuilder getSummary()
     {
         return summary_;
     }
@@ -106,12 +103,12 @@ public class Variables
         	index_.append(index);
         }
         
-        public String getIndexAsString()
+        public java.lang.String getIndexAsString()
         {
         	return getIndex().toString();
         }
 
-    public StringBuilder getIndex()
+    public java.lang.StringBuilder getIndex()
     {
         return index_;
     }
@@ -144,7 +141,7 @@ public class Variables
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -174,7 +171,7 @@ public class Variables
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -212,10 +209,10 @@ public class Variables
     }
 
     private us.ihmc.robotDataLogger.HandshakeFileType handshakeFileType_; 
-    private StringBuilder handshake_; 
-    private StringBuilder data_; 
-    private StringBuilder summary_; 
-    private StringBuilder index_; 
+    private java.lang.StringBuilder handshake_; 
+    private java.lang.StringBuilder data_; 
+    private java.lang.StringBuilder summary_; 
+    private java.lang.StringBuilder index_; 
     private boolean timestamped_; 
     private boolean compressed_; 
 
