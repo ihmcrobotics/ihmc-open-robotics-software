@@ -10,6 +10,7 @@ import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commons.Conversions;
@@ -274,6 +275,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                      if(yoVariableClientInterface.reconnect())
                      {
                         disconnectButton.setEnabled(false);
+                     }
+                     else
+                     {
+                        JOptionPane.showMessageDialog(scs.getJFrame(),
+                                                      "Cannot reconnect. No matching sessions found.",
+                                                      "Cannot reconnect",
+                                                      JOptionPane.ERROR_MESSAGE);
                      }
                   }
                   catch (IOException reconnectError)
