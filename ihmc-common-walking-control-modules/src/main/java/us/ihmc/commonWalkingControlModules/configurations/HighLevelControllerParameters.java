@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 public interface HighLevelControllerParameters
 {
@@ -28,6 +29,15 @@ public interface HighLevelControllerParameters
    double getTimeInStandTransition();
    double getCalibrationDuration();
 
+   /**
+    * Parameter that allows to scale desired joint velocities in the joint level control. This
+    * parameter is passed down as part of the {@link JointDesiredOutputReadOnly} and if or how the
+    * parameter is used is implementation specific to each robot.
+    */
+   public default double getJointVelocityScaling(String joint, HighLevelControllerName state)
+   {
+      return 1.0;
+   }
 
    /**
     * Specifies if the controller should compute desired positions and velocities for all the robot
