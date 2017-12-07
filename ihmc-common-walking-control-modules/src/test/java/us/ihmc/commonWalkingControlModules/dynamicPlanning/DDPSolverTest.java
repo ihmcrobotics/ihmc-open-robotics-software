@@ -9,13 +9,16 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
 
-public class LIPMDDPCalculatorTest
+public class DDPSolverTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testComputeNewControlAndNextState()
    {
-      LIPMDDPCalculator calculator = new LIPMDDPCalculator(0.01, 10.0, 9.81);
+      LIPMDynamics dynamics = new LIPMDynamics(0.01, 10, 9.81);
+      LQCostFunction costFunction = new LIPMSimpleCostFunction();
+      LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
+      DDPSolver<LIPMState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
 
       DenseMatrix64F feedforwardTerm = new DenseMatrix64F(3, 1);
 
@@ -111,7 +114,10 @@ public class LIPMDDPCalculatorTest
    @Test(timeout = 30000)
    public void testComputeValueApproximationAtNextStep()
    {
-      LIPMDDPCalculator calculator = new LIPMDDPCalculator(0.01, 10.0, 9.81);
+      LIPMDynamics dynamics = new LIPMDynamics(0.01, 10, 9.81);
+      LQCostFunction costFunction = new LIPMSimpleCostFunction();
+      LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
+      DDPSolver<LIPMState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
 
       DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
       DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
@@ -240,7 +246,10 @@ public class LIPMDDPCalculatorTest
    @Test(timeout = 30000)
    public void testComputeFeedbackGainAndFeedForwardTerm()
    {
-      LIPMDDPCalculator calculator = new LIPMDDPCalculator(0.01, 10.0, 9.81);
+      LIPMDynamics dynamics = new LIPMDynamics(0.01, 10, 9.81);
+      LQCostFunction costFunction = new LIPMSimpleCostFunction();
+      LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
+      DDPSolver<LIPMState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
 
       DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
       DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);

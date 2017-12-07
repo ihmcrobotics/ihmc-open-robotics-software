@@ -97,8 +97,10 @@ public class LIPMDDPCalculatorVisualizer
    private final BagOfBalls comTrack;
 
    private final BasicCoPPlanner copPlanner;
-   private final LIPMDDPCalculator ddp = new LIPMDDPCalculator(0.01, 10.0, 9.81);
+
+   private static final boolean useSimple = false;
    //private final SimpleLIPMDDPCalculator ddp = new SimpleLIPMDDPCalculator(0.01, 1.0, 9.81);
+   private final LIPMDDPCalculator ddp = new LIPMDDPCalculator(0.01, 10.0, 9.81);
 
    private final YoDouble lineSearchGain = new YoDouble("lineSearchGain", registry);
    private final YoInteger updatesPerRequest = new YoInteger("updatesPerRequest", registry);
@@ -250,8 +252,16 @@ public class LIPMDDPCalculatorVisualizer
 
       plotCoPPlan(trajectoryTime);
 
-      DenseMatrix64F currentCoMState = new DenseMatrix64F(6, 1);
-      currentCoMState.set(2, 0, 1.0);
+      DenseMatrix64F currentCoMState;
+      if (useSimple)
+      {
+         currentCoMState = new DenseMatrix64F(4, 1);
+      }
+      else
+      {
+         currentCoMState = new DenseMatrix64F(6, 1);
+         currentCoMState.set(2, 0, 1.0);
+      }
       DenseMatrix64F currentControlState = new DenseMatrix64F(2, 1);
 
       ddp.initialize(currentCoMState, currentControlState, copPlanner.getCoPTrajectory());
