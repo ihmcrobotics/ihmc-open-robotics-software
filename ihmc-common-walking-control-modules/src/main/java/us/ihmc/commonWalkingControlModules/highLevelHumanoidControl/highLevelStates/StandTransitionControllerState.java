@@ -10,14 +10,11 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandTransitionControllerState extends HighLevelControllerState
 {
    private static final HighLevelControllerName controllerState = HighLevelControllerName.STAND_TRANSITION_STATE;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble standTransitionDuration = new YoDouble("standTransitionDuration", registry);
    private final YoDouble standTransitionGainRatio = new YoDouble("standTransitionGainRatio", registry);
@@ -95,12 +92,6 @@ public class StandTransitionControllerState extends HighLevelControllerState
    public boolean isDone()
    {
       return getTimeInCurrentState() > standTransitionDuration.getDoubleValue();
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
    }
 
    @Override
