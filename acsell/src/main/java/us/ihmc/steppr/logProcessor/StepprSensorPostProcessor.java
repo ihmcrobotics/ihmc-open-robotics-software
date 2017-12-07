@@ -293,7 +293,6 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             @Deprecated
             public void setFootContactState(boolean hasFootHitGround)
             {
-               // TODO Auto-generated method stub
                
             }
 

@@ -95,7 +95,6 @@ public class DataConsumerParticipant
       @Override
       public void onSubscriptionMatched(Subscriber subscriber, MatchingInfo info)
       {
-         // TODO Auto-generated method stub
          
       }
       
@@ -142,7 +141,6 @@ public class DataConsumerParticipant
       @Override
       public void onSubscriptionMatched(Subscriber subscriber, MatchingInfo info)
       {
-         // TODO Auto-generated method stub
          
       }
       

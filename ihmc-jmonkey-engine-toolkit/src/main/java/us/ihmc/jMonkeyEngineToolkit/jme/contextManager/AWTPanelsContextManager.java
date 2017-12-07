@@ -99,7 +99,6 @@ public class AWTPanelsContextManager extends JMEContextManager implements MouseL
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
       
    }
    
