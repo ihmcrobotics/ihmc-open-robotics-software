@@ -107,6 +107,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private final List<SpatialNode> path = new ArrayList<>();
    private final double minTimeInterval = 0.05;
 
+   private int numberOfValidPosture = 0;
+   private int numberOfInvalidPosture = 0;
    private final YoInteger currentExpansionSize = new YoInteger("currentExpansionSize", registry);
    private final YoInteger maximumExpansionSize = new YoInteger("maximumExpansionSize", registry);
 
@@ -397,23 +399,26 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
             if (candidate.isValid())
             {
                tree.attachCandidate();
+               numberOfValidPosture++;
 
                if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
                {
                   if (VERBOSE)
-                     PrintTools.info("Successfully finished tree expansion. " + currentExpansionSize.getIntegerValue());
+                     PrintTools.info("Successfully finished tree expansion. " + currentExpansionSize.getIntegerValue() + " " + numberOfValidPosture + " "
+                           + numberOfInvalidPosture);
                   currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
                }
             }
             else
             {
                tree.dismissCandidate();
+               numberOfInvalidPosture++;
             }
          }
          else
          {
             maximumPatientCounter--;
-            if(maximumPatientCounter == 0)
+            if (maximumPatientCounter == 0)
                break;
          }
       }
@@ -426,7 +431,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          if (tree.getMostAdvancedTime() < toolboxData.getTrajectoryTime())
          {
             if (VERBOSE)
-               PrintTools.info("Failed to complete trajectory.");
+               PrintTools.info("Failed to complete trajectory." + " " + numberOfValidPosture + " " + numberOfInvalidPosture);
 
             setOutputStatus(toolboxSolution, 2);
             terminateToolboxController();
@@ -445,10 +450,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     * @throws ExecutionException
     * @throws InterruptedException
     */
-   private void findInitialGuess()
+   private void findInitialGuess2() // TODO : to enable this method, refine holding method.
    {
-      //SpatialData initialGuessData = toolboxData.createRandomInitialSpatialData();
-      SpatialData initialGuessData = toolboxData.createRandomSpatialData();
+      SpatialData initialGuessData = toolboxData.createRandomInitialSpatialData();
+      //SpatialData initialGuessData = toolboxData.createRandomSpatialData();
 
       SpatialNode initialGuessNode = new SpatialNode(initialGuessData);
       updateValidity(initialGuessNode);
@@ -507,6 +512,51 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
       treeExpansionStartTime = updateTimer(initialGuessComputationTime, initialGuessStartTime);
    }
+   private void findInitialGuess()
+   {
+      SpatialData initialGuessData = toolboxData.createRandomSpatialData();
+
+      SpatialNode initialGuessNode = new SpatialNode(initialGuessData);
+      updateValidity(initialGuessNode);
+
+      visualizedNode = initialGuessNode;
+
+      double jointScore = 0.0;
+      if (initialGuessNode.isValid())
+      {
+         tree.addInitialNode(initialGuessNode);
+         currentNumberOfValidInitialGuesses.increment();
+         jointScore = computeArmJointsLimitScore(humanoidKinematicsSolver.getDesiredFullRobotModel());
+      }
+      jointlimitScore.set(jointScore);
+
+      nodePlotter.update(initialGuessNode, 1);
+      
+      /*
+       * terminate finding initial guess.
+       */
+      currentNumberOfInitialGuesses.increment();
+
+      if (currentNumberOfInitialGuesses.getIntegerValue() >= desiredNumberOfInitialGuesses.getIntegerValue()
+            || currentNumberOfValidInitialGuesses.getIntegerValue() >= terminalConditionNumberOfValidInitialGuesses.getIntegerValue())
+      {
+         if (tree.getValidNodes().size() == 0)
+         {
+            if (VERBOSE)
+               PrintTools.info("Did not find a single valid root node.");
+            setOutputStatus(toolboxSolution, 1);
+            terminateToolboxController();
+         }
+         else
+         {
+            if (VERBOSE)
+               PrintTools.info("Successfully finished initial guess stage. " + currentNumberOfInitialGuesses.getIntegerValue() + " "
+                     + currentNumberOfValidInitialGuesses.getIntegerValue());
+            state.set(CWBToolboxState.EXPAND_TREE);
+         }
+      }
+      treeExpansionStartTime = updateTimer(initialGuessComputationTime, initialGuessStartTime);
+   }
 
    private long updateTimer(YoDouble currentTimer, long currentTimerStartTime)
    {
@@ -534,8 +584,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // Convert command into WholeBodyTrajectoryToolboxData.
       // ******************************************************************************** //
 
-      //toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, trajectoryCommands, rigidBodyCommands);
-
       if (VERBOSE)
          PrintTools.info("initialize CWB toolbox");
 
@@ -562,9 +610,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       shortcutPathComputationTime.setToNaN();
       motionGenerationComputationTime.setToNaN();
 
+      numberOfValidPosture = 0;
+      numberOfInvalidPosture = 0;
+
       rootNode = null;
       nodePlotter = new SpatialNodePlotter(toolboxData, visualize);
 
+      // TODO : findInitialGuess2()
+      tree = new SpatialNodeTree();
+      
       return true;
    }
 

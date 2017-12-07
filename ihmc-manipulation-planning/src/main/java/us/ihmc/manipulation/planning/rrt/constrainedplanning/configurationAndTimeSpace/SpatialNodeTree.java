@@ -13,13 +13,13 @@ public class SpatialNodeTree
 
    private List<SpatialNode> invalidNodes = new ArrayList<>();
 
-   private double timeWeight = 1.0;
-   private double positionWeight = 1.0;
+   private double timeWeight = 0.5;
+   private double positionWeight = 0.5;
    private double orientationWeight = 1.0;
 
-   private double maxTimeInterval = 0.2;   
-   private double maxPositionDistance = 0.05;
-   private double maxOrientationDistance = Math.toRadians(20);
+   private double maxTimeInterval = 1/3.0;   
+   private double maxPositionDistance = 0.08;
+   private double maxOrientationDistance = Math.toRadians(25);
    
 //   private double timeWeight = 1.0;
 //   private double positionWeight = 1.0;
@@ -33,10 +33,20 @@ public class SpatialNodeTree
 
    private SpatialNode randomNode = null;
 
+   public SpatialNodeTree()
+   {
+    
+   }
+   
    public SpatialNodeTree(SpatialNode rootNode)
    {
       this.rootNode = rootNode;
       validNodes.add(rootNode);
+   }
+   
+   public void addInitialNode(SpatialNode node)
+   {
+      validNodes.add(node);
    }
 
    public void setRandomNode(SpatialNode node)
