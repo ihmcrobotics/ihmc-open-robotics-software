@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -64,35 +65,35 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
 
       // Can go up to kp = 30.0, kd = 3.0
-      configureSymmetricBehavior(behaviors, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
       // Can go up to kp = 30.0, kd = 4.0
-      configureSymmetricBehavior(behaviors, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 15.0, 2.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 15.0, 2.0);
       // Can go up to kp = 60.0, kd = 6.0
-      configureSymmetricBehavior(behaviors, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 30.0, 3.0);
-      configureSymmetricBehavior(behaviors, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 30.0, 3.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 30.0, 3.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 30.0, 3.0);
       // Can go up to kp = 30.0, kd = 2.0
-      configureSymmetricBehavior(behaviors, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.0);
-      configureSymmetricBehavior(behaviors, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.0);
-      configureSymmetricBehavior(behaviors, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.0);
       // Can go up to kp = 30.0, kd = 2.0
-      configureSymmetricBehavior(behaviors, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.0);
       // Can go up to kp = 50.0, kd = 1.0
-      configureBehavior(behaviors, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 1.0);
-      configureBehavior(behaviors, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 30.0, 1.0);
-      configureBehavior(behaviors, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 30.0, 1.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 1.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 30.0, 1.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 30.0, 1.0);
 
       // position controlled on the real robot:
       JointDesiredControlMode controlMode = runningOnRealRobot ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
 
-      configureSymmetricBehavior(behaviors, ArmJointName.ELBOW_ROLL, controlMode, 7.0, 0.0);
-      configureSymmetricBehavior(behaviors, ArmJointName.WRIST_ROLL, controlMode, 20.0, 0.5);
-      configureSymmetricBehavior(behaviors, ArmJointName.FIRST_WRIST_PITCH, controlMode, 20.0, 0.5);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, controlMode, 7.0, 0.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, controlMode, 20.0, 0.5);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, controlMode, 20.0, 0.5);
 
-      configureBehavior(behaviors, NeckJointName.DISTAL_NECK_PITCH, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, NeckJointName.PROXIMAL_NECK_PITCH, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, NeckJointName.DISTAL_NECK_YAW, controlMode, 0.0, 0.0);
+      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, controlMode, 0.0, 0.0);
+      configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, controlMode, 0.0, 0.0);
+      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, controlMode, 0.0, 0.0);
 
       return behaviors;
    }
@@ -101,67 +102,69 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors = new ArrayList<>();
 
-      configureSymmetricBehavior(behaviors, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
-      configureSymmetricBehavior(behaviors, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 12.0, 1.2);
-      configureSymmetricBehavior(behaviors, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 12.0, 3.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.EFFORT, 15.0, 1.5);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.EFFORT, 12.0, 1.2);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.EFFORT, 12.0, 3.0);
 
-      configureSymmetricBehavior(behaviors, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 30.0, 6.2);
-      configureSymmetricBehavior(behaviors, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 150.0, 7.5);
-      configureSymmetricBehavior(behaviors, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 160.0, 7.0);
-      configureSymmetricBehavior(behaviors, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 75.0, 3.0);
-      configureSymmetricBehavior(behaviors, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 25.0, 2.0);
-      configureSymmetricBehavior(behaviors, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 17.0, 1.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 30.0, 6.2);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.EFFORT, 150.0, 7.5);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.EFFORT, 160.0, 7.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.EFFORT, 75.0, 3.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.EFFORT, 25.0, 2.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.EFFORT, 17.0, 1.0);
 
-      configureBehavior(behaviors, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 3.0);
-      configureBehavior(behaviors, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 180.0, 12.0);
-      configureBehavior(behaviors, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.EFFORT, 30.0, 3.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 180.0, 12.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
 
       // position controlled on the real robot:
       JointDesiredControlMode controlMode = runningOnRealRobot ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
 
-      configureSymmetricBehavior(behaviors, ArmJointName.ELBOW_ROLL, controlMode, 15.0, 0.0);
-      configureSymmetricBehavior(behaviors, ArmJointName.WRIST_ROLL, controlMode, 6.0, 0.3);
-      configureSymmetricBehavior(behaviors, ArmJointName.FIRST_WRIST_PITCH, controlMode, 6.0, 0.3);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, controlMode, 15.0, 0.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, controlMode, 6.0, 0.3);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, controlMode, 6.0, 0.3);
 
-      configureBehavior(behaviors, NeckJointName.PROXIMAL_NECK_PITCH, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, NeckJointName.DISTAL_NECK_YAW, controlMode, 0.0, 0.0);
-      configureBehavior(behaviors, NeckJointName.DISTAL_NECK_PITCH, controlMode, 0.0, 0.0);
+      configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, controlMode, 0.0, 0.0);
+      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, controlMode, 0.0, 0.0);
+      configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, controlMode, 0.0, 0.0);
 
       return behaviors;
    }
 
-   private void configureBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, SpineJointName jointName,
-                                  JointDesiredControlMode controlMode, double stiffness, double damping)
+   private static void configureBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, DRCRobotJointMap jointMap,
+                                         SpineJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
       behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, names));
    }
 
-   private void configureBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, NeckJointName jointName,
-                                  JointDesiredControlMode controlMode, double stiffness, double damping)
+   private static void configureBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, DRCRobotJointMap jointMap,
+                                         NeckJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
       behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, names));
    }
 
-   private void configureSymmetricBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, LegJointName jointName,
-                                       JointDesiredControlMode controlMode, double stiffness, double damping)
+   private static void configureSymmetricBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors,
+                                                  DRCRobotJointMap jointMap, LegJointName jointName, JointDesiredControlMode controlMode, double stiffness,
+                                                  double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointName)));
+      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
-   private void configureSymmetricBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors, ArmJointName jointName,
-                                       JointDesiredControlMode controlMode, double stiffness, double damping)
+   private static void configureSymmetricBehavior(List<ImmutableTriple<String, JointDesiredBehaviorReadOnly, List<String>>> behaviors,
+                                                  DRCRobotJointMap jointMap, ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness,
+                                                  double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointName)));
+      behaviors.add(new ImmutableTriple<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
-   private List<String> getLeftAndRightJointNames(LegJointName legJointName)
+   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, LegJointName legJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -171,7 +174,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointNames;
    }
 
-   private List<String> getLeftAndRightJointNames(ArmJointName armJointName)
+   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, ArmJointName armJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
