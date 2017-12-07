@@ -36,6 +36,7 @@ import us.ihmc.robotDataLogger.listeners.TimestampListener;
  */
 public class DataConsumerSession
 {
+   private final Announcement announcement;
    private final Domain domain;
    private final Participant participant;
    
@@ -65,9 +66,10 @@ public class DataConsumerSession
    
    DataConsumerSession(Domain domain, Announcement announcement, IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, VariableChangedProducer variableChangedProducer, TimestampListener timeStampListener, ClearLogListener clearLogListener, RTPSDebugRegistry rtpsDebugRegistry) throws IOException
    {
+      this.announcement = announcement;
+      this.domain = domain;
       ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, "DataConsumerSession");
       this.participant = domain.createParticipant(att);
-      this.domain = domain;
       
       this.variableChangedProducer = variableChangedProducer;
       if(variableChangedProducer != null)
@@ -225,11 +227,18 @@ public class DataConsumerSession
       @Override
       public void onSubscriptionMatched(Subscriber subscriber, MatchingInfo info)
       {
-         // TODO Auto-generated method stub
 
       }
 
    }
+
+   Announcement getAnnouncement()
+   {
+      return announcement;
+   }
+
+   
+   
    
    
 }
