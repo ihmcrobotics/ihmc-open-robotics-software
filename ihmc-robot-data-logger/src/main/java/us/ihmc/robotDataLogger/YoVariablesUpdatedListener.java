@@ -37,7 +37,7 @@ public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogL
 
 
 
-   /**s
+   /**
     * Data and timestamp is received over the TCP channel. Significant delay can occur depending on the
     * network conditions. Use receivedTimestampOnly for synchronization purposes.
     * 
@@ -45,5 +45,8 @@ public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogL
     */
    void receivedTimestampAndData(long timestamp);
 
-   boolean executeVariableChangedListeners();
+   /**
+    * Gets called when the client is connected and the first data has been received.
+    */
+   void connected();
 }

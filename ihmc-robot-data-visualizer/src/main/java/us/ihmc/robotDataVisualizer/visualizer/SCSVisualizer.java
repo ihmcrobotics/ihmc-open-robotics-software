@@ -2,6 +2,7 @@ package us.ihmc.robotDataVisualizer.visualizer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +45,15 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
+   private final static String DISCONNECT_DISCONNECT = "Disconnect";
+   private final static String DISCONNECT_RECONNECT = "Reconnect";
+   
+   
    private YoVariableRegistry registry;
    private SimulationConstructionSet scs;
 
    
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
-   private volatile boolean recording = true;
    private YoVariableClientInterface yoVariableClientInterface;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
@@ -58,7 +62,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<>();
 
-   private final JButton disconnectButton = new JButton("Disconnect");
+   private final JButton disconnectButton = new JButton("Waiting for connection...");
    private final JButton clearLogButton = new JButton("Clear log");
 
    private final DecimalFormat delayFormat = new DecimalFormat("0000");
@@ -89,6 +93,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       this.bufferSize = bufferSize;
       this.showGUI = showGUI;
       this.hideViewport = hideViewport;
+      this.disconnectButton.setEnabled(false);
       addSCSVisualizerStateListener(this);
    }
 
@@ -100,30 +105,39 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
          delayValue.setText(delayFormat.format(delay));
    
-         if (recording)
+         for (int i = 0; i < jointUpdaters.size(); i++)
          {
-            for (int i = 0; i < jointUpdaters.size(); i++)
-            {
-               jointUpdaters.get(i).update();
-            }
-            scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
-            updateLocalVariables();
-            scs.tickAndUpdate();
+            jointUpdaters.get(i).update();
          }
+         scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
+         updateLocalVariables();
+         scs.tickAndUpdate();
       }
    }
 
    @Override
    public void disconnected()
    {
-      System.out.println("DISCONNECTED. SLIDERS NOW ENABLED");
-      scs.setScrollGraphsEnabled(true);
+      synchronized(disconnectButton)
+      {
+         System.out.println("Disconnected. Sliders now enabled.");
+         disconnectButton.setText(DISCONNECT_RECONNECT);
+         disconnectButton.setEnabled(true);
+         scs.setScrollGraphsEnabled(true);
+      }
    }
 
-   private void disconnect(final JButton disconnectButton)
+   @Override
+   public void connected()
    {
-      disconnectButton.setEnabled(false);
-      yoVariableClientInterface.stop();
+      synchronized(disconnectButton)
+      {
+         System.out.println("Connected. Disabling sliders.");
+         disconnectButton.setText(DISCONNECT_DISCONNECT);
+         disconnectButton.setEnabled(true);
+         scs.gotoOutPoint();
+         scs.setScrollGraphsEnabled(false);
+      }
    }
 
    public void addButton(String yoVariableName, double newValue)
@@ -162,7 +176,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void exitActionPerformed()
    {
-      recording = false;
       if (yoVariableClientInterface != null)
       {
          yoVariableClientInterface.stop();
@@ -243,10 +256,31 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            disconnect(disconnectButton);
+            if(disconnectButton.getText().equals(DISCONNECT_DISCONNECT))
+            {
+               synchronized(this)
+               {
+                  yoVariableClientInterface.disconnect();
+               }
+            }
+            else
+            {
+               synchronized(this)
+               {
+                  try
+                  {
+                     yoVariableClientInterface.reconnect();
+                  }
+                  catch (IOException reconnectError)
+                  {
+                     reconnectError.printStackTrace();
+                  }
+               }
+            }
          }
 
       });
+      
       scs.addButton(clearLogButton);
       clearLogButton.addActionListener(new ActionListener()
       {
@@ -286,36 +320,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          stateListener.starting(scs, robot, this.registry);
       }
 
-//      final JToggleButton record = new JToggleButton("Pause recording");
-//      scs.addButton(record);
-//      record.addActionListener(new ActionListener()
-//      {
-//         @Override
-//         public void actionPerformed(ActionEvent e)
-//         {
-//            if(record.isSelected())
-//            {
-//               synchronized (this)
-//               {
-//                  yoVariableClient.setSendingVariableChanges(false);
-//                  recording = false;
-//                  record.setText("Resume recording");
-//                  scs.setScrollGraphsEnabled(true);
-//               }
-//            }
-//            else
-//            {
-//               synchronized (this)
-//               {
-//                  scs.gotoOutPointNow();
-//                  recording = true;
-//                  record.setText("Pause recording");
-//                  scs.setScrollGraphsEnabled(false);
-//                  yoVariableClient.setSendingVariableChanges(true);
-//               }
-//            }
-//         }
-//      });
+
 
       for (String yoVariableName : buttons.keySet())
       {
@@ -369,12 +374,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void clearLog(String guid)
    {
-   }
-
-   @Override
-   public synchronized boolean executeVariableChangedListeners()
-   {
-      return recording;
    }
 
    private PlaybackListener createYoGraphicsUpdater()
