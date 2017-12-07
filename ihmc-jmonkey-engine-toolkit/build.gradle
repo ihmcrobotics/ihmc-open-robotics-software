@@ -29,7 +29,7 @@ mainDependencies {
    compile group: "org.jmonkeyengine", name: "jme3-plugins", version: "NIGHTLY-171205"
    compile group: "org.jmonkeyengine", name: "jme3-dae", version: "NIGHTLY-171205"
    compile group: "org.jmonkeyengine", name: "jme3-ogre", version: "NIGHTLY-171205"
-   compile group: "org.jmonkeyengine", name: "jme3-lwjgl3", version: "NIGHTLY-171205
+   compile group: "org.jmonkeyengine", name: "jme3-lwjgl3", version: "NIGHTLY-171205"
    compile(group: "org.jmonkeyengine", name: "jme3-lwjgl", version: "NIGHTLY-171205") {
       //Exclude incompatible version of jinput
       exclude group: "net.java.jinput", module: "jinput"
