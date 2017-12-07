@@ -450,7 +450,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     * @throws ExecutionException
     * @throws InterruptedException
     */
-   private void findInitialGuess2() // TODO : to enable this method, refine holding method.
+   private void findInitialGuessSub() // TODO : to enable this method, refine holding method.
    {
       SpatialData initialGuessData = toolboxData.createRandomInitialSpatialData();
       //SpatialData initialGuessData = toolboxData.createRandomSpatialData();
@@ -616,7 +616,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       rootNode = null;
       nodePlotter = new SpatialNodePlotter(toolboxData, visualize);
 
-      // TODO : findInitialGuess2()
+      // TODO : findInitialGuessSub()
       tree = new SpatialNodeTree();
       
       return true;
