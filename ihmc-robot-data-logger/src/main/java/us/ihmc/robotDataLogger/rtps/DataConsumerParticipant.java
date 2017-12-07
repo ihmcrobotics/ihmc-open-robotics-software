@@ -2,9 +2,7 @@ package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import us.ihmc.pubsub.Domain;
@@ -120,7 +118,7 @@ public class DataConsumerParticipant
    /**
     * Get the first matching announcement that is compatible with the original announcement.
     * 
-    * It iterates in reverse order over the announcements, such that the newest session is connected to.
+    * The announcement returned is the latest added, such that the newest session is connected to.
     * 
     * @param originalAnnouncement
     */
@@ -129,11 +127,13 @@ public class DataConsumerParticipant
       Announcement newAnnouncement = null;
       
       announcementLock.lock();
-      List<Announcement> announcementList =  new ArrayList<>(announcements.values());
-      for(int i = announcementList.size() - 1; i >= 0; i--)
+      for(Announcement announcement : announcements.values())
       {
-         Announcement announcement = announcementList.get(i);
          System.out.println("Trying announcement " + announcement);
+         if(announcement.getHostNameAsString().equals(originalAnnouncement.getHostNameAsString()))
+         {
+            newAnnouncement = announcement;
+         }
       }
       announcementLock.unlock();
       
