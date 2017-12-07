@@ -130,7 +130,11 @@ public class DataConsumerParticipant
       for(Announcement announcement : announcements.values())
       {
          System.out.println("Trying announcement " + announcement);
-         if(announcement.getHostNameAsString().equals(originalAnnouncement.getHostNameAsString()))
+         
+         
+         if(announcement.getHostNameAsString().equals(originalAnnouncement.getHostNameAsString())
+               && announcement.getReconnectKeyAsString().equals(originalAnnouncement.getReconnectKeyAsString()) 
+               && announcement.getNameAsString().equals(originalAnnouncement.getNameAsString()))
          {
             newAnnouncement = announcement;
          }
