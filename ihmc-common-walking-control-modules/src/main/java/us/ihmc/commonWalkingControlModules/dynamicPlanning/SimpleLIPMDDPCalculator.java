@@ -47,11 +47,6 @@ public class SimpleLIPMDDPCalculator
       desiredControlVector.clear();
    }
 
-   public void setLineSearchGain(double lineSearchGain)
-   {
-      ddpSolver.setLineSearchGain(lineSearchGain);
-   }
-
    public void setDeltaT(double deltaT)
    {
       dynamics.setTimeStepSize(deltaT);
@@ -102,20 +97,15 @@ public class SimpleLIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      ddpSolver.setDesiredTrajectories(desiredStateVector, desiredControlVector, currentState, currentControl, copDesiredPlan.getFinalTime());
-      ddpSolver.solveBackwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
-      ddpSolver.solveForwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
-      ddpSolver.initializeDDPWithLQRSolution();
-   }
-
-   public void backwardDDPPass()
-   {
-      ddpSolver.solveBackwardDDPPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      ddpSolver.initializeTrajectoriesFromDesireds(currentState, desiredStateVector, desiredControlVector);
+      //ddpSolver.solveBackwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      //ddpSolver.solveForwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      //ddpSolver.initializeDDPWithLQRSolution();
    }
 
    public void forwardDDPPass()
    {
-      ddpSolver.solveForwardDDPPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      //ddpSolver.solveForwardDDPPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
    }
 
    private double computeDeltaT(double trajectoryLength)
@@ -131,11 +121,11 @@ public class SimpleLIPMDDPCalculator
 
    public RecyclingArrayList<DenseMatrix64F> getControlVector()
    {
-      return ddpSolver.getControlVector();
+      return ddpSolver.getControlTrajectory();
    }
 
    public RecyclingArrayList<DenseMatrix64F> getStateVector()
    {
-      return ddpSolver.getStateVector();
+      return ddpSolver.getStateTrajectory();
    }
 }

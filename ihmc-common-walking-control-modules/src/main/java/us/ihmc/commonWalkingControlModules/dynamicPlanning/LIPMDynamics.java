@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 /** This class defines the Linear Inverted Pendulum Dynamics.
  * The state variables are X = [x, y, z, xdot, ydot, zdot], the center of mass
@@ -9,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
  */
 public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
 {
+   private static final boolean incorporateAccelerationIntoPosition = false;
    static final int stateVectorSize = 6;
    static final int controlVectorSize = 3;
 
@@ -67,9 +69,15 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double py_k = currentControl.get(1);
       double fz_k = currentControl.get(2);
 
-      double x_k1 = x_k + deltaT * xdot_k + 0.5 * deltaT2 * (x_k - px_k) * fz_k / (pendulumMass * z_k);
-      double y_k1 = y_k + deltaT * ydot_k + 0.5 * deltaT2 * (y_k - py_k) * fz_k / (pendulumMass * z_k);
-      double z_k1 = z_k + deltaT * zdot_k + 0.5 * deltaT2 * (fz_k / pendulumMass - gravityZ);
+      double x_k1 = x_k + deltaT * xdot_k;
+      double y_k1 = y_k + deltaT * ydot_k;
+      double z_k1 = z_k + deltaT * zdot_k;
+      if (incorporateAccelerationIntoPosition)
+      {
+         x_k1 += 0.5 * deltaT2 * (x_k - px_k) * fz_k / (pendulumMass * z_k);
+         y_k1 += 0.5 * deltaT2 * (y_k - py_k) * fz_k / (pendulumMass * z_k);
+         z_k1 += 0.5 * deltaT2 * (fz_k / pendulumMass - gravityZ);
+      }
 
       double xdot_k1 = xdot_k + deltaT * (x_k - px_k) * fz_k / (pendulumMass * z_k);
       double ydot_k1 = ydot_k + deltaT * (y_k - py_k) * fz_k / (pendulumMass * z_k);
@@ -103,26 +111,43 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double value1 = deltaT2 / (2.0 * pendulumMass * z_k);
       double value2 = deltaT / (pendulumMass * z_k);
 
-      matrixToPack.set(0, 0, 1 + fz_k * value1);
-      matrixToPack.set(0, 2, (px_k - x_k) * fz_k / z_k * value1);
-      matrixToPack.set(0, 3, deltaT);
+      if (incorporateAccelerationIntoPosition)
+      {
+         matrixToPack.set(0, 0, 1 + fz_k * value1);
+         matrixToPack.set(0, 2, (px_k - x_k) * fz_k / z_k * value1);
+         matrixToPack.set(0, 3, deltaT);
 
-      matrixToPack.set(1, 1, matrixToPack.get(0, 0));
-      matrixToPack.set(1, 2, (py_k - y_k) * fz_k / z_k * value1);
-      matrixToPack.set(1, 4, deltaT);
+         matrixToPack.set(1, 1, matrixToPack.get(0, 0));
+         matrixToPack.set(1, 2, (py_k - y_k) * fz_k / z_k * value1);
+         matrixToPack.set(1, 4, deltaT);
 
-      matrixToPack.set(2, 2, 1.0);
-      matrixToPack.set(2, 5, deltaT);
+         matrixToPack.set(2, 2, 1.0);
+         matrixToPack.set(2, 5, deltaT);
 
-      matrixToPack.set(3, 0, fz_k * value2);
-      matrixToPack.set(3, 2, (px_k - x_k) * fz_k / z_k * value2);
-      matrixToPack.set(3, 3, 1.0);
+         matrixToPack.set(3, 0, fz_k * value2);
+         matrixToPack.set(3, 2, (px_k - x_k) * fz_k / z_k * value2);
+         matrixToPack.set(3, 3, 1.0);
 
-      matrixToPack.set(4, 1, matrixToPack.get(3, 0));
-      matrixToPack.set(4, 2, (py_k - y_k) * fz_k / z_k * value2);
-      matrixToPack.set(4, 4, 1.0);
+         matrixToPack.set(4, 1, matrixToPack.get(3, 0));
+         matrixToPack.set(4, 2, (py_k - y_k) * fz_k / z_k * value2);
+         matrixToPack.set(4, 4, 1.0);
 
-      matrixToPack.set(5, 5, 1.0);
+         matrixToPack.set(5, 5, 1.0);
+      }
+      else
+      {
+         CommonOps.setIdentity(matrixToPack);
+
+         matrixToPack.set(0, 3, deltaT);
+         matrixToPack.set(1, 4, deltaT);
+         matrixToPack.set(2, 5, deltaT);
+
+         matrixToPack.set(3, 0, fz_k * deltaT / (pendulumMass * z_k));
+         matrixToPack.set(3, 2, fz_k * deltaT * (px_k - x_k) / (pendulumMass * z_k * z_k));
+
+         matrixToPack.set(4, 1, fz_k * deltaT / (pendulumMass * z_k));
+         matrixToPack.set(4, 2, fz_k * deltaT * (py_k - y_k) / (pendulumMass * z_k * z_k));
+      }
    }
 
    public void getDynamicsControlGradient(LIPMState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
@@ -145,21 +170,34 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double value = deltaT / (pendulumMass * z_k);
       double value2 = deltaT2 / (2 * pendulumMass * z_k);
 
-      matrixToPack.set(0, 0, value2 * -fz_k);
-      matrixToPack.set(0, 2, value2 * (x_k - px_k));
+      if (incorporateAccelerationIntoPosition)
+      {
+         matrixToPack.set(0, 0, value2 * -fz_k);
+         matrixToPack.set(0, 2, value2 * (x_k - px_k));
 
-      matrixToPack.set(1, 1, value2 * -fz_k);
-      matrixToPack.set(1, 2, value2 * (y_k - py_k));
+         matrixToPack.set(1, 1, value2 * -fz_k);
+         matrixToPack.set(1, 2, value2 * (y_k - py_k));
 
-      matrixToPack.set(2, 2, value2 * z_k);
+         matrixToPack.set(2, 2, value2 * z_k);
 
-      matrixToPack.set(3, 0, value * -fz_k);
-      matrixToPack.set(3, 2, value * (x_k - px_k));
+         matrixToPack.set(3, 0, value * -fz_k);
+         matrixToPack.set(3, 2, value * (x_k - px_k));
 
-      matrixToPack.set(4, 1, value * -fz_k);
-      matrixToPack.set(4, 2, value * (y_k - py_k));
+         matrixToPack.set(4, 1, value * -fz_k);
+         matrixToPack.set(4, 2, value * (y_k - py_k));
 
-      matrixToPack.set(5, 2, value * z_k);
+         matrixToPack.set(5, 2, value * z_k);
+      }
+      else
+      {
+         matrixToPack.set(3, 0, -fz_k * deltaT / (pendulumMass * z_k));
+         matrixToPack.set(3, 2, -(px_k - x_k) * deltaT / (pendulumMass * z_k));
+
+         matrixToPack.set(4, 1, -fz_k * deltaT / (pendulumMass * z_k));
+         matrixToPack.set(4, 2, -(py_k - y_k) * deltaT / (pendulumMass * z_k));
+
+         matrixToPack.set(5, 2, deltaT / pendulumMass);
+      }
    }
 
    public void getDynamicsStateHessian(LIPMState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
@@ -184,29 +222,51 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double value = -deltaT * fz_k / (pendulumMass * z_k * z_k);
       double value2 = -deltaT2 * fz_k / (2 * pendulumMass * z_k * z_k);
 
-      switch (stateVariable)
+      if (incorporateAccelerationIntoPosition)
       {
-      case 0:
-         matrixToPack.set(0, 2, value2);
-         matrixToPack.set(3, 2, value);
-         break;
-      case 1:
-         matrixToPack.set(1, 2, value2);
-         matrixToPack.set(4, 2, value);
-         break;
-      case 2:
-         matrixToPack.set(0, 0, value2);
-         matrixToPack.set(0, 2, 2.0 * value2 * (px_k - x_k) / z_k);
+         switch (stateVariable)
+         {
+         case 0:
+            matrixToPack.set(0, 2, value2);
+            matrixToPack.set(3, 2, value);
+            break;
+         case 1:
+            matrixToPack.set(1, 2, value2);
+            matrixToPack.set(4, 2, value);
+            break;
+         case 2:
+            matrixToPack.set(0, 0, value2);
+            matrixToPack.set(0, 2, 2.0 * value2 * (px_k - x_k) / z_k);
 
-         matrixToPack.set(1, 1, value2);
-         matrixToPack.set(1, 2, 2.0 * value2 * (py_k - y_k) / z_k);
+            matrixToPack.set(1, 1, value2);
+            matrixToPack.set(1, 2, 2.0 * value2 * (py_k - y_k) / z_k);
 
-         matrixToPack.set(3, 0, value);
-         matrixToPack.set(3, 2, 2.0 * value * (px_k - x_k) / z_k);
+            matrixToPack.set(3, 0, value);
+            matrixToPack.set(3, 2, 2.0 * value * (px_k - x_k) / z_k);
 
-         matrixToPack.set(4, 1, value);
-         matrixToPack.set(4, 2, 2.0 * value * (py_k - y_k) / z_k);
-         break;
+            matrixToPack.set(4, 1, value);
+            matrixToPack.set(4, 2, 2.0 * value * (py_k - y_k) / z_k);
+            break;
+         }
+      }
+      else
+      {
+         switch (stateVariable)
+         {
+         case 0:
+            matrixToPack.set(3, 2, value);
+            break;
+         case 1:
+            matrixToPack.set(4, 2, value);
+            break;
+         case 2:
+            matrixToPack.set(3, 0, value);
+            matrixToPack.set(3, 2, 2.0 * value * (px_k - x_k) / z_k);
+
+            matrixToPack.set(4, 1, value);
+            matrixToPack.set(4, 2, 2.0 * value * (py_k - y_k) / z_k);
+            break;
+         }
       }
    }
 
@@ -226,22 +286,41 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double value = -deltaT / (pendulumMass * z_k);
       double value2 = -deltaT2 / (2 * pendulumMass * z_k);
 
-      switch (controlVariable)
+      if (incorporateAccelerationIntoPosition)
       {
-      case 0:
-         matrixToPack.set(0, 2, value2);
-         matrixToPack.set(3, 2, value);
-         break;
-      case 1:
-         matrixToPack.set(1, 2, value2);
-         matrixToPack.set(4, 2, value);
-         break;
-      case 2:
-         matrixToPack.set(0, 0, value2);
-         matrixToPack.set(1, 1, value2);
-         matrixToPack.set(3, 0, value);
-         matrixToPack.set(4, 1, value);
-         break;
+         switch (controlVariable)
+         {
+         case 0:
+            matrixToPack.set(0, 2, value2);
+            matrixToPack.set(3, 2, value);
+            break;
+         case 1:
+            matrixToPack.set(1, 2, value2);
+            matrixToPack.set(4, 2, value);
+            break;
+         case 2:
+            matrixToPack.set(0, 0, value2);
+            matrixToPack.set(1, 1, value2);
+            matrixToPack.set(3, 0, value);
+            matrixToPack.set(4, 1, value);
+            break;
+         }
+      }
+      else
+      {
+         switch (controlVariable)
+         {
+         case 0:
+            matrixToPack.set(3, 2, value);
+            break;
+         case 1:
+            matrixToPack.set(4, 2, value);
+            break;
+         case 2:
+            matrixToPack.set(3, 0, value);
+            matrixToPack.set(4, 1, value);
+            break;
+         }
       }
    }
 
@@ -268,29 +347,51 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double value = deltaT / (pendulumMass * z_k * z_k);
       double value2 = deltaT2 / (2 * pendulumMass * z_k * z_k);
 
-      switch (stateVariable)
+      if (incorporateAccelerationIntoPosition)
       {
-      case 0:
-         matrixToPack.set(0, 2, value2 * z_k);
-         matrixToPack.set(3, 2, value * z_k);
-         break;
-      case 1:
-         matrixToPack.set(1, 2, value2 * z_k);
-         matrixToPack.set(4, 2, value * z_k);
-         break;
-      case 2:
-         matrixToPack.set(0, 0, value2 * fz_k);
-         matrixToPack.set(0, 2, value2 * (px_k - x_k));
+         switch (stateVariable)
+         {
+         case 0:
+            matrixToPack.set(0, 2, value2 * z_k);
+            matrixToPack.set(3, 2, value * z_k);
+            break;
+         case 1:
+            matrixToPack.set(1, 2, value2 * z_k);
+            matrixToPack.set(4, 2, value * z_k);
+            break;
+         case 2:
+            matrixToPack.set(0, 0, value2 * fz_k);
+            matrixToPack.set(0, 2, value2 * (px_k - x_k));
 
-         matrixToPack.set(1, 1, value2 * fz_k);
-         matrixToPack.set(1, 2, value2 * (py_k - y_k));
+            matrixToPack.set(1, 1, value2 * fz_k);
+            matrixToPack.set(1, 2, value2 * (py_k - y_k));
 
-         matrixToPack.set(3, 0, value * fz_k);
-         matrixToPack.set(3, 2, value * (px_k - x_k));
+            matrixToPack.set(3, 0, value * fz_k);
+            matrixToPack.set(3, 2, value * (px_k - x_k));
 
-         matrixToPack.set(4, 1, value * fz_k);
-         matrixToPack.set(4, 2, value * (py_k - y_k));
-         break;
+            matrixToPack.set(4, 1, value * fz_k);
+            matrixToPack.set(4, 2, value * (py_k - y_k));
+            break;
+         }
+      }
+      else
+      {
+         switch (stateVariable)
+         {
+         case 0:
+            matrixToPack.set(3, 2, value * z_k);
+            break;
+         case 1:
+            matrixToPack.set(4, 2, value * z_k);
+            break;
+         case 2:
+            matrixToPack.set(3, 0, value * fz_k);
+            matrixToPack.set(3, 2, value * (px_k - x_k));
+
+            matrixToPack.set(4, 1, value * fz_k);
+            matrixToPack.set(4, 2, value * (py_k - y_k));
+            break;
+         }
       }
    }
 
@@ -317,28 +418,49 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       double value = deltaT / (pendulumMass * z_k * z_k );
       double value2 = deltaT2 / (2 * pendulumMass * z_k * z_k );
 
-      switch (controlVariable)
+      if (incorporateAccelerationIntoPosition)
       {
-      case 0:
-         matrixToPack.set(0, 2, fz_k  * value2);
-         matrixToPack.set(3, 2, fz_k  * value);
-         break;
-      case 1:
-         matrixToPack.set(1, 2, fz_k  * value2);
-         matrixToPack.set(4, 2, fz_k  * value);
-         break;
-      case 2:
-         matrixToPack.set(0, 0, value2 * z_k);
-         matrixToPack.set(0, 2, value2 * (px_k - x_k));
+         switch (controlVariable)
+         {
+         case 0:
+            matrixToPack.set(0, 2, fz_k * value2);
+            matrixToPack.set(3, 2, fz_k * value);
+            break;
+         case 1:
+            matrixToPack.set(1, 2, fz_k * value2);
+            matrixToPack.set(4, 2, fz_k * value);
+            break;
+         case 2:
+            matrixToPack.set(0, 0, value2 * z_k);
+            matrixToPack.set(0, 2, value2 * (px_k - x_k));
 
-         matrixToPack.set(1, 1, value2 * z_k);
-         matrixToPack.set(1, 2, value2 * (py_k - y_k));
+            matrixToPack.set(1, 1, value2 * z_k);
+            matrixToPack.set(1, 2, value2 * (py_k - y_k));
 
-         matrixToPack.set(3, 0, value * z_k);
-         matrixToPack.set(3, 2, value * (px_k - x_k));
+            matrixToPack.set(3, 0, value * z_k);
+            matrixToPack.set(3, 2, value * (px_k - x_k));
 
-         matrixToPack.set(4, 1, value * z_k);
-         matrixToPack.set(4, 2, value * (py_k - y_k));
+            matrixToPack.set(4, 1, value * z_k);
+            matrixToPack.set(4, 2, value * (py_k - y_k));
+         }
+      }
+      else
+      {
+         switch (controlVariable)
+         {
+         case 0:
+            matrixToPack.set(3, 2, fz_k * value);
+            break;
+         case 1:
+            matrixToPack.set(4, 2, fz_k * value);
+            break;
+         case 2:
+            matrixToPack.set(3, 0, value * z_k);
+            matrixToPack.set(3, 2, value * (px_k - x_k));
+
+            matrixToPack.set(4, 1, value * z_k);
+            matrixToPack.set(4, 2, value * (py_k - y_k));
+         }
       }
    }
 

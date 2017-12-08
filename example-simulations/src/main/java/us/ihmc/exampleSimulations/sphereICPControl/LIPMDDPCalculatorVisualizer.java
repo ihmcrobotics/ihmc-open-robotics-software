@@ -86,6 +86,7 @@ public class LIPMDDPCalculatorVisualizer
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    private final YoBoolean computeNextPass = new YoBoolean("computeNextPass", registry);
+   private final YoDouble costToGo = new YoDouble("costToGo", registry);
 
    private final int simulatedTicksPerGraphicUpdate = 1;
    private final double trailingDuration = 4.0 * (singleSupportDuration + doubleSupportDuration);
@@ -100,7 +101,7 @@ public class LIPMDDPCalculatorVisualizer
 
    private static final boolean useSimple = false;
    //private final SimpleLIPMDDPCalculator ddp = new SimpleLIPMDDPCalculator(0.01, 1.0, 9.81);
-   private final LIPMDDPCalculator ddp = new LIPMDDPCalculator(0.01, 10.0, 9.81);
+   private final LIPMDDPCalculator ddp = new LIPMDDPCalculator(0.01, 150.0, 9.81);
 
    private final YoDouble lineSearchGain = new YoDouble("lineSearchGain", registry);
    private final YoInteger updatesPerRequest = new YoInteger("updatesPerRequest", registry);
@@ -253,16 +254,18 @@ public class LIPMDDPCalculatorVisualizer
       plotCoPPlan(trajectoryTime);
 
       DenseMatrix64F currentCoMState;
+      DenseMatrix64F currentControlState;
       if (useSimple)
       {
          currentCoMState = new DenseMatrix64F(4, 1);
+         currentControlState = new DenseMatrix64F(2, 1);
       }
       else
       {
          currentCoMState = new DenseMatrix64F(6, 1);
          currentCoMState.set(2, 0, 1.0);
+         currentControlState = new DenseMatrix64F(3, 1);
       }
-      DenseMatrix64F currentControlState = new DenseMatrix64F(2, 1);
 
       ddp.initialize(currentCoMState, currentControlState, copPlanner.getCoPTrajectory());
       plotCoMPlan();
@@ -275,8 +278,12 @@ public class LIPMDDPCalculatorVisualizer
 
             for (int i = 0; i < updatesPerRequest.getIntegerValue(); i++)
             {
+               ddp.solve();
+               /*
                ddp.backwardDDPPass();
                ddp.forwardDDPPass();
+               costToGo.set(ddp.getValue());
+               */
             }
 
             plotCoMPlan();

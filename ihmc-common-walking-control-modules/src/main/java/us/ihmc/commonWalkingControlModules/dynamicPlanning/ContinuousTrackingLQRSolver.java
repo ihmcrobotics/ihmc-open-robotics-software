@@ -12,6 +12,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    private final RecyclingArrayList<DenseMatrix64F> desiredStateTrajectory;
    private final RecyclingArrayList<DenseMatrix64F> desiredControlTrajectory;
 
+   private final RecyclingArrayList<DenseMatrix64F> feedbackGainTrajectory;
+
    private final RecyclingArrayList<DenseMatrix64F> S2Trajectory;
    private final RecyclingArrayList<DenseMatrix64F> S1Trajectory;
 
@@ -77,6 +79,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       desiredStateTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
       desiredControlTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
 
+      feedbackGainTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, new VariableVectorBuilder(controlSize, stateSize));
+
       S2Trajectory = new RecyclingArrayList<DenseMatrix64F>(1000, hessianBuilder);
       S1Trajectory = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
 
@@ -84,6 +88,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       optimalControlTrajectory.clear();
       desiredStateTrajectory.clear();
       desiredControlTrajectory.clear();
+      feedbackGainTrajectory.clear();
 
       S2Trajectory.clear();
       S1Trajectory.clear();
@@ -99,6 +104,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
 
       this.S2Trajectory.clear();
       this.S1Trajectory.clear();
+      this.feedbackGainTrajectory.clear();
 
       for (int i = 0; i < desiredStateTrajectory.size(); i++)
       {
@@ -110,6 +116,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
 
          S2Trajectory.add();
          S1Trajectory.add();
+
+         feedbackGainTrajectory.add();
       }
 
       optimalStateTrajectory.getFirst().set(initialState);
@@ -197,6 +205,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
          DenseMatrix64F desiredControl = desiredControlTrajectory.get(i);
          DenseMatrix64F state = optimalStateTrajectory.get(i);
          DenseMatrix64F control = optimalControlTrajectory.get(i);
+         DenseMatrix64F gain = feedbackGainTrajectory.get(i);
 
          DenseMatrix64F nextState = optimalStateTrajectory.get(i + 1);
          DenseMatrix64F S2 = S2Trajectory.get(i);
@@ -207,6 +216,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
          tempMatrix.reshape(stateSize, 1);
          CommonOps.mult(S2, state, tempMatrix);
          CommonOps.addEquals(tempMatrix, 0.5, S1);
+         CommonOps.mult(-1.0, R_invBT, tempMatrix, gain);
          CommonOps.multAdd(-1.0, R_invBT, tempMatrix, control);
 
          CommonOps.mult(A, state, XDot);
@@ -234,6 +244,36 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
          optimalStateTrajectoryToPack.getAndGrowIfNeeded(i).set(optimalStateTrajectory.get(i));
          optimalControlTrajectoryToPack.getAndGrowIfNeeded(i).set(optimalControlTrajectory.get(i));
       }
+   }
+
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalStateTrajectory()
+   {
+      return optimalStateTrajectory;
+   }
+
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalControlTrajectory()
+   {
+      return optimalControlTrajectory;
+   }
+
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainTrajectory()
+   {
+      throw new RuntimeException("this isn't implemented correctly.");
+   }
+
+   @Override
+   public DenseMatrix64F getValueHessian()
+   {
+      return S1Trajectory.get(0);
+   }
+
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlTrajectory()
+   {
+      throw new RuntimeException("this isn't implemented correctly.");
    }
 
    private boolean isAnyInvalid(DenseMatrix64F matrix)

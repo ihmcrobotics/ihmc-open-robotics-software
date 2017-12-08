@@ -17,9 +17,9 @@ public class LIPMTerminalCostFunction implements LQCostFunction
       Q.set(0, 0, 1e2);
       Q.set(1, 1, 1e2);
       Q.set(2, 2, 1e2);
-      Q.set(3, 3, 1e1);
-      Q.set(4, 4, 1e1);
-      Q.set(5, 5, 1e1);
+      Q.set(3, 3, 1e2);
+      Q.set(4, 4, 1e2);
+      Q.set(5, 5, 1e2);
 
       R.set(0, 0, 0.0);
       R.set(1, 1, 0.0);
@@ -75,5 +75,11 @@ public class LIPMTerminalCostFunction implements LQCostFunction
    public void getCostStateGradientOfControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
+   }
+
+   /** L_xu(X_k, U_k) */
+   public void getCostControlGradientOfStateGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   {
+      matrixToPack.reshape(stateVectorSize, controlVectorSize);
    }
 }

@@ -9,6 +9,13 @@ public interface LQRSolverInterface<E extends Enum>
                                DenseMatrix64F initialState);
    void getOptimalTrajectories(RecyclingArrayList<DenseMatrix64F> optimalStateTrajectoryToPack, RecyclingArrayList<DenseMatrix64F> optimalControlTrajectoryToPack);
 
+   RecyclingArrayList<DenseMatrix64F> getOptimalStateTrajectory();
+   RecyclingArrayList<DenseMatrix64F> getOptimalControlTrajectory();
+   RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainTrajectory();
+   RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlTrajectory();
+
+   DenseMatrix64F getValueHessian();
+
    void solveRiccatiEquation(E dynamicState, int startIndex, int endIndex); // backwards pass
    void computeOptimalTrajectories(E dynamicsState, int startIndex, int endIndex); // forward pass
 }

@@ -218,14 +218,16 @@ public class DDPSolverTest
       linearSolver.invert(Q_UU_inv);
 
       DenseMatrix64F gainMatrix = new DenseMatrix64F(3, 6);
+      DenseMatrix64F deltaU = new DenseMatrix64F(3, 1);
 
       CommonOps.mult(Q_UU_inv, Q_UX, gainMatrix);
 
 
+      DenseMatrix64F V = new DenseMatrix64F(1, 1);
       DenseMatrix64F V_X = new DenseMatrix64F(6, 1);
       DenseMatrix64F V_XX = new DenseMatrix64F(6, 6);
 
-      calculator.computeValueApproximationForNextStep(V_X, V_XX, gainMatrix, Q_X, Q_U, Q_XX, Q_UX);
+      calculator.computeValueApproximationForNextStep(V, V_X, V_XX, gainMatrix, deltaU, Q_X, Q_U, Q_XX, Q_UU, Q_UX);
 
       DenseMatrix64F V_X_expected = new DenseMatrix64F(1, 6);
       DenseMatrix64F V_XX_expected = new DenseMatrix64F(6, 6);
