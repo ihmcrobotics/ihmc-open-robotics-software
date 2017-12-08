@@ -134,6 +134,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       synchronized(disconnectLock)
       {
+         scs.setInPoint();
          disconnectButton.setText(DISCONNECT_DISCONNECT);
          disconnectButton.setEnabled(true);
       }
@@ -269,6 +270,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                      System.out.println("Reconnecting. Disabling sliders.");
                      scs.gotoOutPointNow();
                      scs.setScrollGraphsEnabled(false);
+                     scs.tick(0);
 
                      if (yoVariableClientInterface.reconnect())
                      {
