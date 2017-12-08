@@ -18,12 +18,12 @@ public class LIPMSimpleCostFunction implements LQCostFunction
 
    public LIPMSimpleCostFunction()
    {
-      Q.set(0, 0, 1e-5);
-      Q.set(1, 1, 1e-5);
-      Q.set(2, 2, 1e-1);
-      Q.set(3, 3, 1e-5);
-      Q.set(4, 4, 1e-5);
-      Q.set(5, 5, 1e-5);
+      Q.set(0, 0, 1e-6);
+      Q.set(1, 1, 1e-6);
+      Q.set(2, 2, 1e1);
+      Q.set(3, 3, 1e-6);
+      Q.set(4, 4, 1e-6);
+      Q.set(5, 5, 1e-6);
 
       R.set(0, 0, 1e2);
       R.set(1, 1, 1e2);
@@ -79,5 +79,11 @@ public class LIPMSimpleCostFunction implements LQCostFunction
    public void getCostStateGradientOfControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
+   }
+
+   /** L_xu(X_k, U_k) */
+   public void getCostControlGradientOfStateGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   {
+      matrixToPack.reshape(stateVectorSize, controlVectorSize);
    }
 }

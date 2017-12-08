@@ -282,6 +282,36 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       }
    }
 
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalStateTrajectory()
+   {
+      return optimalStateTrajectory;
+   }
+
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalControlTrajectory()
+   {
+      return optimalControlTrajectory;
+   }
+
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainTrajectory()
+   {
+      return feedbackGainTrajectory;
+   }
+
+   @Override
+   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlTrajectory()
+   {
+      return feedforwardTrajectory;
+   }
+
+   @Override
+   public DenseMatrix64F getValueHessian()
+   {
+      return s1Trajectory.get(0);
+   }
+
    private final DenseMatrix64F tempMatrix3 = new DenseMatrix64F(0, 0);
    /**
     * D = D + A^T *  B * C

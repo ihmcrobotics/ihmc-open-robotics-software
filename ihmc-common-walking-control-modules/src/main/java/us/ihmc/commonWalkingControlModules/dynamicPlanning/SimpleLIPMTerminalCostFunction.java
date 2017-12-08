@@ -73,4 +73,10 @@ public class SimpleLIPMTerminalCostFunction implements LQCostFunction
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
    }
+
+   /** L_ux(X_k, U_k) */
+   public void getCostControlGradientOfStateGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   {
+      matrixToPack.reshape(stateVectorSize, controlVectorSize);
+   }
 }

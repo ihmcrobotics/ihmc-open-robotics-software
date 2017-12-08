@@ -18,4 +18,6 @@ public interface LQCostFunction
    void getCostControlHessian(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack);
    /** L_ux(X_k, U_k) */
    void getCostStateGradientOfControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack);
+   /** L_xu(X_k, U_k) */
+   void getCostControlGradientOfStateGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack);
 }

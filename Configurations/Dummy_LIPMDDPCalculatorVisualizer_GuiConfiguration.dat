@@ -37,9 +37,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-1.7801143568221975</Camera X>
- <Camera Y>0.43283834516464437</Camera Y>
- <Camera Z>8.678865681962908</Camera Z>
+ <Camera X>-5.0</Camera X>
+ <Camera Y>5.0</Camera Y>
+ <Camera Z>5.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
