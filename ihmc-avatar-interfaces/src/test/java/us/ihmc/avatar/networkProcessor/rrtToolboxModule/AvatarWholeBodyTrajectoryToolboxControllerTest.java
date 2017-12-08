@@ -86,7 +86,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(false);
+      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -628,6 +628,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       Point3DReadOnly[] waypoints = IntStream.range(0, numberOfWaypoints).mapToDouble(i -> t0 + i * dT).mapToObj(trajectoryToVisualize::compute)
                                              .map(pose -> new Point3D(pose.getPosition())).toArray(size -> new Point3D[size]);
       segmentedLine3DMeshGenerator.compute(waypoints);
+      
       Graphics3DObject graphics = new Graphics3DObject();
       for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
       {
