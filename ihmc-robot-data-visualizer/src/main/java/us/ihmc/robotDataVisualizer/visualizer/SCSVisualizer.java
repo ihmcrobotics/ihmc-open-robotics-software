@@ -134,11 +134,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       synchronized(disconnectLock)
       {
-         System.out.println("Connected. Disabling sliders.");
          disconnectButton.setText(DISCONNECT_DISCONNECT);
          disconnectButton.setEnabled(true);
-         scs.gotoOutPointNow();
-         scs.setScrollGraphsEnabled(false);
       }
    }
 
@@ -258,30 +255,32 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            if(disconnectButton.getText().equals(DISCONNECT_DISCONNECT))
+            synchronized (disconnectLock)
             {
-               synchronized(disconnectLock)
+               if (disconnectButton.getText().equals(DISCONNECT_DISCONNECT))
                {
                   disconnectButton.setEnabled(false);
                   yoVariableClientInterface.disconnect();
                }
-            }
-            else
-            {
-               synchronized(disconnectLock)
+               else
                {
                   try
                   {
-                     if(yoVariableClientInterface.reconnect())
+                     System.out.println("Reconnecting. Disabling sliders.");
+                     scs.gotoOutPointNow();
+                     scs.setScrollGraphsEnabled(false);
+
+                     if (yoVariableClientInterface.reconnect())
                      {
                         disconnectButton.setEnabled(false);
                      }
                      else
                      {
-                        JOptionPane.showMessageDialog(scs.getJFrame(),
-                                                      "Cannot reconnect. No matching sessions found.",
-                                                      "Cannot reconnect",
+                        JOptionPane.showMessageDialog(scs.getJFrame(), "Cannot reconnect. No matching sessions found.", "Cannot reconnect",
                                                       JOptionPane.ERROR_MESSAGE);
+                        System.out.println("Reconnect failed. Enabling sliders.");
+                        scs.setScrollGraphsEnabled(true);
+
                      }
                   }
                   catch (IOException reconnectError)
