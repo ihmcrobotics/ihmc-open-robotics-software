@@ -109,6 +109,10 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
 
       }
 
+      if(variableChangedProducer != null)
+      {
+         variableChangedProducer.startVariableChangedProducers(handshakeParser.getYoVariablesList());
+      }
       yoVariablesUpdatedListener.start(this, logHandshake, handshakeParser);
 
       handshakeAnnouncement = announcement;
