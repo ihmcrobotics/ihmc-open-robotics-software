@@ -1256,49 +1256,91 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Add an orientation estimator based on the Mahony filter, see <a href="http://www.olliw.eu/2013/imu-data-fusing/">IMU Data Fusing</a>.
+    * Add an orientation estimator based on the Mahony filter, see
+    * <a href="http://www.olliw.eu/2013/imu-data-fusing/">IMU Data Fusing</a>.
     * <p>
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
     * 
-    * @param proportionalGain gain used to correct the orientation resulting from integrating angular velocity using the accelerometer.
-    * @param integralGain gain used to update the angular velocity bias.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param proportionalGain
+    *           gain used to correct the orientation resulting from integrating angular velocity
+    *           using the accelerometer.
+    * @param integralGain
+    *           gain used to update the angular velocity bias.
+    * @param useStateEstimatorData
+    *           when {@code false}, the filter will use acceleration measurements from the IMU to
+    *           correct the orientation. When {@code true}, a state estimator has to be running and
+    *           this filter should NOT be used on the principal IMU; it creates a virtual
+    *           accelerometer and a virtual magnetometer such that the resulting orientation is
+    *           consistent with the robot state estimation. This is a hack, if you need it, we
+    *           should spend time on implementing this feature properly.
+    * @param forVizOnly
+    *           if set to true, the result will not be used as the input of the next processing
+    *           stage, nor as the output of the sensor processing.
     */
-   public Map<String, Integer> addIMUMahony6DFusion(double proportionalGain, double integralGain, boolean forVizOnly)
+   public Map<String, Integer> addIMUMahonyFusion(double proportionalGain, double integralGain, boolean useStateEstimatorData, boolean forVizOnly)
    {
-      return addIMUMahony6DFusionWithSensorsToIgnore(proportionalGain, integralGain, forVizOnly);
+      return addIMUMahonyFusionWithSensorsToIgnore(proportionalGain, integralGain, useStateEstimatorData, forVizOnly);
    }
 
    /**
-    * Add an orientation estimator based on the Mahony filter, see <a href="http://www.olliw.eu/2013/imu-data-fusing/">IMU Data Fusing</a>.
+    * Add an orientation estimator based on the Mahony filter, see
+    * <a href="http://www.olliw.eu/2013/imu-data-fusing/">IMU Data Fusing</a>.
     * <p>
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
     * 
-    * @param proportionalGain gain used to correct the orientation resulting from integrating angular velocity using the accelerometer.
-    * @param integralGain gain used to update the angular velocity bias.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @param sensorsToBeProcessed list of the names of the sensors that need to be filtered.
+    * @param proportionalGain
+    *           gain used to correct the orientation resulting from integrating angular velocity
+    *           using the accelerometer.
+    * @param integralGain
+    *           gain used to update the angular velocity bias.
+    * @param useStateEstimatorData
+    *           when {@code false}, the filter will use acceleration measurements from the IMU to
+    *           correct the orientation. When {@code true}, a state estimator has to be running and
+    *           this filter should NOT be used on the principal IMU; it creates a virtual
+    *           accelerometer and a virtual magnetometer such that the resulting orientation is
+    *           consistent with the robot state estimation. This is a hack, if you need it, we
+    *           should spend time on implementing this feature properly.
+    * @param forVizOnly
+    *           if set to true, the result will not be used as the input of the next processing
+    *           stage, nor as the output of the sensor processing.
+    * @param sensorsToBeProcessed
+    *           list of the names of the sensors that need to be filtered.
     */
-   public Map<String, Integer> addIMUMahony6DFusionOnlyForSpecifiedSensors(double proportionalGain, double integralGain, boolean forVizOnly, String... sensorsToBeProcessed)
+   public Map<String, Integer> addIMUMahonyFusionOnlyForSpecifiedSensors(double proportionalGain, double integralGain, boolean useStateEstimatorData, boolean forVizOnly, String... sensorsToBeProcessed)
    {
-      return addIMUMahony6DFusionWithSensorsToIgnore(proportionalGain, integralGain, forVizOnly,
+      return addIMUMahonyFusionWithSensorsToIgnore(proportionalGain, integralGain, useStateEstimatorData, forVizOnly,
                                                              invertSensorSelection(IMU_ORIENTATION, sensorsToBeProcessed));
    }
 
    /**
-    * Add an orientation estimator based on the Mahony filter, see <a href="http://www.olliw.eu/2013/imu-data-fusing/">IMU Data Fusing</a>.
+    * Add an orientation estimator based on the Mahony filter, see
+    * <a href="http://www.olliw.eu/2013/imu-data-fusing/">IMU Data Fusing</a>.
     * <p>
     * This estimator only uses gyro and accelerometer data to estimate the orientation.
     * </p>
     * 
-    * @param proportionalGain gain used to correct the orientation resulting from integrating angular velocity using the accelerometer.
-    * @param integralGain gain used to update the angular velocity bias.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
-    * @param sensorsToIgnore list of the names of the sensors to ignore.
+    * @param proportionalGain
+    *           gain used to correct the orientation resulting from integrating angular velocity
+    *           using the accelerometer.
+    * @param integralGain
+    *           gain used to update the angular velocity bias.
+    * @param useStateEstimatorData
+    *           when {@code false}, the filter will use acceleration measurements from the IMU to
+    *           correct the orientation. When {@code true}, a state estimator has to be running and
+    *           this filter should NOT be used on the principal IMU; it creates a virtual
+    *           accelerometer and a virtual magnetometer such that the resulting orientation is
+    *           consistent with the robot state estimation. This is a hack, if you need it, we
+    *           should spend time on implementing this feature properly.
+    * @param forVizOnly
+    *           if set to true, the result will not be used as the input of the next processing
+    *           stage, nor as the output of the sensor processing.
+    * @param sensorsToIgnore
+    *           list of the names of the sensors to ignore.
     */
-   public Map<String, Integer> addIMUMahony6DFusionWithSensorsToIgnore(double proportionalGain, double integralGain, boolean forVizOnly, String... sensorsToIgnore)
+   public Map<String, Integer> addIMUMahonyFusionWithSensorsToIgnore(double proportionalGain, double integralGain, boolean useStateEstimatorData,
+                                                                     boolean forVizOnly, String... sensorsToIgnore)
    {
       Map<String, Integer> processorIDs = new HashMap<>();
 
@@ -1317,20 +1359,69 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoFrameVector3D intermediateAngularVelocity = intermediateAngularVelocities.get(imuDefinition);
          YoFrameVector3D intermediateLinearAcceleration = intermediateLinearAccelerations.get(imuDefinition);
 
-         List<ProcessingYoVariable> processors = processedOrientations.get(imuDefinition);
-         String prefix = IMU_ORIENTATION.getProcessorNamePrefix(MAHONY);
-         int newProcessorID = processors.size();
-         processorIDs.put(imuName, newProcessorID);
-         String suffix = IMU_ORIENTATION.getProcessorNameSuffix(imuName, newProcessorID);
+         List<ProcessingYoVariable> orientationProcessors = processedOrientations.get(imuDefinition);
+         List<ProcessingYoVariable> angularVelocityProcessors = processedAngularVelocities.get(imuDefinition);
+         processorIDs.put(imuName, orientationProcessors.size());
+         String orientationPrefix = IMU_ORIENTATION.getProcessorNamePrefix(MAHONY);
+         String orientationSuffix = IMU_ORIENTATION.getProcessorNameSuffix(imuName, orientationProcessors.size());
+         String angularVelocityPrefix = IMU_ANGULAR_VELOCITY.getProcessorNamePrefix(MAHONY);
+         String angularVelocitySuffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, angularVelocityProcessors.size());
+
          ReferenceFrame sensorFrame = imuDefinition.getIMUFrame();
-         YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName, prefix, suffix, updateDT, sensorFrame, intermediateAngularVelocity,
-                                                                          intermediateLinearAcceleration, registry);
+         YoFrameQuaternion processedOrientation = new YoFrameQuaternion(orientationPrefix, orientationSuffix, sensorFrame, registry);
+         YoFrameVector3D processedAngularVelocity = new YoFrameVector3D(angularVelocityPrefix, angularVelocitySuffix, sensorFrame, registry);
+
+         YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName, orientationSuffix, updateDT, sensorFrame, processedOrientation, processedAngularVelocity,
+                                                          registry);
          filter.setGains(proportionalGain, integralGain);
 
-         processors.add(filter);
+
+         if (useStateEstimatorData)
+         {
+            /*
+             * TODO This is a hack. This feature has to be implemented in the state estimator. As
+             * the proper implementation would require some refactor, I (Sylvain) decided to hack it
+             * until the feature is really needed, in which case we should dedicate time to find a
+             * proper implementation.
+             */
+            orientationProcessors.add(new ProcessingYoVariable()
+            {
+               private final FrameVector3D virtualAccelerometerMeasurement = new FrameVector3D();
+               private final FrameVector3D virtualMagnetometerMeasurement = new FrameVector3D();
+               private boolean reinitialize = true;
+
+               @Override
+               public void update()
+               {
+                  virtualAccelerometerMeasurement.setIncludingFrame(worldFrame, YoIMUMahonyFilter.ACCELERATION_REFERENCE);
+                  virtualAccelerometerMeasurement.changeFrame(sensorFrame);
+                  virtualMagnetometerMeasurement.setIncludingFrame(worldFrame, YoIMUMahonyFilter.NORTH_REFERENCE);
+                  virtualMagnetometerMeasurement.changeFrame(sensorFrame);
+
+                  filter.update(intermediateAngularVelocity, virtualAccelerometerMeasurement, virtualMagnetometerMeasurement);
+
+                  if (reinitialize)
+                  { // For the first tick, the frame will not be initialized properly, the filter has to be reinitilized on the second tick when all the frames are in place.
+                     filter.setHasBeenInitialized(false);
+                     reinitialize = false;
+                  }
+               }
+            });
+         }
+         else
+         {
+            filter.setInputs(intermediateAngularVelocity, intermediateLinearAcceleration);
+            orientationProcessors.add(filter);
+         }
+
+         angularVelocityProcessors.add(EMPTY_PROCESSOR);
+
 
          if (!forVizOnly)
-            intermediateOrientations.put(imuDefinition, filter.getEstimatedOrientation());
+         {
+            intermediateOrientations.put(imuDefinition, processedOrientation);
+            intermediateAngularVelocities.put(imuDefinition, processedAngularVelocity);
+         }
       }
 
       return processorIDs;
