@@ -33,7 +33,8 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class YoIMUMahonyFilter implements ProcessingYoVariable
 {
    private static final double MIN_MAGNITUDE = 1.0e-5;
-   private static final Vector3DReadOnly Z_UP = new Vector3DReadOnly()
+
+   public static final Vector3DReadOnly ACCELERATION_REFERENCE = new Vector3DReadOnly()
    {
       @Override
       public double getX()
@@ -54,11 +55,33 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       }
    };
 
-   private final YoFrameVector3D rawAngularVelocity;
-   private final YoFrameVector3D rawLinearAcceleration;
-   private final YoFrameVector3D rawMagneticVector;
+   public static final Vector3DReadOnly NORTH_REFERENCE = new Vector3DReadOnly()
+   {
+      @Override
+      public double getX()
+      {
+         return 1.0;
+      }
+
+      @Override
+      public double getY()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getZ()
+      {
+         return 0.0;
+      }
+   };
+
+   private YoFrameVector3D rawAngularVelocity;
+   private YoFrameVector3D rawLinearAcceleration;
+   private YoFrameVector3D rawMagneticVector;
 
    private final YoFrameQuaternion estimatedOrientation;
+   private final YoFrameVector3D estimatedAngularVelocity;
 
    private final YoFrameVector3D yoErrorTerm;
    private final YoFrameVector3D yoIntegralTerm;
@@ -72,40 +95,21 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    private final ReferenceFrame sensorFrame;
 
-   public YoIMUMahonyFilter(String imuName, String namePrefix, String nameSuffix, double updateDT, ReferenceFrame sensorFrame,
-                            YoVariableRegistry parentRegistry)
-   {
-      this(imuName, namePrefix, nameSuffix, updateDT, sensorFrame, null, null, null, parentRegistry);
-   }
-
-   public YoIMUMahonyFilter(String imuName, String namePrefix, String nameSuffix, double updateDT, ReferenceFrame sensorFrame,
-                            YoFrameVector3D inputAngularVelocity, YoFrameVector3D inputLinearAcceleration, YoVariableRegistry parentRegistry)
-   {
-      this(imuName, namePrefix, nameSuffix, updateDT, sensorFrame, inputAngularVelocity, inputLinearAcceleration, null, parentRegistry);
-   }
-
-   public YoIMUMahonyFilter(String imuName, String namePrefix, String nameSuffix, double updateDT, ReferenceFrame sensorFrame,
-                            YoFrameVector3D inputAngularVelocity, YoFrameVector3D inputLinearAcceleration, YoFrameVector3D inputMagneticVector,
-                            YoVariableRegistry parentRegistry)
+   public YoIMUMahonyFilter(String imuName, String nameSuffix, double updateDT, ReferenceFrame sensorFrame, YoFrameQuaternion estimatedOrientation,
+                            YoFrameVector3D estimatedAngularVelocity, YoVariableRegistry parentRegistry)
    {
       this.updateDT = updateDT;
       this.sensorFrame = sensorFrame;
 
-      if (inputAngularVelocity != null)
-         inputAngularVelocity.checkReferenceFrameMatch(sensorFrame);
-      if (inputLinearAcceleration != null)
-         inputLinearAcceleration.checkReferenceFrameMatch(sensorFrame);
-      if (inputMagneticVector != null)
-         inputMagneticVector.checkReferenceFrameMatch(sensorFrame);
-
       YoVariableRegistry registry = new YoVariableRegistry(imuName + "MahonyFilter");
       parentRegistry.addChild(registry);
 
-      this.rawAngularVelocity = inputAngularVelocity;
-      this.rawLinearAcceleration = inputLinearAcceleration;
-      this.rawMagneticVector = inputMagneticVector;
+      estimatedOrientation.checkReferenceFrameMatch(sensorFrame);
+      if (estimatedAngularVelocity != null)
+         estimatedAngularVelocity.checkReferenceFrameMatch(sensorFrame);
 
-      estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame, registry);
+      this.estimatedOrientation = estimatedOrientation;
+      this.estimatedAngularVelocity = estimatedAngularVelocity;
 
       yoErrorTerm = new YoFrameVector3D("ErrorTerm", nameSuffix, sensorFrame, registry);
       yoIntegralTerm = new YoFrameVector3D("IntegralTerm", nameSuffix, sensorFrame, registry);
@@ -116,12 +120,85 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       hasBeenInitialized = new YoBoolean("HasBeenInitialized" + nameSuffix, registry);
    }
 
+   public YoIMUMahonyFilter(String imuName, String namePrefix, String nameSuffix, double updateDT, ReferenceFrame sensorFrame,
+                            YoVariableRegistry parentRegistry)
+   {
+      this.updateDT = updateDT;
+      this.sensorFrame = sensorFrame;
+
+      YoVariableRegistry registry = new YoVariableRegistry(imuName + "MahonyFilter");
+      parentRegistry.addChild(registry);
+
+      estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame, registry);
+      estimatedAngularVelocity = new YoFrameVector3D(namePrefix, nameSuffix, sensorFrame, registry);
+
+      yoErrorTerm = new YoFrameVector3D("ErrorTerm", nameSuffix, sensorFrame, registry);
+      yoIntegralTerm = new YoFrameVector3D("IntegralTerm", nameSuffix, sensorFrame, registry);
+
+      proportionalGain = new YoDouble("ProportionalGain" + nameSuffix, registry);
+      integralGain = new YoDouble("IntegralGain" + nameSuffix, registry);
+
+      hasBeenInitialized = new YoBoolean("HasBeenInitialized" + nameSuffix, registry);
+   }
+
+   /**
+    * Sets the input variables to use when updating this filter.
+    * 
+    * @param inputAngularVelocity
+    *           the variable holding the measurements from the gyroscope. Not modified.
+    * @param inputLinearAcceleration
+    *           the variable holding the measurements from the accelerometer. Not modified.
+    */
+   public void setInputs(YoFrameVector3D inputAngularVelocity, YoFrameVector3D inputLinearAcceleration)
+   {
+      setInputs(inputAngularVelocity, inputLinearAcceleration, null);
+   }
+
+   /**
+    * Sets the input variables to use when updating this filter.
+    * 
+    * @param inputAngularVelocity
+    *           the variable holding the measurements from the gyroscope. Not modified.
+    * @param inputLinearAcceleration
+    *           the variable holding the measurements from the accelerometer. Not modified.
+    * @param inputMagneticVector
+    *           the variable holding the measurements from the magnetometer. Not modified.
+    */
+   public void setInputs(YoFrameVector3D inputAngularVelocity, YoFrameVector3D inputLinearAcceleration, YoFrameVector3D inputMagneticVector)
+   {
+      if (inputAngularVelocity != null)
+         inputAngularVelocity.checkReferenceFrameMatch(sensorFrame);
+      if (inputLinearAcceleration != null)
+         inputLinearAcceleration.checkReferenceFrameMatch(sensorFrame);
+      if (inputMagneticVector != null)
+         inputMagneticVector.checkReferenceFrameMatch(sensorFrame);
+
+      this.rawAngularVelocity = inputAngularVelocity;
+      this.rawLinearAcceleration = inputLinearAcceleration;
+      this.rawMagneticVector = inputMagneticVector;
+   }
+
+   /**
+    * Sets the gains for this filter.
+    * 
+    * @param proportionalGain
+    *           gain used to correct the orientation according to the estimated error.
+    * @param integralGain
+    *           gain used to update the gyroscope bias according to the estimated error.
+    */
    public void setGains(double proportionalGain, double integralGain)
    {
       this.proportionalGain.set(proportionalGain);
       this.integralGain.set(integralGain);
    }
 
+   /**
+    * Mostly useful for test purpose, but can be used to reinitilize this filter by giving
+    * {@code false}.
+    * 
+    * @param value
+    *           whether this filter has been initialized or not.
+    */
    public void setHasBeenInitialized(boolean value)
    {
       hasBeenInitialized.set(value);
@@ -196,6 +273,9 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       rotationUpdate.setAndScale(updateDT, angularVelocityTerm);
       quaternionUpdate.setRotationVector(rotationUpdate);
       estimatedOrientation.multiply(quaternionUpdate);
+
+      if (estimatedAngularVelocity != null)
+         estimatedAngularVelocity.add(inputAngularVelocity, integralTerm);
    }
 
    private void initialize(Vector3DReadOnly acceleration, Vector3DReadOnly magneticVector)
@@ -206,6 +286,8 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          return;
 
       estimatedOrientation.multiply(quaternionUpdate);
+      yoIntegralTerm.setToZero();
+
       hasBeenInitialized.set(true);
    }
 
@@ -253,7 +335,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
       accelerationCurrentDirectionWorld.setAndScale(1.0 / accelerationLength, acceleration);
       orientation.transform(accelerationCurrentDirectionWorld);
-      accelerationDesiredDirectionWorld.set(Z_UP);
+      accelerationDesiredDirectionWorld.set(ACCELERATION_REFERENCE);
 
       boolean useMagneticVector = false;
 
