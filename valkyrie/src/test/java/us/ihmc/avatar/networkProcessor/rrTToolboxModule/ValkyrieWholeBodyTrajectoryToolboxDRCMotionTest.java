@@ -121,7 +121,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
    public void testDrillMotion() throws Exception, UnreasonableAccelerationException
    {
       handControlFrames = WholeBodyTrajectoryToolboxSettings.getValkyrieHandControlFrames();
-      
+
       // trajectory parameter
       double trajectoryTime = 10.0;
 
@@ -144,7 +144,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
 
       RobotSide robotSide = RobotSide.RIGHT;
       RigidBody hand = fullRobotModel.getHand(robotSide);
-      
+
       Vector3D translationToGraspingFrame = new Vector3D(-0.1, 0.05, 0.0);
       handControlFrames.get(robotSide).appendTranslation(translationToGraspingFrame);
 
@@ -177,8 +177,9 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
 
       // trajectory parameter
       double trajectoryTime = 5.0;
-      boolean closingDirectionCW = true;
+      boolean closingDirectionCW = false;
       double closingRadius = 0.2;
+      double closingAngle = Math.PI;
       Vector3D valveNormalVector = new Vector3D(-1.0, 0.2, 0.0);
       Point3D valveCenterPosition = new Point3D(0.5, -0.4, 1.1);
 
@@ -198,7 +199,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       RigidBody hand = fullRobotModel.getHand(robotSide);
 
       FunctionTrajectory handFunction = time -> TrajectoryLibraryForDRC.computeClosingValveTrajectory(time, trajectoryTime, closingRadius, closingDirectionCW,
-                                                                                                      valveCenterPosition, valveNormalVector);
+                                                                                                      closingAngle, valveCenterPosition, valveNormalVector);
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
       selectionMatrix.resetSelection();
@@ -211,7 +212,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
-      
+
       // run test      
       int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
