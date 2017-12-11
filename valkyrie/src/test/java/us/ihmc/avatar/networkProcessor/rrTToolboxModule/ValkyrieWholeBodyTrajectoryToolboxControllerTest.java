@@ -61,4 +61,13 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       handControlFrames = WholeBodyTrajectoryToolboxSettings.getValkyrieHandControlFrames();
       super.testHandCirclePositionAndYawPitchRoll();
    }
+   
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 120000)
+   public void testReaching() throws Exception, UnreasonableAccelerationException
+   {
+      handControlFrames = WholeBodyTrajectoryToolboxSettings.getValkyrieHandControlFrames();
+      super.testReaching();
+   }
 }

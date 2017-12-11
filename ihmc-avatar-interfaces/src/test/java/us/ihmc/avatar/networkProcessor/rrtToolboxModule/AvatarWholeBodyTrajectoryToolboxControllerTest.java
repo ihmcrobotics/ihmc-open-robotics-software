@@ -49,6 +49,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ReachingManifoldMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
@@ -274,7 +275,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
 
       // run toolbox
-      runTest(message, 100000);
+      runTrajectoryTest(message, 100000);
    }
 
    @Test
@@ -331,7 +332,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
 
       // run toolbox
-      runTest(message, 100000);
+      runTrajectoryTest(message, 100000);
    }
 
    @Test
@@ -387,10 +388,34 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
 
       // run toolbox
-      runTest(message, maxNumberOfIterations);
+      runTrajectoryTest(message, maxNumberOfIterations);
    }
 
-   protected void runTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
+   @Test
+   public void testReaching() throws Exception, UnreasonableAccelerationException
+   {
+      ReachingManifoldMessage reachingManifoldMessage = new ReachingManifoldMessage();
+
+      reachingManifoldMessage.setOrigin(new Point3D(1.0, 0.0, 1.0), new Quaternion());
+
+      ConfigurationSpaceName[] spaces = {YAW, PITCH, ConfigurationSpaceName.X};
+      double[] lowerLimits = new double[] {-Math.PI * 0.5, -Math.PI * 0.5, 0.1};
+      double[] upperLimits = new double[] {Math.PI * 0.5, Math.PI * 0.5, 0.1};
+      reachingManifoldMessage.setManifold(spaces, lowerLimits, upperLimits);
+
+      if (visualize)
+         scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(reachingManifoldMessage, 0.01, YoAppearance.AliceBlue()));
+
+      PrintTools.info("END");
+
+      int maxNumberOfIterations = 10000;
+      //      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
+      //
+      //      // run toolbox
+      //      runTrajectoryTest(message, maxNumberOfIterations);
+   }
+
+   protected void runTrajectoryTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
    {
       List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
       double t0 = Double.POSITIVE_INFINITY;
@@ -437,6 +462,13 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       {
          fail("planning result " + solution.getPlanningResult());
       }
+   }
+
+   protected void runReachingTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
+   {
+      commandInputManager.submitMessage(message);
+
+      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
    }
 
    public void trackingTrajectoryWithOutput(WholeBodyTrajectoryToolboxMessage message, WholeBodyTrajectoryToolboxOutputStatus solution)
@@ -520,6 +552,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return null;
    }
 
+   // TODO
    // Is this for testing ahead put message on planner?
    private SideDependentList<Pose3D> computePrivilegedHandPosesAtPositions(SideDependentList<Point3D> desiredPositions)
    {
@@ -614,6 +647,72 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       double timeResolution = (tf - t0) / trajectoryMessage.getNumberOfWaypoints();
       FunctionTrajectory trajectoryToVisualize = WholeBodyTrajectoryToolboxMessageTools.createFunctionTrajectory(trajectoryMessage);
       return createFunctionTrajectoryVisualization(trajectoryToVisualize, t0, tf, timeResolution, radius, appearance);
+   }
+
+   private static Graphics3DObject createTrajectoryMessageVisualization(ReachingManifoldMessage reachingMessage, double radius, AppearanceDefinition appearance)
+   {
+      int configurationValueResolution = 20;
+      int numberOfPoints = (int) Math.pow(configurationValueResolution, reachingMessage.manifoldConfigurationSpaces.length);
+      int radialResolution = 16;
+
+      SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfPoints, radialResolution, radius);
+
+      Point3D[] points = new Point3D[numberOfPoints];
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         Pose3D originPose = new Pose3D(reachingMessage.manifoldOriginPosition, reachingMessage.manifoldOriginOrientation);
+         double[] configurationValues = new double[reachingMessage.manifoldConfigurationSpaces.length];
+         int[] configurationIndex = new int[reachingMessage.manifoldConfigurationSpaces.length];
+
+         int tempIndex = i;
+         for (int j = reachingMessage.manifoldConfigurationSpaces.length; j > 0; j--)
+         {
+            configurationIndex[j - 1] = (int) (tempIndex / Math.pow(configurationValueResolution, j - 1));
+            tempIndex = (int) (tempIndex % Math.pow(configurationValueResolution, j - 1));
+         }
+
+         for (int j = 0; j < reachingMessage.manifoldConfigurationSpaces.length; j++)
+         {
+            configurationValues[j] = (reachingMessage.manifoldUpperLimits[j] - reachingMessage.manifoldLowerLimits[j]) / (configurationValueResolution - 1)
+                  * configurationIndex[j] + reachingMessage.manifoldLowerLimits[j];
+            switch (reachingMessage.manifoldConfigurationSpaces[j])
+            {
+            case X:
+               originPose.appendTranslation(configurationValues[j], 0.0, 0.0);
+               break;
+            case Y:
+               originPose.appendTranslation(0.0, configurationValues[j], 0.0);
+               break;
+            case Z:
+               originPose.appendTranslation(0.0, 0.0, configurationValues[j]);
+               break;
+            case ROLL:
+               originPose.appendRollRotation(configurationValues[j]);
+               break;
+            case PITCH:
+               originPose.appendPitchRotation(configurationValues[j]);
+               break;
+            case YAW:
+               originPose.appendYawRotation(configurationValues[j]);
+               break;
+            default:
+               break;
+            }
+         }
+
+         points[i] = new Point3D(originPose.getPosition());
+      }
+
+      segmentedLine3DMeshGenerator.compute(points);
+
+      Graphics3DObject graphics = new Graphics3DObject();
+      for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
+      {
+         graphics.addMeshData(mesh, appearance);
+      }
+
+      return graphics;
    }
 
    private void visualizeSolution(WholeBodyTrajectoryToolboxOutputStatus solution, double timeResolution) throws UnreasonableAccelerationException

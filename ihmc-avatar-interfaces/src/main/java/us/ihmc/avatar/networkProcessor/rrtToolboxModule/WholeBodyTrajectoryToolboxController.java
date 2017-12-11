@@ -446,9 +446,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    /**
     * state == FIND_INITIAL_GUESS
-    *
-    * @throws ExecutionException
-    * @throws InterruptedException
     */
    private void findInitialGuessSub() // TODO : to enable this method, refine holding method.
    {
