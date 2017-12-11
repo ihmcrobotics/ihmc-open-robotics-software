@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoIMUMahonyFilterTest
 {
-   @Test
+   @Test(timeout=10000)
    public void testInitialization() throws Exception
    {
       String imuName = "test";
@@ -54,7 +54,7 @@ public class YoIMUMahonyFilterTest
       assertTrue(currentError <= 1.0e-10);
    }
 
-   @Test
+   @Test(timeout=10000)
    public void testConvergenceToStaticOrientation() throws Exception
    {
       String imuName = "test";
@@ -101,7 +101,7 @@ public class YoIMUMahonyFilterTest
       assertTrue(currentError <= 3.0e-4);
    }
 
-   @Test
+   @Test(timeout=10000)
    public void testConvergenceToStaticOrientationWithGyroBias() throws Exception
    {
       String imuName = "test";
