@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclussionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
@@ -30,7 +31,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = true;
+   private final static boolean debug = false;
 
    private List<PlanarRegion> regions;
    private List<PlanarRegion> accesibleRegions = new ArrayList<>();
@@ -118,7 +119,7 @@ public class NavigableRegionsManager
       }
 
    }
-   
+
    public boolean createVisMapsForStartAndGoal(Point3D startProjected, Point3D goalProjected)
    {
       NavigableRegion region1 = null;
@@ -152,7 +153,7 @@ public class NavigableRegionsManager
             break;
          }
       }
-
+      
       VisibilityMap startMap = createVisMapForSinglePointSource(point1, region1);
       VisibilityMap goalMap = createVisMapForSinglePointSource(point2, region2);
 
@@ -164,15 +165,15 @@ public class NavigableRegionsManager
             globalMapPoints.add(new Connection(startProjected, goalProjected));
          }
       }
-      
+
       if (startMap != null && goalMap != null)
       {
          visMaps.add(startMap);
          visMaps.add(goalMap);
-         
+
          return true;
       }
-      
+
       return false;
    }
 
@@ -211,6 +212,12 @@ public class NavigableRegionsManager
 
       connectionPoints.clear();
       globalMapPoints.clear();
+      
+//      //Occlussions
+//      if(!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), startProjected, goalProjected))
+//      {
+//         globalMapPoints.add(new Connection(startProjected, goalProjected));
+//      }
 
       boolean readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
       createGlobalMapFromAlltheLocalMaps();
@@ -221,34 +228,34 @@ public class NavigableRegionsManager
       if (readyToRunBodyPath)
       {
          long startForcingPoints = System.currentTimeMillis();
-//         start = forceConnectionOrSnapPoint(start);
-//
-//         if (debug)
-//         {
-//            if (start == null)
-//               PrintTools.error("Visibility graph unable to snap the start point to the closest point in the graph");
-//         }
-//
-//         if (start == null)
-//         {
-//            throw new RuntimeException("Visibility graph unable to snap the start point to the closest point in the graph");
-//         }
-//
-//         goal = forceConnectionOrSnapPoint(goal);
-//         
-//         connectToClosestRegions(goal);
-//
-//         if (debug)
-//         {
-//            if (goal == null)
-//               PrintTools.error("Visibility graph unable to snap the goal point to the closest point in the graph");
-//         }
-//
-//         if (goal == null)
-//         {
-//            throw new RuntimeException("Visibility graph unable to snap the goal point to the closest point in the graph");
-//         }
-//
+         start = forceConnectionOrSnapPoint(start);
+
+         if (debug)
+         {
+            if (start == null)
+               PrintTools.error("Visibility graph unable to snap the start point to the closest point in the graph");
+         }
+
+         if (start == null)
+         {
+            throw new RuntimeException("Visibility graph unable to snap the start point to the closest point in the graph");
+         }
+
+         goal = forceConnectionOrSnapPoint(goal);
+
+         connectToClosestRegions(goal);
+
+         if (debug)
+         {
+            if (goal == null)
+               PrintTools.error("Visibility graph unable to snap the goal point to the closest point in the graph");
+         }
+
+         if (goal == null)
+         {
+            throw new RuntimeException("Visibility graph unable to snap the goal point to the closest point in the graph");
+         }
+
          long endForcingPoints = System.currentTimeMillis();
 
          long startGlobalMapTime = System.currentTimeMillis();
@@ -303,10 +310,10 @@ public class NavigableRegionsManager
                PrintTools.info("NO BODY PATH SOLUTION WAS FOUND!" + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
             }
          }
-         
-         if(path == null || path.size() == 0)
+
+         if (path == null || path.size() == 0)
          {
-            
+
          }
 
          return path;
@@ -314,6 +321,8 @@ public class NavigableRegionsManager
 
       return null;
    }
+   
+   
 
    private static PlanarRegion getLargestAreaRegion(List<PlanarRegion> planarRegions)
    {

@@ -606,6 +606,7 @@ public class ClusterTools
       clusters.add(cluster);
       cluster.setType(Type.POLYGON);
       cluster.setTransformToWorld(transformToWorld);
+      cluster.setHomeRegion(true);
 
       Point2D[] concaveHull = homeRegion.getConcaveHull();
       for (Point2D vertex : concaveHull)
