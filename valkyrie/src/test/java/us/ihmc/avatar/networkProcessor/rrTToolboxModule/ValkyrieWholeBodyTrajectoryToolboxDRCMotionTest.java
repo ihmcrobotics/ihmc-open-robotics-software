@@ -110,17 +110,6 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
 
-      //ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      ConfigurationSpaceName[] pelvisConfigurations = {};
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
-                                                                                                                         pelvisConfigurations);
-      //ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-      ConfigurationSpaceName[] chestConfigurations = {};
-      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-                                                                                                                        chestConfigurations);
-      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      rigidBodyConfigurations.add(chestConfigurationMessage);
-
       // run test
       int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
@@ -173,17 +162,6 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
-
-      //ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      ConfigurationSpaceName[] pelvisConfigurations = {};
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
-                                                                                                                         pelvisConfigurations);
-      //ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-      ConfigurationSpaceName[] chestConfigurations = {};
-      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-                                                                                                                        chestConfigurations);
-      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      rigidBodyConfigurations.add(chestConfigurationMessage);
 
       // run test      
       int maxNumberOfIterations = 10000;

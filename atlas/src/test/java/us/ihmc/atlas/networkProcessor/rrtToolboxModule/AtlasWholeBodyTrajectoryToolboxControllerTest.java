@@ -99,16 +99,8 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       ConfigurationSpaceName[] spaces = {YAW};
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
-
-      ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
-                                                                                                                         pelvisConfigurations,
-                                                                                                                         new double[] {0.10});
-      ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-                                                                                                                        chestConfigurations);
-      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      rigidBodyConfigurations.add(chestConfigurationMessage);
+      
+      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
 
       int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);

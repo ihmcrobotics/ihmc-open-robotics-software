@@ -86,7 +86,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      simulationTestingParameters.setKeepSCSUp(false);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -249,11 +249,12 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                ccw = false;
             else
                ccw = true;
-            FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenter,
-                                                                              circleOrientation, handOrientation, ccw, 0.0);
+            FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenter, circleOrientation,
+                                                                              handOrientation, ccw, 0.0);
 
             SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
             selectionMatrix.resetSelection();
+            selectionMatrix.clearAngularSelection();
             WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
 
             trajectory.setControlFramePose(handControlFrames.get(robotSide));
@@ -268,18 +269,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01,
                                                                                YoAppearance.AliceBlue()));
          }
-      }      
+      }
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.RIGHT)));
-      
-      ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
-                                                                                                                         pelvisConfigurations,
-                                                                                                                         new double[] {0.15});
-      ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-                                                                                                                        chestConfigurations);
-      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      rigidBodyConfigurations.add(chestConfigurationMessage);
+
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
 
       // run toolbox
@@ -311,45 +303,32 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (robotSide == RobotSide.LEFT)
-         {
-            RigidBody hand = fullRobotModel.getHand(robotSide);
+         RigidBody hand = fullRobotModel.getHand(robotSide);
 
-            boolean ccw;
-            if (robotSide == RobotSide.RIGHT)
-               ccw = false;
-            else
-               ccw = true;
-            FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide),
-                                                                              circleOrientation, handOrientation, ccw, 0.0);
+         boolean ccw;
+         if (robotSide == RobotSide.RIGHT)
+            ccw = false;
+         else
+            ccw = true;
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
+                                                                           handOrientation, ccw, 0.0);
 
-            SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-            selectionMatrix.resetSelection();
-            WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
+         SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+         selectionMatrix.resetSelection();
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
 
-            trajectory.setControlFramePose(handControlFrames.get(robotSide));
+         trajectory.setControlFramePose(handControlFrames.get(robotSide));
 
-            handTrajectories.add(trajectory);
-            ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW};
-            RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
+         handTrajectories.add(trajectory);
+         ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW};
+         RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
 
-            rigidBodyConfigurations.add(rigidBodyConfiguration);
+         rigidBodyConfigurations.add(rigidBodyConfiguration);
 
-            if (visualize)
-               scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01,
-                                                                               YoAppearance.AliceBlue()));
-         }
+         if (visualize)
+            scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
 
-      ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
-                                                                                                                         pelvisConfigurations,
-                                                                                                                         new double[] {0.2});
-      ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-                                                                                                                        chestConfigurations);
-      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      rigidBodyConfigurations.add(chestConfigurationMessage);
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
 
       // run toolbox
@@ -404,15 +383,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
          rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
       }
-      ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
-                                                                                                                         pelvisConfigurations,
-                                                                                                                         new double[] {0.2});
-      ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};      
-      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
-                                                                                                                        chestConfigurations);
-      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      rigidBodyConfigurations.add(chestConfigurationMessage);
 
       int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
@@ -512,7 +482,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
                SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
                trajectory.getSelectionMatrix(selectionMatrix);
-               
+
                double positionError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryPositionError(solutionRigidBodyPose, givenRigidBodyPose,
                                                                                                       explorationMessage);
 
@@ -526,7 +496,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                   PrintTools.info("rigid body of the solution is far from the given trajectory");
                   fail("rigid body of the solution is far from the given trajectory");
                }
-                  
+
             }
          }
       }
@@ -628,7 +598,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       Point3DReadOnly[] waypoints = IntStream.range(0, numberOfWaypoints).mapToDouble(i -> t0 + i * dT).mapToObj(trajectoryToVisualize::compute)
                                              .map(pose -> new Point3D(pose.getPosition())).toArray(size -> new Point3D[size]);
       segmentedLine3DMeshGenerator.compute(waypoints);
-      
+
       Graphics3DObject graphics = new Graphics3DObject();
       for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
       {
@@ -718,7 +688,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, null, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null, null, null);
       drcPerfectSensorReaderFactory.getSensorReader().read();
-            
+
       return initialFullRobotModel;
    }
 
