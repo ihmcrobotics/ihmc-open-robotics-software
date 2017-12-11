@@ -39,7 +39,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
  */
 public class WholeBodyTrajectoryToolboxData
 {
-   private static final boolean VERBOSE = false;
+   private static final boolean VERBOSE = true;
 
    private final FullHumanoidRobotModel fullRobotModel;
 

@@ -104,7 +104,7 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
 
       int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
-      runTest(message, maxNumberOfIterations);
+      runTrajectoryTest(message, maxNumberOfIterations);
    }
 
    private static Pose3D computeMovingTrajectory(double time, double trajectoryTime, Point3D initialHandle, Vector3D initialHandleConfiguration,
