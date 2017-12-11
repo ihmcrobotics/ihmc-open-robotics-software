@@ -9,6 +9,7 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
 {
    private int numberOfInitialGuesses = -1;
    private int maximumExpansionSize = -1;
+   private int trajectoryType = 0;
    private boolean hasInitialConfiguration = false;
    private final KinematicsToolboxOutputStatus initialConfiguration = new KinematicsToolboxOutputStatus();
 
@@ -21,7 +22,8 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    {
       numberOfInitialGuesses = -1;
       maximumExpansionSize = -1;
-      hasInitialConfiguration = false;
+      trajectoryType = 0;
+      hasInitialConfiguration = false;      
    }
 
    @Override
@@ -30,6 +32,7 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
       clear();
       numberOfInitialGuesses = other.numberOfInitialGuesses;
       maximumExpansionSize = other.maximumExpansionSize;
+      trajectoryType = other.trajectoryType;
       hasInitialConfiguration = other.hasInitialConfiguration;
       if (hasInitialConfiguration)
          initialConfiguration.set(other.initialConfiguration);
@@ -41,6 +44,7 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
       clear();
       numberOfInitialGuesses = message.getNumberOfInitialGuesses();
       maximumExpansionSize = message.getMaximumExpansionSize();
+      trajectoryType = message.getTrajectoryType();
       hasInitialConfiguration = message.getInitialConfiguration() != null;
       if (hasInitialConfiguration)
          initialConfiguration.set(message.getInitialConfiguration());
@@ -54,6 +58,11 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    public int getMaximumExpansionSize()
    {
       return maximumExpansionSize;
+   }
+   
+   public int getTrajectoryType()
+   {
+      return trajectoryType;
    }
 
    public boolean hasInitialConfiguration()
