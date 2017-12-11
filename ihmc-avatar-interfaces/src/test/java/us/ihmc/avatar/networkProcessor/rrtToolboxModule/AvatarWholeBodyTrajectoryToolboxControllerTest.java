@@ -86,7 +86,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(false);
+      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -220,8 +220,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    {
       // Trajectory parameters
       double trajectoryTime = 10.0;
-      double circleRadius = 0.37;
-      Point3D circleCenter = new Point3D(0.55, 0.3, 0.9);
+      double circleRadius = 0.6; // Valkyrie, enable ypr, is available for 0.5 radius.
+      Point3D circleCenter = new Point3D(0.55, 0.3, 1.1);
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.0);
       Quaternion handOrientation = new Quaternion(circleOrientation);
@@ -260,7 +260,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             trajectory.setControlFramePose(handControlFrames.get(robotSide));
 
             handTrajectories.add(trajectory);
-            ConfigurationSpaceName[] handConfigurations = {YAW, PITCH, ROLL};
+            ConfigurationSpaceName[] handConfigurations = {};
             RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
 
             rigidBodyConfigurations.add(rigidBodyConfiguration);
@@ -270,7 +270,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                                                YoAppearance.AliceBlue()));
          }
       }
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.RIGHT)));
 
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
 
