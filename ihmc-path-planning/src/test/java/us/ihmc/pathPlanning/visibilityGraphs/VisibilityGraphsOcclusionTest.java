@@ -50,7 +50,7 @@ public class VisibilityGraphsOcclusionTest
 {
    private static final boolean VERBOSE = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = true;// simulationTestingParameters.getKeepSCSUp();
+   private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
