@@ -110,4 +110,32 @@ public class TrajectoryLibraryForDRC
 
       return new Pose3D(handControl);
    }
+
+   /**
+    * Valkyrie is able to complete only half rotating motion.
+    */
+   public static Pose3D computeClosingValveTrajectory(double time, double trajectoryTime, double radius, boolean closingDirectionCW,
+                                                      Point3D valveCenterPosition, Vector3D valveNormalVector)
+   {
+      Vector3D xAxisHandFrame = new Vector3D(valveNormalVector);
+      Vector3D yAxisHandFrame = new Vector3D();
+      Vector3D zAxisHandFrame = new Vector3D(0, 0, 1);
+
+      xAxisHandFrame.negate();
+      xAxisHandFrame.normalize();
+      yAxisHandFrame.cross(zAxisHandFrame, xAxisHandFrame);
+
+      RotationMatrix handFrame = new RotationMatrix();
+      handFrame.setColumns(xAxisHandFrame, yAxisHandFrame, zAxisHandFrame);
+      handFrame.appendRollRotation(closingDirectionCW ? -0.5*Math.PI : 0.5*Math.PI);
+      
+      RigidBodyTransform handControl = new RigidBodyTransform(handFrame, valveCenterPosition);
+
+      double phase = time / trajectoryTime;
+
+      handControl.appendRollRotation(closingDirectionCW ? phase * Math.PI : -phase * Math.PI);
+      handControl.appendTranslation(0, -radius, 0);
+
+      return new Pose3D(handControl);
+   }
 }

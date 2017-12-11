@@ -173,29 +173,48 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
    @Test(timeout = 120000)
    public void testValveMotion() throws Exception, UnreasonableAccelerationException
    {
-      //      handControlFrames = WholeBodyTrajectoryToolboxSettings.getAtlasRobotiQHandControlFrames();
-      //
-      //      // trajectory parameter
-      //      double trajectoryTime = 5.0;
-      //
-      //      // wbt toolbox configuration message
-      //      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
-      //      WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
-      //      configuration.setInitialConfigration(fullRobotModel);
-      //      configuration.setMaximumExpansionSize(1000);
-      //
-      //      // trajectory message
-      //      List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
-      //      List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
-      //
-      //      double timeResolution = trajectoryTime / 100.0;
-      //
-      //      RobotSide robotSide = RobotSide.RIGHT;
-      //      RigidBody hand = fullRobotModel.getHand(robotSide);
-      //
-      //      // run test      
-      //      int maxNumberOfIterations = 10000;
-      //      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
-      //      runTest(message, maxNumberOfIterations);
+      handControlFrames = WholeBodyTrajectoryToolboxSettings.getValkyrieHandControlFrames();
+
+      // trajectory parameter
+      double trajectoryTime = 5.0;
+      boolean closingDirectionCW = true;
+      double closingRadius = 0.2;
+      Vector3D valveNormalVector = new Vector3D(-1.0, 0.2, 0.0);
+      Point3D valveCenterPosition = new Point3D(0.5, -0.4, 1.1);
+
+      // wbt toolbox configuration message
+      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
+      WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
+      configuration.setInitialConfigration(fullRobotModel);
+      configuration.setMaximumExpansionSize(1000);
+
+      // trajectory message
+      List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
+      List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
+
+      double timeResolution = trajectoryTime / 100.0;
+
+      RobotSide robotSide = RobotSide.RIGHT;
+      RigidBody hand = fullRobotModel.getHand(robotSide);
+
+      FunctionTrajectory handFunction = time -> TrajectoryLibraryForDRC.computeClosingValveTrajectory(time, trajectoryTime, closingRadius, closingDirectionCW,
+                                                                                                      valveCenterPosition, valveNormalVector);
+
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.resetSelection();
+      WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
+
+      trajectory.setControlFramePose(handControlFrames.get(robotSide));
+
+      handTrajectories.add(trajectory);
+
+      ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
+
+      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+      
+      // run test      
+      int maxNumberOfIterations = 10000;
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
+      runTest(message, maxNumberOfIterations);
    }
 }
