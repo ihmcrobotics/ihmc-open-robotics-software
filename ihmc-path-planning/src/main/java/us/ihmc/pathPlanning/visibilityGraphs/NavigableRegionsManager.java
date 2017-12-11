@@ -120,65 +120,11 @@ public class NavigableRegionsManager
 
    }
 
-   public boolean createVisMapsForStartAndGoal(Point3D startProjected, Point3D goalProjected)
-   {
-      NavigableRegion region1 = null;
-      Point2D point1 = null;
-
-      for (NavigableRegion navigableRegion : listOfLocalPlanners)
-      {
-         FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), startProjected);
-         pointFpt.changeFrame(navigableRegion.getLocalReferenceFrame());
-
-         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), pointFpt.getPoint()))
-         {
-            point1 = new Point2D(pointFpt.getPoint().getX(), pointFpt.getPoint().getY());
-            region1 = navigableRegion;
-            break;
-         }
-      }
-
-      NavigableRegion region2 = null;
-      Point2D point2 = null;
-
-      for (NavigableRegion navigableRegion : listOfLocalPlanners)
-      {
-         FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), goalProjected);
-         pointFpt.changeFrame(navigableRegion.getLocalReferenceFrame());
-
-         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), pointFpt.getPoint()))
-         {
-            point2 = new Point2D(pointFpt.getPoint().getX(), pointFpt.getPoint().getY());
-            region2 = navigableRegion;
-            break;
-         }
-      }
-      
-      VisibilityMap startMap = createVisMapForSinglePointSource(point1, region1);
-      VisibilityMap goalMap = createVisMapForSinglePointSource(point2, region2);
-
-      if (region1 == region2)
-      {
-         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(region1.getClusters(), point1, point2);
-         if (targetIsVisible)
-         {
-            globalMapPoints.add(new Connection(startProjected, goalProjected));
-         }
-      }
-
-      if (startMap != null && goalMap != null)
-      {
-         visMaps.add(startMap);
-         visMaps.add(goalMap);
-
-         return true;
-      }
-
-      return false;
-   }
-
    public List<Point3D> calculateBodyPath(Point3D start, Point3D goal)
    {
+      connectionPoints.clear();
+      globalMapPoints.clear();
+
       if (start == null)
       {
          throw new RuntimeException("Start is null!.");
@@ -210,22 +156,26 @@ public class NavigableRegionsManager
       createIndividualVisMapsForRegions();
       long endCreationTime = System.currentTimeMillis();
 
-      connectionPoints.clear();
-      globalMapPoints.clear();
-      
-//      //Occlussions
-//      if(!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), startProjected, goalProjected))
-//      {
-//         globalMapPoints.add(new Connection(startProjected, goalProjected));
-//      }
+      boolean readyToRunBodyPath = false;
+      if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+      {
+         readyToRunBodyPath = true;
+         globalMapPoints.add(new Connection(start, goal));
+      }
+      else
+      {
+         if(startProjected != null && goalProjected != null)
+         {
+            readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
+         }
+      }
 
-      boolean readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
       connectLocalMaps();
       long endConnectingTime = System.currentTimeMillis();
-      
-      if (readyToRunBodyPath)
+
+      if(readyToRunBodyPath)
       {
          long startForcingPoints = System.currentTimeMillis();
          start = forceConnectionOrSnapPoint(start);
@@ -311,18 +261,68 @@ public class NavigableRegionsManager
             }
          }
 
-         if (path == null || path.size() == 0)
-         {
-
-         }
-
          return path;
       }
-
+      
       return null;
    }
-   
-   
+
+   public boolean createVisMapsForStartAndGoal(Point3D startProjected, Point3D goalProjected)
+   {
+      NavigableRegion region1 = null;
+      Point2D point1 = null;
+
+      for (NavigableRegion navigableRegion : listOfLocalPlanners)
+      {
+         FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), startProjected);
+         pointFpt.changeFrame(navigableRegion.getLocalReferenceFrame());
+
+         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), pointFpt.getPoint()))
+         {
+            point1 = new Point2D(pointFpt.getPoint().getX(), pointFpt.getPoint().getY());
+            region1 = navigableRegion;
+            break;
+         }
+      }
+
+      NavigableRegion region2 = null;
+      Point2D point2 = null;
+
+      for (NavigableRegion navigableRegion : listOfLocalPlanners)
+      {
+         FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), goalProjected);
+         pointFpt.changeFrame(navigableRegion.getLocalReferenceFrame());
+
+         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), pointFpt.getPoint()))
+         {
+            point2 = new Point2D(pointFpt.getPoint().getX(), pointFpt.getPoint().getY());
+            region2 = navigableRegion;
+            break;
+         }
+      }
+
+      VisibilityMap startMap = createVisMapForSinglePointSource(point1, region1);
+      VisibilityMap goalMap = createVisMapForSinglePointSource(point2, region2);
+
+      if (region1 == region2)
+      {
+         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(region1.getClusters(), point1, point2);
+         if (targetIsVisible)
+         {
+            globalMapPoints.add(new Connection(startProjected, goalProjected));
+         }
+      }
+
+      if (startMap != null && goalMap != null)
+      {
+         visMaps.add(startMap);
+         visMaps.add(goalMap);
+
+         return true;
+      }
+
+      return false;
+   }
 
    private static PlanarRegion getLargestAreaRegion(List<PlanarRegion> planarRegions)
    {
