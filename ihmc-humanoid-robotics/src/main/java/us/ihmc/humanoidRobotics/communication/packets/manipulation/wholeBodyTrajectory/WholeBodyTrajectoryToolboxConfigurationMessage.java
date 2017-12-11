@@ -10,6 +10,10 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
    public int numberOfInitialGuesses = -1;
    public int maximumExpansionSize = -1;
    public KinematicsToolboxOutputStatus initialConfiguration = null;
+   
+   // 1: way point based trajectory
+   // 2: reaching manifold
+   public int trajectoryType = 0;
 
    public WholeBodyTrajectoryToolboxConfigurationMessage()
    {
@@ -19,13 +23,14 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
 
    public WholeBodyTrajectoryToolboxConfigurationMessage(int numberOfInitialGuesses)
    {
-      this(numberOfInitialGuesses, -1);
+      this(numberOfInitialGuesses, -1, 0);
    }
 
-   public WholeBodyTrajectoryToolboxConfigurationMessage(int numberOfInitialGuesses, int maximumExpansionSize)
+   public WholeBodyTrajectoryToolboxConfigurationMessage(int numberOfInitialGuesses, int maximumExpansionSize, int trajectoryType)
    {
       this.numberOfInitialGuesses = numberOfInitialGuesses;
       this.maximumExpansionSize = maximumExpansionSize;
+      this.trajectoryType = trajectoryType;
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -49,6 +54,11 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       initialConfiguration = new KinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel),
                                                                false);
    }
+   
+   public void setTrajectoryType(int trajectoryType)
+   {
+      this.trajectoryType = trajectoryType;
+   }
 
    public int getNumberOfInitialGuesses()
    {
@@ -64,6 +74,11 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
    {
       return initialConfiguration;
    }
+   
+   public int getTrajectoryType()
+   {
+      return trajectoryType;
+   }
 
    @Override
    public boolean epsilonEquals(WholeBodyTrajectoryToolboxConfigurationMessage other, double epsilon)
@@ -71,6 +86,8 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       if (numberOfInitialGuesses != other.numberOfInitialGuesses)
          return false;
       if (maximumExpansionSize != other.maximumExpansionSize)
+         return false;
+      if (trajectoryType != other.trajectoryType)
          return false;
       if (initialConfiguration == null ^ other.initialConfiguration == null)
          return false;

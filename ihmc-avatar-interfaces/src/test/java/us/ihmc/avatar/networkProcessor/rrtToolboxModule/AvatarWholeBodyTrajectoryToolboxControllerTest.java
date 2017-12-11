@@ -232,6 +232,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
+      configuration.setTrajectoryType(1);
 
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -293,7 +294,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
-      configuration.setMaximumExpansionSize(2000);
+      configuration.setMaximumExpansionSize(1000);
+      configuration.setTrajectoryType(1);
 
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -350,7 +352,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
-      configuration.setMaximumExpansionSize(2000);
+      configuration.setMaximumExpansionSize(1000);
+      configuration.setTrajectoryType(1);
 
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -394,15 +397,23 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    @Test
    public void testReaching() throws Exception, UnreasonableAccelerationException
    {
+      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
+      
       ReachingManifoldMessage reachingManifoldMessage = new ReachingManifoldMessage();
 
       reachingManifoldMessage.setOrigin(new Point3D(1.0, 0.0, 1.0), new Quaternion());
 
-      ConfigurationSpaceName[] spaces = {YAW, PITCH, ConfigurationSpaceName.X};
+      ConfigurationSpaceName[] manifoldSpaces = {YAW, PITCH, ConfigurationSpaceName.X};
       double[] lowerLimits = new double[] {-Math.PI * 0.5, -Math.PI * 0.5, 0.1};
       double[] upperLimits = new double[] {Math.PI * 0.5, Math.PI * 0.5, 0.1};
-      reachingManifoldMessage.setManifold(spaces, lowerLimits, upperLimits);
+      reachingManifoldMessage.setManifold(manifoldSpaces, lowerLimits, upperLimits);
 
+      List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
+      
+      ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, YAW, PITCH, ROLL};
+      
+      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.RIGHT), explorationSpaces));
+      
       if (visualize)
          scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(reachingManifoldMessage, 0.01, YoAppearance.AliceBlue()));
 

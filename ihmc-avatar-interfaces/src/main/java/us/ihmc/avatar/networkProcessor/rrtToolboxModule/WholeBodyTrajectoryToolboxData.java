@@ -116,6 +116,9 @@ public class WholeBodyTrajectoryToolboxData
          PrintTools.info("Total exploration dimension is " + dimensionOfExploration);
    }
 
+   /**
+    * For findInitialGuessSub()
+    */
    public SpatialData createRandomInitialSpatialData()
    {
       SpatialData spatialData = new SpatialData();
@@ -165,6 +168,9 @@ public class WholeBodyTrajectoryToolboxData
       return messages;
    }
 
+   /**
+    * For findInitialGuessSub()
+    */
    public void holdConfiguration(FullHumanoidRobotModel fullRobotModel)
    {
       for (int i = 0; i < allRigidBodies.size(); i++)
@@ -181,6 +187,9 @@ public class WholeBodyTrajectoryToolboxData
       }
    }
 
+   /**
+    * For findInitialGuessSub()
+    */
    public void updateInitialConfiguration()
    {
       for (int i = 0; i < allRigidBodies.size(); i++)
