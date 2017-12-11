@@ -48,6 +48,15 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VisibilityGraphsOcclusionTest
 {
+   private static final DefaultVisibilityGraphParameters VISIBILITY_GRAPH_PARAMETERS = new DefaultVisibilityGraphParameters()
+   {
+      @Override
+      public int getPlanarRegionMinSize()
+      {
+         return 0;
+      }
+   };
+
    private static final boolean VERBOSE = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
@@ -99,7 +108,7 @@ public class VisibilityGraphsOcclusionTest
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      NavigableRegionsManager vizGraphs = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
+      NavigableRegionsManager vizGraphs = new NavigableRegionsManager(VISIBILITY_GRAPH_PARAMETERS);
 
       SimulationConstructionSet scs = null;
 
@@ -261,7 +270,6 @@ public class VisibilityGraphsOcclusionTest
             PrintTools.info("Failed");
             plannerFailed.set(true);
          }
-
 
          if (currentPosition.getPoint3dCopy().distance(goal) < 0.05)
          {
