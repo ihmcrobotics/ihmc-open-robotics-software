@@ -64,10 +64,10 @@ public class VisibilityGraphsOcclusionTest
 
    private static final int rays = 5000;
    private static final int maxPolygonsToVisualize = 10;
-   private static final int maxPolygonsVertices = 50;
+   private static final int maxPolygonsVertices = 100;
    private static final double defaultMaxAllowedSolveTime = 1.0;
    private static final int bodyPathVisualizationResolution = 500;
-   private static final double marchingSpeedInMetersPerTick = 0.50;
+   private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
    private static final int maxNumberOfIterations = 40;
 
    @Rule
@@ -80,7 +80,26 @@ public class VisibilityGraphsOcclusionTest
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createFlatGround(startPose, goalPose);
-      runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime, 3.0);
+   }
+
+   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   public void testFlatGroundWithWall()
+   {
+      Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
+      Point3D goalPose = new Point3D(4.805, 0.001, 0.0);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(10.0, 5.0);
+      generator.translate(0.0, 0.0, 1.0);
+      generator.rotate(Math.PI / 2.0, Axis.Y);
+      generator.rotate(Math.PI / 2.0, Axis.Z);
+      generator.addRectangle(3.0, 2.0);
+
+      PlanarRegionsList regions = generator.getPlanarRegionsList();
+
+      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime);
    }
 
    @Test(timeout = 300000)
@@ -104,6 +123,11 @@ public class VisibilityGraphsOcclusionTest
    }
 
    private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, boolean cheatByAddingGroundRegion, double maxAllowedSolveTime)
+   {
+      runTest(start, goal, regions, cheatByAddingGroundRegion, maxAllowedSolveTime, defaultMarchingSpeedInMetersPerTick);
+   }
+
+   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, boolean cheatByAddingGroundRegion, double maxAllowedSolveTime, double marchingSpeedInMetersPerTick)
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -510,12 +534,12 @@ public class VisibilityGraphsOcclusionTest
    private PlanarRegionsList createFlatGround(Point3D startPoseToPack, Point3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.addCubeReferencedAtBottomMiddle(50.0, 5.0, 0.005);
+      generator.addRectangle(50.0, 5.0);
 
-      startPoseToPack.set(-23.005, -2.001, 0.0025);
+      startPoseToPack.set(-23.005, -2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), startPoseToPack, startPoseToPack);
 
-      goalPoseToPack.set(23.005, 2.001, 0.0025);
+      goalPoseToPack.set(23.005, 2.001, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), goalPoseToPack, goalPoseToPack);
 
       return generator.getPlanarRegionsList();
