@@ -81,7 +81,7 @@ public class Example_IsPointInsideConcavePolygon_Complex extends Application
 
          Point2D endPoint = new Point2D(pointToCheck.getX() + directionToCentroid.getX(), pointToCheck.getY() + directionToCentroid.getY());
 
-         if (PlanarRegionTools.isPointInsidePolygon(region.getConcaveHull(), pointToCheck, endPoint))
+         if (PlanarRegionTools.isPointInsidePolygon(region.getConcaveHull(), pointToCheck))
          {
             System.out.println("Point is inside");
          }
