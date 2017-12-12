@@ -37,7 +37,7 @@ public class PlanarRegionToolsTest
          if (!clockwiseOrdered)
             Collections.reverse(convexPolygon2D.subList(0, hullSize));
 
-         Point2D[] convexPolygon2DArray = convexPolygon2D.subList(0, hullSize).toArray(new Point2D[convexPolygon2D.size()]);
+         Point2DReadOnly[] convexPolygon2DArray = convexPolygon2D.subList(0, hullSize).toArray(new Point2DReadOnly[convexPolygon2D.size()]);
 
          Point2D centroid = new Point2D();
          EuclidGeometryPolygonTools.computeConvexPolyong2DArea(convexPolygon2D, hullSize, clockwiseOrdered, centroid);
@@ -52,24 +52,12 @@ public class PlanarRegionToolsTest
          double alphaOutside = nextDouble(random, 1.0, 3.0);
          Point2D outsidePoint = new Point2D();
          outsidePoint.interpolate(centroid, pointOnEdge, alphaOutside);
-
-         Vector2D directionToCentroid = new Vector2D(centroid.getX() - outsidePoint.getX(), centroid.getY() - outsidePoint.getY());
-         directionToCentroid.normalize();
-         directionToCentroid.scale(10);
-         Point2D endPoint = new Point2D(outsidePoint.getX() + directionToCentroid.getX(), outsidePoint.getY() + directionToCentroid.getY());
-
-         assertFalse(PlanarRegionTools.isPointInsidePolygon(convexPolygon2DArray, outsidePoint, endPoint));
+         assertFalse(PlanarRegionTools.isPointInsidePolygon(convexPolygon2DArray, outsidePoint));
 
          double alphaInside = nextDouble(random, 0.0, 1.0);
          Point2D insidePoint = new Point2D();
          insidePoint.interpolate(centroid, pointOnEdge, alphaInside);
-
-         directionToCentroid = new Vector2D(centroid.getX() - outsidePoint.getX(), centroid.getY() - outsidePoint.getY());
-         directionToCentroid.normalize();
-         directionToCentroid.scale(10);
-         endPoint = new Point2D(outsidePoint.getX() + directionToCentroid.getX(), outsidePoint.getY() + directionToCentroid.getY());
-
-         assertTrue(PlanarRegionTools.isPointInsidePolygon(convexPolygon2DArray, insidePoint, endPoint));
+         assertTrue(PlanarRegionTools.isPointInsidePolygon(convexPolygon2DArray, insidePoint));
       }
    }
 
