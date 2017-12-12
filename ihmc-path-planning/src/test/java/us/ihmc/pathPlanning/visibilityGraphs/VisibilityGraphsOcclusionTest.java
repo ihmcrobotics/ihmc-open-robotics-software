@@ -199,6 +199,7 @@ public class VisibilityGraphsOcclusionTest
          scs = setupSCS(name.getMethodName(), registry, regions, start, goal);
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.setInPoint();
+         scs.startOnAThread();
       }
 
       double maxSolveTime = 0.0;
@@ -328,7 +329,6 @@ public class VisibilityGraphsOcclusionTest
          scs.cropBuffer();
          scs.setPlaybackRealTimeRate(0.001);
          scs.play();
-         scs.startOnAThread();
          ThreadTools.sleepForever();
       }
       else
