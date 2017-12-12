@@ -646,19 +646,22 @@ public class ClusterTools
       return closestPoint;
    }
 
-   public static Point3D getTheClosestVisibleExtrusionPoint(double alpha, Point3D start, Point3D goal, List<Point3D> extrusionPoints)
+   public static Point3D getTheClosestVisibleExtrusionPoint(double alpha, Point3D start, Point3D goal, List<Point3D> extrusionPoints, PlanarRegion region)
    {
       double minWeight = Double.MAX_VALUE;
       Point3D closestPoint = null;
 
       for (Point3D point : extrusionPoints)
       {
-         double weight = alpha * goal.distance(point) + (1 - alpha) * start.distance(point);
-
-         if (weight < minWeight)
+         if(PlanarRegionTools.isPointInWorldInsideARegion(region, point))
          {
-            minWeight = weight;
-            closestPoint = point;
+            double weight = alpha * goal.distance(point) + (1 - alpha) * start.distance(point);
+
+            if (weight < minWeight)
+            {
+               minWeight = weight;
+               closestPoint = point;
+            }
          }
       }
 

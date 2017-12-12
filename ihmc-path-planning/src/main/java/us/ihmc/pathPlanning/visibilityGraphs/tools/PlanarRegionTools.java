@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -238,6 +239,32 @@ public class PlanarRegionTools
       Point3D pointInLocalToCheck = new Point3D();
       transformToWorld.inverseTransform(pointInWorldToCheck, pointInLocalToCheck);
       return isPointInLocalInsideARegion(region, pointInLocalToCheck);
+   }
+
+   public static PlanarRegion getRegionContainingThisPoint(Point3D point, List<PlanarRegion> regions)
+   {
+      for (PlanarRegion region : regions)
+      {
+         if (isPointInWorldInsideARegion(region, point))
+         {
+            return region;
+         }
+      }
+
+      return null;
+   }
+
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3D point, List<NavigableRegion> navigableRegions)
+   {
+      for (NavigableRegion navigableRegion : navigableRegions)
+      {
+         if (isPointInWorldInsideARegion(navigableRegion.getHomeRegion(), point))
+         {
+            return navigableRegion;
+         }
+      }
+
+      return null;
    }
 
    public static boolean isPointInLocalInsideARegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)

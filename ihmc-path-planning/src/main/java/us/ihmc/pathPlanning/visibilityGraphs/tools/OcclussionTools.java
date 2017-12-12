@@ -38,10 +38,10 @@ public class OcclussionTools
       return false;
    }
 
-   public static List<Cluster> getListOfIntersectingObstacles(NavigableRegion region, Point3D start, Point3D goal)
+   public static List<Cluster> getListOfIntersectingObstacles(List<Cluster> clusters, Point3D start, Point3D goal)
    {
-      List<Cluster> clusters = new ArrayList<Cluster>();
-      for (Cluster cluster : region.getClusters())
+      List<Cluster> clustersTemp = new ArrayList<Cluster>();
+      for (Cluster cluster : clusters)
       {
          if (!cluster.isHomeRegion())
          {
@@ -56,10 +56,10 @@ public class OcclussionTools
 
             if (!visible)
             {
-               clusters.add(cluster);
+               clustersTemp.add(cluster);
             }
          }
       }
-      return clusters;
+      return clustersTemp;
    }
 }
