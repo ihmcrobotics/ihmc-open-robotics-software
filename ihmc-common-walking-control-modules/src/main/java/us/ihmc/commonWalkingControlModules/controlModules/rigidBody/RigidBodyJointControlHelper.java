@@ -8,9 +8,10 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -39,7 +40,7 @@ public class RigidBodyJointControlHelper
 
    private final List<YoDouble> defaultWeights = new ArrayList<>();
    private final List<YoDouble> currentWeights = new ArrayList<>();
-   private final List<YoPIDGains> gains = new ArrayList<>();
+   private final List<PIDGainsReadOnly> gains = new ArrayList<>();
 
    private final YoBoolean hasWeights;
    private final YoBoolean hasGains;
@@ -114,7 +115,7 @@ public class RigidBodyJointControlHelper
       setWeightsToDefaults();
    }
 
-   public void setGains(Map<String, YoPIDGains> gains)
+   public void setGains(Map<String, PIDGainsReadOnly> gains)
    {
       hasGains.set(true);
       this.gains.clear();
