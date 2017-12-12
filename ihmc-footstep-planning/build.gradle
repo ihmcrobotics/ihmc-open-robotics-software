@@ -39,3 +39,11 @@ testDependencies {
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
 }
+
+visualizersDependencies {
+   compile ihmc.sourceSetProject("main")
+
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+}
