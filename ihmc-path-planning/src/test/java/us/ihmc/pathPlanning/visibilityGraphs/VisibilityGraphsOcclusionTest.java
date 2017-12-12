@@ -48,6 +48,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VisibilityGraphsOcclusionTest
 {
+   private static final int TIMEOUT = 300000; // Integer.MAX_VALUE; //
+
    private static final DefaultVisibilityGraphParameters VISIBILITY_GRAPH_PARAMETERS = new DefaultVisibilityGraphParameters()
    {
       @Override
@@ -73,7 +75,7 @@ public class VisibilityGraphsOcclusionTest
    @Rule
    public TestName name = new TestName();
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testFlatGround()
    {
@@ -83,7 +85,7 @@ public class VisibilityGraphsOcclusionTest
       runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime, 3.0);
    }
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testFlatGroundWithWall()
    {
@@ -102,7 +104,7 @@ public class VisibilityGraphsOcclusionTest
       runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime);
    }
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testSimpleOcclusions()
    {
@@ -112,7 +114,7 @@ public class VisibilityGraphsOcclusionTest
       runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
    }
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @Ignore
    public void testMazeWithOcclusions()
    {
