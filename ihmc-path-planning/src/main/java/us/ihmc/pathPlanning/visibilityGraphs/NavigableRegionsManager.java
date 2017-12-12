@@ -11,12 +11,10 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -154,6 +152,7 @@ public class NavigableRegionsManager
       long startCreatingMaps = System.currentTimeMillis();
 
       createIndividualVisMapsForRegions();
+
       long endCreationTime = System.currentTimeMillis();
 
       boolean readyToRunBodyPath = false;
@@ -169,7 +168,7 @@ public class NavigableRegionsManager
          readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
       }
       //      }
-
+      
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
       connectLocalMaps();
@@ -267,19 +266,38 @@ public class NavigableRegionsManager
       return null;
    }
 
-   public void calculateBodyPathWithOcclussions(Point3D start, Point3D goal)
+   public List<Point3D> calculateBodyPathWithOcclussions(Point3D start, Point3D goal)
    {
       List<Point3D> path = calculateBodyPath(start, goal);
-
+      
       if (path == null)
       {
+         if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+         {
+            System.out.println("StraightLine available");
+
+            path = new ArrayList<Point3D>();
+            path.add(new Point3D(start));
+            path.add(goal);
+
+            return path;
+         }
+
          NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
          List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomeRegion());
-      }
+         
+         path = calculateBodyPath(start, closestExtrusion);
+         path.add(goal);
 
+         return path;
+      }
+      else
+      {
+         return path;
+      }
    }
 
    public boolean createVisMapsForStartAndGoal(Point3D startProjected, Point3D goalProjected)
@@ -774,11 +792,6 @@ public class NavigableRegionsManager
       List<Cluster> clusters = new ArrayList<>();
 
       regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(navigableRegionLocalPlanner.getHomeRegion(), regions);
-
-      if (debug)
-      {
-         System.out.println(regionsInsideHomeRegion.size());
-      }
 
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, navigableRegionLocalPlanner.getHomeRegion(), lineObstacleRegions, polygonObstacleRegions,
                                       parameters.getNormalZThresholdForPolygonObstacles());
