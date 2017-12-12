@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "YoRegistryDefinition" defined in Handshake.idl. 
@@ -14,7 +11,7 @@ public class YoRegistryDefinition
 {
     public YoRegistryDefinition()
     {
-        	name_ = new StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
         
         
     }
@@ -44,12 +41,12 @@ public class YoRegistryDefinition
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -60,7 +57,7 @@ public class YoRegistryDefinition
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -78,7 +75,7 @@ public class YoRegistryDefinition
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -96,6 +93,6 @@ public class YoRegistryDefinition
     }
 
     private int parent_; 
-    private StringBuilder name_; 
+    private java.lang.StringBuilder name_; 
 
 }

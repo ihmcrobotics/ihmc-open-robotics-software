@@ -5,35 +5,24 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class DoNothingControllerState extends HighLevelControllerState
 {
    private static final HighLevelControllerName controllerState = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-
-   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final OneDoFJoint[] allRobotJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
    public DoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(controllerState);
+      super(controllerState, highLevelControllerParameters, controllerToolbox);
 
-      this.controllerToolbox = controllerToolbox;
-      allRobotJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      allRobotJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
 
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(allRobotJoints);
-
-      OneDoFJoint[] oneDoFJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
-      for (OneDoFJoint joint : oneDoFJoints)
-      {
-         JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(joint.getName(), controllerState);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(joint, jointControlMode);
-      }
    }
 
    @Override
@@ -42,8 +31,11 @@ public class DoNothingControllerState extends HighLevelControllerState
       for (int i = 0; i < allRobotJoints.length; i++)
       {
          allRobotJoints[i].setTau(0.0);
+         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(allRobotJoints[i]).clear();
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(allRobotJoints[i], 0.0);
       }
+
+      lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
    @Override
@@ -58,12 +50,6 @@ public class DoNothingControllerState extends HighLevelControllerState
    {
       // Do nothing
 
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return null;
    }
 
    @Override

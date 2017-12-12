@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "Summary" defined in Handshake.idl. 
@@ -14,8 +11,8 @@ public class Summary
 {
     public Summary()
     {
-        	summaryTriggerVariable_ = new StringBuilder(1024); 
-        	summarizedVariables_ = new IDLSequence.StringBuilderHolder (128, "type_d");           
+        	summaryTriggerVariable_ = new java.lang.StringBuilder(1024); 
+        	summarizedVariables_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (128, "type_d");           
         
     }
 
@@ -44,19 +41,19 @@ public class Summary
         	summaryTriggerVariable_.append(summaryTriggerVariable);
         }
         
-        public String getSummaryTriggerVariableAsString()
+        public java.lang.String getSummaryTriggerVariableAsString()
         {
         	return getSummaryTriggerVariable().toString();
         }
 
-    public StringBuilder getSummaryTriggerVariable()
+    public java.lang.StringBuilder getSummaryTriggerVariable()
     {
         return summaryTriggerVariable_;
     }
 
         
 
-    public IDLSequence.StringBuilderHolder  getSummarizedVariables()
+    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getSummarizedVariables()
     {
         return summarizedVariables_;
     }
@@ -67,7 +64,7 @@ public class Summary
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -87,7 +84,7 @@ public class Summary
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -109,7 +106,7 @@ public class Summary
     }
 
     private boolean createSummary_; 
-    private StringBuilder summaryTriggerVariable_; 
-    private IDLSequence.StringBuilderHolder  summarizedVariables_; 
+    private java.lang.StringBuilder summaryTriggerVariable_; 
+    private us.ihmc.idl.IDLSequence.StringBuilderHolder  summarizedVariables_; 
 
 }

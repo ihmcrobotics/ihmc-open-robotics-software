@@ -3,9 +3,12 @@ buildscript {
       maven {
          url "http://dl.bintray.com/ihmcrobotics/maven-release"
       }
+      maven {
+         url "http://dl.bintray.com/ihmcrobotics/maven-vendor"
+      }
    }
    dependencies {
-      classpath group: 'us.ihmc', name: 'IHMCPubSubGenerator', version: '0.3.2'
+      classpath group: 'us.ihmc', name: 'ihmc-pub-sub-generator', version: '0.3.7'
    }
 }
 
