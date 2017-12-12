@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -69,7 +70,7 @@ public class ICPTimingOptimizationController extends AbstractICPOptimizationCont
 
    private double previousSwingDurationSolution;
 
-   public ICPTimingOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+   public ICPTimingOptimizationController(ContinuousCMPICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                           WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
                                           ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                           double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)

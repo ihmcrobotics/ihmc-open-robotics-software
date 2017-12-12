@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
@@ -82,15 +83,15 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       {
          if (icpOptimizationParameters.useTimingOptimization())
          {
-            icpOptimizationController = new ICPTimingOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-                                                                            bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT, registry,
-                                                                            yoGraphicsListRegistry);
+            icpOptimizationController = new ICPTimingOptimizationController((ContinuousCMPICPPlannerParameters) icpPlannerParameters, icpOptimizationParameters,
+                                                                            walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
+                                                                            contactableFeet, controlDT, registry, yoGraphicsListRegistry);
          }
          else
          {
-            icpOptimizationController = new ICPAdjustmentOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
-                                                                                bipedSupportPolygons, icpControlPolygons, contactableFeet, controlDT,
-                                                                                registry, yoGraphicsListRegistry);
+            icpOptimizationController = new ICPAdjustmentOptimizationController((ContinuousCMPICPPlannerParameters) icpPlannerParameters,
+                                                                                icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
+                                                                                icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
          }
       }
    }
