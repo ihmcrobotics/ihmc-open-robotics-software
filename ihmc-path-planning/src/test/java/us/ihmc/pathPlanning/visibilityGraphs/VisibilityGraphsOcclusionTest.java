@@ -10,6 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -65,6 +66,7 @@ public class VisibilityGraphsOcclusionTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
+   private static final double rayLengthSquared = MathTools.square(5.0);
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 100;
    private static final double defaultMaxAllowedSolveTime = 1.0;
@@ -440,7 +442,7 @@ public class VisibilityGraphsOcclusionTest
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
          Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null)
+         if (intersection == null || intersection.distanceSquared(observer) > rayLengthSquared)
          {
             if (rayPointsToPack != null)
             {
