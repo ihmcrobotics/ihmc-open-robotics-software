@@ -1,17 +1,17 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class YoPDGains implements PDGainsInterface
+public class YoPDGains implements PDGainsReadOnly
 {
-   protected final YoDouble kp;
+   private final YoDouble kp;
+   private final YoDouble kd;
    private final YoDouble zeta;
-   protected final YoDouble kd;
-   private final YoDouble maximumOutput;
    private final YoDouble maximumFeedback;
    private final YoDouble maximumFeedbackRate;
    private final YoDouble positionDeadband;
@@ -22,13 +22,11 @@ public class YoPDGains implements PDGainsInterface
       zeta = new YoDouble("zeta" + suffix, registry);
       kd = new YoDouble("kd" + suffix, registry);
 
-      maximumOutput = new YoDouble("maximumOutput" + suffix, registry);
       maximumFeedback = new YoDouble("maximumFeedback" + suffix, registry);
       maximumFeedbackRate = new YoDouble("maximumFeedbackRate" + suffix, registry);
 
       positionDeadband = new YoDouble("positionDeadband" + suffix, registry);
 
-      maximumOutput.set(Double.POSITIVE_INFINITY);
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
    }
@@ -52,11 +50,6 @@ public class YoPDGains implements PDGainsInterface
    public void setZeta(double zeta)
    {
       this.zeta.set(zeta);
-   }
-
-   public void setMaximumOutput(double maximumOutput)
-   {
-      this.maximumOutput.set(maximumOutput);
    }
 
    public void setMaximumFeedback(double maxFeedback)
@@ -97,11 +90,6 @@ public class YoPDGains implements PDGainsInterface
       return kd.getDoubleValue();
    }
 
-   public double getMaximumOutput()
-   {
-      return maximumOutput.getDoubleValue();
-   }
-
    @Override
    public double getMaximumFeedback()
    {
@@ -112,6 +100,12 @@ public class YoPDGains implements PDGainsInterface
    public double getMaximumFeedbackRate()
    {
       return maximumFeedbackRate.getDoubleValue();
+   }
+
+   @Override
+   public double getPositionDeadband()
+   {
+      return positionDeadband.getDoubleValue();
    }
 
    public YoDouble getYoKp()
@@ -129,11 +123,6 @@ public class YoPDGains implements PDGainsInterface
       return kd;
    }
 
-   public YoDouble getYoMaximumOutput()
-   {
-      return maximumOutput;
-   }
-
    public YoDouble getYoMaximumFeedback()
    {
       return maximumFeedback;
@@ -144,7 +133,7 @@ public class YoPDGains implements PDGainsInterface
       return maximumFeedbackRate;
    }
 
-   public YoDouble getPositionDeadband()
+   public YoDouble getYoPositionDeadband()
    {
       return positionDeadband;
    }
@@ -169,9 +158,8 @@ public class YoPDGains implements PDGainsInterface
    public void set(YoPDGains other)
    {
       this.kp.set(other.kp.getDoubleValue());
-      this.zeta.set(other.zeta.getDoubleValue());
       this.kd.set(other.kd.getDoubleValue());
-      this.maximumOutput.set(other.maximumOutput.getDoubleValue());
+      this.zeta.set(other.zeta.getDoubleValue());
       this.maximumFeedback.set(other.maximumFeedback.getDoubleValue());
       this.maximumFeedbackRate.set(other.maximumFeedbackRate.getDoubleValue());
       this.positionDeadband.set(other.positionDeadband.getDoubleValue());
@@ -182,8 +170,8 @@ public class YoPDGains implements PDGainsInterface
       setKp(pdGains.getKp());
       setKd(pdGains.getKd());
       setZeta(pdGains.getZeta());
-      setMaximumOutput(pdGains.getMaximumOutput());
       setMaximumFeedback(pdGains.getMaximumFeedback());
+      setMaximumFeedbackRate(pdGains.getMaximumFeedbackRate());
       setPositionDeadband(pdGains.getPositionDeadband());
    }
 
