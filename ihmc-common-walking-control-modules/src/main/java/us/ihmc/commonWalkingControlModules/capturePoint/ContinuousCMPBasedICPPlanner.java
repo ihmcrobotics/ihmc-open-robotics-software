@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -184,9 +185,9 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
+   public void initializeParameters(ContinuousCMPICPPlannerParameters icpPlannerParameters)
    {
-      super.initializeParameters((ICPTrajectoryPlannerParameters) icpPlannerParameters);
+      super.initializeParameters(icpPlannerParameters);
 
       icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
       icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnFinalCMP(icpPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());

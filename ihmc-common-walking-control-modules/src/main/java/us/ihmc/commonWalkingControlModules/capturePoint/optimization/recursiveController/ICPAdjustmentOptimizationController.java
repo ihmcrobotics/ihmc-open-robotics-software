@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -20,7 +21,7 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
-   public ICPAdjustmentOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+   public ICPAdjustmentOptimizationController(ContinuousCMPICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
                                               BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
                                               SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -29,7 +30,7 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
            icpControlPolygons, contactableFeet, controlDT, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public ICPAdjustmentOptimizationController(ICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
+   public ICPAdjustmentOptimizationController(ContinuousCMPICPPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                               WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
                                               ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                               double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)

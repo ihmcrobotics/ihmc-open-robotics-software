@@ -1,18 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
@@ -320,27 +316,39 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public List<Vector2D> getCoPOffsets()
+      public CoPPointName getExitCoPName()
+      {
+         return CoPPointName.TOE_COP;
+      }
+
+      @Override
+      public CoPPointName getEntryCoPName()
+      {
+         return CoPPointName.HEEL_COP;
+      }
+
+      @Override
+      public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
       {
          Vector2D entryOffset = new Vector2D();
          Vector2D exitOffset = new Vector2D();
 
-         List<Vector2D> copOffsets = new ArrayList<>();
-         copOffsets.add(entryOffset);
-         copOffsets.add(exitOffset);
+         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+         copOffsets.put(getEntryCoPName(), entryOffset);
+         copOffsets.put(getExitCoPName(), exitOffset);
 
          return copOffsets;
       }
 
       @Override
-      public List<Vector2D> getCoPForwardOffsetBounds()
+      public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
       {
          Vector2D entryOffset = new Vector2D();
          Vector2D exitOffset = new Vector2D();
 
-         List<Vector2D> copOffsets = new ArrayList<>();
-         copOffsets.add(entryOffset);
-         copOffsets.add(exitOffset);
+         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+         copOffsets.put(getEntryCoPName(), entryOffset);
+         copOffsets.put(getExitCoPName(), exitOffset);
 
          return copOffsets;
       }
