@@ -22,6 +22,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
@@ -203,7 +204,7 @@ public class EscherWalkingControllerParameters extends WalkingControllerParamete
 
    /** {@inheritDoc} */
    @Override
-   public List<JointGroupParameter<PIDGains>> getJointSpaceControlGains()
+   public List<JointGroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       List<String> spineNames = new ArrayList<>();
       List<String> neckNames = new ArrayList<>();
@@ -220,10 +221,10 @@ public class EscherWalkingControllerParameters extends WalkingControllerParamete
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
 
-      List<JointGroupParameter<PIDGains>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new JointGroupParameter<PIDGains>("_SpineJointGains", spineGains, spineNames));
-      jointspaceGains.add(new JointGroupParameter<PIDGains>("_NeckJointGains", neckGains, neckNames));
-      jointspaceGains.add(new JointGroupParameter<PIDGains>("_ArmJointGains", armGains, armNames));
+      List<JointGroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new JointGroupParameter<>("_SpineJointGains", spineGains, spineNames));
+      jointspaceGains.add(new JointGroupParameter<>("_NeckJointGains", neckGains, neckNames));
+      jointspaceGains.add(new JointGroupParameter<>("_ArmJointGains", armGains, armNames));
 
       return jointspaceGains;
    }
