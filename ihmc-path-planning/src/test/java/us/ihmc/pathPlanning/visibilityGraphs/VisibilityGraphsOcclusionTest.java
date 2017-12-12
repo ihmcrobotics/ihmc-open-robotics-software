@@ -292,7 +292,8 @@ public class VisibilityGraphsOcclusionTest
             break;
          }
 
-         if (!bodyPath.get(bodyPath.size() - 1).geometricallyEquals(goal, 1.0e-3))
+         // Use different epsilon for xy and z in case the point got projected onto a region
+         if (bodyPath.get(bodyPath.size() - 1).distanceXY(goal) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(bodyPath.size() - 1).getZ(), goal.getZ(), 0.1))
          {
             if (visualize)
             {
@@ -373,12 +374,12 @@ public class VisibilityGraphsOcclusionTest
       {
          LineSegment3D segment = new LineSegment3D(bodyPath.get(i), bodyPath.get(i + 1));
 
-         if (segment.distance(startingPosition) < 1.0e-10)
+         if (segment.distance(startingPosition) < 1.0e-4)
          {
             Vector3D segmentDirection = segment.getDirection(true);
             newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
 
-            if (segment.distance(newPosition) < 1.0e-10)
+            if (segment.distance(newPosition) < 1.0e-4)
             {
                return newPosition;
             }
