@@ -32,12 +32,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -139,7 +141,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       this.fullRobotModel = controllerToolbox.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
-      OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
+      OneDoFJoint[] jointArray = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
@@ -308,8 +310,13 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
-      lowLevelOneDoFJointDesiredDataHolder.clear();
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(jointArray);
+      for (int jointIdx = 0; jointIdx < jointArray.length; jointIdx++)
+      {
+         OneDoFJoint joint = jointArray[jointIdx];
+         JointDesiredOutput jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         jointDesiredOutput.clear();
+         jointDesiredOutput.setDesiredTorque(joint.getTau());
+      }
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 

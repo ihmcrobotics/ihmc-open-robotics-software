@@ -57,6 +57,7 @@ public class WalkingControllerState extends HighLevelControllerState
       // create controller core
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       InverseDynamicsJoint[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+      OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(jointsToOptimizeFor, OneDoFJoint.class);
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
@@ -75,12 +76,11 @@ public class WalkingControllerState extends HighLevelControllerState
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, controllerToolbox.getContactablePlaneBodies());
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controllerToolbox.getFullRobotModel().getOneDoFJoints());
+      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledOneDofJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
-      OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       accelerationIntegrationParameterHelper = new AccelerationIntegrationParameterHelper(highLevelControllerParameters, controlledOneDofJoints,
                                                                                           walkingController, registry);
 
