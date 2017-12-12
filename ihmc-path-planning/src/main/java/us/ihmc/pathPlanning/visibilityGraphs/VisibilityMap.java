@@ -3,11 +3,12 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import java.util.HashSet;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class VisibilityMap
 {
    private HashSet<Connection> connections;
-   private HashSet<Point3D> vertices;
+   private HashSet<Point3DReadOnly> vertices;
 
    public VisibilityMap()
    {
@@ -45,7 +46,7 @@ public class VisibilityMap
       }
    }
    
-   public HashSet<Point3D> getVertices()
+   public HashSet<Point3DReadOnly> getVertices()
    {
       return vertices;
    }
