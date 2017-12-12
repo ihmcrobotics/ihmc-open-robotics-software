@@ -4,8 +4,6 @@ import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 
 public class PDGains
 {
-   private final String name;
-
    private double kp;
    private double kd;
    private double zeta;
@@ -13,21 +11,6 @@ public class PDGains
    private double maximumFeedback;
    private double maximumFeedbackRate;
    private double positionDeadband;
-
-   public PDGains()
-   {
-      this("");
-   }
-
-   public PDGains(String name)
-   {
-      this.name = name;
-   }
-
-   public String getName()
-   {
-      return name;
-   }
 
    public double getKp()
    {
