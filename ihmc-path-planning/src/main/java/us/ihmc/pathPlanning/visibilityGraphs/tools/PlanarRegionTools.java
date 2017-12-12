@@ -605,7 +605,7 @@ public class PlanarRegionTools
                return true;
             return false;
          }
-         // The line segments are parallel but are not collinear, they do not intersect
+         // The ray and line segment are parallel but are not collinear, they do not intersect
          else
          {
             return false;
