@@ -11,6 +11,7 @@ import javafx.scene.Node;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsParameters;
@@ -117,7 +118,7 @@ public class VisibilityGraphsRenderer
 
          navigableRegionsManager.setPlanarRegions(planarRegions);
 
-         List<Point3D> bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
+         List<Point3DReadOnly> bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
          bodyPathMeshViewer.processBodyPath(bodyPath);
          navigableRegionInnerVizMapMeshViewer.processNavigableRegions(navigableRegionsManager.getListOfLocalPlanners());
 

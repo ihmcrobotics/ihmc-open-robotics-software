@@ -25,6 +25,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -290,7 +291,7 @@ public class VisibilityGraphsOcclusionTest
 
          vizGraphs.setPlanarRegions(visiblePlanarRegions.getPlanarRegionsAsList());
 
-         List<Point3D> bodyPath = null;
+         List<Point3DReadOnly> bodyPath = null;
 
          try
          {
@@ -394,7 +395,7 @@ public class VisibilityGraphsOcclusionTest
       }
    }
 
-   private static void visualizeBodyPath(List<Point3D> bodyPath, BagOfBalls vizToUpdate)
+   private static void visualizeBodyPath(List<Point3DReadOnly> bodyPath, BagOfBalls vizToUpdate)
    {
       int numberOfBalls = vizToUpdate.getNumberOfBalls();
 
@@ -415,7 +416,7 @@ public class VisibilityGraphsOcclusionTest
       }
    }
 
-   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3D> bodyPath)
+   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
    {
       Point3D newPosition = new Point3D();
 
