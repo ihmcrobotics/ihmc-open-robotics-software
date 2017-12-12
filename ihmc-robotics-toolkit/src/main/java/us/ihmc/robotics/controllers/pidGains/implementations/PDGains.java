@@ -52,10 +52,16 @@ public class PDGains implements PDGainsReadOnly
 
    public void set(double kp, double kd, double maxFeedback, double maxFeedbackRate)
    {
+      set(kp, kd, maxFeedback, maxFeedbackRate, 0.0);
+   }
+
+   public void set(double kp, double kd, double maxFeedback, double maxFeedbackRate, double positionDeadband)
+   {
       setKp(kp);
       setKd(kd);
       setMaximumFeedback(maxFeedback);
       setMaximumFeedbackRate(maxFeedbackRate);
+      setPositionDeadband(positionDeadband);
    }
 
    @Override
