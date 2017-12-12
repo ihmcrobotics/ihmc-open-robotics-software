@@ -7,18 +7,15 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandTransitionControllerState extends HighLevelControllerState
 {
    private static final HighLevelControllerName controllerState = HighLevelControllerName.STAND_TRANSITION_STATE;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble standTransitionDuration = new YoDouble("standTransitionDuration", registry);
    private final YoDouble standTransitionGainRatio = new YoDouble("standTransitionGainRatio", registry);
@@ -33,25 +30,19 @@ public class StandTransitionControllerState extends HighLevelControllerState
    public StandTransitionControllerState(HighLevelControllerState standReadyControllerState, HighLevelControllerState walkingControllerState,
                                          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(controllerState);
+      super(controllerState, highLevelControllerParameters, controllerToolbox);
 
       this.standReadyControllerState = standReadyControllerState;
       this.walkingControllerState = walkingControllerState;
       this.standTransitionDuration.set(highLevelControllerParameters.getTimeInStandTransition());
 
-      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
          JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registry);
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
-
-         String jointName = controlledJoint.getName();
-         JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(jointName, controllerState);
-
-         JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
-         lowLevelJointData.setControlMode(jointControlMode);
       }
    }
 
@@ -82,10 +73,13 @@ public class StandTransitionControllerState extends HighLevelControllerState
          OneDoFJoint joint = jointCommandBlenders.get(jointIndex).getLeft();
          JointControlBlender jointControlBlender = jointCommandBlenders.get(jointIndex).getRight();
          JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         lowLevelJointData.clear();
 
          jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getJointDesiredOutput(joint),
                                                           walkingJointCommand.getJointDesiredOutput(joint), gainRatio);
       }
+
+      lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
    @Override
@@ -98,12 +92,6 @@ public class StandTransitionControllerState extends HighLevelControllerState
    public boolean isDone()
    {
       return getTimeInCurrentState() > standTransitionDuration.getDoubleValue();
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
    }
 
    @Override

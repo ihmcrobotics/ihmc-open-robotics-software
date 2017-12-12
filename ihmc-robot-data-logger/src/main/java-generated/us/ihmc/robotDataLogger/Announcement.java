@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "Announcement" defined in Announcement.idl. 
@@ -14,10 +11,11 @@ public class Announcement
 {
     public Announcement()
     {
-        	identifier_ = new StringBuilder(255); 
-        	name_ = new StringBuilder(255); 
-        	hostName_ = new StringBuilder(255); 
-        	cameras_ = new IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement> (127, us.ihmc.robotDataLogger.CameraAnnouncement.class, new us.ihmc.robotDataLogger.CameraAnnouncementPubSubType());
+        	identifier_ = new java.lang.StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
+        	hostName_ = new java.lang.StringBuilder(255); 
+        	reconnectKey_ = new java.lang.StringBuilder(255); 
+        	cameras_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement> (127, us.ihmc.robotDataLogger.CameraAnnouncement.class, new us.ihmc.robotDataLogger.CameraAnnouncementPubSubType());
 
         	modelFileDescription_ = new us.ihmc.robotDataLogger.ModelFileDescription();
         
@@ -32,6 +30,8 @@ public class Announcement
         	name_.append(other.name_);
         	hostName_.setLength(0);
         	hostName_.append(other.hostName_);
+        	reconnectKey_.setLength(0);
+        	reconnectKey_.append(other.reconnectKey_);
             cameras_.set(other.cameras_);	us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.staticCopy(other.modelFileDescription_, modelFileDescription_);log_ = other.log_;
 
     }
@@ -42,12 +42,12 @@ public class Announcement
         	identifier_.append(identifier);
         }
         
-        public String getIdentifierAsString()
+        public java.lang.String getIdentifierAsString()
         {
         	return getIdentifier().toString();
         }
 
-    public StringBuilder getIdentifier()
+    public java.lang.StringBuilder getIdentifier()
     {
         return identifier_;
     }
@@ -59,12 +59,12 @@ public class Announcement
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -76,19 +76,36 @@ public class Announcement
         	hostName_.append(hostName);
         }
         
-        public String getHostNameAsString()
+        public java.lang.String getHostNameAsString()
         {
         	return getHostName().toString();
         }
 
-    public StringBuilder getHostName()
+    public java.lang.StringBuilder getHostName()
     {
         return hostName_;
     }
 
         
+        public void setReconnectKey(String reconnectKey)
+        {
+        	reconnectKey_.setLength(0);
+        	reconnectKey_.append(reconnectKey);
+        }
+        
+        public java.lang.String getReconnectKeyAsString()
+        {
+        	return getReconnectKey().toString();
+        }
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  getCameras()
+    public java.lang.StringBuilder getReconnectKey()
+    {
+        return reconnectKey_;
+    }
+
+        
+
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  getCameras()
     {
         return cameras_;
     }
@@ -117,7 +134,7 @@ public class Announcement
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -131,6 +148,8 @@ public class Announcement
                 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.hostName_, otherMyClass.hostName_);
                 
+        returnedValue &= us.ihmc.idl.IDLTools.equals(this.reconnectKey_, otherMyClass.reconnectKey_);
+                
         returnedValue &= this.cameras_.equals(otherMyClass.cameras_);
                 
         returnedValue &= this.modelFileDescription_.equals(otherMyClass.modelFileDescription_);
@@ -143,7 +162,7 @@ public class Announcement
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -158,6 +177,10 @@ public class Announcement
                 builder.append(", ");
         builder.append("hostName=");
         builder.append(this.hostName_);
+
+                builder.append(", ");
+        builder.append("reconnectKey=");
+        builder.append(this.reconnectKey_);
 
                 builder.append(", ");
         builder.append("cameras=");
@@ -176,10 +199,11 @@ public class Announcement
 		return builder.toString();
     }
 
-    private StringBuilder identifier_; 
-    private StringBuilder name_; 
-    private StringBuilder hostName_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  cameras_; 
+    private java.lang.StringBuilder identifier_; 
+    private java.lang.StringBuilder name_; 
+    private java.lang.StringBuilder hostName_; 
+    private java.lang.StringBuilder reconnectKey_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  cameras_; 
     private us.ihmc.robotDataLogger.ModelFileDescription modelFileDescription_; 
     private boolean log_; 
 

@@ -132,10 +132,10 @@ public class ClusterTools
 
          if (intersectionPoint == null)
          {
-            if(debug)
+            if (debug)
                PrintTools.error("Failed to extrude non-navigable boundary for region " + index + " \n" + "point1: " + point1 + "\n" + "point2: " + point2 + "\n"
-                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2 + "\n"
-                     + "extrusionDistance: " + extrusionDistance);
+                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2
+                     + "\n" + "extrusionDistance: " + extrusionDistance);
             continue;
          }
 
@@ -199,10 +199,10 @@ public class ClusterTools
 
          if (intersectionPoint == null)
          {
-            if(debug)
+            if (debug)
                PrintTools.error("Failed to extrude navigable boundary for region " + index + " \n" + "point1: " + point1 + "\n" + "point2: " + point2 + "\n"
-                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2 + "\n"
-                     + "extrusionDistance: " + extrusionDistance);
+                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2
+                     + "\n" + "extrusionDistance: " + extrusionDistance);
             continue;
          }
 
@@ -524,7 +524,7 @@ public class ClusterTools
       //      if (cluster.isObstacleClosed())
       //         extrudeLastNavigable(cluster, extrusionIndex, extrusionDist1);
    }
-   
+
    public static void generateNormalsFromRawBoundaryMap(double extrusionDistance, List<Cluster> listOfClusters)
    {
       for (Cluster cluster : listOfClusters)
@@ -571,11 +571,11 @@ public class ClusterTools
       }
    }
 
-   
-   public static void classifyExtrusions(List<PlanarRegion> regionsToProject, PlanarRegion regionToProjectTo, List<PlanarRegion> lineObstaclesToPack, List<PlanarRegion> polygonObstaclesToPack, double zNormalThreshold)
+   public static void classifyExtrusions(List<PlanarRegion> regionsToProject, PlanarRegion regionToProjectTo, List<PlanarRegion> lineObstaclesToPack,
+                                         List<PlanarRegion> polygonObstaclesToPack, double zNormalThreshold)
    {
-      
-      for(PlanarRegion regionToProject : regionsToProject)
+
+      for (PlanarRegion regionToProject : regionsToProject)
       {
          Vector3D normal = PlanarRegionTools.calculateNormal(regionToProject);
 
@@ -599,13 +599,82 @@ public class ClusterTools
          //                  + "   Polygon obstacles: " + polygonObstacleRegions.size());
       }
    }
-   
+
+   public static Cluster getTheClosestCluster(Point3D pointToSortFrom, List<Cluster> clusters)
+   {
+      double minDistance = Double.MAX_VALUE;
+      Cluster closestCluster = null;
+
+      for (Cluster cluster : clusters)
+      {
+         double distOfPoint = Double.MAX_VALUE;
+         Point3D closestPointInCluster = null;
+
+         for (Point3D point : cluster.getNonNavigableExtrusionsInWorld())
+         {
+            if (point.distance(pointToSortFrom) < distOfPoint)
+            {
+               distOfPoint = point.distance(pointToSortFrom);
+               closestPointInCluster = point;
+            }
+         }
+
+         if (closestPointInCluster.distance(pointToSortFrom) < minDistance)
+         {
+            minDistance = closestPointInCluster.distance(pointToSortFrom);
+            closestCluster = cluster;
+         }
+      }
+
+      return closestCluster;
+   }
+
+   public static Point3D getTheClosestVisibleExtrusionPoint(Point3D pointToSortFrom, List<Point3D> extrusionPoints)
+   {
+      double minDist = Double.MAX_VALUE;
+      Point3D closestPoint = null;
+
+      for (Point3D point : extrusionPoints)
+      {
+         if (point.distance(pointToSortFrom) < minDist)
+         {
+            minDist = point.distance(pointToSortFrom);
+            closestPoint = point;
+         }
+      }
+
+      return closestPoint;
+   }
+
+   public static Point3D getTheClosestVisibleExtrusionPoint(double alpha, Point3D start, Point3D goal, List<Point3D> extrusionPoints, PlanarRegion region)
+   {
+      double minWeight = Double.MAX_VALUE;
+      Point3D closestPoint = null;
+
+      for (Point3D point : extrusionPoints)
+      {
+         if(PlanarRegionTools.isPointInWorldInsideARegion(region, point))
+         {
+            double weight = alpha * goal.distance(point) + (1 - alpha) * start.distance(point);
+
+            if (weight < minWeight)
+            {
+               minWeight = weight;
+               closestPoint = point;
+            }
+         }
+      }
+
+      return closestPoint;
+   }
+
    public static void createClusterForHomeRegion(List<Cluster> clusters, RigidBodyTransform transformToWorld, PlanarRegion homeRegion, double extrusionDistance)
    {
       Cluster cluster = new Cluster();
       clusters.add(cluster);
       cluster.setType(Type.POLYGON);
       cluster.setTransformToWorld(transformToWorld);
+      cluster.setHomeRegion(true);
 
       Point2D[] concaveHull = homeRegion.getConcaveHull();
       for (Point2D vertex : concaveHull)
@@ -618,8 +687,10 @@ public class ClusterTools
       cluster.setExtrusionSide(ExtrusionSide.INSIDE);
       cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.1));
    }
-   
-   public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions, List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformToWorld, VisibilityGraphsParameters visibilityGraphsParameters)
+
+   public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions,
+                                                List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformToWorld,
+                                                VisibilityGraphsParameters visibilityGraphsParameters)
    {
       for (PlanarRegion region : lineObstacleRegions)
       {
@@ -741,7 +812,7 @@ public class ClusterTools
          }
       }
    }
-   
+
    public static void performExtrusions(Point2D initialObserver, double extrusionDistance, List<Cluster> clusters)
    {
       for (Cluster cluster : clusters)

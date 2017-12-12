@@ -14,8 +14,8 @@ public class YoVariableLoggerOptions
 {
    public final static String defaultLogDirectory = System.getProperty("user.home") + "/robotLogs";
    
-   public final static CodecID defaultCodec = CodecID.AV_CODEC_ID_H264;
-   public final static double defaultVideoQuality = 0.75;
+   public final static CodecID defaultCodec = CodecID.AV_CODEC_ID_MJPEG;
+   public final static double defaultVideoQuality = 0.85;
    public final static int defaultCRF = 23;
 
    private String logDirectory = defaultLogDirectory;

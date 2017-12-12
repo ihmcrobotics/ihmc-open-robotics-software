@@ -13,10 +13,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -48,8 +52,8 @@ public class PlanarRegionTools
    }
 
    /**
-    * Projects the given point onto the planar region, returning the closest point on
-    * the region to the provided point.
+    * Projects the given point onto the planar region, returning the closest point on the region to
+    * the provided point.
     */
    public static Point3D closestPointOnPlane(Point3DReadOnly point, PlanarRegion region)
    {
@@ -86,9 +90,9 @@ public class PlanarRegionTools
    }
 
    /**
-    * Projects the given point onto a planar region from the list. The projection is done along
-    * the z axis in world frame and if there is multiple regions that the point can be
-    * projected onto, the highest intersection point will be returned.
+    * Projects the given point onto a planar region from the list. The projection is done along the
+    * z axis in world frame and if there is multiple regions that the point can be projected onto,
+    * the highest intersection point will be returned.
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
@@ -96,6 +100,7 @@ public class PlanarRegionTools
    {
       Line3D projectionLine = new Line3D(point, new Vector3D(0.0, 0.0, 1.0));
       Point3D highestIntersection = null;
+      PlanarRegion highestRegion = null;
 
       for (PlanarRegion region : regions.getPlanarRegionsAsList())
       {
@@ -109,6 +114,7 @@ public class PlanarRegionTools
          if (highestIntersection == null || highestIntersection.getZ() < intersection.getZ())
          {
             highestIntersection = intersection;
+            highestRegion = region;
          }
       }
 
@@ -116,8 +122,8 @@ public class PlanarRegionTools
    }
 
    /**
-    * Will return the intersection point between a line and a single planar region. If
-    * the line does not intersect the region this method will return null.
+    * Will return the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return null.
     */
    public static Point3D intersectRegionWithLine(PlanarRegion region, Line3D projectionLine)
    {
@@ -235,129 +241,100 @@ public class PlanarRegionTools
       return isPointInLocalInsideARegion(region, pointInLocalToCheck);
    }
 
-   public static boolean isPointInLocalInsideARegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)
+   public static PlanarRegion getRegionContainingThisPoint(Point3D point, List<PlanarRegion> regions)
    {
-      Point2D[] pointsInConcaveHull = region.getConcaveHull();
-
-      Point2D centroid = EuclidGeometryTools.averagePoint2Ds(Arrays.asList(pointsInConcaveHull));
-
-      Vector2D directionToCentroid = new Vector2D(centroid.getX() - pointInLocalToCheck.getX(), centroid.getY() - pointInLocalToCheck.getY());
-      directionToCentroid.normalize();
-      directionToCentroid.scale(10);
-
-      Point2D endPoint = new Point2D(pointInLocalToCheck.getX() + directionToCentroid.getX(), pointInLocalToCheck.getY() + directionToCentroid.getY());
-
-      boolean pointIsInside = isPointInsidePolygon(pointsInConcaveHull, new Point2D(pointInLocalToCheck), endPoint);
-
-      if (pointIsInside)
+      for (PlanarRegion region : regions)
       {
-         return true;
-      }
-
-      return false;
-   }
-
-   public static boolean isPointInsidePolygon(Point2D[] polygon, Point2D pointToCheck, Point2D lineEnd)
-   {
-      int index = 0;
-
-      Point2D[] points = new Point2D[polygon.length + 1];
-
-      for (int i = 0; i < polygon.length; i++)
-      {
-         points[i] = polygon[i];
-      }
-      points[points.length - 1] = points[0];
-
-      for (int i = 1; i < points.length; i++)
-      {
-         Point2D point1 = points[i - 1];
-         Point2D point2 = points[i];
-
-         if (EuclidGeometryTools.doLineSegment2DsIntersect(point1, point2, pointToCheck, lineEnd))
+         if (isPointInWorldInsideARegion(region, point))
          {
-            index++;
+            return region;
          }
       }
 
-      //      System.out.println("INDEX: " + index);
+      return null;
+   }
 
-      if (index == 0)
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3D point, List<NavigableRegion> navigableRegions)
+   {
+      for (NavigableRegion navigableRegion : navigableRegions)
+      {
+         if (isPointInWorldInsideARegion(navigableRegion.getHomeRegion(), point))
+         {
+            return navigableRegion;
+         }
+      }
+
+      return null;
+   }
+
+   public static boolean isPointInLocalInsideARegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)
+   {
+      return isPointInsidePolygon(region.getConcaveHull(), new Point2D(pointInLocalToCheck));
+   }
+
+   // FIXME This is flaky when the line (pointToCheck, lineEnd) goes through vertices of the polygon.
+   public static boolean isPointInsidePolygon(Point2DReadOnly[] polygon, Point2DReadOnly pointToCheck)
+   {
+      if (polygon.length < 3)
+      {
+         return false;
+      }
+
+      Point2D pointOnArbitraryEdge = new Point2D();
+      pointOnArbitraryEdge.interpolate(polygon[0], polygon[1], 0.5);
+
+      Point2DReadOnly rayOrigin = pointToCheck;
+      Vector2D rayDirection = new Vector2D();
+      rayDirection.sub(pointOnArbitraryEdge, rayOrigin);
+
+      int numberOfIntersections = 0;
+
+      Point2D previousIntersection = null;
+      Point2D currentIntersection = null;
+
+      for (int i = 0; i < polygon.length; i++)
+      {
+         Point2DReadOnly edgeStart = polygon[i];
+         Point2DReadOnly edgeEnd = polygon[(i + 1) % polygon.length];
+
+         currentIntersection = intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, edgeStart, edgeEnd);
+
+         if (currentIntersection != null)
+         { // There is an intersection
+            if (previousIntersection == null || !currentIntersection.epsilonEquals(previousIntersection, 1.0e-10))
+            { // Because the intersection is different from the previous, the intersection is not on a vertex.
+               numberOfIntersections++;
+            }
+         }
+
+         previousIntersection = currentIntersection;
+      }
+
+      if (numberOfIntersections == 0)
       {
          //Could be both outside or inside
          return false;
       }
 
-      if (index % 2 == 0)
-      {
-         return false;
-      }
-      else
-      {
-         return true;
-      }
+      // If the number of intersections is odd, the point is inside.
+      return numberOfIntersections % 2 != 0;
    }
 
    public static boolean areBothPointsInsidePolygon(Point2D point1, Point2D point2, PlanarRegion homeRegion)
    {
-      ArrayList<Point2D> points = new ArrayList<>();
-      for (int i = 1; i < homeRegion.getConcaveHullSize(); i++)
-      {
-         Point2D point = homeRegion.getConcaveHull()[i];
-         points.add(point);
-      }
+      boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point1);
+      boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point2);
 
-      Point2D centroid = EuclidGeometryTools.averagePoint2Ds(points);
-
-      Vector2D directionToCentroid = new Vector2D(centroid.getX() - point1.getX(), centroid.getY() - point1.getY());
-      directionToCentroid.normalize();
-      directionToCentroid.scale(10);
-
-      Point2D endPoint = new Point2D(point1.getX() + directionToCentroid.getX(), point1.getY() + directionToCentroid.getY());
-
-      boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point1, endPoint);
-
-      directionToCentroid = new Vector2D(centroid.getX() - point2.getX(), centroid.getY() - point2.getY());
-      directionToCentroid.normalize();
-      directionToCentroid.scale(10);
-
-      endPoint = new Point2D(point2.getX() + directionToCentroid.getX(), point2.getY() + directionToCentroid.getY());
-
-      boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point2, endPoint);
-
-      if (startIsInside && goalIsInside)
-      {
-         return true;
-      }
-      return false;
+      return startIsInside && goalIsInside;
    }
 
    public static boolean areBothPointsInsidePolygon(Point2D point1, Point2D point2, List<Point2D> pointsInPolygon)
    {
-      Point2D centroid = EuclidGeometryTools.averagePoint2Ds(pointsInPolygon);
-
-      Vector2D directionToCentroid = new Vector2D(centroid.getX() - point1.getX(), centroid.getY() - point1.getY());
-      directionToCentroid.normalize();
-      directionToCentroid.scale(10);
-
-      Point2D endPoint = new Point2D(point1.getX() + directionToCentroid.getX(), point1.getY() + directionToCentroid.getY());
-
       Point2D[] pointsArr = pointsInPolygon.toArray(new Point2D[pointsInPolygon.size()]);
-      boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point1, endPoint);
+      boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point1);
+      boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point2);
 
-      directionToCentroid = new Vector2D(centroid.getX() - point2.getX(), centroid.getY() - point2.getY());
-      directionToCentroid.normalize();
-      directionToCentroid.scale(10);
-
-      endPoint = new Point2D(point2.getX() + directionToCentroid.getX(), point2.getY() + directionToCentroid.getY());
-
-      boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point2, endPoint);
-
-      if (startIsInside && goalIsInside)
-      {
-         return true;
-      }
-      return false;
+      return startIsInside && goalIsInside;
    }
 
    public static boolean isPartOfTheRegionInside(PlanarRegion regionToCheck, PlanarRegion containingRegion)
@@ -382,8 +359,6 @@ public class PlanarRegionTools
       ConvexPolygon2D homeConvexPol = new ConvexPolygon2D(homePointsArr);
       homeConvexPol.update();
 
-      Point3D centroidOfHomeRegion = PointCloudTools.getCentroid(pointsToCalculateCentroid);
-
       Vector3D normal = calculateNormal(containingRegion);
 
       for (int i = 0; i < regionToCheck.getConvexHull().getNumberOfVertices(); i++)
@@ -399,14 +374,12 @@ public class PlanarRegionTools
          Point3D pointToProject = fpt.getPoint();
          Point3D projectedPointFromOtherRegion = new Point3D();
 
-         //                     System.out.println(pointToProject + "  " + point3D + "  " + normal + "  " + projectedPointFromOtherRegion);
          EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal, projectedPointFromOtherRegion);
 
-         if (homeConvexPol.isPointInside(new Point2D(projectedPointFromOtherRegion.getX(), projectedPointFromOtherRegion.getY())))
+         if (homeConvexPol.isPointInside(new Point2D(projectedPointFromOtherRegion)))
          {
             return true;
          }
-         //         }
       }
 
       return false;
@@ -533,7 +506,7 @@ public class PlanarRegionTools
    }
 
    public static void classifyRegions(List<PlanarRegion> regionsToClassify, double zNormalThreshold, List<PlanarRegion> obstacleRegionsToPack,
-                                       List<PlanarRegion> accessibleRegionsToPack)
+                                      List<PlanarRegion> accessibleRegionsToPack)
    {
       Vector3D normal = new Vector3D();
 
@@ -553,7 +526,7 @@ public class PlanarRegionTools
          }
       }
    }
-   
+
    public static List<PlanarRegion> filterRegionsThatAreAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
    {
       List<PlanarRegion> filteredList = new ArrayList<>();
@@ -567,7 +540,7 @@ public class PlanarRegionTools
 
       return filteredList;
    }
-   
+
    public static boolean isRegionAboveHomeRegion(PlanarRegion regionToCheck, PlanarRegion homeRegion)
    {
       for (int i = 0; i < homeRegion.getConcaveHull().length; i++)
@@ -600,7 +573,7 @@ public class PlanarRegionTools
       //      System.out.println("Region is above home");
       return true;
    }
-   
+
    public static boolean isRegionTooHighToStep(PlanarRegion regionToProject, PlanarRegion regionToProjectTo, double tooHighToStepThreshold)
    {
       Vector3D normal = PlanarRegionTools.calculateNormal(regionToProjectTo);
@@ -626,5 +599,102 @@ public class PlanarRegionTools
       }
 
       return false;
+   }
+
+   public static boolean doRay2DAndLineSegment2DIntersect(Point2DReadOnly rayOrigin, Vector2DReadOnly rayDirection, Point2DReadOnly lineSegmentStart,
+                                                          Point2DReadOnly lineSegmentEnd)
+   {
+      return doRay2DAndLineSegment2DIntersect(rayOrigin.getX(), rayOrigin.getY(), rayDirection.getX(), rayDirection.getY(), lineSegmentStart.getX(),
+                                              lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
+   }
+
+   public static boolean doRay2DAndLineSegment2DIntersect(double rayOriginX, double rayOriginY, double rayDirectionX, double rayDirectionY,
+                                                          double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
+   {
+      return intersectionBetweenRay2DAndLineSegment2D(rayOriginX, rayOriginY, rayDirectionX, rayDirectionY, lineSegmentStartX, lineSegmentStartY,
+                                                      lineSegmentEndX, lineSegmentEndY, null);
+   }
+
+   public static Point2D intersectionBetweenRay2DAndLineSegment2D(Point2DReadOnly rayOrigin, Vector2D rayDirection, Point2DReadOnly lineSegmentStart,
+                                                                  Point2DReadOnly lineSegmentEnd)
+   {
+      Point2D intersection = new Point2D();
+      boolean success = intersectionBetweenRay2DAndLineSegment2D(rayOrigin.getX(), rayOrigin.getY(), rayDirection.getX(), rayDirection.getY(),
+                                                                 lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
+                                                                 intersection);
+      if (success)
+         return intersection;
+      else
+         return null;
+   }
+
+   public static boolean intersectionBetweenRay2DAndLineSegment2D(Point2DReadOnly rayOrigin, Vector2DReadOnly rayDirection, Point2DReadOnly lineSegmentStart,
+                                                                  Point2DReadOnly lineSegmentEnd, Point2DBasics intersectionToPack)
+   {
+      return intersectionBetweenRay2DAndLineSegment2D(rayOrigin.getX(), rayOrigin.getY(), rayDirection.getX(), rayDirection.getY(), lineSegmentStart.getX(),
+                                                      lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(), intersectionToPack);
+   }
+
+   public static boolean intersectionBetweenRay2DAndLineSegment2D(double rayOriginX, double rayOriginY, double rayDirectionX, double rayDirectionY,
+                                                                  double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
+                                                                  double lineSegmentEndY, Point2DBasics intersectionToPack)
+   {
+      double epsilon = 1.0e-7;
+
+      double lineSegmentDirectionX = lineSegmentEndX - lineSegmentStartX;
+      double lineSegmentDirectionY = lineSegmentEndY - lineSegmentStartY;
+
+      double determinant = -rayDirectionX * lineSegmentDirectionY + rayDirectionY * lineSegmentDirectionX;
+
+      double dx = lineSegmentStartX - rayOriginX;
+      double dy = lineSegmentStartY - rayOriginY;
+
+      if (Math.abs(determinant) < epsilon)
+      { // The ray and line segment are parallel
+        // Check if they are collinear
+         double cross = dx * rayDirectionY - dy * rayDirectionX;
+         if (Math.abs(cross) < epsilon)
+         {
+            if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentStartX, lineSegmentStartY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(lineSegmentStartX, lineSegmentStartY);
+               return true;
+            }
+
+            if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentEndX, lineSegmentEndY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(lineSegmentEndX, lineSegmentEndY);
+               return true;
+            }
+
+            return false;
+         }
+         // The ray and line segment are parallel but are not collinear, they do not intersect
+         else
+         {
+            return false;
+         }
+      }
+
+      double oneOverDeterminant = 1.0 / determinant;
+      double AInverse00 = -lineSegmentDirectionY;
+      double AInverse01 = lineSegmentDirectionX;
+      double AInverse10 = -rayDirectionY;
+      double AInverse11 = rayDirectionX;
+
+      double alpha = oneOverDeterminant * (AInverse00 * dx + AInverse01 * dy);
+      double beta = oneOverDeterminant * (AInverse10 * dx + AInverse11 * dy);
+
+      boolean areIntersecting = alpha > 0.0 - epsilon && 0.0 - epsilon < beta && beta < 1.0 + epsilon;
+
+      if (areIntersecting && intersectionToPack != null)
+      {
+         intersectionToPack.setX(rayOriginX + alpha * rayDirectionX);
+         intersectionToPack.setY(rayOriginY + alpha * rayDirectionY);
+      }
+
+      return areIntersecting;
    }
 }
