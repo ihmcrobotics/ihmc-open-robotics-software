@@ -583,45 +583,8 @@ public class PlanarRegionTools
    public static boolean doRay2DAndLineSegment2DIntersect(double rayOriginX, double rayOriginY, double rayDirectionX, double rayDirectionY,
                                                           double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
    {
-      double epsilon = 1.0e-7;
-
-      double lineSegmentDirectionX = lineSegmentEndX - lineSegmentStartX;
-      double lineSegmentDirectionY = lineSegmentEndY - lineSegmentStartY;
-
-      double determinant = -rayDirectionX * lineSegmentDirectionY + rayDirectionY * lineSegmentDirectionX;
-
-      double dx = lineSegmentStartX - rayOriginX;
-      double dy = lineSegmentStartY - rayOriginY;
-
-      if (Math.abs(determinant) < epsilon)
-      { // The ray and line segment are parallel
-        // Check if they are collinear
-         double cross = dx * rayDirectionY - dy * rayDirectionX;
-         if (Math.abs(cross) < epsilon)
-         {
-            if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentStartX, lineSegmentStartY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
-               return true;
-            if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentEndX, lineSegmentEndY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
-               return true;
-            return false;
-         }
-         // The ray and line segment are parallel but are not collinear, they do not intersect
-         else
-         {
-            return false;
-         }
-      }
-
-      double oneOverDeterminant = 1.0 / determinant;
-      double AInverse00 = -lineSegmentDirectionY;
-      double AInverse01 = lineSegmentDirectionX;
-      double AInverse10 = -rayDirectionY;
-      double AInverse11 = rayDirectionX;
-
-      double alpha = oneOverDeterminant * (AInverse00 * dx + AInverse01 * dy);
-      double beta = oneOverDeterminant * (AInverse10 * dx + AInverse11 * dy);
-
-      return alpha > 0.0 - epsilon && 0.0 - epsilon < beta && beta < 1.0 + epsilon;
+      return intersectionBetweenRay2DAndLineSegment2D(rayOriginX, rayOriginY, rayDirectionX, rayDirectionY, lineSegmentStartX, lineSegmentStartY,
+                                                      lineSegmentEndX, lineSegmentEndY, null);
    }
 
    public static Point2D intersectionBetweenRay2DAndLineSegment2D(Point2DReadOnly rayOrigin, Vector2D rayDirection, Point2DReadOnly lineSegmentStart,
@@ -648,46 +611,62 @@ public class PlanarRegionTools
                                                                   double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
                                                                   double lineSegmentEndY, Point2DBasics intersectionToPack)
    {
-      if (!doRay2DAndLineSegment2DIntersect(rayOriginX, rayOriginY, rayDirectionX, rayDirectionY, lineSegmentStartX, lineSegmentStartY, lineSegmentEndX,
-                                            lineSegmentEndY))
+      double epsilon = 1.0e-7;
+
+      double lineSegmentDirectionX = lineSegmentEndX - lineSegmentStartX;
+      double lineSegmentDirectionY = lineSegmentEndY - lineSegmentStartY;
+
+      double determinant = -rayDirectionX * lineSegmentDirectionY + rayDirectionY * lineSegmentDirectionX;
+
+      double dx = lineSegmentStartX - rayOriginX;
+      double dy = lineSegmentStartY - rayOriginY;
+
+      if (Math.abs(determinant) < epsilon)
+      { // The ray and line segment are parallel
+        // Check if they are collinear
+         double cross = dx * rayDirectionY - dy * rayDirectionX;
+         if (Math.abs(cross) < epsilon)
+         {
+            if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentStartX, lineSegmentStartY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(lineSegmentStartX, lineSegmentStartY);
+               return true;
+            }
+
+            if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentEndX, lineSegmentEndY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
+            {
+               if (intersectionToPack != null)
+                  intersectionToPack.set(lineSegmentEndX, lineSegmentEndY);
+               return true;
+            }
+
+            return false;
+         }
+         // The ray and line segment are parallel but are not collinear, they do not intersect
+         else
+         {
+            return false;
+         }
+      }
+
+      double oneOverDeterminant = 1.0 / determinant;
+      double AInverse00 = -lineSegmentDirectionY;
+      double AInverse01 = lineSegmentDirectionX;
+      double AInverse10 = -rayDirectionY;
+      double AInverse11 = rayDirectionX;
+
+      double alpha = oneOverDeterminant * (AInverse00 * dx + AInverse01 * dy);
+      double beta = oneOverDeterminant * (AInverse10 * dx + AInverse11 * dy);
+
+      boolean areIntersecting = alpha > 0.0 - epsilon && 0.0 - epsilon < beta && beta < 1.0 + epsilon;
+
+      if (areIntersecting && intersectionToPack != null)
       {
-         if (intersectionToPack != null)
-            intersectionToPack.setToNaN();
-         return false;
+         intersectionToPack.setX(rayOriginX + alpha * rayDirectionX);
+         intersectionToPack.setY(rayOriginY + alpha * rayDirectionY);
       }
 
-      double epsilon = 1.0e-10;
-
-      double lineSegmentDirectionx = lineSegmentEndX - lineSegmentStartX;
-      double lineSegmentDirectiony = lineSegmentEndY - lineSegmentStartY;
-
-      if (Math.abs(-rayDirectionX * lineSegmentDirectiony + rayDirectionY * lineSegmentDirectionx) > epsilon)
-      { // The ray and line segment are not parallel and are intersecting, same as finding the intersection of two lines.
-         double pointOnLine1x = rayOriginX;
-         double pointOnLine1y = rayOriginY;
-         double pointOnLine2x = lineSegmentStartX;
-         double pointOnLine2y = lineSegmentStartY;
-         return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(pointOnLine1x, pointOnLine1y, rayDirectionX, rayDirectionY, pointOnLine2x, pointOnLine2y,
-                                                                  lineSegmentDirectionx, lineSegmentDirectiony, intersectionToPack);
-      }
-      else
-      { // The ray and line segment are parallel and intersecting, they must be overlapping.
-        // Let's first check for a common endpoint
-        // Let's find the first endpoint that is inside the other line segment and return it.
-         if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentStartX, lineSegmentStartY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
-         {
-            intersectionToPack.set(lineSegmentStartX, lineSegmentStartY);
-            return true;
-         }
-
-         if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(lineSegmentEndX, lineSegmentEndY, rayOriginX, rayOriginY, rayDirectionX, rayDirectionY))
-         {
-            intersectionToPack.set(lineSegmentEndX, lineSegmentEndY);
-            return true;
-         }
-
-         // There is some inconsistency between doRay2DAndLineSegment2DIntersect and this method, crashing.
-         throw new RuntimeException("Unexpected state.");
-      }
+      return areIntersecting;
    }
 }
