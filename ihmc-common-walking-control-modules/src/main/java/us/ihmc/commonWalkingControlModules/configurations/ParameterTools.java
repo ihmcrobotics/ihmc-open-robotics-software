@@ -13,6 +13,8 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
@@ -35,20 +37,47 @@ public class ParameterTools
       }
    }
 
-   public static void extractAccelerationIntegrationParameterMap(List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> parameterList,
-                                                                  Map<String, JointAccelerationIntegrationParametersReadOnly> parameterMapToPack,
-                                                                  YoVariableRegistry registry)
+   public static void extractAccelerationIntegrationParameterMap(String prefix, List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> parameterList,
+                                                                 Map<String, JointAccelerationIntegrationParametersReadOnly> parameterMapToPack,
+                                                                 YoVariableRegistry registry)
    {
       parameterMapToPack.clear();
-      for (ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>> parameterTripple : parameterList)
+      if (parameterList == null)
       {
-         String name = parameterTripple.getLeft();
-         JointAccelerationIntegrationParametersReadOnly defaultParameters = parameterTripple.getMiddle();
-         TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name, registry, defaultParameters);
+         return;
+      }
 
-         for (String jointName : parameterTripple.getRight())
+      for (JointGroupParameter<JointAccelerationIntegrationParametersReadOnly> jointGroupParameter : parameterList)
+      {
+         String name = jointGroupParameter.getJointGroupName();
+         JointAccelerationIntegrationParametersReadOnly defaultParameters = jointGroupParameter.getParameter();
+         TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
+
+         for (String jointName : jointGroupParameter.getJointNames())
          {
             parameterMapToPack.put(jointName, yoParameters);
+         }
+      }
+   }
+
+   public static void extractJointBehaviorMap(String prefix, List<JointGroupParameter<JointDesiredBehaviorReadOnly>> parameterList,
+                                              Map<String, JointDesiredBehaviorReadOnly> parameterMapToPack, YoVariableRegistry registry)
+   {
+      parameterMapToPack.clear();
+      if (parameterList == null)
+      {
+         return;
+      }
+
+      for (JointGroupParameter<JointDesiredBehaviorReadOnly> jointGroupParameter : parameterList)
+      {
+         String name = jointGroupParameter.getJointGroupName();
+         JointDesiredBehaviorReadOnly defaultParameters = jointGroupParameter.getParameter();
+         JointDesiredBehaviorReadOnly tunableParameters = new TunableJointDesiredBehavior(prefix + name, defaultParameters, registry);
+
+         for (String jointName : jointGroupParameter.getJointNames())
+         {
+            parameterMapToPack.put(jointName, tunableParameters);
          }
       }
    }

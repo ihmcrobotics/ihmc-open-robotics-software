@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "ClearLogRequest" defined in ClearLogRequest.idl. 
@@ -14,7 +11,7 @@ public class ClearLogRequest
 {
     public ClearLogRequest()
     {
-        	guid_ = new StringBuilder(255); 
+        	guid_ = new java.lang.StringBuilder(255); 
         
         
     }
@@ -31,12 +28,12 @@ public class ClearLogRequest
         	guid_.append(guid);
         }
         
-        public String getGuidAsString()
+        public java.lang.String getGuidAsString()
         {
         	return getGuid().toString();
         }
 
-    public StringBuilder getGuid()
+    public java.lang.StringBuilder getGuid()
     {
         return guid_;
     }
@@ -47,7 +44,7 @@ public class ClearLogRequest
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -62,7 +59,7 @@ public class ClearLogRequest
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -75,6 +72,6 @@ public class ClearLogRequest
 		return builder.toString();
     }
 
-    private StringBuilder guid_; 
+    private java.lang.StringBuilder guid_; 
 
 }

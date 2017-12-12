@@ -277,7 +277,6 @@ public class SimulationConstructionSetProcessDataCallTest
       @Override
       public void initializeProcessing()
       {
-         // TODO Auto-generated method stub
          
       }
    }
@@ -307,7 +306,6 @@ public class SimulationConstructionSetProcessDataCallTest
       @Override
       public void initializeProcessing()
       {
-         // TODO Auto-generated method stub
          
       }
    }   

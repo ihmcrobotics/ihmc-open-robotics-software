@@ -3,11 +3,13 @@ package us.ihmc.robotics.linearAlgebra;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.ejml.alg.dense.misc.TransposeAlgs;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixIO;
 
@@ -587,6 +589,37 @@ public class MatrixTools
       for (int i = 0; i < 3; i++)
       {
          matrix.setElement(i, i, diagValues[i]);
+      }
+   }
+
+   /**
+    * Set diagonal elements of matrix to diagValues
+    *
+    * @param matrix
+    * @param diagValue
+    */
+   public static void setMatrixDiag(Matrix3D matrix, double diagValue)
+   {
+      matrix.setM00(diagValue);
+      matrix.setM11(diagValue);
+      matrix.setM22(diagValue);
+   }
+
+   /**
+    * Sets all the diagonal elements equal to one and everything else equal to zero.
+    * If this is a square matrix then it will be an identity matrix.
+    *
+    * @param mat A square matrix.
+    */
+   public static void setDiagonal( RowD1Matrix64F mat , double diagonalValue)
+   {
+      int width = mat.numRows < mat.numCols ? mat.numRows : mat.numCols;
+
+      Arrays.fill(mat.data, 0, mat.getNumElements(), 0);
+
+      int index = 0;
+      for( int i = 0; i < width; i++ , index += mat.numCols + 1) {
+         mat.data[index] = diagonalValue;
       }
    }
 

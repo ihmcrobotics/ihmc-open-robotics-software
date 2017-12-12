@@ -140,7 +140,6 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return pipeLine.isDone();
    }
 

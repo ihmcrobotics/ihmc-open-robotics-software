@@ -90,8 +90,8 @@ public class DiagonalMatrixTools
    /**
     * <p>Performs the following operation:<br>
     * <br>
-    * c = a * b <br>
-    * <br>
+    * c = a * b
+    * </br>
     * c<sub>ij</sub> = &sum;<sub>k=1:n</sub> { a<sub>ik</sub> * b<sub>kj</sub>}
     * </p>
     * <p>  where we assume that matrix 'b' is a diagonal matrix. </p>

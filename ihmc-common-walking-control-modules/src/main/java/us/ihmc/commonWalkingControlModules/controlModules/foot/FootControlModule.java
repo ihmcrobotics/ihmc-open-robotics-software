@@ -40,7 +40,19 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN
+      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN;
+
+      public boolean isLoaded()
+      {
+         switch (this)
+         {
+         case FULL:
+         case TOES:
+            return true;
+         default:
+            return false;
+         }
+      }
    }
 
    private static final double coefficientOfFriction = 0.8;

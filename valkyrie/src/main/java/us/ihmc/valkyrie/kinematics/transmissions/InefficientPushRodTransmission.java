@@ -319,14 +319,12 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    @Override
    public void actuatorToJointVelocity(LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData)
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public void actuatorToJointPosition(LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData)
    {
-      // TODO Auto-generated method stub
       
    }
    
@@ -334,14 +332,12 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    @Override
    public void jointToActuatorVelocity(LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData)
    {
-      // TODO Auto-generated method stub
       
    }
 
    @Override
    public void jointToActuatorPosition(LinearActuator[] actuatorData, ValkyrieJointInterface[] jointData)
    {
-      // TODO Auto-generated method stub
       
    }
 }

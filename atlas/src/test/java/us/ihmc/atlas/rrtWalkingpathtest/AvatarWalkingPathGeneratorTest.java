@@ -126,35 +126,30 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       @Override
       public TerrainObject3D getTerrainObject3D()
       {
-         // TODO Auto-generated method stub
          return EnvSet;
       }
 
       @Override
       public List<? extends Robot> getEnvironmentRobots()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public void createAndSetContactControllerToARobot()
       {
-         // TODO Auto-generated method stub
 
       }
 
       @Override
       public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
       {
-         // TODO Auto-generated method stub
 
       }
 
       @Override
       public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
       {
-         // TODO Auto-generated method stub
       }
    }
 

@@ -1,11 +1,13 @@
 package us.ihmc.robotics.functionApproximation;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.Matrix;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SpecializedOps;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
 {
@@ -75,11 +77,13 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       else
       {
          tempMatrix1.reshape(A.getNumRows(), A.getNumRows());
-         CommonOps.multTransB(A, A, tempMatrix1);
-         SpecializedOps.addIdentity(tempMatrix1, tempMatrix1, alpha * alpha);
+         CommonOps.multOuter(A, tempMatrix1);
+         MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
+
          linearSolver.setA(tempMatrix1);
          tempMatrix2.reshape(A.getNumCols(), b.getNumCols());
          linearSolver.solve(b, tempMatrix2);
+
          CommonOps.multTransA(A, tempMatrix2, x);
       }
    }
@@ -103,11 +107,13 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       else
       {
          tempMatrix1.reshape(A.getNumRows(), A.getNumRows());
-         CommonOps.multTransB(A, A, tempMatrix1);
-         SpecializedOps.addIdentity(tempMatrix1, tempMatrix1, alpha * alpha);
+         CommonOps.multOuter(A, tempMatrix1);
+         MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
+
          linearSolver.setA(tempMatrix1);
          tempMatrix2.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumCols());
          linearSolver.invert(tempMatrix2);
+
          CommonOps.multTransA(A, tempMatrix2, A_inv);
       }
    }

@@ -123,7 +123,6 @@ public class M2SimulationConstructor implements SimulationConstructor, Simulatio
 
    public void doActionAfterSimulationStateInitialized(Simulation simulation)
    {
-      // TODO Auto-generated method stub
       
    }
 }

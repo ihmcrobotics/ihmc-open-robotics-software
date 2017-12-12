@@ -52,6 +52,11 @@ public interface JointNameMap extends RobotSpecificJointNames
    boolean isTorqueVelocityLimitsEnabled();
 
    Set<String> getLastSimulatedJoints();
+   
+   default Set<String> getEndEffectorJoints()
+   {
+      return getLastSimulatedJoints();
+   }
 
    String[] getJointNamesBeforeFeet();
 

@@ -64,9 +64,9 @@ public class RigidBodyControlManager
    private final YoBoolean stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
-                                  Pose3D homePose, List<String> positionControlledJointNames, Collection<ReferenceFrame> trajectoryFrames,
-                                  ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody, YoDouble yoTime,
-                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
+                                  ContactablePlaneBody contactableBody, YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry,
+                                  YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -536,4 +536,8 @@ public class RigidBodyControlManager
       return ret;
    }
 
+   public OneDoFJoint[] getControlledJoints()
+   {
+      return jointsToControl;
+   }
 }
