@@ -28,6 +28,7 @@ public class Cluster
    private String name;
    private Point2D observerInLocal;
    private Point2D centroidInLocal = new Point2D();
+   private boolean isHomeRegion = false;
 
    public enum ExtrusionSide
    {
@@ -45,6 +46,16 @@ public class Cluster
 
    public Cluster()
    {
+   }
+
+   public void setHomeRegion(boolean isHomeRegion)
+   {
+      this.isHomeRegion = isHomeRegion;
+   }
+   
+   public boolean isHomeRegion()
+   {
+      return isHomeRegion;
    }
 
    public void setExtrusionSide(ExtrusionSide extrusionSide)
@@ -107,7 +118,7 @@ public class Cluster
    {
       return observerInLocal;
    }
-   
+
    public Point3D getObserverInWorld()
    {
       return toWorld3D(observerInLocal);

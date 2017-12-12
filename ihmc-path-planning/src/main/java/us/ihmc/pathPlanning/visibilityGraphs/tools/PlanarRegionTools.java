@@ -257,6 +257,7 @@ public class PlanarRegionTools
       return false;
    }
 
+   // FIXME This is flaky when the line (pointToCheck, lineEnd) goes through vertices of the polygon.
    public static boolean isPointInsidePolygon(Point2D[] polygon, Point2D pointToCheck, Point2D lineEnd)
    {
       int index = 0;

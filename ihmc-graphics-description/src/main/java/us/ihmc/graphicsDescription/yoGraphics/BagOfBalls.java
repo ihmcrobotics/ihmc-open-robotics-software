@@ -260,14 +260,24 @@ public class BagOfBalls
       index++;
    }
 
-   public void setBall(Point3D pointToTestAboveRamp)
+   public void setBall(Point3D location)
    {
-      setBall(new FramePoint3D(worldFrame, pointToTestAboveRamp));
+      setBall(new FramePoint3D(worldFrame, location));
    }
 
-   public void setBall(Point3D pointToTestAboveRamp, AppearanceDefinition appearance)
+   public void setBall(Point3D location, int ballIndex)
    {
-      setBall(new FramePoint3D(worldFrame, pointToTestAboveRamp), appearance);
+      setBall(new FramePoint3D(worldFrame, location), null, ballIndex);
+   }
+
+   public void setBall(Point3D location, AppearanceDefinition appearance)
+   {
+      setBall(new FramePoint3D(worldFrame, location), appearance);
+   }
+
+   public void setBall(Point3D location, AppearanceDefinition appearance, int ballIndex)
+   {
+      setBall(new FramePoint3D(worldFrame, location), appearance, ballIndex);
    }
 
    /**
