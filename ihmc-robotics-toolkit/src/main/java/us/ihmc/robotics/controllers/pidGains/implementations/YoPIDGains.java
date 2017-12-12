@@ -1,13 +1,15 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoPIDGains extends YoPDGains
+public class YoPIDGains extends YoPDGains implements PIDGainsReadOnly
 {
-   protected final YoDouble ki;
-   private final YoDouble maxIntegralError, integralLeakRatio;
+   private final YoDouble ki;
+   private final YoDouble maxIntegralError;
+   private final YoDouble integralLeakRatio;
 
    public YoPIDGains(String suffix, YoVariableRegistry registry)
    {
@@ -39,6 +41,24 @@ public class YoPIDGains extends YoPDGains
    public void setIntegralLeakRatio(double integralLeakRatio)
    {
       this.integralLeakRatio.set(MathTools.clamp(integralLeakRatio, 0.0, 1.0));
+   }
+
+   @Override
+   public double getKi()
+   {
+      return ki.getDoubleValue();
+   }
+
+   @Override
+   public double getMaxIntegralError()
+   {
+      return maxIntegralError.getDoubleValue();
+   }
+
+   @Override
+   public double getIntegralLeakRatio()
+   {
+      return integralLeakRatio.getDoubleValue();
    }
 
    public YoDouble getYoKi()

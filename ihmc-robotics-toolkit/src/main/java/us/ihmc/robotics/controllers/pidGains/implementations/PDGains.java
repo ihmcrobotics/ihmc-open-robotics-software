@@ -1,17 +1,18 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 
-public class PDGains
+public class PDGains implements PDGainsReadOnly
 {
    private double kp;
    private double kd;
    private double zeta;
-   private double maximumOutput;
    private double maximumFeedback;
    private double maximumFeedbackRate;
    private double positionDeadband;
 
+   @Override
    public double getKp()
    {
       return kp;
@@ -34,21 +35,36 @@ public class PDGains
       kd = GainCalculator.computeDerivativeGain(kp, zeta);
    }
 
+   public void setKd(double kd)
+   {
+      this.kd = kd;
+      zeta = GainCalculator.computeDampingRatio(kp, kd);
+   }
+
+   public void set(PDGainsReadOnly other)
+   {
+      setKp(other.getKp());
+      setKd(other.getKd());
+      setMaximumFeedback(other.getMaximumFeedback());
+      setMaximumFeedbackRate(other.getMaximumFeedbackRate());
+      setPositionDeadband(other.getPositionDeadband());
+   }
+
+   public void set(double kp, double kd, double maxFeedback, double maxFeedbackRate)
+   {
+      setKp(kp);
+      setKd(kd);
+      setMaximumFeedback(maxFeedback);
+      setMaximumFeedbackRate(maxFeedbackRate);
+   }
+
+   @Override
    public double getKd()
    {
       return kd;
    }
 
-   public double getMaximumOutput()
-   {
-      return maximumOutput;
-   }
-
-   public void setMaximumOutput(double maximumOutput)
-   {
-      this.maximumOutput = maximumOutput;
-   }
-
+   @Override
    public double getMaximumFeedback()
    {
       return maximumFeedback;
@@ -59,6 +75,7 @@ public class PDGains
       this.maximumFeedback = maximumFeedback;
    }
 
+   @Override
    public double getMaximumFeedbackRate()
    {
       return maximumFeedbackRate;
@@ -69,6 +86,7 @@ public class PDGains
       this.maximumFeedbackRate = maximumFeedbackRate;
    }
 
+   @Override
    public double getPositionDeadband()
    {
       return positionDeadband;
