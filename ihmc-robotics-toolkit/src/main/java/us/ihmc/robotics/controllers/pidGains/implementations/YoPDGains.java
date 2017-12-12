@@ -165,11 +165,11 @@ public class YoPDGains implements PDGainsReadOnly
       this.positionDeadband.set(other.positionDeadband.getDoubleValue());
    }
 
-   public void set(PDGains pdGains)
+   public void set(PDGainsReadOnly pdGains)
    {
       setKp(pdGains.getKp());
       setKd(pdGains.getKd());
-      setZeta(pdGains.getZeta());
+      setZeta(GainCalculator.computeDampingRatio(pdGains.getKp(), pdGains.getKd()));
       setMaximumFeedback(pdGains.getMaximumFeedback());
       setMaximumFeedbackRate(pdGains.getMaximumFeedbackRate());
       setPositionDeadband(pdGains.getPositionDeadband());
