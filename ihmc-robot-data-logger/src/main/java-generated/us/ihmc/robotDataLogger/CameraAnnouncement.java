@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "CameraAnnouncement" defined in Announcement.idl. 
@@ -14,8 +11,8 @@ public class CameraAnnouncement
 {
     public CameraAnnouncement()
     {
-        	name_ = new StringBuilder(255); 
-        	identifier_ = new StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
+        	identifier_ = new java.lang.StringBuilder(255); 
         
         
     }
@@ -47,12 +44,12 @@ public class CameraAnnouncement
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -64,12 +61,12 @@ public class CameraAnnouncement
         	identifier_.append(identifier);
         }
         
-        public String getIdentifierAsString()
+        public java.lang.String getIdentifierAsString()
         {
         	return getIdentifier().toString();
         }
 
-    public StringBuilder getIdentifier()
+    public java.lang.StringBuilder getIdentifier()
     {
         return identifier_;
     }
@@ -80,7 +77,7 @@ public class CameraAnnouncement
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -100,7 +97,7 @@ public class CameraAnnouncement
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -122,7 +119,7 @@ public class CameraAnnouncement
     }
 
     private us.ihmc.robotDataLogger.CameraType type_; 
-    private StringBuilder name_; 
-    private StringBuilder identifier_; 
+    private java.lang.StringBuilder name_; 
+    private java.lang.StringBuilder identifier_; 
 
 }
