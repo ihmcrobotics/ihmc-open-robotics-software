@@ -1,11 +1,17 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
+package us.ihmc.robotics.linearAlgebra;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.robotics.linearAlgebra.DampedNullspaceCalculator;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class DampedLeastSquaresNullspaceCalculator
+public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCalculator
 {
    private final DampedLeastSquaresSolver pseudoInverseSolver;
 
@@ -21,34 +27,34 @@ public class DampedLeastSquaresNullspaceCalculator
       tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
    }
 
+   @Override
    public void setPseudoInverseAlpha(double alpha)
    {
       pseudoInverseSolver.setAlpha(alpha);
    }
 
    /**
-    * Compute the nullspace of the given matrix as follows:
+    * Compute the nullspace projector of the given matrix as follows:
     * <p>
     * &Nu; = I - M<sup>+</sup>M
     * </p>
     * Where M<sup>+</sup> is the Moore-Penrose pseudo-inverse of M.
     * A damped least-squares solver is used to compute M<sup>+</sup>.
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection. Not Modified.
-    * @param nullspaceToPack matrix to store the resulting nullspace matrix. Modified.
+    * @param nullspaceProjectorToPack matrix to store the resulting nullspace matrix. Modified.
     */
-   public void computeNullspace(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceToPack)
+   @Override
+   public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
    {
       int nullspaceMatrixSize = matrixToComputeNullspaceOf.getNumCols();
-      nullspaceToPack.reshape(nullspaceMatrixSize, nullspaceMatrixSize);
 
       pseudoInverseMatrix.reshape(nullspaceMatrixSize, matrixToComputeNullspaceOf.getNumRows());
       pseudoInverseSolver.setA(matrixToComputeNullspaceOf);
       pseudoInverseSolver.invert(pseudoInverseMatrix);
 
       // I - J^* J
-      CommonOps.mult(-1.0, pseudoInverseMatrix, matrixToComputeNullspaceOf, nullspaceToPack);
-      for (int i = 0; i < nullspaceMatrixSize; i++)
-         nullspaceToPack.add(i, i, 1.0);
+      CommonOps.mult(-1.0, pseudoInverseMatrix, matrixToComputeNullspaceOf, nullspaceProjectorToPack);
+      MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
    }
 
    /**
@@ -59,6 +65,7 @@ public class DampedLeastSquaresNullspaceCalculator
     * @param matrixToProjectOntoNullspace the matrix to be projected, A in the equation. Modified.
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection, B in the equation. Not Modified.
     */
+   @Override
    public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf)
    {
       tempMatrixForProjectionInPlace.set(matrixToProjectOntoNullspace);
@@ -74,9 +81,11 @@ public class DampedLeastSquaresNullspaceCalculator
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection, B in the equation. Not Modified.
     * @param projectedMatrixToPack matrix to store the resulting projection, C in the equation. Modified.
     */
+   @Override
    public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
    {
-      computeNullspace(matrixToComputeNullspaceOf, nullspaceProjector);
+      nullspaceProjector.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToProjectOntoNullspace.getNumCols());
+      computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
       projectedMatrixToPack.reshape(matrixToProjectOntoNullspace.getNumRows(), matrixToProjectOntoNullspace.getNumCols());
       CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
    }

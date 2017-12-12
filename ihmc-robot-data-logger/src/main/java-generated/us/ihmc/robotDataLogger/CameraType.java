@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the enum "CameraType" defined in Announcement.idl. 
