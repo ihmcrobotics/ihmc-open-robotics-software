@@ -38,16 +38,13 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DiagnosticsWhenHangingControllerState extends HighLevelControllerState implements RobotController, JointTorqueOffsetEstimator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private static final HighLevelControllerName controllerState = HighLevelControllerName.DIAGNOSTICS;
 
    private JointTorqueOffsetProcessor jointTorqueOffsetProcessor;
@@ -114,7 +111,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
                                                 HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                 TorqueOffsetPrinter torqueOffsetPrinter)
    {
-      super(controllerState);
+      super(controllerState, highLevelControllerParameters, controllerToolbox);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
       this.bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
@@ -144,12 +141,6 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
-      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
-      for (OneDoFJoint controlledJoint : controlledJoints)
-      {
-         JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(controlledJoint.getName(), controllerState);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoint, jointControlMode);
-      }
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -257,12 +248,6 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-
-   @Override
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
@@ -323,7 +308,9 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
+      lowLevelOneDoFJointDesiredDataHolder.clear();
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(jointArray);
+      lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
    private void callUpdatables()

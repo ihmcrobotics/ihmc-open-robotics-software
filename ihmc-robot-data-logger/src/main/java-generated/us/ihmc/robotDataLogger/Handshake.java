@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "Handshake" defined in Handshake.idl. 
@@ -14,17 +11,17 @@ public class Handshake
 {
     public Handshake()
     {
-        	registries_ = new IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class, new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
+        	registries_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class, new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
 
-        	variables_ = new IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> (32767, us.ihmc.robotDataLogger.YoVariableDefinition.class, new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
+        	variables_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> (32767, us.ihmc.robotDataLogger.YoVariableDefinition.class, new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
 
-        	joints_ = new IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> (128, us.ihmc.robotDataLogger.JointDefinition.class, new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
+        	joints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> (128, us.ihmc.robotDataLogger.JointDefinition.class, new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
 
-        	graphicObjects_ = new IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+        	graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
 
-        	artifacts_ = new IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+        	artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
 
-        	enumTypes_ = new IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, us.ihmc.robotDataLogger.EnumType.class, new us.ihmc.robotDataLogger.EnumTypePubSubType());
+        	enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, us.ihmc.robotDataLogger.EnumType.class, new us.ihmc.robotDataLogger.EnumTypePubSubType());
 
         	summary_ = new us.ihmc.robotDataLogger.Summary();
         
@@ -49,42 +46,42 @@ public class Handshake
 
         
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  getRegistries()
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  getRegistries()
     {
         return registries_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  getVariables()
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  getVariables()
     {
         return variables_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  getJoints()
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  getJoints()
     {
         return joints_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getGraphicObjects()
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getGraphicObjects()
     {
         return graphicObjects_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getArtifacts()
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getArtifacts()
     {
         return artifacts_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  getEnumTypes()
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  getEnumTypes()
     {
         return enumTypes_;
     }
@@ -102,7 +99,7 @@ public class Handshake
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -132,7 +129,7 @@ public class Handshake
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -174,12 +171,12 @@ public class Handshake
     }
 
     private double dt_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  registries_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  variables_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  joints_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  graphicObjects_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  artifacts_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  enumTypes_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  registries_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  variables_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  joints_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  graphicObjects_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  artifacts_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  enumTypes_; 
     private us.ihmc.robotDataLogger.Summary summary_; 
 
 }

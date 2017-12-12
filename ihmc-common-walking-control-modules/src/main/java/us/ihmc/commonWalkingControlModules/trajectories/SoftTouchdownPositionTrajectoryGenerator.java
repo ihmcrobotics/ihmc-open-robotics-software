@@ -188,12 +188,10 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    @Override
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

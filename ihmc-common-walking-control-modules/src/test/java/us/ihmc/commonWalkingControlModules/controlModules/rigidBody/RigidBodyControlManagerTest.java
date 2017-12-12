@@ -496,9 +496,6 @@ public class RigidBodyControlManagerTest
       homeConfiguration.put(joint1.getName(), q1_home);
       homeConfiguration.put(joint2.getName(), q2_home);
 
-      // no position controlled joints
-      List<String> positionControlledJointNames = new ArrayList<>();
-
       // add some possible trajectory frames
       Collection<ReferenceFrame> trajectoryFrames = new ArrayList<>();
       trajectoryFrames.add(link1.getBodyFixedFrame());
@@ -513,8 +510,8 @@ public class RigidBodyControlManagerTest
       ReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
 
-      return new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, positionControlledJointNames, trajectoryFrames,
-                                         controlFrame, baseFrame, contactableBody, yoTime, null, testRegistry);
+      return new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, trajectoryFrames, controlFrame, baseFrame, contactableBody,
+                                         yoTime, null, testRegistry);
    }
 
    private void setGainsAndWeights(RigidBodyControlManager manager)

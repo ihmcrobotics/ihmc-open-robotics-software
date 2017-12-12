@@ -1,13 +1,5 @@
 package us.ihmc.robotDataLogger;
 
-import java.io.IOException;
-
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.common.SerializedPayload;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.IDLSequence;
-
 /**
 * 
 * Topic data type of the struct "GraphicObjectMessage" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
@@ -16,9 +8,9 @@ import us.ihmc.idl.IDLSequence;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.robotDataLogger.GraphicObjectMessage>
+public class GraphicObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.GraphicObjectMessage>
 {
-	public static final String name = "us::ihmc::robotDataLogger::GraphicObjectMessage";
+	public static final java.lang.String name = "us::ihmc::robotDataLogger::GraphicObjectMessage";
 	
 	
 	
@@ -27,19 +19,19 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.rob
         
     }
 
-	private final CDR serializeCDR = new CDR();
-	private final CDR deserializeCDR = new CDR();
+	private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
+	private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
     
     @Override
-   public void serialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
       serializeCDR.finishSerialize();
    }
    @Override
-   public void deserialize(SerializedPayload serializedPayload, us.ihmc.robotDataLogger.GraphicObjectMessage data) throws IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.GraphicObjectMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -55,20 +47,20 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.rob
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
+	    current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (1024 * 2) + CDR.alignment(current_alignment, 2);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+	    current_alignment += (1024 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (128 * 8) + CDR.alignment(current_alignment, 8);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+	    current_alignment += (128 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 	    current_alignment += us.ihmc.robotDataLogger.AppearanceDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	
 	    return current_alignment - initial_alignment;
@@ -84,26 +76,26 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.rob
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
+	    current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (data.getYoVariableIndex().size() * 2) + CDR.alignment(current_alignment, 2);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+	    current_alignment += (data.getYoVariableIndex().size() * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (data.getConstants().size() * 8) + CDR.alignment(current_alignment, 8);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+	    current_alignment += (data.getConstants().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 	    current_alignment += us.ihmc.robotDataLogger.AppearanceDefinitionMessagePubSubType.getCdrSerializedSize(data.getAppearance(), current_alignment);
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getListName().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getListName().length() + 1;
 
 	
 	    return current_alignment - initial_alignment;
 	}
 	
-   public static void write(us.ihmc.robotDataLogger.GraphicObjectMessage data, CDR cdr)
+   public static void write(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.CDR cdr)
    {
 
 	    cdr.write_type_3(data.getType());
@@ -127,7 +119,7 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.rob
 	        throw new RuntimeException("listName field exceeds the maximum length");
    }
 
-   public static void read(us.ihmc.robotDataLogger.GraphicObjectMessage data, CDR cdr)
+   public static void read(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.CDR cdr)
    {
 
 	    	data.setType(cdr.read_type_3());
@@ -145,7 +137,7 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.rob
    }
    
 	@Override
-	public final void serialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, InterchangeSerializer ser)
+	public final void serialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.InterchangeSerializer ser)
 	{
 			    ser.write_type_3("type", data.getType());
 			    
@@ -163,7 +155,7 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.rob
 	}
 	
 	@Override
-	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.GraphicObjectMessage data)
+	public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.GraphicObjectMessage data)
 	{
 	    			data.setType(ser.read_type_3("type"));	
 	    	    
@@ -196,21 +188,21 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<us.ihmc.rob
    @Override
    public int getTypeSize()
    {
-      return CDR.getTypeSize(getMaxCdrSerializedSize());
+      return us.ihmc.idl.CDR.getTypeSize(getMaxCdrSerializedSize());
    }
 
    @Override
-   public String getName()
+   public java.lang.String getName()
    {
       return name;
    }
    
-   public void serialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, CDR cdr)
+   public void serialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.CDR cdr)
 	{
 		write(data, cdr);
 	}
 
-   public void deserialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, CDR cdr)
+   public void deserialize(us.ihmc.robotDataLogger.GraphicObjectMessage data, us.ihmc.idl.CDR cdr)
    {
         read(data, cdr);
    }

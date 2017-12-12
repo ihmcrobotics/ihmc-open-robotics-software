@@ -63,7 +63,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       wiggleIntoConvexHullOfPlanarRegions.set(defaults.getWiggleIntoConvexHullOfPlanarRegions());
       maximumXYWiggleDistance.set(defaults.getMaximumXYWiggleDistance());
       maximumYawWiggle.set(defaults.getMaximumYawWiggle());
-      cliffHeightToShiftAwayFrom.set(defaults.getCliffHeightToShiftAwayFrom());
+      cliffHeightToShiftAwayFrom.set(defaults.getCliffHeightToAvoid());
       minimumDistanceFromCliffBottoms.set(defaults.getMinimumDistanceFromCliffBottoms());
       minimumSurfaceInclineRadians.set(defaults.getMinimumSurfaceInclineRadians());
       maximumZPenetrationOnValleyRegions.set(defaults.getMaximumZPenetrationOnValleyRegions());
@@ -191,7 +191,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
-   public double getCliffHeightToShiftAwayFrom()
+   public double getCliffHeightToAvoid()
    {
       return cliffHeightToShiftAwayFrom.getDoubleValue();
    }

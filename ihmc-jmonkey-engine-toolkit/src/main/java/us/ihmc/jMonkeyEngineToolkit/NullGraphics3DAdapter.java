@@ -158,7 +158,6 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
                public Quaternion getCameraRotation()
                {
-                  // TODO Auto-generated method stub
                   return new Quaternion();
                }
 

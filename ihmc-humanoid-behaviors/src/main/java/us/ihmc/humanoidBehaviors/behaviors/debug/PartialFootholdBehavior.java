@@ -22,7 +22,6 @@ public class PartialFootholdBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -66,28 +65,24 @@ public class PartialFootholdBehavior extends AbstractBehavior
    @Override
    public void onBehaviorAborted()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
 
    }
 

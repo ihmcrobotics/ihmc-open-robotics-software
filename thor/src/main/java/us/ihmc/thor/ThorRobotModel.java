@@ -46,7 +46,14 @@ import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobot
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.thor.configuration.ThorConfigurationRoot;
-import us.ihmc.thor.parameters.*;
+import us.ihmc.thor.parameters.ThorCapturePointPlannerParameters;
+import us.ihmc.thor.parameters.ThorContactPointParameters;
+import us.ihmc.thor.parameters.ThorHighLevelControllerParameters;
+import us.ihmc.thor.parameters.ThorJointMap;
+import us.ihmc.thor.parameters.ThorSensorInformation;
+import us.ihmc.thor.parameters.ThorStateEstimatorParameters;
+import us.ihmc.thor.parameters.ThorUIParameters;
+import us.ihmc.thor.parameters.ThorWalkingControllerParameters;
 import us.ihmc.thor.sensors.ThorSensorSuiteManager;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
@@ -152,7 +159,7 @@ public class ThorRobotModel implements DRCRobotModel, SDFDescriptionMutator
       capturePointPlannerParameters = new ThorCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new ThorWalkingControllerParameters(target, jointMap);
       stateEstimatorParamaters = new ThorStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
-      highLevelControllerParameters = new ThorHighLevelControllerParameters();
+      highLevelControllerParameters = new ThorHighLevelControllerParameters(jointMap);
       robotDescription = createRobotDescription();
    }
 

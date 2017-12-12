@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "LogData" defined in LogData.idl. 
@@ -14,8 +11,8 @@ public class LogData
 {
     public LogData()
     {
-        	data_ = new IDLSequence.Byte (100, "type_9");
-        	jointStates_ = new IDLSequence.Double (100, "type_6");
+        	data_ = new us.ihmc.idl.IDLSequence.Byte (100, "type_9");
+        	jointStates_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
         
         
     }
@@ -110,14 +107,14 @@ public class LogData
 
         
 
-    public IDLSequence.Byte  getData()
+    public us.ihmc.idl.IDLSequence.Byte  getData()
     {
         return data_;
     }
 
         
 
-    public IDLSequence.Double  getJointStates()
+    public us.ihmc.idl.IDLSequence.Double  getJointStates()
     {
         return jointStates_;
     }
@@ -128,7 +125,7 @@ public class LogData
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -166,7 +163,7 @@ public class LogData
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -218,7 +215,7 @@ public class LogData
     private int registry_; 
     private int offset_; 
     private int numberOfVariables_; 
-    private IDLSequence.Byte  data_; 
-    private IDLSequence.Double  jointStates_; 
+    private us.ihmc.idl.IDLSequence.Byte  data_; 
+    private us.ihmc.idl.IDLSequence.Double  jointStates_; 
 
 }

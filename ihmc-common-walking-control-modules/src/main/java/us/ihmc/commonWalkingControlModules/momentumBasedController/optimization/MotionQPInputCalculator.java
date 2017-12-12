@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
+import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -598,7 +599,7 @@ public class MotionQPInputCalculator
    private void recordTaskJacobian(DenseMatrix64F taskJacobian)
    {
       int taskSize = taskJacobian.getNumRows();
-      allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs);
+      allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs, true);
       CommonOps.insert(taskJacobian, allTaskJacobian, allTaskJacobian.getNumRows() - taskSize, 0);
    }
 

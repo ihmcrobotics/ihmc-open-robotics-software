@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "ModelFileDescription" defined in Announcement.idl. 
@@ -14,9 +11,9 @@ public class ModelFileDescription
 {
     public ModelFileDescription()
     {
-        	name_ = new StringBuilder(255); 
-        	modelLoaderClass_ = new StringBuilder(255); 
-        	resourceDirectories_ = new IDLSequence.StringBuilderHolder (255, "type_d");           
+        	name_ = new java.lang.StringBuilder(255); 
+        	modelLoaderClass_ = new java.lang.StringBuilder(255); 
+        	resourceDirectories_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (255, "type_d");           
         
     }
 
@@ -50,12 +47,12 @@ public class ModelFileDescription
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -67,19 +64,19 @@ public class ModelFileDescription
         	modelLoaderClass_.append(modelLoaderClass);
         }
         
-        public String getModelLoaderClassAsString()
+        public java.lang.String getModelLoaderClassAsString()
         {
         	return getModelLoaderClass().toString();
         }
 
-    public StringBuilder getModelLoaderClass()
+    public java.lang.StringBuilder getModelLoaderClass()
     {
         return modelLoaderClass_;
     }
 
         
 
-    public IDLSequence.StringBuilderHolder  getResourceDirectories()
+    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getResourceDirectories()
     {
         return resourceDirectories_;
     }
@@ -123,7 +120,7 @@ public class ModelFileDescription
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -154,7 +151,7 @@ public class ModelFileDescription
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -192,9 +189,9 @@ public class ModelFileDescription
     }
 
     private boolean hasModel_; 
-    private StringBuilder name_; 
-    private StringBuilder modelLoaderClass_; 
-    private IDLSequence.StringBuilderHolder  resourceDirectories_; 
+    private java.lang.StringBuilder name_; 
+    private java.lang.StringBuilder modelLoaderClass_; 
+    private us.ihmc.idl.IDLSequence.StringBuilderHolder  resourceDirectories_; 
     private int modelFileSize_; 
     private boolean hasResourceZip_; 
     private int resourceZipSize_; 
