@@ -74,6 +74,8 @@ public class VisibilityGraphsOcclusionTest
    private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
    private static final int maxNumberOfIterations = 40;
 
+   private enum OcclusionMethod {OCCLUSION, OCCLUSION_PLUS_GROUND, NO_OCCLUSION};
+
    @Rule
    public TestName name = new TestName();
 
@@ -84,7 +86,7 @@ public class VisibilityGraphsOcclusionTest
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createFlatGround(startPose, goalPose);
-      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime, 3.0);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime, 3.0);
    }
 
    @Test(timeout = TIMEOUT)
@@ -103,7 +105,7 @@ public class VisibilityGraphsOcclusionTest
 
       PlanarRegionsList regions = generator.getPlanarRegionsList();
 
-      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime);
    }
 
    @Test(timeout = TIMEOUT)
@@ -113,7 +115,7 @@ public class VisibilityGraphsOcclusionTest
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createSimpleOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
    @Test(timeout = TIMEOUT)
@@ -123,15 +125,16 @@ public class VisibilityGraphsOcclusionTest
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createMazeOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
-   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, boolean cheatByAddingGroundRegion, double maxAllowedSolveTime)
+   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime)
    {
-      runTest(start, goal, regions, cheatByAddingGroundRegion, maxAllowedSolveTime, defaultMarchingSpeedInMetersPerTick);
+      runTest(start, goal, regions, occlusionMethod, maxAllowedSolveTime, defaultMarchingSpeedInMetersPerTick);
    }
 
-   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, boolean cheatByAddingGroundRegion, double maxAllowedSolveTime, double marchingSpeedInMetersPerTick)
+   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime,
+                        double marchingSpeedInMetersPerTick)
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -179,14 +182,17 @@ public class VisibilityGraphsOcclusionTest
             graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(visualization);
          }
 
-         rayIntersectionVisualizations = new ArrayList<>();
-         for (int i = 0; i < rays; i++)
+         if (occlusionMethod != OcclusionMethod.NO_OCCLUSION)
          {
-            YoFramePoint point = new YoFramePoint("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
-            point.setToNaN();
-            YoGraphicPosition visualization = new YoGraphicPosition("RayIntersection" + i, point, 0.0025, YoAppearance.Blue());
-            rayIntersectionVisualizations.add(point);
-            graphicsListRegistry.registerYoGraphic("viz", visualization);
+            rayIntersectionVisualizations = new ArrayList<>();
+            for (int i = 0; i < rays; i++)
+            {
+               YoFramePoint point = new YoFramePoint("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
+               point.setToNaN();
+               YoGraphicPosition visualization = new YoGraphicPosition("RayIntersection" + i, point, 0.0025, YoAppearance.Blue());
+               rayIntersectionVisualizations.add(point);
+               graphicsListRegistry.registerYoGraphic("viz", visualization);
+            }
          }
 
          observerPoint = new YoFramePoint("Observer", worldFrame, registry);
@@ -210,10 +216,20 @@ public class VisibilityGraphsOcclusionTest
 
       // Add the ground plane here so the visibility graph works. Remove that later.
       PlanarRegionsList visiblePlanarRegions;
-      if (cheatByAddingGroundRegion)
-         visiblePlanarRegions = new PlanarRegionsList(regions.getPlanarRegion(0));
-      else
+      switch (occlusionMethod)
+      {
+      case OCCLUSION:
          visiblePlanarRegions = new PlanarRegionsList();
+         break;
+      case OCCLUSION_PLUS_GROUND:
+         visiblePlanarRegions = new PlanarRegionsList(regions.getPlanarRegion(0));
+         break;
+      case NO_OCCLUSION:
+         visiblePlanarRegions = regions;
+         break;
+      default:
+         throw new RuntimeException("Unhandled occlusion method: " + occlusionMethod);
+      }
 
       int iteration = -1;
 
@@ -232,7 +248,8 @@ public class VisibilityGraphsOcclusionTest
          Point3D observer = new Point3D(currentPosition.getFrameTuple());
          observer.addZ(0.05);
 
-         visiblePlanarRegions = createVisibleRegions(regions, observer, visiblePlanarRegions, rayIntersectionVisualizations);
+         if (occlusionMethod != OcclusionMethod.NO_OCCLUSION)
+            visiblePlanarRegions = createVisibleRegions(regions, observer, visiblePlanarRegions, rayIntersectionVisualizations);
 
          if (visualize)
          {
