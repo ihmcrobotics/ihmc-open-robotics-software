@@ -36,7 +36,7 @@ public class NavigableRegionsManager
    private List<PlanarRegion> obstacleRegions = new ArrayList<>();
    private List<NavigableRegion> listOfLocalPlanners = new ArrayList<>();
    private List<VisibilityMap> visMaps = new ArrayList<>();
-   private SimpleWeightedGraph<Point3DReadOnly, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+   private SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
    private JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder;
    private double pathLength = 0.0;
@@ -384,11 +384,11 @@ public class NavigableRegionsManager
 
    private List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      ArrayList<DefaultWeightedEdge> solution = (ArrayList<DefaultWeightedEdge>) DijkstraShortestPath.findPathBetween(globalVisMap, start, goal);
+      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(globalVisMap, new ConnectionPoint3D(start), new ConnectionPoint3D(goal));
       return convertVisibilityGraphSolutionToPath(solution, start);
    }
 
-   private List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(ArrayList<DefaultWeightedEdge> solution, Point3DReadOnly start)
+   private List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, Point3DReadOnly start)
    {
       List<Point3DReadOnly> path = new ArrayList<>();
       pathLength = 0.0;
@@ -458,8 +458,8 @@ public class NavigableRegionsManager
       int actualConnectionsAdded = 0;
       for (Connection pair : globalMapPoints)
       {
-         Point3DReadOnly pt1 = pair.getSourcePoint();
-         Point3DReadOnly pt2 = pair.getTargetPoint();
+         ConnectionPoint3D pt1 = pair.getSourcePoint();
+         ConnectionPoint3D pt2 = pair.getTargetPoint();
 
          if (!pt1.epsilonEquals(pt2, 1e-5))
          {
