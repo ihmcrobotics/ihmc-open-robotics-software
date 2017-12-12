@@ -157,25 +157,25 @@ public class NavigableRegionsManager
       long endCreationTime = System.currentTimeMillis();
 
       boolean readyToRunBodyPath = false;
-      if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+      //      if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+      //      {
+      //         readyToRunBodyPath = true;
+      //         globalMapPoints.add(new Connection(start, goal));
+      //      }
+      //      else
+      //      {
+      if (startProjected != null && goalProjected != null)
       {
-         readyToRunBodyPath = true;
-         globalMapPoints.add(new Connection(start, goal));
+         readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
       }
-      else
-      {
-         if(startProjected != null && goalProjected != null)
-         {
-            readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
-         }
-      }
+      //      }
 
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
       connectLocalMaps();
       long endConnectingTime = System.currentTimeMillis();
 
-      if(readyToRunBodyPath)
+      if (readyToRunBodyPath)
       {
          long startForcingPoints = System.currentTimeMillis();
          start = forceConnectionOrSnapPoint(start);
@@ -263,8 +263,23 @@ public class NavigableRegionsManager
 
          return path;
       }
-      
+
       return null;
+   }
+
+   public void calculateBodyPathWithOcclussions(Point3D start, Point3D goal)
+   {
+      List<Point3D> path = calculateBodyPath(start, goal);
+
+      if (path == null)
+      {
+         NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
+         List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getClusters(), start, goal);
+         Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
+         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
+                                                                                    regionContainingPoint.getHomeRegion());
+      }
+
    }
 
    public boolean createVisMapsForStartAndGoal(Point3D startProjected, Point3D goalProjected)
