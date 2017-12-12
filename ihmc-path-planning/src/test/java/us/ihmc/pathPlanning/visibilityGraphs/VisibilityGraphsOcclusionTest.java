@@ -99,7 +99,7 @@ public class VisibilityGraphsOcclusionTest
 
       PlanarRegionsList regions = generator.getPlanarRegionsList();
 
-      runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime);
    }
 
    @Test(timeout = 300000)
@@ -262,7 +262,9 @@ public class VisibilityGraphsOcclusionTest
          try
          {
             long startTime = System.currentTimeMillis();
-            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
+//            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
+            bodyPath = vizGraphs.calculateBodyPathWithOcclussions(currentPosition.getPoint3dCopy(), goal);
+
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             solveTime.set(seconds);
 
