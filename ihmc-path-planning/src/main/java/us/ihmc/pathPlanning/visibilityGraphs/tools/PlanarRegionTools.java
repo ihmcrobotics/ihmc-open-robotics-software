@@ -92,7 +92,7 @@ public class PlanarRegionTools
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
-   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, PlanarRegionsList regions, PlanarRegion regionToPack)
+   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, PlanarRegionsList regions)
    {
       Line3D projectionLine = new Line3D(point, new Vector3D(0.0, 0.0, 1.0));
       Point3D highestIntersection = null;
@@ -114,7 +114,6 @@ public class PlanarRegionTools
          }
       }
 
-      regionToPack = highestRegion;
       return highestIntersection;
    }
 
