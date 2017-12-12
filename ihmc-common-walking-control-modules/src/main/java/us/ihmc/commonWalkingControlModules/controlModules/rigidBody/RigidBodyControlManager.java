@@ -23,8 +23,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -137,7 +137,7 @@ public class RigidBodyControlManager
          loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(Map<String, YoPIDGains> jointspaceGains, YoPID3DGains taskspaceOrientationGains,
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains, YoPID3DGains taskspaceOrientationGains,
                         YoPID3DGains taskspacePositionGains)
    {
       jointspaceControlState.setGains(jointspaceGains);

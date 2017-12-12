@@ -11,22 +11,22 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
 {
-   public static void extractJointGainMap(List<JointGroupParameter<PIDGainsReadOnly>> jointspaceGains, Map<String, YoPIDGains> jointGainMapToPack,
+   public static void extractJointGainMap(List<JointGroupParameter<PIDGainsReadOnly>> jointspaceGains, Map<String, PIDGainsReadOnly> jointGainMapToPack,
                                           YoVariableRegistry registry)
    {
       jointGainMapToPack.clear();
       for (JointGroupParameter<PIDGainsReadOnly> jointGroupParameter : jointspaceGains)
       {
-         YoPIDGains yoGains = new YoPIDGains(jointGroupParameter.getJointGroupName(), registry);
-         yoGains.set(jointGroupParameter.getParameter());
-         yoGains.createDerivativeGainUpdater(true);
+         String name = jointGroupParameter.getJointGroupName();
+         PIDGainsReadOnly parameter = jointGroupParameter.getParameter();
+         ParameterizedPIDGains yoGains = new ParameterizedPIDGains(name, parameter, registry);
 
          for (String jointName : jointGroupParameter.getJointNames())
          {

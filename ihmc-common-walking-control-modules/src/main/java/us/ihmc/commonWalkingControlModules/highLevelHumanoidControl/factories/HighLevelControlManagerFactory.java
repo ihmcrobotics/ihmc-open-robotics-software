@@ -29,8 +29,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -55,7 +55,7 @@ public class HighLevelControlManagerFactory
    private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
-   private final Map<String, YoPIDGains> jointGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, YoPID3DGains> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, YoPID3DGains> taskspacePositionGainMap = new HashMap<>();
 
