@@ -31,7 +31,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = false;
+   private final static boolean debug = true;
 
    private List<PlanarRegion> regions;
    private List<PlanarRegion> accesibleRegions = new ArrayList<>();
@@ -835,24 +835,13 @@ public class NavigableRegionsManager
             }
 
             Point2D[] homePointsArr = new Point2D[cluster.getNonNavigableExtrusionsInWorld().size()];
-            ArrayList<Point2D> points = new ArrayList<>();
+
             for (int i = 0; i < cluster.getNonNavigableExtrusionsInWorld().size(); i++)
             {
-               Point3D extrusion = cluster.getNonNavigableExtrusionsInWorld().get(i);
-               Point2D point2D = new Point2D(extrusion.getX(), extrusion.getY());
-               homePointsArr[i] = point2D;
-               points.add(point2D);
+               homePointsArr[i] = new Point2D(cluster.getNonNavigableExtrusionsInWorld().get(i));
             }
 
-            Point2D centroid = EuclidGeometryTools.averagePoint2Ds(points);
-
-            Vector2D directionToCentroid = new Vector2D(centroid.getX() - pointToCheck.getX(), centroid.getY() - pointToCheck.getY());
-            directionToCentroid.normalize();
-            directionToCentroid.scale(10);
-
-            Point2D endPoint = new Point2D(pointToCheck.getX() + directionToCentroid.getX(), pointToCheck.getY() + directionToCentroid.getY());
-
-            if (PlanarRegionTools.isPointInsidePolygon(homePointsArr, new Point2D(pointToCheck.getX(), pointToCheck.getY()), endPoint))
+            if (PlanarRegionTools.isPointInsidePolygon(homePointsArr, new Point2D(pointToCheck)))
             {
                index++;
 

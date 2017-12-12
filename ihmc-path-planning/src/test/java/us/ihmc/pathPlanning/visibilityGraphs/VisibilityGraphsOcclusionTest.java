@@ -99,7 +99,7 @@ public class VisibilityGraphsOcclusionTest
 
       PlanarRegionsList regions = generator.getPlanarRegionsList();
 
-      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
    }
 
    @Test(timeout = 300000)
@@ -282,16 +282,17 @@ public class VisibilityGraphsOcclusionTest
             PrintTools.info("Planner threw exception:");
             e.printStackTrace();
             plannerFailed.set(true);
+            break;
          }
 
-         if (bodyPath == null || !bodyPath.get(bodyPath.size() - 1).geometricallyEquals(goal, 1.0e-3))
+         if (!bodyPath.get(bodyPath.size() - 1).geometricallyEquals(goal, 1.0e-3))
          {
             if (visualize)
             {
                scs.setTime(iteration);
                scs.tickAndUpdate();
             }
-            PrintTools.info("Failed");
+            PrintTools.info("Failed, not at the goal: " + goal + ", end of plan: " + bodyPath.get(bodyPath.size() - 1));
             plannerFailed.set(true);
          }
 
@@ -559,10 +560,10 @@ public class VisibilityGraphsOcclusionTest
       generator.rotate(-Math.PI / 2.0, Axis.Y);
       generator.addRectangle(1.0, 4.0);
 
-      startPoseToPack.set(-2.005, -2.001, 0.0);
+      startPoseToPack.set(-2.0, -2.0, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), startPoseToPack, startPoseToPack);
 
-      goalPoseToPack.set(2.005, 2.001, 0.0);
+      goalPoseToPack.set(2.0, 2.0, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), goalPoseToPack, goalPoseToPack);
 
       return generator.getPlanarRegionsList();
