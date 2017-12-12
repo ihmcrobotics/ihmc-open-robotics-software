@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -27,17 +24,14 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
    private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final WholeBodyControllerCore controllerCore;
    private final WalkingHighLevelHumanoidController walkingController;
@@ -48,15 +42,13 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean setupInverseKinematicsSolver = false;
    private boolean setupVirtualModelControlSolver = false;
 
-   private final JointDesiredOutputList additionalJointLevelSettings;
-
    private final AccelerationIntegrationParameterHelper accelerationIntegrationParameterHelper;
 
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
-      super(controllerState);
+      super(controllerState, highLevelControllerParameters, controllerToolbox);
 
       // create walking controller
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
@@ -83,39 +75,14 @@ public class WalkingControllerState extends HighLevelControllerState
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, controllerToolbox.getContactablePlaneBodies());
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controllerToolbox.getFullRobotModel()
-                                                                                                                                        .getOneDoFJoints());
+      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controllerToolbox.getFullRobotModel().getOneDoFJoints());
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
-      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
-      additionalJointLevelSettings = new JointDesiredOutputList(controlledJoints);
-
-      List<String> positionControlledJoints = new ArrayList<>();
-      for (OneDoFJoint controlledJoint : controlledJoints)
-      {
-         JointDesiredControlMode jointDesiredControlMode = highLevelControllerParameters.getJointDesiredControlMode(controlledJoint.getName(), controllerState);
-         double desiredJointStiffness = highLevelControllerParameters.getDesiredJointStiffness(controlledJoint.getName(), controllerState);
-         double desiredJointDamping = highLevelControllerParameters.getDesiredJointDamping(controlledJoint.getName(), controllerState);
-         double velocityScaling = highLevelControllerParameters.getJointVelocityScaling(controlledJoint.getName(), controllerState);
-
-         // Integration acceleration must be activated for these joints.
-         if (jointDesiredControlMode == JointDesiredControlMode.POSITION)
-         {
-            positionControlledJoints.add(controlledJoint.getName());
-         }
-
-         JointDesiredOutput jointDesiredOutput = additionalJointLevelSettings.getJointDesiredOutput(controlledJoint);
-         jointDesiredOutput.setControlMode(jointDesiredControlMode);
-         jointDesiredOutput.setStiffness(desiredJointStiffness);
-         jointDesiredOutput.setDamping(desiredJointDamping);
-         jointDesiredOutput.setVelocityScaling(velocityScaling);
-      }
-
       OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
-      accelerationIntegrationParameterHelper = new AccelerationIntegrationParameterHelper(highLevelControllerParameters, positionControlledJoints,
-                                                                                          controlledOneDofJoints, walkingController, registry);
+      accelerationIntegrationParameterHelper = new AccelerationIntegrationParameterHelper(highLevelControllerParameters, controlledOneDofJoints,
+                                                                                          walkingController, registry);
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -179,25 +146,33 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.doAction();
       accelerationIntegrationParameterHelper.update();
 
+      ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+      controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationParameterHelper.getJointAccelerationIntegrationCommand());
+      controllerCoreCommand.completeLowLevelJointData(getStateSpecificJointSettings());
+
+      controllerCoreTimer.startMeasurement();
+      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      controllerCore.compute();
+      controllerCoreTimer.stopMeasurement();
+   }
+
+   @Override
+   protected JointDesiredOutputList getStateSpecificJointSettings()
+   {
+      JointDesiredOutputList stateSpecificJointLevelSettings = super.getStateSpecificJointSettings();
+
       // update the additional joint settings with the values from the acceleration integration parameters
       JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = accelerationIntegrationParameterHelper.getJointAccelerationIntegrationCommand();
       for (int jointIdx = 0; jointIdx < jointAccelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); jointIdx++)
       {
          OneDoFJoint joint = jointAccelerationIntegrationCommand.getJointToComputeDesiredPositionFor(jointIdx);
          JointAccelerationIntegrationParametersReadOnly jointParameters = jointAccelerationIntegrationCommand.getJointParameters(jointIdx);
-         JointDesiredOutput jointDesiredOutput = additionalJointLevelSettings.getJointDesiredOutput(joint);
+         JointDesiredOutput jointDesiredOutput = stateSpecificJointLevelSettings.getJointDesiredOutput(joint);
          jointDesiredOutput.setVelocityIntegrationLeakRate(jointParameters.getAlphaVelocity());
          jointDesiredOutput.setPositionIntegrationLeakRate(jointParameters.getAlphaPosition());
       }
 
-      ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
-      controllerCoreCommand.addInverseDynamicsCommand(jointAccelerationIntegrationCommand);
-      controllerCoreCommand.completeLowLevelJointData(additionalJointLevelSettings);
-
-      controllerCoreTimer.startMeasurement();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
-      controllerCoreTimer.stopMeasurement();
+      return stateSpecificJointLevelSettings;
    }
 
    public void reinitializePelvisOrientation(boolean reinitialize)
@@ -222,12 +197,6 @@ public class WalkingControllerState extends HighLevelControllerState
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return controllerCore.getOutputForLowLevelController();
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
    }
 
    /**
