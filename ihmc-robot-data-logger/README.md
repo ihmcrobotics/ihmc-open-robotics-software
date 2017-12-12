@@ -14,22 +14,25 @@ IHMC Robot Data Logger
 
 ## Setting up a logging computer's dependencies
 
+- Disable secure boot (Or follow instructions during the Ubuntu installation to enable third party drivers)
 - Install Ubuntu 16.04 64 bit (Server is recommended, no need for a GUI)
 	- Make sure to install OpenSSH server
-- Install avcodec dependencies.
-    - `sudo apt-get install libavformat-ffmpeg56 libavcodec-ffmpeg56 libswscale-ffmpeg3`
+- Install IHMC Java Decklink dependencies and Java 8.
+    - `sudo apt-get install libavformat-ffmpeg56 libavcodec-ffmpeg56 libswscale-ffmpeg3 libboost-thread1.58.0 openjdk-8-jre`
 - (If logging video streams with capture card) Install BlackMagic software
-    - Get "Desktop Video 10.8.5" from [https://www.blackmagicdesign.com/support/family/capture-and-playback](https://www.blackmagicdesign.com/support/family/capture-and-playback).
-	   - You do not need the SDK, just the plain Desktop Video product. The registration has a "Download only" link in the bottom left to bypass.
+    - Get "Desktop Video 10.8.5" for Linux from [https://www.blackmagicdesign.com/support/family/capture-and-playback](https://www.blackmagicdesign.com/support/family/capture-and-playback).
+        - You do not need the SDK, just the plain Desktop Video product. The registration has a "Download only" link in the bottom left to bypass.
+    - Untar Desktop video: `tar xzvf Blackmagic_Desktop_Video_Linux_10.8.5.tar.gz`
+    - Install debian packages: `sudo dpkg -i Blackmagic_Desktop_Video_Linux_10.8.5a4/deb/amd64/desktopvideo_10.8.5a4_amd64.deb`
 - (If logging video streams with capture card) Update Blackmagic firmware for each Decklink card (first card is 0, second 1, etc).
     - `BlackmagicFirmwareUpdater update [Decklink card]`
 - Reboot the computer
 
 ## Publishing the logger from source
 
-    clone ihmc-open-robotics-software
-    cd ihmc-open-robotics-software/ihmc-robot-data-logger
-    ./gradlew deployLogger -PdeployLoggerHost=[Hostname or IP of logger] -PdeployLoggerUser=[SSH username] -PdeployLoggerPassword=[SSH password]
+- clone ihmc-open-robotics-software
+- `cd ihmc-open-robotics-software/ihmc-robot-data-logger`
+- `../gradlew deployLogger -PdeployLoggerHost=[Hostname or IP of logger] -PdeployLoggerUser=[SSH username] -PdeployLoggerPassword=[SSH password]`
 
 ## Finishing the logger configuration
 
@@ -46,21 +49,27 @@ If you would like to log somewhere other than ~/robotLogs, you can change the di
 
 ## Setting up robot controller network configuration
 
-The robot controller is responsible for determining what Decklink cards are recording during a logging session. This is configured in ~/.ihmc/IHMCNetworkParameters.ini or via the networking environment variables
+To enable logging and selecting which Decklink cards are captured by the logger, the controller needs to be configured using `~/.ihmc/IHMCLoggerConfiguration.ini`.
 
-To make the logger work, IHMCNetworkParameters.ini needs a "logger" entry and optionally has a "loggedCameras" entry, or a IHMC_LOGGER_IP and IHMC_LOGGED_CAMERAS environment variables.
+Create `~/.ihmc/IHMCLoggerConfiguration.ini` and add the following
 
-	loggedCameras=[comma separated list of Decklink card ID's to capture]
+```
+publicBroadcast=true
+camerasToCapture=[comma separated list of Decklink card ID's to capture]
+```
+
+- `publicBroadcast=true` enables the controller to announce its existance over the network.
+- `camerasToCapture=...` informs the logger which cameras to use for this contorller. 
 
 The Decklink cards are numbered sequentially starting from 0. Video resolution is auto-detected. If you want to log Decklink cards 0 and 2, set "loggedCameras=0,2". If you only want to log Decklink card 1, set "loggedCameras=1". If you do not want to log any cameras, remove the loggedCameras line or set it to an empty string.
 
-
+Alternatively, you can add `-Dihmc.publicBroadcast=true` and `-Dihmc.camerasToCapture` to the java command line arguments.
+ 
 ## Starting the logger
 
 From the logger computer:
 
-    cd IHMCLogger/bin
-    ./IHMCLogger
+    ~/IHMCLogger/bin/IHMCLogger
 
 You can also add the IHMCLogger/bin directory to your PATH. The logger will listen for controller sessions coming online. It will dispatching logging sessions accordingly. There is no need to restart the logger unless it crashes.
 
