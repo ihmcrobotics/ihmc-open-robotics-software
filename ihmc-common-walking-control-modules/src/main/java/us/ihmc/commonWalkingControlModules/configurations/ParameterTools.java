@@ -8,9 +8,9 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.TunableJointAccelerationIntegrationParameters;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
@@ -18,11 +18,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
 {
-   public static void extractJointGainMap(List<JointGroupParameter<PIDGains>> jointspaceGains, Map<String, YoPIDGains> jointGainMapToPack,
+   public static void extractJointGainMap(List<JointGroupParameter<PIDGainsReadOnly>> jointspaceGains, Map<String, YoPIDGains> jointGainMapToPack,
                                           YoVariableRegistry registry)
    {
       jointGainMapToPack.clear();
-      for (JointGroupParameter<PIDGains> jointGroupParameter : jointspaceGains)
+      for (JointGroupParameter<PIDGainsReadOnly> jointGroupParameter : jointspaceGains)
       {
          YoPIDGains yoGains = new YoPIDGains(jointGroupParameter.getJointGroupName(), registry);
          yoGains.set(jointGroupParameter.getParameter());

@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
@@ -159,14 +160,14 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
 
    /** {@inheritDoc} */
    @Override
-   public List<JointGroupParameter<PIDGains>> getJointSpaceControlGains()
+   public List<JointGroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       List<String> spineNames = new ArrayList<>();
       Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
       PIDGains spineGains = createSpineControlGains();
 
-      List<JointGroupParameter<PIDGains>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new JointGroupParameter<PIDGains>("_SpineJointGains", spineGains, spineNames));
+      List<JointGroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new JointGroupParameter<>("_SpineJointGains", spineGains, spineNames));
 
       return jointspaceGains;
    }
