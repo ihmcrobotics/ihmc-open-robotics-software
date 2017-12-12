@@ -7,6 +7,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
@@ -35,7 +36,7 @@ public class StandTransitionControllerState extends HighLevelControllerState
       this.walkingControllerState = walkingControllerState;
       this.standTransitionDuration.set(highLevelControllerParameters.getTimeInStandTransition());
 
-      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
@@ -67,13 +68,12 @@ public class StandTransitionControllerState extends HighLevelControllerState
       JointDesiredOutputListReadOnly standReadyJointCommand = standReadyControllerState.getOutputForLowLevelController();
       JointDesiredOutputListReadOnly walkingJointCommand = walkingControllerState.getOutputForLowLevelController();
 
-      lowLevelOneDoFJointDesiredDataHolder.clear();
-
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
          OneDoFJoint joint = jointCommandBlenders.get(jointIndex).getLeft();
          JointControlBlender jointControlBlender = jointCommandBlenders.get(jointIndex).getRight();
          JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         lowLevelJointData.clear();
 
          jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getJointDesiredOutput(joint),
                                                           walkingJointCommand.getJointDesiredOutput(joint), gainRatio);

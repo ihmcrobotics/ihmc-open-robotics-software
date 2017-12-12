@@ -8,6 +8,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -71,7 +72,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter);
       registry.addChild(jointTorqueOffsetEstimatorController.getYoVariableRegistry());
 
-      OneDoFJoint[] jointArray = highLevelControllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] jointArray = ScrewTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
 
       CalibrationEntry calibrationEntry = new CalibrationEntry();
@@ -167,7 +168,6 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             transitionToDefaultNextState();
 
          jointTorqueOffsetEstimatorController.doControl();
-         lowLevelOneDoFJointDesiredDataHolder.clear();
 
          for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
          {
@@ -180,6 +180,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             double desiredPosition = trajectory.getPosition();
 
             JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            lowLevelJointData.clear();
             lowLevelJointData.setDesiredPosition(desiredPosition);
             lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
             lowLevelJointData.setDesiredAcceleration(trajectory.getAcceleration());
@@ -297,7 +298,6 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       public void doAction()
       {
          double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToMoveForCalibration.getDoubleValue());
-         lowLevelOneDoFJointDesiredDataHolder.clear();
 
          for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
          {
@@ -310,6 +310,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             double desiredPosition = trajectory.getPosition();
 
             JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            lowLevelJointData.clear();
             lowLevelJointData.setDesiredPosition(desiredPosition);
             lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
             lowLevelJointData.setDesiredAcceleration(trajectory.getAcceleration());
