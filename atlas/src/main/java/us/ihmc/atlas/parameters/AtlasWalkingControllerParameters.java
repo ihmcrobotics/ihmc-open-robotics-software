@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
@@ -250,7 +250,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public PDGains getCoMHeightControlGains()
    {
-      PDGains gains = new PDGains("_CoMHeight");
+      PDGains gains = new PDGains();
 
       double kp = 40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
@@ -267,7 +267,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
+   public List<JointGroupParameter<PIDGains>> getJointSpaceControlGains()
    {
       List<String> spineNames = new ArrayList<>();
       List<String> neckNames = new ArrayList<>();
@@ -284,17 +284,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
 
-      List<ImmutablePair<PIDGains, List<String>>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(spineGains, spineNames));
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(neckGains, neckNames));
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(armGains, armNames));
+      List<JointGroupParameter<PIDGains>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new JointGroupParameter<PIDGains>("_SpineJointGains", spineGains, spineNames));
+      jointspaceGains.add(new JointGroupParameter<PIDGains>("_NeckJointGains", neckGains, neckNames));
+      jointspaceGains.add(new JointGroupParameter<PIDGains>("_ArmJointGains", armGains, armNames));
 
       return jointspaceGains;
    }
 
    private PIDGains createSpineControlGains()
    {
-      PIDGains spineGains = new PIDGains("_SpineJointGains");
+      PIDGains spineGains = new PIDGains();
 
       double kp = 50.0;
       double zeta = runningOnRealRobot ? 0.3 : 0.8;
@@ -315,7 +315,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private PIDGains createNeckControlGains()
    {
-      PIDGains gains = new PIDGains("_NeckJointGains");
+      PIDGains gains = new PIDGains();
 
       double kp = 40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
@@ -332,7 +332,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private PIDGains createArmControlGains()
    {
-      PIDGains armGains = new PIDGains("_ArmJointGains");
+      PIDGains armGains = new PIDGains();
 
       double kp = runningOnRealRobot ? 40.0 : 80.0;
       double zeta = runningOnRealRobot ? 0.3 : 0.6;

@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
@@ -19,18 +18,17 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
 {
-   public static void extractJointGainMap(List<ImmutablePair<PIDGains, List<String>>> jointspaceGains, Map<String, YoPIDGains> jointGainMapToPack,
+   public static void extractJointGainMap(List<JointGroupParameter<PIDGains>> jointspaceGains, Map<String, YoPIDGains> jointGainMapToPack,
                                           YoVariableRegistry registry)
    {
       jointGainMapToPack.clear();
-      for (ImmutablePair<PIDGains, List<String>> gainPair : jointspaceGains)
+      for (JointGroupParameter<PIDGains> jointGroupParameter : jointspaceGains)
       {
-         PIDGains gains = gainPair.getLeft();
-         YoPIDGains yoGains = new YoPIDGains(gains.getName(), registry);
-         yoGains.set(gains);
+         YoPIDGains yoGains = new YoPIDGains(jointGroupParameter.getJointGroupName(), registry);
+         yoGains.set(jointGroupParameter.getParameter());
          yoGains.createDerivativeGainUpdater(true);
 
-         for (String jointName : gainPair.getRight())
+         for (String jointName : jointGroupParameter.getJointNames())
          {
             jointGainMapToPack.put(jointName, yoGains);
          }
