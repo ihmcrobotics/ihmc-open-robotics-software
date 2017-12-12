@@ -73,7 +73,7 @@ public class CenterOfMassHeightManager
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
 
       PDGains gains = walkingControllerParameters.getCoMHeightControlGains();
-      comHeightGains = new YoPDGains(gains.getName(), registry);
+      comHeightGains = new YoPDGains("_CoMHeight", registry);
       comHeightGains.createDerivativeGainUpdater(true);
       comHeightGains.set(gains);
 
@@ -172,10 +172,10 @@ public class CenterOfMassHeightManager
       {
          enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
          stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-         
+
          tempPose.setToZero(tempPosition.getReferenceFrame());
          tempPose.setPosition(tempPosition);
-         
+
          if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
          {
             requestState(pelvisHeightControlState.getStateEnum());

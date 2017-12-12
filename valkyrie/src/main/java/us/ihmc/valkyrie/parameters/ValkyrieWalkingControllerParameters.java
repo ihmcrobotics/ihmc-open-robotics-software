@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -194,7 +194,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public PDGains getCoMHeightControlGains()
    {
-      PDGains gains = new PDGains("_CoMHeight");
+      PDGains gains = new PDGains();
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -213,7 +213,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
+   public List<JointGroupParameter<PIDGains>> getJointSpaceControlGains()
    {
       List<String> spineNames = new ArrayList<>();
       List<String> neckNames = new ArrayList<>();
@@ -230,17 +230,17 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
 
-      List<ImmutablePair<PIDGains, List<String>>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(spineGains, spineNames));
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(neckGains, neckNames));
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(armGains, armNames));
+      List<JointGroupParameter<PIDGains>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new JointGroupParameter<PIDGains>("_SpineJointGains", spineGains, spineNames));
+      jointspaceGains.add(new JointGroupParameter<PIDGains>("_NeckJointGains", neckGains, neckNames));
+      jointspaceGains.add(new JointGroupParameter<PIDGains>("_ArmJointGains", armGains, armNames));
 
       return jointspaceGains;
    }
 
    private PIDGains createSpineControlGains()
    {
-      PIDGains spineGains = new PIDGains("_SpineJointGains");
+      PIDGains spineGains = new PIDGains();
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = 50.0;
@@ -262,7 +262,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private PIDGains createNeckControlGains()
    {
-      PIDGains gains = new PIDGains("_NeckJointGains");
+      PIDGains gains = new PIDGains();
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = 40.0;
@@ -280,7 +280,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private PIDGains createArmControlGains()
    {
-      PIDGains armGains = new PIDGains("_ArmJointGains");
+      PIDGains armGains = new PIDGains();
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0

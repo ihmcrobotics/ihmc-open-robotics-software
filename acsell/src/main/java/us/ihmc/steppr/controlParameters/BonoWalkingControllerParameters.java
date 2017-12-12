@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -142,7 +142,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public PDGains getCoMHeightControlGains()
    {
-      PDGains gains = new PDGains("_CoMHeight");
+      PDGains gains = new PDGains();
 
       double kp = runningOnRealRobot ? 40.0 : 50.0;
       double zeta = runningOnRealRobot ? 0.4 : 1.0;
@@ -159,21 +159,21 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
+   public List<JointGroupParameter<PIDGains>> getJointSpaceControlGains()
    {
       List<String> spineNames = new ArrayList<>();
       Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
       PIDGains spineGains = createSpineControlGains();
 
-      List<ImmutablePair<PIDGains, List<String>>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(spineGains, spineNames));
+      List<JointGroupParameter<PIDGains>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new JointGroupParameter<PIDGains>("_SpineJointGains", spineGains, spineNames));
 
       return jointspaceGains;
    }
 
    private PIDGains createSpineControlGains()
    {
-      PIDGains spineGains = new PIDGains("_SpineJointGains");
+      PIDGains spineGains = new PIDGains();
 
       double kp = 250.0;
       double zeta = 0.6;
