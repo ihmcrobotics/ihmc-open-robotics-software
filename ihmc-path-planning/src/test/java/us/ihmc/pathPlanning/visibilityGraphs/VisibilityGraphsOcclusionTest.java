@@ -73,6 +73,7 @@ public class VisibilityGraphsOcclusionTest
    private static final double defaultMaxAllowedSolveTime = 1.0;
    private static final int bodyPathVisualizationResolution = 500;
    private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
+   private static final double maximumFlyingDistance = 0.05;
    private static final int maxNumberOfIterations = 40;
 
    private enum OcclusionMethod {OCCLUSION, OCCLUSION_PLUS_GROUND, NO_OCCLUSION};
@@ -136,7 +137,7 @@ public class VisibilityGraphsOcclusionTest
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);
       Point3D goalPose = new Point3D(8.5, -3.5, 0.010);
       PlanarRegionsList regions = createBodyPathPlannerTestEnvironment();
-      runTest(startPose, goalPose, regions, OcclusionMethod.NO_OCCLUSION, defaultMaxAllowedSolveTime, 3.0);
+      runTest(startPose, goalPose, regions, OcclusionMethod.NO_OCCLUSION, defaultMaxAllowedSolveTime, 0.2);
    }
 
    private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime)
@@ -328,7 +329,19 @@ public class VisibilityGraphsOcclusionTest
                scs.setTime(iteration);
                scs.tickAndUpdate();
             }
-            PrintTools.info("Failed, not at the goal: " + goal + ", end of plan: " + bodyPath.get(bodyPath.size() - 1));
+            PrintTools.info("Failed, not going to the goal: " + goal + ", end of plan: " + bodyPath.get(bodyPath.size() - 1));
+            plannerFailed.set(true);
+         }
+
+         // Use different epsilon for xy and z in case the point got projected onto a region
+         if (bodyPath.get(0).distanceXY(currentPosition.getFramePointCopy()) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(0).getZ(), currentPosition.getZ(), 0.1))
+         {
+            if (visualize)
+            {
+               scs.setTime(iteration);
+               scs.tickAndUpdate();
+            }
+            PrintTools.info("Failed, not starting from current position: " + currentPosition.getPoint3dCopy() + ", beginning of plan: " + bodyPath.get(0));
             plannerFailed.set(true);
          }
 
@@ -353,7 +366,15 @@ public class VisibilityGraphsOcclusionTest
             scs.tickAndUpdate();
          }
 
+         currentPosition.set(bodyPath.get(0)); // Set to remove precision problems causing the travel method to fail. Already checked that the bodyPath starts from the currentPosition.
          currentPosition.set(travelAlongBodyPath(marchingSpeedInMetersPerTick, currentPosition.getPoint3dCopy(), bodyPath));
+
+         if (regions.findPlanarRegionsContainingPoint(currentPosition.getPoint3dCopy(), maximumFlyingDistance) == null)
+         {
+            PrintTools.info("Planner failed: path results in a flying robot.");
+            plannerFailed.set(true);
+            break;
+         }
       }
 
       PrintTools.info("Maximum solve time was " + maxSolveTime + "s.");
