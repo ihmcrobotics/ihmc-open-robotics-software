@@ -6,16 +6,6 @@ public class PIDGains extends PDGains
    private double maxIntegralError;
    private double integralLeakRatio;
 
-   public PIDGains()
-   {
-      super();
-   }
-
-   public PIDGains(String name)
-   {
-      super(name);
-   }
-
    public double getKi()
    {
       return ki;
