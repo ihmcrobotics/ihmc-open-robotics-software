@@ -84,7 +84,7 @@ public class YoPIDGains extends YoPDGains implements PIDGainsReadOnly
       integralLeakRatio.set(other.integralLeakRatio.getDoubleValue());
    }
 
-   public void set(PIDGains pidGains)
+   public void set(PIDGainsReadOnly pidGains)
    {
       super.set(pidGains);
       setKi(pidGains.getKi());
