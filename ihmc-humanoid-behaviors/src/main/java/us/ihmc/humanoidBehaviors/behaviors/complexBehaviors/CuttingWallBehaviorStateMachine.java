@@ -233,7 +233,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             double[] waypointTimes = {t0, tf};
             WaypointBasedTrajectoryMessage rightHandTrajectoryMessage = new WaypointBasedTrajectoryMessage(rightHand, waypointTimes, waypoints);
 
-            WholeBodyTrajectoryToolboxConfigurationMessage configurationMessage = new WholeBodyTrajectoryToolboxConfigurationMessage(320, 1000, 1);
+            WholeBodyTrajectoryToolboxConfigurationMessage configurationMessage = new WholeBodyTrajectoryToolboxConfigurationMessage(320, 1000);
             configurationMessage.setInitialConfigration(fullRobotModel);
 
             WholeBodyTrajectoryToolboxMessage wholeBodyTrajectoryToolboxMessage = new WholeBodyTrajectoryToolboxMessage();

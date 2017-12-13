@@ -84,7 +84,6 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(500);
-      configuration.setTrajectoryType(1);
 
       // trajectory message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -136,7 +135,6 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
-      configuration.setTrajectoryType(1);
 
       // trajectory message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -190,7 +188,6 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
-      configuration.setTrajectoryType(1);
 
       // trajectory message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();

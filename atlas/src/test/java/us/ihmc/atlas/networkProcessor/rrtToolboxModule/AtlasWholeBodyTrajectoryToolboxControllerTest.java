@@ -75,7 +75,6 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
-      configuration.setTrajectoryType(1);
 
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
