@@ -10,8 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.TunableJoin
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
@@ -27,11 +26,11 @@ public class ParameterTools
       {
          String name = jointGroupParameter.getJointGroupName();
          PIDGainsReadOnly parameter = jointGroupParameter.getParameter();
-         ParameterizedPIDGains yoGains = new ParameterizedPIDGains(name, parameter, registry);
+         ParameterizedPIDGains parameterizedGains = new ParameterizedPIDGains(name, parameter, registry);
 
          for (String jointName : jointGroupParameter.getJointNames())
          {
-            jointGainMapToPack.put(jointName, yoGains);
+            jointGainMapToPack.put(jointName, parameterizedGains);
          }
       }
    }
@@ -50,11 +49,11 @@ public class ParameterTools
       {
          String name = jointGroupParameter.getJointGroupName();
          JointAccelerationIntegrationParametersReadOnly defaultParameters = jointGroupParameter.getParameter();
-         TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
+         TunableJointAccelerationIntegrationParameters parameterizedParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
 
          for (String jointName : jointGroupParameter.getJointNames())
          {
-            parameterMapToPack.put(jointName, yoParameters);
+            parameterMapToPack.put(jointName, parameterizedParameters);
          }
       }
    }
@@ -88,11 +87,11 @@ public class ParameterTools
       {
          String gainName = gainTriple.getLeft() + suffix;
          PID3DGains gain = gainTriple.getMiddle();
-         YoPID3DGains yoGains = new DefaultYoPID3DGains(gainName, gain, registry);
+         PID3DGainsReadOnly parameterizedGains = new ParameterizedPID3DGains(gainName, gain, registry);
 
          for (String bodyName : gainTriple.getRight())
          {
-            yoGainsToPack.put(bodyName, yoGains);
+            yoGainsToPack.put(bodyName, parameterizedGains);
          }
       }
    }
