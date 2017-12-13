@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.VizGraphsPlanarRegionViewer;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,6 +18,8 @@ public class FootstepPlannerUI
    private final SimpleUIMessager messager = new SimpleUIMessager(FootstepPlannerUserInterfaceAPI.API);
    private final Stage primaryStage;
    private final BorderPane mainPane;
+
+   private final PlanarRegionViewer planarRegionViewer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -48,6 +51,10 @@ public class FootstepPlannerUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
 
+      planarRegionViewer = new PlanarRegionViewer(messager);
+      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      planarRegionViewer.start();
+
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
@@ -63,6 +70,6 @@ public class FootstepPlannerUI
 
    public void stop()
    {
-      // TODO
+      planarRegionViewer.stop();
    }
 }
