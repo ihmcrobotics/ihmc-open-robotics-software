@@ -192,7 +192,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
 
       testFramePose = new YoFramePose("testFramePose", ReferenceFrame.getWorldFrame(), registry);
-      testFrameViz = new YoGraphicCoordinateSystem("testFrameViz", testFramePose, 0.1);
+      testFrameViz = new YoGraphicCoordinateSystem("testFrameViz", testFramePose, 0.25);
       yoGraphicsListRegistry.registerYoGraphic("testFrameYoGraphic", testFrameViz);
    }
 
@@ -426,19 +426,21 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                      isExpandingTerminalCondition = true;
                }
                else if (manifoldCommands != null)
-               {
-                  //tree.getLastNodeAdded().getSpatialData().getMaximumDistanceFromManifolds(manifoldCommands);
-                  Pose3D testFrame = tree.getLastNodeAdded().getSpatialData().getTestFrame(manifoldCommands);
+               {  
+                  //Pose3D testFrame = tree.getLastNodeAdded().getSpatialData().getTestFrame(manifoldCommands);
+                  Pose3D testFrame = toolboxData.getTestFrame(tree.getLastNodeAdded());
 
-                  testFrameViz.setVisible(true);
-                  testFrameViz.update();
                   testFramePose.setPosition(testFrame.getPosition());
                   testFramePose.setOrientation(testFrame.getOrientation());
+                  testFrameViz.setVisible(true);
+                  testFrameViz.update();
+                  
 
                   // TODO : terminal condition for manifold command.
-                  if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
+//                  if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
+//                     isExpandingTerminalCondition = true;
+                  if(toolboxData.getMaximumDistanceFromManifolds(tree.getLastNodeAdded()) < 0.05)
                      isExpandingTerminalCondition = true;
-
                }
                else
                {

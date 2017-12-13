@@ -50,12 +50,15 @@ public class WholeBodyTrajectoryToolboxData
    private final List<RigidBody> allRigidBodies = new ArrayList<>();
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
+   
+   private final List<ReachingManifoldCommand> reachingManifolds;
 
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
                                          List<ReachingManifoldCommand> reachingManifolds,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
       this.fullRobotModel = fullRobotModel;
+      this.reachingManifolds = reachingManifolds;
 
       Map<RigidBody, RigidBodyExplorationConfigurationCommand> explorationMap = new HashMap<>();
       Map<RigidBody, WaypointBasedTrajectoryCommand> trajectoryMap = new HashMap<>();
@@ -86,7 +89,7 @@ public class WholeBodyTrajectoryToolboxData
       else if (reachingManifolds != null)
       {
          // TODO .......................... some action is required to deal with.
-         this.trajectoryTime = 5.0;
+         this.trajectoryTime = 25.0;
       }
       else
       {
@@ -190,7 +193,66 @@ public class WholeBodyTrajectoryToolboxData
 
       return messages;
    }
+   
+   public double getMaximumDistanceFromManifolds(SpatialNode node)
+   {      
+      double distance = Double.MAX_VALUE;
+      for (int j = 0; j < reachingManifolds.size(); j++)
+      {
+         for (int i = 0; i < node.getSpatialData().getRigidBodySpatials().size(); i++)
+         {
+            if (node.getSpatialData().getRigidBodyNames().get(i).equals(reachingManifolds.get(j).getRigidBody().getName()))
+            {
+               ReachingManifoldCommand manifold = reachingManifolds.get(j);
+               
+               
+               RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
+               
+               Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatial(i));
+               //Pose3D currentSpatial = node.getSpatialData().getRigidBodySpatials().get(i);
 
+               Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
+
+               distance = currentSpatial.getPositionDistance(closestPose);
+               // TODO get closest pose from manifold
+               // and distance.
+            }
+         }
+      }
+      return distance;      
+   }
+   
+   public Pose3D getTestFrame(SpatialNode node)
+   {
+      for (int j = 0; j < reachingManifolds.size(); j++)
+      {
+         for (int i = 0; i < node.getSpatialData().getRigidBodySpatials().size(); i++)
+         {
+            if (node.getSpatialData().getRigidBodyNames().get(i).equals(reachingManifolds.get(j).getRigidBody().getName()))
+            {
+               ReachingManifoldCommand manifold = reachingManifolds.get(j);
+               
+               
+               RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
+               
+               Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatial(i));
+               //Pose3D currentSpatial = node.getSpatialData().getRigidBodySpatials().get(i);
+
+               Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
+
+               return closestPose;
+               // TODO get closest pose from manifold
+               // and distance.
+            }
+         }
+      }
+      return null;
+   }
+   
+   
+   
+   
+   
    /**
     * For findInitialGuessSub()
     */
