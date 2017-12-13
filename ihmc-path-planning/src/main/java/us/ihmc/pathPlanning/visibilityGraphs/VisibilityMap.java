@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,6 +21,11 @@ public class VisibilityMap implements Transformable
    public VisibilityMap(HashSet<Connection> connections)
    {
       this.connections = connections;
+   }
+
+   public void setConnections(Collection<Connection> connections)
+   {
+      this.connections = new HashSet<>(connections);
    }
 
    public void setConnections(Set<Connection> connections)
