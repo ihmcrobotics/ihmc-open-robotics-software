@@ -53,7 +53,7 @@ public class Cluster
    {
       this.isHomeRegion = isHomeRegion;
    }
-   
+
    public boolean isHomeRegion()
    {
       return isHomeRegion;
@@ -266,6 +266,16 @@ public class Cluster
       navigableExtrusionsInLocal.add(toLocal2D(navigableExtrusionInWorld));
    }
 
+   public void addNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
+   {
+      navigableExtrusionInLocal.forEach(this::addNavigableExtrusionInLocal);
+   }
+
+   public void addNavigableExtrusionsInWorld(List<? extends Point3DReadOnly> navigableExtrusionInWorld)
+   {
+      navigableExtrusionInWorld.forEach(this::addNavigableExtrusionInWorld);
+   }
+
    public void addFirstNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
    {
       navigableExtrusionsInLocal.add(0, new Point2D(navigableExtrusionInLocal));
@@ -284,6 +294,16 @@ public class Cluster
    public void addNonNavigableExtrusionInWorld(Point3DReadOnly nonNavigableExtrusionInWorld)
    {
       nonNavigableExtrusionsInLocal.add(toLocal2D(nonNavigableExtrusionInWorld));
+   }
+
+   public void addNonNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
+   {
+      nonNavigableExtrusionInLocal.forEach(this::addNonNavigableExtrusionInLocal);
+   }
+
+   public void addNonNavigableExtrusionsInWorld(List<? extends Point3DReadOnly> nonNavigableExtrusionInWorld)
+   {
+      nonNavigableExtrusionInWorld.forEach(this::addNonNavigableExtrusionInWorld);
    }
 
    public void addFirstNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
