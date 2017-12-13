@@ -84,6 +84,7 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
    @Override
    public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
    {
+      nullspaceProjector.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToProjectOntoNullspace.getNumCols());
       computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
       projectedMatrixToPack.reshape(matrixToProjectOntoNullspace.getNumRows(), matrixToProjectOntoNullspace.getNumCols());
       CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);

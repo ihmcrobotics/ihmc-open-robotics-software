@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -11,8 +12,6 @@ public class OcclussionTools
 {
    public static boolean IsTheGoalIntersectingAnyObstacles(NavigableRegion region, Point3D start, Point3D goal)
    {
-      System.out.println("Looking for a straighline path to goal");
-      System.out.println("Clusters size: " + region.getClusters().size());
       for (Cluster cluster : region.getClusters())
       {
          if (!cluster.isHomeRegion())
@@ -24,21 +23,43 @@ public class OcclussionTools
                list2D.add(new Point2D(point3d.getX(), point3d.getY()));
             }
 
-            System.out.println(start + "   " + goal + "   " + list2D.size());
             boolean visible = VisibilityTools.isPointVisible(new Point2D(start.getX(), start.getY()), new Point2D(goal.getX(), goal.getY()), list2D);
 
             if (!visible)
             {
-               System.out.println("Goal is not visible!!!!!!!!!!!!!");
                return true;
             }
             else
             {
-               System.out.println("Goal is visible!!!!!!!!!!!!!");
             }
          }
       }
 
       return false;
+   }
+
+   public static List<Cluster> getListOfIntersectingObstacles(List<Cluster> clusters, Point3D start, Point3D goal)
+   {
+      List<Cluster> clustersTemp = new ArrayList<Cluster>();
+      for (Cluster cluster : clusters)
+      {
+         if (!cluster.isHomeRegion())
+         {
+            ArrayList<Point2D> list2D = new ArrayList<>();
+
+            for (Point3D point3d : cluster.getNonNavigableExtrusionsInWorld())
+            {
+               list2D.add(new Point2D(point3d.getX(), point3d.getY()));
+            }
+
+            boolean visible = VisibilityTools.isPointVisible(new Point2D(start.getX(), start.getY()), new Point2D(goal.getX(), goal.getY()), list2D);
+
+            if (!visible)
+            {
+               clustersTemp.add(cluster);
+            }
+         }
+      }
+      return clustersTemp;
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.atlas.commonWalkingControlModules;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import org.junit.Test;
@@ -19,11 +20,7 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -407,14 +404,14 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
       /** {@inheritDoc} */
       @Override
-      public List<Vector2D> getCoPOffsets()
+      public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
       {
          Vector2D entryOffset = new Vector2D(0.0, -0.005);
          Vector2D exitOffset = new Vector2D(0.0, 0.015);
 
-         List<Vector2D> copOffsets = new ArrayList<>();
-         copOffsets.add(entryOffset);
-         copOffsets.add(exitOffset);
+         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+         copOffsets.put(entryCoPName, entryOffset);
+         copOffsets.put(exitCoPName, exitOffset);
 
          return copOffsets;
       }

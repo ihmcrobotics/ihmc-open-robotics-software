@@ -12,6 +12,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
@@ -50,7 +51,7 @@ public class BodyPathMeshViewer extends AnimationTimer
          bodyPathMeshView.setMesh(bodyPathMeshRendered);
    }
 
-   public void processBodyPath(List<Point3D> bodyPath)
+   public void processBodyPath(List<Point3DReadOnly> bodyPath)
    {
       if (VERBOSE)
          PrintTools.info(this, "Building mesh for body path.");

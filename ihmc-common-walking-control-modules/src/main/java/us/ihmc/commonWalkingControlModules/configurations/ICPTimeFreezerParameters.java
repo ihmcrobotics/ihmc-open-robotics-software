@@ -5,7 +5,10 @@ public interface ICPTimeFreezerParameters
    /**
     * Slow down factor on the time when doing partial time freeze
     */
-   double getFreezeTimeFactor();
+   default double getFreezeTimeFactor()
+   {
+      return 0.9;
+   }
 
    /**
     * Threshold on the ICP error used to trigger the complete time freeze.

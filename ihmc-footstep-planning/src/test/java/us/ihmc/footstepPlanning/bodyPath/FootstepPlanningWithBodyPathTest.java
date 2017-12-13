@@ -13,6 +13,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -99,8 +100,8 @@ public class FootstepPlanningWithBodyPathTest
       TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
       JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), javaFXMultiColorMeshBuilder);
-      List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-      for (Point3D waypoint3d : path)
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      for (Point3DReadOnly waypoint3d : path)
       {
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
       }
