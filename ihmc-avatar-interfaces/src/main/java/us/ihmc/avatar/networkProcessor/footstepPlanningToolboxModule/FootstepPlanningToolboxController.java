@@ -59,9 +59,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final boolean visualize = true;
    private HumanoidRobotDataReceiver robotDataReceiver;
 
-   private final YoEnum<FootstepPlanningRequestPacket.FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry,
-                                                                                                        FootstepPlanningRequestPacket.FootstepPlannerType.class);
-   private final EnumMap<FootstepPlanningRequestPacket.FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlanningRequestPacket.FootstepPlannerType.class);
+   private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry,
+                                                                          FootstepPlannerType.class);
+   private final EnumMap<FootstepPlannerType, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegionsReference = new AtomicReference<PlanarRegionsListMessage>(null);
@@ -110,16 +110,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
 
-      plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL,
+      plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL,
                      createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
-      plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.PLAN_THEN_SNAP,
+      plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP,
                      new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
-      plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, drcRobotModel));
-      plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.SIMPLE_BODY_PATH,
+      plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, drcRobotModel));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH,
                      new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
-      plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
-      activePlanner.set(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL);
+      activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
       usePlanarRegions.set(true);
@@ -239,7 +239,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          return false;
 
       planId.set(request.planId);
-      FootstepPlanningRequestPacket.FootstepPlannerType requestedPlannerType = request.requestedPlannerType;
+      FootstepPlannerType requestedPlannerType = request.requestedPlannerType;
 
       if (debug)
       {
@@ -354,7 +354,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
       }
 
-      if(activePlanner.getEnumValue().equals(FootstepPlanningRequestPacket.FootstepPlannerType.VIS_GRAPH_WITH_A_STAR))
+      if(activePlanner.getEnumValue().equals(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR))
       {
          setOutputStatusOfVisibilityGraph(result);
       }
@@ -367,7 +367,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private void setOutputStatusOfVisibilityGraph(FootstepPlanningToolboxOutputStatus result)
    {
-      VisibilityGraphWithAStarPlanner visibilityGraphWithAStarPlanner = (VisibilityGraphWithAStarPlanner) plannerMap.get(FootstepPlanningRequestPacket.FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+      VisibilityGraphWithAStarPlanner visibilityGraphWithAStarPlanner = (VisibilityGraphWithAStarPlanner) plannerMap.get(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
       result.navigableExtrusions = visibilityGraphWithAStarPlanner.getNavigableRegions();
       result.lowLevelPlannerGoal = visibilityGraphWithAStarPlanner.getLowLevelPlannerGoal();
 
