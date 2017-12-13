@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -72,5 +73,34 @@ public class WholeBodyTrajectoryToolboxMessageTools
       for (int i = 0; i < configurationSpaceNames.length; i++)
          lowerLimit[i] = configurationSpaceNames[i].getDefaultExplorationAmplitude();
       return lowerLimit;
+   }
+
+   public static double[] createDefaultExplorationUpperLimitArray(ConfigurationSpaceName... configurationSpaceNames)
+   {
+      double[] upperLimit = new double[configurationSpaceNames.length];
+      for (int i = 0; i < configurationSpaceNames.length; i++)
+         upperLimit[i] = configurationSpaceNames[i].getDefaultExplorationUpperLimit();
+      return upperLimit;
+   }
+
+   public static double[] createDefaultExplorationLowerLimitArray(ConfigurationSpaceName... configurationSpaceNames)
+   {
+      double[] lowerLimit = new double[configurationSpaceNames.length];
+      for (int i = 0; i < configurationSpaceNames.length; i++)
+         lowerLimit[i] = configurationSpaceNames[i].getDefaultExplorationLowerLimit();
+      return lowerLimit;
+   }
+
+   public static double computePoseDistance(Pose3D poseOne, Pose3D poseTwo, double positionWeight, double orientationWeight)
+   {
+      double distance = 0.0;
+
+      double positionDistance = poseOne.getPositionDistance(poseTwo);
+      double orientationDistance = poseOne.getOrientationDistance(poseTwo);
+      orientationDistance = AngleTools.trimAngleMinusPiToPi(orientationDistance);
+      orientationDistance = Math.abs(orientationDistance);
+      distance = positionWeight * positionDistance + orientationWeight * orientationDistance;
+
+      return distance;
    }
 }

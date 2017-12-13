@@ -113,7 +113,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
 
       // run test
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
@@ -167,7 +167,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
 
       // run test      
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
@@ -215,10 +215,12 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+      
+      //rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
 
       // run test      
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 }

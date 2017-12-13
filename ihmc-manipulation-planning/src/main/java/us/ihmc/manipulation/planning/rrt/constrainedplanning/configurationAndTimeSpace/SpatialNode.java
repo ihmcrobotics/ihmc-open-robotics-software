@@ -48,7 +48,7 @@ public class SpatialNode
    {
       spatialData.initializeData();
    }
-      
+
    public double getTimeGap(SpatialNode other)
    {
       if (getTime() > other.getTime())
@@ -99,6 +99,7 @@ public class SpatialNode
          return Double.MAX_VALUE;
 
       double distance = timeDistance + positionDistance + orientationDistance;
+
       return distance;
    }
 

@@ -13,7 +13,9 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ReachingManifoldMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxCommand;
@@ -60,6 +62,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
       commands.add(WholeBodyTrajectoryToolboxCommand.class);
       commands.add(WaypointBasedTrajectoryCommand.class);
       commands.add(RigidBodyExplorationConfigurationCommand.class);
+      commands.add(ReachingManifoldCommand.class);
       commands.add(WholeBodyTrajectoryToolboxConfigurationCommand.class);
       return commands;
    }
@@ -83,6 +86,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
       Set<Class<? extends Command<?, ?>>> commands = new HashSet<>();
       commands.add(WaypointBasedTrajectoryCommand.class);
       commands.add(RigidBodyExplorationConfigurationCommand.class);
+      commands.add(ReachingManifoldCommand.class);
       commands.add(WholeBodyTrajectoryToolboxConfigurationCommand.class);
       return commands;
    }

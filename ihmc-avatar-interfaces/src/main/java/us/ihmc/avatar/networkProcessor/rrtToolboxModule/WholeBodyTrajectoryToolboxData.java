@@ -12,6 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
@@ -51,38 +52,61 @@ public class WholeBodyTrajectoryToolboxData
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
 
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
+                                         List<ReachingManifoldCommand> reachingManifolds,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
       this.fullRobotModel = fullRobotModel;
-      // trajectory time.
-      this.trajectoryTime = 0.0;
-      for (int i = 0; i < endEffectorTrajectories.size(); i++)
-         this.trajectoryTime = Math.max(trajectoryTime, endEffectorTrajectories.get(i).getLastWaypointTime());
-
-      Map<RigidBody, WaypointBasedTrajectoryCommand> trajectoryMap = new HashMap<>();
-      for (int i = 0; i < endEffectorTrajectories.size(); i++)
-      {
-         WaypointBasedTrajectoryCommand traj = endEffectorTrajectories.get(i);
-         trajectoryMap.put(traj.getEndEffector(), traj);
-      }
 
       Map<RigidBody, RigidBodyExplorationConfigurationCommand> explorationMap = new HashMap<>();
+      Map<RigidBody, WaypointBasedTrajectoryCommand> trajectoryMap = new HashMap<>();
 
       for (int i = 0; i < explorationConfigurations.size(); i++)
       {
          RigidBodyExplorationConfigurationCommand exp = explorationConfigurations.get(i);
          explorationMap.put(exp.getRigidBody(), exp);
       }
-
       Set<RigidBody> rigidBodySet = new HashSet<>(explorationMap.keySet());
-      rigidBodySet.addAll(trajectoryMap.keySet());
+
+      // classify
+      if (endEffectorTrajectories != null)
+      {
+         this.trajectoryTime = 0.0;
+         for (int i = 0; i < endEffectorTrajectories.size(); i++)
+            this.trajectoryTime = Math.max(trajectoryTime, endEffectorTrajectories.get(i).getLastWaypointTime());
+
+         for (int i = 0; i < endEffectorTrajectories.size(); i++)
+         {
+            WaypointBasedTrajectoryCommand traj = endEffectorTrajectories.get(i);
+            trajectoryMap.put(traj.getEndEffector(), traj);
+         }
+
+         rigidBodySet.addAll(trajectoryMap.keySet());
+      }
+
+      else if (reachingManifolds != null)
+      {
+         // TODO .......................... some action is required to deal with.
+         this.trajectoryTime = 5.0;
+      }
+      else
+      {
+         if (VERBOSE)
+            PrintTools.info("no trajectory or manifold");
+      }
+
       allRigidBodies.addAll(rigidBodySet);
 
       allRigidBodies.forEach(body -> nameToRigidBodyMap.put(body.getName(), body));
 
+      // construct ConstrainedRigidBodyTrajectory
       for (RigidBody rigidBody : allRigidBodies)
       {
-         WaypointBasedTrajectoryCommand trajectory = trajectoryMap.get(rigidBody);
+         WaypointBasedTrajectoryCommand trajectory;
+         if (trajectoryMap.isEmpty())
+            trajectory = null;
+         else
+            trajectory = trajectoryMap.get(rigidBody);
+
          RigidBodyExplorationConfigurationCommand exploration = explorationMap.get(rigidBody);
          if (VERBOSE)
          {
@@ -131,7 +155,6 @@ public class WholeBodyTrajectoryToolboxData
          {
             rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
          }
-                        
       }
 
       return spatialData;

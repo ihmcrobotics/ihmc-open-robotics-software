@@ -11,6 +11,7 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    public WholeBodyTrajectoryToolboxConfigurationMessage configuration;
    public List<WaypointBasedTrajectoryMessage> endEffectorTrajectories;
    public List<RigidBodyExplorationConfigurationMessage> explorationConfigurations;
+   public List<ReachingManifoldMessage> reachingManifolds;
 
    public WholeBodyTrajectoryToolboxMessage()
    {
@@ -18,18 +19,13 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public WholeBodyTrajectoryToolboxMessage(List<WaypointBasedTrajectoryMessage> endEffectorTrajectories,
-                                            List<RigidBodyExplorationConfigurationMessage> explorationConfigurations)
-   {
-      this(null, endEffectorTrajectories, explorationConfigurations);
-   }
-
    public WholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxConfigurationMessage configuration,
-                                            List<WaypointBasedTrajectoryMessage> endEffectorTrajectories,
+                                            List<WaypointBasedTrajectoryMessage> endEffectorTrajectories, List<ReachingManifoldMessage> reachingManifolds,
                                             List<RigidBodyExplorationConfigurationMessage> explorationConfigurations)
    {
       this.configuration = configuration;
       this.endEffectorTrajectories = endEffectorTrajectories;
+      this.reachingManifolds = reachingManifolds;
       this.explorationConfigurations = explorationConfigurations;
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
@@ -69,6 +65,21 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       }
    }
 
+   public void addReachingManifold(ReachingManifoldMessage reachingManifold)
+   {
+      addReachingManifolds(reachingManifold);
+   }
+
+   public void addReachingManifolds(ReachingManifoldMessage... reachingManifolds)
+   {
+      if (this.reachingManifolds == null)
+         this.reachingManifolds = new ArrayList<>();
+      for (ReachingManifoldMessage explorationConfiguration : reachingManifolds)
+      {
+         this.reachingManifolds.add(explorationConfiguration);
+      }
+   }
+
    public void setEndEffectorTrajectories(List<WaypointBasedTrajectoryMessage> endEffectorTrajectories)
    {
       this.endEffectorTrajectories = endEffectorTrajectories;
@@ -89,6 +100,11 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       return explorationConfigurations;
    }
 
+   public List<ReachingManifoldMessage> getReachingManifolds()
+   {
+      return reachingManifolds;
+   }
+
    @Override
    public List<Packet<?>> getPackets()
    {
@@ -100,6 +116,8 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
          allPackets.addAll(explorationConfigurations);
       if (configuration != null)
          allPackets.add(configuration);
+      if (reachingManifolds != null)
+         allPackets.addAll(reachingManifolds);
 
       return allPackets;
    }
@@ -123,6 +141,13 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       for (int i = 0; i < explorationConfigurations.size(); i++)
       {
          if (!explorationConfigurations.get(i).epsilonEquals(other.explorationConfigurations.get(i), epsilon))
+            return false;
+      }
+      if (reachingManifolds.size() != other.reachingManifolds.size())
+         return false;
+      for (int i = 0; i < reachingManifolds.size(); i++)
+      {
+         if (!reachingManifolds.get(i).epsilonEquals(other.reachingManifolds.get(i), epsilon))
             return false;
       }
       return true;

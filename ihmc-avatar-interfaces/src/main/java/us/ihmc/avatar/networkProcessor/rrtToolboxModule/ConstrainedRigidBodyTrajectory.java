@@ -185,6 +185,8 @@ public class ConstrainedRigidBodyTrajectory
 
    public void appendRandomSpatial(SpatialData spatialData)
    {
+      // TODO: need a boolean variable to enable or disable exploration.
+      // TODO: that is for dual hand reaching.
       RigidBodyTransform randomPose = new RigidBodyTransform();
 
       String[] configurationNames = new String[explorationConfigurationSpaces.size()];
