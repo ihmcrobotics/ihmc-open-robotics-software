@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -21,12 +22,14 @@ public class FootstepPlannerUserInterfaceAPI
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
+   private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
    private static final Category Root = apiFactory.getRootCategory(apiFactory.createCategoryTheme("FootstepPlanning"));
 
    public static final Topic<PlanarRegionsList> PlanarRegionData = Root.child(PlanarRegion).topic(Data);
+   public static final Topic<FootstepPlannerType> SelectedPlannerType = Root.child(PlanarRegion).topic(Data);
 
    public static final Topic<Boolean> StartEditModeEnabled = Root.child(Start).child(EditMode).topic(Enable);
    public static final Topic<Boolean> GoalEditModeEnabled = Root.child(Goal).child(EditMode).topic(Enable);
