@@ -3,11 +3,8 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.TunableJointAccelerationIntegrationParameters;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
@@ -80,16 +77,16 @@ public class ParameterTools
       }
    }
 
-   public static void extract3DGainMap(String suffix, List<ImmutableTriple<String, PID3DGains, List<String>>> gains, Map<String, PID3DGainsReadOnly> yoGainsToPack, YoVariableRegistry registry)
+   public static void extract3DGainMap(String suffix, List<JointGroupParameter<PID3DGainsReadOnly>> gains, Map<String, PID3DGainsReadOnly> yoGainsToPack, YoVariableRegistry registry)
    {
       yoGainsToPack.clear();
-      for (ImmutableTriple<String, PID3DGains, List<String>> gainTriple : gains)
+      for (JointGroupParameter<PID3DGainsReadOnly> jointGroupGains : gains)
       {
-         String gainName = gainTriple.getLeft() + suffix;
-         PID3DGains gain = gainTriple.getMiddle();
+         String gainName = jointGroupGains.getJointGroupName() + suffix;
+         PID3DGainsReadOnly gain = jointGroupGains.getParameter();
          PID3DGainsReadOnly parameterizedGains = new ParameterizedPID3DGains(gainName, gain, registry);
 
-         for (String bodyName : gainTriple.getRight())
+         for (String bodyName : jointGroupGains.getJointNames())
          {
             yoGainsToPack.put(bodyName, parameterizedGains);
          }

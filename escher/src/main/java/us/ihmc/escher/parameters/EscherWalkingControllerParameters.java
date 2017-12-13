@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -22,6 +20,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -292,19 +291,19 @@ public class EscherWalkingControllerParameters extends WalkingControllerParamete
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
+   public List<JointGroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
    {
-      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceAngularGains = new ArrayList<>();
+      List<JointGroupParameter<PID3DGainsReadOnly>> taskspaceAngularGains = new ArrayList<>();
 
       PID3DGains chestAngularGains = createChestOrientationControlGains();
       List<String> chestGainBodies = new ArrayList<>();
       chestGainBodies.add(jointMap.getChestName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Chest", chestAngularGains, chestGainBodies));
+      taskspaceAngularGains.add(new JointGroupParameter<>("Chest", chestAngularGains, chestGainBodies));
 
       PID3DGains headAngularGains = createHeadOrientationControlGains();
       List<String> headGainBodies = new ArrayList<>();
       headGainBodies.add(jointMap.getHeadName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Head", headAngularGains, headGainBodies));
+      taskspaceAngularGains.add(new JointGroupParameter<>("Head", headAngularGains, headGainBodies));
 
       PID3DGains handAngularGains = createHandOrientationControlGains();
       List<String> handGainBodies = new ArrayList<>();
@@ -312,12 +311,12 @@ public class EscherWalkingControllerParameters extends WalkingControllerParamete
       {
          handGainBodies.add(jointMap.getHandName(robotSide));
       }
-      taskspaceAngularGains.add(new ImmutableTriple<>("Hand", handAngularGains, handGainBodies));
+      taskspaceAngularGains.add(new JointGroupParameter<>("Hand", handAngularGains, handGainBodies));
 
       PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
       List<String> pelvisGainBodies = new ArrayList<>();
       pelvisGainBodies.add(jointMap.getPelvisName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
+      taskspaceAngularGains.add(new JointGroupParameter<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
 
       return taskspaceAngularGains;
    }
@@ -394,9 +393,9 @@ public class EscherWalkingControllerParameters extends WalkingControllerParamete
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspacePositionControlGains()
+   public List<JointGroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
    {
-      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceLinearGains = new ArrayList<>();
+      List<JointGroupParameter<PID3DGainsReadOnly>> taskspaceLinearGains = new ArrayList<>();
 
       PID3DGains handLinearGains = createHandPositionControlGains();
       List<String> handGainBodies = new ArrayList<>();
@@ -404,7 +403,7 @@ public class EscherWalkingControllerParameters extends WalkingControllerParamete
       {
          handGainBodies.add(jointMap.getHandName(robotSide));
       }
-      taskspaceLinearGains.add(new ImmutableTriple<>("Hand", handLinearGains, handGainBodies));
+      taskspaceLinearGains.add(new JointGroupParameter<>("Hand", handLinearGains, handGainBodies));
 
       return taskspaceLinearGains;
    }

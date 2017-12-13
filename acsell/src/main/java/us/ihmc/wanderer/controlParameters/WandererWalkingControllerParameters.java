@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
@@ -18,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -201,19 +200,19 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
+   public List<JointGroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
    {
-      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceAngularGains = new ArrayList<>();
+      List<JointGroupParameter<PID3DGainsReadOnly>> taskspaceAngularGains = new ArrayList<>();
 
       PID3DGains chestAngularGains = createChestOrientationControlGains();
       List<String> chestGainBodies = new ArrayList<>();
       chestGainBodies.add(jointMap.getChestName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Chest", chestAngularGains, chestGainBodies));
+      taskspaceAngularGains.add(new JointGroupParameter<>("Chest", chestAngularGains, chestGainBodies));
 
       PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
       List<String> pelvisGainBodies = new ArrayList<>();
       pelvisGainBodies.add(jointMap.getPelvisName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
+      taskspaceAngularGains.add(new JointGroupParameter<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
 
       return taskspaceAngularGains;
    }
