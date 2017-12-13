@@ -56,6 +56,11 @@ public class VisibilityMap implements Transformable
       return connections;
    }
 
+   public boolean isEmpty()
+   {
+      return connections.isEmpty();
+   }
+
    @Override
    public void applyTransform(Transform transform)
    {
