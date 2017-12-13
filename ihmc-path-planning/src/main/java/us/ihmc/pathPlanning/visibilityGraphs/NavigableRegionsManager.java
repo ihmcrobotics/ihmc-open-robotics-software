@@ -19,7 +19,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclussionTools;
@@ -40,7 +39,6 @@ public class NavigableRegionsManager
    private List<VisibilityMap> visMaps = new ArrayList<>();
    private SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-   private JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder;
    private double pathLength = 0.0;
    private final VisibilityGraphsParameters parameters;
 
@@ -48,40 +46,24 @@ public class NavigableRegionsManager
    private ArrayList<Connection> globalMapPoints = new ArrayList<>();
    private ArrayList<DistancePoint> distancePoints = new ArrayList<>();
 
+   public NavigableRegionsManager()
+   {
+      this(null, null);
+   }
+
    public NavigableRegionsManager(VisibilityGraphsParameters parameters)
    {
-      this(parameters, null, null);
+      this(parameters, null);
    }
 
    public NavigableRegionsManager(List<PlanarRegion> regions)
    {
-      this(regions, null);
+      this(null, regions);
    }
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {
-      this(parameters, regions, null);
-   }
-
-   public NavigableRegionsManager(JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder)
-   {
-      this(null, null, javaFXMultiColorMeshBuilder);
-   }
-
-   public NavigableRegionsManager(VisibilityGraphsParameters parameters, JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder)
-   {
-      this(parameters, null, javaFXMultiColorMeshBuilder);
-   }
-
-   public NavigableRegionsManager(List<PlanarRegion> regions, JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder)
-   {
-      this(null, regions, javaFXMultiColorMeshBuilder);
-   }
-
-   public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions, JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder)
-   {
       this.regions = regions;
-      this.javaFXMultiColorMeshBuilder = javaFXMultiColorMeshBuilder;
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
    }
 

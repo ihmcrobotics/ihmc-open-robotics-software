@@ -74,7 +74,7 @@ public class Example_Concavity extends Application
 
       System.out.println(regions.size() + "   " + filteredRegions.size());
 
-      NavigableRegionsManager manager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), filteredRegions, meshBuilder);
+      NavigableRegionsManager manager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), filteredRegions);
 
       Point3D start = new Point3D(-0.45, -0.25, 0.05);
       Point3D goal = new Point3D(1.25, 1.45, 0.05);

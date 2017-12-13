@@ -66,7 +66,7 @@ public class Example_IsStartGoalInsideRegion extends Application
 
       long startTime = System.currentTimeMillis();
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), regions, javaFXMultiColorMeshBuilder);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), regions);
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
       
       for (int i = 1; i < path.size(); i++)
