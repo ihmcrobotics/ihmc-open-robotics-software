@@ -8,7 +8,6 @@ import java.util.Set;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -32,12 +31,12 @@ public class VisibilityTools
 
    public static List<Connection> getConnectionsThatAreInsideRegion(List<Connection> connections, PlanarRegion region)
    {
-      ArrayList<Connection> filteredConnections = new ArrayList<>();
+      List<Connection> filteredConnections = new ArrayList<>();
 
       for (Connection connection : connections)
       {
 
-         if (PlanarRegionTools.areBothPointsInsidePolygon(new Point2D(connection.getSourcePoint()), new Point2D(connection.getTargetPoint()), region))
+         if (PlanarRegionTools.areBothPointsInsidePolygon(connection.getSourcePoint2D(), connection.getTargetPoint2D(), region))
          {
             filteredConnections.add(connection);
          }
@@ -53,7 +52,7 @@ public class VisibilityTools
       for (Connection connection : connections)
       {
 
-         if (PlanarRegionTools.areBothPointsInsidePolygon(new Point2D(connection.getSourcePoint()), new Point2D(connection.getTargetPoint()), polygon))
+         if (PlanarRegionTools.areBothPointsInsidePolygon(connection.getSourcePoint2D(), connection.getTargetPoint2D(), polygon))
          {
             filteredConnections.add(connection);
          }
@@ -104,7 +103,7 @@ public class VisibilityTools
 
                if (targetIsVisible)
                {
-                  connections.add(new Connection(new Point3D(observer), new Point3D(target)));
+                  connections.add(new Connection(observer, target));
                }
             }
          }
@@ -140,7 +139,7 @@ public class VisibilityTools
 
             if (targetIsVisible)
             {
-               connections.add(new Connection(new Point3D(observer), new Point3D(target)));
+               connections.add(new Connection(observer, target));
             }
          }
       }
