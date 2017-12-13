@@ -368,7 +368,7 @@ public class ClusterTools
       }
    }
 
-   public static ArrayList<Point2D> extrudeLine(Point2DReadOnly pt1, Point2DReadOnly pt2, double extrusionDistance)
+   public static List<Point2D> extrudeLine(Point2DReadOnly pt1, Point2DReadOnly pt2, double extrusionDistance)
    {
       ArrayList<Point2D> points = new ArrayList<>();
 
@@ -426,34 +426,14 @@ public class ClusterTools
       int extrusionIndex = 0;
       if (cluster.getType() == Type.LINE)
       {
-         //         System.out.println("Extruding line");
-         //         System.out.println("Distance: " + extrusionDistance);
-
          double extrusionDist1 = extrusionDistance - 0.01 + cluster.getAdditionalExtrusionDistance();
          double extrusionDist2 = extrusionDistance + cluster.getAdditionalExtrusionDistance();
 
-         //         System.out.println(extrusionDist1 + "   " + extrusionDist2);
+         List<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal(0), cluster.getRawPointInLocal(1), extrusionDist1);
+         List<Point2D> navExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal(0), cluster.getRawPointInLocal(1), extrusionDist2);
 
-         ArrayList<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(new Point2D(cluster.getRawPointsInLocal().get(0).getX(),
-                                                                                    cluster.getRawPointsInLocal().get(0).getY()),
-                                                                        new Point2D(cluster.getRawPointsInLocal().get(1).getX(),
-                                                                                    cluster.getRawPointsInLocal().get(1).getY()),
-                                                                        extrusionDist1);
-         ArrayList<Point2D> navExtrusions = ClusterTools.extrudeLine(new Point2D(cluster.getRawPointsInLocal().get(0).getX(),
-                                                                                 cluster.getRawPointsInLocal().get(0).getY()),
-                                                                     new Point2D(cluster.getRawPointsInLocal().get(1).getX(),
-                                                                                 cluster.getRawPointsInLocal().get(1).getY()),
-                                                                     extrusionDist2);
-
-         for (Point2D pt : nonNavExtrusions)
-         {
-            cluster.addNonNavigableExtrusionInLocal(pt);
-         }
-
-         for (Point2D pt : navExtrusions)
-         {
-            cluster.addNavigableExtrusionInLocal(pt);
-         }
+         cluster.addNonNavigableExtrusionsInLocal(nonNavExtrusions);
+         cluster.addNavigableExtrusionsInLocal(navExtrusions);
       }
 
       if (cluster.getType() == Type.POLYGON)
