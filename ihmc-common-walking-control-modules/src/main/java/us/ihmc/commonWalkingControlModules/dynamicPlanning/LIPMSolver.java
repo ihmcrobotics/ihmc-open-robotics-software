@@ -105,9 +105,9 @@ public class LIPMSolver
       //ddpSolver.computeTrajectory(initialCoM, desiredCoMTrajectory, desiredZmpTrajectory);
    }
 
-   public void computeTrajectory()
+   public int computeTrajectory()
    {
-      ddpSolver.computeTrajectory(LIPMState.NORMAL);
+      return ddpSolver.computeTrajectory(LIPMState.NORMAL);
       /*
       double cost, cost0;
       cost0 = Double.POSITIVE_INFINITY;

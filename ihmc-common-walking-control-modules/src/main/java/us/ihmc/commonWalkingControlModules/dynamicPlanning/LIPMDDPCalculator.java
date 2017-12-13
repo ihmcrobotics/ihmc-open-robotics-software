@@ -57,11 +57,6 @@ public class LIPMDDPCalculator
       desiredControlVector.clear();
    }
 
-   public void setLineSearchGain(double lineSearchGain)
-   {
-      //ddpSolver.setLineSearchGain(lineSearchGain);
-   }
-
    public void setDeltaT(double deltaT)
    {
       dynamics.setTimeStepSize(deltaT);
@@ -124,36 +119,11 @@ public class LIPMDDPCalculator
       int size = desiredStateVector.size() - 1;
 
       lipmSolver.initializeTrajectory(desiredControlVector, desiredStateVector, currentState);
-      /*
-      ddpSolver.setDesiredTrajectories(desiredStateVector, desiredControlVector, currentState, currentControl);
-      lqrSolver.setDesiredTrajectories(desiredStateVector, desiredControlVector, currentState);
-      lqrSolver.solveRiccatiEquation(LIPMState.NORMAL, 0, size);
-      lqrSolver.computeOptimalTrajectories(LIPMState.NORMAL, 0, size);
-      ddpSolver.initializeFromLQRSolution(lqrSolver.getOptimalStateTrajectory(), lqrSolver.getOptimalControlTrajectory(), lqrSolver.getOptimalFeedbackGainTrajectory(),
-                                          lqrSolver.getOptimalFeedForwardControlTrajectory(), lqrSolver.getValueHessian());
-      ddpSolver.solveForwardDDPPass(LIPMState.NORMAL, 0, size, Double.POSITIVE_INFINITY, false);
-      */
-      /*
-      ddpSolver.solveBackwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
-      ddpSolver.solveForwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
-      ddpSolver.initializeDDPWithLQRSolution();
-      */
    }
 
-   public void solve()
+   public int solve()
    {
-      lipmSolver.computeTrajectory();
-      //ddpSolver.fullDDPPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
-   }
-
-   public void backwardDDPPass()
-   {
-      //ddpSolver.solveBackwardDDPPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
-   }
-
-   public void forwardDDPPass()
-   {
-      //ddpSolver.solveForwardDDPPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
+      return lipmSolver.computeTrajectory();
    }
 
    private double computeDeltaT(double trajectoryLength)
@@ -169,19 +139,16 @@ public class LIPMDDPCalculator
 
    public RecyclingArrayList<DenseMatrix64F> getControlVector()
    {
-      //return ddpSolver.getControlVector();
       return lipmSolver.getControlTrajectory();
    }
 
    public RecyclingArrayList<DenseMatrix64F> getStateVector()
    {
-      //return ddpSolver.getStateVector();
       return lipmSolver.getStateTrajectory();
    }
 
    public double getValue()
    {
-      //return ddpSolver.getValue();
       return 0.0;
    }
 }

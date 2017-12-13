@@ -86,7 +86,7 @@ public class LIPMDDPCalculatorVisualizer
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    private final YoBoolean computeNextPass = new YoBoolean("computeNextPass", registry);
-   private final YoDouble costToGo = new YoDouble("costToGo", registry);
+   private final YoInteger iterations = new YoInteger("iterations", registry);
 
    private final int simulatedTicksPerGraphicUpdate = 1;
    private final double trailingDuration = 4.0 * (singleSupportDuration + doubleSupportDuration);
@@ -152,15 +152,6 @@ public class LIPMDDPCalculatorVisualizer
       }
 
       updatesPerRequest.set(1);
-      lineSearchGain.set(0.2);
-      lineSearchGain.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            ddp.setLineSearchGain(lineSearchGain.getDoubleValue());
-         }
-      });
       trajectoryDT.set(0.01);
       trajectoryDT.addVariableChangedListener(new VariableChangedListener()
       {
@@ -278,12 +269,7 @@ public class LIPMDDPCalculatorVisualizer
 
             for (int i = 0; i < updatesPerRequest.getIntegerValue(); i++)
             {
-               ddp.solve();
-               /*
-               ddp.backwardDDPPass();
-               ddp.forwardDDPPass();
-               costToGo.set(ddp.getValue());
-               */
+               iterations.set(ddp.solve());
             }
 
             plotCoMPlan();

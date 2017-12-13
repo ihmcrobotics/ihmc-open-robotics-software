@@ -17,8 +17,8 @@ public interface DDPSolverInterface<E extends Enum>
    RecyclingArrayList<DenseMatrix64F> getControlTrajectory();
    RecyclingArrayList<DenseMatrix64F> getStateTrajectory();
 
-   boolean computeTrajectory(E dynamicsState);
-   boolean computeTrajectory(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices);
+   int computeTrajectory(E dynamicsState);
+   int computeTrajectory(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices);
    double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, RecyclingArrayList<DenseMatrix64F> updatedStateTrajectory,
                       RecyclingArrayList<DenseMatrix64F> updatedControlTrajectory);
    boolean backwardPass(E dynamicsState, int startIndex, int endIndex, RecyclingArrayList<DenseMatrix64F> stateTrajectory,
