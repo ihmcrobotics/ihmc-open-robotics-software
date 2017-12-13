@@ -19,7 +19,7 @@ public class StepForwardAction extends AbstractAction
       super("Step Forward");
       this.executor = executor;
 
-      String iconFilename = "icons/StepForward24.gif";
+      String iconFilename = "icons/StepForward.png";
       int shortKey = KeyEvent.VK_F;
       String longDescription = "Step Forward";
       String shortDescription = "Step Forward";

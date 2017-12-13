@@ -19,7 +19,7 @@ public class GotoOutPointAction extends AbstractAction
       super("Goto Out Point");
       this.executor = executor;
 
-      String iconFilename = "icons/YoGoOutPoint24_2.gif";
+      String iconFilename = "icons/GotoOutPoint.png";
       int shortKey = KeyEvent.VK_O;
       String longDescription = "Goto Out Point";
       String shortDescription = "Goto Out Point";

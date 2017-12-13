@@ -19,7 +19,7 @@ public class ZoomInAction extends AbstractAction
       super("Zoom In");
       this.executor = executor;
 
-      String iconFilename = "icons/ZoomIn24.gif";
+      String iconFilename = "icons/ZoomIn.png";
       int shortKey = KeyEvent.VK_I;
       String longDescription = "Zoom In";
       String shortDescription = "Zoom In";
