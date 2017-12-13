@@ -179,6 +179,7 @@ public class Cluster
       if (closed)
       {
          rawPointsLocal.add(new Point2D(pointsInLocal.get(0)));
+         rawPointsLocal.add(new Point2D(pointsInLocal.get(1)));
       }
 
       centroidInLocal.set(EuclidGeometryTools.averagePoint2Ds(rawPointsLocal));
