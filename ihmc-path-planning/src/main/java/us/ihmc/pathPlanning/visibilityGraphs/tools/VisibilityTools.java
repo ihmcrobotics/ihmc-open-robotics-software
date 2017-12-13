@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -112,10 +113,10 @@ public class VisibilityTools
       return connections;
    }
 
-   public static HashSet<Connection> createStaticVisibilityMap(Point2D observer, List<Cluster> clusters)
+   public static Set<Connection> createStaticVisibilityMap(Point2D observer, List<Cluster> clusters)
    {
-      HashSet<Connection> connections = new HashSet<>();
-      ArrayList<Point2D> listOfTargetPoints = new ArrayList<>();
+      Set<Connection> connections = new HashSet<>();
+      List<Point2D> listOfTargetPoints = new ArrayList<>();
 
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)

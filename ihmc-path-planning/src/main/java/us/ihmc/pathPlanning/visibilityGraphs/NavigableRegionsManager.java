@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -85,18 +86,6 @@ public class NavigableRegionsManager
 
    public void setPlanarRegions(List<PlanarRegion> regions)
    {
-      //      ArrayList<PlanarRegion> regions1 = new ArrayList<>();
-      //      regions1.add(regions.get(0));
-      //      regions1.add(regions.get(1));
-      //      regions1.add(regions.get(2));
-      //      regions1.add(regions.get(3));
-      //      regions1.add(regions.get(4));
-      //      regions1.add(regions.get(5));
-      //      regions1.add(regions.get(6));
-      //    regions1.add(regions.get(20)); //slanted
-      //    regions1.add(regions.get(21)); //slanted 2
-      //    regions1.add(regions.get(24)); //slanted 3
-
       regions = PlanarRegionTools.filterPlanarRegionsByArea(parameters.getPlanarRegionMinArea(), regions);
       regions = PlanarRegionTools.filterPlanarRegionsByHullSize(parameters.getPlanarRegionMinSize(), regions);
 
@@ -269,7 +258,7 @@ public class NavigableRegionsManager
    public List<Point3DReadOnly> calculateBodyPathWithOcclussions(Point3D start, Point3D goal)
    {
       List<Point3DReadOnly> path = calculateBodyPath(start, goal);
-      
+
       if (path == null)
       {
          if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
@@ -288,7 +277,7 @@ public class NavigableRegionsManager
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomeRegion());
-         
+
          path = calculateBodyPath(start, closestExtrusion);
          path.add(goal);
 
@@ -346,40 +335,12 @@ public class NavigableRegionsManager
          }
       }
 
-      if (startMap != null && goalMap != null)
-      {
-         visMaps.add(startMap);
-         visMaps.add(goalMap);
+      if (startMap.isEmpty() || goalMap.isEmpty())
+         return false;
 
-         return true;
-      }
-
-      return false;
-   }
-
-   private static PlanarRegion getLargestAreaRegion(List<PlanarRegion> planarRegions)
-   {
-      double largestArea = Double.NEGATIVE_INFINITY;
-      int index = -1;
-
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         double area = 0.0;
-         PlanarRegion region = planarRegions.get(i);
-
-         for (int j = 0; j < planarRegions.get(i).getNumberOfConvexPolygons(); j++)
-         {
-            area += region.getConvexPolygon(j).getArea();
-         }
-
-         if (area > largestArea)
-         {
-            largestArea = area;
-            index = i;
-         }
-      }
-
-      return planarRegions.get(index);
+      visMaps.add(startMap);
+      visMaps.add(goalMap);
+      return true;
    }
 
    private List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal)
@@ -476,7 +437,7 @@ public class NavigableRegionsManager
 
    public static VisibilityMap createVisMapForSinglePointSource(Point2D point, NavigableRegion navigableRegion)
    {
-      HashSet<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getClusters());
+      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getClusters());
 
       RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
 
@@ -711,7 +672,7 @@ public class NavigableRegionsManager
       {
          for (VisibilityMap sourceMap : visMaps)
          {
-            HashSet<Point3DReadOnly> sourcePoints = sourceMap.getVertices();
+            Set<Point3DReadOnly> sourcePoints = sourceMap.getVertices();
 
             for (Point3DReadOnly sourcePt : sourcePoints)
             {
@@ -719,7 +680,7 @@ public class NavigableRegionsManager
                {
                   if (sourceMap != targetMap)
                   {
-                     HashSet<Point3DReadOnly> targetPoints = targetMap.getVertices();
+                     Set<Point3DReadOnly> targetPoints = targetMap.getVertices();
 
                      for (Point3DReadOnly targetPt : targetPoints)
                      {
@@ -851,11 +812,7 @@ public class NavigableRegionsManager
             }
 
             Point2D[] homePointsArr = new Point2D[cluster.getNonNavigableExtrusionsInWorld().size()];
-
-            for (int i = 0; i < cluster.getNonNavigableExtrusionsInWorld().size(); i++)
-            {
-               homePointsArr[i] = new Point2D(cluster.getNonNavigableExtrusionsInWorld().get(i));
-            }
+            cluster.getNonNavigableExtrusionsInWorld().toArray(homePointsArr);
 
             if (PlanarRegionTools.isPointInsidePolygon(homePointsArr, new Point2D(pointToCheck)))
             {
