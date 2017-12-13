@@ -288,9 +288,9 @@ public class PlanarRegionTools
       { // Picking an edge that is not parallel to the ray.
          Point2DReadOnly edgeStart = polygon[i];
          Point2DReadOnly edgeEnd = polygon[(i + 1) % polygon.length];
-         Vector2D edgeDirection =  new Vector2D();
+         Vector2D edgeDirection = new Vector2D();
          edgeDirection.sub(edgeEnd, edgeStart);
-         
+
          pointOnArbitraryEdge.interpolate(edgeStart, edgeEnd, 0.5);
          rayDirection.sub(pointOnArbitraryEdge, rayOrigin);
 
@@ -333,7 +333,7 @@ public class PlanarRegionTools
       return numberOfIntersections % 2 != 0;
    }
 
-   public static boolean areBothPointsInsidePolygon(Point2D point1, Point2D point2, PlanarRegion homeRegion)
+   public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, PlanarRegion homeRegion)
    {
       boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point1);
       boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point2);
@@ -341,7 +341,7 @@ public class PlanarRegionTools
       return startIsInside && goalIsInside;
    }
 
-   public static boolean areBothPointsInsidePolygon(Point2D point1, Point2D point2, List<Point2D> pointsInPolygon)
+   public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, List<? extends Point2DReadOnly> pointsInPolygon)
    {
       Point2D[] pointsArr = pointsInPolygon.toArray(new Point2D[pointsInPolygon.size()]);
       boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point1);

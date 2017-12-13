@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -435,7 +436,7 @@ public class NavigableRegionsManager
       //      System.out.println("Actual connections added: " + actualConnectionsAdded);
    }
 
-   public static VisibilityMap createVisMapForSinglePointSource(Point2D point, NavigableRegion navigableRegion)
+   public static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion)
    {
       Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getClusters());
 
@@ -766,7 +767,7 @@ public class NavigableRegionsManager
       }
 
       VisibilityMap visibilityMap = new VisibilityMap();
-      HashSet<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters);
+      Set<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters);
       visibilityMap.setConnections(connectionsForMap);
 
       ArrayList<Connection> connections = new ArrayList<>();
@@ -779,9 +780,9 @@ public class NavigableRegionsManager
          connections.add(connection);
       }
 
-      ArrayList<Connection> filteredConnections1 = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connections,
-                                                                                                                 navigableRegionLocalPlanner.getHomeRegion());
-      ArrayList<Connection> filteredConnections2 = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(filteredConnections1, clusters);
+      List<Connection> filteredConnections1 = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connections,
+                                                                                                            navigableRegionLocalPlanner.getHomeRegion());
+      List<Connection> filteredConnections2 = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(filteredConnections1, clusters);
 
       HashSet<Connection> sets = new HashSet<>();
 

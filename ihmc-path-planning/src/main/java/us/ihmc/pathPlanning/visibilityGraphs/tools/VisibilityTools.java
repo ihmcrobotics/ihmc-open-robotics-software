@@ -7,6 +7,7 @@ import java.util.Set;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -14,12 +15,12 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityTools
 {
-   public static boolean isPointVisible(Point2D observer, Point2D targetPoint, List<Point2D> listOfPointsInCluster)
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster)
    {
       for (int i = 0; i < listOfPointsInCluster.size() - 1; i++)
       {
-         Point2D first = listOfPointsInCluster.get(i);
-         Point2D second = listOfPointsInCluster.get(i + 1);
+         Point2DReadOnly first = listOfPointsInCluster.get(i);
+         Point2DReadOnly second = listOfPointsInCluster.get(i + 1);
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
@@ -29,7 +30,7 @@ public class VisibilityTools
       return true;
    }
 
-   public static ArrayList<Connection> getConnectionsThatAreInsideRegion(ArrayList<Connection> connections, PlanarRegion region)
+   public static List<Connection> getConnectionsThatAreInsideRegion(List<Connection> connections, PlanarRegion region)
    {
       ArrayList<Connection> filteredConnections = new ArrayList<>();
 
@@ -45,15 +46,14 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static ArrayList<Connection> getConnectionsThatAreInsideRegion(ArrayList<Connection> connections, List<Point2D> polygon)
+   public static List<Connection> getConnectionsThatAreInsideRegion(List<Connection> connections, List<? extends Point2DReadOnly> polygon)
    {
-      ArrayList<Connection> filteredConnections = new ArrayList<>();
+      List<Connection> filteredConnections = new ArrayList<>();
 
       for (Connection connection : connections)
       {
 
-         if (PlanarRegionTools.areBothPointsInsidePolygon(new Point2D(connection.getSourcePoint().getX(), connection.getSourcePoint().getY()),
-                                                          new Point2D(connection.getTargetPoint().getX(), connection.getTargetPoint().getY()), polygon))
+         if (PlanarRegionTools.areBothPointsInsidePolygon(new Point2D(connection.getSourcePoint()), new Point2D(connection.getTargetPoint()), polygon))
          {
             filteredConnections.add(connection);
          }
@@ -62,11 +62,11 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static HashSet<Connection> createStaticVisibilityMap(Point2D start, Point2D goal, List<Cluster> clusters)
+   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly start, Point2DReadOnly goal, List<Cluster> clusters)
    {
-      HashSet<Connection> connections = new HashSet<>();
+      Set<Connection> connections = new HashSet<>();
 
-      ArrayList<Point2D> listOfObserverPoints = new ArrayList<>();
+      List<Point2DReadOnly> listOfObserverPoints = new ArrayList<>();
 
       if (start != null)
       {
@@ -92,11 +92,11 @@ public class VisibilityTools
 
       for (int i = 0; i < listOfObserverPoints.size(); i++)
       {
-         Point2D observer = listOfObserverPoints.get(i);
+         Point2DReadOnly observer = listOfObserverPoints.get(i);
 
          for (int j = i + 1; j < listOfObserverPoints.size(); j++)
          {
-            Point2D target = listOfObserverPoints.get(j);
+            Point2DReadOnly target = listOfObserverPoints.get(j);
 
             if (observer.distance(target) > 0.01)
             {
@@ -113,7 +113,7 @@ public class VisibilityTools
       return connections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point2D observer, List<Cluster> clusters)
+   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, List<Cluster> clusters)
    {
       Set<Connection> connections = new HashSet<>();
       List<Point2D> listOfTargetPoints = new ArrayList<>();
@@ -148,7 +148,7 @@ public class VisibilityTools
       return connections;
    }
 
-   public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2D observer, Point2D targetPoint)
+   public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
    {
       for (Cluster cluster : clusters)
       {
@@ -160,27 +160,25 @@ public class VisibilityTools
 
       return true;
    }
-   
-   public static ArrayList<Connection> removeConnectionsFromExtrusionsOutsideRegions(ArrayList<Connection> connections, PlanarRegion homeRegion)
-   {
-      ArrayList<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connections, homeRegion);
 
-      return filteredConnections;
+   public static List<Connection> removeConnectionsFromExtrusionsOutsideRegions(List<Connection> connections, PlanarRegion homeRegion)
+   {
+      return VisibilityTools.getConnectionsThatAreInsideRegion(connections, homeRegion);
    }
-   
-   public static ArrayList<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(ArrayList<Connection> connectionsToClean, List<Cluster> clusters)
-   {
-      ArrayList<Connection> masterListOfConnections = new ArrayList<>();
 
-      ArrayList<Cluster> filteredClusters = new ArrayList<>();
+   public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(List<Connection> connectionsToClean, List<Cluster> clusters)
+   {
+      List<Connection> masterListOfConnections = new ArrayList<>();
+      List<Cluster> filteredClusters = new ArrayList<>();
+
       if (clusters.size() > 1)
       {
          for (int i = 0; i < clusters.size() - 1; i++)
          {
             filteredClusters.add(clusters.get(i));
          }
-         
-         ArrayList<Connection> connectionsToRemove = new ArrayList<>();
+
+         List<Connection> connectionsToRemove = new ArrayList<>();
          for (Cluster cluster : filteredClusters)
          {
 
@@ -189,31 +187,26 @@ public class VisibilityTools
                continue;
             }
 
-            ArrayList<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                          cluster.getNonNavigableExtrusionsInLocal());
+            List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
+                                                                                                     cluster.getNonNavigableExtrusionsInLocal());
             for (Connection connection : filteredConnections)
             {
                connectionsToRemove.add(connection);
             }
          }
 
+         List<Connection> connectionsInsideHomeRegion = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
+                                                                                                          clusters.get(clusters.size() - 1)
+                                                                                                                  .getNonNavigableExtrusionsInLocal());
 
-         ArrayList<Connection> connectionsInsideHomeRegion = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                               clusters.get(clusters.size() - 1)
-                                                                                                                       .getNonNavigableExtrusionsInLocal());
-
-         int index = 0;
-
-         ArrayList<Connection> finalList = (ArrayList<Connection>) connectionsInsideHomeRegion.clone();
+         List<Connection> finalList = new ArrayList<>(connectionsInsideHomeRegion);
          for (Connection connection : connectionsInsideHomeRegion)
          {
             for (Connection connectionToRemove : connectionsToRemove)
             {
-               if (connection.getSourcePoint().epsilonEquals(connectionToRemove.getSourcePoint(), 1E-5)
-                     && connection.getTargetPoint().epsilonEquals(connectionToRemove.getTargetPoint(), 1E-5))
+               if (connection.epsilonEquals(connectionToRemove, 1E-5))
                {
                   finalList.remove(connection);
-                  index++;
                }
             }
          }
@@ -222,7 +215,6 @@ public class VisibilityTools
          {
             masterListOfConnections.add(connection);
          }
-
       }
       else
       {
@@ -234,9 +226,9 @@ public class VisibilityTools
             {
                continue;
             }
-            
-            ArrayList<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                          cluster.getNonNavigableExtrusionsInLocal());
+
+            List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
+                                                                                                     cluster.getNonNavigableExtrusionsInLocal());
             for (Connection connection : filteredConnections)
             {
                masterListOfConnections.add(connection);
@@ -246,6 +238,5 @@ public class VisibilityTools
 
       return masterListOfConnections;
    }
-
 
 }
