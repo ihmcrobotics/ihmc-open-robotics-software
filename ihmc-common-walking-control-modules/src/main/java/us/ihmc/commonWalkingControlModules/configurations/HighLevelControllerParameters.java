@@ -25,7 +25,7 @@ public interface HighLevelControllerParameters
    double getCalibrationDuration();
 
    /**
-    * Returns a list of joint behaviors for groups of joints. In each {@link JointGroupParameter} a set
+    * Returns a list of joint behaviors for groups of joints. In each {@link GroupParameter} a set
     * of joints can be specified that will share a common tunable parameter. In this way joints can
     * be grouped together and tuned using a single parameter (e.g. left elbow and right elbow).
     * <p>
@@ -35,7 +35,7 @@ public interface HighLevelControllerParameters
     * </p>
     * @return list containing joint behavior parameters and the corresponding joint groups
     */
-   public default List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
+   public default List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
       return null;
    }
@@ -52,7 +52,7 @@ public interface HighLevelControllerParameters
 
    /**
     * Returns a list of acceleration integration parameters for groups of joints. In each
-    * {@link JointGroupParameter} a set of joints can be specified that will share a common tunable
+    * {@link GroupParameter} a set of joints can be specified that will share a common tunable
     * parameter. In this way joints can be grouped together and tuned using a single parameter (e.g.
     * left elbow and right elbow).
     * <p>
@@ -67,7 +67,7 @@ public interface HighLevelControllerParameters
     * </p>
     * @return list containing acceleration integration parameters and the corresponding joint groups
     */
-   public default List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
+   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
    {
       return null;
    }
@@ -80,7 +80,7 @@ public interface HighLevelControllerParameters
     *
     * @return list containing acceleration integration parameters to be used if a joint is loaded
     */
-   public default List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersLoaded()
+   public default List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersLoaded()
    {
       return null;
    }

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
@@ -28,13 +28,13 @@ public class ThorHighLevelControllerParameters implements HighLevelControllerPar
    }
 
    @Override
-   public List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
+   public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
       JointDesiredBehavior allJointBehaviors = new JointDesiredBehavior(JointDesiredControlMode.EFFORT, 100.0, 0.5);
 
       List<String> allJoints = Arrays.asList(jointMap.getOrderedJointNames());
-      List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
-      behaviors.add(new JointGroupParameter<>("", allJointBehaviors, allJoints));
+      List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
+      behaviors.add(new GroupParameter<>("", allJointBehaviors, allJoints));
       return behaviors;
    }
 
