@@ -31,6 +31,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -44,7 +45,7 @@ public class RigidBodyControlManager
    private final YoVariableRegistry registry;
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
-   private final YoEnum<RigidBodyControlMode> defaultControlMode;
+   private final EnumParameter<RigidBodyControlMode> defaultControlMode;
 
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
@@ -65,8 +66,8 @@ public class RigidBodyControlManager
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
                                   Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                  ContactablePlaneBody contactableBody, YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry,
-                                  YoVariableRegistry parentRegistry)
+                                  ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode, YoDouble yoTime,
+                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -75,9 +76,6 @@ public class RigidBodyControlManager
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
-
-      defaultControlMode = new YoEnum<>(namePrefix + "DefaultControlMode", registry, RigidBodyControlMode.class, true);
-      defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
 
       jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
 
@@ -100,6 +98,13 @@ public class RigidBodyControlManager
          this.homePose = new FramePose(baseFrame, homePose);
       else
          this.homePose = null;
+
+      defaultControlMode = defaultControlMode == null ? RigidBodyControlMode.JOINTSPACE : defaultControlMode;
+      checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);
+      String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
+      this.defaultControlMode = new EnumParameter<>(namePrefix + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false,
+            defaultControlMode);
+      this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
@@ -146,12 +151,11 @@ public class RigidBodyControlManager
          loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
-   public void setDefaultControlMode(RigidBodyControlMode defaultControlMode)
+   private static void checkDefaultControlMode(RigidBodyControlMode defaultControlMode, FramePose homePose, String bodyName)
    {
       if (defaultControlMode == null)
       {
-         this.defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         return;
+         throw new RuntimeException("Default control mode can not be null for body " + bodyName + ".");
       }
 
       if (defaultControlMode == RigidBodyControlMode.TASKSPACE && homePose == null)
@@ -161,10 +165,8 @@ public class RigidBodyControlManager
 
       if (defaultControlMode != RigidBodyControlMode.TASKSPACE && defaultControlMode != RigidBodyControlMode.JOINTSPACE)
       {
-         throw new RuntimeException("Only JOINTSPACE or TASKSPACE control modes are allowed as default modes.");
+         throw new RuntimeException("Only JOINTSPACE or TASKSPACE control modes are allowed as default modes for body " + bodyName + ".");
       }
-
-      this.defaultControlMode.set(defaultControlMode);
    }
 
    public void initialize()
@@ -342,7 +344,7 @@ public class RigidBodyControlManager
 
    public void hold()
    {
-      switch (defaultControlMode.getEnumValue())
+      switch (defaultControlMode.getValue())
       {
       case JOINTSPACE:
          holdInJointspace();
@@ -351,16 +353,13 @@ public class RigidBodyControlManager
          holdInTaskspace();
          break;
       default:
-         PrintTools.warn("Default control mode " + defaultControlMode.getEnumValue() + " is not an implemented option.");
-         defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         hold();
-         break;
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
    public void goToHomeFromCurrent(double trajectoryTime)
    {
-      switch (defaultControlMode.getEnumValue())
+      switch (defaultControlMode.getValue())
       {
       case JOINTSPACE:
          jointspaceControlState.goHomeFromCurrent(trajectoryTime);
@@ -371,16 +370,13 @@ public class RigidBodyControlManager
          requestState(taskspaceControlState.getStateEnum());
          break;
       default:
-         PrintTools.warn("Default control mode " + defaultControlMode.getEnumValue() + " is not an implemented option.");
-         defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         goToHomeFromCurrent(trajectoryTime);
-         break;
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
    public void goHome(double trajectoryTime)
    {
-      switch (defaultControlMode.getEnumValue())
+      switch (defaultControlMode.getValue())
       {
       case JOINTSPACE:
          computeDesiredJointPositions(initialJointPositions);
@@ -394,10 +390,7 @@ public class RigidBodyControlManager
          requestState(taskspaceControlState.getStateEnum());
          break;
       default:
-         PrintTools.warn("Default control mode " + defaultControlMode.getEnumValue() + " is not an implemented option.");
-         defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         goHome(trajectoryTime);
-         break;
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
