@@ -4,16 +4,22 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
+
+import java.util.Random;
+
+import static junit.framework.TestCase.assertTrue;
 
 public class DDPSolverTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
-   public void testComputeNewControlAndNextState()
+   public void testComputeUpdatedControl()
    {
       LIPMDynamics dynamics = new LIPMDynamics(0.01, 10, 9.81);
       LQCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -29,7 +35,6 @@ public class DDPSolverTest
       DenseMatrix64F updatedControl = new DenseMatrix64F(3, 1);
 
       DenseMatrix64F updatedControlExpected = new DenseMatrix64F(3, 1);
-
 
       DenseMatrix64F gainMatrix = new DenseMatrix64F(3, 6);
 
@@ -89,9 +94,9 @@ public class DDPSolverTest
       feedforwardTerm.set(1, feedforwardY);
       feedforwardTerm.set(2, feedforwardZ);
 
-      double updatedPx = pX - feedforwardX + xyPositionGain * (currentX - updatedX) + xyDotPositionGain * (currentXDot - updatedXDot);
-      double updatedPy = pY - feedforwardY + xyPositionGain * (currentY - updatedY) + xyDotPositionGain * (currentYDot - updatedYDot);
-      double updatedFz = fZ - feedforwardZ + zPositionGain * (currentZ - updatedZ) + zDotPositionGain * (currentZDot - updatedZDot);
+      double updatedPx = pX + feedforwardX + xyPositionGain * (updatedX - currentX) + xyDotPositionGain * (updatedXDot - currentXDot);
+      double updatedPy = pY + feedforwardY + xyPositionGain * (updatedY - currentY) + xyDotPositionGain * (updatedYDot - currentYDot);
+      double updatedFz = fZ + feedforwardZ + zPositionGain * (updatedZ - currentZ) + zDotPositionGain * (updatedZDot - currentZDot);
 
       updatedControlExpected.set(0, updatedPx);
       updatedControlExpected.set(1, updatedPy);
@@ -102,8 +107,8 @@ public class DDPSolverTest
       DenseMatrix64F stateError = new DenseMatrix64F(6, 1);
       DenseMatrix64F updatedControlAlternative = new DenseMatrix64F(3, 1);
 
-      CommonOps.subtract(currentState, updatedState, stateError);
-      CommonOps.subtract(currentControl, feedforwardTerm, updatedControlAlternative);
+      CommonOps.subtract(updatedState, currentState, stateError);
+      CommonOps.add(currentControl, feedforwardTerm, updatedControlAlternative);
       CommonOps.multAdd(gainMatrix, stateError, updatedControlAlternative);
 
       JUnitTools.assertMatrixEquals(updatedControlAlternative, updatedControl, 1e-12);
@@ -112,7 +117,16 @@ public class DDPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
-   public void testComputeValueApproximationAtNextStep()
+   public void testUpdateHamiltonianApproximations()
+   {
+      assertTrue(false);
+   }
+
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testComputePreviousValueApproximation()
    {
       LIPMDynamics dynamics = new LIPMDynamics(0.01, 10, 9.81);
       LQCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -121,7 +135,7 @@ public class DDPSolverTest
 
       DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
       DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
-      DenseMatrix64F Q_UX = new DenseMatrix64F(3, 6);
+      DenseMatrix64F Q_XU = new DenseMatrix64F(6, 3);
       DenseMatrix64F Q_XX = new DenseMatrix64F(6, 6);
 
       DenseMatrix64F Q_U = new DenseMatrix64F(3, 1);
@@ -150,26 +164,29 @@ public class DDPSolverTest
       Q_UU.set(2, 1, 8.0);
       Q_UU.set(2, 2, 12.0);
 
-      Q_UX.set(0, 0, 1.0);
-      Q_UX.set(0, 1, 2.0);
-      Q_UX.set(0, 2, 3.0);
-      Q_UX.set(0, 3, 4.0);
-      Q_UX.set(0, 4, 5.0);
-      Q_UX.set(0, 5, 6.0);
+      Q_XU.set(0, 0, 1.0);
+      Q_XU.set(0, 1, 2.0);
+      Q_XU.set(0, 2, 3.0);
 
-      Q_UX.set(1, 0, 2.0);
-      Q_UX.set(1, 1, 7.0);
-      Q_UX.set(1, 2, 8.0);
-      Q_UX.set(1, 3, 9.0);
-      Q_UX.set(1, 4, 10.0);
-      Q_UX.set(1, 5, 11.0);
+      Q_XU.set(1, 0, 4.0);
+      Q_XU.set(1, 1, 5.0);
+      Q_XU.set(1, 2, 6.0);
 
-      Q_UX.set(2, 0, 3.0);
-      Q_UX.set(2, 1, 8.0);
-      Q_UX.set(2, 2, 12.0);
-      Q_UX.set(2, 3, 13.0);
-      Q_UX.set(2, 4, 14.0);
-      Q_UX.set(2, 5, 15.0);
+      Q_XU.set(2, 0, 2.0);
+      Q_XU.set(2, 1, 7.0);
+      Q_XU.set(2, 2, 8.0);
+
+      Q_XU.set(3, 0, 9.0);
+      Q_XU.set(3, 1, 10.0);
+      Q_XU.set(3, 2, 11.0);
+
+      Q_XU.set(4, 0, 3.0);
+      Q_XU.set(4, 1, 8.0);
+      Q_XU.set(4, 2, 12.0);
+
+      Q_XU.set(5, 0, 13.0);
+      Q_XU.set(5, 1, 14.0);
+      Q_XU.set(5, 2, 15.0);
 
       Q_XX.set(0, 0, 1.0);
       Q_XX.set(0, 1, 2.0);
@@ -218,27 +235,22 @@ public class DDPSolverTest
       linearSolver.invert(Q_UU_inv);
 
       DenseMatrix64F gainMatrix = new DenseMatrix64F(3, 6);
-      DenseMatrix64F deltaU = new DenseMatrix64F(3, 1);
 
-      CommonOps.mult(Q_UU_inv, Q_UX, gainMatrix);
+      CommonOps.multTransB(Q_UU_inv, Q_XU, gainMatrix);
 
-
-      DenseMatrix64F V = new DenseMatrix64F(1, 1);
       DenseMatrix64F V_X = new DenseMatrix64F(6, 1);
       DenseMatrix64F V_XX = new DenseMatrix64F(6, 6);
 
-      calculator.computeValueApproximationForNextStep(V, V_X, V_XX, gainMatrix, deltaU, Q_X, Q_U, Q_XX, Q_UU, Q_UX);
+      calculator.computePreviousValueApproximation(Q_X, Q_U, Q_XX, Q_XU, gainMatrix, V_X, V_XX);
 
-      DenseMatrix64F V_X_expected = new DenseMatrix64F(1, 6);
+      DenseMatrix64F V_X_expected = new DenseMatrix64F(6, 1);
       DenseMatrix64F V_XX_expected = new DenseMatrix64F(6, 6);
 
-      CommonOps.transpose(Q_X, V_X_expected);
+      V_X_expected.set(Q_X);
       V_XX_expected.set(Q_XX);
 
-      CommonOps.multAddTransA(-1.0, Q_U, gainMatrix, V_X_expected);
-      CommonOps.multAddTransA(-1.0, Q_UX, gainMatrix, V_XX_expected);
-
-      CommonOps.transpose(V_X_expected);
+      CommonOps.multAddTransA(gainMatrix, Q_U, V_X_expected);
+      CommonOps.multAdd(Q_XU, gainMatrix, V_XX_expected);
 
       JUnitTools.assertMatrixEquals(V_X_expected, V_X, 1e-12);
       JUnitTools.assertMatrixEquals(V_XX_expected, V_XX, 1e-12);
@@ -351,19 +363,70 @@ public class DDPSolverTest
       solver.setA(Q_UU);
       solver.invert(Q_UU_inv);
 
-
       DenseMatrix64F gainMatrix = new DenseMatrix64F(3, 6);
       DenseMatrix64F feedforwardMatrix = new DenseMatrix64F(3, 1);
 
-      calculator.computeFeedbackGainAndFeedForwardTerms(gainMatrix, feedforwardMatrix, Q_U, Q_UU, Q_UX);
+      calculator.computeFeedbackGainAndFeedForwardTerms(Q_U, Q_UU, Q_UX, gainMatrix, feedforwardMatrix);
 
       DenseMatrix64F gainExpected = new DenseMatrix64F(3, 6);
       DenseMatrix64F feedforwardExpected = new DenseMatrix64F(3, 1);
 
-      CommonOps.mult(Q_UU_inv, Q_UX, gainExpected);
-      CommonOps.mult(Q_UU_inv, Q_U, feedforwardExpected);
+      CommonOps.mult(-1.0, Q_UU_inv, Q_UX, gainExpected);
+      CommonOps.mult(-1.0, Q_UU_inv, Q_U, feedforwardExpected);
 
-      JUnitTools.assertMatrixEquals(gainExpected, gainMatrix, 1e-12);
-      JUnitTools.assertMatrixEquals(feedforwardExpected, feedforwardMatrix, 1e-12);
+      JUnitTools.assertMatrixEquals(gainExpected, gainMatrix, 1e-6);
+      JUnitTools.assertMatrixEquals(feedforwardExpected, feedforwardMatrix, 1e-6);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testAddMultQuad()
+   {
+      Random random = new Random(1738);
+      DenseMatrix64F d = RandomMatrices.createRandom(6, 3, random);
+      DenseMatrix64F a = RandomMatrices.createRandom(4, 6, random);
+      DenseMatrix64F b = RandomMatrices.createRandom(4, 4, random);
+      DenseMatrix64F c = RandomMatrices.createRandom(4, 3, random);
+
+      DenseMatrix64F a_expected = new DenseMatrix64F(a);
+      DenseMatrix64F b_expected = new DenseMatrix64F(b);
+      DenseMatrix64F c_expected = new DenseMatrix64F(c);
+      DenseMatrix64F d_original = new DenseMatrix64F(d);
+
+      LIPMDynamics dynamics = new LIPMDynamics(0.01, 10, 9.81);
+      LQCostFunction costFunction = new LIPMSimpleCostFunction();
+      LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
+      DDPSolver<LIPMState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+
+      calculator.addMultQuad(a, b, c, d);
+
+      DenseMatrix64F d_expected = new DenseMatrix64F(6, 3);
+      DenseMatrix64F abc = new DenseMatrix64F(6, 3);
+
+      DenseMatrix64F aTran = new DenseMatrix64F(6, 4);
+      CommonOps.transpose(a, aTran);
+
+      DenseMatrix64F aTranB = new DenseMatrix64F(6, 4);
+      CommonOps.mult(aTran, b, aTranB);
+
+      CommonOps.mult(aTranB, c, abc);
+
+      CommonOps.add(d_original, abc, d_expected);
+
+      JUnitTools.assertMatrixEquals(a_expected, a, 1e-12);
+      JUnitTools.assertMatrixEquals(b_expected, b, 1e-12);
+      JUnitTools.assertMatrixEquals(c_expected, c, 1e-12);
+      JUnitTools.assertMatrixEquals(d_expected, d, 1e-12);
+
+      double alpha = RandomNumbers.nextDouble(random, 1000);
+
+      d.set(d_original);
+      CommonOps.add(d_original, alpha, abc, d_expected);
+      calculator.addMultQuad(alpha, a, b, c, d);
+
+      JUnitTools.assertMatrixEquals(a_expected, a, 1e-12);
+      JUnitTools.assertMatrixEquals(b_expected, b, 1e-12);
+      JUnitTools.assertMatrixEquals(c_expected, c, 1e-12);
+      JUnitTools.assertMatrixEquals(d_expected, d, 1e-12);
    }
 }

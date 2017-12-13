@@ -118,8 +118,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       dynamicsStateGradientTrajectory = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
       dynamicsControlGradientTrajectory = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, controlSize));
       dynamicsStateHessian = new DenseMatrix64F(stateSize, stateSize);
-      dynamicsControlHessian = new DenseMatrix64F(stateSize, stateSize);
-      dynamicsControlStateHessian = new DenseMatrix64F(stateSize, stateSize);
+      dynamicsControlHessian = new DenseMatrix64F(stateSize, controlSize);
+      dynamicsControlStateHessian = new DenseMatrix64F(stateSize, controlSize);
 
       stateTrajectory.clear();
       controlTrajectory.clear();
@@ -345,8 +345,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
          for (int stateIndex = 0; stateIndex < dynamics.getStateVectorSize(); stateIndex++)
          {
             dynamics.getDynamicsStateHessian(dynamicsState, stateIndex, currentState, currentControl, dynamicsStateHessian);
-            dynamics.getDynamicsStateGradientOfControlGradient(dynamicsState, stateIndex, currentState, currentControl,
-                                                               dynamicsControlStateHessian);
+            dynamics.getDynamicsStateGradientOfControlGradient(dynamicsState, stateIndex, currentState, currentControl, dynamicsControlStateHessian);
 
             CommonOps.multTransA(dynamicsStateHessian, valueStateGradient, Q_XX_col);
             MatrixTools.addMatrixBlock(hamiltonianStateHessianToPack, 0, stateIndex, Q_XX_col, 0, 0, dynamics.getStateVectorSize(), 1, 1.0);
@@ -362,6 +361,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
             CommonOps.multTransA(dynamicsControlHessian, valueStateGradient, Q_UU_col);
             MatrixTools.addMatrixBlock(hamiltonianControlHessianToPack, 0, controlIndex, Q_UU_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
          }
+
+         throw new RuntimeException("This doesn't work properly.");
       }
 
       // Qux = Qxu'
@@ -443,7 +444,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public boolean computeTrajectory(E dynamicsState)
+   public int computeTrajectory(E dynamicsState)
    {
       double cost, cost0;
       cost0 = Double.MAX_VALUE;
@@ -451,7 +452,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       int startIndex = 0;
       int endIndex = stateTrajectory.size() - 1;
 
-      for (int iter = 0; iter < 1000; iter++)
+      for (int iterations = 0; iterations < 20; iterations++)
       {
          boolean lastIteration = false;
          computeFunctionApproximations(dynamicsState, startIndex, endIndex);
@@ -471,7 +472,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
                }
 
                if (Math.abs(cost - cost0) / Math.abs(cost0) < 1e-1)
-                  return true;
+                  return iterations;
 
                cost0 = cost;
 
@@ -497,12 +498,12 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
 
    @Override
-   public boolean computeTrajectory(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices)
+   public int computeTrajectory(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices)
    {
       double cost, cost0;
       cost0 = Double.MAX_VALUE;
 
-      for (int iter = 0; iter < 1000; iter++)
+      for (int iterations = 0; iterations < 20; iterations++)
       {
          boolean lastIteration = false;
          for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
@@ -535,7 +536,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
                }
 
                if (Math.abs(cost - cost0) / Math.abs(cost0) < 1e-1)
-                  return true;
+                  return iterations;
 
                cost0 = cost;
 
@@ -547,6 +548,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
                if (lastIteration)
                   break;
 
+               if (debug) PrintTools.info("Dynamics are not positive definite");
                applyLevenbergMarquardtHeuristicForHessianRegularization(false);
             }
 
