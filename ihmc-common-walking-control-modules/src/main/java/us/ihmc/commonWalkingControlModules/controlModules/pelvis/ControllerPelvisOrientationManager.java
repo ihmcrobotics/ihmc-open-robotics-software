@@ -98,7 +98,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       yoPelvisAngularWeight.get(pelvisAngularWeight);
       orientationFeedbackControlCommand.set(elevator, pelvis);
       orientationFeedbackControlCommand.setWeightsForSolver(pelvisAngularWeight);
-      orientationFeedbackControlCommand.setGains(gains);
       selectionMatrix.resetSelection();
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
