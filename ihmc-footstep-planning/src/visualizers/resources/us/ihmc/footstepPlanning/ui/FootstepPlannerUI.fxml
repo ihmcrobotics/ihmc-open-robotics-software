@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <fx:include fx:id="simpleUIMenu" source="FootstepPlannerMenuUI.fxml" />
+    </top>
+    <bottom>
+        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <tabs>
+                <Tab text="Start/Goal">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="startGoalAnchorPane" source="StartGoalAnchorPane.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+                <Tab text="Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="plannerParametersAnchorPane" source="PlannerParametersAnchorPane.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </bottom>
+</BorderPane>
