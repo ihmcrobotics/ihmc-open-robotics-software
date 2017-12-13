@@ -254,7 +254,7 @@ public class NavigableRegionsManager
          }
 
          NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
-         List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getClusters(), start, goal);
+         List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getAllClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomeRegion());
@@ -309,7 +309,7 @@ public class NavigableRegionsManager
 
       if (startRegion == goalRegion)
       {
-         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(startRegion.getClusters(), startInRegionFrame, goalInRegionFrame);
+         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(startRegion.getAllClusters(), startInRegionFrame, goalInRegionFrame);
          if (targetIsVisible)
          {
             globalMapPoints.add(new Connection(startProjected, goalProjected));
@@ -418,7 +418,7 @@ public class NavigableRegionsManager
 
    private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion)
    {
-      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getClusters());
+      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getAllClusters());
 
       RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
 
@@ -749,7 +749,7 @@ public class NavigableRegionsManager
       int index = 0;
       for (NavigableRegion localPlanner : listOfLocalPlanners)
       {
-         for (Cluster cluster : localPlanner.getClusters())
+         for (Cluster cluster : localPlanner.getAllClusters())
          {
             if (cluster.getNonNavigableExtrusionsInWorld().size() == 0)
             {
@@ -785,9 +785,9 @@ public class NavigableRegionsManager
       for (int i = 0; i < listOfLocalPlanners.size(); i++)
       {
          NavigableRegion localPlanner = listOfLocalPlanners.get(i);
-         Point3D[] navigableExtrusions = new Point3D[localPlanner.getClusters().size()];
+         Point3D[] navigableExtrusions = new Point3D[localPlanner.getAllClusters().size()];
 
-         for (Cluster cluster : localPlanner.getClusters())
+         for (Cluster cluster : localPlanner.getAllClusters())
          {
             for (int j = 0; j < cluster.getNumberOfNavigableExtrusions(); j++)
             {
