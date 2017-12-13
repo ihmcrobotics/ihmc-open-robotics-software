@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
@@ -65,7 +65,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame desiredPelvisFrame;
 
-   private final YoPID3DGains gains;
+   private final PID3DGainsReadOnly gains;
 
    private Footstep nextFootstep;
    private final ReferenceFrame nextSoleZUpFrame;
@@ -73,7 +73,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    private final PelvisOffsetTrajectoryWhileWalking offsetTrajectoryWhileWalking;
 
-   public ControllerPelvisOrientationManager(YoPID3DGains gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
+   public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                              LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
                                              YoVariableRegistry parentRegistry)
    {
