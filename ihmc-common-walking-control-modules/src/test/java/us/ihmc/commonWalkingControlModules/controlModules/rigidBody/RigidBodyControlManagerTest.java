@@ -38,9 +38,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -517,7 +518,7 @@ public class RigidBodyControlManagerTest
    private void setGainsAndWeights(RigidBodyControlManager manager)
    {
       // setup gains and weights to be all zero with weights 1.0
-      Map<String, YoPIDGains> jointspaceGains = new HashMap<>();
+      Map<String, PIDGainsReadOnly> jointspaceGains = new HashMap<>();
       jointspaceGains.put(joint1.getName(), new YoPIDGains("Joint1Gains", testRegistry));
       jointspaceGains.put(joint2.getName(), new YoPIDGains("Joint2Gains", testRegistry));
       YoPID3DGains taskspaceOrientationGains = new SymmetricYoPIDSE3Gains("OrientationGains", testRegistry);

@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -54,8 +54,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
 
-   private YoPID3DGains orientationGains = null;
-   private YoPID3DGains positionGains = null;
+   private PID3DGainsReadOnly orientationGains = null;
+   private PID3DGainsReadOnly positionGains = null;
 
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
@@ -243,7 +243,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       weightMatrix.setAngularWeights(this.angularWeight);
    }
 
-   public void setGains(YoPID3DGains orientationGains, YoPID3DGains positionGains)
+   public void setGains(PID3DGainsReadOnly orientationGains, PID3DGainsReadOnly positionGains)
    {
       this.orientationGains = orientationGains;
       this.positionGains = positionGains;

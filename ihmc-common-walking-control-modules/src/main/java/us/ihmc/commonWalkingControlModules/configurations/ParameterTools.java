@@ -3,41 +3,36 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.TunableJointAccelerationIntegrationParameters;
-import us.ihmc.robotics.controllers.PIDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
 {
-   public static void extractJointGainMap(List<ImmutablePair<PIDGains, List<String>>> jointspaceGains, Map<String, YoPIDGains> jointGainMapToPack,
+   public static void extractJointGainMap(List<GroupParameter<PIDGainsReadOnly>> jointspaceGains, Map<String, PIDGainsReadOnly> jointGainMapToPack,
                                           YoVariableRegistry registry)
    {
       jointGainMapToPack.clear();
-      for (ImmutablePair<PIDGains, List<String>> gainPair : jointspaceGains)
+      for (GroupParameter<PIDGainsReadOnly> jointGroupParameter : jointspaceGains)
       {
-         PIDGains gains = gainPair.getLeft();
-         YoPIDGains yoGains = new YoPIDGains(gains.getName(), registry);
-         yoGains.set(gains);
-         yoGains.createDerivativeGainUpdater(true);
+         String name = jointGroupParameter.getGroupName();
+         PIDGainsReadOnly parameter = jointGroupParameter.getParameter();
+         ParameterizedPIDGains parameterizedGains = new ParameterizedPIDGains(name, parameter, registry);
 
-         for (String jointName : gainPair.getRight())
+         for (String jointName : jointGroupParameter.getMemberNames())
          {
-            jointGainMapToPack.put(jointName, yoGains);
+            jointGainMapToPack.put(jointName, parameterizedGains);
          }
       }
    }
 
-   public static void extractAccelerationIntegrationParameterMap(String prefix, List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> parameterList,
+   public static void extractAccelerationIntegrationParameterMap(String prefix, List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> parameterList,
                                                                  Map<String, JointAccelerationIntegrationParametersReadOnly> parameterMapToPack,
                                                                  YoVariableRegistry registry)
    {
@@ -47,20 +42,20 @@ public class ParameterTools
          return;
       }
 
-      for (JointGroupParameter<JointAccelerationIntegrationParametersReadOnly> jointGroupParameter : parameterList)
+      for (GroupParameter<JointAccelerationIntegrationParametersReadOnly> jointGroupParameter : parameterList)
       {
-         String name = jointGroupParameter.getJointGroupName();
+         String name = jointGroupParameter.getGroupName();
          JointAccelerationIntegrationParametersReadOnly defaultParameters = jointGroupParameter.getParameter();
-         TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
+         TunableJointAccelerationIntegrationParameters parameterizedParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
 
-         for (String jointName : jointGroupParameter.getJointNames())
+         for (String jointName : jointGroupParameter.getMemberNames())
          {
-            parameterMapToPack.put(jointName, yoParameters);
+            parameterMapToPack.put(jointName, parameterizedParameters);
          }
       }
    }
 
-   public static void extractJointBehaviorMap(String prefix, List<JointGroupParameter<JointDesiredBehaviorReadOnly>> parameterList,
+   public static void extractJointBehaviorMap(String prefix, List<GroupParameter<JointDesiredBehaviorReadOnly>> parameterList,
                                               Map<String, JointDesiredBehaviorReadOnly> parameterMapToPack, YoVariableRegistry registry)
    {
       parameterMapToPack.clear();
@@ -69,31 +64,31 @@ public class ParameterTools
          return;
       }
 
-      for (JointGroupParameter<JointDesiredBehaviorReadOnly> jointGroupParameter : parameterList)
+      for (GroupParameter<JointDesiredBehaviorReadOnly> jointGroupParameter : parameterList)
       {
-         String name = jointGroupParameter.getJointGroupName();
+         String name = jointGroupParameter.getGroupName();
          JointDesiredBehaviorReadOnly defaultParameters = jointGroupParameter.getParameter();
          JointDesiredBehaviorReadOnly tunableParameters = new TunableJointDesiredBehavior(prefix + name, defaultParameters, registry);
 
-         for (String jointName : jointGroupParameter.getJointNames())
+         for (String jointName : jointGroupParameter.getMemberNames())
          {
             parameterMapToPack.put(jointName, tunableParameters);
          }
       }
    }
 
-   public static void extractGainMap(String suffix, List<ImmutableTriple<String, PID3DGains, List<String>>> gains, Map<String, YoPID3DGains> yoGainsToPack, YoVariableRegistry registry)
+   public static void extract3DGainMap(String suffix, List<GroupParameter<PID3DGainsReadOnly>> gains, Map<String, PID3DGainsReadOnly> yoGainsToPack, YoVariableRegistry registry)
    {
       yoGainsToPack.clear();
-      for (ImmutableTriple<String, PID3DGains, List<String>> gainTriple : gains)
+      for (GroupParameter<PID3DGainsReadOnly> jointGroupGains : gains)
       {
-         String gainName = gainTriple.getLeft() + suffix;
-         PID3DGains gain = gainTriple.getMiddle();
-         YoPID3DGains yoGains = new DefaultYoPID3DGains(gainName, gain, registry);
+         String gainName = jointGroupGains.getGroupName() + suffix;
+         PID3DGainsReadOnly gain = jointGroupGains.getParameter();
+         PID3DGainsReadOnly parameterizedGains = new ParameterizedPID3DGains(gainName, gain, registry);
 
-         for (String bodyName : gainTriple.getRight())
+         for (String bodyName : jointGroupGains.getMemberNames())
          {
-            yoGainsToPack.put(bodyName, yoGains);
+            yoGainsToPack.put(bodyName, parameterizedGains);
          }
       }
    }

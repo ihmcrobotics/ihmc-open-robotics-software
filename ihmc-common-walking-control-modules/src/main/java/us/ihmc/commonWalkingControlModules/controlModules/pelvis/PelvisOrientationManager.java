@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrient
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
@@ -38,14 +38,10 @@ public class PelvisOrientationManager
 
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
-   private final YoPID3DGains gains;
-
-   public PelvisOrientationManager(YoPID3DGains gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
+   public PelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                    LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
                                    YoVariableRegistry parentRegistry)
    {
-      this.gains = gains;
-
       parentRegistry.addChild(registry);
       YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
@@ -262,10 +258,5 @@ public class PelvisOrientationManager
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
-   }
-
-   public YoPID3DGains getGains()
-   {
-      return gains;
    }
 }

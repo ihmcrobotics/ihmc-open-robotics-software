@@ -1,8 +1,8 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains.implementations;
 
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 
 public class YoLimitedPDGains extends YoPDGains
 {
@@ -19,8 +19,8 @@ public class YoLimitedPDGains extends YoPDGains
       maxKpRate = new YoDouble("maxKpRate" + suffix, registry);
       maxKdRate = new YoDouble("maxKdRate" + suffix, registry);
 
-      limitedKp = new RateLimitedYoVariable("limitedKp" + suffix, registry, maxKpRate, kp, controlDT);
-      limitedKd = new RateLimitedYoVariable("limitedKd" + suffix, registry, maxKdRate, kd, controlDT);
+      limitedKp = new RateLimitedYoVariable("limitedKp" + suffix, registry, maxKpRate, super.getYoKp(), controlDT);
+      limitedKd = new RateLimitedYoVariable("limitedKd" + suffix, registry, maxKdRate, super.getYoKd(), controlDT);
 
       maxKpRate.set(Double.POSITIVE_INFINITY);
       maxKdRate.set(Double.POSITIVE_INFINITY);
