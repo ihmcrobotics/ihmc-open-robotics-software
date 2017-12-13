@@ -272,7 +272,6 @@ public class PlanarRegionTools
       return isPointInsidePolygon(region.getConcaveHull(), new Point2D(pointInLocalToCheck));
    }
 
-   // FIXME This is flaky when the line (pointToCheck, lineEnd) goes through vertices of the polygon.
    public static boolean isPointInsidePolygon(Point2DReadOnly[] polygon, Point2DReadOnly pointToCheck)
    {
       if (polygon.length < 3)
@@ -280,12 +279,26 @@ public class PlanarRegionTools
          return false;
       }
 
-      Point2D pointOnArbitraryEdge = new Point2D();
-      pointOnArbitraryEdge.interpolate(polygon[0], polygon[1], 0.5);
-
       Point2DReadOnly rayOrigin = pointToCheck;
       Vector2D rayDirection = new Vector2D();
-      rayDirection.sub(pointOnArbitraryEdge, rayOrigin);
+
+      Point2D pointOnArbitraryEdge = new Point2D();
+
+      for (int i = 0; i < polygon.length; i++)
+      { // Picking an edge that is not parallel to the ray.
+         Point2DReadOnly edgeStart = polygon[i];
+         Point2DReadOnly edgeEnd = polygon[(i + 1) % polygon.length];
+         Vector2D edgeDirection =  new Vector2D();
+         edgeDirection.sub(edgeEnd, edgeStart);
+         
+         pointOnArbitraryEdge.interpolate(edgeStart, edgeEnd, 0.5);
+         rayDirection.sub(pointOnArbitraryEdge, rayOrigin);
+
+         double cross = edgeDirection.cross(rayDirection);
+
+         if (Math.abs(cross) > 1.0e-3)
+            break;
+      }
 
       int numberOfIntersections = 0;
 
