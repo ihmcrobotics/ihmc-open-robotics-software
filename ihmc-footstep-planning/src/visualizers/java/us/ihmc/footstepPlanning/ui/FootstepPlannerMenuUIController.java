@@ -12,9 +12,6 @@ public class FootstepPlannerMenuUIController
 {
    private static final boolean VERBOSE = true;
 
-   @FXML
-   private MenuItem reloadMenuItem;
-
    private REAMessager messager;
    private Window ownerWindow;
 
@@ -28,11 +25,10 @@ public class FootstepPlannerMenuUIController
    public void setMainWindow(Window ownerWindow)
    {
       this.ownerWindow = ownerWindow;
-      reloadMenuItem.setDisable(true);
    }
 
    @FXML
-   public void loadPlanarRegion()
+   public void loadPlanarRegions()
    {
       loadedPlanarRegions = PlanarRegionDataImporter.importUsingFileChooser(ownerWindow);
 
@@ -42,25 +38,11 @@ public class FootstepPlannerMenuUIController
             PrintTools.info(this, "Loaded planar regions, broadcasting data.");
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.GlobalResetTopic, true);
          messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, loadedPlanarRegions);
-         reloadMenuItem.setDisable(false);
       }
       else
       {
          if (VERBOSE)
             PrintTools.info(this, "Failed to load planar regions.");
-         reloadMenuItem.setDisable(true);
-      }
-   }
-
-   @FXML
-   public void reloadPlanarRegion()
-   {
-      if (loadedPlanarRegions != null)
-      {
-         if (VERBOSE)
-            PrintTools.info(this, "Loaded planar regions, broadcasting data.");
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.GlobalResetTopic, true);
-         messager.submitMessage(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, loadedPlanarRegions);
       }
    }
 }
