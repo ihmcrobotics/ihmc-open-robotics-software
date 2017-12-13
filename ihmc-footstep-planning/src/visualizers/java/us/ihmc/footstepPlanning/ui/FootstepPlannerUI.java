@@ -21,25 +21,26 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
 
+   @FXML
+   private StartGoalTabController startGoalTabController;
+
    public FootstepPlannerUI(Stage primaryStage) throws IOException
    {
       this.primaryStage = primaryStage;
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
-
-      String name = getClass().getSimpleName() + ".fxml";
-      System.out.println("Trying to load url: " + name);
-      URL resource = getClass().getResource(name);
-      System.out.println("Loading resource: " + resource);
-      loader.setLocation(resource);
+      loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 
       mainPane = loader.load();
       messager.startMessager();
 
       footstepPlannerMenuUIController.attachMessager(messager);
+      startGoalTabController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
+
+      startGoalTabController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
