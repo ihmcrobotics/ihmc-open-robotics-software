@@ -145,20 +145,31 @@ public class NavigableRegionsManager
 
       long endCreationTime = System.currentTimeMillis();
 
+      long startForcingPoints = System.currentTimeMillis();
+      start = forceConnectionOrSnapPoint(start);
+
+      if (start == null)
+      {
+         throw new RuntimeException("Visibility graph unable to snap the start point to the closest point in the graph");
+      }
+
+      goal = forceConnectionOrSnapPoint(goal);
+
+      connectToClosestRegions(goal);
+
+      if (goal == null)
+      {
+         throw new RuntimeException("Visibility graph unable to snap the goal point to the closest point in the graph");
+      }
+
+      long endForcingPoints = System.currentTimeMillis();
+
       boolean readyToRunBodyPath = false;
-      //      if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
-      //      {
-      //         readyToRunBodyPath = true;
-      //         globalMapPoints.add(new Connection(start, goal));
-      //      }
-      //      else
-      //      {
       if (startProjected != null && goalProjected != null)
       {
          readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
       }
-      //      }
-      
+
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
       connectLocalMaps();
@@ -166,37 +177,6 @@ public class NavigableRegionsManager
 
       if (readyToRunBodyPath)
       {
-         long startForcingPoints = System.currentTimeMillis();
-         start = forceConnectionOrSnapPoint(start);
-
-         if (debug)
-         {
-            if (start == null)
-               PrintTools.error("Visibility graph unable to snap the start point to the closest point in the graph");
-         }
-
-         if (start == null)
-         {
-            throw new RuntimeException("Visibility graph unable to snap the start point to the closest point in the graph");
-         }
-
-         goal = forceConnectionOrSnapPoint(goal);
-
-         connectToClosestRegions(goal);
-
-         if (debug)
-         {
-            if (goal == null)
-               PrintTools.error("Visibility graph unable to snap the goal point to the closest point in the graph");
-         }
-
-         if (goal == null)
-         {
-            throw new RuntimeException("Visibility graph unable to snap the goal point to the closest point in the graph");
-         }
-
-         long endForcingPoints = System.currentTimeMillis();
-
          long startGlobalMapTime = System.currentTimeMillis();
          createGlobalVisibilityGraph();
          long endGlobalMapTime = System.currentTimeMillis();
