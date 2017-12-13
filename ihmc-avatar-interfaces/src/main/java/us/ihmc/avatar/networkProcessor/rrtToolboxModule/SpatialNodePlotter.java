@@ -20,7 +20,7 @@ public class SpatialNodePlotter
    private double[] lowerLimits;
 
    private int cnt;
-   
+
    private boolean isFrameEnabled;
 
    public SpatialNodePlotter(WholeBodyTrajectoryToolboxData toolboxData, boolean enabled)
@@ -59,7 +59,7 @@ public class SpatialNodePlotter
       for (int i = 0; i < plotters.size(); i++)
       {
          // TODO : close panels.
-         if(isFrameEnabled)
+         if (isFrameEnabled)
             plotters.get(i).getJFrame().dispose();
       }
    }

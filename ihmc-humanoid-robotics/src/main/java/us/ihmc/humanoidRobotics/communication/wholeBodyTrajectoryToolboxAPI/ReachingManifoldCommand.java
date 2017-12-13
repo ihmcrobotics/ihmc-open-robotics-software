@@ -122,12 +122,12 @@ public class ReachingManifoldCommand
 
    public Pose3D computeClosestPoseOnManifold(Pose3D pose)
    {
-      double positionWeight = 10.0;
-      double orientationWeight = 0.1;
+      double positionWeight = 1.0;
+      double orientationWeight = 0.0;
       double closestDistance = Double.MAX_VALUE;
       double distanceOld = closestDistance;
 
-      double alpha = -0.2;
+      double alpha = -7.0;
       double perturb = 0.01;
 
       int maximumNumberOfIteration = 100;
@@ -140,15 +140,15 @@ public class ReachingManifoldCommand
          closestConfigurationSpace.add((getUpperLimit(i) + getLowerLimit(i)) / 2);
       }
 
-      // get pose
-      Pose3D closestPoseControl = computePoseOnManifold(closestConfigurationSpace);
-
-      // current distance 
-      closestDistance = WholeBodyTrajectoryToolboxMessageTools.computePoseDistance(pose, closestPoseControl, positionWeight, orientationWeight);
-
       // start iteration
       for (int i = 0; i < maximumNumberOfIteration; i++)
       {
+         // get pose
+         Pose3D closestPoseControl = computePoseOnManifold(closestConfigurationSpace);
+
+         // closest distance 
+         closestDistance = WholeBodyTrajectoryToolboxMessageTools.computePoseDistance(pose, closestPoseControl, positionWeight, orientationWeight);
+
          // gradient decent
          TDoubleArrayList gradientDecent = new TDoubleArrayList();
          for (int j = 0; j < getDimensionOfManifold(); j++)
@@ -156,17 +156,19 @@ public class ReachingManifoldCommand
             TDoubleArrayList perturbedConfigurationSpace = new TDoubleArrayList(closestConfigurationSpace);
             perturbedConfigurationSpace.set(j, perturbedConfigurationSpace.get(j) + perturb);
 
+            perturbedConfigurationSpace.set(j, MathTools.clamp(perturbedConfigurationSpace.get(j), getLowerLimit(j), getUpperLimit(j)));
+
             Pose3D perturbedPoseControl = computePoseOnManifold(perturbedConfigurationSpace);
             double perturbedDistance = WholeBodyTrajectoryToolboxMessageTools.computePoseDistance(pose, perturbedPoseControl, positionWeight,
                                                                                                   orientationWeight);
             gradientDecent.add((perturbedDistance - closestDistance) / perturb);
          }
 
-         // get current space
-         TDoubleArrayList currentConfigurationSpace = new TDoubleArrayList(closestConfigurationSpace);
+         // step alpha
+         TDoubleArrayList currentConfigurationSpace = new TDoubleArrayList();
          for (int j = 0; j < getDimensionOfManifold(); j++)
          {
-            currentConfigurationSpace.set(j, (closestConfigurationSpace.get(j) + alpha * gradientDecent.get(j)));
+            currentConfigurationSpace.add(closestConfigurationSpace.get(j) + alpha * gradientDecent.get(j));
 
             currentConfigurationSpace.set(j, MathTools.clamp(currentConfigurationSpace.get(j), getLowerLimit(j), getUpperLimit(j)));
          }
@@ -179,15 +181,13 @@ public class ReachingManifoldCommand
          {
             closestDistance = currentDistance;
             closestConfigurationSpace = new TDoubleArrayList(currentConfigurationSpace);
-
-            // PrintTools.info("closestDistance " + i + " " + closestDistance);
          }
          else
          {
-            //PrintTools.info("" + i);
             return computePoseOnManifold(closestConfigurationSpace);
          }
       }
+
       return computePoseOnManifold(closestConfigurationSpace);
    }
 
@@ -216,13 +216,13 @@ public class ReachingManifoldCommand
       return manifoldLowerLimits.get(i);
    }
 
-   public Pose3D computePoseOnManifold(TDoubleArrayList currentConfigurationSpace)
+   public Pose3D computePoseOnManifold(TDoubleArrayList configurationSpace)
    {
       Pose3D pose = new Pose3D(manifoldOriginPosition, manifoldOriginOrientation);
 
       for (int i = 0; i < manifoldConfigurationSpaces.size(); i++)
       {
-         pose.appendTransform(manifoldConfigurationSpaces.get(i).getLocalRigidBodyTransform(currentConfigurationSpace.get(i)));
+         pose.appendTransform(manifoldConfigurationSpaces.get(i).getLocalRigidBodyTransform(configurationSpace.get(i)));
       }
 
       return pose;

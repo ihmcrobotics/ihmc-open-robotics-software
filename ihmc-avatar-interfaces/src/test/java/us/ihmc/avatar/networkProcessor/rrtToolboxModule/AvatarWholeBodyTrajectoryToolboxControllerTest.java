@@ -398,29 +398,32 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
     
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
-      configuration.setMaximumExpansionSize(3);
+      configuration.setMaximumExpansionSize(2300);
       
       RigidBody hand = fullRobotModel.getHand(RobotSide.RIGHT);
       List<ReachingManifoldMessage> reachingManifolds = new ArrayList<>();
       
       ReachingManifoldMessage reachingManifold = new ReachingManifoldMessage(hand);
 
-      reachingManifold.setOrigin(new Point3D(0.7, -0.9, 1.3), new Quaternion());
+      reachingManifold.setOrigin(new Point3D(0.7, -0.2, 1.0), new Quaternion());
 
       ConfigurationSpaceName[] manifoldSpaces = {YAW, PITCH, ConfigurationSpaceName.X};
-      double[] lowerLimits = new double[] {-Math.PI * 0.75, -Math.PI * 0.5, -0.1};
-      double[] upperLimits = new double[] {Math.PI * 0.75, Math.PI * 0.5, -0.1};
+      double[] lowerLimits = new double[] {-Math.PI * 0.5, -Math.PI * 0.5, -0.1};
+      double[] upperLimits = new double[] {Math.PI * 0.5, Math.PI * 0.5, 0.0};
       reachingManifold.setManifold(manifoldSpaces, lowerLimits, upperLimits);
       reachingManifolds.add(reachingManifold);
 
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
       
-      ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, YAW, PITCH, ROLL};
-      double[] explorationAmplitudes = {0.8, 0.3, 0.4, Math.PI*0.25, Math.PI*0.25, Math.PI*0.25};
+//      ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, YAW, PITCH, ROLL};
+//      double[] explorationAmplitudes = {0.8, 0.3, 0.8, Math.PI*0.25, Math.PI*0.25, Math.PI*0.25};
+      
+      ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,};
+      double[] explorationAmplitudes = {0.9, 0.3, 0.4};
       
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationAmplitudes));
       
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
+      //rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
       
       
       int maxNumberOfIterations = 10000;

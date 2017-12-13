@@ -183,6 +183,11 @@ public class ConstrainedRigidBodyTrajectory
       return message;
    }
 
+   public Pose3D getPoseToWorldFrame(Pose3D poseToAppend)
+   {
+     return appendPoseToTrajectory(0.0, poseToAppend);
+   }
+   
    public void appendRandomSpatial(SpatialData spatialData)
    {
       // TODO: need a boolean variable to enable or disable exploration.
