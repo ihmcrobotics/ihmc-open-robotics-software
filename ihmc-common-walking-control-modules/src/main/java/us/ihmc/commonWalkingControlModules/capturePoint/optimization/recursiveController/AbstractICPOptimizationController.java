@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -166,7 +167,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
    protected final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
 
-   public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+   public AbstractICPOptimizationController(ContinuousCMPICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
                                             BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
                                             SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
                                             boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -175,7 +176,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
             contactableFeet, controlDT, updateRegularizationAutomatically, yoGraphicsListRegistry);
    }
 
-   public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+   public AbstractICPOptimizationController(ContinuousCMPICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
                                             ICPOptimizationParameters icpOptimizationParameters, BipedSupportPolygons bipedSupportPolygons,
                                             ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
                                             boolean updateRegularizationAutomatically, YoGraphicsListRegistry yoGraphicsListRegistry)
