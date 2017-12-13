@@ -5,8 +5,6 @@ import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -660,15 +658,7 @@ public class ClusterTools
       cluster.setType(Type.POLYGON);
       cluster.setTransformToWorld(transformToWorld);
       cluster.setHomeRegion(true);
-
-      Point2D[] concaveHull = homeRegion.getConcaveHull();
-      for (Point2D vertex : concaveHull)
-      {
-         cluster.addRawPointInLocal(vertex);
-         //         javaFXMultiColorMeshBuilder.addSphere(0.05f, new Point3D(pointToProject.getX(), pointToProject.getY(), pointToProject.getZ()), Color.GREEN);
-      }
-
-      cluster.setClusterClosure(true);
+      cluster.addRawPointsInLocal(homeRegion.getConcaveHull(), true);
       cluster.setExtrusionSide(ExtrusionSide.INSIDE);
       cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.1));
    }
@@ -681,7 +671,6 @@ public class ClusterTools
       {
          if (regions.contains(region))
          {
-            //                        System.out.println("Creating a line cluster");
             Cluster cluster = new Cluster();
             clusters.add(cluster);
             cluster.setType(Type.LINE);
@@ -693,29 +682,19 @@ public class ClusterTools
             }
             else
             {
-               cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
-                     - visibilityGraphsParameters.getExtrusionDistance());
-
-               //               cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.01));
-               //               cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance * 0.6));
+               cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep() - visibilityGraphsParameters.getExtrusionDistance());
             }
 
-            Vector3D normal = PlanarRegionTools.calculateNormal(homeRegion);
+
             ArrayList<Point3D> points = new ArrayList<>();
+            RigidBodyTransform transToWorld = new RigidBodyTransform();
+            region.getTransformToWorld(transToWorld);
+
             for (int i = 0; i < region.getConvexHull().getNumberOfVertices(); i++)
             {
-               Point2D point2D = (Point2D) region.getConvexHull().getVertex(i);
-               Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-               FramePoint3D fpt = new FramePoint3D();
-               fpt.set(point3D);
-               RigidBodyTransform transToWorld = new RigidBodyTransform();
-               region.getTransformToWorld(transToWorld);
-               fpt.applyTransform(transToWorld);
-
-               Point3D pointToProject = fpt.getPoint();
-               Point3D projectedPoint = new Point3D();
-               EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal, projectedPoint);
-               points.add(projectedPoint);
+               Point3D concaveHullVertexWorld = new Point3D(region.getConvexHull().getVertex(i));
+               concaveHullVertexWorld.applyTransform(transToWorld);
+               points.add(concaveHullVertexWorld);
             }
 
             LinearRegression3D linearRegression = new LinearRegression3D(points);
@@ -723,24 +702,14 @@ public class ClusterTools
 
             //Convert to local frame
             Point3D[] extremes = linearRegression.getTheTwoPointsFurthestApart();
-            FramePoint3D extreme1Fpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), extremes[0]);
-            FramePoint3D extreme2Fpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), extremes[1]);
-
-            cluster.addRawPointInWorld(extreme1Fpt.getPoint());
-            cluster.addRawPointInWorld(extreme2Fpt.getPoint());
-
-            //                           javaFXMultiColorMeshBuilder.addLine(extreme1Fpt.getPoint(), extreme2Fpt.getPoint(), 0.005, Color.BLUE);
+            cluster.addRawPointsInWorld(extremes, false);
          }
       }
-
-      //      System.out.println(polygonObstacleRegions.size());
 
       for (PlanarRegion region : polygonObstacleRegions)
       {
          if (regions.contains(region))
          {
-            //            System.out.println("Creating a polygon cluster");
-
             Cluster cluster = new Cluster();
             clusters.add(cluster);
             cluster.setType(Type.POLYGON);
@@ -749,40 +718,24 @@ public class ClusterTools
             Vector3D normal1 = PlanarRegionTools.calculateNormal(region);
             if (Math.abs(normal1.getZ()) >= 0.5) //if its closer to being flat you can probably step on it -->> extrude less
             {
-               cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
-                     - visibilityGraphsParameters.getExtrusionDistance());
-               //               cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance * 0.7));
-
                if (PlanarRegionTools.isRegionTooHighToStep(region, homeRegion, visibilityGraphsParameters.getTooHighToStepDistance())) //is flat but too high to step so its an obstacle
                {
                   cluster.setAdditionalExtrusionDistance(0);
                }
                else
                {
-
+                  cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep() - visibilityGraphsParameters.getExtrusionDistance());
                }
             }
 
-            Vector3D normal = PlanarRegionTools.calculateNormal(homeRegion);
+            RigidBodyTransform transToWorld = new RigidBodyTransform();
+            region.getTransformToWorld(transToWorld);
+
             for (int i = 0; i < region.getConcaveHullSize(); i++)
             {
-               Point2D point2D = (Point2D) region.getConcaveHull()[i];
-               Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-               FramePoint3D fpt = new FramePoint3D();
-               fpt.set(point3D);
-               RigidBodyTransform transToWorld = new RigidBodyTransform();
-               region.getTransformToWorld(transToWorld);
-               fpt.applyTransform(transToWorld);
-
-               Point3D pointToProject = fpt.getPoint();
-               Point3D projectedPoint = new Point3D();
-               EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal, projectedPoint);
-
-               FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), projectedPoint);
-
-               //               System.out.println(pointFpt);
-
-               cluster.addRawPointInWorld(pointFpt.getPoint());
+               Point3D concaveHullVertexWorld = new Point3D(region.getConcaveHull()[i]);
+               concaveHullVertexWorld.applyTransform(transToWorld);
+               cluster.addRawPointInWorld(concaveHullVertexWorld);
             }
 
             cluster.setClusterClosure(true);
