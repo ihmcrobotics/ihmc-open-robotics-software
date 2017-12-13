@@ -11,8 +11,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
@@ -23,7 +25,7 @@ public class ClusterTools
 {
    private static final boolean debug = false;
 
-   public static int determineExtrusionSide(Cluster cluster, Point2D observer)
+   public static int determineExtrusionSide(Cluster cluster, Point2DReadOnly observer)
    {
       int index = 0;
 
@@ -48,7 +50,7 @@ public class ClusterTools
       return index;
    }
 
-   private static boolean isNormalVisible(Cluster cluster, int normalIndex, Point2D observer)
+   private static boolean isNormalVisible(Cluster cluster, int normalIndex, Point2DReadOnly observer)
    {
       List<Point2D> rawPointsInLocal = cluster.getRawPointsInLocal();
       for (int i = 1; i < rawPointsInLocal.size(); i++)
@@ -368,7 +370,7 @@ public class ClusterTools
       }
    }
 
-   public static ArrayList<Point2D> extrudeLine(Point2D pt1, Point2D pt2, double extrusionDistance)
+   public static ArrayList<Point2D> extrudeLine(Point2DReadOnly pt1, Point2DReadOnly pt2, double extrusionDistance)
    {
       ArrayList<Point2D> points = new ArrayList<>();
 
@@ -397,7 +399,8 @@ public class ClusterTools
    }
 
    // TODO That method isn't very clear
-   private static Point2D extrudeCorner(Point2D pointOnLine, Vector2D vec21, Point2D extrudedPoint1, Point2D extrudedPoint2, double extrusion)
+   private static Point2D extrudeCorner(Point2DReadOnly pointOnLine, Vector2DReadOnly vec21, Point2DReadOnly extrudedPoint1, Point2DReadOnly extrudedPoint2,
+                                        double extrusion)
    {
       Vector2D orthoVec = new Vector2D(vec21.getX() * Math.cos(Math.toRadians(90)) - vec21.getY() * Math.sin(Math.toRadians(90)),
                                        vec21.getX() * Math.sin(Math.toRadians(90)) + vec21.getY() * Math.cos(Math.toRadians(90)));
@@ -420,7 +423,7 @@ public class ClusterTools
       return extr1;
    }
 
-   public static void extrudeCluster(Cluster cluster, Point2D observer, double extrusionDistance, List<Cluster> listOfClusters)
+   public static void extrudeCluster(Cluster cluster, Point2DReadOnly observer, double extrusionDistance, List<Cluster> listOfClusters)
    {
       int extrusionIndex = 0;
       if (cluster.getType() == Type.LINE)
@@ -581,7 +584,7 @@ public class ClusterTools
       }
    }
 
-   public static Cluster getTheClosestCluster(Point3D pointToSortFrom, List<Cluster> clusters)
+   public static Cluster getTheClosestCluster(Point3DReadOnly pointToSortFrom, List<Cluster> clusters)
    {
       double minDistance = Double.MAX_VALUE;
       Cluster closestCluster = null;
@@ -610,7 +613,7 @@ public class ClusterTools
       return closestCluster;
    }
 
-   public static Point3D getTheClosestVisibleExtrusionPoint(Point3D pointToSortFrom, List<Point3D> extrusionPoints)
+   public static Point3D getTheClosestVisibleExtrusionPoint(Point3DReadOnly pointToSortFrom, List<Point3D> extrusionPoints)
    {
       double minDist = Double.MAX_VALUE;
       Point3D closestPoint = null;
@@ -627,14 +630,15 @@ public class ClusterTools
       return closestPoint;
    }
 
-   public static Point3D getTheClosestVisibleExtrusionPoint(double alpha, Point3D start, Point3D goal, List<Point3D> extrusionPoints, PlanarRegion region)
+   public static Point3D getTheClosestVisibleExtrusionPoint(double alpha, Point3DReadOnly start, Point3DReadOnly goal,
+                                                            List<? extends Point3DReadOnly> extrusionPoints, PlanarRegion region)
    {
       double minWeight = Double.MAX_VALUE;
-      Point3D closestPoint = null;
+      Point3DReadOnly closestPoint = null;
 
-      for (Point3D point : extrusionPoints)
+      for (Point3DReadOnly point : extrusionPoints)
       {
-         if(PlanarRegionTools.isPointInWorldInsideARegion(region, point))
+         if (PlanarRegionTools.isPointInWorldInsideARegion(region, point))
          {
             double weight = alpha * goal.distance(point) + (1 - alpha) * start.distance(point);
 
@@ -646,7 +650,7 @@ public class ClusterTools
          }
       }
 
-      return closestPoint;
+      return new Point3D(closestPoint);
    }
 
    public static void createClusterForHomeRegion(List<Cluster> clusters, RigidBodyTransform transformToWorld, PlanarRegion homeRegion, double extrusionDistance)
