@@ -119,7 +119,70 @@ public class DDPSolverTest
    @Test(timeout = 30000)
    public void testUpdateHamiltonianApproximations()
    {
-      assertTrue(false);
+      Random random = new Random(1738);
+      DenseMatrix64F V_X = RandomMatrices.createRandom(6, 1, random);
+      DenseMatrix64F V_XX = RandomMatrices.createSymmetric(6, -1000, 1000, random);
+
+      DenseMatrix64F L_X = RandomMatrices.createRandom(6, 1, random);
+      DenseMatrix64F L_U = RandomMatrices.createRandom(3, 1, random);
+      DenseMatrix64F L_XX = RandomMatrices.createRandom(6, 6, random);
+      DenseMatrix64F L_XU = RandomMatrices.createRandom(6, 3, random);
+      DenseMatrix64F L_UX = new DenseMatrix64F(3, 6);
+      DenseMatrix64F L_UU = RandomMatrices.createRandom(3, 3, random);
+      CommonOps.transpose(L_XU, L_UX);
+
+      DenseMatrix64F f_X = RandomMatrices.createRandom(6, 6, random);
+      DenseMatrix64F f_U = RandomMatrices.createRandom(6, 3, random);
+
+      DenseMatrix64F Qx = new DenseMatrix64F(6, 1);
+      DenseMatrix64F Qu = new DenseMatrix64F(3, 1);
+      DenseMatrix64F Qxx = new DenseMatrix64F(6, 6);
+      DenseMatrix64F Quu = new DenseMatrix64F(3, 3);
+      DenseMatrix64F Qux = new DenseMatrix64F(3, 6);
+      DenseMatrix64F Qxu = new DenseMatrix64F(6, 3);
+      DenseMatrix64F QuExpected = new DenseMatrix64F(3, 1);
+      DenseMatrix64F QxExpected = new DenseMatrix64F(6, 1);
+      DenseMatrix64F QxxExpected = new DenseMatrix64F(6, 6);
+      DenseMatrix64F QuuExpected = new DenseMatrix64F(3, 3);
+      DenseMatrix64F QuxExpected = new DenseMatrix64F(3, 6);
+      DenseMatrix64F QxuExpected = new DenseMatrix64F(6, 3);
+
+      LIPMDynamics dynamics = new LIPMDynamics(0.01, 10, 9.81);
+      LQCostFunction costFunction = new LIPMSimpleCostFunction();
+      LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
+      DDPSolver<LIPMState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+
+      calculator.updateHamiltonianApproximations(LIPMState.NORMAL, 0, L_X, L_U, L_XX, L_UU, L_XU, f_X, f_U, V_X, V_XX, Qx, Qu, Qxx, Quu, Qxu, Qux);
+
+      QxExpected.set(L_X);
+      CommonOps.multAddTransA(f_X, V_X, QxExpected);
+
+      QuExpected.set(L_U);
+      CommonOps.multAddTransA(f_U, V_X, QuExpected);
+
+      DenseMatrix64F aV = new DenseMatrix64F(6, 6);
+      DenseMatrix64F bV = new DenseMatrix64F(3, 6);
+      CommonOps.multTransA(f_X, V_XX, aV);
+      CommonOps.multTransA(f_U, V_XX, bV);
+
+      QxxExpected.set(L_XX);
+      CommonOps.multAdd(aV, f_X, QxxExpected);
+
+      QuuExpected.set(L_UU);
+      CommonOps.multAdd(bV, f_U, QuuExpected);
+
+      QuxExpected.set(L_UX);
+      CommonOps.multAdd(bV, f_X, QuxExpected);
+
+      QxuExpected.set(L_XU);
+      CommonOps.multAdd(aV, f_U, QxuExpected);
+
+      JUnitTools.assertMatrixEquals(QxExpected, Qx, 1e-12);
+      JUnitTools.assertMatrixEquals(QuExpected, Qu, 1e-12);
+      JUnitTools.assertMatrixEquals(QxxExpected, Qxx, 1e-12);
+      JUnitTools.assertMatrixEquals(QuuExpected, Quu, 1e-12);
+      JUnitTools.assertMatrixEquals(QxuExpected, Qxu, 1e-12);
+      JUnitTools.assertMatrixEquals(QuxExpected, Qux, 1e-12);
    }
 
 
