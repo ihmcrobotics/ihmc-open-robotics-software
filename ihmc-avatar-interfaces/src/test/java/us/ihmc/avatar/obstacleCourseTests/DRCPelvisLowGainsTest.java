@@ -9,6 +9,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -22,8 +23,6 @@ import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -77,8 +76,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, flatGround);
       drcSimulationTestHelper.createSimulation("DRCPelvisFlippingOutBugTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -107,9 +105,6 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
 
       String namespace = HighLevelControlManagerFactory.class.getSimpleName();
-      YoBoolean updatePelvisDampingFromRatio = (YoBoolean) simulationConstructionSet.getVariable(namespace, "UpdateFromDampingRatioPelvisOrientation");
-      updatePelvisDampingFromRatio.set(true);
-
       YoDouble kpPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(namespace, "kpXYPelvisOrientation");
       YoDouble zetaPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(namespace, "zetaXYPelvisOrientation");
 
