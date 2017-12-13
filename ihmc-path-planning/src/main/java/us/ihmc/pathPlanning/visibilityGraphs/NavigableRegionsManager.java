@@ -474,30 +474,17 @@ public class NavigableRegionsManager
       //      System.out.println("Actual connections added: " + actualConnectionsAdded);
    }
 
-   public VisibilityMap createVisMapForSinglePointSource(Point2D point, NavigableRegion navigableRegion)
+   public static VisibilityMap createVisMapForSinglePointSource(Point2D point, NavigableRegion navigableRegion)
    {
       HashSet<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getClusters());
 
-      VisibilityMap mapForSingleObserverLocal = new VisibilityMap();
-      mapForSingleObserverLocal.setConnections(connections);
+      RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
 
-      VisibilityMap mapForSingleObserverWorld = new VisibilityMap();
-
-      for (Connection connection : mapForSingleObserverLocal.getConnections())
-      {
-         Point2D edgeSource = new Point2D(connection.getSourcePoint().getX(), connection.getSourcePoint().getY());
-         Point2D edgeTarget = new Point2D(connection.getTargetPoint().getX(), connection.getTargetPoint().getY());
-
-         FramePoint3D pt1 = new FramePoint3D(navigableRegion.getLocalReferenceFrame(), new Point3D(edgeSource.getX(), edgeSource.getY(), 0));
-         pt1.changeFrame(ReferenceFrame.getWorldFrame());
-         FramePoint3D pt2 = new FramePoint3D(navigableRegion.getLocalReferenceFrame(), new Point3D(edgeTarget.getX(), edgeTarget.getY(), 0));
-         pt2.changeFrame(ReferenceFrame.getWorldFrame());
-
-         mapForSingleObserverWorld.addConnection(new Connection(pt1.getPoint(), pt2.getPoint()));
-      }
-
-      mapForSingleObserverWorld.computeVertices();
-      return mapForSingleObserverWorld;
+      VisibilityMap mapForSingleObserver = new VisibilityMap();
+      mapForSingleObserver.setConnections(connections);
+      mapForSingleObserver.applyTransform(transformToWorld);
+      mapForSingleObserver.computeVertices();
+      return mapForSingleObserver;
    }
 
    public NavigableRegion getTheRegionContainingThePoint(Point3D point, Point2D pointToPack)
