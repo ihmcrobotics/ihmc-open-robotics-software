@@ -6,7 +6,7 @@ import java.util.List;
 
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointGroupParameter;
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
@@ -36,7 +36,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    }
 
    @Override
-   public List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
+   public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors(HighLevelControllerName state)
    {
       switch (state)
       {
@@ -49,37 +49,37 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       }
    }
 
-   private List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalking()
+   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalking()
    {
-      List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
+      List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
       JointDesiredControlMode positionControlMode = runningOnRealRobot ? JointDesiredControlMode.POSITION : JointDesiredControlMode.EFFORT;
 
       // neck
       JointDesiredBehavior neckJointBehavior = new JointDesiredBehavior(positionControlMode);
-      behaviors.add(new JointGroupParameter<>("Neck", neckJointBehavior, jointMap.getNeckJointNamesAsStrings()));
+      behaviors.add(new GroupParameter<>("Neck", neckJointBehavior, jointMap.getNeckJointNamesAsStrings()));
 
       // arms
       JointDesiredBehavior armJointBehavior = new JointDesiredBehavior(positionControlMode);
-      behaviors.add(new JointGroupParameter<>("Arms", armJointBehavior, jointMap.getArmJointNamesAsStrings()));
+      behaviors.add(new GroupParameter<>("Arms", armJointBehavior, jointMap.getArmJointNamesAsStrings()));
 
       // spine
       JointDesiredBehavior spineJointBehavior = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
-      behaviors.add(new JointGroupParameter<>("Spine", spineJointBehavior, jointMap.getSpineJointNamesAsStrings()));
+      behaviors.add(new GroupParameter<>("Spine", spineJointBehavior, jointMap.getSpineJointNamesAsStrings()));
 
       // legs
       JointDesiredBehavior legJointBehavior = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
-      behaviors.add(new JointGroupParameter<>("Legs", legJointBehavior, jointMap.getLegJointNamesAsStrings()));
+      behaviors.add(new GroupParameter<>("Legs", legJointBehavior, jointMap.getLegJointNamesAsStrings()));
 
       return behaviors;
    }
 
-   private List<JointGroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
+   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
    {
       List<String> allJoints = Arrays.asList(jointMap.getOrderedJointNames());
       JointDesiredBehavior allJointBehaviors = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
 
-      List<JointGroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
-      behaviors.add(new JointGroupParameter<>("", allJointBehaviors, allJoints));
+      List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
+      behaviors.add(new GroupParameter<>("", allJointBehaviors, allJoints));
       return behaviors;
    }
 
@@ -127,9 +127,9 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
    /** {@inheritDoc} */
    @Override
-   public List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
+   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
    {
-      List<JointGroupParameter<JointAccelerationIntegrationParametersReadOnly>> integrationSettings = new ArrayList<>();
+      List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> integrationSettings = new ArrayList<>();
 
       // Neck joints:
       JointAccelerationIntegrationParameters neckJointSettings = new JointAccelerationIntegrationParameters();
@@ -141,7 +141,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       List<String> neckJointNames = new ArrayList<>();
       for (NeckJointName name : jointMap.getNeckJointNames())
          neckJointNames.add(jointMap.getNeckJointName(name));
-      integrationSettings.add(new JointGroupParameter<>("NeckAccelerationIntegration", neckJointSettings, neckJointNames));
+      integrationSettings.add(new GroupParameter<>("NeckAccelerationIntegration", neckJointSettings, neckJointNames));
 
       // Shoulder joints:
       JointAccelerationIntegrationParameters shoulderJointSettings = new JointAccelerationIntegrationParameters();
@@ -159,7 +159,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
             shoulderJointNames.add(jointMap.getArmJointName(robotSide, name));
          }
       }
-      integrationSettings.add(new JointGroupParameter<>("ShoulderAccelerationIntegration", shoulderJointSettings, shoulderJointNames));
+      integrationSettings.add(new GroupParameter<>("ShoulderAccelerationIntegration", shoulderJointSettings, shoulderJointNames));
 
       // Elbow joints:
       JointAccelerationIntegrationParameters elbowJointSettings = new JointAccelerationIntegrationParameters();
@@ -177,7 +177,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
             elbowJointNames.add(jointMap.getArmJointName(robotSide, name));
          }
       }
-      integrationSettings.add(new JointGroupParameter<>("ElbowAccelerationIntegration", elbowJointSettings, elbowJointNames));
+      integrationSettings.add(new GroupParameter<>("ElbowAccelerationIntegration", elbowJointSettings, elbowJointNames));
 
       // Wrist joints:
       JointAccelerationIntegrationParameters wristJointSettings = new JointAccelerationIntegrationParameters();
@@ -195,7 +195,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
             wristJointNames.add(jointMap.getArmJointName(robotSide, name));
          }
       }
-      integrationSettings.add(new JointGroupParameter<>("WristAccelerationIntegration", wristJointSettings, wristJointNames));
+      integrationSettings.add(new GroupParameter<>("WristAccelerationIntegration", wristJointSettings, wristJointNames));
 
       return integrationSettings;
    }

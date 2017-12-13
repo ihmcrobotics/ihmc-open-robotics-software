@@ -148,7 +148,7 @@ public abstract class WalkingControllerParameters
    /**
     * Returns a list of joint control gains for groups of joints.
     * <p>
-    * Each {@link JointGroupParameter} contains gains for one joint group:</br>
+    * Each {@link GroupParameter} contains gains for one joint group:</br>
     *  - The name of the joint group that the gain is used for (e.g. Arms).</br>
     *  - The gains for the joint group.</br>
     *  - The names of all rigid bodies in the joint group.
@@ -158,7 +158,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<JointGroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       return new ArrayList<>();
    }
@@ -166,7 +166,7 @@ public abstract class WalkingControllerParameters
    /**
     * Returns a list of taskspace orientation control gains for groups of bodies.
     * <p>
-    * Each {@link JointGroupParameter} contains gains for one body group:</br>
+    * Each {@link GroupParameter} contains gains for one body group:</br>
     *  - The name of the body group that the gain is used for (e.g. Hands).</br>
     *  - The gains for the body group.</br>
     *  - The names of all rigid bodies in the body group.
@@ -178,7 +178,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public List<JointGroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
    {
       return new ArrayList<>();
    }
@@ -186,7 +186,7 @@ public abstract class WalkingControllerParameters
    /**
     * Returns a list of taskspace position control gains for groups of bodies.
     * <p>
-    * Each {@link JointGroupParameter} contains gains for one body group:</br>
+    * Each {@link GroupParameter} contains gains for one body group:</br>
     *  - The name of the body group that the gain is used for (e.g. Hands).</br>
     *  - The gains for the body group.</br>
     *  - The names of all rigid bodies in the body group.
@@ -198,7 +198,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing position PID gains and the corresponding rigid bodies
     */
-   public List<JointGroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
    {
       return new ArrayList<>();
    }
