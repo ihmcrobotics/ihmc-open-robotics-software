@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class VisibilityTools
       return true;
    }
 
-   public static List<Connection> getConnectionsThatAreInsideRegion(List<Connection> connections, PlanarRegion region)
+   public static List<Connection> getConnectionsThatAreInsideRegion(Collection<Connection> connections, PlanarRegion region)
    {
       List<Connection> filteredConnections = new ArrayList<>();
 
@@ -45,7 +46,7 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static List<Connection> getConnectionsThatAreInsideRegion(List<Connection> connections, List<? extends Point2DReadOnly> polygon)
+   public static List<Connection> getConnectionsThatAreInsideRegion(Collection<Connection> connections, List<? extends Point2DReadOnly> polygon)
    {
       List<Connection> filteredConnections = new ArrayList<>();
 
@@ -160,12 +161,12 @@ public class VisibilityTools
       return true;
    }
 
-   public static List<Connection> removeConnectionsFromExtrusionsOutsideRegions(List<Connection> connections, PlanarRegion homeRegion)
+   public static List<Connection> removeConnectionsFromExtrusionsOutsideRegions(Collection<Connection> connections, PlanarRegion homeRegion)
    {
       return VisibilityTools.getConnectionsThatAreInsideRegion(connections, homeRegion);
    }
 
-   public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(List<Connection> connectionsToClean, List<Cluster> clusters)
+   public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(Collection<Connection> connectionsToClean, List<Cluster> clusters)
    {
       List<Connection> masterListOfConnections = new ArrayList<>();
       List<Cluster> filteredClusters = new ArrayList<>();

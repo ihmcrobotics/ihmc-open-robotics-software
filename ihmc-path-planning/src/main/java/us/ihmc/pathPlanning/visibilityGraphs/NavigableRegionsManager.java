@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -766,32 +767,13 @@ public class NavigableRegionsManager
          PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal(), parameters.getClusterResolution());
       }
 
+      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters);
+
+      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, navigableRegionLocalPlanner.getHomeRegion());
+      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, clusters);
+
       VisibilityMap visibilityMap = new VisibilityMap();
-      Set<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters);
       visibilityMap.setConnections(connectionsForMap);
-
-      ArrayList<Connection> connections = new ArrayList<>();
-
-      Iterator it = visibilityMap.getConnections().iterator();
-
-      while (it.hasNext())
-      {
-         Connection connection = (Connection) it.next();
-         connections.add(connection);
-      }
-
-      List<Connection> filteredConnections1 = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connections,
-                                                                                                            navigableRegionLocalPlanner.getHomeRegion());
-      List<Connection> filteredConnections2 = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(filteredConnections1, clusters);
-
-      HashSet<Connection> sets = new HashSet<>();
-
-      for (Connection connection : filteredConnections2)
-      {
-         sets.add(connection);
-      }
-
-      visibilityMap.setConnections(sets);
 
       navigableRegionLocalPlanner.setClusters(clusters);
       navigableRegionLocalPlanner.setRegionsInsideHomeRegion(regionsInsideHomeRegion);
