@@ -17,6 +17,7 @@ IHMC Robot Data Logger
 - Disable secure boot (Or follow instructions during the Ubuntu installation to enable third party drivers)
 - Install Ubuntu 16.04 64 bit (Server is recommended, no need for a GUI)
 	- Make sure to install OpenSSH server
+	- Make sure a gateway within the same subnet is set for the interface you connect to. It does not need to exist on the network, but without a default gateway FastRTPS cannot reliably connect. 
 - Install IHMC Java Decklink dependencies and Java 8.
     - `sudo apt-get install libavformat-ffmpeg56 libavcodec-ffmpeg56 libswscale-ffmpeg3 libboost-thread1.58.0 openjdk-8-jre`
 - (If logging video streams with capture card) Install BlackMagic software
