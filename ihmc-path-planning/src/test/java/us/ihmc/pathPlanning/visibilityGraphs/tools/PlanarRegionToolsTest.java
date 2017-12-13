@@ -62,6 +62,15 @@ public class PlanarRegionToolsTest
    }
 
    @Test(timeout=10000)
+   public void testIsInsidePolygonBug1() throws Exception
+   {
+      Point2D[] polygon = {new Point2D(-0.3, 0.5), new Point2D(0.3, 0.5), new Point2D(0.3, -0.5), new Point2D(-0.3, -0.5)};
+      Point2D pointToCheck = new Point2D(-2.0, 0.5);
+
+      assertFalse(PlanarRegionTools.isPointInsidePolygon(polygon, pointToCheck));
+   }
+
+   @Test(timeout=10000)
    public void testDoRay2DAndLineSegment2DIntersect() throws Exception
    {
       Random random = new Random(116L);
