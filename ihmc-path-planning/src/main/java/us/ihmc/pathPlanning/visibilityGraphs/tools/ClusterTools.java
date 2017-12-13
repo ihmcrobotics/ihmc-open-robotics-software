@@ -208,36 +208,17 @@ public class ClusterTools
 
          if (intersectionPoint.distance(normal1) < 1E-6)
          {
-            double deltaX = (normal2.getX() - normal1.getX()) / 2.0;
-            double deltaY = (normal2.getY() - normal1.getY()) / 2.0;
-
-            intersectionPoint.setX(normal1.getX() + deltaX);
-            intersectionPoint.setY(normal2.getY() + deltaY);
+            intersectionPoint.interpolate(normal1, normal2, 0.5);
          }
 
-         Vector2D normalIntersection = new Vector2D(intersectionPoint.getX() - point2.getX(), intersectionPoint.getY() - point2.getY());
+         Vector2D normalIntersection = new Vector2D();
+         normalIntersection.sub(intersectionPoint, point2);
          normalIntersection.normalize();
 
-         Point2D adjustedIntersection = new Point2D(point2.getX() + normalIntersection.getX() * (extrusionDistance),
-                                                    point2.getY() + normalIntersection.getY() * (extrusionDistance));
+         Point2D adjustedIntersection = new Point2D();
+         adjustedIntersection.scaleAdd(extrusionDistance, normalIntersection, point2);
 
-         double x1 = point1.getX() + ((point2.getX() - point1.getX()) * 0.5);
-         double y1 = point1.getY() + ((point2.getY() - point1.getY()) * 0.5);
-         Point2D midPoint1 = new Point2D(x1, y1);
-
-         double x2 = point2.getX() + ((point3.getX() - point2.getX()) * 0.5);
-         double y2 = point2.getY() + ((point3.getY() - point2.getY()) * 0.5);
-         Point2D midPoint2 = new Point2D(x2, y2);
-
-         Vector2D vec21 = new Vector2D(normal1.getX() - midPoint1.getX(), normal1.getY() - midPoint1.getY());
-         Point2D safePoint1 = new Point2D(point2.getX() + vec21.getX() * 0.7, point2.getY() + vec21.getY() * 0.7);
-
-         Vector2D vec32 = new Vector2D(normal2.getX() - midPoint2.getX(), normal2.getY() - midPoint2.getY());
-         Point2D safePoint2 = new Point2D(point2.getX() + vec32.getX() * 0.7, point2.getY() + vec32.getY() * 0.7);
-
-         //         cluster.addNavigableExtrusionPoint(new Point3D(safePoint1.getX(), safePoint1.getY(), 0));
          cluster.addNavigableExtrusionInLocal(adjustedIntersection);
-         //         cluster.addNavigableExtrusionPoint(new Point3D(safePoint2.getX(), safePoint2.getY(), 0));
 
          index = index + 2;
       }
