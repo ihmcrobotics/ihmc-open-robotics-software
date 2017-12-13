@@ -795,7 +795,11 @@ public class NavigableRegionsManager
             }
 
             Point2D[] homePointsArr = new Point2D[cluster.getNonNavigableExtrusionsInWorld().size()];
-            cluster.getNonNavigableExtrusionsInWorld().toArray(homePointsArr);
+
+            for (int i = 0; i < cluster.getNonNavigableExtrusionsInWorld().size(); i++)
+            {
+               homePointsArr[i] = new Point2D(cluster.getNonNavigableExtrusionsInWorld().get(i));
+            }
 
             if (PlanarRegionTools.isPointInsidePolygon(homePointsArr, new Point2D(pointToCheck)))
             {
