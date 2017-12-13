@@ -83,6 +83,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
 
+   private PID3DGainsReadOnly taskspaceOrientationGains;
+   private PID3DGainsReadOnly taskspacePositionGains;
+
    public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, YoDouble yoTime,
          RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -139,8 +142,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    public void setGains(PID3DGainsReadOnly taskspaceOrientationGains, PID3DGainsReadOnly taskspacePositionGains)
    {
-      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
-      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
+      this.taskspaceOrientationGains = taskspaceOrientationGains;
+      this.taskspacePositionGains = taskspacePositionGains;
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -186,6 +189,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(desiredContactPosition, zeroInWorld, zeroInWorld);
       spatialFeedbackControlCommand.set(desiredContactOrientation, zeroInWorld, zeroInWorld);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
+
+      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
+      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
 
       if (hybridModeActive.getBooleanValue())
       {
