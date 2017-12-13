@@ -56,7 +56,7 @@ public class Example_DataFile extends Application
 
       long startTime = System.currentTimeMillis();
 
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), regions, javaFXMultiColorMeshBuilder);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), regions);
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       System.out.println("Total Vis. Graphs Time: " + (System.currentTimeMillis() - startTime));
