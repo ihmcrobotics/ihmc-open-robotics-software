@@ -15,12 +15,14 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxSettings;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
@@ -60,6 +62,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private WholeBodyTrajectoryToolboxData toolboxData;
 
+   private List<RigidBodyExplorationConfigurationCommand> rigidBodyCommands = null;
+   private List<WaypointBasedTrajectoryCommand> trajectoryCommands = null;
+   private List<ReachingManifoldCommand> manifoldCommands = null;
+
    /*
     * YoVariables
     */
@@ -98,6 +104,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private final SideDependentList<YoFramePose> endeffectorPose = new SideDependentList<>();
 
    private final SideDependentList<YoGraphicCoordinateSystem> endeffectorFrame = new SideDependentList<>();
+
+   private final YoFramePose testFramePose;
+   private final YoGraphicCoordinateSystem testFrameViz;
 
    /*
     * Configuration and Time space Tree
@@ -181,6 +190,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       toolboxSolution.setDestination(-1);
 
       configurationConverter = new KinematicsToolboxOutputConverter(drcRobotModel);
+
+      testFramePose = new YoFramePose("testFramePose", ReferenceFrame.getWorldFrame(), registry);
+      testFrameViz = new YoGraphicCoordinateSystem("testFrameViz", testFramePose, 0.1);
+      yoGraphicsListRegistry.registerYoGraphic("testFrameYoGraphic", testFrameViz);
    }
 
    @Override
@@ -368,9 +381,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private void expandingTree()
    {
       currentExpansionSize.increment();
+      boolean isExpandingTerminalCondition = false;
 
       boolean randomNodeHasParentNode = false;
-      int maximumPatientCounter = 100;
+      int maximumPatientCounter = 1000;
       while (!randomNodeHasParentNode)
       {
          SpatialNode randomNode;
@@ -382,7 +396,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          randomNode = new SpatialNode(randomTime, randomData);
 
          tree.setRandomNode(randomNode);
-         randomNodeHasParentNode = tree.findNearestValidNodeToCandidate(true);
+         if (trajectoryCommands != null)
+            randomNodeHasParentNode = tree.findNearestValidNodeToCandidate(true);
+         if (manifoldCommands != null)
+            randomNodeHasParentNode = tree.findNearestValidNodeToCandidate(false);
 
          if (randomNodeHasParentNode)
          {
@@ -401,12 +418,32 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                tree.attachCandidate();
                numberOfValidPosture++;
 
-               if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
+               // TODO: terminal conditions.
+
+               if (trajectoryCommands != null)
+               {
+                  if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
+                     isExpandingTerminalCondition = true;
+               }
+               else if (manifoldCommands != null)
+               {
+                  //tree.getLastNodeAdded().getSpatialData().getMaximumDistanceFromManifolds(manifoldCommands);
+                  Pose3D testFrame = tree.getLastNodeAdded().getSpatialData().getTestFrame(manifoldCommands);
+
+                  testFrameViz.setVisible(true);
+                  testFrameViz.update();
+                  testFramePose.setPosition(testFrame.getPosition());
+                  testFramePose.setOrientation(testFrame.getOrientation());
+
+                  // TODO : terminal condition for manifold command.
+                  if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
+                     isExpandingTerminalCondition = true;
+
+               }
+               else
                {
                   if (VERBOSE)
-                     PrintTools.info("Successfully finished tree expansion. " + currentExpansionSize.getIntegerValue() + " " + numberOfValidPosture + " "
-                           + numberOfInvalidPosture);
-                  currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
+                     PrintTools.warn("any command is available");
                }
             }
             else
@@ -419,16 +456,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          {
             maximumPatientCounter--;
             if (maximumPatientCounter == 0)
-               break;
+               continue;
          }
       }
 
       /*
        * terminate expanding tree.
        */
-      if (currentExpansionSize.getIntegerValue() >= maximumExpansionSize.getIntegerValue())
+      if (currentExpansionSize.getIntegerValue() >= maximumExpansionSize.getIntegerValue() || isExpandingTerminalCondition)
       {
-         if (tree.getMostAdvancedTime() < toolboxData.getTrajectoryTime())
+         if (!isExpandingTerminalCondition)
          {
             if (VERBOSE)
                PrintTools.info("Failed to complete trajectory." + " " + numberOfValidPosture + " " + numberOfInvalidPosture);
@@ -438,6 +475,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          }
          else
          {
+            if (VERBOSE)
+               PrintTools.info("Successfully finished tree expansion. " + numberOfValidPosture + " " + numberOfInvalidPosture);
             state.set(CWBToolboxState.SHORTCUT_PATH);
          }
       }
@@ -509,6 +548,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
       treeExpansionStartTime = updateTimer(initialGuessComputationTime, initialGuessStartTime);
    }
+
    private void findInitialGuess()
    {
       SpatialData initialGuessData = toolboxData.createRandomSpatialData();
@@ -528,7 +568,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       jointlimitScore.set(jointScore);
 
       nodePlotter.update(initialGuessNode, 1);
-      
+
       /*
        * terminate finding initial guess.
        */
@@ -566,23 +606,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    protected boolean initialize()
    {
       isDone.set(false);
-      if (!commandInputManager.isNewCommandAvailable(WaypointBasedTrajectoryCommand.class))
-      {
-         return false;
-      }
-
-      List<WaypointBasedTrajectoryCommand> trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
-      if (trajectoryCommands.size() < 1)
-         return false;
-
-      List<RigidBodyExplorationConfigurationCommand> rigidBodyCommands = commandInputManager.pollNewCommands(RigidBodyExplorationConfigurationCommand.class);
-
-      // ******************************************************************************** //
-      // Convert command into WholeBodyTrajectoryToolboxData.
-      // ******************************************************************************** //
-
-      if (VERBOSE)
-         PrintTools.info("initialize CWB toolbox");
 
       /*
        * bring control parameters from request.
@@ -593,13 +616,26 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          return false;
       }
 
+      if (!commandInputManager.isNewCommandAvailable(RigidBodyExplorationConfigurationCommand.class))
+      {
+         return false;
+      }
+
+      rigidBodyCommands = commandInputManager.pollNewCommands(RigidBodyExplorationConfigurationCommand.class);
+
+      // ******************************************************************************** //
+      // Convert command into WholeBodyTrajectoryToolboxData.
+      // ******************************************************************************** //
+
+      if (VERBOSE)
+         PrintTools.info("initialize CWB toolbox");
+
       configurationConverter.updateFullRobotModel(initialConfiguration);
 
-      toolboxData = new WholeBodyTrajectoryToolboxData(configurationConverter.getFullRobotModel(), trajectoryCommands, rigidBodyCommands);
+      toolboxData = new WholeBodyTrajectoryToolboxData(configurationConverter.getFullRobotModel(), trajectoryCommands, manifoldCommands, rigidBodyCommands);
 
       bestScoreInitialGuess.set(0.0);
 
-      state.set(CWBToolboxState.FIND_INITIAL_GUESS);
       initialGuessStartTime = System.nanoTime();
 
       initialGuessComputationTime.setToNaN();
@@ -613,9 +649,32 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       rootNode = null;
       nodePlotter = new SpatialNodePlotter(toolboxData, visualize);
 
+      // Initiate tree.
       // TODO : findInitialGuessSub()
       tree = new SpatialNodeTree();
-      
+
+      if (trajectoryCommands != null)
+      {
+         state.set(CWBToolboxState.FIND_INITIAL_GUESS);
+      }
+      else if (manifoldCommands != null)
+      {
+         state.set(CWBToolboxState.EXPAND_TREE);
+         SpatialData rootData = toolboxData.createRandomSpatialData();
+         SpatialNode rootNode = new SpatialNode(rootData);
+         rootNode.setConfiguration(initialConfiguration);
+         rootNode.initializeSpatialData();
+
+         nodePlotter.update(rootNode, 1);
+         tree.addInitialNode(rootNode);
+
+         treeExpansionStartTime = updateTimer(initialGuessComputationTime, initialGuessStartTime);
+      }
+      else
+      {
+         return false;
+      }
+
       return true;
    }
 
@@ -628,6 +687,30 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       if (commandInputManager.isNewCommandAvailable(WholeBodyTrajectoryToolboxConfigurationCommand.class))
       {
          WholeBodyTrajectoryToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(WholeBodyTrajectoryToolboxConfigurationCommand.class);
+
+         trajectoryCommands = null;
+         manifoldCommands = null;
+         if (commandInputManager.isNewCommandAvailable(WaypointBasedTrajectoryCommand.class))
+         {
+            PrintTools.info("WaypointBasedTrajectoryCommand");
+            trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
+            PrintTools.info("WaypointBasedTrajectoryCommand");
+            if (trajectoryCommands.size() < 1)
+               return false;
+         }
+         else if (commandInputManager.isNewCommandAvailable(ReachingManifoldCommand.class))
+         {
+            manifoldCommands = commandInputManager.pollNewCommands(ReachingManifoldCommand.class);
+            if (manifoldCommands.size() < 1)
+               return false;
+         }
+         else
+         {
+            if (VERBOSE)
+               PrintTools.info("wrong type received");
+            return false;
+         }
+
          newMaxExpansionSize = command.getMaximumExpansionSize();
          newNumberOfInitialGuesses = command.getNumberOfInitialGuesses();
 
@@ -675,6 +758,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       initialConfiguration.desiredJointAngles = new float[length];
       System.arraycopy(currentRobotConfiguration.jointAngles, 0, initialConfiguration.desiredJointAngles, 0, length);
 
+      PrintTools.info("update config done");
       return true;
    }
 
@@ -740,7 +824,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        */
       boolean success = humanoidKinematicsSolver.solve();
 
-      //node.setConfiguration(new KinematicsToolboxOutputStatus(humanoidKinematicsSolver.getSolution()));
       node.setConfiguration(humanoidKinematicsSolver.getSolution());
       node.setValidity(success);
       return success;
@@ -757,8 +840,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private void updateVisualizerRobotConfiguration()
    {
-      //      updateVisualizerRobotConfiguration(visualizedNode.getConfiguration());
-
       visualizedNode.getConfiguration().getDesiredJointState(visualizedFullRobotModel.getRootJoint(),
                                                              FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
    }

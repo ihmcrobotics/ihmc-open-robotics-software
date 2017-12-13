@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.robotics.geometry.AngleTools;
 
 /**
@@ -123,6 +124,7 @@ public class SpatialData
       for (int i = 0; i < rigidBodySpatials.size(); i++)
       {
          double positionDistance = rigidBodySpatials.get(i).getPositionDistance(other.getRigidBodySpatials().get(i));
+
          if (distance < positionDistance)
             distance = positionDistance;
       }
@@ -144,6 +146,53 @@ public class SpatialData
       }
 
       return distance;
+   }
+
+   public double getMaximumDistanceFromManifolds(List<ReachingManifoldCommand> manifolds)
+   {
+      double distance = Double.MAX_VALUE;
+      for (int j = 0; j < manifolds.size(); j++)
+      {
+         for (int i = 0; i < rigidBodySpatials.size(); i++)
+         {
+            if (rigidBodyNames.get(i).equals(manifolds.get(j).getRigidBody().getName()))
+            {
+               //PrintTools.info("" + rigidBodyNames.get(i));
+               ReachingManifoldCommand manifold = manifolds.get(j);
+               Pose3D currentSpatial = rigidBodySpatials.get(i);
+
+               Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
+               
+               
+               //distance = currentSpatial.get
+               // TODO get closest pose from manifold
+               // and distance.
+            }
+         }
+
+      }
+      return distance;
+   }
+   
+   public Pose3D getTestFrame(List<ReachingManifoldCommand> manifolds)
+   {
+      for (int j = 0; j < manifolds.size(); j++)
+      {
+         for (int i = 0; i < rigidBodySpatials.size(); i++)
+         {
+            if (rigidBodyNames.get(i).equals(manifolds.get(j).getRigidBody().getName()))
+            {
+               //PrintTools.info("" + rigidBodyNames.get(i));
+               ReachingManifoldCommand manifold = manifolds.get(j);
+               Pose3D currentSpatial = rigidBodySpatials.get(i);
+
+               //Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
+               return manifold.computeClosestPoseOnManifold(currentSpatial);
+            }
+         }
+
+      }
+      return null;
    }
 
    public List<String> getRigidBodyNames()

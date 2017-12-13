@@ -82,4 +82,41 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
          return false;
       return true;
    }
+   
+   public Point3D getOriginPosition()
+   {
+      return manifoldOriginPosition;
+   }
+   
+   public Quaternion getOriginOrientation()
+   {
+      return manifoldOriginOrientation;
+   }
+   
+   public long getRigidBodyNameBasedHashCode()
+   {
+      return endEffectorNameBasedHashCode;
+   }
+
+   public int getDimensionOfManifold()
+   {
+      if (manifoldConfigurationSpaces == null)
+         return 0;
+      return manifoldConfigurationSpaces.length;
+   }
+   
+   public ConfigurationSpaceName getDegreeOfManifold(int i)
+   {
+      return manifoldConfigurationSpaces[i];
+   }
+   
+   public double getUpperLimit(int i)
+   {
+      return manifoldUpperLimits[i];
+   }
+   
+   public double getLowerLimit(int i)
+   {
+      return manifoldLowerLimits[i];
+   }
 }

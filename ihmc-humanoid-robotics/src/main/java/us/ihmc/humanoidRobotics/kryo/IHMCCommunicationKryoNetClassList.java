@@ -122,6 +122,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ReachingManifoldMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
@@ -361,9 +362,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WholeBodyTrajectoryToolboxMessage.class);
       registerPacketClass(WholeBodyTrajectoryToolboxConfigurationMessage.class);
       registerPacketClass(WaypointBasedTrajectoryMessage.class);
+      registerPacketClass(ReachingManifoldMessage.class);
       registerPacketClass(RigidBodyExplorationConfigurationMessage.class);
       registerPacketFields(WholeBodyTrajectoryToolboxConfigurationMessage.class);
       registerPacketFields(WaypointBasedTrajectoryMessage.class);
+      registerPacketFields(ReachingManifoldMessage.class);
       registerPacketFields(RigidBodyExplorationConfigurationMessage.class);
       registerPacketFields(ConfigurationSpaceName.class);
       registerPacketFields(ConfigurationSpaceName[].class);
@@ -503,7 +506,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(DrillPacket.class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
       registerPacketClass(WallPosePacket.class);
-      
+
       registerPacketClass(DoorLocationPacket.class);
       registerPacketClass(ValveLocationPacket.class);
       registerPacketClass(BehaviorStatusPacket.class);
