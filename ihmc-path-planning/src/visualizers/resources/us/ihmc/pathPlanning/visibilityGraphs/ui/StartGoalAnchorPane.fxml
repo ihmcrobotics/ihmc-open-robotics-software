@@ -36,11 +36,11 @@
             <ToggleButton fx:id="placeStartToggleButton" mnemonicParsing="false" text="Place Start" />
             <ToggleButton fx:id="placeGoalToggleButton" mnemonicParsing="false" text="Place Goal" GridPane.rowIndex="1" />
             <Spinner fx:id="startXSpinner" editable="true" GridPane.columnIndex="2" />
-            <Spinner fx:id="goalYSpinner" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
             <Spinner fx:id="goalXSpinner" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Spinner fx:id="startYSpinner" editable="true" GridPane.columnIndex="4" />
+            <Spinner fx:id="goalYSpinner" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
             <Spinner fx:id="startZSpinner" editable="true" GridPane.columnIndex="7" />
             <Spinner fx:id="goalZSpinner" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="1" />
-            <Spinner fx:id="startYSpinner" editable="true" GridPane.columnIndex="4" />
          </children>
       </GridPane>
    </children>
