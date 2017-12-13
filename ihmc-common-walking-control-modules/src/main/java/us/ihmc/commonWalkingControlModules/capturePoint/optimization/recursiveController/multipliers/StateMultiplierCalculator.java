@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.multipliers;
 
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -44,7 +45,7 @@ public class StateMultiplierCalculator
    private static final double blendingFraction = 0.5;
    private static final double minimumBlendingTime = 0.05;
 
-   public StateMultiplierCalculator(ICPTrajectoryPlannerParameters icpPlannerParameters, List<YoDouble> doubleSupportDurations,
+   public StateMultiplierCalculator(ContinuousCMPICPPlannerParameters icpPlannerParameters, List<YoDouble> doubleSupportDurations,
                                     List<YoDouble> singleSupportDurations, List<YoDouble> transferSplitFractions,
                                     List<YoDouble> swingSplitFractions, int maxNumberOfFootstepsToConsider, String yoNamePrefix, YoVariableRegistry parentRegistry)
    {

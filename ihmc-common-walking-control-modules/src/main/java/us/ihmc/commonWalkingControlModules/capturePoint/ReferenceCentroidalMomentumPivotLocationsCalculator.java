@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -186,9 +188,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       useTwoCMPsPerSupport = icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1;
       safeDistanceFromCMPToSupportEdges.set(icpPlannerParameters.getCoPSafeDistanceAwayFromSupportEdges());
 
-      List<Vector2D> cmpForwardOffsetBounds = icpPlannerParameters.getCoPForwardOffsetBounds();
-      Vector2D entryCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(0);
-      Vector2D exitCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(1);
+      CoPPointName exitCoPName = icpPlannerParameters.getExitCoPName();
+      CoPPointName entryCoPName = icpPlannerParameters.getEntryCoPName();
+
+      EnumMap<CoPPointName, Vector2D> cmpForwardOffsetBounds = icpPlannerParameters.getCoPForwardOffsetBoundsInFoot();
+      Vector2D entryCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(entryCoPName);
+      Vector2D exitCMPForwardOffsetBounds = cmpForwardOffsetBounds.get(exitCoPName);
 
       minForwardEntryCMPOffset.set(entryCMPForwardOffsetBounds.getX());
       maxForwardEntryCMPOffset.set(entryCMPForwardOffsetBounds.getY());
@@ -196,11 +201,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       minForwardExitCMPOffset.set(exitCMPForwardOffsetBounds.getX());
       maxForwardExitCMPOffset.set(exitCMPForwardOffsetBounds.getY());
 
-      stepLengthToCMPOffsetFactor.set(icpPlannerParameters.getStepLengthToBallCoPOffsetFactor());
+      stepLengthToCMPOffsetFactor.set(icpPlannerParameters.getStepLengthToCoPOffsetFactors().get(exitCoPName));
 
-      List<Vector2D> cmpOffsets = icpPlannerParameters.getCoPOffsets();
-      Vector2D entryCMPOffsets = cmpOffsets.get(0);
-      Vector2D exitCMPOffsets = cmpOffsets.get(1);
+      EnumMap<CoPPointName, Vector2D> cmpOffsets = icpPlannerParameters.getCoPOffsetsInFootFrame();
+      Vector2D entryCMPOffsets = cmpOffsets.get(entryCoPName);
+      Vector2D exitCMPOffsets = cmpOffsets.get(exitCoPName);
       double entryCMPForwardOffset = entryCMPOffsets.getX();
       double entryCMPInsideOffset = entryCMPOffsets.getY();
       double exitCMPForwardOffset = exitCMPOffsets.getX();

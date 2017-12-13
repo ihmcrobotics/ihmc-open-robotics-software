@@ -137,7 +137,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
-      super.initializeParameters((ICPTrajectoryPlannerParameters) icpPlannerParameters);
+      super.initializeParameters(icpPlannerParameters);
 
       if (icpPlannerParameters instanceof SmoothCMPPlannerParameters)
       {
