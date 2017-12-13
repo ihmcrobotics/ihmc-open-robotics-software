@@ -140,7 +140,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
