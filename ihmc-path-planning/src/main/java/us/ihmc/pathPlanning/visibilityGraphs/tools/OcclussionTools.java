@@ -12,7 +12,7 @@ public class OcclussionTools
 {
    public static boolean IsTheGoalIntersectingAnyObstacles(NavigableRegion region, Point3D start, Point3D goal)
    {
-      for (Cluster cluster : region.getClusters())
+      for (Cluster cluster : region.getAllClusters())
       {
          if (!cluster.isHomeRegion())
          {

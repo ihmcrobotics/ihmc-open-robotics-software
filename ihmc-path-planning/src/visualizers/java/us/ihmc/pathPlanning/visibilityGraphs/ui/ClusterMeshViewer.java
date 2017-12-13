@@ -167,7 +167,7 @@ public class ClusterMeshViewer extends AnimationTimer
          JavaFXMeshBuilder navigableExtrusionsMeshBuilder = getOrCreate(navigableExtrusionsMeshBuilders, regionId);
          JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder = getOrCreate(nonNavigableExtrusionsMeshBuilders, regionId);
 
-         List<Cluster> clusters = navigableRegionLocalPlanner.getClusters();
+         List<Cluster> clusters = navigableRegionLocalPlanner.getAllClusters();
          for (Cluster cluster : clusters)
          {
             for (Point3D rawPoint : cluster.getRawPointsInWorld())
