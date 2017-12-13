@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -8,8 +9,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class VisibilityMap implements Transformable
 {
-   private HashSet<Connection> connections;
-   private HashSet<Point3DReadOnly> vertices;
+   private Set<Connection> connections;
+   private Set<Point3DReadOnly> vertices;
 
    public VisibilityMap()
    {
@@ -21,7 +22,7 @@ public class VisibilityMap implements Transformable
       this.connections = connections;
    }
 
-   public void setConnections(HashSet<Connection> connections)
+   public void setConnections(Set<Connection> connections)
    {
       this.connections = connections;
    }
@@ -31,7 +32,7 @@ public class VisibilityMap implements Transformable
       connections.add(connection);
    }
 
-   public void addConnections(HashSet<Connection> connections)
+   public void addConnections(Set<Connection> connections)
    {
       this.connections.addAll(connections);
    }
@@ -46,12 +47,12 @@ public class VisibilityMap implements Transformable
       }
    }
 
-   public HashSet<Point3DReadOnly> getVertices()
+   public Set<Point3DReadOnly> getVertices()
    {
       return vertices;
    }
 
-   public HashSet<Connection> getConnections()
+   public Set<Connection> getConnections()
    {
       return connections;
    }
