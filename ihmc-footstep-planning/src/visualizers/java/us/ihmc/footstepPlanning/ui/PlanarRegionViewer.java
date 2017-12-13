@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -40,8 +39,8 @@ public class PlanarRegionViewer
    public PlanarRegionViewer(REAMessager messager)
    {
       colorPalette.setHueBrightnessBased(0.9);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.PlanarRegionData, this::buildMeshAndMaterialOnThread);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.ShowPlanarRegions, this::handleShowThreadSafe);
+      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, this::buildMeshAndMaterialOnThread);
+      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.ShowPlanarRegionsTopic, this::handleShowThreadSafe);
 
       renderMeshAnimation = new AnimationTimer()
       {
