@@ -46,4 +46,5 @@ visualizersDependencies {
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
    compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: groupDependencyVersion
 }
