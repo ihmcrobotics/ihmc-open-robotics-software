@@ -232,8 +232,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
-      configuration.setTrajectoryType(1);
-
+      
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
@@ -295,7 +294,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
-      configuration.setTrajectoryType(1);
 
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -353,7 +351,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
-      configuration.setTrajectoryType(1);
 
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
@@ -402,7 +399,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(3);
-      configuration.setTrajectoryType(2);
       
       RigidBody hand = fullRobotModel.getHand(RobotSide.RIGHT);
       List<ReachingManifoldMessage> reachingManifolds = new ArrayList<>();
