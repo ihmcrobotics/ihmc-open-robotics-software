@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -56,7 +57,7 @@ public class Example_DataFile extends Application
       long startTime = System.currentTimeMillis();
 
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), regions, javaFXMultiColorMeshBuilder);
-      List<Point3D> path = navigableRegionsManager.calculateBodyPath(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       System.out.println("Total Vis. Graphs Time: " + (System.currentTimeMillis() - startTime));
 
@@ -80,8 +81,8 @@ public class Example_DataFile extends Application
 
       for (int i = 1; i < path.size(); i++)
       {
-         Point3D from = path.get(i - 1);
-         Point3D to = path.get(i);
+         Point3DReadOnly from = path.get(i - 1);
+         Point3DReadOnly to = path.get(i);
 
          javaFXMultiColorMeshBuilder.addLine(new Point3D(from.getX(), from.getY(), from.getZ()), new Point3D(to.getX(), to.getY(), to.getZ()), 0.025,
                                              Color.RED);
@@ -89,7 +90,7 @@ public class Example_DataFile extends Application
 
       for (int i = 0; i < path.size(); i++)
       {
-         Point3D to = path.get(i);
+         Point3DReadOnly to = path.get(i);
 
          javaFXMultiColorMeshBuilder.addSphere(0.03f, to, Color.YELLOW);
 

@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -10,6 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -23,6 +25,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -48,6 +51,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VisibilityGraphsOcclusionTest
 {
+   private static final int TIMEOUT = 300000; // Integer.MAX_VALUE; //
+
    private static final DefaultVisibilityGraphParameters VISIBILITY_GRAPH_PARAMETERS = new DefaultVisibilityGraphParameters()
    {
       @Override
@@ -63,27 +68,31 @@ public class VisibilityGraphsOcclusionTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
+   private static final double rayLengthSquared = MathTools.square(5.0);
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 100;
    private static final double defaultMaxAllowedSolveTime = 1.0;
    private static final int bodyPathVisualizationResolution = 500;
    private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
+   private static final double maximumFlyingDistance = 0.05;
    private static final int maxNumberOfIterations = 40;
+
+   private enum OcclusionMethod {OCCLUSION, OCCLUSION_PLUS_GROUND, NO_OCCLUSION};
 
    @Rule
    public TestName name = new TestName();
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testFlatGround()
    {
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createFlatGround(startPose, goalPose);
-      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime, 3.0);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime, 3.0);
    }
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testFlatGroundWithWall()
    {
@@ -99,35 +108,46 @@ public class VisibilityGraphsOcclusionTest
 
       PlanarRegionsList regions = generator.getPlanarRegionsList();
 
-      runTest(startPose, goalPose, regions, false, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime);
    }
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testSimpleOcclusions()
    {
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createSimpleOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
-   @Test(timeout = 300000)
+   @Test(timeout = TIMEOUT)
    @Ignore
    public void testMazeWithOcclusions()
    {
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createMazeOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, true, defaultMaxAllowedSolveTime);
+      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
-   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, boolean cheatByAddingGroundRegion, double maxAllowedSolveTime)
+   @Test(timeout = TIMEOUT)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   public void testCrazyBridgeEnvironment()
    {
-      runTest(start, goal, regions, cheatByAddingGroundRegion, maxAllowedSolveTime, defaultMarchingSpeedInMetersPerTick);
+      Point3D startPose = new Point3D(0.4, 0.5, 0.001);
+      Point3D goalPose = new Point3D(8.5, -3.5, 0.010);
+      PlanarRegionsList regions = createBodyPathPlannerTestEnvironment();
+      runTest(startPose, goalPose, regions, OcclusionMethod.NO_OCCLUSION, defaultMaxAllowedSolveTime, 0.2);
    }
 
-   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, boolean cheatByAddingGroundRegion, double maxAllowedSolveTime, double marchingSpeedInMetersPerTick)
+   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime)
+   {
+      runTest(start, goal, regions, occlusionMethod, maxAllowedSolveTime, defaultMarchingSpeedInMetersPerTick);
+   }
+
+   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime,
+                        double marchingSpeedInMetersPerTick)
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -175,14 +195,17 @@ public class VisibilityGraphsOcclusionTest
             graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(visualization);
          }
 
-         rayIntersectionVisualizations = new ArrayList<>();
-         for (int i = 0; i < rays; i++)
+         if (occlusionMethod != OcclusionMethod.NO_OCCLUSION)
          {
-            YoFramePoint point = new YoFramePoint("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
-            point.setToNaN();
-            YoGraphicPosition visualization = new YoGraphicPosition("RayIntersection" + i, point, 0.0025, YoAppearance.Blue());
-            rayIntersectionVisualizations.add(point);
-            graphicsListRegistry.registerYoGraphic("viz", visualization);
+            rayIntersectionVisualizations = new ArrayList<>();
+            for (int i = 0; i < rays; i++)
+            {
+               YoFramePoint point = new YoFramePoint("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
+               point.setToNaN();
+               YoGraphicPosition visualization = new YoGraphicPosition("RayIntersection" + i, point, 0.0025, YoAppearance.Blue());
+               rayIntersectionVisualizations.add(point);
+               graphicsListRegistry.registerYoGraphic("viz", visualization);
+            }
          }
 
          observerPoint = new YoFramePoint("Observer", worldFrame, registry);
@@ -199,16 +222,27 @@ public class VisibilityGraphsOcclusionTest
          scs = setupSCS(name.getMethodName(), registry, regions, start, goal);
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.setInPoint();
+         scs.startOnAThread();
       }
 
       double maxSolveTime = 0.0;
 
       // Add the ground plane here so the visibility graph works. Remove that later.
       PlanarRegionsList visiblePlanarRegions;
-      if (cheatByAddingGroundRegion)
-         visiblePlanarRegions = new PlanarRegionsList(regions.getPlanarRegion(0));
-      else
+      switch (occlusionMethod)
+      {
+      case OCCLUSION:
          visiblePlanarRegions = new PlanarRegionsList();
+         break;
+      case OCCLUSION_PLUS_GROUND:
+         visiblePlanarRegions = new PlanarRegionsList(regions.getPlanarRegion(0));
+         break;
+      case NO_OCCLUSION:
+         visiblePlanarRegions = regions;
+         break;
+      default:
+         throw new RuntimeException("Unhandled occlusion method: " + occlusionMethod);
+      }
 
       int iteration = -1;
 
@@ -227,7 +261,8 @@ public class VisibilityGraphsOcclusionTest
          Point3D observer = new Point3D(currentPosition.getFrameTuple());
          observer.addZ(0.05);
 
-         visiblePlanarRegions = createVisibleRegions(regions, observer, visiblePlanarRegions, rayIntersectionVisualizations);
+         if (occlusionMethod != OcclusionMethod.NO_OCCLUSION)
+            visiblePlanarRegions = createVisibleRegions(regions, observer, visiblePlanarRegions, rayIntersectionVisualizations);
 
          if (visualize)
          {
@@ -256,12 +291,14 @@ public class VisibilityGraphsOcclusionTest
 
          vizGraphs.setPlanarRegions(visiblePlanarRegions.getPlanarRegionsAsList());
 
-         List<Point3D> bodyPath = null;
+         List<Point3DReadOnly> bodyPath = null;
 
          try
          {
             long startTime = System.currentTimeMillis();
-            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
+//            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
+            bodyPath = vizGraphs.calculateBodyPathWithOcclussions(currentPosition.getPoint3dCopy(), goal);
+
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             solveTime.set(seconds);
 
@@ -282,16 +319,30 @@ public class VisibilityGraphsOcclusionTest
             PrintTools.info("Planner threw exception:");
             e.printStackTrace();
             plannerFailed.set(true);
+            break;
          }
 
-         if (bodyPath == null || !bodyPath.get(bodyPath.size() - 1).geometricallyEquals(goal, 1.0e-3))
+         // Use different epsilon for xy and z in case the point got projected onto a region
+         if (bodyPath.get(bodyPath.size() - 1).distanceXY(goal) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(bodyPath.size() - 1).getZ(), goal.getZ(), 0.1))
          {
             if (visualize)
             {
                scs.setTime(iteration);
                scs.tickAndUpdate();
             }
-            PrintTools.info("Failed");
+            PrintTools.info("Failed, not going to the goal: " + goal + ", end of plan: " + bodyPath.get(bodyPath.size() - 1));
+            plannerFailed.set(true);
+         }
+
+         // Use different epsilon for xy and z in case the point got projected onto a region
+         if (bodyPath.get(0).distanceXY(currentPosition.getFramePointCopy()) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(0).getZ(), currentPosition.getZ(), 0.1))
+         {
+            if (visualize)
+            {
+               scs.setTime(iteration);
+               scs.tickAndUpdate();
+            }
+            PrintTools.info("Failed, not starting from current position: " + currentPosition.getPoint3dCopy() + ", beginning of plan: " + bodyPath.get(0));
             plannerFailed.set(true);
          }
 
@@ -316,7 +367,15 @@ public class VisibilityGraphsOcclusionTest
             scs.tickAndUpdate();
          }
 
+         currentPosition.set(bodyPath.get(0)); // Set to remove precision problems causing the travel method to fail. Already checked that the bodyPath starts from the currentPosition.
          currentPosition.set(travelAlongBodyPath(marchingSpeedInMetersPerTick, currentPosition.getPoint3dCopy(), bodyPath));
+
+         if (regions.findPlanarRegionsContainingPoint(currentPosition.getPoint3dCopy(), maximumFlyingDistance) == null)
+         {
+            PrintTools.info("Planner failed: path results in a flying robot.");
+            plannerFailed.set(true);
+            break;
+         }
       }
 
       PrintTools.info("Maximum solve time was " + maxSolveTime + "s.");
@@ -327,7 +386,6 @@ public class VisibilityGraphsOcclusionTest
          scs.cropBuffer();
          scs.setPlaybackRealTimeRate(0.001);
          scs.play();
-         scs.startOnAThread();
          ThreadTools.sleepForever();
       }
       else
@@ -337,7 +395,7 @@ public class VisibilityGraphsOcclusionTest
       }
    }
 
-   private static void visualizeBodyPath(List<Point3D> bodyPath, BagOfBalls vizToUpdate)
+   private static void visualizeBodyPath(List<Point3DReadOnly> bodyPath, BagOfBalls vizToUpdate)
    {
       int numberOfBalls = vizToUpdate.getNumberOfBalls();
 
@@ -358,7 +416,7 @@ public class VisibilityGraphsOcclusionTest
       }
    }
 
-   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3D> bodyPath)
+   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
    {
       Point3D newPosition = new Point3D();
 
@@ -366,12 +424,12 @@ public class VisibilityGraphsOcclusionTest
       {
          LineSegment3D segment = new LineSegment3D(bodyPath.get(i), bodyPath.get(i + 1));
 
-         if (segment.distance(startingPosition) < 1.0e-10)
+         if (segment.distance(startingPosition) < 1.0e-4)
          {
             Vector3D segmentDirection = segment.getDirection(true);
             newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
 
-            if (segment.distance(newPosition) < 1.0e-10)
+            if (segment.distance(newPosition) < 1.0e-4)
             {
                return newPosition;
             }
@@ -435,7 +493,7 @@ public class VisibilityGraphsOcclusionTest
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
          Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null)
+         if (intersection == null || intersection.distanceSquared(observer) > rayLengthSquared)
          {
             if (rayPointsToPack != null)
             {
@@ -559,10 +617,10 @@ public class VisibilityGraphsOcclusionTest
       generator.rotate(-Math.PI / 2.0, Axis.Y);
       generator.addRectangle(1.0, 4.0);
 
-      startPoseToPack.set(-2.005, -2.001, 0.0);
+      startPoseToPack.set(-2.0, -2.0, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), startPoseToPack, startPoseToPack);
 
-      goalPoseToPack.set(2.005, 2.001, 0.0);
+      goalPoseToPack.set(2.0, 2.0, 0.0);
       //      RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), goalPoseToPack, goalPoseToPack);
 
       return generator.getPlanarRegionsList();
@@ -605,5 +663,199 @@ public class VisibilityGraphsOcclusionTest
       RotationMatrixTools.applyRollRotation(Math.toRadians(10.0), goalPoseToPack, goalPoseToPack);
 
       return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList createBodyPathPlannerTestEnvironment()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double extrusionDistance = -0.05;
+
+      // starting plane
+      generator.translate(1.0, 0.5, 0.0);
+      generator.addRectangle(2.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // long plane on the start side
+      generator.translate(2.5, -3.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 13.0 + extrusionDistance);
+      generator.identity();
+
+      // narrow passage
+      double wallSeparation = 0.4;
+      double wallWidth = 0.5;
+      double wallHeight = 1.0;
+
+      generator.translate(4.5, 2.5, 0.0);
+      generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.identity();
+
+      // high-sloped ramp
+      generator.translate(3.5, 0.5, 0.5);
+      generator.rotate(-0.25 * Math.PI, Axis.Y);
+      generator.addRectangle(Math.sqrt(2.0), 1.0);
+      generator.identity();
+      generator.translate(4.5, 0.5, 1.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+      generator.translate(5.5, 0.5, 0.5);
+      generator.rotate(0.25 * Math.PI, Axis.Y);
+      generator.addRectangle(Math.sqrt(2.0), 1.0);
+      generator.identity();
+
+      // large step down
+      double stepDownHeight = 0.4;
+      generator.translate(3.5, -1.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, -stepDownHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, stepDownHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // large step up
+      double stepUpHeight = 0.4;
+      generator.translate(3.5, -3.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, stepUpHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, -stepUpHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // barrier
+      double barrierHeight = 1.5;
+      double barrierWidth = 0.8;
+
+      generator.translate(4.5, -5.5, 0.0);
+      generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(0.0, 0.0, 0.5 * barrierHeight);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(barrierHeight, barrierWidth);
+      generator.identity();
+
+      // long gap
+      generator.translate(3.5, -7.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(2.0, 0.0, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // long plane on the goal side
+      generator.translate(6.5, -3.5, 0.01);
+      generator.addRectangle(1.0 + extrusionDistance, 13.0 + extrusionDistance);
+      generator.identity();
+
+      // goal plane
+      generator.translate(8.0, -3.5, 0.01);
+      generator.addRectangle(2.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      PlanarRegionsList obstacleCourse = generator.getPlanarRegionsList();
+
+      // overhang, wide barrier, and stepping stones
+      generator.translate(4.5, -9.5, 2.5);
+      generator.addRectangle(1.5, 0.8);
+      generator.identity();
+
+      wallSeparation = 0.9;
+      wallWidth = 0.2;
+      wallHeight = 1.0;
+
+      generator.translate(3.0, -9.5, 0.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.identity();
+
+      PlanarRegionsList cinderBlockField = generateCinderBlockField(3.0, -9.5, 0.25, 0.2, 11, 4, 0.0);
+      for (int i = 0; i < cinderBlockField.getNumberOfPlanarRegions(); i++)
+      {
+         obstacleCourse.addPlanarRegion(cinderBlockField.getPlanarRegion(i));
+      }
+
+      return obstacleCourse;
+   }
+
+   public static PlanarRegionsList generateCinderBlockField(double startX, double startY, double cinderBlockSize, double cinderBlockHeight,
+                                                            int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double courseWidth = courseLengthYInNumberOfBlocks * cinderBlockSize;
+
+      generator.translate(startX, startY, 0.001); // avoid graphical issue
+      generator.addRectangle(0.6, courseWidth); // standing platform
+      generator.translate(0.5, 0.0, 0.0); // forward to first row
+      generator.translate(0.0, -0.5 * (courseLengthYInNumberOfBlocks - 1) * cinderBlockSize, 0.0); // over to grid origin
+
+      Random random = new Random(1231239L);
+      for (int x = 0; x < courseWidthXInNumberOfBlocks; x++)
+      {
+         for (int y = 0; y < courseLengthYInNumberOfBlocks; y++)
+         {
+            int angleType = Math.abs(random.nextInt() % 3);
+            int axisType = Math.abs(random.nextInt() % 2);
+
+            generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, angleType, axisType);
+
+            generator.translate(0.0, cinderBlockSize, 0.0);
+         }
+
+         if ((x / 2) % 2 == 0)
+         {
+            generator.translate(0.0, 0.0, heightVariation);
+         }
+         else
+         {
+            generator.translate(0.0, 0.0, -heightVariation);
+         }
+
+         generator.translate(cinderBlockSize, -cinderBlockSize * courseLengthYInNumberOfBlocks, 0.0);
+      }
+
+      generator.identity();
+      generator.translate(0.6 + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
+      generator.addRectangle(0.6, courseWidth);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
+                                               int axisType)
+   {
+      double angle = 0;
+      switch (angleType)
+      {
+      case 0:
+         angle = 0.0;
+         break;
+      case 1:
+         angle = Math.toRadians(15);
+         break;
+      case 2:
+         angle = -Math.toRadians(15);
+         break;
+      }
+
+      Axis axis = null;
+      switch (axisType)
+      {
+      case 0:
+         axis = Axis.X;
+         break;
+      case 1:
+         axis = Axis.Y;
+         break;
+      }
+
+      generator.rotate(angle, axis);
+      generator.addCubeReferencedAtBottomMiddle(cinderBlockSize, cinderBlockSize, cinderBlockHeight);
+      generator.rotate(-angle, axis);
    }
 }

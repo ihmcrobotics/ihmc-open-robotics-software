@@ -2,24 +2,19 @@ package us.ihmc.atlas.StepAdjustmentVisualizers;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.ICPAdjustmentOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPAdjustmentOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -124,7 +119,7 @@ public class StepAdjustmentExampleGraphic
    private ICPControlPolygons icpControlPolygons;
    private FootstepTestHelper footstepTestHelper;
 
-   private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
+   private final ContinuousCMPICPPlannerParameters capturePointPlannerParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
    private final ICPAdjustmentOptimizationController icpOptimizationController;
    private final ContinuousCMPBasedICPPlanner icpPlanner;
@@ -898,21 +893,34 @@ public class StepAdjustmentExampleGraphic
       };
    }
 
-   private ICPWithTimeFreezingPlannerParameters createICPPlannerParameters()
+   private ContinuousCMPICPPlannerParameters createICPPlannerParameters()
    {
       return new ContinuousCMPICPPlannerParameters()
       {
+         /**{@inheritDoc} */
+         @Override
+         public CoPPointName getExitCoPName()
+         {
+            return exitCoPName;
+         }
+
+         /**{@inheritDoc} */
+         @Override
+         public CoPPointName getEntryCoPName()
+         {
+            return entryCoPName;
+         }
+
          /** {@inheritDoc} */
          @Override
-         public List<Vector2D> getCoPOffsets()
+         public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
          {
-
             Vector2D entryOffset = new Vector2D(0.0, -0.005);
             Vector2D exitOffset = new Vector2D(0.0, 0.025);
 
-            List<Vector2D> copOffsets = new ArrayList<>();
-            copOffsets.add(entryOffset);
-            copOffsets.add(exitOffset);
+            EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+            copOffsets.put(entryCoPName, entryOffset);
+            copOffsets.put(exitCoPName, exitOffset);
 
             return copOffsets;
          }
@@ -926,14 +934,14 @@ public class StepAdjustmentExampleGraphic
 
          /** {@inheritDoc} */
          @Override
-         public List<Vector2D> getCoPForwardOffsetBounds()
+         public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
          {
             Vector2D entryBounds = new Vector2D(0.0, 0.03);
             Vector2D exitBounds = new Vector2D(-0.04, 0.08);
 
-            List<Vector2D> copForwardOffsetBounds = new ArrayList<>();
-            copForwardOffsetBounds.add(entryBounds);
-            copForwardOffsetBounds.add(exitBounds);
+            EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
+            copForwardOffsetBounds.put(entryCoPName, entryBounds);
+            copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
             return copForwardOffsetBounds;
          }

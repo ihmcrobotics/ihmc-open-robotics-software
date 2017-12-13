@@ -7,6 +7,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -42,7 +43,7 @@ public class StandPrepControllerState extends HighLevelControllerState
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
       WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
-      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
@@ -90,7 +91,6 @@ public class StandPrepControllerState extends HighLevelControllerState
    public void doAction()
    {
       double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToPrepareForStanding.getDoubleValue());
-      lowLevelOneDoFJointDesiredDataHolder.clear();
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
@@ -104,6 +104,7 @@ public class StandPrepControllerState extends HighLevelControllerState
          desiredPosition.set(trajectory.getPosition());
 
          JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         lowLevelJointData.clear();
          lowLevelJointData.setDesiredPosition(desiredPosition.getDoubleValue());
          lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
          lowLevelJointData.setDesiredAcceleration(trajectory.getAcceleration());
