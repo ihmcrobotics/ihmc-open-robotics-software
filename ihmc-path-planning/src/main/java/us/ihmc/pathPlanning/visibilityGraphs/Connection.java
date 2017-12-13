@@ -1,10 +1,11 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
-public class Connection implements Transformable
+public class Connection implements Transformable, EpsilonComparable<Connection>
 {
    private ConnectionPoint3D source;
    private ConnectionPoint3D target;
@@ -36,5 +37,11 @@ public class Connection implements Transformable
    {
       source.applyInverseTransform(transform);
       target.applyInverseTransform(transform);
+   }
+
+   @Override
+   public boolean epsilonEquals(Connection other, double epsilon)
+   {
+      return source.epsilonEquals(other.source, epsilon) && target.epsilonEquals(other.target, epsilon);
    }
 }
