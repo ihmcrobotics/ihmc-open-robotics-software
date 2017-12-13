@@ -477,8 +477,6 @@ public class ClusterTools
             extrusionIndex = ClusterTools.determineExtrusionSide(cluster, observer);
          }
 
-         //         javaFXMultiColorMeshBuilder.addSphere(0.04f, cluster.getListOfSafeNormals().get(extrusionIndex), Color.RED);
-
          extrudePolygon(cluster, extrusionIndex, extrusionDistance);
       }
    }
@@ -490,21 +488,8 @@ public class ClusterTools
       double extrusionDist1 = extrusionDistance - 0.01;
       double extrusionDist2 = extrusionDistance;
 
-      //      if (cluster.isObstacleClosed())
-      //         extrudeFirstNonNavigable(extrusionIndex, cluster, extrusionDist1);
-
       ClusterTools.extrudedNonNavigableBoundary(extrusionIndex, cluster, extrusionDist1);
-
-      //      if (cluster.isObstacleClosed())
-      //         extrudeLastNonNavigable(cluster, extrusionIndex, extrusionDist1);
-
-      //      if (cluster.isObstacleClosed())
-      //         extrudeFirstNavigable(cluster, extrusionIndex, extrusionDist1);
-
       ClusterTools.extrudedNavigableBoundary(extrusionIndex, cluster, extrusionDist2);
-
-      //      if (cluster.isObstacleClosed())
-      //         extrudeLastNavigable(cluster, extrusionIndex, extrusionDist1);
    }
 
    public static void generateNormalsFromRawBoundaryMap(double extrusionDistance, List<Cluster> listOfClusters)
@@ -512,26 +497,11 @@ public class ClusterTools
       for (Cluster cluster : listOfClusters)
       {
          List<Point2D> rawPoints = cluster.getRawPointsInLocal();
-         for (int i = 0; i < rawPoints.size(); i++)
+         for (int i = 0; i < rawPoints.size() - 1; i++)
          {
-            if (i < rawPoints.size() - 1)
-            {
-               Point2D first = rawPoints.get(i);
-               Point2D second = rawPoints.get(i + 1);
-               generateNormalsForSegment(first, second, cluster, extrusionDistance);
-
-               // TODO Remove following?
-               //               if(cluster.isObstacleClosed())
-               //               {
-               ////                  first = new Point2D(list.get(list.size() - 1).getX(), list.get(list.size() - 1).getY());
-               ////                  second = new Point2D(list.get(0).getX(), list.get(0).getY());
-               ////                  generateNormalsForSegment(first, second, cluster, extrusionDistance);
-               //
-               ////                  first = new Point2D(list.get(0).getX(), list.get(0).getY());
-               ////                  second = new Point2D(list.get(1).getX(), list.get(1).getY());
-               ////                  generateNormalsForSegment(first, second, cluster, extrusionDistance);
-               //               }
-            }
+            Point2D first = rawPoints.get(i);
+            Point2D second = rawPoints.get(i + 1);
+            generateNormalsForSegment(first, second, cluster, extrusionDistance);
          }
       }
    }
@@ -563,22 +533,15 @@ public class ClusterTools
 
          if (normal != null && regionToProject != regionToProjectTo)
          {
-            //         System.out.println(Math.abs(normal.getZ()) + "   " + VisibilityGraphsParameters.NORMAL_Z_THRESHOLD_FOR_POLYGON_OBSTACLES);
-
             if (Math.abs(normal.getZ()) < zNormalThreshold)
             {
-               //            System.out.println("Adding a line obstacle");
                lineObstaclesToPack.add(regionToProject);
             }
             else
             {
-               //            System.out.println("Adding a polygon obstacle");
                polygonObstaclesToPack.add(regionToProject);
             }
          }
-
-         //            System.out.println("Total obstacles to classify: " + regionsInsideHomeRegion.size() + "  Line obstacles: " + lineObstacleRegions.size()
-         //                  + "   Polygon obstacles: " + polygonObstacleRegions.size());
       }
    }
 
@@ -594,16 +557,19 @@ public class ClusterTools
 
          for (Point3D point : cluster.getNonNavigableExtrusionsInWorld())
          {
-            if (point.distance(pointToSortFrom) < distOfPoint)
+            double currentDistance = point.distanceSquared(pointToSortFrom);
+            if (currentDistance < distOfPoint)
             {
-               distOfPoint = point.distance(pointToSortFrom);
+               distOfPoint = currentDistance;
                closestPointInCluster = point;
             }
          }
 
-         if (closestPointInCluster.distance(pointToSortFrom) < minDistance)
+         double currentDistance = closestPointInCluster.distanceSquared(pointToSortFrom);
+
+         if (currentDistance < minDistance)
          {
-            minDistance = closestPointInCluster.distance(pointToSortFrom);
+            minDistance = currentDistance;
             closestCluster = cluster;
          }
       }
@@ -613,14 +579,15 @@ public class ClusterTools
 
    public static Point3D getTheClosestVisibleExtrusionPoint(Point3DReadOnly pointToSortFrom, List<Point3D> extrusionPoints)
    {
-      double minDist = Double.MAX_VALUE;
+      double minDistance = Double.MAX_VALUE;
       Point3D closestPoint = null;
 
       for (Point3D point : extrusionPoints)
       {
-         if (point.distance(pointToSortFrom) < minDist)
+         double currentDistance = point.distanceSquared(pointToSortFrom);
+         if (currentDistance < minDistance)
          {
-            minDist = point.distance(pointToSortFrom);
+            minDistance = currentDistance;
             closestPoint = point;
          }
       }
@@ -682,9 +649,9 @@ public class ClusterTools
             }
             else
             {
-               cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep() - visibilityGraphsParameters.getExtrusionDistance());
+               cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
+                     - visibilityGraphsParameters.getExtrusionDistance());
             }
-
 
             ArrayList<Point3D> points = new ArrayList<>();
             RigidBodyTransform transToWorld = new RigidBodyTransform();
@@ -724,7 +691,8 @@ public class ClusterTools
                }
                else
                {
-                  cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep() - visibilityGraphsParameters.getExtrusionDistance());
+                  cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
+                        - visibilityGraphsParameters.getExtrusionDistance());
                }
             }
 
