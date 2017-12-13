@@ -3,7 +3,6 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -94,7 +93,7 @@ public class NavigableRegionsManager
       this.regions = regions;
    }
 
-   public void createIndividualVisMapsForRegions()
+   private void createIndividualVisMapsForRegions()
    {
       listOfLocalPlanners.clear();
       visMaps.clear();
@@ -291,7 +290,7 @@ public class NavigableRegionsManager
       }
    }
 
-   public boolean createVisMapsForStartAndGoal(Point3DReadOnly startProjected, Point3DReadOnly goalProjected)
+   private boolean createVisMapsForStartAndGoal(Point3DReadOnly startProjected, Point3DReadOnly goalProjected)
    {
       NavigableRegion startRegion = null;
       Point2D startInRegionFrame = null;
@@ -437,7 +436,7 @@ public class NavigableRegionsManager
       //      System.out.println("Actual connections added: " + actualConnectionsAdded);
    }
 
-   public static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion)
+   private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion)
    {
       Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getClusters());
 
@@ -450,24 +449,7 @@ public class NavigableRegionsManager
       return mapForSingleObserver;
    }
 
-   public NavigableRegion getTheRegionContainingThePoint(Point3D point, Point2D pointToPack)
-   {
-      for (NavigableRegion navigableRegion : listOfLocalPlanners)
-      {
-         FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), point);
-         pointFpt.changeFrame(navigableRegion.getLocalReferenceFrame());
-
-         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), pointFpt.getPoint()))
-         {
-            pointToPack = new Point2D(pointFpt.getPoint().getX(), pointFpt.getPoint().getY());
-            System.out.println(pointToPack);
-            return navigableRegion;
-         }
-      }
-      return null;
-   }
-
-   public Point3DReadOnly getSnappedPointFromVisibilityGraph(Point3D position)
+   private Point3DReadOnly getSnappedPointFromVisibilityGraph(Point3D position)
    {
       for (DefaultWeightedEdge edge : globalVisMap.edgeSet())
       {
@@ -735,7 +717,7 @@ public class NavigableRegionsManager
       localVisibilityMapInWorld.computeVertices();
    }
 
-   public void processRegion(NavigableRegion navigableRegionLocalPlanner)
+   private void processRegion(NavigableRegion navigableRegionLocalPlanner)
    {
       List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
       List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
@@ -782,7 +764,7 @@ public class NavigableRegionsManager
       navigableRegionLocalPlanner.setVisibilityMap(visibilityMap);
    }
 
-   public boolean isPointInsideNoGoZone(Point3DReadOnly pointToCheck)
+   private boolean isPointInsideNoGoZone(Point3DReadOnly pointToCheck)
    {
       int index = 0;
       for (NavigableRegion localPlanner : listOfLocalPlanners)
