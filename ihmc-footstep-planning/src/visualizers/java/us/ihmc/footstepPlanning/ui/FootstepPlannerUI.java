@@ -24,7 +24,8 @@ public class FootstepPlannerUI
 
    private final PlanarRegionViewer planarRegionViewer;
    private final StartGoalPositionEditor startGoalEditor;
-   private final StartGoalPositionViewer startGoalViewer;
+   private final StartGoalPositionViewer startGoalPositionViewer;
+   private final StartGoalOrientationViewer startGoalOrientationViewer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -54,20 +55,23 @@ public class FootstepPlannerUI
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
-      mainPane.setCenter(subScene);
 
-      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
-      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
-      planarRegionViewer.start();
-
-      startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabledTopic, GoalEditModeEnabledTopic, StartPositionTopic, GoalPositionTopic);
-      view3dFactory.addNodeToView(startGoalViewer.getRoot());
-      startGoalViewer.start();
-
-      startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartEditModeEnabledTopic, GoalEditModeEnabledTopic, StartPositionTopic,
+      this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
+      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic, StartPositionTopic, GoalPositionTopic);
+      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
+      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic, StartPositionTopic,
                                                     GoalPositionTopic);
+
+      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
+      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
+
+      planarRegionViewer.start();
+      startGoalPositionViewer.start();
+      startGoalOrientationViewer.start();
       startGoalEditor.start();
 
+      mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);

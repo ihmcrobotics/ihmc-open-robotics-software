@@ -14,7 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
 
 public class StartGoalPositionViewer extends AnimationTimer
 {
-   private static final double RADIUS = 0.05;
+   public static final double RADIUS = 0.05;
 
    private final Group root = new Group();
 
@@ -26,10 +26,10 @@ public class StartGoalPositionViewer extends AnimationTimer
       TRANSLUCENT, OPAQUE
    };
 
-   private final PhongMaterial startOpaqueMaterial = new PhongMaterial(Color.GREEN);
-   private final PhongMaterial startTransparentMaterial = new PhongMaterial(toTransparentColor(Color.ORANGE, 0.7));
-   private final PhongMaterial goalOpaqueMaterial = new PhongMaterial(Color.RED);
-   private final PhongMaterial goalTransparentMaterial = new PhongMaterial(toTransparentColor(Color.ORANGE, 0.7));
+   public static final PhongMaterial startOpaqueMaterial = new PhongMaterial(Color.GREEN);
+   public static final PhongMaterial startTransparentMaterial = new PhongMaterial(toTransparentColor(Color.ORANGE, 0.7));
+   public static final PhongMaterial goalOpaqueMaterial = new PhongMaterial(Color.RED);
+   public static final PhongMaterial goalTransparentMaterial = new PhongMaterial(toTransparentColor(Color.ORANGE, 0.7));
 
    private final AtomicReference<Boolean> startEditModeEnabled;
    private final AtomicReference<Boolean> goalEditModeEnabled;
@@ -91,7 +91,7 @@ public class StartGoalPositionViewer extends AnimationTimer
       goalSphere.setTranslateZ(position.getZ());
    }
 
-   private static Color toTransparentColor(Color opaqueColor, double opacity)
+   public static Color toTransparentColor(Color opaqueColor, double opacity)
    {
       double red = opaqueColor.getRed();
       double green = opaqueColor.getGreen();
