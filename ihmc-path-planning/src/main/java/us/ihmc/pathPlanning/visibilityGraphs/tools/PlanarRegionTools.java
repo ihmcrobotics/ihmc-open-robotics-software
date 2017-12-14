@@ -26,8 +26,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionTools
 {
-   private static final boolean debug = false;
-
    /**
     * Finds and returns the closest point the the provided point on the planar regions.
     */
@@ -479,7 +477,7 @@ public class PlanarRegionTools
       return planarRegions.stream().filter(region -> computePlanarRegionArea(region) >= minArea).collect(Collectors.toList());
    }
 
-   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3D capsuleStart, Point3D capsuleEnd, double capsuleRadius,
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStart, Point3DReadOnly capsuleEnd, double capsuleRadius,
                                                                            List<PlanarRegion> planarRegions)
    {
       return filterPlanarRegionsWithBoundingCapsule(new LineSegment3D(capsuleStart, capsuleEnd), capsuleRadius, planarRegions);
