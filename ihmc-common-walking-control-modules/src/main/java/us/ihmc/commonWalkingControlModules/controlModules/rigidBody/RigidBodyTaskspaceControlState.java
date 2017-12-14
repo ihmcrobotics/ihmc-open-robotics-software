@@ -67,6 +67,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final WeightMatrix6D defaultWeightMatrix = new WeightMatrix6D();
    private Vector3DReadOnly defaultAngularWeight = null;
    private Vector3DReadOnly defaultLinearWeight = null;
+   private final YoFrameVector currentAngularWeight;
+   private final YoFrameVector currentLinearWeight;
 
    private final YoBoolean trackingOrientation;
    private final YoBoolean trackingPosition;
@@ -144,6 +146,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       messageLinearWeight = new YoFrameVector(prefix + "MessageLinearWeight", null, registry);
       messageAngularWeightFrame = new YoLong(prefix + "MessageAngularReferenceFrame", registry);
       messageLinearWeightFrame = new YoLong(prefix + "MessageLinearReferenceFrame", registry);
+
+      currentAngularWeight = new YoFrameVector(prefix + "CurrentAngularWeight", null, registry);
+      currentLinearWeight = new YoFrameVector(prefix + "CurrentLinearWeight", null, registry);
 
       yoControlPoint = new YoFramePoint(prefix + "ControlPoint", worldFrame, registry);
       yoControlOrientation = new YoFrameOrientation(prefix + "ControlOrientation", worldFrame, registry);
@@ -254,6 +259,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       WeightMatrix6D weightMatrix = usingWeightFromMessage.getBooleanValue() ? messageWeightMatrix : defaultWeightMatrix;
       spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
       spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
+
+      currentAngularWeight.set(weightMatrix.getAngularPart().getXAxisWeight(), weightMatrix.getAngularPart().getYAxisWeight(),
+                               weightMatrix.getAngularPart().getZAxisWeight());
+      currentLinearWeight.set(weightMatrix.getLinearPart().getXAxisWeight(), weightMatrix.getLinearPart().getYAxisWeight(),
+                              weightMatrix.getLinearPart().getZAxisWeight());
 
       numberOfPointsInQueue.set(pointQueue.size());
       numberOfPointsInGenerator.set(orientationTrajectoryGenerator.getCurrentNumberOfWaypoints());
