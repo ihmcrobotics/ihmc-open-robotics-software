@@ -67,6 +67,9 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
 
       taskspaceAngularWeights.add(new GroupParameter<>("Chest", chestAngularWeight, Collections.singletonList(jointMap.getChestName())));
       taskspaceAngularWeights.add(new GroupParameter<>("Head", headAngularWeight, Collections.singletonList(jointMap.getHeadName())));
+
+      taskspaceAngularWeights.add(new GroupParameter<>("Pelvis", pelvisAngularWeight, Collections.singletonList(jointMap.getPelvisName())));
+      taskspaceLinearWeights.add(new GroupParameter<>("Pelvis", pelvisLinearWeight, Collections.singletonList(jointMap.getPelvisName())));
    }
 
    /** @inheritDoc */
@@ -155,13 +158,6 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
 
    /** @inheritDoc */
    @Override
-   public Vector3D getPelvisAngularWeight()
-   {
-      return pelvisAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
    public Vector3D getDefaultLinearFootWeight()
    {
       return defaultLinearFootWeight;
@@ -242,11 +238,5 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
    public List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights()
    {
       return taskspaceLinearWeights;
-   }
-
-   @Override
-   public Vector3D getPelvisLinearWeight()
-   {
-      return pelvisLinearWeight;
    }
 }

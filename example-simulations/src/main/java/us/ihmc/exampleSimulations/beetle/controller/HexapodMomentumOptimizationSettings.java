@@ -20,9 +20,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
-   private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
-
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 1;
    private final int nContactableBodies = 6;
@@ -41,6 +38,10 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    private final List<GroupParameter<Double>> userModeWeights = new ArrayList<>();
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceAngularWeights = new ArrayList<>();
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeights = new ArrayList<>();
+
+   public HexapodMomentumOptimizationSettings()
+   {
+   }
 
    /** @inheritDoc */
    @Override
@@ -128,13 +129,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
 
    /** @inheritDoc */
    @Override
-   public Vector3D getPelvisAngularWeight()
-   {
-      return pelvisAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
    public Vector3D getDefaultLinearFootWeight()
    {
       return defaultLinearFootWeight;
@@ -215,11 +209,5 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    public List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights()
    {
       return taskspaceLinearWeights;
-   }
-
-   @Override
-   public Vector3D getPelvisLinearWeight()
-   {
-      return pelvisLinearWeight;
    }
 }
