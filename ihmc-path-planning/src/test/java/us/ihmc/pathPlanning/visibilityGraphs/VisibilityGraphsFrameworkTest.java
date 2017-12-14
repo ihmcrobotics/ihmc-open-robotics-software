@@ -42,7 +42,11 @@ public class VisibilityGraphsFrameworkTest
    @Test(timeout = 30000)
    public void testASolutionExists() throws Exception
    {
-      Path filePath = Paths.get(getClass().getClassLoader().getResource("Data").getPath());
+      String pathString = getClass().getClassLoader().getResource("Data").getPath();
+      if (isWindows())
+         pathString  = pathString.substring(1, pathString.length());
+
+      Path filePath = Paths.get(pathString);
       File fileLocationsForAllData = filePath.toFile();
 
       if(debug)
@@ -224,5 +228,11 @@ public class VisibilityGraphsFrameworkTest
       double z = Double.parseDouble(set.substring(0));
 
       return new Point3D(x, y, z);
+   }
+
+   public static boolean isWindows()
+   {
+      String OS = System.getProperty("os.name").toLowerCase();
+      return (OS.contains("win"));
    }
 }
