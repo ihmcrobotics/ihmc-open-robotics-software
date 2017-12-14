@@ -10,7 +10,7 @@ import org.ejml.ops.CommonOps;
  */
 public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
 {
-   private static final boolean incorporateAccelerationIntoPosition = false;
+   private static final boolean incorporateAccelerationIntoPosition = true;
    static final int stateVectorSize = 6;
    static final int controlVectorSize = 3;
 
@@ -200,6 +200,9 @@ public class LIPMDynamics implements DiscreteHybridDynamics<LIPMState>
       }
    }
 
+   /**
+    * {@param stateVariable} represents the first partial derivative variable of the dynamics. The gradient is then taken w.r.t to this value.
+    */
    public void getDynamicsStateHessian(LIPMState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
