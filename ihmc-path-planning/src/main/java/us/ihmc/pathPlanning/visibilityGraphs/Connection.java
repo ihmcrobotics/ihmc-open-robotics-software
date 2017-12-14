@@ -12,6 +12,12 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
    private ConnectionPoint3D source;
    private ConnectionPoint3D target;
 
+   public Connection(Connection other)
+   {
+      this.source = new ConnectionPoint3D(other.source);
+      this.target = new ConnectionPoint3D(other.target);
+   }
+
    public Connection(Point2DReadOnly source, Point2DReadOnly target)
    {
       this.source = new ConnectionPoint3D(source);
@@ -38,7 +44,7 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
    {
       return new Point2D(source);
    }
-   
+
    public Point2D getTargetPoint2D()
    {
       return new Point2D(target);
@@ -60,6 +66,6 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
    @Override
    public boolean epsilonEquals(Connection other, double epsilon)
    {
-      return source.epsilonEquals(other.source, epsilon) && target.epsilonEquals(other.target, epsilon);
+      return source.epsilonEquals(other.source, epsilon) && target.epsilonEquals(other.target, epsilon) || source.epsilonEquals(other.target, epsilon) && target.epsilonEquals(other.source, epsilon);
    }
 }
