@@ -2,38 +2,51 @@ package us.ihmc.pathPlanning.visibilityGraphs.visualizer;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionInnerVizMapMeshViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionsInterConnectionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityGraphStartGoalViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VizGraphsPlanarRegionViewer;
 
 public class VisibilityGraphsTestVisualizer
 {
-   private final BorderPane mainPane;
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+
    private final Stage primaryStage;
    private final SimpleUIMessager messager;
    private final VizGraphsPlanarRegionViewer planarRegionViewer;
    private final VisibilityGraphStartGoalViewer startGoalViewer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
-   private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
+   private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
+   private final NavigableRegionsInterConnectionViewer navigableRegionsInterConnectionViewer;
 
+   @FXML
+   private BorderPane mainPane;
    @FXML
    private TextField startTextFieldX, startTextFieldY, startTextFieldZ;
    @FXML
    private TextField goalTextFieldX, goalTextFieldY, goalTextFieldZ;
+   @FXML
+   private ToggleButton nextDatasetButton;
 
    public VisibilityGraphsTestVisualizer(Stage primaryStage, SimpleUIMessager messager) throws IOException
    {
@@ -42,8 +55,7 @@ public class VisibilityGraphsTestVisualizer
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
-
-      mainPane = loader.load();
+      Pane root = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -51,29 +63,34 @@ public class VisibilityGraphsTestVisualizer
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
 
-      bindTextFields(messager);
+      bindUIControls();
 
       planarRegionViewer = new VizGraphsPlanarRegionViewer(messager);
-      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       startGoalViewer = new VisibilityGraphStartGoalViewer(messager);
+      bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
+      clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
+      navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager, executorService);
+      navigableRegionsInterConnectionViewer = new NavigableRegionsInterConnectionViewer(messager, executorService);
+
+      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
-      bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
-      navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager);
-      view3dFactory.addNodeToView(navigableRegionInnerVizMapMeshViewer.getRoot());
-      clusterMeshViewer = new ClusterMeshViewer(messager);
       view3dFactory.addNodeToView(clusterMeshViewer.getRoot());
+      view3dFactory.addNodeToView(navigableRegionInnerVizMapMeshViewer.getRoot());
+      view3dFactory.addNodeToView(navigableRegionsInterConnectionViewer.getRoot());
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
-      Scene mainScene = new Scene(mainPane, 600, 400);
+      Scene mainScene = new Scene(root, 600, 400);
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
-   private void bindTextFields(SimpleUIMessager messager)
+   private void bindUIControls()
    {
+      messager.bindBidirectional(UIVisibilityGraphsTopics.NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
+
       DecimalFormat formatter = new DecimalFormat(" 0.000;-0.000");
       messager.registerTopicListener(UIVisibilityGraphsTopics.StartPosition, start -> startTextFieldX.setText(formatter.format(start.getX())));
       messager.registerTopicListener(UIVisibilityGraphsTopics.StartPosition, start -> startTextFieldY.setText(formatter.format(start.getY())));
@@ -83,23 +100,31 @@ public class VisibilityGraphsTestVisualizer
       messager.registerTopicListener(UIVisibilityGraphsTopics.GoalPosition, goal -> goalTextFieldZ.setText(formatter.format(goal.getZ())));
    }
 
+   public BooleanProperty getNextDatasetRequestedProperty()
+   {
+      return nextDatasetButton.selectedProperty();
+   }
+
    public void show() throws IOException
    {
       primaryStage.show();
       planarRegionViewer.start();
       startGoalViewer.start();
       bodyPathMeshViewer.start();
-      navigableRegionInnerVizMapMeshViewer.start();
       clusterMeshViewer.start();
+      navigableRegionInnerVizMapMeshViewer.start();
+      navigableRegionsInterConnectionViewer.start();
    }
 
    public void stop()
    {
-      messager.closeMessager();
       planarRegionViewer.stop();
       startGoalViewer.stop();
       bodyPathMeshViewer.stop();
-      navigableRegionInnerVizMapMeshViewer.stop();
       clusterMeshViewer.stop();
+      navigableRegionInnerVizMapMeshViewer.stop();
+      navigableRegionsInterConnectionViewer.stop();
+      messager.closeMessager();
+      Platform.exit();
    }
 }

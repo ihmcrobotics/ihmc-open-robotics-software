@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -61,7 +60,7 @@ public class VisibilityGraphsIOTools
          {
             if (sCurrentLine.contains(fieldOpen) && sCurrentLine.contains(fieldClose))
             {
-               return parser.parse(sCurrentLine.substring(10, sCurrentLine.indexOf(fieldClose)));
+               return parser.parse(sCurrentLine.substring(fieldOpen.length(), sCurrentLine.indexOf(fieldClose)));
             }
          }
       }
@@ -171,12 +170,12 @@ public class VisibilityGraphsIOTools
          return file.getName();
       }
 
-      public Point3DReadOnly getStart()
+      public Point3D getStart()
       {
          return start;
       }
 
-      public Point3DReadOnly getGoal()
+      public Point3D getGoal()
       {
          return goal;
       }

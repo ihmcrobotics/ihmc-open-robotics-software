@@ -2,8 +2,11 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,24 +18,60 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.SimpleVisibilityGraphsUI;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest extends Application
 {
+   private static boolean VISUALIZE = true;
+
    private boolean debug = true;
-   private SimpleVisibilityGraphsUI ui;
+   private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
+   private static VisibilityGraphsTestVisualizer ui;
+
+   private static final boolean showBodyPath = true;
+   private static final boolean showClusterRawPoints = false;
+   private static final boolean showClusterNavigableExtrusions = false;
+   private static final boolean showClusterNonNavigableExtrusions = false;
+   private static final boolean showRegionInnerConnections = false;
+   private static final boolean showRegionInterConnections = false;
 
    @Before
-   public void setup()
+   public void setup() throws InterruptedException, IOException
    {
       debug = debug && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-      new Thread(() -> launch()).start();
+      VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      if (VISUALIZE)
+      {
+         messager.startMessager();
+
+         new Thread(() -> launch()).start();
+
+         while (ui == null)
+            ThreadTools.sleep(200);
+
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowBodyPath, showBodyPath);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterRawPoints, showClusterRawPoints);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions, showClusterNavigableExtrusions);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusions);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowLocalGraphs, showRegionInnerConnections);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterConnections, showRegionInterConnections);
+      }
    }
 
-   @Test(timeout = 30000)
+   @After
+   public void tearDown() throws Exception
+   {
+      if (VISUALIZE)
+         stop();
+   }
+
+   @Test
    public void testASolutionExists() throws Exception
    {
       List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets();
@@ -42,11 +81,30 @@ public class VisibilityGraphsFrameworkTest extends Application
          PrintTools.info("Unit test files found: " + allDatasets.size());
       }
 
+      AtomicReference<Boolean> nextDatasetRequested = null;
+      if (VISUALIZE)
+         nextDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.NextDatasetRequest, false);
+
       for (VisibilityGraphsUnitTestDataset dataset : allDatasets)
       {
+         if (VISUALIZE)
+            messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
+
          testFile(dataset);
+
+         if (VISUALIZE)
+         {
+            messager.submitMessage(UIVisibilityGraphsTopics.NextDatasetRequest, false);
+
+            while (!nextDatasetRequested.get())
+            {
+               if (!messager.isMessagerOpen())
+                  return; // The ui has been closed
+
+               ThreadTools.sleep(200);
+            }
+         }
       }
-      ThreadTools.sleepForever();
    }
 
    private void testFile(VisibilityGraphsUnitTestDataset dataset)
@@ -57,7 +115,16 @@ public class VisibilityGraphsFrameworkTest extends Application
       }
 
       NavigableRegionsManager manager = new NavigableRegionsManager();
-      manager.setPlanarRegions(dataset.getPlanarRegionsList().getPlanarRegionsAsList());
+      PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, dataset.getGoal());
+      }
+
+      manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
       List<Point3DReadOnly> path = null;
 
       try
@@ -66,20 +133,36 @@ public class VisibilityGraphsFrameworkTest extends Application
       }
       catch (Exception e)
       {
-         
+
       }
 
-//      assertTrue("Path is null!", path != null);
-//      assertTrue("Path does not contain any waypoints", path.size() > 0);
-//
-//      if (dataset.hasExpectedPathSize())
-//         assertTrue("Path size is not equal", path.size() == dataset.getExpectedPathSize());
+      if (VISUALIZE)
+      {
+         if (path != null)
+         {
+            messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
+            messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, manager.getListOfLocalPlanners());
+            messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getConnectionPoints());
+         }
+         else
+         {
+            PrintTools.error("Failed to compute a body path!");
+         }
+      }
+      else
+      {
+         assertTrue("Path is null!", path != null);
+         assertTrue("Path does not contain any waypoints", path.size() > 0);
+         
+         if (dataset.hasExpectedPathSize())
+            assertTrue("Path size is not equal", path.size() == dataset.getExpectedPathSize());
+      }
    }
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = new SimpleVisibilityGraphsUI(primaryStage);
+      ui = new VisibilityGraphsTestVisualizer(primaryStage, messager);
       ui.show();
    }
 
