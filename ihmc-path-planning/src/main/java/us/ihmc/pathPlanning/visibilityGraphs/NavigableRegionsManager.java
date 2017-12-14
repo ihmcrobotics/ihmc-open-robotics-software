@@ -663,17 +663,13 @@ public class NavigableRegionsManager
       VisibilityMap localVisibilityMapInWorld = new VisibilityMap();
       visMaps.add(localVisibilityMapInWorld);
 
-      for (Connection connection : navigableRegionLocalPlanner.getLocalVisibilityGraph().getConnections())
+      RigidBodyTransform transformToWorld = navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame();
+
+      for (Connection connectionLocal : navigableRegionLocalPlanner.getLocalVisibilityGraph().getConnections())
       {
-         Point2D edgeSource = new Point2D(connection.getSourcePoint().getX(), connection.getSourcePoint().getY());
-         Point2D edgeTarget = new Point2D(connection.getTargetPoint().getX(), connection.getTargetPoint().getY());
-
-         FramePoint3D pt1 = new FramePoint3D(navigableRegionLocalPlanner.getLocalReferenceFrame(), new Point3D(edgeSource.getX(), edgeSource.getY(), 0));
-         pt1.changeFrame(ReferenceFrame.getWorldFrame());
-         FramePoint3D pt2 = new FramePoint3D(navigableRegionLocalPlanner.getLocalReferenceFrame(), new Point3D(edgeTarget.getX(), edgeTarget.getY(), 0));
-         pt2.changeFrame(ReferenceFrame.getWorldFrame());
-
-         localVisibilityMapInWorld.addConnection(new Connection(pt1.getPoint(), pt2.getPoint()));
+         Connection connectionWorld = new Connection(connectionLocal);
+         connectionWorld.applyTransform(transformToWorld);
+         localVisibilityMapInWorld.addConnection(connectionWorld);
       }
 
       localVisibilityMapInWorld.computeVertices();
@@ -685,17 +681,20 @@ public class NavigableRegionsManager
       List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
       List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
       List<Cluster> clusters = new ArrayList<>();
+      PlanarRegion homeRegion = navigableRegionLocalPlanner.getHomeRegion();
 
-      regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(navigableRegionLocalPlanner.getHomeRegion(), regions);
+      regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, regions);
 
-      ClusterTools.classifyExtrusions(regionsInsideHomeRegion, navigableRegionLocalPlanner.getHomeRegion(), lineObstacleRegions, polygonObstacleRegions,
-                                      parameters.getNormalZThresholdForPolygonObstacles());
-      regionsInsideHomeRegion = PlanarRegionTools.filterRegionsThatAreAboveHomeRegion(regionsInsideHomeRegion, navigableRegionLocalPlanner.getHomeRegion());
+      double normalZThresholdForPolygonObstacles = parameters.getNormalZThresholdForPolygonObstacles();
+      RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame();
+      double extrusionDistance = parameters.getExtrusionDistance();
 
-      ClusterTools.createClustersFromRegions(navigableRegionLocalPlanner.getHomeRegion(), regionsInsideHomeRegion, lineObstacleRegions, polygonObstacleRegions,
-                                             clusters, navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame(), parameters);
-      ClusterTools.createClusterForHomeRegion(clusters, navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame(),
-                                              navigableRegionLocalPlanner.getHomeRegion(), parameters.getExtrusionDistance());
+      ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, normalZThresholdForPolygonObstacles);
+      regionsInsideHomeRegion = PlanarRegionTools.filterRegionsThatAreAboveHomeRegion(regionsInsideHomeRegion, homeRegion);
+
+      ClusterTools.createClustersFromRegions(homeRegion, regionsInsideHomeRegion, lineObstacleRegions, polygonObstacleRegions, clusters, transformToWorldFrame,
+                                             parameters);
+      ClusterTools.createClusterForHomeRegion(clusters, transformToWorldFrame, homeRegion, extrusionDistance);
 
       if (debug)
       {
@@ -704,7 +703,7 @@ public class NavigableRegionsManager
 
       // TODO The use of Double.MAX_VALUE for the observer seems rather risky. I'm actually surprised that it works.
       //      clusterMgr.performExtrusions(new Point2D(Double.MAX_VALUE, Double.MAX_VALUE), parameters.getExtrusionDistance());
-      ClusterTools.performExtrusions(new Point2D(Double.MAX_VALUE, Double.MAX_VALUE), parameters.getExtrusionDistance(), clusters);
+      ClusterTools.performExtrusions(new Point2D(Double.MAX_VALUE, Double.MAX_VALUE), extrusionDistance, clusters);
 
       for (Cluster cluster : clusters)
       {
@@ -713,7 +712,7 @@ public class NavigableRegionsManager
 
       Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters);
 
-      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, navigableRegionLocalPlanner.getHomeRegion());
+      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
       connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, clusters);
 
       VisibilityMap visibilityMap = new VisibilityMap();
