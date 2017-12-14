@@ -32,6 +32,7 @@ public class NavigableRegionsManager
 {
    private final static boolean debug = true;
    private final static boolean CONNECT_GOAL_TO_CLOSEST_REGION = false;
+   private final static boolean TRUNCATE_OBSTACLE_REGIONS = false;
 
    private final static int START_GOAL_ID = 0;
 
@@ -312,7 +313,8 @@ public class NavigableRegionsManager
 
    private List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(globalVisMap, new ConnectionPoint3D(start, START_GOAL_ID), new ConnectionPoint3D(goal, START_GOAL_ID));
+      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(globalVisMap, new ConnectionPoint3D(start, START_GOAL_ID),
+                                                                                new ConnectionPoint3D(goal, START_GOAL_ID));
       return convertVisibilityGraphSolutionToPath(solution, start);
    }
 
@@ -399,9 +401,11 @@ public class NavigableRegionsManager
       }
    }
 
-   private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, int pointRegionId, NavigableRegion navigableRegion, boolean ensureConnection)
+   private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, int pointRegionId, NavigableRegion navigableRegion,
+                                                                 boolean ensureConnection)
    {
-      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, pointRegionId, navigableRegion.getAllClusters(), navigableRegion.getRegionId(), ensureConnection);
+      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, pointRegionId, navigableRegion.getAllClusters(),
+                                                                              navigableRegion.getRegionId(), ensureConnection);
 
       RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
 
@@ -671,14 +675,25 @@ public class NavigableRegionsManager
       PlanarRegion homeRegion = navigableRegionLocalPlanner.getHomeRegion();
 
       regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, regions);
+      if (TRUNCATE_OBSTACLE_REGIONS)
+      {
+         double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
+         int minTruncatedSize = 5; // TODO Extract me!
+         double minTruncatedArea = 0.01; // TODO Extract me!
+         regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
+                                                                                                        depthThresholdForConvexDecomposition, minTruncatedSize,
+                                                                                                        minTruncatedArea);
+      }
+      else
+      {
+         regionsInsideHomeRegion = PlanarRegionTools.keepOnlyRegionsThatAreEntirelyAboveHomeRegion(regionsInsideHomeRegion, homeRegion);
+      }
 
       double normalZThresholdForPolygonObstacles = parameters.getNormalZThresholdForPolygonObstacles();
       RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame();
       double extrusionDistance = parameters.getExtrusionDistance();
 
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, normalZThresholdForPolygonObstacles);
-      regionsInsideHomeRegion = PlanarRegionTools.filterRegionsThatAreAboveHomeRegion(regionsInsideHomeRegion, homeRegion);
-
       ClusterTools.createClustersFromRegions(homeRegion, regionsInsideHomeRegion, lineObstacleRegions, polygonObstacleRegions, clusters, transformToWorldFrame,
                                              parameters);
       ClusterTools.createClusterForHomeRegion(clusters, transformToWorldFrame, homeRegion, extrusionDistance);
