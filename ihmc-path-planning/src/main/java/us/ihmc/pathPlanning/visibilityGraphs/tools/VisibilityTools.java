@@ -113,7 +113,7 @@ public class VisibilityTools
       return connections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, List<Cluster> clusters)
+   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, List<Cluster> clusters, boolean ensureConnection)
    {
       Set<Connection> connections = new HashSet<>();
       List<Point2D> listOfTargetPoints = new ArrayList<>();
@@ -143,6 +143,22 @@ public class VisibilityTools
                connections.add(new Connection(observer, target));
             }
          }
+      }
+
+      if (ensureConnection && connections.isEmpty())
+      {
+         Point2D closestTarget = null;
+         double minDistance = Double.POSITIVE_INFINITY;
+         for (Point2D target : listOfTargetPoints)
+         {
+            double targetDistance = target.distanceSquared(observer);
+            if (targetDistance < minDistance)
+            {
+               closestTarget = target;
+               minDistance = targetDistance;
+            }
+         }
+         connections.add(new Connection(observer, closestTarget));
       }
 
       return connections;
