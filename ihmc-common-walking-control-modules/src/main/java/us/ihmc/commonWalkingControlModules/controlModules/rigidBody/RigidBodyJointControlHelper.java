@@ -39,6 +39,7 @@ public class RigidBodyJointControlHelper
 
    private final YoBoolean usingWeightFromMessage;
    private final List<DoubleProvider> defaultWeights = new ArrayList<>();
+   private final List<YoDouble> currentWeights = new ArrayList<>();
    private final List<YoDouble> messageWeights = new ArrayList<>();
    private final List<PIDGainsReadOnly> gains = new ArrayList<>();
 
@@ -82,6 +83,7 @@ public class RigidBodyJointControlHelper
          numberOfPoints.add(new YoInteger(prefix + "_" + jointName + "_numberOfPoints", registry));
 
          messageWeights.add(new YoDouble(prefix + "_" + jointName + "_messageWeight", registry));
+         currentWeights.add(new YoDouble(prefix + "_" + jointName + "_currentWeight", registry));
       }
 
       parentRegistry.addChild(registry);
@@ -193,7 +195,11 @@ public class RigidBodyJointControlHelper
          OneDoFJoint joint = joints[jointIdx];
          PIDGainsReadOnly gain = gains.get(jointIdx);
          double weight = weights.get(jointIdx).getValue();
-         feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gain, weight);
+         currentWeights.get(jointIdx).set(weight);
+         if (weight > 0.0)
+         {
+            feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gain, weight);
+         }
 
          YoInteger numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);
          YoInteger numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(jointIdx);
@@ -277,7 +283,7 @@ public class RigidBodyJointControlHelper
 
             double weight = trajectoryPoints.getWeight();
             messageWeights.get(jointIdx).set(weight);
-            if (Double.isNaN(weight) || weight <= 0.0)
+            if (Double.isNaN(weight) || weight < 0.0)
             {
                messageHasValidWeights = false;
             }
