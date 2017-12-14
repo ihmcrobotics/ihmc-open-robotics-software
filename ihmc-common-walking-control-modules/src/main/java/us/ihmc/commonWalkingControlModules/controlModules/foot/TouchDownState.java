@@ -20,7 +20,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FramePose;
@@ -297,7 +297,7 @@ public class TouchDownState extends AbstractFootControlState
       feedbackControlCommand.setWeightForSolver(weight);
    }
 
-   public void setWeights(Vector3D angular, Vector3D linear)
+   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       feedbackControlCommand.setWeightsForSolver(angular, linear);
    }
@@ -334,6 +334,7 @@ public class TouchDownState extends AbstractFootControlState
          this.cop.setIncludingFrame(cop);
       }
 
+      @Override
       public int compare(YoContactPoint o1, YoContactPoint o2)
       {
          o1.getPosition2d(cp1);
@@ -360,6 +361,7 @@ public class TouchDownState extends AbstractFootControlState
       private final FramePoint3D cp1 = new FramePoint3D();
       private final FramePoint3D cp2 = new FramePoint3D();
       
+      @Override
       public int compare(YoContactPoint o1, YoContactPoint o2)
       {
          o1.getPosition(cp1);

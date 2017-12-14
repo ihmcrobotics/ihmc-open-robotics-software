@@ -1,8 +1,6 @@
 package us.ihmc.atlas.commonWalkingControlModules;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 
 import org.junit.Test;
 
@@ -20,12 +18,16 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
@@ -374,12 +376,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       public double getJointAccelerationWeight()
       {
          return 0.05;
-      }
-
-      @Override
-      public Vector3D getPelvisAngularWeight()
-      {
-         return new Vector3D(5.0, 5.0, 5.0);
       }
    }
 

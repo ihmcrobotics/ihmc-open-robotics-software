@@ -9,6 +9,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -40,12 +41,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       }
    }
 
-   public void setDefaultWeights(TObjectDoubleHashMap<String> weights)
+   public void setDefaultWeights(Map<String, DoubleProvider> weights)
    {
       jointControlHelper.setDefaultWeights(weights);
    }
 
-   public void setDefaultWeight(double weight)
+   public void setDefaultWeight(DoubleProvider weight)
    {
       jointControlHelper.setDefaultWeight(weight);
    }
