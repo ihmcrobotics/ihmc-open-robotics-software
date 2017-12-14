@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -132,7 +132,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * set the qp weights for the taskspace linear z command
     * @param linearWeight
     */
-   public void setWeights(Vector3D linearWeight)
+   public void setWeights(Vector3DReadOnly linearWeight)
    {
       taskspaceControlState.setWeights(null, linearWeight);
    }
