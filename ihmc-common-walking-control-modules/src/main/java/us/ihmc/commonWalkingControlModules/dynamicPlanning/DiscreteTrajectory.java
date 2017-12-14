@@ -25,8 +25,23 @@ public class DiscreteTrajectory extends RecyclingArrayList<DenseMatrix64F>
       this.clear();
    }
 
-   public void setTrajectorySize(double startTime, double endTime, double deltaT)
+   public void set(DiscreteTrajectory other)
    {
+      this.startTime = other.startTime;
+      this.endTime = other.endTime;
+      this.deltaT = other.deltaT;
+      this.realDeltaT = other.realDeltaT;
+      this.numberOfTimeSteps = other.numberOfTimeSteps;
+
+      this.clear();
+      for (int i = 0; i < other.numberOfTimeSteps; i++)
+         this.add().set(other.get(i));
+   }
+
+   public void setTrajectoryDuration(double startTime, double endTime, double deltaT)
+   {
+      this.startTime = startTime;
+      this.endTime = endTime;
       this.deltaT = deltaT;
       computeRequiredDeltaT((endTime - startTime), deltaT);
 
@@ -49,6 +64,28 @@ public class DiscreteTrajectory extends RecyclingArrayList<DenseMatrix64F>
 
       CommonOps.scale((1.0 - alpha), get(startIndex), valueToPack);
       CommonOps.addEquals(valueToPack, alpha, get(startIndex + 1));
+   }
+
+   public void zero(int size)
+   {
+      this.clear();
+      for (int i = 0; i < size; i++)
+         this.add().zero();
+   }
+
+   public double getStartTime()
+   {
+      return startTime;
+   }
+
+   public double getEndTime()
+   {
+      return endTime;
+   }
+
+   public double getDeltaT()
+   {
+      return deltaT;
    }
 
    private void computeRequiredDeltaT(double trajectoryDuration, double deltaT)

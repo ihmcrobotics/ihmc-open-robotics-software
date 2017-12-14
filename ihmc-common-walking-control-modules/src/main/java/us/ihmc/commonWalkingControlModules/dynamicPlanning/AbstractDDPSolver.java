@@ -21,14 +21,9 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    protected final LQCostFunction costFunction;
    protected final LQCostFunction terminalCostFunction;
 
-   protected final RecyclingArrayList<DenseMatrix64F> stateTrajectory;
-   protected final RecyclingArrayList<DenseMatrix64F> controlTrajectory;
-
-   protected final RecyclingArrayList<DenseMatrix64F> desiredStateTrajectory;
-   protected final RecyclingArrayList<DenseMatrix64F> desiredControlTrajectory;
-
-   protected final RecyclingArrayList<DenseMatrix64F> updatedStateTrajectory;
-   protected final RecyclingArrayList<DenseMatrix64F> updatedControlTrajectory;
+   protected final DiscreteOptimizationTrajectory optimalTrajectory;
+   protected final DiscreteOptimizationTrajectory desiredTrajectory;
+   protected final DiscreteOptimizationTrajectory updatedTrajectory;
 
    protected final RecyclingArrayList<DenseMatrix64F> feedBackGainTrajectory;
    protected final RecyclingArrayList<DenseMatrix64F> feedForwardTrajectory;
@@ -85,15 +80,11 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       int controlSize = dynamics.getControlVectorSize();
 
       VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize, 1);
-      VariableVectorBuilder stateBuilder = new VariableVectorBuilder(stateSize, 1);
       VariableVectorBuilder gainBuilder = new VariableVectorBuilder(controlSize, stateSize);
 
-      stateTrajectory = new RecyclingArrayList<>(1000, stateBuilder);
-      controlTrajectory = new RecyclingArrayList<>(1000, controlBuilder);
-      desiredStateTrajectory = new RecyclingArrayList<>(1000, stateBuilder);
-      desiredControlTrajectory = new RecyclingArrayList<>(1000, controlBuilder);
-      updatedStateTrajectory = new RecyclingArrayList<>(1000, stateBuilder);
-      updatedControlTrajectory = new RecyclingArrayList<>(1000, controlBuilder);
+      optimalTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      desiredTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      updatedTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
 
       feedBackGainTrajectory = new RecyclingArrayList<>(1000, gainBuilder);
       feedForwardTrajectory = new RecyclingArrayList<>(1000, controlBuilder);
@@ -121,13 +112,6 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       dynamicsControlHessian = new DenseMatrix64F(stateSize, controlSize);
       dynamicsControlStateHessian = new DenseMatrix64F(stateSize, controlSize);
 
-      stateTrajectory.clear();
-      controlTrajectory.clear();
-      desiredStateTrajectory.clear();
-      desiredControlTrajectory.clear();
-      updatedStateTrajectory.clear();
-      updatedControlTrajectory.clear();
-
       valueStateHessianTrajectory.clear();
       valueStateGradientTrajectory.clear();
 
@@ -139,18 +123,11 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       Q_UU_col = new DenseMatrix64F(controlSize, 1);
    }
 
-   public void initializeFromLQRSolution(E dynamicsState, RecyclingArrayList<DenseMatrix64F> stateTrajectory, RecyclingArrayList<DenseMatrix64F> controlTrajectory,
-                                         RecyclingArrayList<DenseMatrix64F> desiredStateTrajectory, RecyclingArrayList<DenseMatrix64F> desiredControlTrajectory,
+   public void initializeFromLQRSolution(E dynamicsState, DiscreteOptimizationTrajectory trajectory, DiscreteOptimizationTrajectory desiredTrajectory,
                                          RecyclingArrayList<DenseMatrix64F> feedBackGainTrajectory, RecyclingArrayList<DenseMatrix64F> feedForwardTrajectory)
    {
-      this.stateTrajectory.clear();
-      this.controlTrajectory.clear();
       this.feedBackGainTrajectory.clear();
       this.feedForwardTrajectory.clear();
-      this.desiredStateTrajectory.clear();
-      this.desiredControlTrajectory.clear();
-      this.updatedControlTrajectory.clear();
-      this.updatedStateTrajectory.clear();
 
       valueStateHessianTrajectory.clear();
       valueStateGradientTrajectory.clear();
@@ -164,16 +141,14 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       dynamicsControlGradientTrajectory.clear();
       dynamicsStateGradientTrajectory.clear();
 
-      for (int i = 0; i < stateTrajectory.size(); i++)
+      this.optimalTrajectory.set(trajectory);
+      this.desiredTrajectory.set(desiredTrajectory);
+      this.updatedTrajectory.setZeroTrajectory(trajectory);
+
+      for (int i = 0; i < trajectory.size(); i++)
       {
-         this.stateTrajectory.add().set(stateTrajectory.get(i));
-         this.controlTrajectory.add().set(controlTrajectory.get(i));
-         this.desiredStateTrajectory.add().set(desiredStateTrajectory.get(i));
-         this.desiredControlTrajectory.add().set(desiredControlTrajectory.get(i));
          this.feedBackGainTrajectory.add().set(feedBackGainTrajectory.get(i));
          this.feedForwardTrajectory.add().set(feedForwardTrajectory.get(i));
-         this.updatedControlTrajectory.add().zero();
-         this.updatedStateTrajectory.add().zero();
 
          valueStateHessianTrajectory.add().zero();
          valueStateGradientTrajectory.add().zero();
@@ -189,25 +164,15 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       }
 
       // FIXME
-      forwardPass(dynamicsState, 0, stateTrajectory.size() - 1, stateTrajectory.get(0), updatedStateTrajectory, updatedControlTrajectory);
+      forwardPass(dynamicsState, 0, optimalTrajectory.size() - 1, optimalTrajectory.getState(0), updatedTrajectory);
 
-      for (int i = 0; i < updatedControlTrajectory.size(); i++)
-      {
-         this.stateTrajectory.get(i).set(updatedStateTrajectory.get(i));
-         this.controlTrajectory.get(i).set(updatedControlTrajectory.get(i));
-      }
+      optimalTrajectory.set(updatedTrajectory);
    }
 
-   public void initializeTrajectoriesFromDesireds(DenseMatrix64F initialCoM, RecyclingArrayList<DenseMatrix64F> desiredStateTrajectory, RecyclingArrayList<DenseMatrix64F> desiredControlTrajectory)
+   public void initializeTrajectoriesFromDesireds(DenseMatrix64F initialCoM, DiscreteOptimizationTrajectory desiredTrajectory)
    {
-      this.stateTrajectory.clear();
-      this.controlTrajectory.clear();
       this.feedBackGainTrajectory.clear();
       this.feedForwardTrajectory.clear();
-      this.desiredStateTrajectory.clear();
-      this.desiredControlTrajectory.clear();
-      this.updatedControlTrajectory.clear();
-      this.updatedStateTrajectory.clear();
 
       valueStateHessianTrajectory.clear();
       valueStateGradientTrajectory.clear();
@@ -221,16 +186,15 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       dynamicsControlGradientTrajectory.clear();
       dynamicsStateGradientTrajectory.clear();
 
-      for (int i = 0; i < desiredStateTrajectory.size(); i++)
+      this.optimalTrajectory.set(desiredTrajectory);
+      this.desiredTrajectory.set(desiredTrajectory);
+      this.updatedTrajectory.setZeroTrajectory(desiredTrajectory);
+
+
+      for (int i = 0; i < desiredTrajectory.size(); i++)
       {
-         this.stateTrajectory.add().set(desiredStateTrajectory.get(i));
-         this.controlTrajectory.add().set(desiredControlTrajectory.get(i));
-         this.desiredStateTrajectory.add().set(desiredStateTrajectory.get(i));
-         this.desiredControlTrajectory.add().set(desiredControlTrajectory.get(i));
          this.feedBackGainTrajectory.add().zero();
          this.feedForwardTrajectory.add().zero();
-         this.updatedControlTrajectory.add().zero();
-         this.updatedStateTrajectory.add().zero();
          valueStateHessianTrajectory.add().zero();
          valueStateGradientTrajectory.add().zero();
 
@@ -244,17 +208,17 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
          dynamicsStateGradientTrajectory.add().zero();
       }
 
-      stateTrajectory.getFirst().set(initialCoM);
+      optimalTrajectory.setState(0, initialCoM);
    }
 
    void computeFunctionApproximations(E dynamicsState, int startIndex, int endIndex)
    {
       for (int t = startIndex; t <= endIndex; t++)
       {
-         DenseMatrix64F currentState = stateTrajectory.getAndGrowIfNeeded(t);
-         DenseMatrix64F currentControl = controlTrajectory.getAndGrowIfNeeded(t);
-         DenseMatrix64F desiredState = desiredStateTrajectory.get(t);
-         DenseMatrix64F desiredControl = desiredControlTrajectory.get(t);
+         DenseMatrix64F currentState = optimalTrajectory.getState(t);
+         DenseMatrix64F currentControl = optimalTrajectory.getControl(t);
+         DenseMatrix64F desiredState = desiredTrajectory.getState(t);
+         DenseMatrix64F desiredControl = desiredTrajectory.getControl(t);
 
          dynamics.getDynamicsStateGradient(dynamicsState, currentState, currentControl, dynamicsStateGradientTrajectory.get(t));
          dynamics.getDynamicsControlGradient(dynamicsState, currentState, currentControl, dynamicsControlGradientTrajectory.get(t));
@@ -339,8 +303,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
       if (useDynamicsHessian)
       {
-         DenseMatrix64F currentState = stateTrajectory.get(t);
-         DenseMatrix64F currentControl = controlTrajectory.get(t);
+         DenseMatrix64F currentState = optimalTrajectory.getState(t);
+         DenseMatrix64F currentControl = optimalTrajectory.getControl(t);
 
          for (int stateIndex = 0; stateIndex < dynamics.getStateVectorSize(); stateIndex++)
          {
@@ -433,14 +397,10 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       }
    }
 
-   public RecyclingArrayList<DenseMatrix64F> getControlTrajectory()
+   @Override
+   public DiscreteOptimizationTrajectory getOptimalTrajectory()
    {
-      return controlTrajectory;
-   }
-
-   public RecyclingArrayList<DenseMatrix64F> getStateTrajectory()
-   {
-      return stateTrajectory;
+      return optimalTrajectory;
    }
 
    @Override
@@ -450,7 +410,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       cost0 = Double.MAX_VALUE;
 
       int startIndex = 0;
-      int endIndex = stateTrajectory.size() - 1;
+      int endIndex = optimalTrajectory.size() - 1;
 
       for (int iterations = 0; iterations < 20; iterations++)
       {
@@ -459,17 +419,12 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
          for (int iterB = 0; iterB < 20; iterB++)
          {
-            boolean hessianWasPD = backwardPass(dynamicsState, startIndex, endIndex, stateTrajectory, controlTrajectory);
+            boolean hessianWasPD = backwardPass(dynamicsState, startIndex, endIndex, optimalTrajectory);
 
             if (hessianWasPD)
             {
-               cost = forwardPass(dynamicsState, startIndex, endIndex, stateTrajectory.getFirst(), updatedStateTrajectory, updatedControlTrajectory);
-
-               for (int i = 0; i < updatedControlTrajectory.size(); i++)
-               {
-                  stateTrajectory.get(i).set(updatedStateTrajectory.get(i));
-                  controlTrajectory.get(i).set(updatedControlTrajectory.get(i));
-               }
+               cost = forwardPass(dynamicsState, startIndex, endIndex, optimalTrajectory.getState(0), updatedTrajectory);
+               optimalTrajectory.set(updatedTrajectory);
 
                if (Math.abs(cost - cost0) / Math.abs(cost0) < 1e-1)
                   return iterations;
@@ -514,7 +469,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
             boolean hessianWasPD = true;
             for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
             {
-               hessianWasPD = backwardPass(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment), stateTrajectory, controlTrajectory);
+               hessianWasPD = backwardPass(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment), optimalTrajectory);
                if (!hessianWasPD)
                   break;
             }
@@ -525,15 +480,10 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
                for (int segment = 0; segment < dynamicsStates.size(); segment++)
                {
                   int startIndex = startIndices.get(segment);
-                  cost += forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), stateTrajectory.get(startIndex),
-                                     updatedStateTrajectory, updatedControlTrajectory);
+                  cost += forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), optimalTrajectory.getState(startIndex),
+                                     updatedTrajectory);
                }
-
-               for (int i = 0; i < updatedControlTrajectory.size(); i++)
-               {
-                  stateTrajectory.get(i).set(updatedStateTrajectory.get(i));
-                  controlTrajectory.get(i).set(updatedControlTrajectory.get(i));
-               }
+               optimalTrajectory.set(updatedTrajectory);
 
                if (Math.abs(cost - cost0) / Math.abs(cost0) < 1e-1)
                   return iterations;
@@ -561,10 +511,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       throw new RuntimeException("Didn't converge.");
    }
 
-   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM,
-                                      RecyclingArrayList<DenseMatrix64F> updatedStateTrajectory, RecyclingArrayList<DenseMatrix64F> updatedControlTrajectory);
+   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationTrajectory updatedTrajectory);
 
 
-   public abstract boolean backwardPass(E dynamicsState, int startIndex, int endIndex, RecyclingArrayList<DenseMatrix64F> stateTrajectory,
-                                        RecyclingArrayList<DenseMatrix64F> controlTrajectory);
+   public abstract boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationTrajectory trajectory);
 }

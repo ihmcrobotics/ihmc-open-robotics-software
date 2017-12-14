@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.BasicCoPPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.DiscreteOptimizationTrajectory;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDDPCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.SimpleLIPMDDPCalculator;
 import us.ihmc.commons.thread.ThreadTools;
@@ -308,15 +309,14 @@ public class LIPMDDPCalculatorVisualizer
    private final FramePoint3D tempPoint = new FramePoint3D();
    private void plotCoMPlan()
    {
-      RecyclingArrayList<DenseMatrix64F> controlVector = ddp.getControlVector();
-      RecyclingArrayList<DenseMatrix64F> stateVector = ddp.getStateVector();
+      DiscreteOptimizationTrajectory trajectory = ddp.getOptimalTrajectory();
 
       comTrack.reset();
 
-      for (int i = 0; i < controlVector.size(); i++)
+      for (int i = 0; i < trajectory.size(); i++)
       {
-         DenseMatrix64F control = controlVector.get(i);
-         DenseMatrix64F state = stateVector.get(i);
+         DenseMatrix64F control = trajectory.getControl(i);
+         DenseMatrix64F state = trajectory.getState(i);
 
          tempPoint.set(control.get(0), control.get(1), 0.0);
          modifiedCopTrack.setBallLoop(tempPoint);

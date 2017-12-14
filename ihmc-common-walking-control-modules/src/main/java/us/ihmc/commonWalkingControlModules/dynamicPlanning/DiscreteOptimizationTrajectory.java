@@ -17,10 +17,16 @@ public class DiscreteOptimizationTrajectory
       this.controlTrajectory = new DiscreteTrajectory(controlSize);
    }
 
-   public void setTrajectorySize(double startTime, double endTime, double deltaT)
+   public void set(DiscreteOptimizationTrajectory other)
    {
-      stateTrajectory.setTrajectorySize(startTime, endTime, deltaT);
-      controlTrajectory.setTrajectorySize(startTime, endTime, deltaT);
+      this.stateTrajectory.set(other.stateTrajectory);
+      this.controlTrajectory.set(other.controlTrajectory);
+   }
+
+   public void setTrajectoryDuration(double startTime, double endTime, double deltaT)
+   {
+      stateTrajectory.setTrajectoryDuration(startTime, endTime, deltaT);
+      controlTrajectory.setTrajectoryDuration(startTime, endTime, deltaT);
    }
 
    public void compute(double time, DenseMatrix64F stateMatrixToPack, DenseMatrix64F controlMatrixToPack)
@@ -47,5 +53,50 @@ public class DiscreteOptimizationTrajectory
    public DiscreteTrajectory getStateTrajectory()
    {
       return stateTrajectory;
+   }
+
+   public DenseMatrix64F getState(int index)
+   {
+      return stateTrajectory.get(index);
+   }
+
+   public DenseMatrix64F getControl(int index)
+   {
+      return controlTrajectory.get(index);
+   }
+
+   public void setState(int index, DenseMatrix64F state)
+   {
+      stateTrajectory.get(index).set(state);
+   }
+
+   public void setControl(int index, DenseMatrix64F control)
+   {
+      controlTrajectory.get(index).set(control);
+   }
+
+   public int size()
+   {
+      return controlTrajectory.size();
+   }
+
+   public double getStartTime()
+   {
+      return controlTrajectory.getStartTime();
+   }
+
+   public double getEndTime()
+   {
+      return controlTrajectory.getEndTime();
+   }
+
+   public double getDeltaT()
+   {
+      return controlTrajectory.getDeltaT();
+   }
+
+   public void setZeroTrajectory(DiscreteOptimizationTrajectory other)
+   {
+      setTrajectoryDuration(other.getStartTime(), other.getEndTime(), other.getDeltaT());
    }
 }

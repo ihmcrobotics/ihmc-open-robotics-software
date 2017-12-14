@@ -27,36 +27,45 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
    }
 
    @Override
-   public double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, RecyclingArrayList<DenseMatrix64F> updatedStateTrajectory,
-                      RecyclingArrayList<DenseMatrix64F> updatedControlTrajectory)
+   public double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationTrajectory updatedTrajectory)
    {
-      updatedStateTrajectory.get(startIndex).set(initialCoM);
+      updatedTrajectory.setState(startIndex, initialCoM);
 
       double cost = 0.0;
 
       for (int t = startIndex; t <= endIndex; t++)
       {
-         DenseMatrix64F updatedControl = updatedControlTrajectory.get(t);
-         DenseMatrix64F updatedState = updatedStateTrajectory.get(t);
-         DenseMatrix64F currentState = this.stateTrajectory.get(t);
+         DenseMatrix64F desiredControl = desiredTrajectory.getControl(t);
+         DenseMatrix64F desiredState = desiredTrajectory.getState(t);
+         DenseMatrix64F updatedControl = updatedTrajectory.getControl(t);
+         DenseMatrix64F updatedState = updatedTrajectory.getState(t);
 
-         computeUpdatedControl(currentState, updatedState, feedBackGainTrajectory.get(t), feedForwardTrajectory.get(t), controlTrajectory.get(t), updatedControl);
+         DenseMatrix64F currentState = optimalTrajectory.getState(t);
+         DenseMatrix64F currentControl = optimalTrajectory.getControl(t);
+
+         computeUpdatedControl(currentState, updatedState, feedBackGainTrajectory.get(t), feedForwardTrajectory.get(t),
+                               currentControl, updatedControl);
 
          // compute cost
-         cost += costFunction.getCost(updatedControl, updatedState, desiredControlTrajectory.get(t), desiredStateTrajectory.get(t));
+         cost += costFunction.getCost(updatedControl, updatedState, desiredControl, desiredState);
 
          // integrate
-         if (t < desiredStateTrajectory.size() - 1)
-            dynamics.getNextState(dynamicsState, updatedState, updatedControl, updatedStateTrajectory.get(t + 1));
+         if (t < desiredTrajectory.size() - 1)
+            dynamics.getNextState(dynamicsState, updatedState, updatedControl, updatedTrajectory.getState(t + 1));
       }
 
       return cost;
    }
 
    @Override
-   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex, RecyclingArrayList<DenseMatrix64F> stateTrajectory, RecyclingArrayList<DenseMatrix64F> controlTrajectory)
+   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationTrajectory trajectoryToPack)
    {
       boolean success = true;
+
+      DiscreteTrajectory stateTrajectory = trajectoryToPack.getStateTrajectory();
+      DiscreteTrajectory controlTrajectory = trajectoryToPack.getControlTrajectory();
+      DiscreteTrajectory desiredStateTrajectory = desiredTrajectory.getStateTrajectory();
+      DiscreteTrajectory desiredControlTrajectory = desiredTrajectory.getControlTrajectory();
 
       terminalCostFunction.getCostStateHessian(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), valueStateHessianTrajectory.get(endIndex));
       terminalCostFunction.getCostStateGradient(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), desiredControlTrajectory.get(endIndex),

@@ -19,15 +19,13 @@ public class LIPMDDPCalculator
    private double deltaT;
    private double modifiedDeltaT;
 
-   private final RecyclingArrayList<DenseMatrix64F> desiredStateVector;
-   private final RecyclingArrayList<DenseMatrix64F> desiredControlVector;
+   private final DiscreteOptimizationTrajectory desiredTrajectory;
+   private final DiscreteOptimizationTrajectory optimalTrajectory;
 
    private int numberOfTimeSteps;
 
-   //private final DDPSolver<LIPMState> ddpSolver;
-   //private final LQRSolverInterface<LIPMState> lqrSolver;
-
-   private final LIPMSolver lipmSolver = new LIPMSolver(true);
+   private final SimpleDDPSolver<LIPMState> ddpSolver;
+   private final LQRSolverInterface<LIPMState> lqrSolver;
 
    private double mass;
    private double gravityZ;
@@ -41,20 +39,14 @@ public class LIPMDDPCalculator
 
       LQCostFunction costFunction = new LIPMSimpleCostFunction();
       LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
-      //ddpSolver = new DDPSolver<>(dynamics, costFunction, terminalCostFunction, true);
-      //lqrSolver = new DiscreteTimeVaryingTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
+      ddpSolver = new SimpleDDPSolver<>(dynamics, costFunction, terminalCostFunction, true);
+      lqrSolver = new DiscreteTimeVaryingTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
 
-      VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize, 1);
-      VariableVectorBuilder stateBuilder = new VariableVectorBuilder(stateSize, 1);
-
-      desiredStateVector = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
-      desiredControlVector = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
-
-      desiredStateVector.clear();
-      desiredControlVector.clear();
+      desiredTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      optimalTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
    }
 
    public void setDeltaT(double deltaT)
@@ -71,16 +63,15 @@ public class LIPMDDPCalculator
    {
       modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
       dynamics.setTimeStepSize(modifiedDeltaT);
-
-      desiredControlVector.clear();
-      desiredStateVector.clear();
+      desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
+      optimalTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
 
       double height = currentState.get(2);
 
       double time = 0.0;
 
       copDesiredPlan.update(time, tempPoint, tempVector);
-      DenseMatrix64F desiredState = desiredStateVector.add();
+      DenseMatrix64F desiredState = desiredTrajectory.getState(0);
 
       desiredState.set(0, tempPoint.getX());
       desiredState.set(1, tempPoint.getY());
@@ -89,7 +80,7 @@ public class LIPMDDPCalculator
       desiredState.set(4, tempVector.getY());
       desiredState.set(5, tempVector.getZ());
 
-      DenseMatrix64F desiredControl = desiredControlVector.add();
+      DenseMatrix64F desiredControl = desiredTrajectory.getControl(0);
       desiredControl.set(0, tempPoint.getX());
       desiredControl.set(1, tempPoint.getY());
       desiredControl.set(2, mass * gravityZ);
@@ -99,7 +90,7 @@ public class LIPMDDPCalculator
       for (int i = 1; i < numberOfTimeSteps; i++)
       {
          copDesiredPlan.update(time, tempPoint, tempVector);
-         desiredState = desiredStateVector.add();
+         desiredState = desiredTrajectory.getState(i);
 
          desiredState.set(0, tempPoint.getX());
          desiredState.set(1, tempPoint.getY());
@@ -108,7 +99,7 @@ public class LIPMDDPCalculator
          desiredState.set(4, tempVector.getY());
          desiredState.set(5, tempVector.getZ());
 
-         desiredControl = desiredControlVector.add();
+         desiredControl = desiredTrajectory.getControl(i);
          desiredControl.set(0, tempPoint.getX());
          desiredControl.set(1, tempPoint.getY());
          desiredControl.set(2, mass * gravityZ);
@@ -116,14 +107,20 @@ public class LIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      int size = desiredStateVector.size() - 1;
+      lqrSolver.setDesiredTrajectories(desiredTrajectory.getStateTrajectory(), desiredTrajectory.getControlTrajectory(), currentState);
+      lqrSolver.solveRiccatiEquation(LIPMState.NORMAL, 0, desiredTrajectory.size() - 1);
+      lqrSolver.computeOptimalTrajectories(LIPMState.NORMAL, 0, desiredTrajectory.size() - 1);
+      lqrSolver.getOptimalTrajectories(optimalTrajectory.getStateTrajectory(), optimalTrajectory.getControlTrajectory());
 
-      lipmSolver.initializeTrajectory(desiredControlVector, desiredStateVector, currentState);
+      ddpSolver.initializeFromLQRSolution(LIPMState.NORMAL, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainTrajectory(),
+                                          lqrSolver.getOptimalFeedForwardControlTrajectory());
    }
 
    public int solve()
    {
-      return lipmSolver.computeTrajectory();
+      int iterations = ddpSolver.computeTrajectory(LIPMState.NORMAL);
+      optimalTrajectory.set(ddpSolver.getOptimalTrajectory());
+      return iterations;
    }
 
    private double computeDeltaT(double trajectoryLength)
@@ -137,14 +134,9 @@ public class LIPMDDPCalculator
       return modifiedDeltaT;
    }
 
-   public RecyclingArrayList<DenseMatrix64F> getControlVector()
+   public DiscreteOptimizationTrajectory getOptimalTrajectory()
    {
-      return lipmSolver.getControlTrajectory();
-   }
-
-   public RecyclingArrayList<DenseMatrix64F> getStateVector()
-   {
-      return lipmSolver.getStateTrajectory();
+      return optimalTrajectory;
    }
 
    public double getValue()
