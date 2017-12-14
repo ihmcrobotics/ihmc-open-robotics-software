@@ -1,4 +1,8 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
@@ -14,14 +18,10 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PlanarRegionViewer
 {
@@ -36,11 +36,11 @@ public class PlanarRegionViewer
 
    private final AnimationTimer renderMeshAnimation;
 
-   public PlanarRegionViewer(REAMessager messager)
+   public PlanarRegionViewer(REAMessager messager, APIFactory.Topic planarRegionDataTopic, APIFactory.Topic showPlanarRegionsTopic)
    {
       colorPalette.setHueBrightnessBased(0.9);
-      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.PlanarRegionDataTopic, this::buildMeshAndMaterialOnThread);
-      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.ShowPlanarRegionsTopic, this::handleShowThreadSafe);
+      messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
+      messager.registerTopicListener(showPlanarRegionsTopic, this::handleShowThreadSafe);
 
       renderMeshAnimation = new AnimationTimer()
       {

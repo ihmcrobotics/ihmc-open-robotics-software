@@ -7,11 +7,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.SimpleUIMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.VizGraphsPlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.PlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 
 import java.io.IOException;
-import java.net.URL;
+
+import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
 public class FootstepPlannerUI
 {
@@ -20,6 +23,8 @@ public class FootstepPlannerUI
    private final BorderPane mainPane;
 
    private final PlanarRegionViewer planarRegionViewer;
+   private final StartGoalPositionEditor startGoalEditor;
+   private final StartGoalPositionViewer startGoalViewer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -51,9 +56,17 @@ public class FootstepPlannerUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
 
-      planarRegionViewer = new PlanarRegionViewer(messager);
+      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       planarRegionViewer.start();
+
+      startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabledTopic, GoalEditModeEnabledTopic, StartPositionTopic, GoalPositionTopic);
+      view3dFactory.addNodeToView(startGoalViewer.getRoot());
+      startGoalViewer.start();
+
+      startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartEditModeEnabledTopic, GoalEditModeEnabledTopic, StartPositionTopic,
+                                                    GoalPositionTopic);
+      startGoalEditor.start();
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
