@@ -1,6 +1,8 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
@@ -11,32 +13,48 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class NavigableRegionsInterConnectionViewer extends AnimationTimer
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
+
+   private final boolean isExecutorServiceProvided;
+   private final ExecutorService executorService;
 
    private final MeshView connectionsMeshView = new MeshView();
 
    private final AtomicReference<Mesh> connectionsMeshToRender = new AtomicReference<>(null);
    private Mesh connectionsMeshRendered = null;
    private final AtomicReference<Boolean> resetRequested;
-   private NavigableRegionsManager navigableRegionsManager;
+   private final AtomicReference<Boolean> show;
 
-   public NavigableRegionsInterConnectionViewer(REAMessager messager, NavigableRegionsManager navigableRegionsManager)
+   public NavigableRegionsInterConnectionViewer(REAMessager messager)
    {
-      this.navigableRegionsManager = navigableRegionsManager;
+      this(messager, null);
+   }
+
+   public NavigableRegionsInterConnectionViewer(REAMessager messager, ExecutorService executorService)
+   {
+      isExecutorServiceProvided = executorService == null;
+
+      if (isExecutorServiceProvided)
+         this.executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+      else
+         this.executorService = executorService;
+
       connectionsMeshView.setMouseTransparent(true);
       connectionsMeshView.setMaterial(new PhongMaterial(Color.CRIMSON));
 
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
+      show = messager.createInput(UIVisibilityGraphsTopics.ShowLocalGraphs, false);
       messager.registerTopicListener(UIVisibilityGraphsTopics.ShowInterConnections, this::handleShowThreadSafe);
+      messager.registerTopicListener(UIVisibilityGraphsTopics.InterRegionConnectionData, this::processInterConnectionsOnThread);
    }
 
    private void handleShowThreadSafe(boolean show)
@@ -52,21 +70,21 @@ public class NavigableRegionsInterConnectionViewer extends AnimationTimer
       if (!show)
          connectionsMeshView.setMesh(null);
       else
-      {
-         processInterConnections(navigableRegionsManager);
-
          connectionsMeshView.setMesh(connectionsMeshRendered);
-      }
    }
 
-   public void processInterConnections(NavigableRegionsManager navigableRegionsManager)
+   private void processInterConnectionsOnThread(List<Connection> interConnections)
+   {
+      executorService.execute(() -> processInterConnections(interConnections));
+   }
+
+   private void processInterConnections(List<Connection> interConnections)
    {
       if (VERBOSE)
          PrintTools.info(this, "Building mesh for inter-connections.");
       JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
 
-      List<Connection> connections = navigableRegionsManager.getConnectionPoints();
-      for (Connection connection : connections)
+      for (Connection connection : interConnections)
          meshBuilder.addLine(connection.getSourcePoint(), connection.getTargetPoint(), VisualizationParameters.INTER_REGION_CONNECTIVITY_LINE_THICKNESS);
       connectionsMeshToRender.set(meshBuilder.generateMesh());
    }
@@ -88,8 +106,18 @@ public class NavigableRegionsInterConnectionViewer extends AnimationTimer
          if (VERBOSE)
             PrintTools.info(this, "Rendering inter-connection lines.");
          connectionsMeshRendered = newMesh;
-         connectionsMeshView.setMesh(newMesh);
+         if (show.get())
+            connectionsMeshView.setMesh(newMesh);
       }
+   }
+
+   @Override
+   public void stop()
+   {
+      super.stop();
+
+      if (!isExecutorServiceProvided)
+         executorService.shutdownNow();
    }
 
    public Node getRoot()
