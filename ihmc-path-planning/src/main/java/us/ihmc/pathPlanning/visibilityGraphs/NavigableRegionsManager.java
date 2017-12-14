@@ -91,7 +91,7 @@ public class NavigableRegionsManager
 
    }
 
-   public List<Point3DReadOnly> calculateBodyPath(Point3D start, Point3D goal)
+   public List<Point3DReadOnly> calculateBodyPath(Point3DReadOnly start, Point3DReadOnly goal)
    {
       connectionPoints.clear();
       globalMapPoints.clear();
@@ -410,7 +410,7 @@ public class NavigableRegionsManager
       return mapForSingleObserver;
    }
 
-   private Point3DReadOnly getSnappedPointFromVisibilityGraph(Point3D position)
+   private Point3DReadOnly getSnappedPointFromVisibilityGraph(Point3DReadOnly position)
    {
       for (DefaultWeightedEdge edge : globalVisMap.edgeSet())
       {
