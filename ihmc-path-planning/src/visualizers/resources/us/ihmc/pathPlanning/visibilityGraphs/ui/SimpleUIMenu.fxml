@@ -4,7 +4,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 
-<MenuBar xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.pathPlanning.visibilityGraphs.ui.SimpleUIMenuController">
+<MenuBar xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.SimpleUIMenuController">
   <menus>
     <Menu mnemonicParsing="false" text="File">
       <items>

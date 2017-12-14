@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,6 +14,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class NavigableRegionsInterConnectionViewer extends AnimationTimer

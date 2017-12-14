@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class VisibilityGraphStartGoalEditor extends AnimationTimer

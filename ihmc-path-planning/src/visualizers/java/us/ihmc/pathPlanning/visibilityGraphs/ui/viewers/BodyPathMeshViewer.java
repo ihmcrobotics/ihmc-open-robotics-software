@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -11,9 +11,10 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class BodyPathMeshViewer extends AnimationTimer
