@@ -33,6 +33,8 @@ public class NavigableRegionsManager
    private final static boolean debug = true;
    private final static boolean CONNECT_GOAL_TO_CLOSEST_REGION = false;
 
+   private final static int START_GOAL_ID = 0;
+
    private List<PlanarRegion> regions;
    private List<PlanarRegion> accesibleRegions = new ArrayList<>();
    private List<PlanarRegion> obstacleRegions = new ArrayList<>();
@@ -129,17 +131,17 @@ public class NavigableRegionsManager
       long endCreationTime = System.currentTimeMillis();
 
       long startForcingPoints = System.currentTimeMillis();
-      start = forceConnectionOrSnapPoint(start);
+      start = forceConnectionOrSnapPoint(start, START_GOAL_ID);
 
       if (start == null)
       {
          throw new RuntimeException("Visibility graph unable to snap the start point to the closest point in the graph");
       }
 
-      goal = forceConnectionOrSnapPoint(goal);
+      goal = forceConnectionOrSnapPoint(goal, START_GOAL_ID);
 
       if (CONNECT_GOAL_TO_CLOSEST_REGION)
-         connectToClosestRegions(goal);
+         connectToClosestRegions(goal, START_GOAL_ID);
 
       if (goal == null)
       {
@@ -288,15 +290,15 @@ public class NavigableRegionsManager
          }
       }
 
-      VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion, true);
-      VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion, true);
+      VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion.getRegionId(), startRegion, true);
+      VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion.getRegionId(), goalRegion, true);
 
       if (startRegion == goalRegion)
       {
          boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(startRegion.getAllClusters(), startInRegionFrame, goalInRegionFrame);
          if (targetIsVisible)
          {
-            globalMapPoints.add(new Connection(start, goal));
+            globalMapPoints.add(new Connection(start, startRegion.getRegionId(), goal, goalRegion.getRegionId()));
          }
       }
 
@@ -310,7 +312,7 @@ public class NavigableRegionsManager
 
    private List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(globalVisMap, new ConnectionPoint3D(start), new ConnectionPoint3D(goal));
+      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(globalVisMap, new ConnectionPoint3D(start, START_GOAL_ID), new ConnectionPoint3D(goal, START_GOAL_ID));
       return convertVisibilityGraphSolutionToPath(solution, start);
    }
 
@@ -353,7 +355,7 @@ public class NavigableRegionsManager
       return path;
    }
 
-   private Point3D forceConnectionOrSnapPoint(Point3DReadOnly pointToCheck)
+   private Point3D forceConnectionOrSnapPoint(Point3DReadOnly pointToCheck, int pointToCheckId)
    {
       if (PlanarRegionTools.isPointInsideAnyRegion(accesibleRegions, pointToCheck))
       {
@@ -363,7 +365,7 @@ public class NavigableRegionsManager
             {
                PrintTools.info("Point " + pointToCheck + " is in a NO-GO zone. Snapping the point to the closest navigable point.");
             }
-            pointToCheck = snapDesiredPointToClosestPoint(pointToCheck);
+            pointToCheck = snapDesiredPointToClosestPoint(pointToCheck, pointToCheckId);
          }
       }
       else
@@ -372,7 +374,7 @@ public class NavigableRegionsManager
          {
             PrintTools.info("Point " + pointToCheck + " is outside a planar region. Forcing connections to the closest navigable regions");
          }
-         forceConnectionToPoint(pointToCheck);
+         forceConnectionToPoint(pointToCheck, pointToCheckId);
       }
       return new Point3D(pointToCheck);
    }
@@ -397,9 +399,9 @@ public class NavigableRegionsManager
       }
    }
 
-   private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion, boolean ensureConnection)
+   private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, int pointRegionId, NavigableRegion navigableRegion, boolean ensureConnection)
    {
-      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getAllClusters(), ensureConnection);
+      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, pointRegionId, navigableRegion.getAllClusters(), navigableRegion.getRegionId(), ensureConnection);
 
       RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
 
@@ -455,7 +457,7 @@ public class NavigableRegionsManager
       }
    }
 
-   private Point3D snapDesiredPointToClosestPoint(Point3DReadOnly desiredPointToSnap)
+   private Point3D snapDesiredPointToClosestPoint(Point3DReadOnly desiredPointToSnap, int pointId)
    {
       if (debug)
       {
@@ -475,26 +477,27 @@ public class NavigableRegionsManager
 
       distancePoints.sort(new DistancePointComparator());
 
-      ArrayList<Point3DReadOnly> filteredList = new ArrayList<>();
+      ArrayList<ConnectionPoint3D> filteredList = new ArrayList<>();
 
       for (DistancePoint point : distancePoints)
       {
          filteredList.add(point.point);
       }
 
-      Iterator<Point3DReadOnly> it = filteredList.iterator();
+      Iterator<ConnectionPoint3D> it = filteredList.iterator();
 
-      Point3DReadOnly pointToSnapTo = null;
+      ConnectionPoint3D pointToSnapTo = null;
+
       while (it.hasNext())
       {
-         Point3DReadOnly source = it.next();
-         Point3DReadOnly target = it.next();
+         ConnectionPoint3D source = it.next();
+         ConnectionPoint3D target = it.next();
 
          //Cannot add an edge where the source is equal to the target!
          if (!source.epsilonEquals(desiredPointToSnap, 1e-5))
          {
             pointToSnapTo = target;
-            connectionPoints.add(new Connection(pointToSnapTo, desiredPointToSnap));
+            connectionPoints.add(new Connection(pointToSnapTo, pointToSnapTo.getRegionId(), desiredPointToSnap, pointId));
             break;
          }
       }
@@ -502,7 +505,7 @@ public class NavigableRegionsManager
       return new Point3D(pointToSnapTo);
    }
 
-   private void forceConnectionToPoint(Point3DReadOnly position)
+   private void forceConnectionToPoint(Point3DReadOnly position, int positionId)
    {
       if (debug)
       {
@@ -522,31 +525,31 @@ public class NavigableRegionsManager
 
       distancePoints.sort(new DistancePointComparator());
 
-      ArrayList<Point3DReadOnly> listOfOrderedPoints = new ArrayList<>();
+      ArrayList<ConnectionPoint3D> listOfOrderedPoints = new ArrayList<>();
 
       for (DistancePoint point : distancePoints)
       {
          listOfOrderedPoints.add(point.point);
       }
 
-      Iterator<Point3DReadOnly> it = listOfOrderedPoints.iterator();
+      Iterator<ConnectionPoint3D> it = listOfOrderedPoints.iterator();
 
       int index = 0;
       while (it.hasNext() && index < parameters.getNumberOfForcedConnections())
       {
-         Point3DReadOnly closestPoint = it.next();
+         ConnectionPoint3D closestPoint = it.next();
 
          //Cannot add an edge where the source is equal to the target!
          if (!closestPoint.epsilonEquals(position, 1e-5))
          {
-            globalMapPoints.add(new Connection(closestPoint, position));
-            connectionPoints.add(new Connection(closestPoint, position));
+            globalMapPoints.add(new Connection(closestPoint, closestPoint.getRegionId(), position, positionId));
+            connectionPoints.add(new Connection(closestPoint, closestPoint.getRegionId(), position, positionId));
             index++;
          }
       }
    }
 
-   private void connectToClosestRegions(Point3DReadOnly position)
+   private void connectToClosestRegions(Point3DReadOnly position, int positionId)
    {
       ArrayList<PlanarRegionDistance> planarRegionsDistance = new ArrayList<>();
 
@@ -584,7 +587,7 @@ public class NavigableRegionsManager
          Point3D pointInWorld = new Point3D(closestRegion.getConcaveHull()[i]);
          pointInWorld.applyTransform(transformToWorld);
 
-         connectionPoints.add(new Connection(position, pointInWorld));
+         connectionPoints.add(new Connection(position, positionId, pointInWorld, closestRegion.getRegionId()));
       }
 
       if (debug)
@@ -602,20 +605,24 @@ public class NavigableRegionsManager
       {
          for (VisibilityMap sourceMap : visMaps)
          {
-            Set<Point3DReadOnly> sourcePoints = sourceMap.getVertices();
+            Set<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
 
-            for (Point3DReadOnly sourcePt : sourcePoints)
+            for (ConnectionPoint3D sourcePt : sourcePoints)
             {
                for (VisibilityMap targetMap : visMaps)
                {
                   if (sourceMap != targetMap)
                   {
-                     Set<Point3DReadOnly> targetPoints = targetMap.getVertices();
+                     Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
 
-                     for (Point3DReadOnly targetPt : targetPoints)
+                     for (ConnectionPoint3D targetPt : targetPoints)
                      {
+                        if (sourcePt.getRegionId() == targetPt.getRegionId())
+                           continue;
+
                         boolean distanceOk = sourcePt.distance(targetPt) < parameters.getMinimumConnectionDistanceForRegions();
                         boolean heightOk = Math.abs(sourcePt.getZ() - targetPt.getZ()) < parameters.getTooHighToStepDistance();
+
                         if (distanceOk && heightOk)
                         {
                            connectionPoints.add(new Connection(sourcePt, targetPt));
@@ -690,7 +697,7 @@ public class NavigableRegionsManager
          PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal(), parameters.getClusterResolution());
       }
 
-      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters);
+      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters, navigableRegionLocalPlanner.getRegionId());
 
       connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
       connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, clusters);
@@ -789,10 +796,10 @@ public class NavigableRegionsManager
 
    private class DistancePoint implements Comparable<DistancePoint>
    {
-      Point3DReadOnly point;
+      ConnectionPoint3D point;
       double distance;
 
-      public DistancePoint(Point3DReadOnly point, double distance)
+      public DistancePoint(ConnectionPoint3D point, double distance)
       {
          this.point = point;
          this.distance = distance;

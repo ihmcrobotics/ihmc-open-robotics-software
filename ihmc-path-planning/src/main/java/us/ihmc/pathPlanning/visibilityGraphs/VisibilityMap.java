@@ -6,12 +6,11 @@ import java.util.Set;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class VisibilityMap implements Transformable
 {
    private Set<Connection> connections;
-   private Set<Point3DReadOnly> vertices;
+   private Set<ConnectionPoint3D> vertices;
 
    public VisibilityMap()
    {
@@ -53,7 +52,7 @@ public class VisibilityMap implements Transformable
       }
    }
 
-   public Set<Point3DReadOnly> getVertices()
+   public Set<ConnectionPoint3D> getVertices()
    {
       return vertices;
    }

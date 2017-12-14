@@ -18,16 +18,22 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
       this.target = new ConnectionPoint3D(other.target);
    }
 
-   public Connection(Point2DReadOnly source, Point2DReadOnly target)
+   public Connection(Point2DReadOnly source, int sourceRegionId, Point2DReadOnly target, int targetRegionId)
+   {
+      this.source = new ConnectionPoint3D(source, sourceRegionId);
+      this.target = new ConnectionPoint3D(target, targetRegionId);
+   }
+
+   public Connection(ConnectionPoint3D source, ConnectionPoint3D target)
    {
       this.source = new ConnectionPoint3D(source);
       this.target = new ConnectionPoint3D(target);
    }
 
-   public Connection(Point3DReadOnly source, Point3DReadOnly target)
+   public Connection(Point3DReadOnly source, int sourceRegionId, Point3DReadOnly target, int targetRegionId)
    {
-      this.source = new ConnectionPoint3D(source);
-      this.target = new ConnectionPoint3D(target);
+      this.source = new ConnectionPoint3D(source, sourceRegionId);
+      this.target = new ConnectionPoint3D(target, targetRegionId);
    }
 
    public ConnectionPoint3D getSourcePoint()
@@ -52,15 +58,15 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
 
    public void applyTransform(Transform transform)
    {
-      source.applyTransform(transform);
-      target.applyTransform(transform);
+      source = source.applyTransform(transform);
+      target = target.applyTransform(transform);
    }
 
    @Override
    public void applyInverseTransform(Transform transform)
    {
-      source.applyInverseTransform(transform);
-      target.applyInverseTransform(transform);
+      source = source.applyInverseTransform(transform);
+      target = target.applyInverseTransform(transform);
    }
 
    @Override

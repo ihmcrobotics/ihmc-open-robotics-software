@@ -62,7 +62,7 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly start, Point2DReadOnly goal, List<Cluster> clusters)
+   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly start, Point2DReadOnly goal, List<Cluster> clusters, int regionId)
    {
       Set<Connection> connections = new HashSet<>();
 
@@ -104,7 +104,7 @@ public class VisibilityTools
 
                if (targetIsVisible)
                {
-                  connections.add(new Connection(observer, target));
+                  connections.add(new Connection(observer, regionId, target, regionId));
                }
             }
          }
@@ -113,7 +113,7 @@ public class VisibilityTools
       return connections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, List<Cluster> clusters, boolean ensureConnection)
+   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId, boolean ensureConnection)
    {
       Set<Connection> connections = new HashSet<>();
       List<Point2D> listOfTargetPoints = new ArrayList<>();
@@ -140,7 +140,7 @@ public class VisibilityTools
 
             if (targetIsVisible)
             {
-               connections.add(new Connection(observer, target));
+               connections.add(new Connection(observer, observerRegionId, target, clustersRegionId));
             }
          }
       }
@@ -158,7 +158,7 @@ public class VisibilityTools
                minDistance = targetDistance;
             }
          }
-         connections.add(new Connection(observer, closestTarget));
+         connections.add(new Connection(observer, observerRegionId, closestTarget, clustersRegionId));
       }
 
       return connections;
