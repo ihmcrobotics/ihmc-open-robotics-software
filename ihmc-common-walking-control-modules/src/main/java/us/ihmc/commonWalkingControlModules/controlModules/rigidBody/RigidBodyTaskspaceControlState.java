@@ -488,7 +488,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             }
          }
          usingWeightFromMessage.set(messageHasValidWeights);
-         messageWeightMatrix.clearLinearWeights();
+         messageWeightMatrix.setLinearWeights(0.0, 0.0, 0.0);
          messageWeightMatrix.setAngularPart(weightMatrix);
 
          if (!setAndCheckTrackingFromSelectionMatrices())
@@ -684,7 +684,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
             }
          }
          usingWeightFromMessage.set(messageHasValidWeights);
-         messageWeightMatrix.clearAngularWeights();
+         messageWeightMatrix.setAngularWeights(0.0, 0.0, 0.0);
          messageWeightMatrix.setLinearPart(weightMatrix);
 
          if (!setAndCheckTrackingFromSelectionMatrices())
