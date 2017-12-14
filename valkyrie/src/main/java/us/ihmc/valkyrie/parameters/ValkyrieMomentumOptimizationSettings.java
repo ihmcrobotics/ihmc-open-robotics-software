@@ -84,6 +84,9 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
       taskspaceAngularWeights.add(new GroupParameter<>("Chest", chestAngularWeight, Collections.singletonList(jointMap.getChestName())));
       taskspaceAngularWeights.add(new GroupParameter<>("Head", headAngularWeight, Collections.singletonList(jointMap.getHeadName())));
 
+      taskspaceAngularWeights.add(new GroupParameter<>("Pelvis", pelvisAngularWeight, Collections.singletonList(jointMap.getPelvisName())));
+      taskspaceLinearWeights.add(new GroupParameter<>("Pelvis", pelvisLinearWeight, Collections.singletonList(jointMap.getPelvisName())));
+
       List<String> handNames = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -196,13 +199,6 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
 
    /** @inheritDoc */
    @Override
-   public Vector3D getPelvisAngularWeight()
-   {
-      return pelvisAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
    public Vector3D getDefaultLinearFootWeight()
    {
       return defaultLinearFootWeight;
@@ -283,11 +279,5 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    public List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights()
    {
       return taskspaceLinearWeights;
-   }
-
-   @Override
-   public Vector3D getPelvisLinearWeight()
-   {
-      return pelvisLinearWeight;
    }
 }
