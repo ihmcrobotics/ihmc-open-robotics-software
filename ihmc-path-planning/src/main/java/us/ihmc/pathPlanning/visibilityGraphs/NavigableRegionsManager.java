@@ -381,7 +381,6 @@ public class NavigableRegionsManager
    {
       globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-      int actualConnectionsAdded = 0;
       for (Connection pair : globalMapPoints)
       {
          ConnectionPoint3D pt1 = pair.getSourcePoint();
@@ -394,10 +393,8 @@ public class NavigableRegionsManager
             DefaultWeightedEdge edge = new DefaultWeightedEdge();
             globalVisMap.addEdge(pt1, pt2, edge);
             globalVisMap.setEdgeWeight(edge, pt1.distance(pt2));
-            actualConnectionsAdded++;
          }
       }
-      //      System.out.println("Actual connections added: " + actualConnectionsAdded);
    }
 
    private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion)
@@ -449,22 +446,17 @@ public class NavigableRegionsManager
 
    private void createGlobalMapFromAlltheLocalMaps()
    {
-      int connectionsAdded = 0;
       for (VisibilityMap map : visMaps)
       {
          for (Connection connection : map.getConnections())
          {
             globalMapPoints.add(new Connection(connection.getSourcePoint(), connection.getTargetPoint()));
-            connectionsAdded++;
          }
       }
-
-      //      System.out.println("Creating global map added " + connectionsAdded + " connections");
    }
 
    private Point3D snapDesiredPointToClosestPoint(Point3DReadOnly desiredPointToSnap)
    {
-      int connectionsAdded = 0;
       if (debug)
       {
          PrintTools.info("------>>>>  Point: " + desiredPointToSnap + " is inside a planar region and a No-Go-Zone - snapping connection");
@@ -472,7 +464,6 @@ public class NavigableRegionsManager
 
       distancePoints.clear();
 
-      int index1 = 0;
       for (Connection pair : globalMapPoints)
       {
          DistancePoint point1 = new DistancePoint(pair.getSourcePoint(), pair.getSourcePoint().distance(desiredPointToSnap));
@@ -480,10 +471,7 @@ public class NavigableRegionsManager
 
          distancePoints.add(point1);
          distancePoints.add(point2);
-         index1++;
       }
-
-      //      System.out.println("Added raw: " + index1);
 
       distancePoints.sort(new DistancePointComparator());
 
@@ -491,12 +479,8 @@ public class NavigableRegionsManager
 
       for (DistancePoint point : distancePoints)
       {
-         //         System.out.println("Adding connection "+ point.point + "  to " + position);
-
          filteredList.add(point.point);
       }
-
-      //      System.out.println("After filtering: " + filteredList.size());
 
       Iterator<Point3DReadOnly> it = filteredList.iterator();
 
@@ -510,7 +494,6 @@ public class NavigableRegionsManager
          if (!source.epsilonEquals(desiredPointToSnap, 1e-5))
          {
             pointToSnapTo = target;
-            //            System.out.println("-----> new snapped point: " + pointToSnapTo);
             connectionPoints.add(new Connection(pointToSnapTo, desiredPointToSnap));
             break;
          }
@@ -521,7 +504,6 @@ public class NavigableRegionsManager
 
    private void forceConnectionToPoint(Point3DReadOnly position)
    {
-      int connectionsAdded = 0;
       if (debug)
       {
          PrintTools.info("------>>>>  Point: " + position + " is not inside a planar region - forcing connection to closest points");
@@ -559,7 +541,6 @@ public class NavigableRegionsManager
          {
             globalMapPoints.add(new Connection(closestPoint, position));
             connectionPoints.add(new Connection(closestPoint, position));
-            connectionsAdded++;
             index++;
          }
       }
@@ -610,7 +591,6 @@ public class NavigableRegionsManager
 
    private void connectLocalMaps()
    {
-      int connectionsAdded = 0;
       if (debug)
       {
          PrintTools.info("Starting connectivity check");
@@ -638,7 +618,6 @@ public class NavigableRegionsManager
                         {
                            connectionPoints.add(new Connection(sourcePt, targetPt));
                            globalMapPoints.add(new Connection(sourcePt, targetPt));
-                           connectionsAdded++;
                         }
                      }
                   }
@@ -646,9 +625,6 @@ public class NavigableRegionsManager
             }
          }
       }
-
-      //      System.out.println("Connecting maps added " + connectionsAdded + " connections");
-
    }
 
    private void createVisibilityGraphForRegion(PlanarRegion region, Point3D startPos, Point3D goalPos)
