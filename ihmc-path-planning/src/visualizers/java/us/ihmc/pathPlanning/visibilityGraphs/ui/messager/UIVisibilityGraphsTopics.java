@@ -1,9 +1,19 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.messager;
 
+import java.util.List;
+
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.*;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Category;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.CategoryTheme;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.TopicTheme;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.TypedTopicTheme;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class UIVisibilityGraphsTopics
@@ -16,6 +26,8 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme BodyPath = apiFactory.createCategoryTheme("BodyPath");
    private static final CategoryTheme Cluster = apiFactory.createCategoryTheme("Cluster");
    private static final CategoryTheme RawPoints = apiFactory.createCategoryTheme("RawPoints");
+   private static final CategoryTheme InterConnection = apiFactory.createCategoryTheme("InterConnection");
+   private static final CategoryTheme NavigableRegion = apiFactory.createCategoryTheme("NavigableRegion");
    private static final CategoryTheme NavigableExtrusions = apiFactory.createCategoryTheme("NavigableExtrusions");
    private static final CategoryTheme NonNavigableExtrusions = apiFactory.createCategoryTheme("NonNavigableExtrusions");
    private static final CategoryTheme PlanarRegion = apiFactory.createCategoryTheme("PlanarRegion");
@@ -45,6 +57,10 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> GoalEditModeEnabled = Root.child(Goal).child(EditMode).topic(Enable);
    public static final Topic<Point3D> StartPosition = Root.child(Start).topic(Position);
    public static final Topic<Point3D> GoalPosition = Root.child(Goal).topic(Position);
+
+   public static final Topic<List<Point3DReadOnly>> BodyPathData = Root.child(VisibilityGraphs).child(BodyPath).topic(Data);
+   public static final Topic<List<NavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).child(NavigableRegion).topic(Data);
+   public static final Topic<List<Connection>> InterRegionConnectionData = Root.child(VisibilityGraphs).child(NavigableRegion).child(InterConnection).topic(Data);
 
    public static final Topic<Boolean> VisibilityGraphsComputePath = Root.child(VisibilityGraphs).topic(ComputePath);
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParameters = Root.child(VisibilityGraphs).topic(Parameters);

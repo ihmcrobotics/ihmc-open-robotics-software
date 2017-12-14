@@ -3,6 +3,8 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
@@ -13,13 +15,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
@@ -27,20 +29,34 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
 {
+   private final boolean isExecutorServiceProvided;
+   private final ExecutorService executorService;
+
    private final Group root = new Group();
    private AtomicReference<Map<Integer, MeshView>> regionVisMapToRenderReference = new AtomicReference<>(null);
    private Map<Integer, MeshView> regionVisMapRendered;
 
-   private final REAMessager messager;
    private final AtomicReference<Boolean> resetRequested;
    private final AtomicReference<Boolean> show;
 
    public NavigableRegionInnerVizMapMeshViewer(REAMessager messager)
    {
-      this.messager = messager;
+      this(messager, null);
+   }
+
+   public NavigableRegionInnerVizMapMeshViewer(REAMessager messager, ExecutorService executorService)
+   {
+      isExecutorServiceProvided = executorService == null;
+
+      if (isExecutorServiceProvided)
+         this.executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+      else
+         this.executorService = executorService;
+
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       show = messager.createInput(UIVisibilityGraphsTopics.ShowLocalGraphs, false);
       messager.registerTopicListener(UIVisibilityGraphsTopics.ShowLocalGraphs, this::handleShowThreadSafe);
+      messager.registerTopicListener(UIVisibilityGraphsTopics.NavigableRegionData, this::processNavigableRegionsOnThread);
       root.setMouseTransparent(true);
    }
 
@@ -84,7 +100,12 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
       }
    }
 
-   public void processNavigableRegions(List<NavigableRegion> navigableRegionLocalPlanners)
+   private void processNavigableRegionsOnThread(List<NavigableRegion> navigableRegionLocalPlanners)
+   {
+      executorService.execute(() -> processNavigableRegions(navigableRegionLocalPlanners));
+   }
+
+   private void processNavigableRegions(List<NavigableRegion> navigableRegionLocalPlanners)
    {
       Map<Integer, JavaFXMeshBuilder> meshBuilders = new HashMap<>();
       Map<Integer, Material> materials = new HashMap<>();
@@ -124,23 +145,6 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
       regionVisMapToRenderReference.set(regionVisMapToRender);
    }
 
-   public void processGlobalMap(NavigableRegionsManager navigableRegionsManager)
-   {
-      JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
-
-      for (Connection connection : navigableRegionsManager.getGlobalMapPoints())
-      {
-         meshBuilder.addLine(connection.getSourcePoint(), connection.getTargetPoint(), VisualizationParameters.VISBILITYMAP_LINE_THICKNESS);
-      }
-      
-      HashMap<Integer, MeshView> regionVisMapToRender = new HashMap<>();
-      MeshView meshView = new MeshView(meshBuilder.generateMesh());
-      meshView.setMaterial(new PhongMaterial(getLineColor(50)));
-      regionVisMapToRender.put(50, meshView);
-      regionVisMapToRenderReference.set(regionVisMapToRender);
-
-   }
-
    private Color getLineColor(int regionId)
    {
       return VizGraphsPlanarRegionViewer.getRegionColor(regionId).brighter();
@@ -151,6 +155,15 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
       Point3D worldPoint = new Point3D(localPoint);
       transformToWorld.transform(worldPoint);
       return worldPoint;
+   }
+
+   @Override
+   public void stop()
+   {
+      super.stop();
+
+      if (!isExecutorServiceProvided)
+         executorService.shutdownNow();
    }
 
    public Node getRoot()
