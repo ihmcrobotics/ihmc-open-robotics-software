@@ -2,10 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -28,9 +25,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest
 {
-   private Point3D start;
-   private Point3D goal;
-
    private boolean debug = true;
 
    @Before
@@ -43,7 +37,7 @@ public class VisibilityGraphsFrameworkTest
    public void testASolutionExists() throws Exception
    {
       String pathString = getClass().getClassLoader().getResource("Data").getPath();
-      if (isWindows())
+      if (VisibilityGraphsIOTools.isWindows())
          pathString = pathString.substring(1, pathString.length());
 
       Path filePath = Paths.get(pathString);
@@ -85,7 +79,10 @@ public class VisibilityGraphsFrameworkTest
             PrintTools.info("Running test for : " + fileFolder.getName());
          }
 
-         readStartGoalParameters(fileLocationForStartGoalParameters);
+         Point3D start = new Point3D();
+         Point3D goal = new Point3D();
+         VisibilityGraphsIOTools.readStartGoalParameters(fileLocationForStartGoalParameters, start, goal);
+         int expectedPathSize = VisibilityGraphsIOTools.parsePathSize(fileLocationForStartGoalParameters);
 
          List<PlanarRegion> regions = planarRegionData.getPlanarRegionsAsList();
          ArrayList<PlanarRegion> filteredRegions = new ArrayList<>();
@@ -104,120 +101,8 @@ public class VisibilityGraphsFrameworkTest
 
          assertTrue("Path is null!", path != null);
          assertTrue("Path does not contain any waypoints", path.size() > 0);
-         testPathSize(fileLocationForStartGoalParameters, path);
+         assertTrue("Path size is not equal", path.size() == expectedPathSize);
+
       }
-   }
-
-   public void testPathSize(File file, List<Point3DReadOnly> path)
-   {
-      BufferedReader br = null;
-      FileReader fr = null;
-
-      try
-      {
-         fr = new FileReader(file);
-         br = new BufferedReader(fr);
-
-         String sCurrentLine;
-
-         while ((sCurrentLine = br.readLine()) != null)
-         {
-            if (sCurrentLine.contains("<PathSize,") && sCurrentLine.contains(",PathSize>"))
-            {
-               double pathSize = Double.parseDouble(sCurrentLine.substring(10, sCurrentLine.indexOf(",PathSize>")));
-               assertTrue("Path size is not equal", path.size() == pathSize);
-            }
-         }
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-
-      } finally
-      {
-
-         try
-         {
-
-            if (br != null)
-               br.close();
-
-            if (fr != null)
-               fr.close();
-
-         }
-         catch (IOException ex)
-         {
-
-            ex.printStackTrace();
-
-         }
-      }
-   }
-
-   public ArrayList<Point3D> readStartGoalParameters(File file)
-   {
-      BufferedReader br = null;
-      FileReader fr = null;
-
-      try
-      {
-         fr = new FileReader(file);
-         br = new BufferedReader(fr);
-
-         String sCurrentLine;
-
-         while ((sCurrentLine = br.readLine()) != null)
-         {
-            if (sCurrentLine.contains("<Start,") && sCurrentLine.contains("Start>"))
-            {
-               String startAsString = sCurrentLine.substring(7, sCurrentLine.indexOf(",Start>"));
-               start = getPoint3DFromStringSet(startAsString);
-            }
-
-            if (sCurrentLine.contains("<Goal,") && sCurrentLine.contains(",Goal>"))
-            {
-               String goalAsString = sCurrentLine.substring(6, sCurrentLine.indexOf(",Goal>"));
-               goal = getPoint3DFromStringSet(goalAsString);
-            }
-         }
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-
-      } finally
-      {
-         try
-         {
-            if (br != null)
-               br.close();
-
-            if (fr != null)
-               fr.close();
-         }
-         catch (IOException ex)
-         {
-            ex.printStackTrace();
-         }
-      }
-      return null;
-   }
-
-   private Point3D getPoint3DFromStringSet(String set)
-   {
-      double x = Double.parseDouble(set.substring(0, set.indexOf(",")));
-      set = set.substring(set.indexOf(",") + 1);
-      double y = Double.parseDouble(set.substring(0, set.indexOf(",")));
-      set = set.substring(set.indexOf(",") + 1);
-      double z = Double.parseDouble(set.substring(0));
-
-      return new Point3D(x, y, z);
-   }
-
-   public static boolean isWindows()
-   {
-      String OS = System.getProperty("os.name").toLowerCase();
-      return (OS.contains("win"));
    }
 }
