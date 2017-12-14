@@ -1,12 +1,11 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,8 +27,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class VisibilityGraphsFrameworkTest extends Application
 {
    private static boolean VISUALIZE = true;
+   private boolean DEBUG = true;
 
-   private boolean debug = true;
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
    private static VisibilityGraphsTestVisualizer ui;
 
@@ -43,8 +42,8 @@ public class VisibilityGraphsFrameworkTest extends Application
    @Before
    public void setup() throws InterruptedException, IOException
    {
-      debug = debug && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+      DEBUG = (VISUALIZE || (DEBUG && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()));
 
       if (VISUALIZE)
       {
@@ -76,7 +75,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    {
       List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets();
 
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Unit test files found: " + allDatasets.size());
       }
@@ -109,13 +108,14 @@ public class VisibilityGraphsFrameworkTest extends Application
 
    private void testFile(VisibilityGraphsUnitTestDataset dataset)
    {
-      if (debug)
+      if (DEBUG)
       {
          PrintTools.info("Processing file: " + dataset.getDatasetName());
       }
 
       NavigableRegionsManager manager = new NavigableRegionsManager();
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
+
       if (VISUALIZE)
       {
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
@@ -141,21 +141,30 @@ public class VisibilityGraphsFrameworkTest extends Application
          if (path != null)
          {
             messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
-            messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, manager.getListOfLocalPlanners());
-            messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getConnectionPoints());
          }
-         else
-         {
-            PrintTools.error("Failed to compute a body path!");
-         }
+         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, manager.getListOfLocalPlanners());
+         messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getConnectionPoints());
+      }
+
+      assertTrue("Path is null!", path != null);
+      if (path != null)
+         assertTrue("Path does not contain any waypoints", path.size() > 0);
+
+      if (dataset.hasExpectedPathSize())
+         assertTrue("Path size is not equal", path.size() == dataset.getExpectedPathSize());
+
+   }
+
+   private void assertTrue(String message, boolean condition)
+   {
+      if (VISUALIZE)
+      {
+         if (!condition)
+            PrintTools.error(message);
       }
       else
       {
-         assertTrue("Path is null!", path != null);
-         assertTrue("Path does not contain any waypoints", path.size() > 0);
-         
-         if (dataset.hasExpectedPathSize())
-            assertTrue("Path size is not equal", path.size() == dataset.getExpectedPathSize());
+         Assert.assertTrue(message, condition);
       }
    }
 

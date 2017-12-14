@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.visualizer;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.*;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutorService;
@@ -48,6 +50,17 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private ToggleButton nextDatasetButton;
 
+   @FXML
+   private ToggleButton showClusterRawPointsButton;
+   @FXML
+   private ToggleButton showClusterNavigableExtrusionsButton;
+   @FXML
+   private ToggleButton showClusterNonNavigableExtrusionsButton;
+   @FXML
+   private ToggleButton showRegionInnerConnectionsButton;
+   @FXML
+   private ToggleButton showRegionInterConnectionsButton;
+
    public VisibilityGraphsTestVisualizer(Stage primaryStage, SimpleUIMessager messager) throws IOException
    {
       this.primaryStage = primaryStage;
@@ -92,12 +105,18 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(UIVisibilityGraphsTopics.NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
 
       DecimalFormat formatter = new DecimalFormat(" 0.000;-0.000");
-      messager.registerTopicListener(UIVisibilityGraphsTopics.StartPosition, start -> startTextFieldX.setText(formatter.format(start.getX())));
-      messager.registerTopicListener(UIVisibilityGraphsTopics.StartPosition, start -> startTextFieldY.setText(formatter.format(start.getY())));
-      messager.registerTopicListener(UIVisibilityGraphsTopics.StartPosition, start -> startTextFieldZ.setText(formatter.format(start.getZ())));
-      messager.registerTopicListener(UIVisibilityGraphsTopics.GoalPosition, goal -> goalTextFieldX.setText(formatter.format(goal.getX())));
-      messager.registerTopicListener(UIVisibilityGraphsTopics.GoalPosition, goal -> goalTextFieldY.setText(formatter.format(goal.getY())));
-      messager.registerTopicListener(UIVisibilityGraphsTopics.GoalPosition, goal -> goalTextFieldZ.setText(formatter.format(goal.getZ())));
+      messager.registerTopicListener(StartPosition, start -> startTextFieldX.setText(formatter.format(start.getX())));
+      messager.registerTopicListener(StartPosition, start -> startTextFieldY.setText(formatter.format(start.getY())));
+      messager.registerTopicListener(StartPosition, start -> startTextFieldZ.setText(formatter.format(start.getZ())));
+      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldX.setText(formatter.format(goal.getX())));
+      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldY.setText(formatter.format(goal.getY())));
+      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldZ.setText(formatter.format(goal.getZ())));
+
+      messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowLocalGraphs, showRegionInnerConnectionsButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowInterConnections, showRegionInterConnectionsButton.selectedProperty(), false);
    }
 
    public BooleanProperty getNextDatasetRequestedProperty()
