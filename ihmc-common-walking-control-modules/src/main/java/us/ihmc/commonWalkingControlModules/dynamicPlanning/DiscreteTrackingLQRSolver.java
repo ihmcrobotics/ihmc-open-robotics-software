@@ -10,11 +10,8 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
 {
-   private final RecyclingArrayList<DenseMatrix64F> optimalStateTrajectory;
-   private final RecyclingArrayList<DenseMatrix64F> optimalControlTrajectory;
-
-   private final RecyclingArrayList<DenseMatrix64F> desiredStateTrajectory;
-   private final RecyclingArrayList<DenseMatrix64F> desiredControlTrajectory;
+   private final DiscreteOptimizationTrajectory optimalTrajectory;
+   private final DiscreteOptimizationTrajectory desiredTrajectory;
 
    private final RecyclingArrayList<DenseMatrix64F> feedbackGainTrajectory;
    private final RecyclingArrayList<DenseMatrix64F> feedforwardTrajectory;
@@ -70,24 +67,16 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       H = new DenseMatrix64F(stateSize, stateSize);
 
       VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize, 1);
-      VariableVectorBuilder stateBuilder = new VariableVectorBuilder(stateSize, 1);
       VariableVectorBuilder gainBuilder = new VariableVectorBuilder(controlSize, stateSize);
 
-      optimalStateTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
-      optimalControlTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
-      desiredStateTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, stateBuilder);
-      desiredControlTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
+      optimalTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      desiredTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
 
-      feedbackGainTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, gainBuilder);
-      feedforwardTrajectory = new RecyclingArrayList<DenseMatrix64F>(1000, controlBuilder);
+      feedbackGainTrajectory = new RecyclingArrayList<>(1000, gainBuilder);
+      feedforwardTrajectory = new RecyclingArrayList<>(1000, controlBuilder);
 
-      s1Trajectory = new RecyclingArrayList<DenseMatrix64F>(1000, new VariableVectorBuilder(stateSize, stateSize));
-      s2Trajectory = new RecyclingArrayList<DenseMatrix64F>(1000, new VariableVectorBuilder(1, stateSize));
-
-      optimalStateTrajectory.clear();
-      optimalControlTrajectory.clear();
-      desiredStateTrajectory.clear();
-      desiredControlTrajectory.clear();
+      s1Trajectory = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
+      s2Trajectory = new RecyclingArrayList<>(1000, new VariableVectorBuilder(1, stateSize));
 
       feedbackGainTrajectory.clear();
       feedforwardTrajectory.clear();
@@ -96,13 +85,10 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       s2Trajectory.clear();
    }
 
-   public void setDesiredTrajectories(RecyclingArrayList<DenseMatrix64F> desiredStateTrajectory, RecyclingArrayList<DenseMatrix64F> desiredControlTrajectory,
-                                      DenseMatrix64F initialState)
+   public void setDesiredTrajectory(DiscreteOptimizationTrajectory desiredTrajectory, DenseMatrix64F initialState)
    {
-      this.optimalStateTrajectory.clear();
-      this.optimalControlTrajectory.clear();
-      this.desiredStateTrajectory.clear();
-      this.desiredControlTrajectory.clear();
+      this.desiredTrajectory.set(desiredTrajectory);
+      this.optimalTrajectory.setZeroTrajectory(desiredTrajectory);
 
       this.feedbackGainTrajectory.clear();
       this.feedforwardTrajectory.clear();
@@ -110,14 +96,8 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       this.s1Trajectory.clear();
       this.s2Trajectory.clear();
 
-      for (int i = 0; i < desiredStateTrajectory.size(); i++)
+      for (int i = 0; i < desiredTrajectory.size(); i++)
       {
-         this.desiredStateTrajectory.add().set(desiredStateTrajectory.get(i));
-         this.desiredControlTrajectory.add().set(desiredControlTrajectory.get(i));
-
-         optimalStateTrajectory.add();
-         optimalControlTrajectory.add();
-
          feedbackGainTrajectory.add();
          feedforwardTrajectory.add();
 
@@ -125,7 +105,7 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
          s2Trajectory.add();
       }
 
-      optimalStateTrajectory.getFirst().set(initialState);
+      optimalTrajectory.setState(0, initialState);
    }
 
    // backwards pass
@@ -136,8 +116,8 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
 
       int i = endIndex;
       // assumes a constant A and B matrix throughout the trajectory
-      DenseMatrix64F initialDesiredState = desiredStateTrajectory.get(startIndex);
-      DenseMatrix64F initialDesiredControl = desiredControlTrajectory.get(startIndex);
+      DenseMatrix64F initialDesiredState = desiredTrajectory.getState(startIndex);
+      DenseMatrix64F initialDesiredControl = desiredTrajectory.getControl(startIndex);
 
       costFunction.getCostStateHessian(initialDesiredState, initialDesiredControl, Q);
       costFunction.getCostControlHessian(initialDesiredState, initialDesiredControl, R);
@@ -163,7 +143,7 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       DenseMatrix64F initialS1 = s1Trajectory.get(i);
       DenseMatrix64F initialS2 = s2Trajectory.get(i);
       initialS1.set(Qf);
-      CommonOps.multTransA(-2.0, desiredStateTrajectory.get(i), Qf, initialS2);
+      CommonOps.multTransA(-2.0, desiredTrajectory.getState(i), Qf, initialS2);
 
       i--;
 
@@ -177,8 +157,8 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
          DenseMatrix64F nextS1Matrix = s1Trajectory.get(i + 1);
          DenseMatrix64F nextS2Matrix = s2Trajectory.get(i + 1);
 
-         DenseMatrix64F currentDesiredControl = desiredControlTrajectory.get(i);
-         DenseMatrix64F currentDesiredState = desiredStateTrajectory.get(i);
+         DenseMatrix64F currentDesiredControl = desiredTrajectory.getControl(i);
+         DenseMatrix64F currentDesiredState = desiredTrajectory.getState(i);
 
          // G = R + B^T S1 B
          G.set(R);
@@ -236,8 +216,8 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
    public void computeOptimalTrajectories(E dynamicState, int startIndex, int endIndex) // forward pass
    {
       // assumes a constant A and B matrix throughout the trajectory
-      DenseMatrix64F initialDesiredState = desiredStateTrajectory.get(startIndex);
-      DenseMatrix64F initialDesiredControl = desiredControlTrajectory.get(startIndex);
+      DenseMatrix64F initialDesiredState = desiredTrajectory.getState(startIndex);
+      DenseMatrix64F initialDesiredControl = desiredTrajectory.getControl(startIndex);
 
       dynamics.getDynamicsStateGradient(dynamicState, initialDesiredState, initialDesiredControl, A);
       dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, B);
@@ -245,10 +225,10 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       // the first index is the initial state
       for (int i = startIndex; i < endIndex; i++)
       {
-         DenseMatrix64F optimalControl = optimalControlTrajectory.get(i);
+         DenseMatrix64F optimalControl = optimalTrajectory.getControl(i);
 
-         DenseMatrix64F currentState = optimalStateTrajectory.get(i);
-         DenseMatrix64F nextState = optimalStateTrajectory.get(i + 1);
+         DenseMatrix64F currentState = optimalTrajectory.getState(i);
+         DenseMatrix64F nextState = optimalTrajectory.getState(i + 1);
 
          DenseMatrix64F feedbackGainMatrix = feedbackGainTrajectory.get(i);
          DenseMatrix64F feedforwardMatrix = feedforwardTrajectory.get(i);
@@ -272,26 +252,27 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
    }
 
    @Override
-   public void getOptimalTrajectories(RecyclingArrayList<DenseMatrix64F> optimalStateTrajectoryToPack,
-                                      RecyclingArrayList<DenseMatrix64F> optimalControlTrajectoryToPack)
+   public void getOptimalTrajectory(DiscreteOptimizationTrajectory optimalTrajectoryToPack)
    {
-      for (int i = 0; i < optimalStateTrajectory.size(); i++)
-      {
-         optimalStateTrajectoryToPack.getAndGrowIfNeeded(i).set(optimalStateTrajectory.get(i));
-         optimalControlTrajectoryToPack.getAndGrowIfNeeded(i).set(optimalControlTrajectory.get(i));
-      }
+      optimalTrajectoryToPack.set(optimalTrajectory);
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalStateTrajectory()
+   public DiscreteOptimizationTrajectory getOptimalTrajectory()
    {
-      return optimalStateTrajectory;
+      return optimalTrajectory;
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalControlTrajectory()
+   public DiscreteTrajectory getOptimalStateTrajectory()
    {
-      return optimalControlTrajectory;
+      return optimalTrajectory.getStateTrajectory();
+   }
+
+   @Override
+   public DiscreteTrajectory getOptimalControlTrajectory()
+   {
+      return optimalTrajectory.getControlTrajectory();
    }
 
    @Override

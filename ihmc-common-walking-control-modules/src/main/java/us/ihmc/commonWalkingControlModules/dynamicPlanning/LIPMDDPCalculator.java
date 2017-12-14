@@ -107,10 +107,10 @@ public class LIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      lqrSolver.setDesiredTrajectories(desiredTrajectory.getStateTrajectory(), desiredTrajectory.getControlTrajectory(), currentState);
+      lqrSolver.setDesiredTrajectory(desiredTrajectory, currentState);
       lqrSolver.solveRiccatiEquation(LIPMState.NORMAL, 0, desiredTrajectory.size() - 1);
       lqrSolver.computeOptimalTrajectories(LIPMState.NORMAL, 0, desiredTrajectory.size() - 1);
-      lqrSolver.getOptimalTrajectories(optimalTrajectory.getStateTrajectory(), optimalTrajectory.getControlTrajectory());
+      lqrSolver.getOptimalTrajectory(optimalTrajectory);
 
       ddpSolver.initializeFromLQRSolution(LIPMState.NORMAL, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainTrajectory(),
                                           lqrSolver.getOptimalFeedForwardControlTrajectory());
