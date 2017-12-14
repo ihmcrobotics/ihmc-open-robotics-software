@@ -52,6 +52,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -526,14 +527,16 @@ public class RigidBodyControlManagerTest
       jointspaceGains.put(joint2.getName(), new YoPIDGains("Joint2Gains", testRegistry));
       YoPID3DGains taskspaceOrientationGains = new SymmetricYoPIDSE3Gains("OrientationGains", testRegistry);
       YoPID3DGains taskspacePositionGains = new SymmetricYoPIDSE3Gains("PositionGains", testRegistry);
-      TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
-      jointspaceWeights.put(joint1.getName(), 1.0);
-      jointspaceWeights.put(joint2.getName(), 1.0);
+      YoDouble weight = new YoDouble("JointWeights", testRegistry);
+      weight.set(1.0);
+      Map<String, DoubleProvider> jointspaceWeights = new HashMap<>();
+      jointspaceWeights.put(joint1.getName(), weight);
+      jointspaceWeights.put(joint2.getName(), weight);
+      Map<String, DoubleProvider> userModeWeights = new HashMap<>();
+      userModeWeights.put(joint1.getName(), weight);
+      userModeWeights.put(joint2.getName(), weight);
       Vector3D taskspaceAngularWeight = new Vector3D(1.0, 1.0, 1.0);
       Vector3D taskspaceLinearWeight = new Vector3D(1.0, 1.0, 1.0);
-      TObjectDoubleHashMap<String> userModeWeights = new TObjectDoubleHashMap<>();
-      userModeWeights.put(joint1.getName(), 1.0);
-      userModeWeights.put(joint2.getName(), 1.0);
 
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);

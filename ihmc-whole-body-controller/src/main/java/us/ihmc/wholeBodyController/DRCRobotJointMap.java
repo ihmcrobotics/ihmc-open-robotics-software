@@ -96,4 +96,24 @@ public interface DRCRobotJointMap extends HumanoidJointNameMap
       }
       return legJointNames;
    }
+
+   public default List<String> getLeftAndRightJointNames(LegJointName legJointName)
+   {
+      List<String> jointNames = new ArrayList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         jointNames.add(getLegJointName(side, legJointName));
+      }
+      return jointNames;
+   }
+
+   public default List<String> getLeftAndRightJointNames(ArmJointName armJointName)
+   {
+      List<String> jointNames = new ArrayList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         jointNames.add(getArmJointName(side, armJointName));
+      }
+      return jointNames;
+   }
 }

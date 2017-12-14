@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -117,7 +117,7 @@ public class OnToesState extends AbstractFootControlState
       zeroAccelerationCommand.setWeight(weight);
    }
 
-   public void setWeights(Vector3D angular, Vector3D linear)
+   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       feedbackControlCommand.setWeightsForSolver(angular, linear);
       zeroAccelerationCommand.setWeights(angular, linear);

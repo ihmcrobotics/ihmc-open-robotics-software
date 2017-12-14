@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -405,7 +405,7 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setWeightForSolver(weight);
    }
 
-   public void setWeights(Vector3D angular, Vector3D linear)
+   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
       spatialFeedbackControlCommand.setWeightsForSolver(angular, linear);

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commons.PrintTools;
@@ -16,8 +15,8 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,8 +37,9 @@ public class RigidBodyJointControlHelper
    private final List<YoInteger> numberOfPointsInGenerator = new ArrayList<>();
    private final List<YoInteger> numberOfPoints = new ArrayList<>();
 
-   private final List<YoDouble> defaultWeights = new ArrayList<>();
-   private final List<YoDouble> currentWeights = new ArrayList<>();
+   private final YoBoolean usingWeightFromMessage;
+   private final List<DoubleProvider> defaultWeights = new ArrayList<>();
+   private final List<YoDouble> messageWeights = new ArrayList<>();
    private final List<PIDGainsReadOnly> gains = new ArrayList<>();
 
    private final YoBoolean hasWeights;
@@ -63,6 +63,7 @@ public class RigidBodyJointControlHelper
       String prefix = bodyName + "Jointspace";
       hasWeights = new YoBoolean(prefix + "HasWeights", registry);
       hasGains = new YoBoolean(prefix + "HasGains", registry);
+      usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
       {
@@ -80,37 +81,40 @@ public class RigidBodyJointControlHelper
          numberOfPointsInGenerator.add(new YoInteger(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry));
          numberOfPoints.add(new YoInteger(prefix + "_" + jointName + "_numberOfPoints", registry));
 
-         defaultWeights.add(new YoDouble(prefix + "_" + jointName + "_defaultWeight", registry));
-         currentWeights.add(new YoDouble(prefix + "_" + jointName + "_currentWeight", registry));
+         messageWeights.add(new YoDouble(prefix + "_" + jointName + "_messageWeight", registry));
       }
 
       parentRegistry.addChild(registry);
    }
 
-   public void setDefaultWeights(TObjectDoubleHashMap<String> weights)
+   public void setDefaultWeights(Map<String, DoubleProvider> weights)
    {
       hasWeights.set(true);
+      defaultWeights.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJoint joint = joints[jointIdx];
          if (weights.containsKey(joint.getName()))
          {
-            this.defaultWeights.get(jointIdx).set(weights.get(joint.getName()));
-            setWeightsToDefaults();
+            defaultWeights.add(weights.get(joint.getName()));
          }
          else
          {
+            defaultWeights.clear();
             hasWeights.set(false);
+            return;
          }
       }
+      setWeightsToDefaults();
    }
 
-   public void setDefaultWeight(double weight)
+   public void setDefaultWeight(DoubleProvider weight)
    {
       hasWeights.set(true);
+      defaultWeights.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         this.defaultWeights.get(jointIdx).set(weight);
+         this.defaultWeights.add(weight);
       }
       setWeightsToDefaults();
    }
@@ -147,10 +151,7 @@ public class RigidBodyJointControlHelper
 
    public void setWeightsToDefaults()
    {
-      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-      {
-         currentWeights.get(jointIdx).set(defaultWeights.get(jointIdx).getDoubleValue());
-      }
+      usingWeightFromMessage.set(false);
    }
 
    public boolean doAction(double timeInTrajectory)
@@ -162,6 +163,8 @@ public class RigidBodyJointControlHelper
       }
 
       boolean allDone = true;
+
+      List<? extends DoubleProvider> weights = usingWeightFromMessage.getBooleanValue() ? messageWeights : defaultWeights;
 
       feedbackControlCommand.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -187,12 +190,10 @@ public class RigidBodyJointControlHelper
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
 
-         double weight = currentWeights.get(jointIdx).getDoubleValue();
-         if (weight > Double.MIN_VALUE)
-         {
-            OneDoFJoint joint = joints[jointIdx];
-            feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gains.get(jointIdx), weight);
-         }
+         OneDoFJoint joint = joints[jointIdx];
+         PIDGainsReadOnly gain = gains.get(jointIdx);
+         double weight = weights.get(jointIdx).getValue();
+         feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gain, weight);
 
          YoInteger numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);
          YoInteger numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(jointIdx);
@@ -256,9 +257,11 @@ public class RigidBodyJointControlHelper
       if (override || isEmpty())
       {
          overrideTrajectory();
+         boolean messageHasValidWeights = true;
+
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
          {
-            SimpleTrajectoryPoint1DList trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
+            OneDoFJointTrajectoryCommand trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
             if (trajectoryPoints.getNumberOfTrajectoryPoints() > 0)
             {
                SimpleTrajectoryPoint1D trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
@@ -271,28 +274,21 @@ public class RigidBodyJointControlHelper
             {
                queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
             }
+
+            double weight = trajectoryPoints.getWeight();
+            messageWeights.get(jointIdx).set(weight);
+            if (Double.isNaN(weight) || weight <= 0.0)
+            {
+               messageHasValidWeights = false;
+            }
          }
+
+         usingWeightFromMessage.set(messageHasValidWeights);
       }
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointTrajectoryCommand trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
-
-         double weight = 0.0;
-         if (trajectoryPoints != null)
-         {
-            weight = trajectoryPoints.getWeight();
-         }
-
-         if (Double.isNaN(weight))
-         {
-            currentWeights.get(jointIdx).set(defaultWeights.get(jointIdx).getDoubleValue());
-         }
-         else
-         {
-            currentWeights.get(jointIdx).set(weight);
-         }
-
          for (int pointIdx = 0; pointIdx < trajectoryPoints.getNumberOfTrajectoryPoints(); pointIdx++)
          {
             SimpleTrajectoryPoint1D trajectoryPoint = trajectoryPoints.getTrajectoryPoint(pointIdx);
