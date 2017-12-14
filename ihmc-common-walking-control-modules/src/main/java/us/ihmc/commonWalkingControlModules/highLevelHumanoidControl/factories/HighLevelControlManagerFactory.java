@@ -131,8 +131,10 @@ public class HighLevelControlManagerFactory
       if (!hasWalkingControllerParameters(CenterOfMassHeightManager.class))
          return null;
 
+      String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
+      Vector3DReadOnly pelvisLinearWeight = taskspaceAngularWeightMap.get(pelvisName);
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
-      centerOfMassHeightManager.setPelvisTaskspaceWeights(momentumOptimizationSettings.getPelvisLinearWeight());
+      centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
       return centerOfMassHeightManager;
    }
 
@@ -239,11 +241,12 @@ public class HighLevelControlManagerFactory
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
+      Vector3DReadOnly pelvisAngularWeight = taskspaceAngularWeightMap.get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
-      Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox, registry);
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
+                                                              registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       return pelvisOrientationManager;
    }
