@@ -353,7 +353,7 @@ public class NavigableRegionsManager
       return path;
    }
 
-   private Point3D forceConnectionOrSnapPoint(Point3D pointToCheck)
+   private Point3D forceConnectionOrSnapPoint(Point3DReadOnly pointToCheck)
    {
       if (PlanarRegionTools.isPointInsideAnyRegion(accesibleRegions, pointToCheck))
       {
@@ -374,7 +374,7 @@ public class NavigableRegionsManager
          }
          forceConnectionToPoint(pointToCheck);
       }
-      return pointToCheck;
+      return new Point3D(pointToCheck);
    }
 
    private void createGlobalVisibilityGraph()
@@ -462,7 +462,7 @@ public class NavigableRegionsManager
       //      System.out.println("Creating global map added " + connectionsAdded + " connections");
    }
 
-   private Point3D snapDesiredPointToClosestPoint(Point3D desiredPointToSnap)
+   private Point3D snapDesiredPointToClosestPoint(Point3DReadOnly desiredPointToSnap)
    {
       int connectionsAdded = 0;
       if (debug)
@@ -519,7 +519,7 @@ public class NavigableRegionsManager
       return new Point3D(pointToSnapTo);
    }
 
-   private void forceConnectionToPoint(Point3D position)
+   private void forceConnectionToPoint(Point3DReadOnly position)
    {
       int connectionsAdded = 0;
       if (debug)
@@ -565,7 +565,7 @@ public class NavigableRegionsManager
       }
    }
 
-   private void connectToClosestRegions(Point3D position)
+   private void connectToClosestRegions(Point3DReadOnly position)
    {
       ArrayList<PlanarRegionDistance> planarRegsDistance = new ArrayList<>();
 
