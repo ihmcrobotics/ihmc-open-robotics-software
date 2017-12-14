@@ -548,45 +548,47 @@ public class NavigableRegionsManager
 
    private void connectToClosestRegions(Point3DReadOnly position)
    {
-      ArrayList<PlanarRegionDistance> planarRegsDistance = new ArrayList<>();
+      ArrayList<PlanarRegionDistance> planarRegionsDistance = new ArrayList<>();
 
       for (NavigableRegion planner : listOfLocalPlanners)
       {
-         double minDist = Double.MAX_VALUE;
-         for (int i = 0; i < planner.getHomeRegion().getConcaveHull().length; i++)
-         {
-            Point2D point2D = (Point2D) planner.getHomeRegion().getConcaveHull()[i];
-            Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-            FramePoint3D pointInWorld = new FramePoint3D();
-            pointInWorld.set(point3D);
-            RigidBodyTransform transToWorld = new RigidBodyTransform();
-            planner.getHomeRegion().getTransformToWorld(transToWorld);
-            pointInWorld.applyTransform(transToWorld);
+         double minDistance = Double.MAX_VALUE;
+         PlanarRegion homeRegion = planner.getHomeRegion();
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         homeRegion.getTransformToWorld(transformToWorld);
 
-            if (position.distance(pointInWorld) < minDist)
+         for (int i = 0; i < homeRegion.getConcaveHull().length; i++)
+         {
+            Point3D pointInWorld = new Point3D(homeRegion.getConcaveHull()[i]);
+            pointInWorld.applyTransform(transformToWorld);
+
+            double currentDistance = position.distanceSquared(pointInWorld);
+
+            if (currentDistance < minDistance)
             {
-               minDist = position.distance(pointInWorld);
+               minDistance = currentDistance;
             }
          }
-         planarRegsDistance.add(new PlanarRegionDistance(planner.getHomeRegion(), minDist));
+
+         planarRegionsDistance.add(new PlanarRegionDistance(homeRegion, minDistance));
       }
 
-      planarRegsDistance.sort(new PlanarRegionDistanceComparator());
+      planarRegionsDistance.sort(new PlanarRegionDistanceComparator());
 
-      for (int i = 0; i < planarRegsDistance.get(0).getRegion().getConcaveHull().length; i++)
+      PlanarRegion closestRegion = planarRegionsDistance.get(0).getRegion();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      closestRegion.getTransformToWorld(transformToWorld);
+
+      for (int i = 0; i < closestRegion.getConcaveHull().length; i++)
       {
-         Point2D point2D = (Point2D) planarRegsDistance.get(0).getRegion().getConcaveHull()[i];
-         Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-         FramePoint3D pointInWorld = new FramePoint3D();
-         pointInWorld.set(point3D);
-         RigidBodyTransform transToWorld = new RigidBodyTransform();
-         planarRegsDistance.get(0).getRegion().getTransformToWorld(transToWorld);
-         pointInWorld.applyTransform(transToWorld);
+         Point3D pointInWorld = new Point3D(closestRegion.getConcaveHull()[i]);
+         pointInWorld.applyTransform(transformToWorld);
 
-         connectionPoints.add(new Connection(position, pointInWorld.getPoint()));
+         connectionPoints.add(new Connection(position, pointInWorld));
       }
 
-      System.out.println("Sorted: " + planarRegsDistance.size() + " planar regions");
+      if (debug)
+         System.out.println("Sorted: " + planarRegionsDistance.size() + " planar regions");
    }
 
    private void connectLocalMaps()
