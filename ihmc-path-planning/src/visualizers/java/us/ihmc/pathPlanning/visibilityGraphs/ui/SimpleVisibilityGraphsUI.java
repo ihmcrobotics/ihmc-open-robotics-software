@@ -1,7 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui;
 
-import java.io.IOException;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -9,26 +7,23 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsDataExporterAnchorPaneController;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.SimpleUIMenuController;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.StartGoalAnchorPaneController;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsAnchorPaneController;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsParametersAnchorPaneController;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.*;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityGraphStartGoalViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityGraphsRenderer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VizGraphsPlanarRegionViewer;
+
+import java.io.IOException;
+
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.*;
 
 public class SimpleVisibilityGraphsUI
 {
-   private final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
+   private final SimpleUIMessager messager = new SimpleUIMessager(API);
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
-   private final VizGraphsPlanarRegionViewer planarRegionViewer;
-   private final VisibilityGraphStartGoalEditor startGoalEditor;
-   private final VisibilityGraphStartGoalViewer startGoalViewer;
+   private final PlanarRegionViewer planarRegionViewer;
+   private final StartGoalPositionEditor startGoalEditor;
+   private final StartGoalPositionViewer startGoalViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final VisibilityGraphsDataExporter dataExporter;
 
@@ -74,12 +69,13 @@ public class SimpleVisibilityGraphsUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
 
-      planarRegionViewer = new VizGraphsPlanarRegionViewer(messager);
+      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       planarRegionViewer.start();
-      startGoalEditor = new VisibilityGraphStartGoalEditor(messager, subScene);
+      startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       startGoalEditor.start();
-      startGoalViewer = new VisibilityGraphStartGoalViewer(messager);
+
+      startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
       startGoalViewer.start();
       visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);

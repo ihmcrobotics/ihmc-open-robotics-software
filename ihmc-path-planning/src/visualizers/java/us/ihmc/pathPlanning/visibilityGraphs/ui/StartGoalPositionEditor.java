@@ -12,10 +12,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
-public class VisibilityGraphStartGoalEditor extends AnimationTimer
+public class StartGoalPositionEditor extends AnimationTimer
 {
    private static final boolean VERBOSE = true;
 
@@ -33,13 +33,24 @@ public class VisibilityGraphStartGoalEditor extends AnimationTimer
    private final AtomicReference<Boolean> startEditModeEnabled;
    private final AtomicReference<Boolean> goalEditModeEnabled;
 
-   public VisibilityGraphStartGoalEditor(REAMessager messager, Node sceneNode)
+   private final Topic startEditModeEnabledTopic;
+   private final Topic goalEditModeEnabledTopic;
+   private final Topic startPositionTopic;
+   private final Topic goalPositionTopic;
+
+   public StartGoalPositionEditor(REAMessager messager, Node sceneNode, Topic startEditModeEnabledTopic, Topic goalEditModeEnabledTopic,
+                                  Topic startPositionTopic, Topic goalPositionTopic)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;
 
-      startEditModeEnabled = messager.createInput(UIVisibilityGraphsTopics.StartEditModeEnabled, false);
-      goalEditModeEnabled = messager.createInput(UIVisibilityGraphsTopics.GoalEditModeEnabled, false);
+      this.startEditModeEnabledTopic = startEditModeEnabledTopic;
+      this.goalEditModeEnabledTopic = goalEditModeEnabledTopic;
+      this.startPositionTopic = startPositionTopic;
+      this.goalPositionTopic = goalPositionTopic;
+
+      startEditModeEnabled = messager.createInput(startEditModeEnabledTopic, false);
+      goalEditModeEnabled = messager.createInput(goalEditModeEnabledTopic, false);
 
       rayCastInterceptor = new EventHandler<MouseEvent>()
       {
@@ -97,14 +108,14 @@ public class VisibilityGraphStartGoalEditor extends AnimationTimer
          Point3D interception = latestInterception.getAndSet(null);
          if (interception != null)
          {
-            messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, interception);
+            messager.submitMessage(startPositionTopic, interception);
          }
 
          if (positionValidated.getAndSet(false))
          {
             if (VERBOSE)
                PrintTools.info(this, "Start position is validated: " + interception);
-            messager.submitMessage(UIVisibilityGraphsTopics.StartEditModeEnabled, false);
+            messager.submitMessage(startEditModeEnabledTopic, false);
          }
          return;
       }
@@ -114,14 +125,14 @@ public class VisibilityGraphStartGoalEditor extends AnimationTimer
          Point3D interception = latestInterception.getAndSet(null);
          if (interception != null)
          {
-            messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, interception);
+            messager.submitMessage(goalPositionTopic, interception);
          }
 
          if (positionValidated.getAndSet(false))
          {
             if (VERBOSE)
                PrintTools.info(this, "Goal position is validated: " + interception);
-            messager.submitMessage(UIVisibilityGraphsTopics.GoalEditModeEnabled, false);
+            messager.submitMessage(goalEditModeEnabledTopic, false);
          }
       }
    }

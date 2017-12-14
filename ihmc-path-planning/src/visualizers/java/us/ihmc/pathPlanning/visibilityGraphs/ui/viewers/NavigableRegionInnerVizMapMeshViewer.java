@@ -22,6 +22,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
@@ -150,7 +151,7 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
 
    private Color getLineColor(int regionId)
    {
-      return VizGraphsPlanarRegionViewer.getRegionColor(regionId).brighter();
+      return PlanarRegionViewer.getRegionColor(regionId).brighter();
    }
 
    @Override

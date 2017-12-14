@@ -6,9 +6,9 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.Point3DProperty;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.SimpleUIMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.UIVisibilityGraphsTopics;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 
 public class StartGoalTabController
 {
@@ -62,14 +62,14 @@ public class StartGoalTabController
       startPositionProperty.bindBidirectionalX(startXSpinner.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYSpinner.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalZ(startZSpinner.getValueFactory().valueProperty());
-      messager.bindBidirectional(UIVisibilityGraphsTopics.StartPosition, startPositionProperty, false);
+      messager.bindBidirectional(FootstepPlannerUserInterfaceAPI.StartPositionTopic, startPositionProperty, false);
 
       goalPositionProperty.bindBidirectionalX(goalXSpinner.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalY(goalYSpinner.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalZ(goalZSpinner.getValueFactory().valueProperty());
-      messager.bindBidirectional(UIVisibilityGraphsTopics.GoalPosition, goalPositionProperty, false);
+      messager.bindBidirectional(FootstepPlannerUserInterfaceAPI.GoalPositionTopic, goalPositionProperty, false);
 
-      messager.registerTopicListener(UIVisibilityGraphsTopics.GlobalReset, reset -> clearStartGoalTextFields());
+      messager.registerTopicListener(FootstepPlannerUserInterfaceAPI.GlobalResetTopic, reset -> clearStartGoalTextFields());
    }
 
    private void clearStartGoalTextFields()
