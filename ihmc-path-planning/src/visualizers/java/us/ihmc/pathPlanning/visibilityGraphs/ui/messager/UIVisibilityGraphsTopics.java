@@ -35,6 +35,8 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme Goal = apiFactory.createCategoryTheme("Goal");
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme UnitTest = apiFactory.createCategoryTheme("UnitTest");
+   private static final CategoryTheme Dataset = apiFactory.createCategoryTheme("Dataset");
+   private static final CategoryTheme Next = apiFactory.createCategoryTheme("Next");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -42,6 +44,7 @@ public class UIVisibilityGraphsTopics
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
    private static final TypedTopicTheme<Boolean> Close = apiFactory.createTypedTopicTheme("Close");
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
+   private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
@@ -75,6 +78,7 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> CloseClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigableExtrusions).topic(Close);
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
+   public static final Topic<Boolean> NextDatasetRequest = Root.child(UnitTest).child(Dataset).child(Next).topic(Request);
 
    public static final Topic<Boolean> GlobalReset = Root.topic(Reset);
 
