@@ -44,12 +44,12 @@ public class VisibilityGraphsFrameworkTest
    {
       String pathString = getClass().getClassLoader().getResource("Data").getPath();
       if (isWindows())
-         pathString  = pathString.substring(1, pathString.length());
+         pathString = pathString.substring(1, pathString.length());
 
       Path filePath = Paths.get(pathString);
       File fileLocationsForAllData = filePath.toFile();
 
-      if(debug)
+      if (debug)
       {
          PrintTools.info("Unit test files found: " + fileLocationsForAllData.listFiles().length);
       }
@@ -60,12 +60,12 @@ public class VisibilityGraphsFrameworkTest
          File fileFolder = files[i];
          String fileName = fileFolder.getName();
 
-         if(debug)
+         if (debug)
          {
             PrintTools.info("Processing file: " + fileName);
          }
 
-         if(!fileName.contains("UnitTest"))
+         if (!fileName.contains("UnitTest"))
             continue;
 
          String simpleFileName = fileName.replace("_UnitTest", "");
@@ -115,26 +115,22 @@ public class VisibilityGraphsFrameworkTest
 
       try
       {
-
          fr = new FileReader(file);
          br = new BufferedReader(fr);
 
          String sCurrentLine;
-
-         int index = 0;
 
          while ((sCurrentLine = br.readLine()) != null)
          {
             if (sCurrentLine.contains("<PathSize,") && sCurrentLine.contains(",PathSize>"))
             {
                double pathSize = Double.parseDouble(sCurrentLine.substring(10, sCurrentLine.indexOf(",PathSize>")));
-               assertTrue("Path size is not equal",path.size() == pathSize);
+               assertTrue("Path size is not equal", path.size() == pathSize);
             }
          }
       }
       catch (IOException e)
       {
-
          e.printStackTrace();
 
       } finally
@@ -166,61 +162,50 @@ public class VisibilityGraphsFrameworkTest
 
       try
       {
-
          fr = new FileReader(file);
          br = new BufferedReader(fr);
 
          String sCurrentLine;
 
-         int index = 0;
-
          while ((sCurrentLine = br.readLine()) != null)
          {
             if (sCurrentLine.contains("<Start,") && sCurrentLine.contains("Start>"))
             {
-               String tempStart = sCurrentLine.substring(7, sCurrentLine.indexOf(",Start>"));
-               start = getPoint3DFromStringSet(tempStart);
+               String startAsString = sCurrentLine.substring(7, sCurrentLine.indexOf(",Start>"));
+               start = getPoint3DFromStringSet(startAsString);
             }
-            
+
             if (sCurrentLine.contains("<Goal,") && sCurrentLine.contains(",Goal>"))
             {
-               String tempGoal = sCurrentLine.substring(6, sCurrentLine.indexOf(",Goal>"));
-               goal = getPoint3DFromStringSet(tempGoal);
+               String goalAsString = sCurrentLine.substring(6, sCurrentLine.indexOf(",Goal>"));
+               goal = getPoint3DFromStringSet(goalAsString);
             }
          }
       }
       catch (IOException e)
       {
-
          e.printStackTrace();
 
       } finally
       {
-
          try
          {
-
             if (br != null)
                br.close();
 
             if (fr != null)
                fr.close();
-
          }
          catch (IOException ex)
          {
-
             ex.printStackTrace();
-
          }
       }
       return null;
-
    }
 
    private Point3D getPoint3DFromStringSet(String set)
    {
-
       double x = Double.parseDouble(set.substring(0, set.indexOf(",")));
       set = set.substring(set.indexOf(",") + 1);
       double y = Double.parseDouble(set.substring(0, set.indexOf(",")));
