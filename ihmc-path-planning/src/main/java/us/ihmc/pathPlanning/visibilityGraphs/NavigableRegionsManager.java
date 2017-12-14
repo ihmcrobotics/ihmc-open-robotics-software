@@ -31,6 +31,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class NavigableRegionsManager
 {
    private final static boolean debug = true;
+   private final static boolean CONNECT_GOAL_TO_CLOSEST_REGION = false;
 
    private List<PlanarRegion> regions;
    private List<PlanarRegion> accesibleRegions = new ArrayList<>();
@@ -137,7 +138,8 @@ public class NavigableRegionsManager
 
       goal = forceConnectionOrSnapPoint(goal);
 
-      connectToClosestRegions(goal);
+      if (CONNECT_GOAL_TO_CLOSEST_REGION)
+         connectToClosestRegions(goal);
 
       if (goal == null)
       {
@@ -600,7 +602,7 @@ public class NavigableRegionsManager
          planarRegsDistance.get(0).getRegion().getTransformToWorld(transToWorld);
          pointInWorld.applyTransform(transToWorld);
 
-         //         connectionPoints.add(new Connection(position, pointInWorld.getPoint()));
+         connectionPoints.add(new Connection(position, pointInWorld.getPoint()));
       }
 
       System.out.println("Sorted: " + planarRegsDistance.size() + " planar regions");
