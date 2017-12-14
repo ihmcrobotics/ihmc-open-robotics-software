@@ -102,7 +102,7 @@ public class NavigableRegion
    public void setClusters(List<Cluster> clusters)
    {
       this.allClusters = clusters;
-      homeRegionCluster = allClusters.stream().filter(cluster -> !cluster.isHomeRegion()).findFirst().get();
+      homeRegionCluster = allClusters.stream().filter(cluster -> !cluster.isHomeRegion()).findFirst().orElse(null);
       allClusters.stream().filter(cluster -> !cluster.isHomeRegion()).forEach(obstacleClusters::add);
    }
 
