@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 /**
  * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which typically make up the main diagonal of a matrix. 
@@ -249,7 +249,7 @@ public class WeightMatrix6D
     * to.
     * </p>
     */
-   public void setAngularWeights(Vector3D angularWeights)
+   public void setAngularWeights(Vector3DReadOnly angularWeights)
    {
       this.angularWeights.setWeights(angularWeights.getX(), angularWeights.getY(), angularWeights.getZ());
    }
@@ -323,7 +323,7 @@ public class WeightMatrix6D
     * to.
     * </p>
     */
-   public void setLinearWeights(Vector3D linearWeights)
+   public void setLinearWeights(Vector3DReadOnly linearWeights)
    {
       this.linearWeights.setWeights(linearWeights.getX(), linearWeights.getY(), linearWeights.getZ());
    }

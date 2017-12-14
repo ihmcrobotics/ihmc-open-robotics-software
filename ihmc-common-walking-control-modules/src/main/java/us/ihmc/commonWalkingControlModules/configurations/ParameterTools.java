@@ -5,12 +5,16 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.TunableJointAccelerationIntegrationParameters;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
@@ -89,6 +93,40 @@ public class ParameterTools
          for (String bodyName : jointGroupGains.getMemberNames())
          {
             yoGainsToPack.put(bodyName, parameterizedGains);
+         }
+      }
+   }
+
+   public static void extractJointWeightMap(String suffix, List<GroupParameter<Double>> jointspaceWeights, Map<String, DoubleProvider> jointWeightMapToPack,
+                                            YoVariableRegistry registry)
+   {
+      jointWeightMapToPack.clear();
+      for (GroupParameter<Double> jointGroupParameter : jointspaceWeights)
+      {
+         String name = jointGroupParameter.getGroupName() + suffix;
+         Double defaultWeight = jointGroupParameter.getParameter();
+         DoubleParameter tunableWeight = new DoubleParameter(name, registry, defaultWeight.doubleValue());
+
+         for (String jointName : jointGroupParameter.getMemberNames())
+         {
+            jointWeightMapToPack.put(jointName, tunableWeight);
+         }
+      }
+   }
+
+   public static void extract3DWeightMap(String suffix, List<GroupParameter<Vector3DReadOnly>> weights, Map<String, Vector3DReadOnly> weightsToPack,
+                                         YoVariableRegistry registry)
+   {
+      weightsToPack.clear();
+      for (GroupParameter<Vector3DReadOnly> jointGroupWeights : weights)
+      {
+         String gainName = jointGroupWeights.getGroupName() + suffix;
+         Vector3DReadOnly weight = jointGroupWeights.getParameter();
+         Vector3DReadOnly parameterizedWeights = new ParameterVector3D(gainName, weight, registry);
+
+         for (String bodyName : jointGroupWeights.getMemberNames())
+         {
+            weightsToPack.put(bodyName, parameterizedWeights);
          }
       }
    }
