@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -71,7 +71,7 @@ public class PelvisOrientationManager
       }
    }
 
-   public void setWeights(Vector3DReadOnly weight)
+   public void setWeights(Vector3D weight)
    {
       walkingManager.setWeights(weight);
       userManager.setWeights(weight);

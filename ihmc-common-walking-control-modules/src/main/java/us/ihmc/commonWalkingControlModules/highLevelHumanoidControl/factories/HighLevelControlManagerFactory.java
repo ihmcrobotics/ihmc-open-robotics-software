@@ -32,7 +32,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -133,8 +132,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
-      Vector3DReadOnly pelvisLinearWeight = new ParameterVector3D("PelvisLinearWeight", momentumOptimizationSettings.getPelvisLinearWeight(), registry);
-      centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
+      centerOfMassHeightManager.setPelvisTaskspaceWeights(momentumOptimizationSettings.getPelvisLinearWeight());
       return centerOfMassHeightManager;
    }
 
@@ -243,10 +241,9 @@ public class HighLevelControlManagerFactory
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
-      Vector3DReadOnly pelvisAngularWeight = new ParameterVector3D("PelvisAngularWeight", momentumOptimizationSettings.getPelvisAngularWeight(), registry);
+      Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
-                                                              registry);
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox, registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       return pelvisOrientationManager;
    }

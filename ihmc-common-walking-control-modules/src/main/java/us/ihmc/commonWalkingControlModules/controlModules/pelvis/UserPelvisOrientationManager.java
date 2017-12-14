@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -57,7 +57,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       parentRegistry.addChild(registry);
    }
 
-   public void setWeights(Vector3DReadOnly angularWeight)
+   public void setWeights(Vector3D angularWeight)
    {
       taskspaceControlState.setWeights(angularWeight, null);
    }
