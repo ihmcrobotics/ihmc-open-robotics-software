@@ -386,7 +386,7 @@ public class NavigableRegionsManager
          ConnectionPoint3D pt1 = pair.getSourcePoint();
          ConnectionPoint3D pt2 = pair.getTargetPoint();
 
-         if (!pt1.epsilonEquals(pt2, 1e-5))
+         if (!pt1.geometricallyEquals(pt2, 1.0e-3))
          {
             globalVisMap.addVertex(pt1);
             globalVisMap.addVertex(pt2);

@@ -172,12 +172,12 @@ public class VisibilityGraphsIOTools
 
       public Point3D getStart()
       {
-         return start;
+         return new Point3D(start);
       }
 
       public Point3D getGoal()
       {
-         return goal;
+         return new Point3D(goal);
       }
 
       public PlanarRegionsList getPlanarRegionsList()
