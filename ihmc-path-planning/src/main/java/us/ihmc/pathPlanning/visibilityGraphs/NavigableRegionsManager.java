@@ -288,8 +288,8 @@ public class NavigableRegionsManager
          }
       }
 
-      VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion);
-      VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion);
+      VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion, true);
+      VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion, true);
 
       if (startRegion == goalRegion)
       {
@@ -397,9 +397,9 @@ public class NavigableRegionsManager
       }
    }
 
-   private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion)
+   private static VisibilityMap createVisMapForSinglePointSource(Point2DReadOnly point, NavigableRegion navigableRegion, boolean ensureConnection)
    {
-      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getAllClusters());
+      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getAllClusters(), ensureConnection);
 
       RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
 
