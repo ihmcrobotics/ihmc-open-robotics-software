@@ -4,11 +4,21 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class VisibilityGraphsIOTools
 {
+   private static final String UNIT_TEST_FOLDER_SUFFIX = "_UnitTest";
+   private static final String UNIT_TEST_PARAMETERS_FILENAME = "UnitTestParameters.txt";
+
    private static final String PATH_SIZE_FIELD_OPEN = "<PathSize,";
    private static final String PATH_SIZE_FIELD_END = ",PathSize>";
 
@@ -33,21 +43,6 @@ public class VisibilityGraphsIOTools
       double z = Double.parseDouble(stringPoint3D.substring(0));
 
       return new Point3D(x, y, z);
-   }
-
-   public static void readStartGoalParameters(File file, Point3D startToPack, Point3D goalToPack)
-   {
-      startToPack.set(parseField(file, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D));
-      goalToPack.set(parseField(file, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D));
-   }
-
-   public static int parsePathSize(File file)
-   {
-      Integer pathSize = parseField(file, PATH_SIZE_FIELD_OPEN, PATH_SIZE_FIELD_END, Integer::valueOf);
-      if (pathSize == null)
-         return -1;
-      else
-         return pathSize.intValue();
    }
 
    private static <T> T parseField(File file, String fieldOpen, String fieldClose, Parser<T> parser)
@@ -95,5 +90,110 @@ public class VisibilityGraphsIOTools
    private static interface Parser<T>
    {
       T parse(String string);
+   }
+
+   public static File loadAllUnitTestFiles()
+   {
+      String pathString = VisibilityGraphsFrameworkTest.class.getClassLoader().getResource("Data").getPath();
+      if (isWindows())
+         pathString = pathString.substring(1, pathString.length());
+
+      return Paths.get(pathString).toFile();
+   }
+
+   public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets()
+   {
+      File mainDataFolder = loadAllUnitTestFiles();
+
+      return Arrays.stream(mainDataFolder.listFiles()).map(VisibilityGraphsIOTools::loadDataset).filter(dataset -> dataset != null)
+                   .collect(Collectors.toList());
+   }
+
+   public static VisibilityGraphsUnitTestDataset loadDataset(File datasetFile)
+   {
+      if (!isFileUnitTestDatasetFolder(datasetFile))
+         return null;
+      else
+         return new VisibilityGraphsUnitTestDataset(datasetFile);
+   }
+
+   private static boolean isFileUnitTestDatasetFolder(File fileFolder)
+   {
+      if (!fileFolder.isDirectory())
+         return false;
+
+      if (!fileFolder.getName().endsWith(UNIT_TEST_FOLDER_SUFFIX))
+         return false;
+
+      return true;
+   }
+
+   public static class VisibilityGraphsUnitTestDataset
+   {
+      private final File file;
+
+      private final int expectedPathSize;
+      private final Point3D start;
+      private final Point3D goal;
+      private final PlanarRegionsList planarRegionsList;
+
+      private VisibilityGraphsUnitTestDataset(File file)
+      {
+         this.file = file;
+         String simpleFileName = file.getName().replace(UNIT_TEST_FOLDER_SUFFIX, "");
+         File planarRegionFile = new File(file.getPath(), simpleFileName);
+         File parameterFile = new File(file.getPath(), UNIT_TEST_PARAMETERS_FILENAME);
+
+         expectedPathSize = parsePathSize(parameterFile);
+         start = parseField(parameterFile, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
+         goal = parseField(parameterFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+         planarRegionsList = PlanarRegionDataImporter.importPlanRegionData(planarRegionFile);
+
+         if (start == null)
+            throw new RuntimeException("Could not load the start position. Data file: " + parameterFile);
+         if (goal == null)
+            throw new RuntimeException("Could not load the goal position. Data file: " + parameterFile);
+         if (planarRegionsList == null)
+            throw new RuntimeException("Could not load the planar regions. Data file: " + planarRegionFile);
+      }
+
+      private static int parsePathSize(File file)
+      {
+         Integer pathSize = parseField(file, PATH_SIZE_FIELD_OPEN, PATH_SIZE_FIELD_END, Integer::valueOf);
+         if (pathSize == null)
+            return -1;
+         else
+            return pathSize.intValue();
+      }
+
+      public String getDatasetName()
+      {
+         return file.getName();
+      }
+
+      public Point3DReadOnly getStart()
+      {
+         return start;
+      }
+
+      public Point3DReadOnly getGoal()
+      {
+         return goal;
+      }
+
+      public PlanarRegionsList getPlanarRegionsList()
+      {
+         return planarRegionsList;
+      }
+
+      public boolean hasExpectedPathSize()
+      {
+         return expectedPathSize > 0;
+      }
+
+      public int getExpectedPathSize()
+      {
+         return expectedPathSize;
+      }
    }
 }
