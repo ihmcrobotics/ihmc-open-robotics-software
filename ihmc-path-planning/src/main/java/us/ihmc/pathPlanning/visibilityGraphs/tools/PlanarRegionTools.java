@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.signedDistanceFromPoint3DToPlane3D;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +23,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -548,7 +551,7 @@ public class PlanarRegionTools
       }
    }
 
-   public static List<PlanarRegion> filterRegionsThatAreAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
+   public static List<PlanarRegion> keepOnlyRegionsThatAreEntirelyAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
    {
       List<PlanarRegion> filteredList = new ArrayList<>();
       for (PlanarRegion region : regionsToCheck)
@@ -564,35 +567,158 @@ public class PlanarRegionTools
 
    public static boolean isRegionAboveHomeRegion(PlanarRegion regionToCheck, PlanarRegion homeRegion)
    {
+      RigidBodyTransform transformFromHomeToWorld = new RigidBodyTransform();
+      homeRegion.getTransformToWorld(transformFromHomeToWorld);
+
       for (int i = 0; i < homeRegion.getConcaveHull().length; i++)
       {
-         Point2D point2D = (Point2D) homeRegion.getConcaveHull()[i];
-         Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-         FramePoint3D homeRegionPoint = new FramePoint3D();
-         homeRegionPoint.set(point3D);
-         RigidBodyTransform transToWorld = new RigidBodyTransform();
-         homeRegion.getTransformToWorld(transToWorld);
-         homeRegionPoint.applyTransform(transToWorld);
+         RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
+         regionToCheck.getTransformToWorld(transformFromOtherToHome);
+         transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
 
          for (int j = 0; j < regionToCheck.getConcaveHull().length; j++)
          {
-            Point2D point2D1 = (Point2D) regionToCheck.getConcaveHull()[j];
-            Point3D point3D1 = new Point3D(point2D1.getX(), point2D1.getY(), 0);
-            FramePoint3D otherRegionPoint = new FramePoint3D();
-            otherRegionPoint.set(point3D1);
-            RigidBodyTransform transToWorld1 = new RigidBodyTransform();
-            regionToCheck.getTransformToWorld(transToWorld1);
-            otherRegionPoint.applyTransform(transToWorld1);
+            Point3D otherRegionPoint = new Point3D(regionToCheck.getConcaveHull()[j]);
+            otherRegionPoint.applyTransform(transformFromOtherToHome);
 
-            if (homeRegionPoint.getZ() > otherRegionPoint.getZ())
-            {
-               //               System.out.println("Region is below home");
+            if (otherRegionPoint.getZ() < 0.0)
                return false;
-            }
          }
       }
-      //      System.out.println("Region is above home");
       return true;
+   }
+
+   public static List<PlanarRegion> filterRegionsByTruncatingVerticesBeneathHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion,
+                                                                                       double depthThresholdForConvexDecomposition, int minTruncatedSize,
+                                                                                       double minTruncatedArea)
+   {
+      List<PlanarRegion> filteredList = new ArrayList<>();
+      Point3D pointOnPlane = new Point3D();
+      Vector3D planeNormal = new Vector3D();
+
+      homeRegion.getPointInRegion(pointOnPlane);
+      homeRegion.getNormal(planeNormal);
+
+      for (PlanarRegion regionToCheck : regionsToCheck)
+      {
+         PlanarRegion truncatedPlanarRegion = truncatePlanarRegionIfIntersectingWithPlane(pointOnPlane, planeNormal, regionToCheck,
+                                                                                          depthThresholdForConvexDecomposition, minTruncatedSize,
+                                                                                          minTruncatedArea);
+         if (truncatedPlanarRegion != null)
+            filteredList.add(truncatedPlanarRegion);
+      }
+
+      return filteredList;
+   }
+
+   /**
+    * Truncate the given planar region {@code planarRegionToTuncate} with the plane such that only
+    * the part that is <b>above</b> the plane remains.
+    * 
+    * @param pointOnPlane a point on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param planarRegionToTruncate the original planar region to be truncated. Not modified.
+    * @param depthThresholdForConvexDecomposition used to recompute the convex decomposition of the
+    *           planar region when it has been truncated.
+    * @param minTruncatedSize the minimum number of concave hull vertices for the truncated region
+    *           to be created.
+    * @param minTruncatedArea the minimum area for the truncated region to be created.
+    * @return the truncated planar region which is completely above the plane, or {@code null} if
+    *         the given planar region is completely underneath the plane or if it is too small
+    *         according to {@code minTruncatedSize} and {@code minTruncatedArea}.
+    */
+   public static PlanarRegion truncatePlanarRegionIfIntersectingWithPlane(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal,
+                                                                          PlanarRegion planarRegionToTruncate, double depthThresholdForConvexDecomposition,
+                                                                          int minTruncatedSize, double minTruncatedArea)
+   {
+      Point3D pointOnRegion = new Point3D();
+      Vector3D regionNormal = new Vector3D();
+      planarRegionToTruncate.getPointInRegion(pointOnRegion);
+      planarRegionToTruncate.getNormal(regionNormal);
+
+      if (EuclidGeometryTools.areVector3DsParallel(planeNormal, regionNormal, Math.toRadians(3.0)))
+      { // The region and the plane are parallel, check which one is above the other.
+         double signedDistance = signedDistanceFromPoint3DToPlane3D(pointOnRegion, pointOnPlane, planeNormal);
+         if (signedDistance < 0.0)
+            return null; // The region is underneath
+         else
+            return planarRegionToTruncate; // The region is above
+      }
+
+      Point3D pointOnPlaneInRegionFrame = new Point3D(pointOnPlane);
+      Vector3D planeNormalInRegionFrame = new Vector3D(planeNormal);
+
+      RigidBodyTransform transformFromRegionToWorld = new RigidBodyTransform();
+      planarRegionToTruncate.getTransformToWorld(transformFromRegionToWorld);
+      pointOnPlaneInRegionFrame.applyInverseTransform(transformFromRegionToWorld);
+      planeNormalInRegionFrame.applyInverseTransform(transformFromRegionToWorld);
+
+      Point2DReadOnly vertex2D = planarRegionToTruncate.getConcaveHullVertex(planarRegionToTruncate.getConcaveHullSize() - 1);
+      Point3D vertex3D = new Point3D(vertex2D);
+      double previousSignedDistance = signedDistanceFromPoint3DToPlane3D(vertex3D, pointOnPlaneInRegionFrame, planeNormalInRegionFrame);
+
+      Point3D previousVertex3D = vertex3D;
+
+      List<Point2D> truncatedConcaveHullVertices = new ArrayList<>();
+
+      boolean isRegionEntirelyAbove = true;
+      double epsilonDistance = 1.0e-10;
+
+      for (int i = 0; i < planarRegionToTruncate.getConcaveHullSize(); i++)
+      {
+         vertex2D = planarRegionToTruncate.getConcaveHullVertex(i);
+         vertex3D = new Point3D(vertex2D);
+
+         double signedDistance = signedDistanceFromPoint3DToPlane3D(vertex3D, pointOnPlaneInRegionFrame, planeNormalInRegionFrame);
+         isRegionEntirelyAbove &= signedDistance >= -epsilonDistance;
+
+         if (signedDistance * previousSignedDistance < 0.0)
+         {
+            if (Math.abs(signedDistance) <= epsilonDistance)
+            {
+               truncatedConcaveHullVertices.add(new Point2D(vertex2D));
+            }
+            else if (Math.abs(previousSignedDistance) > epsilonDistance)
+            {
+               Vector3D edgeDirection = new Vector3D();
+               edgeDirection.sub(vertex3D, previousVertex3D);
+               Point3D intersection = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame,
+                                                                                                     vertex3D, previousVertex3D);
+
+               truncatedConcaveHullVertices.add(new Point2D(intersection));
+            }
+         }
+         else if (signedDistance >= 0.0)
+         {
+            truncatedConcaveHullVertices.add(new Point2D(vertex2D));
+         }
+
+         previousVertex3D = vertex3D;
+         previousSignedDistance = signedDistance;
+      }
+
+      if (isRegionEntirelyAbove)
+         return planarRegionToTruncate;
+
+      if (truncatedConcaveHullVertices.isEmpty())
+         return null; // The region is completely underneath
+
+      if (minTruncatedSize > 0 && truncatedConcaveHullVertices.size() < minTruncatedSize)
+         return null; // The resulting region is too small
+
+      List<ConvexPolygon2D> truncatedConvexPolygons = new ArrayList<>();
+      ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
+                                                                 truncatedConvexPolygons);
+
+      double totalArea = truncatedConvexPolygons.stream().mapToDouble(ConvexPolygon2D::getArea).sum();
+      if (totalArea < minTruncatedArea)
+         return null; // The resulting region is too small
+
+      Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
+      truncatedConcaveHullVertices.toArray(concaveHullVertices);
+      PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, concaveHullVertices, truncatedConvexPolygons);
+      truncatedRegion.setRegionId(planarRegionToTruncate.getRegionId());
+      return truncatedRegion;
    }
 
    public static boolean isRegionTooHighToStep(PlanarRegion regionToProject, PlanarRegion regionToProjectTo, double tooHighToStepThreshold)

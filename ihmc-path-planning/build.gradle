@@ -31,6 +31,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'us.ihmc', name: 'robot-environment-awareness', version: groupDependencyVersion
 }
 
 visualizersDependencies {
