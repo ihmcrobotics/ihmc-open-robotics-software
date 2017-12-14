@@ -27,11 +27,14 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -59,6 +62,11 @@ public class HighLevelControlManagerFactory
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
 
+   private final Map<String, DoubleProvider> jointspaceWeightMap = new HashMap<>();
+   private final Map<String, DoubleProvider> userModeWeightMap = new HashMap<>();
+   private final Map<String, Vector3DReadOnly> taskspaceAngularWeightMap = new HashMap<>();
+   private final Map<String, Vector3DReadOnly> taskspaceLinearWeightMap = new HashMap<>();
+
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
@@ -76,9 +84,14 @@ public class HighLevelControlManagerFactory
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
+      // Transform weights and gains to their parametrized versions.
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
       ParameterTools.extract3DGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, registry);
       ParameterTools.extract3DGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, registry);
+      ParameterTools.extractJointWeightMap("JointspaceWeight", momentumOptimizationSettings.getJointspaceWeights(), jointspaceWeightMap, registry);
+      ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, registry);
+      ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, registry);
+      ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -120,12 +133,13 @@ public class HighLevelControlManagerFactory
          return null;
 
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
-      centerOfMassHeightManager.setPelvisTaskspaceWeights(momentumOptimizationSettings.getPelvisLinearWeight());
+      Vector3DReadOnly pelvisLinearWeight = new ParameterVector3D("PelvisLinearWeight", momentumOptimizationSettings.getPelvisLinearWeight(), registry);
+      centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
       return centerOfMassHeightManager;
    }
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody baseBody, ReferenceFrame controlFrame,
-         ReferenceFrame baseFrame, Collection<ReferenceFrame> trajectoryFrames)
+                                                              ReferenceFrame baseFrame, Collection<ReferenceFrame> trajectoryFrames)
    {
       if (bodyToControl == null)
          return null;
@@ -148,10 +162,8 @@ public class HighLevelControlManagerFactory
       PID3DGainsReadOnly taskspacePositionGains = taskspacePositionGainMap.get(bodyName);
 
       // Weights
-      TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
-      TObjectDoubleHashMap<String> userModeWeights = momentumOptimizationSettings.getUserModeWeights();
-      Vector3D taskspaceAngularWeight = momentumOptimizationSettings.getTaskspaceAngularWeights().get(bodyName);
-      Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
+      Vector3DReadOnly taskspaceAngularWeight = taskspaceAngularWeightMap.get(bodyName);
+      Vector3DReadOnly taskspaceLinearWeight = taskspaceLinearWeightMap.get(bodyName);
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
@@ -166,7 +178,7 @@ public class HighLevelControlManagerFactory
                                                                     controlFrame, baseFrame, contactableBody, defaultControlMode, yoTime, graphicsListRegistry,
                                                                     registry);
       manager.setGains(jointGainMap, taskspaceOrientationGains, taskspacePositionGains);
-      manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
+      manager.setWeights(jointspaceWeightMap, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeightMap);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
@@ -231,9 +243,10 @@ public class HighLevelControlManagerFactory
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
-      Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
+      Vector3DReadOnly pelvisAngularWeight = new ParameterVector3D("PelvisAngularWeight", momentumOptimizationSettings.getPelvisAngularWeight(), registry);
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox, registry);
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
+                                                              registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       return pelvisOrientationManager;
    }

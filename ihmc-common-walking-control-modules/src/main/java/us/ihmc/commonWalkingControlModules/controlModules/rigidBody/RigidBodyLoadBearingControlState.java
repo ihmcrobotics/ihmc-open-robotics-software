@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -86,6 +87,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private PID3DGainsReadOnly taskspaceOrientationGains;
    private PID3DGainsReadOnly taskspacePositionGains;
 
+   private Vector3DReadOnly taskspaceAngularWeight;
+   private Vector3DReadOnly taskspaceLinearWeight;
+
    public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, YoDouble yoTime,
          RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -135,9 +139,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       hideGraphics();
    }
 
-   public void setWeights(Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight)
+   public void setWeights(Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight)
    {
-      spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
+      this.taskspaceAngularWeight = taskspaceAngularWeight;
+      this.taskspaceLinearWeight = taskspaceLinearWeight;
    }
 
    public void setGains(PID3DGainsReadOnly taskspaceOrientationGains, PID3DGainsReadOnly taskspacePositionGains)
@@ -192,6 +197,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
       spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
+      spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
 
       if (hybridModeActive.getBooleanValue())
       {

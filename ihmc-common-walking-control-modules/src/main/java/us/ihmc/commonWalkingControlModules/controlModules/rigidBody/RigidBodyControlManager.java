@@ -14,7 +14,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
@@ -32,6 +32,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.yoVariables.parameters.EnumParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -132,8 +133,8 @@ public class RigidBodyControlManager
       }
    }
 
-   public void setWeights(TObjectDoubleHashMap<String> jointspaceWeights, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight,
-         TObjectDoubleHashMap<String> userModeWeights)
+   public void setWeights(Map<String, DoubleProvider> jointspaceWeights, Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight,
+                          Map<String, DoubleProvider> userModeWeights)
    {
       jointspaceControlState.setDefaultWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
