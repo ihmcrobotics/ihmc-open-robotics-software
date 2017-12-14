@@ -1,6 +1,12 @@
 package us.ihmc.pathPlanning.visibilityGraphs.visualizer;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.*;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalPosition;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterConnections;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowLocalGraphs;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartPosition;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -105,12 +111,13 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(UIVisibilityGraphsTopics.NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
 
       DecimalFormat formatter = new DecimalFormat(" 0.000;-0.000");
-      messager.registerTopicListener(StartPosition, start -> startTextFieldX.setText(formatter.format(start.getX())));
-      messager.registerTopicListener(StartPosition, start -> startTextFieldY.setText(formatter.format(start.getY())));
-      messager.registerTopicListener(StartPosition, start -> startTextFieldZ.setText(formatter.format(start.getZ())));
-      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldX.setText(formatter.format(goal.getX())));
-      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldY.setText(formatter.format(goal.getY())));
-      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldZ.setText(formatter.format(goal.getZ())));
+      
+      messager.registerTopicListener(StartPosition, start -> startTextFieldX.setText(start == null ? "null" : formatter.format(start.getX())));
+      messager.registerTopicListener(StartPosition, start -> startTextFieldY.setText(start == null ? "null" : formatter.format(start.getY())));
+      messager.registerTopicListener(StartPosition, start -> startTextFieldZ.setText(start == null ? "null" : formatter.format(start.getZ())));
+      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldX.setText(goal == null ? "null" : formatter.format(goal.getX())));
+      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldY.setText(goal == null ? "null" : formatter.format(goal.getY())));
+      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldZ.setText(goal == null ? "null" : formatter.format(goal.getZ())));
 
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsButton.selectedProperty(), false);
