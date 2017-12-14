@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -120,7 +120,7 @@ public class CenterOfMassHeightManager
     * set the weights for user mode, CenterOfMassHeightControlState does not use this weight
     * @param weight
     */
-   public void setPelvisTaskspaceWeights(Vector3DReadOnly weight)
+   public void setPelvisTaskspaceWeights(Vector3D weight)
    {
       pelvisHeightControlState.setWeights(weight);
    }
