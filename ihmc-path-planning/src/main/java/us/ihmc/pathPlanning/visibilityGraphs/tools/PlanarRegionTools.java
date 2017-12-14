@@ -98,11 +98,22 @@ public class PlanarRegionTools
     */
    public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, PlanarRegionsList regions)
    {
+      return projectPointToPlanesVertically(point, regions.getPlanarRegionsAsList());
+   }
+
+   /**
+    * Projects the given point onto a planar region from the list. The projection is done along the
+    * z axis in world frame and if there is multiple regions that the point can be projected onto,
+    * the highest intersection point will be returned.
+    * <p>
+    * Will return null if the is no planar region above or below the point.
+    */
+   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, List<PlanarRegion> regions)
+   {
       Line3D projectionLine = new Line3D(point, new Vector3D(0.0, 0.0, 1.0));
       Point3D highestIntersection = null;
-      PlanarRegion highestRegion = null;
 
-      for (PlanarRegion region : regions.getPlanarRegionsAsList())
+      for (PlanarRegion region : regions)
       {
          Point3D intersection = intersectRegionWithLine(region, projectionLine);
 
@@ -114,7 +125,6 @@ public class PlanarRegionTools
          if (highestIntersection == null || highestIntersection.getZ() < intersection.getZ())
          {
             highestIntersection = intersection;
-            highestRegion = region;
          }
       }
 
