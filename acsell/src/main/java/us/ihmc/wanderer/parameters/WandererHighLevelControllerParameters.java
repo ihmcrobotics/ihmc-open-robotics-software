@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
@@ -32,7 +32,19 @@ public class WandererHighLevelControllerParameters implements HighLevelControlle
    {
       JointDesiredBehavior allJointBehaviors = new JointDesiredBehavior(JointDesiredControlMode.EFFORT);
 
-      List<String> allJoints = Arrays.asList(jointMap.getOrderedJointNames());
+      List<String> allJoints = new ArrayList<>(Arrays.asList(jointMap.getOrderedJointNames()));
+      // for some reason these joints are not part of jointMap.getOrderedJointNames() but are controlled.
+      allJoints.add("l_arm_shy");
+      allJoints.add("r_arm_shy");
+      allJoints.add("l_arm_shx");
+      allJoints.add("r_arm_shx");
+      allJoints.add("l_arm_shz");
+      allJoints.add("r_arm_shz");
+      allJoints.add("l_arm_ely");
+      allJoints.add("r_arm_ely");
+      allJoints.add("l_arm_wrz");
+      allJoints.add("r_arm_wrz");
+
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
       behaviors.add(new GroupParameter<>("", allJointBehaviors, allJoints));
       return behaviors;

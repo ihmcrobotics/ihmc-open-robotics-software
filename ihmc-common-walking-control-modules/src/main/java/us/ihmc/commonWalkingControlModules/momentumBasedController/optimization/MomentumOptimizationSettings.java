@@ -50,20 +50,9 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
     */
    public abstract List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights();
 
-   // TODO: nuke this once the rigid body manager stuff is done and these weights are contained in the maps above
-   public abstract double getHandJointspaceWeight();
-   public abstract double getHeadJointspaceWeight();
-   public abstract double getChestUserModeWeight();
-   public abstract double getHandUserModeWeight();
-   public abstract double getHeadUserModeWeight();
-   public abstract Vector3D getHeadAngularWeight();
-   public abstract Vector3D getChestAngularWeight();
+   // TODO: figure out how to handle these with the maps:
    public abstract Vector3D getPelvisAngularWeight();
    public abstract Vector3D getPelvisLinearWeight();
-   public abstract Vector3D getHandAngularTaskspaceWeight();
-   public abstract Vector3D getHandLinearTaskspaceWeight();
-
-   // TODO: figure out how to handle these with the maps:
    public abstract Vector3D getDefaultLinearFootWeight();
    public abstract Vector3D getDefaultAngularFootWeight();
    public abstract Vector3D getHighLinearFootWeight();
