@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import javafx.fxml.FXML;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class ExportUnitTestAnchorPaneController
 {

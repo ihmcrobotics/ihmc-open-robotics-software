@@ -1,9 +1,9 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.properties;
 
 import javafx.beans.property.Property;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsParametersProperty.SettableVisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty.SettableVisibilityGraphsParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class VisibilityGraphsParametersProperty extends ParametersProperty<SettableVisibilityGraphsParameters>

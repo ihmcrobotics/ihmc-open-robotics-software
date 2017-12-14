@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.messager;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;

@@ -1,13 +1,16 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.UIVisibilityGraphsTopics.GoalEditModeEnabled;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.UIVisibilityGraphsTopics.StartEditModeEnabled;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalEditModeEnabled;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartEditModeEnabled;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 
 public class StartGoalAnchorPaneController
 {

@@ -1,9 +1,10 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.UIVisibilityGraphsTopics.*;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.*;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ToggleButton;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 
 public class VisibilityGraphsAnchorPaneController
 {

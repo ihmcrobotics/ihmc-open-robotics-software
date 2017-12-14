@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.properties;
 
 import javafx.beans.property.Property;
 import us.ihmc.euclid.tuple3D.Point3D;
