@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.clusterManagement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -178,6 +179,7 @@ public class Cluster
       if (closed)
       {
          rawPointsLocal.add(new Point2D(pointsInLocal.get(0)));
+         rawPointsLocal.add(new Point2D(pointsInLocal.get(1)));
       }
 
       centroidInLocal.set(EuclidGeometryTools.averagePoint2Ds(rawPointsLocal));
@@ -187,6 +189,16 @@ public class Cluster
    {
       List<Point2D> pointsInLocal = pointsInWorld.stream().map(this::toLocal2D).collect(Collectors.toList());
       addRawPointsInLocal(pointsInLocal, closed);
+   }
+
+   public void addRawPointsInLocal(Point2DReadOnly[] pointsInLocal, boolean closed)
+   {
+      addRawPointsInLocal(Arrays.asList(pointsInLocal), closed);
+   }
+
+   public void addRawPointsInWorld(Point3DReadOnly[] pointsInWorld, boolean closed)
+   {
+      addRawPointsInWorld(Arrays.asList(pointsInWorld), closed);
    }
 
    public int getNumberOfRawPoints()

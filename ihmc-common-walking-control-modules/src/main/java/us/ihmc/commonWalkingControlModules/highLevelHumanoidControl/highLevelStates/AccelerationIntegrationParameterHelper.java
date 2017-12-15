@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -44,6 +46,9 @@ public class AccelerationIntegrationParameterHelper
       accelerationIntegrationSettingsNoLoad = new JointAccelerationIntegrationParametersReadOnly[joints.length];
       accelerationIntegrationSettingsLoaded = new JointAccelerationIntegrationParametersReadOnly[joints.length];
 
+      List<String> jointsWithoutParametersNoLoad = new ArrayList<>();
+      List<String> jointsWithoutParametersLoaded = new ArrayList<>();
+
       for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
       {
          OneDoFJoint joint = joints[jointIdx];
@@ -55,16 +60,18 @@ public class AccelerationIntegrationParameterHelper
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = parameterJointNameMapNoLoad.get(jointName);
          if (integrationParametersNoLoad == null)
          {
-            PrintTools.warn("(NoLoad) No integration parameters for joint " + jointName + " defined. Using default values.");
+            jointsWithoutParametersNoLoad.add(jointName);
          }
          accelerationIntegrationSettingsNoLoad[jointIdx] = integrationParametersNoLoad;
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = parameterJointNameMapLoaded.get(jointName);
-         if (integrationParametersLoaded == null)
-         {
-            PrintTools.warn("(Loaded) No integration parameters for joint " + jointName + " defined. Using No-Load parameters.");
-         }
          accelerationIntegrationSettingsLoaded[jointIdx] = integrationParametersLoaded;
+      }
+
+      if (!jointsWithoutParametersNoLoad.isEmpty())
+      {
+         PrintTools.warn("Got joints without acceleration integration parameters. Will use default values for:\n"
+               + jointsWithoutParametersNoLoad);
       }
    }
 

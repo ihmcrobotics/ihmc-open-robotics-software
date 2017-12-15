@@ -1,8 +1,8 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains.implementations;
 
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 
 public class YoLimitedPIDGains extends YoPIDGains
 {
@@ -22,9 +22,9 @@ public class YoLimitedPIDGains extends YoPIDGains
       maxKdRate = new YoDouble("maxKdRate" + suffix, registry);
       maxKiRate = new YoDouble("maxKiRate" + suffix, registry);
 
-      limitedKi = new RateLimitedYoVariable("limitedKi" + suffix, registry, maxKiRate, ki, controlDT);
-      limitedKp = new RateLimitedYoVariable("limitedKp" + suffix, registry, maxKpRate, kp, controlDT);
-      limitedKd = new RateLimitedYoVariable("limitedKd" + suffix, registry, maxKdRate, kd, controlDT);
+      limitedKi = new RateLimitedYoVariable("limitedKi" + suffix, registry, maxKiRate, super.getYoKi(), controlDT);
+      limitedKp = new RateLimitedYoVariable("limitedKp" + suffix, registry, maxKpRate, super.getYoKp(), controlDT);
+      limitedKd = new RateLimitedYoVariable("limitedKd" + suffix, registry, maxKdRate, super.getYoKd(), controlDT);
 
       maxKpRate.set(Double.POSITIVE_INFINITY);
       maxKdRate.set(Double.POSITIVE_INFINITY);
@@ -56,6 +56,12 @@ public class YoLimitedPIDGains extends YoPIDGains
    public double getKd()
    {
       return limitedKd.getDoubleValue();
+   }
+
+   @Override
+   public double getKi()
+   {
+      return limitedKi.getDoubleValue();
    }
 
    @Override
