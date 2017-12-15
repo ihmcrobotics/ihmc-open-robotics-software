@@ -359,15 +359,17 @@ public class NavigableRegionsManager
 
    private Point3D forceConnectionOrSnapPoint(Point3DReadOnly pointToCheck, int pointToCheckId)
    {
-      if (PlanarRegionTools.isPointInsideAnyRegion(accesibleRegions, pointToCheck))
+      NavigableRegion container = PlanarRegionTools.getNavigableRegionContainingThisPoint(pointToCheck, listOfLocalPlanners);
+
+      if (container != null)
       {
-         if (isPointInsideNoGoZone(pointToCheck))
+         if (isPointInsideNoGoZone(pointToCheck, container))
          {
             if (debug)
             {
                PrintTools.info("Point " + pointToCheck + " is in a NO-GO zone. Snapping the point to the closest navigable point.");
             }
-            pointToCheck = snapDesiredPointToClosestPoint(pointToCheck, pointToCheckId);
+            pointToCheck = snapDesiredPointToClosestPoint(pointToCheck, container.getRegionId(), container.getLocalVisibilityGraph());
          }
       }
       else
@@ -461,7 +463,7 @@ public class NavigableRegionsManager
       }
    }
 
-   private Point3D snapDesiredPointToClosestPoint(Point3DReadOnly desiredPointToSnap, int pointId)
+   private Point3D snapDesiredPointToClosestPoint(Point3DReadOnly desiredPointToSnap, int pointId, VisibilityMap visibilityMapToSnapPointTo)
    {
       if (debug)
       {
@@ -470,7 +472,7 @@ public class NavigableRegionsManager
 
       distancePoints.clear();
 
-      for (Connection pair : globalMapPoints)
+      for (Connection pair : visibilityMapToSnapPointTo.getConnections())
       {
          DistancePoint point1 = new DistancePoint(pair.getSourcePoint(), pair.getSourcePoint().distance(desiredPointToSnap));
          DistancePoint point2 = new DistancePoint(pair.getTargetPoint(), pair.getTargetPoint().distance(desiredPointToSnap));
@@ -727,26 +729,29 @@ public class NavigableRegionsManager
       navigableRegionLocalPlanner.setVisibilityMap(visibilityMap);
    }
 
-   private boolean isPointInsideNoGoZone(Point3DReadOnly pointToCheck)
+   private static boolean isPointInsideNoGoZone(Point3DReadOnly pointToCheck, NavigableRegion... navigableRegions)
    {
       int index = 0;
-      for (NavigableRegion localPlanner : listOfLocalPlanners)
+      for (NavigableRegion navigableRegion : navigableRegions)
       {
-         for (Cluster cluster : localPlanner.getAllClusters())
+         for (Cluster cluster : navigableRegion.getAllClusters())
          {
-            if (cluster.getNonNavigableExtrusionsInWorld().size() == 0)
+            List<Point3D> nonNavigableExtrusionsInWorld = cluster.getNonNavigableExtrusionsInWorld();
+            int extrusionsSize = nonNavigableExtrusionsInWorld.size();
+
+            if (extrusionsSize == 0)
             {
                continue;
             }
 
-            Point2D[] homePointsArr = new Point2D[cluster.getNonNavigableExtrusionsInWorld().size()];
+            Point2D[] nonNavigableExtrusionsArray = new Point2D[extrusionsSize];
 
-            for (int i = 0; i < cluster.getNonNavigableExtrusionsInWorld().size(); i++)
+            for (int i = 0; i < extrusionsSize; i++)
             {
-               homePointsArr[i] = new Point2D(cluster.getNonNavigableExtrusionsInWorld().get(i));
+               nonNavigableExtrusionsArray[i] = new Point2D(nonNavigableExtrusionsInWorld.get(i));
             }
 
-            if (PlanarRegionTools.isPointInsidePolygon(homePointsArr, new Point2D(pointToCheck)))
+            if (PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsArray, new Point2D(pointToCheck)))
             {
                index++;
 
