@@ -1,9 +1,0 @@
-root*false*false
-root.Dummy*false*false
-root.ICPViz*false*false
-root.ICPViz.CoPBalls*false*false
-root.ICPViz.ModifiedCoPBalls*false*false
-root.ICPViz.CoMBalls*false*false
-root.ICPViz.leftFootYoPlaneContactState*false*false
-root.ICPViz.rightFootYoPlaneContactState*false*false
-root.ICPViz.BipedSupportPolygons*false*false
