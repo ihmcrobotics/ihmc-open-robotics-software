@@ -148,31 +148,6 @@ public class SpatialData
       return distance;
    }
 
-//   public double getMaximumDistanceFromManifolds(List<ReachingManifoldCommand> manifolds)
-//   {
-//      double distance = Double.MAX_VALUE;
-//      for (int j = 0; j < manifolds.size(); j++)
-//      {
-//         for (int i = 0; i < rigidBodySpatials.size(); i++)
-//         {
-//            if (rigidBodyNames.get(i).equals(manifolds.get(j).getRigidBody().getName()))
-//            {
-//               //PrintTools.info("" + rigidBodyNames.get(i));
-//               ReachingManifoldCommand manifold = manifolds.get(j);
-//               Pose3D currentSpatial = rigidBodySpatials.get(i);
-//
-//               Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
-//
-//               distance = currentSpatial.getPositionDistance(closestPose);
-//               // TODO get closest pose from manifold
-//               // and distance.
-//            }
-//         }
-//
-//      }
-//      return distance;
-//   }
-
    public Pose3D getTestFrame(List<ReachingManifoldCommand> manifolds)
    {
       for (int j = 0; j < manifolds.size(); j++)

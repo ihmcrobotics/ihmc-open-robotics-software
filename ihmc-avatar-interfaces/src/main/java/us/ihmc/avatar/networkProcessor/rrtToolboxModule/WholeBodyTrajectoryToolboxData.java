@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
@@ -18,8 +19,10 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 /**
  * This class is for packing input of the controller as like as a packet
@@ -50,7 +53,7 @@ public class WholeBodyTrajectoryToolboxData
    private final List<RigidBody> allRigidBodies = new ArrayList<>();
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
-   
+
    private final List<ReachingManifoldCommand> reachingManifolds;
 
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
@@ -185,17 +188,44 @@ public class WholeBodyTrajectoryToolboxData
       {
          RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
 
-         Pose3D poseToAppend = node.getSpatial(i);
+         Pose3D poseToAppend = node.getSpatialData(i);
 
          KinematicsToolboxRigidBodyMessage message = rigidBodyDataMap.get(rigidBody).createMessage(timeInTrajectory, poseToAppend);
          messages.add(message);
       }
-
+      
+      
+      // TODO. API is need to enable this line. 
+      messages.add(creatHeadMessageKeepOnRigidBody(node, fullRobotModel.getHand(RobotSide.RIGHT).getName()));
+      
       return messages;
    }
    
+   public KinematicsToolboxRigidBodyMessage creatHeadMessageKeepOnRigidBody(SpatialNode node, String rigidBodyName)
+   {
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(fullRobotModel.getHead());
+      message.setControlFramePosition(new Point3D(0.5, 0.0, 0.0));
+      
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.clearSelection();
+      
+      selectionMatrix.selectLinearY(true);
+      selectionMatrix.selectLinearZ(true);
+      
+      message.setSelectionMatrix(selectionMatrix);
+      message.setWeight(0.01);
+      
+      RigidBody rigidBody = nameToRigidBodyMap.get(rigidBodyName);
+      ConstrainedRigidBodyTrajectory constrainedRigidBodyTrajectory = rigidBodyDataMap.get(rigidBody);
+      
+      Pose3D poseToWorldFrame = constrainedRigidBodyTrajectory.getPoseToWorldFrame(node);
+      message.setDesiredPose(poseToWorldFrame);
+      
+      return message;
+   }
+
    public double getMaximumDistanceFromManifolds(SpatialNode node)
-   {      
+   {
       double distance = Double.MAX_VALUE;
       for (int j = 0; j < reachingManifolds.size(); j++)
       {
@@ -204,24 +234,20 @@ public class WholeBodyTrajectoryToolboxData
             if (node.getSpatialData().getRigidBodyNames().get(i).equals(reachingManifolds.get(j).getRigidBody().getName()))
             {
                ReachingManifoldCommand manifold = reachingManifolds.get(j);
-               
-               
+
                RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
-               
-               Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatial(i));
-               //Pose3D currentSpatial = node.getSpatialData().getRigidBodySpatials().get(i);
+
+               Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatialData(i));
 
                Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
 
                distance = currentSpatial.getPositionDistance(closestPose);
-               // TODO get closest pose from manifold
-               // and distance.
             }
          }
       }
-      return distance;      
+      return distance;
    }
-   
+
    public Pose3D getTestFrame(SpatialNode node)
    {
       for (int j = 0; j < reachingManifolds.size(); j++)
@@ -231,11 +257,10 @@ public class WholeBodyTrajectoryToolboxData
             if (node.getSpatialData().getRigidBodyNames().get(i).equals(reachingManifolds.get(j).getRigidBody().getName()))
             {
                ReachingManifoldCommand manifold = reachingManifolds.get(j);
-               
-               
+
                RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));
-               
-               Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatial(i));
+
+               Pose3D currentSpatial = rigidBodyDataMap.get(rigidBody).getPoseToWorldFrame(node.getSpatialData(i));
                //Pose3D currentSpatial = node.getSpatialData().getRigidBodySpatials().get(i);
 
                Pose3D closestPose = manifold.computeClosestPoseOnManifold(currentSpatial);
@@ -248,11 +273,7 @@ public class WholeBodyTrajectoryToolboxData
       }
       return null;
    }
-   
-   
-   
-   
-   
+
    /**
     * For findInitialGuessSub()
     */
