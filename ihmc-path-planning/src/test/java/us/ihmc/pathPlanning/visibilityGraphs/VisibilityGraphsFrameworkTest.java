@@ -39,6 +39,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest extends Application
 {
+   private static final long TIMEOUT = 30000;
    private static final double START_GOAL_EPSILON = 1.0e-2;
    private static boolean VISUALIZE = true;
    private boolean DEBUG = true;
@@ -88,7 +89,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          stop();
    }
 
-   @Test
+   @Test(timeout = TIMEOUT)
    public void testASolutionExists() throws Exception
    {
       List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets();
