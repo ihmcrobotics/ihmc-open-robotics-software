@@ -151,11 +151,7 @@ public class NavigableRegionsManager
 
       long endForcingPoints = System.currentTimeMillis();
 
-      boolean readyToRunBodyPath = false;
-      if (startProjected != null && goalProjected != null)
-      {
-         readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
-      }
+      boolean readyToRunBodyPath = createVisMapsForStartAndGoal(start, goal);
 
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
