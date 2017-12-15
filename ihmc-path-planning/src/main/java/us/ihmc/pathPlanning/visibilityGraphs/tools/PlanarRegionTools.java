@@ -265,7 +265,7 @@ public class PlanarRegionTools
       return null;
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3D point, List<NavigableRegion> navigableRegions)
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions)
    {
       for (NavigableRegion navigableRegion : navigableRegions)
       {
