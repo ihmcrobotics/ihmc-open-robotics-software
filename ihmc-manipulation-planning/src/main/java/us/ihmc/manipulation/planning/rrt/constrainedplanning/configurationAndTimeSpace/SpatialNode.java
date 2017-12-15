@@ -3,6 +3,7 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class SpatialNode
 {
@@ -235,9 +236,19 @@ public class SpatialNode
       return spatialData.getRigidBodyNames().get(index);
    }
 
-   public Pose3D getSpatial(int index)
+   public Pose3D getSpatialData(int index)
    {
       return spatialData.getRigidBodySpatials().get(index);
+   }
+
+   public Pose3D getSpatialData(RigidBody rigidBody)
+   {
+      for (int i = 0; i < spatialData.getRigidBodyNames().size(); i++)
+      {
+         if (spatialData.getRigidBodyNames().get(i).equals(rigidBody.getName()))
+            return getSpatialData(i);
+      }
+      return null;
    }
 
    public void setSpatialsAndConfiguration(SpatialNode other)

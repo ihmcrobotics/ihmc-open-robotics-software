@@ -15,6 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -185,9 +186,14 @@ public class ConstrainedRigidBodyTrajectory
 
    public Pose3D getPoseToWorldFrame(Pose3D poseToAppend)
    {
-     return appendPoseToTrajectory(0.0, poseToAppend);
+      return appendPoseToTrajectory(0.0, poseToAppend);
    }
-   
+
+   public Pose3D getPoseToWorldFrame(SpatialNode spatialNode)
+   {
+      return appendPoseToTrajectory(spatialNode.getTime(), spatialNode.getSpatialData(getRigidBody()));
+   }
+
    public void appendRandomSpatial(SpatialData spatialData)
    {
       // TODO: need a boolean variable to enable or disable exploration.
@@ -202,7 +208,7 @@ public class ConstrainedRigidBodyTrajectory
          ConfigurationSpaceName configurationSpaceName = explorationConfigurationSpaces.get(i);
 
          double lowerBound = -1.0 * explorationRangeAmplitudes.get(i);
-         double upperBound =  1.0* explorationRangeAmplitudes.get(i);
+         double upperBound = 1.0 * explorationRangeAmplitudes.get(i);
          double value = RandomNumbers.nextDouble(WholeBodyTrajectoryToolboxSettings.randomManager, lowerBound, upperBound);
 
          configurationNames[i] = rigidBody + "_" + configurationSpaceName.name();

@@ -820,7 +820,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       humanoidKinematicsSolver.initialize();
       humanoidKinematicsSolver.submit(toolboxData.createMessages(node));
-
       /*
        * result
        */
@@ -828,6 +827,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       node.setConfiguration(humanoidKinematicsSolver.getSolution());
       node.setValidity(success);
+
       return success;
    }
 
