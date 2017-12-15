@@ -185,17 +185,26 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   public void initializeParameters(ContinuousCMPICPPlannerParameters icpPlannerParameters)
+   @Override
+   public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
       super.initializeParameters(icpPlannerParameters);
 
-      icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
-      icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnFinalCMP(icpPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());
+      if (icpPlannerParameters instanceof ContinuousCMPICPPlannerParameters)
+      {
+         ContinuousCMPICPPlannerParameters continuousCMPICPPlannerParameters = (ContinuousCMPICPPlannerParameters) icpPlannerParameters;
+         icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(continuousCMPICPPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
+         icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnFinalCMP(continuousCMPICPPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());
 
-      numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
-      useTwoConstantCMPsPerSupport.set(icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1);
+         numberFootstepsToConsider.set(continuousCMPICPPlannerParameters.getNumberOfFootstepsToConsider());
+         useTwoConstantCMPsPerSupport.set(continuousCMPICPPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1);
 
-      referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
+         referenceCMPsCalculator.initializeParameters(continuousCMPICPPlannerParameters);
+      }
+      else
+      {
+         throw new RuntimeException("Tried to submit the wrong type of parameters.");
+      }
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)

@@ -1,21 +1,14 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains.implementations;
 
-public class PIDGains extends PDGains
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+
+public class PIDGains extends PDGains implements PIDGainsReadOnly
 {
    private double ki;
    private double maxIntegralError;
    private double integralLeakRatio;
 
-   public PIDGains()
-   {
-      super();
-   }
-
-   public PIDGains(String name)
-   {
-      super(name);
-   }
-
+   @Override
    public double getKi()
    {
       return ki;
@@ -26,6 +19,7 @@ public class PIDGains extends PDGains
       this.ki = ki;
    }
 
+   @Override
    public double getMaxIntegralError()
    {
       return maxIntegralError;
@@ -36,6 +30,7 @@ public class PIDGains extends PDGains
       this.maxIntegralError = maxIntegralError;
    }
 
+   @Override
    public double getIntegralLeakRatio()
    {
       return integralLeakRatio;

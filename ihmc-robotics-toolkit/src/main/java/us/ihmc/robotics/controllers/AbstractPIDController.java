@@ -6,9 +6,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AbstractPIDController
 {
-
-   protected final YoDouble cumulativeError;
-   protected final YoDouble actionI;
+   private final YoDouble cumulativeError;
+   private final YoDouble actionI;
 
    protected AbstractPIDController(String suffix, YoVariableRegistry registry)
    {
@@ -17,12 +16,17 @@ public abstract class AbstractPIDController
 
       actionI = new YoDouble("action_I_" + suffix, registry);
       actionI.set(0.0);
-
    }
 
    protected abstract AbstractPDController getPDController();
 
-   public abstract double getMaximumOutputLimit();
+   public abstract double getMaximumFeedback();
+
+   public abstract double getIntegralGain();
+
+   public abstract double getMaxIntegralError();
+
+   public abstract double getIntegralLeakRatio();
 
    public double getProportionalGain()
    {
@@ -54,16 +58,10 @@ public abstract class AbstractPIDController
       cumulativeError.set(error);
    }
 
-   public abstract double getIntegralGain();
-
    public double getPositionDeadband()
    {
       return getPDController().getPositionDeadband();
    }
-
-   public abstract double getMaxIntegralError();
-
-   public abstract double getIntegralLeakRatio();
 
    public void resetIntegrator()
    {
@@ -104,7 +102,7 @@ public abstract class AbstractPIDController
          outputSignal += actionI.getDoubleValue();
       }
 
-      double maximumOutput = Math.abs(getMaximumOutputLimit());
+      double maximumOutput = Math.abs(getMaximumFeedback());
       outputSignal = MathTools.clamp(outputSignal, maximumOutput);
       return outputSignal;
    }

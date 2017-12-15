@@ -41,14 +41,14 @@ public abstract class ContinuousCMPICPPlannerParameters extends AbstractICPPlann
    protected ContinuousCMPICPPlannerParameters()
    {
       this(1.0);
-
-      stepLengthToCoPOffsetFactor.put(entryCoPName, 0.0);
-      stepLengthToCoPOffsetFactor.put(exitCoPName, 1.0 / 3.0);
    }
 
    protected ContinuousCMPICPPlannerParameters(double modelScale)
    {
       super(modelScale);
+
+      stepLengthToCoPOffsetFactor.put(entryCoPName, 0.0);
+      stepLengthToCoPOffsetFactor.put(exitCoPName, 1.0 / 3.0);
    }
 
    @Override
@@ -94,6 +94,8 @@ public abstract class ContinuousCMPICPPlannerParameters extends AbstractICPPlann
    /** {@inheritDoc} */
    public EnumMap<CoPPointName, Double> getStepLengthToCoPOffsetFactors()
    {
+      stepLengthToCoPOffsetFactor.put(entryCoPName, 0.0);
+      stepLengthToCoPOffsetFactor.put(exitCoPName, 1.0 / 3.0);
       return stepLengthToCoPOffsetFactor;
    }
 
