@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs;
+package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -91,18 +91,18 @@ public class VisibilityGraphsIOTools
       T parse(String string);
    }
 
-   public static File loadAllUnitTestFiles()
+   public static File getDataResource(Class<?> loadingClass)
    {
-      String pathString = VisibilityGraphsFrameworkTest.class.getClassLoader().getResource("Data").getPath();
+      String pathString = loadingClass.getClassLoader().getResource("Data").getPath();
       if (isWindows())
          pathString = pathString.substring(1, pathString.length());
 
       return Paths.get(pathString).toFile();
    }
 
-   public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets()
+   public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets(Class<?> loadingClass)
    {
-      File mainDataFolder = loadAllUnitTestFiles();
+      File mainDataFolder = getDataResource(loadingClass);
 
       return Arrays.stream(mainDataFolder.listFiles()).map(VisibilityGraphsIOTools::loadDataset).filter(dataset -> dataset != null)
                    .collect(Collectors.toList());

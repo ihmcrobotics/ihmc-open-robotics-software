@@ -27,7 +27,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
@@ -92,7 +93,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    @Test(timeout = TIMEOUT)
    public void testASolutionExists() throws Exception
    {
-      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets();
+      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(getClass());
 
       if (DEBUG)
       {
