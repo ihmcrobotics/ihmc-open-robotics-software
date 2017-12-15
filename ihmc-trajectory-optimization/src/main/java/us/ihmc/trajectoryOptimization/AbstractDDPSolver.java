@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.trajectoryOptimization;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
@@ -262,6 +262,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
       DiagonalMatrixTools.invertDiagonalMatrix(W);
       CommonOps.mult(V, W, tempMatrix);
+      invQuu.reshape(controlSize, controlSize);
       CommonOps.mult(tempMatrix, U, invQuu);
 
       // K = -inv(Quu) Qux

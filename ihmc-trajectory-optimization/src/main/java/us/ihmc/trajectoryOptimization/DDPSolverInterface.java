@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.trajectoryOptimization;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;

@@ -1,19 +1,14 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
+import us.ihmc.trajectoryOptimization.*;
 
 public class SimpleLIPMDDPCalculator
 {
-   private final DiscreteHybridDynamics<LIPMState> dynamics;
+   private final DiscreteHybridDynamics<DefaultDiscreteState> dynamics;
 
    private double deltaT;
    private double modifiedDeltaT;
@@ -22,7 +17,7 @@ public class SimpleLIPMDDPCalculator
 
    private int numberOfTimeSteps;
 
-   private final DDPSolver<LIPMState> ddpSolver;
+   private final DDPSolver<DefaultDiscreteState> ddpSolver;
 
    public SimpleLIPMDDPCalculator(double deltaT, double mass, double gravityZ)
    {
@@ -49,7 +44,7 @@ public class SimpleLIPMDDPCalculator
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
 
-   public void initialize(DenseMatrix64F currentState, DenseMatrix64F currentControl, SegmentedFrameTrajectory3D copDesiredPlan)
+   public void initialize(DenseMatrix64F currentState, SegmentedFrameTrajectory3D copDesiredPlan)
    {
       modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
       dynamics.setTimeStepSize(modifiedDeltaT);

@@ -1,16 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.robotics.math.trajectories.WrapperForMultipleFrameTrajectory3D;
-import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

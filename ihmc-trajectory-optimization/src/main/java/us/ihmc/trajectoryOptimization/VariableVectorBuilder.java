@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.trajectoryOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
