@@ -59,6 +59,6 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public int getPlanarRegionMinSize()
    {
-      return 5;
+      return 2;
    }
 }
