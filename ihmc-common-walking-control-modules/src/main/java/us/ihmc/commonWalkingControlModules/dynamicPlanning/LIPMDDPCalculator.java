@@ -1,20 +1,14 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
+import us.ihmc.trajectoryOptimization.*;
 
 public class LIPMDDPCalculator
 {
-   private final DiscreteHybridDynamics<LIPMState> dynamics;
+   private final DiscreteHybridDynamics<DefaultDiscreteState> dynamics;
 
    private double deltaT;
    private double modifiedDeltaT;
@@ -24,8 +18,8 @@ public class LIPMDDPCalculator
 
    private int numberOfTimeSteps;
 
-   private final SimpleDDPSolver<LIPMState> ddpSolver;
-   private final LQRSolverInterface<LIPMState> lqrSolver;
+   private final SimpleDDPSolver<DefaultDiscreteState> ddpSolver;
+   private final LQRSolverInterface<DefaultDiscreteState> lqrSolver;
 
    private double mass;
    private double gravityZ;
@@ -59,7 +53,7 @@ public class LIPMDDPCalculator
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
 
-   public void initialize(DenseMatrix64F currentState, DenseMatrix64F currentControl, SegmentedFrameTrajectory3D copDesiredPlan)
+   public void initialize(DenseMatrix64F currentState, SegmentedFrameTrajectory3D copDesiredPlan)
    {
       modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
       dynamics.setTimeStepSize(modifiedDeltaT);
@@ -108,17 +102,17 @@ public class LIPMDDPCalculator
       }
 
       lqrSolver.setDesiredTrajectory(desiredTrajectory, currentState);
-      lqrSolver.solveRiccatiEquation(LIPMState.NORMAL, 0, desiredTrajectory.size() - 1);
-      lqrSolver.computeOptimalTrajectories(LIPMState.NORMAL, 0, desiredTrajectory.size() - 1);
+      lqrSolver.solveRiccatiEquation(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
+      lqrSolver.computeOptimalTrajectories(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
       lqrSolver.getOptimalTrajectory(optimalTrajectory);
 
-      ddpSolver.initializeFromLQRSolution(LIPMState.NORMAL, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainTrajectory(),
+      ddpSolver.initializeFromLQRSolution(DefaultDiscreteState.DEFAULT, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainTrajectory(),
                                           lqrSolver.getOptimalFeedForwardControlTrajectory());
    }
 
    public int solve()
    {
-      int iterations = ddpSolver.computeTrajectory(LIPMState.NORMAL);
+      int iterations = ddpSolver.computeTrajectory(DefaultDiscreteState.DEFAULT);
       optimalTrajectory.set(ddpSolver.getOptimalTrajectory());
       return iterations;
    }

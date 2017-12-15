@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
+import us.ihmc.trajectoryOptimization.LQCostFunction;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDynamics.controlVectorSize;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDynamics.stateVectorSize;

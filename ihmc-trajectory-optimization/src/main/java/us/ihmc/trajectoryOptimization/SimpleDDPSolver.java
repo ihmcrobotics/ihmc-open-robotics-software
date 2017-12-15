@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.trajectoryOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
@@ -11,7 +11,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements DDPSolverInterface<E>
 {
