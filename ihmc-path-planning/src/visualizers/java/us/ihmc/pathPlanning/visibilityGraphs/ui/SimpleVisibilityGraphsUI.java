@@ -62,7 +62,6 @@ public class SimpleVisibilityGraphsUI
       visibilityGraphsAnchorPaneController.bindControls();
       
       exportUnitTestAnchorPaneController.attachMessager(messager);
-      exportUnitTestAnchorPaneController.bindControls();
       visibilityGraphsParametersAnchorPaneController.attachMessager(messager);
       visibilityGraphsParametersAnchorPaneController.bindControls();
       
