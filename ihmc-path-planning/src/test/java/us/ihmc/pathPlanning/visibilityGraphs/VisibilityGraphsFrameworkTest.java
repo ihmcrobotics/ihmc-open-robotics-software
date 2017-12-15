@@ -166,8 +166,10 @@ public class VisibilityGraphsFrameworkTest extends Application
       }
 
       assertTrue("Path is null!", path != null);
-      if (path != null)
-         assertTrue("Path does not contain any waypoints", path.size() > 0);
+      if (path == null)
+         return; // Cannot test anything else when no path is returned.
+
+      assertTrue("Path does not contain any waypoints", path.size() > 0);
 
       if (dataset.hasExpectedPathSize())
          assertTrue("Path size is not equal", path.size() == dataset.getExpectedPathSize());
