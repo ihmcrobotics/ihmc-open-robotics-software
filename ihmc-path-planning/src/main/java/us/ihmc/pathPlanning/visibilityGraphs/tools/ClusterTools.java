@@ -69,6 +69,11 @@ public class ClusterTools
 
    public static List<Point2D> extrudeRawPoints(boolean extrudedToTheLeft, Cluster cluster, double extrusionDistance)
    {
+      return extrudeRawPoints(extrudedToTheLeft, cluster, (p, h) -> extrusionDistance);
+   }
+
+   public static List<Point2D> extrudeRawPoints(boolean extrudedToTheLeft, Cluster cluster, ExtrusionDistanceCalculator calculator)
+   {
       List<Point2D> extrusions = new ArrayList<>();
 
       for (int i = 1; i < cluster.getRawPointsInLocal2D().size() - 1; i++)
@@ -77,8 +82,12 @@ public class ClusterTools
          Point2D pointToExtrude = cluster.getRawPointInLocal2D(i);
          Point2D nextPoint = cluster.getRawPointInLocal2D(i + 1);
 
+         double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
+
          Line2D previousEdge = new Line2D(previousPoint, pointToExtrude);
          Line2D nextEdge = new Line2D(pointToExtrude, nextPoint);
+
+         double extrusionDistance = calculator.computeExtrusionDistance(pointToExtrude, obstacleHeight);
 
          if (extrudedToTheLeft)
          {
@@ -420,4 +429,15 @@ public class ClusterTools
       }
    }
 
+   public static interface ExtrusionDistanceCalculator
+   {
+      /**
+       * @param pointToExtrude the coordinates of the point being extruded. Do not modify.
+       * @param obstacleHeight the height of the obstacle from which the point to extrude is
+       *           created.
+       * @return positive value representing the ditance between the raw points of a cluster and the
+       *         extrusion.
+       */
+      double computeExtrusionDistance(Point2DReadOnly pointToExtrude, double obstacleHeight);
+   }
 }
