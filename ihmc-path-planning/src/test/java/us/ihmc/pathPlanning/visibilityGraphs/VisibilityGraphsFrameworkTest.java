@@ -173,7 +173,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       assertTrue("Path does not contain any waypoints", path.size() > 0);
 
       if (dataset.hasExpectedPathSize())
-         assertTrue("Path size is not equal", path.size() == dataset.getExpectedPathSize());
+         assertTrue("Path size is not equal: expected = " + dataset.getExpectedPathSize() + ", actual = " + path.size(), path.size() == dataset.getExpectedPathSize());
 
       Point3DReadOnly pathEnd = path.get(path.size() - 1);
       Point3DReadOnly pathStart = path.get(0);
