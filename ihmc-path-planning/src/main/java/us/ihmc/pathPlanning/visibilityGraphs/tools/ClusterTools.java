@@ -3,7 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -69,57 +69,55 @@ public class ClusterTools
 
    public static List<Point2D> extrudeRawPoints(int index, Cluster cluster, double extrusionDistance)
    {
-      List<Point2D> extrusion = new ArrayList<>();
-
-      for (int i = 0; i < cluster.getRawPointsInLocal2D().size() - 2; i++)
+      boolean extrudedToTheLeft = true;
       {
-         Point2D point1 = cluster.getRawPointInLocal2D(i);
-         Point2D point2 = cluster.getRawPointInLocal2D(i + 1);
-         Point2D point3 = cluster.getRawPointInLocal2D(i + 2);
-
-         Vector2D vec1 = new Vector2D();
-         Vector2D vec2 = new Vector2D();
-         vec1.sub(point2, point1);
-         vec2.sub(point3, point2);
-
-         Point2D normal1 = cluster.getSafeNormalInLocal(index);
-         Point2D normal2 = cluster.getSafeNormalInLocal(index + 2);
-
-         Point2D intersectionPoint = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(normal1, vec1, normal2, vec2);
-
-         if (intersectionPoint == null)
-         {
-            if (debug)
-               PrintTools.error("Failed to extrude non-navigable boundary for region " + index + " \n" + "point1: " + point1 + "\n" + "point2: " + point2 + "\n"
-                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2
-                     + "\n" + "extrusionDistance: " + extrusionDistance);
-            continue;
-         }
-
-         if (intersectionPoint.distance(normal1) < 1E-6)
-         {
-            intersectionPoint.interpolate(normal1, normal2, 0.5);
-         }
-
-         Vector2D directionOfIntersectionExtrusion = new Vector2D();
-         Point2D adjustedIntersection = new Point2D();
-
-         directionOfIntersectionExtrusion.sub(intersectionPoint, point2);
-         directionOfIntersectionExtrusion.normalize();
-
-         adjustedIntersection.scaleAdd(extrusionDistance, directionOfIntersectionExtrusion, point2);
-
-         extrusion.add(adjustedIntersection);
-
-         index = index + 2;
+         Line2D firstEdge = new Line2D(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1));
+         extrudedToTheLeft = firstEdge.isPointOnLeftSideOfLine(cluster.getSafeNormalInLocal(index));
       }
 
-      if (cluster.isObstacleClosed() && !extrusion.isEmpty())
+      return extrudeRawPoints(extrudedToTheLeft, cluster, extrusionDistance);
+   }
+
+   public static List<Point2D> extrudeRawPoints(boolean extrudedToTheLeft, Cluster cluster, double extrusionDistance)
+   {
+      List<Point2D> extrusions = new ArrayList<>();
+
+      for (int i = 1; i < cluster.getRawPointsInLocal2D().size() - 1; i++)
       {
-         extrusion.add(extrusion.get(0));
+         Point2D previousPoint = cluster.getRawPointInLocal2D(i - 1);
+         Point2D pointToExtrude = cluster.getRawPointInLocal2D(i);
+         Point2D nextPoint = cluster.getRawPointInLocal2D(i + 1);
+
+         Line2D previousEdge = new Line2D(previousPoint, pointToExtrude);
+         Line2D nextEdge = new Line2D(pointToExtrude, nextPoint);
+
+         if (extrudedToTheLeft)
+         {
+            previousEdge.shiftToLeft(extrusionDistance);
+            nextEdge.shiftToLeft(extrusionDistance);
+         }
+         else
+         {
+            previousEdge.shiftToRight(extrusionDistance);
+            nextEdge.shiftToRight(extrusionDistance);
+         }
+
+         Point2D extrusion = previousEdge.intersectionWith(nextEdge);
+
+         Vector2D extrusionDirection = new Vector2D();
+         extrusionDirection.sub(extrusion, pointToExtrude);
+         extrusionDirection.normalize();
+         extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
+
+         extrusions.add(extrusion);
       }
 
-      return extrusion;
+      if (cluster.isObstacleClosed() && !extrusions.isEmpty())
+      {
+         extrusions.add(extrusions.get(0));
+      }
+
+      return extrusions;
    }
 
    public static void extrudedNonNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
