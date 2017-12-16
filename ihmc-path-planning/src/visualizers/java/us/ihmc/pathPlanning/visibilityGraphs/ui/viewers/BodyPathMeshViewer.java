@@ -22,7 +22,6 @@ import javafx.scene.shape.Sphere;
 import javafx.util.Pair;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -175,7 +174,6 @@ public class BodyPathMeshViewer extends AnimationTimer
          currentLength += lineStart.distance(lineEnd);
          double lineEndHue = EuclidCoreTools.interpolate(startColorHue, goalColorHue, currentLength / totalPathLength);
          meshBuilder.addLine(lineStart, lineEnd, BODYPATH_LINE_THICKNESS, Color.hsb(lineStartHue, 1.0, 0.5), Color.hsb(lineEndHue, 1.0, 1.0));
-         PrintTools.info("Line hues: " + EuclidCoreIOTools.getStringOf("", "", ", ", lineStartHue, lineEndHue));
       }
       bodyPathMeshToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
       activeBodyPathReference.set(bodyPath);
