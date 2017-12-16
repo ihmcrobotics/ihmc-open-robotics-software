@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.jgrapht.Graph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -43,7 +44,6 @@ public class NavigableRegionsManager
    private List<VisibilityMap> visMaps = new ArrayList<>();
    private SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-   private double pathLength = 0.0;
    private final VisibilityGraphsParameters parameters;
 
    private ArrayList<Connection> connectionPoints = new ArrayList<>();
@@ -191,7 +191,7 @@ public class NavigableRegionsManager
          List<Point3DReadOnly> path = null;
          if (snappedGoalPosition != null && snappedStartPosition != null)
          {
-            path = calculatePathOnVisibilityGraph(snappedStartPosition, snappedGoalPosition);
+            path = calculatePathOnVisibilityGraph(snappedStartPosition, snappedGoalPosition, globalVisMap);
          }
          else
          {
@@ -312,33 +312,39 @@ public class NavigableRegionsManager
       return true;
    }
 
-   private List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal)
+   private static List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal,
+                                                                       Graph<ConnectionPoint3D, DefaultWeightedEdge> graph)
    {
-      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(globalVisMap, new ConnectionPoint3D(start, START_GOAL_ID),
+      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(graph, new ConnectionPoint3D(start, START_GOAL_ID),
                                                                                 new ConnectionPoint3D(goal, START_GOAL_ID));
-      return convertVisibilityGraphSolutionToPath(solution, start);
+      return convertVisibilityGraphSolutionToPath(solution, start, graph);
    }
 
-   private List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, Point3DReadOnly start)
+   private static List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, Point3DReadOnly start,
+                                                                             Graph<ConnectionPoint3D, DefaultWeightedEdge> graph)
    {
       List<Point3DReadOnly> path = new ArrayList<>();
-      pathLength = 0.0;
       path.clear();
 
-      if (solution != null)
+      if (solution == null)
+      {
+         if (debug)
+            PrintTools.info("WARNING - Visibility graph found no solution");
+      }
+      else
       {
          for (DefaultWeightedEdge edge : solution)
          {
-            Point3DReadOnly from = globalVisMap.getEdgeSource(edge);
-            Point3DReadOnly to = globalVisMap.getEdgeTarget(edge);
-            pathLength = pathLength + from.distance(to);
+            Point3DReadOnly from = graph.getEdgeSource(edge);
+            Point3DReadOnly to = graph.getEdgeTarget(edge);
 
             if (!path.contains(new Point3D(from)))
-               path.add(from);
+               path.add(new Point3D(from));
             if (!path.contains(new Point3D(to)))
-               path.add(to);
+               path.add(new Point3D(to));
          }
 
+         // FIXME Sylvain: it looks like this is to cover a bug.
          if (!path.get(0).epsilonEquals(start, 1e-5))
          {
             Point3DReadOnly pointOut = path.get(1);
@@ -346,13 +352,9 @@ public class NavigableRegionsManager
             path.add(0, pointOut);
          }
 
+
          if (debug)
             PrintTools.info("Visibility graph successfully found a solution");
-      }
-      else
-      {
-         if (debug)
-            PrintTools.info("WARNING - Visibility graph found no solution");
       }
 
       return path;
