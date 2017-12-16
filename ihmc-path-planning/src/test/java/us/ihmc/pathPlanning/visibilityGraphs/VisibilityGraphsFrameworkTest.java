@@ -211,6 +211,9 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       errorMessages += assertTrue(dataset, "Path does not contain any waypoints", path.size() > 0);
 
+      if (!errorMessages.isEmpty())
+         return addPrefixToErrorMessages(dataset, errorMessages); // Cannot test anything else when no path is returned.
+
       if (dataset.hasExpectedPathSize())
          errorMessages += assertTrue(dataset, "Path size is not equal: expected = " + dataset.getExpectedPathSize() + ", actual = " + path.size(),
                                      path.size() == dataset.getExpectedPathSize());
