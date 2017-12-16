@@ -94,9 +94,12 @@ public class SimpleVisibilityGraphsUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
-   public void show() throws IOException
+   public void show(boolean showPlanarRegionFileChooser) throws IOException
    {
       primaryStage.show();
+
+      if (showPlanarRegionFileChooser)
+         simpleUIMenuController.loadPlanarRegion();
    }
 
    public void stop()
