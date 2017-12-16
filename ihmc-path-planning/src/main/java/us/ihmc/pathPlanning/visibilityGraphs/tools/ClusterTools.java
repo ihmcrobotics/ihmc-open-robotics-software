@@ -50,7 +50,7 @@ public class ClusterTools
 
    private static boolean isNormalVisible(Cluster cluster, int normalIndex, Point2DReadOnly observer)
    {
-      List<Point2D> rawPointsInLocal = cluster.getRawPointsInLocal();
+      List<Point2D> rawPointsInLocal = cluster.getRawPointsInLocal2D();
       for (int i = 1; i < rawPointsInLocal.size(); i++)
       {
          Point2D target = new Point2D(cluster.getNormalInLocal(normalIndex));
@@ -68,11 +68,11 @@ public class ClusterTools
 
    public static void extrudedNonNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
    {
-      for (int i = 0; i < cluster.getRawPointsInLocal().size() - 2; i++)
+      for (int i = 0; i < cluster.getRawPointsInLocal2D().size() - 2; i++)
       {
-         Point2D point1 = cluster.getRawPointInLocal(i);
-         Point2D point2 = cluster.getRawPointInLocal(i + 1);
-         Point2D point3 = cluster.getRawPointInLocal(i + 2);
+         Point2D point1 = cluster.getRawPointInLocal2D(i);
+         Point2D point2 = cluster.getRawPointInLocal2D(i + 1);
+         Point2D point3 = cluster.getRawPointInLocal2D(i + 2);
 
          Vector2D vec1 = new Vector2D();
          Vector2D vec2 = new Vector2D();
@@ -119,11 +119,11 @@ public class ClusterTools
 
    public static void extrudedNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
    {
-      for (int i = 0; i < cluster.getRawPointsInLocal().size() - 2; i++)
+      for (int i = 0; i < cluster.getRawPointsInLocal2D().size() - 2; i++)
       {
-         Point2D point1 = cluster.getRawPointInLocal(i);
-         Point2D point2 = cluster.getRawPointInLocal(i + 1);
-         Point2D point3 = cluster.getRawPointInLocal(i + 2);
+         Point2D point1 = cluster.getRawPointInLocal2D(i);
+         Point2D point2 = cluster.getRawPointInLocal2D(i + 1);
+         Point2D point3 = cluster.getRawPointInLocal2D(i + 2);
 
          Vector2D vec1 = new Vector2D();
          Vector2D vec2 = new Vector2D();
@@ -225,8 +225,8 @@ public class ClusterTools
          double extrusionDist1 = extrusionDistance - 0.01 + cluster.getAdditionalExtrusionDistance();
          double extrusionDist2 = extrusionDistance + cluster.getAdditionalExtrusionDistance();
 
-         List<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal(0), cluster.getRawPointInLocal(1), extrusionDist1);
-         List<Point2D> navExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal(0), cluster.getRawPointInLocal(1), extrusionDist2);
+         List<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist1);
+         List<Point2D> navExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist2);
 
          cluster.addNonNavigableExtrusionsInLocal(nonNavExtrusions);
          cluster.addNavigableExtrusionsInLocal(navExtrusions);
@@ -272,7 +272,7 @@ public class ClusterTools
    {
       for (Cluster cluster : listOfClusters)
       {
-         List<Point2D> rawPoints = cluster.getRawPointsInLocal();
+         List<Point2D> rawPoints = cluster.getRawPointsInLocal2D();
          for (int i = 0; i < rawPoints.size() - 1; i++)
          {
             Point2D first = rawPoints.get(i);
@@ -401,7 +401,7 @@ public class ClusterTools
       cluster.setType(Type.POLYGON);
       cluster.setTransformToWorld(transformToWorld);
       cluster.setHomeRegion(true);
-      cluster.addRawPointsInLocal(homeRegion.getConcaveHull(), true);
+      cluster.addRawPointsInLocal2D(homeRegion.getConcaveHull(), true);
       cluster.setExtrusionSide(ExtrusionSide.INSIDE);
       cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.1));
    }
@@ -445,7 +445,7 @@ public class ClusterTools
 
             //Convert to local frame
             Point3D[] extremes = linearRegression.getTheTwoPointsFurthestApart();
-            cluster.addRawPointsInWorld(extremes, false);
+            cluster.addRawPointsInWorld3D(extremes, false);
          }
       }
 
@@ -490,7 +490,7 @@ public class ClusterTools
       {
          for (Cluster cluster : clusters)
          {
-            System.out.println("Created a cluster of type: " + cluster.getType() + " with " + cluster.getRawPointsInLocal().size() + " points");
+            System.out.println("Created a cluster of type: " + cluster.getType() + " with " + cluster.getRawPointsInLocal2D().size() + " points");
          }
       }
    }

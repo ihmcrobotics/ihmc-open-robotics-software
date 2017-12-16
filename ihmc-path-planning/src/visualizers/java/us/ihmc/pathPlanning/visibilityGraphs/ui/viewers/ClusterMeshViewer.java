@@ -196,7 +196,7 @@ public class ClusterMeshViewer extends AnimationTimer
          List<Cluster> clusters = navigableRegionLocalPlanner.getAllClusters();
          for (Cluster cluster : clusters)
          {
-            for (Point3D rawPoint : cluster.getRawPointsInWorld())
+            for (Point3D rawPoint : cluster.getRawPointsInWorld3D())
                rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
             navigableExtrusionsMeshBuilder.addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS,
                                                         closeNavigableExtrusions.get());
