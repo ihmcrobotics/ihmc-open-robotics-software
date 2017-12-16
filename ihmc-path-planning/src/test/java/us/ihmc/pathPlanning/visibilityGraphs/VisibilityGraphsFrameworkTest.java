@@ -186,6 +186,8 @@ public class VisibilityGraphsFrameworkTest extends Application
             else
                dataset = null;
          }
+
+         ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
       }
 
       Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + allDatasets.size() + ". Errors:" + errorMessages,
@@ -348,7 +350,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
    private String assertTrue(VisibilityGraphsUnitTestDataset dataset, String message, boolean condition)
    {
-      if (VISUALIZE)
+      if (VISUALIZE || DEBUG)
       {
          if (!condition)
             PrintTools.error(dataset.getDatasetName() + ": " + message);
