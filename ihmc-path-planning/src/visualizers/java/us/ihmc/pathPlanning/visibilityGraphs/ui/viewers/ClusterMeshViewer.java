@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -34,11 +33,8 @@ public class ClusterMeshViewer extends AnimationTimer
    private final Group navigableExtrusionsGroup = new Group();
    private final Group nonNavigableExtrusionsGroup = new Group();
    private final AtomicReference<Map<Integer, MeshView>> rawPointsToRenderReference = new AtomicReference<>(null);
-   private Map<Integer, MeshView> rawPointsRendered;
    private final AtomicReference<Map<Integer, MeshView>> navigableExtrusionsToRenderReference = new AtomicReference<>(null);
-   private Map<Integer, MeshView> navigableExtrusionsRendered;
    private final AtomicReference<Map<Integer, MeshView>> nonNavigableExtrusionsToRenderReference = new AtomicReference<>(null);
-   private Map<Integer, MeshView> nonNavigableExtrusionsRendered;
 
    private final AtomicReference<Boolean> resetRequested;
    private final AtomicReference<Boolean> showRawPoints;
@@ -67,60 +63,9 @@ public class ClusterMeshViewer extends AnimationTimer
       closeNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.CloseClusterNavigableExtrusions, false);
       showNonNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, false);
       closeNonNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.CloseClusterNonNavigableExtrusions, false);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions, this::handleShowClusterNavigableExtrusionsThreadSafe);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, this::handleShowClusterNonNavigableExtrusionsThreadSafe);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.ShowClusterRawPoints, this::handleShowClusterRawPointsThreadSafe);
       messager.registerTopicListener(UIVisibilityGraphsTopics.NavigableRegionData, this::processNavigableRegionsOnThread);
       root.setMouseTransparent(true);
-      root.getChildren().addAll(rawPointsGroup, navigableExtrusionsGroup);
-   }
-
-   private void handleShowClusterRawPointsThreadSafe(boolean show)
-   {
-      if (Platform.isFxApplicationThread())
-         handleShowClusterRawPoints(show);
-      else
-         Platform.runLater(() -> handleShowClusterRawPoints(show));
-   }
-
-   private void handleShowClusterRawPoints(boolean show)
-   {
-      if (!show)
-         rawPointsGroup.getChildren().clear();
-      else if (rawPointsRendered != null)
-         rawPointsGroup.getChildren().addAll(rawPointsRendered.values());
-   }
-
-   private void handleShowClusterNavigableExtrusionsThreadSafe(boolean show)
-   {
-      if (Platform.isFxApplicationThread())
-         handleShowNavigableExtrusionsPoints(show);
-      else
-         Platform.runLater(() -> handleShowNavigableExtrusionsPoints(show));
-   }
-
-   private void handleShowNavigableExtrusionsPoints(boolean show)
-   {
-      if (!show)
-         navigableExtrusionsGroup.getChildren().clear();
-      else if (navigableExtrusionsRendered != null)
-         navigableExtrusionsGroup.getChildren().addAll(navigableExtrusionsRendered.values());
-   }
-
-   private void handleShowClusterNonNavigableExtrusionsThreadSafe(boolean show)
-   {
-      if (Platform.isFxApplicationThread())
-         handleShowNonNavigableExtrusionsPoints(show);
-      else
-         Platform.runLater(() -> handleShowNonNavigableExtrusionsPoints(show));
-   }
-
-   private void handleShowNonNavigableExtrusionsPoints(boolean show)
-   {
-      if (!show)
-         nonNavigableExtrusionsGroup.getChildren().clear();
-      else if (nonNavigableExtrusionsRendered != null)
-         nonNavigableExtrusionsGroup.getChildren().addAll(nonNavigableExtrusionsRendered.values());
+      root.getChildren().addAll(rawPointsGroup, navigableExtrusionsGroup, nonNavigableExtrusionsGroup);
    }
 
    @Override
@@ -137,40 +82,34 @@ public class ClusterMeshViewer extends AnimationTimer
          return;
       }
 
-      Map<Integer, MeshView> rawPointsToRender = rawPointsToRenderReference.getAndSet(null);
+      Map<Integer, MeshView> rawPointsToRender = rawPointsToRenderReference.get();
 
       if (rawPointsToRender != null)
       {
-         rawPointsRendered = rawPointsToRender;
+         rawPointsGroup.getChildren().clear();
+
          if (showRawPoints.get())
-         {
-            rawPointsGroup.getChildren().clear();
             rawPointsGroup.getChildren().addAll(rawPointsToRender.values());
-         }
       }
 
-      Map<Integer, MeshView> navigableExtrusionsRender = navigableExtrusionsToRenderReference.getAndSet(null);
+      Map<Integer, MeshView> navigableExtrusionsRender = navigableExtrusionsToRenderReference.get();
 
       if (navigableExtrusionsRender != null)
       {
-         navigableExtrusionsRendered = navigableExtrusionsRender;
+         navigableExtrusionsGroup.getChildren().clear();
+
          if (showNavigableExtrusions.get())
-         {
-            navigableExtrusionsGroup.getChildren().clear();
             navigableExtrusionsGroup.getChildren().addAll(navigableExtrusionsRender.values());
-         }
       }
 
-      Map<Integer, MeshView> nonNavigableExtrusionsRender = nonNavigableExtrusionsToRenderReference.getAndSet(null);
+      Map<Integer, MeshView> nonNavigableExtrusionsRender = nonNavigableExtrusionsToRenderReference.get();
 
       if (nonNavigableExtrusionsRender != null)
       {
-         nonNavigableExtrusionsRendered = nonNavigableExtrusionsRender;
+         nonNavigableExtrusionsGroup.getChildren().clear();
+
          if (showNonNavigableExtrusions.get())
-         {
-            nonNavigableExtrusionsGroup.getChildren().clear();
             nonNavigableExtrusionsGroup.getChildren().addAll(nonNavigableExtrusionsRender.values());
-         }
       }
    }
 
