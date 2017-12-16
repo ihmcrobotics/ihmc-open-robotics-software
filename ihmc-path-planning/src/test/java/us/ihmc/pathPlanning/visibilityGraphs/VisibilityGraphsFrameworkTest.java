@@ -32,7 +32,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.Visib
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -42,8 +41,8 @@ public class VisibilityGraphsFrameworkTest extends Application
 {
    private static final long TIMEOUT = 30000;
    private static final double START_GOAL_EPSILON = 1.0e-2;
-   private static boolean VISUALIZE = true;
-   private boolean DEBUG = true;
+   private static boolean VISUALIZE = false;
+   private static boolean DEBUG = true;
 
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
    private static VisibilityGraphsTestVisualizer ui;
@@ -104,12 +103,18 @@ public class VisibilityGraphsFrameworkTest extends Application
       if (VISUALIZE)
          nextDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.NextDatasetRequest, false);
 
+      int numberOfFailingDatasets = 0;
+      String errorMessages = "";
+
       for (VisibilityGraphsUnitTestDataset dataset : allDatasets)
       {
          if (VISUALIZE)
             messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
 
-         testFile(dataset);
+         String errorMessagesForCurrentFile = testFile(dataset);
+         if (!errorMessagesForCurrentFile.isEmpty())
+            numberOfFailingDatasets++;
+         errorMessages += errorMessagesForCurrentFile;
 
          if (VISUALIZE)
          {
@@ -124,9 +129,12 @@ public class VisibilityGraphsFrameworkTest extends Application
             }
          }
       }
+
+      Assert.assertTrue("Number of failing datasets: " + numberOfFailingDatasets + " out of " + allDatasets.size() + ". Errors:" + errorMessages,
+                        errorMessages.isEmpty());
    }
 
-   private void testFile(VisibilityGraphsUnitTestDataset dataset)
+   private String testFile(VisibilityGraphsUnitTestDataset dataset)
    {
       if (DEBUG)
       {
@@ -166,21 +174,24 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getConnectionPoints());
       }
 
-      assertTrue("Path is null!", path != null);
-      if (path == null)
-         return; // Cannot test anything else when no path is returned.
+      String errorMessages = "";
 
-      assertTrue("Path does not contain any waypoints", path.size() > 0);
+      errorMessages += assertTrue(dataset, "Path is null!", path != null);
+      if (!errorMessages.isEmpty())
+         return addPrefixToErrorMessages(dataset, errorMessages); // Cannot test anything else when no path is returned.
+
+      errorMessages += assertTrue(dataset, "Path does not contain any waypoints", path.size() > 0);
 
       if (dataset.hasExpectedPathSize())
-         assertTrue("Path size is not equal: expected = " + dataset.getExpectedPathSize() + ", actual = " + path.size(), path.size() == dataset.getExpectedPathSize());
+         errorMessages += assertTrue(dataset, "Path size is not equal: expected = " + dataset.getExpectedPathSize() + ", actual = " + path.size(),
+                                     path.size() == dataset.getExpectedPathSize());
 
       Point3DReadOnly pathEnd = path.get(path.size() - 1);
       Point3DReadOnly pathStart = path.get(0);
-      assertTrue("Body path does not end at desired goal position: desired = " + dataset.getGoal() + ", actual = " + pathEnd,
-                 pathEnd.geometricallyEquals(dataset.getGoal(), START_GOAL_EPSILON));
-      assertTrue("Body path does not start from desired start position: desired = " + dataset.getGoal() + ", actual = " + pathEnd,
-                 pathStart.geometricallyEquals(dataset.getStart(), START_GOAL_EPSILON));
+      errorMessages += assertTrue(dataset, "Body path does not end at desired goal position: desired = " + dataset.getGoal() + ", actual = " + pathEnd,
+                                  pathEnd.geometricallyEquals(dataset.getGoal(), START_GOAL_EPSILON));
+      errorMessages += assertTrue(dataset, "Body path does not start from desired start position: desired = " + dataset.getGoal() + ", actual = " + pathEnd,
+                                  pathStart.geometricallyEquals(dataset.getStart(), START_GOAL_EPSILON));
 
       // "Walk" along the body path and assert that the walker does not go through any region.
       Point3D walkerCurrentPosition = new Point3D(pathStart);
@@ -215,14 +226,29 @@ public class VisibilityGraphsFrameworkTest extends Application
 
                if (distance < walkerRadius)
                {
-                  fail("Body path is going through a region");
+                  errorMessages += fail(dataset, "Body path is going through a region");
                   break;
                }
             }
+            if (!errorMessages.isEmpty())
+               break;
          }
+         if (!errorMessages.isEmpty())
+            break;
 
          walkerCurrentPosition = travelAlongBodyPath(walkerMarchingSpeed, walkerCurrentPosition, path);
       }
+
+      return addPrefixToErrorMessages(dataset, errorMessages);
+   }
+
+   private static String addPrefixToErrorMessages(VisibilityGraphsUnitTestDataset dataset, String errorMessages)
+   {
+
+      if (!errorMessages.isEmpty())
+         return "\n" + dataset.getDatasetName() + errorMessages;
+      else
+         return "";
    }
 
    private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
@@ -253,22 +279,25 @@ public class VisibilityGraphsFrameworkTest extends Application
       return new Point3D(startingPosition);
    }
 
-   private void fail(String message)
+   private String fail(VisibilityGraphsUnitTestDataset dataset, String message)
    {
-      assertTrue(message, false);
+      return assertTrue(dataset, message, false);
    }
 
-   private void assertTrue(String message, boolean condition)
+   private String assertTrue(VisibilityGraphsUnitTestDataset dataset, String message, boolean condition)
    {
       if (VISUALIZE)
       {
          if (!condition)
-            PrintTools.error(message);
+            PrintTools.error(dataset.getDatasetName() + ": " + message);
       }
       else
       {
-         Assert.assertTrue(message, condition);
+         if (!condition)
+            return "\n" + message;
       }
+
+      return "";
    }
 
    @Override

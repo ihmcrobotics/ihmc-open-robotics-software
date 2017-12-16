@@ -30,6 +30,7 @@ public class SimpleVisibilityGraphsUI
    private final VisibilityGraphStartGoalEditor startGoalEditor;
    private final VisibilityGraphStartGoalViewer startGoalViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
+   private final UnitTestExporter unitTestExporter;
 
    @FXML
    private SimpleUIMenuController simpleUIMenuController;
@@ -65,7 +66,7 @@ public class SimpleVisibilityGraphsUI
       visibilityGraphsParametersAnchorPaneController.attachMessager(messager);
       visibilityGraphsParametersAnchorPaneController.bindControls();
       
-      new UnitTestExporter(messager);
+      unitTestExporter = new UnitTestExporter(messager);
       
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -106,5 +107,6 @@ public class SimpleVisibilityGraphsUI
       startGoalEditor.stop();
       startGoalViewer.stop();
       visibilityGraphsRenderer.stop();
+      unitTestExporter.stop();
    }
 }
