@@ -324,7 +324,7 @@ public class PointCloudTools
                if (!pointsTemp.isEmpty())
                {
                   //                  System.out.println("adding points");
-                  cluster.addRawPointsInWorld(pointsTemp, true);
+                  cluster.addRawPointsInWorld3D(pointsTemp, true);
                   pointsTemp.clear();
                }
 
@@ -405,13 +405,13 @@ public class PointCloudTools
          if (!pointsTemp.isEmpty())
          {
             //            System.out.println("adding points");
-            cluster.addRawPointsInWorld(pointsTemp, true);
+            cluster.addRawPointsInWorld3D(pointsTemp, true);
             pointsTemp.clear();
          }
 
          for (Cluster cluster1 : clusters)
          {
-            ConvexPolygon2D convexPolygon = new ConvexPolygon2D(cluster1.getRawPointsInLocal());
+            ConvexPolygon2D convexPolygon = new ConvexPolygon2D(cluster1.getRawPointsInLocal2D());
 
             PlanarRegion planarRegion = new PlanarRegion(cluster1.getTransformToWorld(), convexPolygon);
             
