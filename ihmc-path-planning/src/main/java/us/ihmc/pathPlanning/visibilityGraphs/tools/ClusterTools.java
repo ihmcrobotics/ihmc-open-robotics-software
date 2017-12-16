@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class ClusterTools
 {
+   private static final double NAV_TO_NON_NAV_DISTANCE = 0.01;
    private static final boolean debug = false;
 
    public static int determineExtrusionSide(Cluster cluster, Point2DReadOnly observer)
@@ -222,7 +223,7 @@ public class ClusterTools
       int extrusionIndex = 0;
       if (cluster.getType() == Type.LINE)
       {
-         double extrusionDist1 = extrusionDistance - 0.01 + cluster.getAdditionalExtrusionDistance();
+         double extrusionDist1 = extrusionDistance - NAV_TO_NON_NAV_DISTANCE + cluster.getAdditionalExtrusionDistance();
          double extrusionDist2 = extrusionDistance + cluster.getAdditionalExtrusionDistance();
 
          List<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist1);
@@ -261,7 +262,7 @@ public class ClusterTools
    {
       extrusionDistance = extrusionDistance + cluster.getAdditionalExtrusionDistance();
 
-      double extrusionDist1 = extrusionDistance - 0.01;
+      double extrusionDist1 = extrusionDistance - NAV_TO_NON_NAV_DISTANCE;
       double extrusionDist2 = extrusionDistance;
 
       ClusterTools.extrudedNonNavigableBoundary(extrusionIndex, cluster, extrusionDist1);
