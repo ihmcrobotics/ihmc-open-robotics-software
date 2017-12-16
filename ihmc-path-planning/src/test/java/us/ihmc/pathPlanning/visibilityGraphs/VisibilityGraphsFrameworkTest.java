@@ -116,7 +116,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          Assert.fail("Did not find any datasets to test.");
 
       VisibilityGraphsUnitTestDataset dataset = datasetIterator.next();
-      
+
       while (datasetIterator.hasNext())
       {
          if (VISUALIZE)
@@ -320,13 +320,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          if (!condition)
             PrintTools.error(dataset.getDatasetName() + ": " + message);
       }
-      else
-      {
-         if (!condition)
-            return "\n" + message;
-      }
-
-      return "";
+      return !condition ? "\n" + message : "";
    }
 
    @Override
