@@ -12,7 +12,6 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartPosition;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,8 +26,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionInnerVizMapMeshViewer;
@@ -52,9 +53,7 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private BorderPane mainPane;
    @FXML
-   private TextField startTextFieldX, startTextFieldY, startTextFieldZ;
-   @FXML
-   private TextField goalTextFieldX, goalTextFieldY, goalTextFieldZ;
+   private TextField startTextField, goalTextField;
    @FXML
    private TextField currentDatasetTextField;
    @FXML
@@ -116,14 +115,14 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
       messager.registerTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
 
-      DecimalFormat formatter = new DecimalFormat(" 0.000;-0.000");
+      Point3DProperty startProperty = new Point3DProperty(this, "startProperty", new Point3D(Double.NaN, Double.NaN, Double.NaN));
+      Point3DProperty goalProperty = new Point3DProperty(this, "goalProperty", new Point3D(Double.NaN, Double.NaN, Double.NaN));
+
+      startProperty.addListener((InvalidationListener) -> Platform.runLater(() -> startTextField.setText(startProperty.get().toString())));
+      goalProperty.addListener((InvalidationListener) -> Platform.runLater(() -> goalTextField.setText(goalProperty.get().toString())));
       
-      messager.registerTopicListener(StartPosition, start -> startTextFieldX.setText(start == null ? "null" : formatter.format(start.getX())));
-      messager.registerTopicListener(StartPosition, start -> startTextFieldY.setText(start == null ? "null" : formatter.format(start.getY())));
-      messager.registerTopicListener(StartPosition, start -> startTextFieldZ.setText(start == null ? "null" : formatter.format(start.getZ())));
-      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldX.setText(goal == null ? "null" : formatter.format(goal.getX())));
-      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldY.setText(goal == null ? "null" : formatter.format(goal.getY())));
-      messager.registerTopicListener(GoalPosition, goal -> goalTextFieldZ.setText(goal == null ? "null" : formatter.format(goal.getZ())));
+      messager.bindPropertyToTopic(StartPosition, startProperty);
+      messager.bindPropertyToTopic(GoalPosition, goalProperty);
 
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsButton.selectedProperty(), false);

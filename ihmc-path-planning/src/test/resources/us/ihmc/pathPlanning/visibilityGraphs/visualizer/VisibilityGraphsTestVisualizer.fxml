@@ -15,13 +15,8 @@
          <bottom>
             <AnchorPane prefHeight="100.0" prefWidth="781.0" BorderPane.alignment="CENTER">
                <children>
-                  <GridPane hgap="10.0" layoutX="14.0" layoutY="43.0">
+                  <GridPane hgap="5.0" layoutX="14.0" layoutY="43.0">
                      <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="6.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="6.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                      </columnConstraints>
@@ -30,18 +25,8 @@
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                        <TextField fx:id="startTextFieldX" editable="false" prefHeight="25.0" prefWidth="63.0" GridPane.columnIndex="2" />
-                        <Label text="x" GridPane.columnIndex="1" />
-                        <TextField fx:id="startTextFieldY" editable="false" prefHeight="25.0" prefWidth="63.0" GridPane.columnIndex="4" />
-                        <TextField fx:id="startTextFieldZ" editable="false" prefHeight="25.0" prefWidth="63.0" GridPane.columnIndex="6" />
-                        <TextField fx:id="goalTextFieldZ" editable="false" prefHeight="25.0" prefWidth="63.0" GridPane.columnIndex="6" GridPane.rowIndex="1" />
-                        <TextField fx:id="goalTextFieldY" editable="false" prefHeight="25.0" prefWidth="63.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                        <TextField fx:id="goalTextFieldX" editable="false" prefHeight="25.0" prefWidth="63.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <Label text="x" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="y" GridPane.columnIndex="3" />
-                        <Label text="y" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                        <Label text="z" GridPane.columnIndex="5" />
-                        <Label text="z" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                        <TextField fx:id="startTextField" editable="false" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                        <TextField fx:id="goalTextField" editable="false" prefHeight="25.0" prefWidth="149.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="Start" />
                         <Label text="Goal" GridPane.rowIndex="1" />
                      </children>
