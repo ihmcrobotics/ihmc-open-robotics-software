@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefHeight="561.0" prefWidth="781.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
    <children>
@@ -49,30 +52,27 @@
                         <ToggleButton fx:id="showRegionInterConnectionsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Connections: Inter region" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                      </children>
                   </GridPane>
+                  <TextField fx:id="currentDatasetTextField" editable="false" layoutX="20.0" layoutY="13.0" prefHeight="25.0" prefWidth="444.0" />
                </children>
             </AnchorPane>
          </bottom>
-         <top>
-            <BorderPane prefHeight="53.0" prefWidth="781.0" BorderPane.alignment="CENTER">
-               <center>
-                  <GridPane>
-                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                     </rowConstraints>
+         <left>
+            <AnchorPane minWidth="-Infinity" prefHeight="408.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+               <children>
+                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <ToggleButton fx:id="previousDatasetButton" minHeight="35.0" mnemonicParsing="false" text="Previous Dataset" GridPane.halignment="RIGHT" />
-                        <ToggleButton fx:id="nextDatasetButton" minHeight="35.0" mnemonicParsing="false" prefWidth="85.0" text="Next Dataset" GridPane.columnIndex="2" GridPane.halignment="LEFT" />
-                        <TextField fx:id="currentDatasetTextField" editable="false" prefHeight="25.0" prefWidth="355.0" GridPane.columnIndex="1" />
+                        <HBox spacing="5.0">
+                           <children>
+                              <ToggleButton fx:id="previousDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Previous" HBox.hgrow="ALWAYS" />
+                              <ToggleButton fx:id="nextDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Next" HBox.hgrow="ALWAYS" />
+                           </children>
+                        </HBox>
+                        <ListView fx:id="datasetsListView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                      </children>
-                  </GridPane>
-               </center>
-            </BorderPane>
-         </top>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </left>
       </BorderPane>
    </children>
 </AnchorPane>

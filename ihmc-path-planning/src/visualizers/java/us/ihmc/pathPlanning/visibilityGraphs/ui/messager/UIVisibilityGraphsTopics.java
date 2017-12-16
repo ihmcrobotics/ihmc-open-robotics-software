@@ -38,6 +38,7 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme Dataset = apiFactory.createCategoryTheme("Dataset");
    private static final CategoryTheme Previous = apiFactory.createCategoryTheme("Next");
    private static final CategoryTheme Next = apiFactory.createCategoryTheme("Previous");
+   private static final CategoryTheme All = apiFactory.createCategoryTheme("All");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -50,6 +51,7 @@ public class UIVisibilityGraphsTopics
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
+   private static final TypedTopicTheme<List<String>> Paths = apiFactory.createTypedTopicTheme("Paths");
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
@@ -86,6 +88,7 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> PreviousDatasetRequest = Root.child(UnitTest).child(Dataset).child(Previous).topic(Request);
    public static final Topic<String> CurrentDatasetPath = Root.child(UnitTest).child(Dataset).topic(Path);
    public static final Topic<Boolean> NextDatasetRequest = Root.child(UnitTest).child(Dataset).child(Next).topic(Request);
+   public static final Topic<List<String>> AllDatasetPaths = Root.child(UnitTest).child(Dataset).child(All).topic(Paths);
 
    public static final API API = apiFactory.getAPIAndCloseFactory();
 }
