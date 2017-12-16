@@ -1,17 +1,17 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class PathTools
 {
-   public static Point3D getPointAlongPath(double alpha, ArrayList<Point3D> path)
+   public static Point3D getPointAlongPath(double alpha, List<Point3D> path)
    {
       //      System.out.println("\n\nComplete Length: " + computePathLength(0.0));
       //      System.out.println("Desired length from the end: " + computePathLength(alpha));
-      
+
       double pathLength = computePathLength(path);
 
       double tempPathDist = 0.0;
@@ -59,7 +59,7 @@ public class PathTools
       return newPoint;
    }
 
-   public static double computePathLength(ArrayList<Point3D> path)
+   public static double computePathLength(List<Point3D> path)
    {
       double pathLength = 0.0;
       for (int i = 1; i < path.size(); i++)
@@ -71,18 +71,18 @@ public class PathTools
       }
       return pathLength;
    }
-   
-   public static double computePathLength(ArrayList<Point3D> path, double alpha)
+
+   public static double computePathLength(List<Point3D> path, double alpha)
    {
       return computePathLength(path) * (1.0 - alpha);
    }
-   
-   public static double computePathLengthFromStart(ArrayList<Point3D> path, double alpha)
+
+   public static double computePathLengthFromStart(List<Point3D> path, double alpha)
    {
       return computePathLength(path) * (alpha);
    }
-   
-   public static double computePathLength(ArrayList<Point3D> path, int startWpIndex, int endWpIndex)
+
+   public static double computePathLength(List<Point3D> path, int startWpIndex, int endWpIndex)
    {
       double pathLength = 0.0;
       for (int i = startWpIndex + 1; i <= endWpIndex; i++)
