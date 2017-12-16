@@ -12,23 +12,31 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartPosition;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import com.sun.javafx.scene.control.skin.LabeledText;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
@@ -69,6 +77,8 @@ public class VisibilityGraphsTestVisualizer
    private ToggleButton showRegionInnerConnectionsButton;
    @FXML
    private ToggleButton showRegionInterConnectionsButton;
+   @FXML
+   private ListView<String> datasetsListView;
 
    public VisibilityGraphsTestVisualizer(Stage primaryStage, SimpleUIMessager messager) throws IOException
    {
@@ -126,7 +136,7 @@ public class VisibilityGraphsTestVisualizer
 
       startProperty.addListener((InvalidationListener) -> Platform.runLater(() -> startTextField.setText(startProperty.get().toString())));
       goalProperty.addListener((InvalidationListener) -> Platform.runLater(() -> goalTextField.setText(goalProperty.get().toString())));
-      
+
       messager.bindPropertyToTopic(StartPosition, startProperty);
       messager.bindPropertyToTopic(GoalPosition, goalProperty);
 
@@ -135,6 +145,28 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsButton.selectedProperty(), false);
       messager.bindBidirectional(ShowLocalGraphs, showRegionInnerConnectionsButton.selectedProperty(), false);
       messager.bindBidirectional(ShowInterConnections, showRegionInterConnectionsButton.selectedProperty(), false);
+
+      messager.registerTopicListener(UIVisibilityGraphsTopics.AllDatasetPaths, this::showDatasets);
+      messager.registerTopicListener(CurrentDatasetPath, path -> datasetsListView.getSelectionModel().select(path));
+
+      datasetsListView.setOnMouseClicked(this::handleDatasetSelection);
+   }
+
+   private void handleDatasetSelection(MouseEvent event)
+   {
+      if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && event.getTarget() instanceof LabeledText)
+      {
+         PrintTools.info("Submitting new dataset request");
+         messager.submitMessage(CurrentDatasetPath, datasetsListView.getSelectionModel().getSelectedItem());
+      }
+   }
+
+   private void showDatasets(List<String> allDatasets)
+   {
+      Platform.runLater(() -> {
+         datasetsListView.getItems().clear();
+         datasetsListView.getItems().addAll(allDatasets);
+      });
    }
 
    public BooleanProperty getNextDatasetRequestedProperty()

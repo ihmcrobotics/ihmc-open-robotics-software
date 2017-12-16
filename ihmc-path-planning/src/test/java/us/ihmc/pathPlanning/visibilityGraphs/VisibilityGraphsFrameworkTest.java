@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -102,21 +102,26 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       AtomicReference<Boolean> previousDatasetRequested = null;
       AtomicReference<Boolean> nextDatasetRequested = null;
+      AtomicReference<String> requestedDatasetPathReference = null;
+
       if (VISUALIZE)
       {
+         List<String> allDatasetNames = allDatasets.stream().map(VisibilityGraphsUnitTestDataset::getDatasetName).collect(Collectors.toList());
+         messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
+
          nextDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.NextDatasetRequest, false);
          previousDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
+         requestedDatasetPathReference = messager.createInput(UIVisibilityGraphsTopics.CurrentDatasetPath, null);
       }
 
       int numberOfFailingDatasets = 0;
       String errorMessages = "";
 
-      ListIterator<VisibilityGraphsUnitTestDataset> datasetIterator = allDatasets.listIterator();
-      if (!datasetIterator.hasNext())
+      int currentDatasetIndex = 0;
+      if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
 
-      boolean wasGoingForward = true;
-      VisibilityGraphsUnitTestDataset dataset = datasetIterator.next();
+      VisibilityGraphsUnitTestDataset dataset = allDatasets.get(currentDatasetIndex);
 
       while (dataset != null)
       {
@@ -136,7 +141,7 @@ public class VisibilityGraphsFrameworkTest extends Application
             messager.submitMessage(UIVisibilityGraphsTopics.NextDatasetRequest, false);
             messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
 
-            while (!nextDatasetRequested.get() && !previousDatasetRequested.get())
+            while (!nextDatasetRequested.get() && !previousDatasetRequested.get() && dataset.getDatasetName().equals(requestedDatasetPathReference.get()))
             {
                if (!messager.isMessagerOpen())
                   return; // The ui has been closed
@@ -144,19 +149,29 @@ public class VisibilityGraphsFrameworkTest extends Application
                ThreadTools.sleep(200);
             }
 
-            if (nextDatasetRequested.get() && datasetIterator.hasNext())
+            if (nextDatasetRequested.get() && currentDatasetIndex < allDatasets.size() - 1)
             {
-               dataset = datasetIterator.next();
-               if (!wasGoingForward && datasetIterator.hasNext())
-                  dataset = datasetIterator.next();
-               wasGoingForward = true;
+               currentDatasetIndex++;
+               dataset = allDatasets.get(currentDatasetIndex);
             }
-            else if (previousDatasetRequested.get() && datasetIterator.hasPrevious())
+            else if (previousDatasetRequested.get() && currentDatasetIndex > 0)
             {
-               dataset = datasetIterator.previous();
-               if (wasGoingForward && datasetIterator.hasPrevious())
-                  dataset = datasetIterator.previous();
-               wasGoingForward = false;
+               currentDatasetIndex--;
+               dataset = allDatasets.get(currentDatasetIndex);
+            }
+            else if (requestedDatasetPathReference.get() != null)
+            {
+               String path = requestedDatasetPathReference.get();
+               VisibilityGraphsUnitTestDataset requestedDataset = allDatasets.stream().filter(d -> d.getDatasetName().equals(path)).findFirst().orElse(null);
+               if (requestedDataset == null)
+               {
+                  PrintTools.error("Could not find the requested dataset with name: " + path);
+               }
+               else
+               {
+                  currentDatasetIndex = allDatasets.indexOf(requestedDataset);
+                  dataset = requestedDataset;
+               }
             }
             else
             {
@@ -165,7 +180,11 @@ public class VisibilityGraphsFrameworkTest extends Application
          }
          else
          {
-            dataset = datasetIterator.hasNext() ? datasetIterator.next() : null;
+            currentDatasetIndex++;
+            if (currentDatasetIndex < allDatasets.size())
+               dataset = allDatasets.get(currentDatasetIndex);
+            else
+               dataset = null;
          }
       }
 
