@@ -15,6 +15,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityTools
 {
+   private static final double MAGIC_NUMBER = 0.01;
+
    public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster)
    {
       for (int i = 0; i < listOfPointsInCluster.size() - 1; i++)
@@ -98,7 +100,7 @@ public class VisibilityTools
          {
             Point2DReadOnly target = listOfObserverPoints.get(j);
 
-            if (observer.distance(target) > 0.01)
+            if (observer.distance(target) > MAGIC_NUMBER)
             {
                boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer, target);
 
@@ -113,7 +115,8 @@ public class VisibilityTools
       return connections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId, boolean ensureConnection)
+   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId,
+                                                           boolean ensureConnection)
    {
       Set<Connection> connections = new HashSet<>();
       List<Point2D> listOfTargetPoints = new ArrayList<>();
@@ -134,7 +137,7 @@ public class VisibilityTools
       {
          Point2D target = listOfTargetPoints.get(j);
 
-         if (observer.distance(target) > 0.01)
+         if (observer.distance(target) > MAGIC_NUMBER)
          {
             boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer, target);
 
