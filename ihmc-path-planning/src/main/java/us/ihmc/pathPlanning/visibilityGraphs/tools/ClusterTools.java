@@ -67,17 +67,6 @@ public class ClusterTools
       return true;
    }
 
-   public static List<Point2D> extrudeRawPoints(int index, Cluster cluster, double extrusionDistance)
-   {
-      boolean extrudedToTheLeft = true;
-      {
-         Line2D firstEdge = new Line2D(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1));
-         extrudedToTheLeft = firstEdge.isPointOnLeftSideOfLine(cluster.getSafeNormalInLocal(index));
-      }
-
-      return extrudeRawPoints(extrudedToTheLeft, cluster, extrusionDistance);
-   }
-
    public static List<Point2D> extrudeRawPoints(boolean extrudedToTheLeft, Cluster cluster, double extrusionDistance)
    {
       List<Point2D> extrusions = new ArrayList<>();
@@ -224,13 +213,6 @@ public class ClusterTools
       for (Point2D normalPoint : points)
       {
          cluster.addNormalInLocal(normalPoint);
-      }
-
-      points = EuclidGeometryTools.perpendicularBisectorSegment2D(first, second, extrusionDistance + cluster.getAdditionalExtrusionDistance());
-
-      for (Point2D normalPoint : points)
-      {
-         cluster.addSafeNormalInLocal(normalPoint);
       }
    }
 

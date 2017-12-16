@@ -18,7 +18,6 @@ public class Cluster
 
    private final List<Point3D> rawPointsLocal = new ArrayList<>();
    private final List<Point2D> normalsInLocal = new ArrayList<>();
-   private final List<Point2D> safeNormalsInLocal = new ArrayList<>();
    private final List<Point2D> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2D> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
@@ -272,16 +271,6 @@ public class Cluster
       normalsInLocal.add(toLocal2D(normalInWorld));
    }
 
-   public void addSafeNormalInLocal(Point2DReadOnly safeNormalInLocal)
-   {
-      safeNormalsInLocal.add(new Point2D(safeNormalInLocal));
-   }
-
-   public void addSafeNormalInWorld(Point3DReadOnly safeNormalInWorld)
-   {
-      safeNormalsInLocal.add(toLocal2D(safeNormalInWorld));
-   }
-
    public void addNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
    {
       navigableExtrusionsInLocal.add(new Point2D(navigableExtrusionInLocal));
@@ -415,41 +404,6 @@ public class Cluster
    public List<Point3D> getNormalsInWorld()
    {
       return normalsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
-   }
-
-   public int getNumberOfSafeNormals()
-   {
-      return safeNormalsInLocal.size();
-   }
-
-   public Point2D getSafeNormalInLocal(int i)
-   {
-      return safeNormalsInLocal.get(i);
-   }
-
-   public Point2D getLastSafeNormalInLocal()
-   {
-      return safeNormalsInLocal.get(getNumberOfSafeNormals() - 1);
-   }
-
-   public List<Point2D> getSafeNormalsInLocal()
-   {
-      return safeNormalsInLocal;
-   }
-
-   public Point3D getSafeNormalInWorld(int i)
-   {
-      return toWorld3D(getSafeNormalInLocal(i));
-   }
-
-   public Point3D getLastSafeNormalInWorld()
-   {
-      return toWorld3D(getSafeNormalInLocal(getNumberOfSafeNormals() - 1));
-   }
-
-   public List<Point3D> getSafeNormalsInWorld()
-   {
-      return safeNormalsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
    private Point3D toWorld3D(Point2DReadOnly pointInLocal)
