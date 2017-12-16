@@ -42,7 +42,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 {
    private static final long TIMEOUT = Long.MAX_VALUE; // 30000;
    private static final double START_GOAL_EPSILON = 1.0e-2;
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
    private static boolean DEBUG = true;
 
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
@@ -115,6 +115,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       if (!datasetIterator.hasNext())
          Assert.fail("Did not find any datasets to test.");
 
+      boolean wasGoingForward = true;
       VisibilityGraphsUnitTestDataset dataset = datasetIterator.next();
 
       while (dataset != null)
@@ -146,10 +147,16 @@ public class VisibilityGraphsFrameworkTest extends Application
             if (nextDatasetRequested.get() && datasetIterator.hasNext())
             {
                dataset = datasetIterator.next();
+               if (!wasGoingForward && datasetIterator.hasNext())
+                  dataset = datasetIterator.next();
+               wasGoingForward = true;
             }
             else if (previousDatasetRequested.get() && datasetIterator.hasPrevious())
             {
                dataset = datasetIterator.previous();
+               if (wasGoingForward && datasetIterator.hasPrevious())
+                  dataset = datasetIterator.previous();
+               wasGoingForward = false;
             }
             else
             {
