@@ -113,6 +113,12 @@ public class VisibilityGraphsTestVisualizer
    {
       messager.bindBidirectional(PreviousDatasetRequest, previousDatasetButton.selectedProperty(), false);
       messager.bindBidirectional(NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
+
+      previousDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      previousDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+      nextDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      nextDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+
       messager.registerTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
 
       Point3DProperty startProperty = new Point3DProperty(this, "startProperty", new Point3D(Double.NaN, Double.NaN, Double.NaN));

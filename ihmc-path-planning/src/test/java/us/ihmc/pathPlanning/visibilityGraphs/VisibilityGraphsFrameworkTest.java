@@ -132,6 +132,8 @@ public class VisibilityGraphsFrameworkTest extends Application
 
          if (VISUALIZE)
          {
+            messager.submitMessage(UIVisibilityGraphsTopics.NextDatasetRequest, false);
+            messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
 
             while (!nextDatasetRequested.get() && !previousDatasetRequested.get())
             {
@@ -149,9 +151,6 @@ public class VisibilityGraphsFrameworkTest extends Application
             {
                dataset = datasetIterator.previous();
             }
-
-            messager.submitMessage(UIVisibilityGraphsTopics.NextDatasetRequest, false);
-            messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
          }
          else
          {
@@ -222,7 +221,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       Point3DReadOnly pathStart = path.get(0);
       errorMessages += assertTrue(dataset, "Body path does not end at desired goal position: desired = " + dataset.getGoal() + ", actual = " + pathEnd,
                                   pathEnd.geometricallyEquals(dataset.getGoal(), START_GOAL_EPSILON));
-      errorMessages += assertTrue(dataset, "Body path does not start from desired start position: desired = " + dataset.getGoal() + ", actual = " + pathEnd,
+      errorMessages += assertTrue(dataset, "Body path does not start from desired start position: desired = " + dataset.getStart() + ", actual = " + pathStart,
                                   pathStart.geometricallyEquals(dataset.getStart(), START_GOAL_EPSILON));
 
       // "Walk" along the body path and assert that the walker does not go through any region.
