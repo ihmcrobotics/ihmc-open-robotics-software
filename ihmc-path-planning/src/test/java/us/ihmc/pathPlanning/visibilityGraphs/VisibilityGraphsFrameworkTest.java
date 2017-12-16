@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
@@ -39,9 +40,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest extends Application
 {
-   private static final long TIMEOUT = 30000;
+   private static final long TIMEOUT = Long.MAX_VALUE; // 30000;
    private static final double START_GOAL_EPSILON = 1.0e-2;
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
    private static boolean DEBUG = true;
 
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
@@ -99,17 +100,30 @@ public class VisibilityGraphsFrameworkTest extends Application
          PrintTools.info("Unit test files found: " + allDatasets.size());
       }
 
+      AtomicReference<Boolean> previousDatasetRequested = null;
       AtomicReference<Boolean> nextDatasetRequested = null;
       if (VISUALIZE)
+      {
          nextDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.NextDatasetRequest, false);
+         previousDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
+      }
 
       int numberOfFailingDatasets = 0;
       String errorMessages = "";
 
-      for (VisibilityGraphsUnitTestDataset dataset : allDatasets)
+      ListIterator<VisibilityGraphsUnitTestDataset> datasetIterator = allDatasets.listIterator();
+      if (!datasetIterator.hasNext())
+         Assert.fail("Did not find any datasets to test.");
+
+      VisibilityGraphsUnitTestDataset dataset = datasetIterator.next();
+      
+      while (datasetIterator.hasNext())
       {
          if (VISUALIZE)
+         {
             messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
+            messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getDatasetName());
+         }
 
          String errorMessagesForCurrentFile = testFile(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
@@ -118,15 +132,30 @@ public class VisibilityGraphsFrameworkTest extends Application
 
          if (VISUALIZE)
          {
-            messager.submitMessage(UIVisibilityGraphsTopics.NextDatasetRequest, false);
 
-            while (!nextDatasetRequested.get())
+            while (!nextDatasetRequested.get() && !previousDatasetRequested.get())
             {
                if (!messager.isMessagerOpen())
                   return; // The ui has been closed
 
                ThreadTools.sleep(200);
             }
+
+            if (nextDatasetRequested.get())
+            {
+               dataset = datasetIterator.next();
+            }
+            else if (previousDatasetRequested.get() && datasetIterator.hasPrevious())
+            {
+               dataset = datasetIterator.previous();
+            }
+
+            messager.submitMessage(UIVisibilityGraphsTopics.NextDatasetRequest, false);
+            messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
+         }
+         else
+         {
+            dataset = datasetIterator.next();
          }
       }
 
