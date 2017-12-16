@@ -20,10 +20,10 @@ public class OcclussionTools
 
             for (Point3D point3d : cluster.getNonNavigableExtrusionsInWorld())
             {
-               list2D.add(new Point2D(point3d.getX(), point3d.getY()));
+               list2D.add(new Point2D(point3d));
             }
 
-            boolean visible = VisibilityTools.isPointVisible(new Point2D(start.getX(), start.getY()), new Point2D(goal.getX(), goal.getY()), list2D);
+            boolean visible = VisibilityTools.isPointVisible(new Point2D(start), new Point2D(goal), list2D);
 
             if (!visible)
             {
@@ -49,10 +49,10 @@ public class OcclussionTools
 
             for (Point3D point3d : cluster.getNonNavigableExtrusionsInWorld())
             {
-               list2D.add(new Point2D(point3d.getX(), point3d.getY()));
+               list2D.add(new Point2D(point3d));
             }
 
-            boolean visible = VisibilityTools.isPointVisible(new Point2D(start.getX(), start.getY()), new Point2D(goal.getX(), goal.getY()), list2D);
+            boolean visible = VisibilityTools.isPointVisible(new Point2D(start), new Point2D(goal), list2D);
 
             if (!visible)
             {
