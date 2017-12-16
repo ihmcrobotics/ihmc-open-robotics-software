@@ -36,7 +36,8 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme UnitTest = apiFactory.createCategoryTheme("UnitTest");
    private static final CategoryTheme Dataset = apiFactory.createCategoryTheme("Dataset");
-   private static final CategoryTheme Next = apiFactory.createCategoryTheme("Next");
+   private static final CategoryTheme Previous = apiFactory.createCategoryTheme("Next");
+   private static final CategoryTheme Next = apiFactory.createCategoryTheme("Previous");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -53,6 +54,8 @@ public class UIVisibilityGraphsTopics
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
    private static final Category Root = apiFactory.getRootCategory(apiFactory.createCategoryTheme("VizGraphs"));
+   
+   public static final Topic<Boolean> GlobalReset = Root.topic(Reset);
 
    public static final Topic<PlanarRegionsList> PlanarRegionData = Root.child(PlanarRegion).topic(Data);
 
@@ -78,9 +81,11 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> CloseClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigableExtrusions).topic(Close);
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
-   public static final Topic<Boolean> NextDatasetRequest = Root.child(UnitTest).child(Dataset).child(Next).topic(Request);
 
-   public static final Topic<Boolean> GlobalReset = Root.topic(Reset);
+   // Topics for the test visualizer
+   public static final Topic<Boolean> PreviousDatasetRequest = Root.child(UnitTest).child(Dataset).child(Previous).topic(Request);
+   public static final Topic<String> CurrentDatasetPath = Root.child(UnitTest).child(Dataset).topic(Path);
+   public static final Topic<Boolean> NextDatasetRequest = Root.child(UnitTest).child(Dataset).child(Next).topic(Request);
 
    public static final API API = apiFactory.getAPIAndCloseFactory();
 }

@@ -1,6 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.visualizer;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.CurrentDatasetPath;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalPosition;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NextDatasetRequest;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PreviousDatasetRequest;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
@@ -26,7 +29,6 @@ import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionInnerVizMapMeshViewer;
@@ -54,7 +56,9 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private TextField goalTextFieldX, goalTextFieldY, goalTextFieldZ;
    @FXML
-   private ToggleButton nextDatasetButton;
+   private TextField currentDatasetTextField;
+   @FXML
+   private ToggleButton previousDatasetButton, nextDatasetButton;
 
    @FXML
    private ToggleButton showClusterRawPointsButton;
@@ -108,7 +112,9 @@ public class VisibilityGraphsTestVisualizer
 
    private void bindUIControls()
    {
-      messager.bindBidirectional(UIVisibilityGraphsTopics.NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
+      messager.bindBidirectional(PreviousDatasetRequest, previousDatasetButton.selectedProperty(), false);
+      messager.bindBidirectional(NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
+      messager.registerTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
 
       DecimalFormat formatter = new DecimalFormat(" 0.000;-0.000");
       
