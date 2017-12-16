@@ -22,7 +22,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class VisibilityGraphsIOTools
 {
-   private static final String DATA_FOLDER_NAME = "us/ihmc/pathPlanning/visibilityGraphs/data";
+   public static final String DATA_FOLDER_NAME = "us/ihmc/pathPlanning/visibilityGraphs/data";
    private static final String VIZ_GRAPHS_DATA_FOLDER_SUFFIX = "VizGraphs";
    public static final String INPUTS_PARAMETERS_FILENAME = "VizGraphsInputs.txt";
 
@@ -71,7 +71,7 @@ public class VisibilityGraphsIOTools
          return false;
       }
 
-      File parametersFile = new File(containingFolder.getAbsolutePath() + File.separator + createDefaultTimeStampedParmetersFileName());
+      File parametersFile = new File(containingFolder.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME);
       writeField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, () -> getPoint3DString(start));
       writeField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, () -> getPoint3DString(goal));
 
@@ -82,22 +82,11 @@ public class VisibilityGraphsIOTools
     * Generates a default timestamped name that can be used to generate automated and unique
     * folders.
     * 
-    * @return a {@code String} of the form: "20171201_163422_PlanarRegion".
+    * @return a {@code String} of the form: "20171201_163422_VizGraphs".
     */
    public static String createDefaultTimeStampedDatasetFolderName()
    {
       return PlanarRegionFileTools.getDate() + "_" + VIZ_GRAPHS_DATA_FOLDER_SUFFIX;
-   }
-
-   /**
-    * Generates a default timestamped name that can be used to generate automated and unique
-    * folders.
-    * 
-    * @return a {@code String} of the form: "20171201_163422_PlanarRegion".
-    */
-   public static String createDefaultTimeStampedParmetersFileName()
-   {
-      return PlanarRegionFileTools.getDate() + "_" + INPUTS_PARAMETERS_FILENAME;
    }
 
    public static boolean isWindows()

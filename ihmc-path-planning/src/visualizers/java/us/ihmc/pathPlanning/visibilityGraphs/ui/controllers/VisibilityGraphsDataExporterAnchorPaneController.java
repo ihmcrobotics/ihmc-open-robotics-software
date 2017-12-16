@@ -7,10 +7,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
-public class ExportUnitTestAnchorPaneController
+public class VisibilityGraphsDataExporterAnchorPaneController
 {
    private final DirectoryChooser planarRegionDirectoryChooser = new DirectoryChooser();
    private final File defaultPlanarRegionDataFile;
@@ -20,9 +21,9 @@ public class ExportUnitTestAnchorPaneController
    @FXML
    private TextField currentPlanarRegionDataFolderTextField;
 
-   public ExportUnitTestAnchorPaneController()
+   public VisibilityGraphsDataExporterAnchorPaneController()
    {
-      File file = new File("..\\test\\resources\\Data");
+      File file = new File("..\\test\\resources\\" + VisibilityGraphsIOTools.DATA_FOLDER_NAME);
       if (!file.exists())
          file = new File(".");
       defaultPlanarRegionDataFile = file;
