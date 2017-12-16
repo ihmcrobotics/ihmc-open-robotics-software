@@ -120,14 +120,14 @@ public class ClusterTools
       return extrusions;
    }
 
-   public static void extrudedNonNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
+   public static void extrudedNonNavigableBoundary(boolean extrudeToTheLeft, Cluster cluster, double extrusionDistance)
    {
-      cluster.addNonNavigableExtrusionsInLocal(extrudeRawPoints(index, cluster, extrusionDistance));
+      cluster.addNonNavigableExtrusionsInLocal(extrudeRawPoints(extrudeToTheLeft, cluster, extrusionDistance));
    }
 
-   public static void extrudedNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
+   public static void extrudedNavigableBoundary(boolean extrudeToTheLeft, Cluster cluster, double extrusionDistance)
    {
-      cluster.addNavigableExtrusionsInLocal(extrudeRawPoints(index, cluster, extrusionDistance));
+      cluster.addNavigableExtrusionsInLocal(extrudeRawPoints(extrudeToTheLeft, cluster, extrusionDistance));
    }
 
    public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2, double extrusionDistance)
@@ -181,12 +181,11 @@ public class ClusterTools
 
    public static void extrudeCluster(Cluster cluster, Point2DReadOnly observer, double extrusionDistance, List<Cluster> listOfClusters)
    {
-      int extrusionIndex = 0;
+      double extrusionDist1 = extrusionDistance - NAV_TO_NON_NAV_DISTANCE + cluster.getAdditionalExtrusionDistance();
+      double extrusionDist2 = extrusionDistance + cluster.getAdditionalExtrusionDistance();
+
       if (cluster.getType() == Type.LINE)
       {
-         double extrusionDist1 = extrusionDistance - NAV_TO_NON_NAV_DISTANCE + cluster.getAdditionalExtrusionDistance();
-         double extrusionDist2 = extrusionDistance + cluster.getAdditionalExtrusionDistance();
-
          List<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist1);
          List<Point2D> navExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist2);
 
@@ -196,38 +195,12 @@ public class ClusterTools
 
       if (cluster.getType() == Type.POLYGON)
       {
-         //                  System.out.println("Extruding Polygon");
          generateNormalsFromRawBoundaryMap(extrusionDistance, listOfClusters);
 
-         if (cluster.isObstacleClosed() && cluster.getExtrusionSide() != ExtrusionSide.AUTO)
-         {
-            if (cluster.getExtrusionSide() == ExtrusionSide.INSIDE)
-            {
-               extrusionIndex = 1;
-            }
-            else
-            {
-               extrusionIndex = 0;
-            }
-         }
-         else
-         {
-            extrusionIndex = ClusterTools.determineExtrusionSide(cluster, observer);
-         }
-
-         extrudePolygon(cluster, extrusionIndex, extrusionDistance);
+         boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
+         ClusterTools.extrudedNonNavigableBoundary(extrudeToTheLeft, cluster, extrusionDist1);
+         ClusterTools.extrudedNavigableBoundary(extrudeToTheLeft, cluster, extrusionDist2);
       }
-   }
-
-   public static void extrudePolygon(Cluster cluster, int extrusionIndex, double extrusionDistance)
-   {
-      extrusionDistance = extrusionDistance + cluster.getAdditionalExtrusionDistance();
-
-      double extrusionDist1 = extrusionDistance - NAV_TO_NON_NAV_DISTANCE;
-      double extrusionDist2 = extrusionDistance;
-
-      ClusterTools.extrudedNonNavigableBoundary(extrusionIndex, cluster, extrusionDist1);
-      ClusterTools.extrudedNavigableBoundary(extrusionIndex, cluster, extrusionDist2);
    }
 
    public static void generateNormalsFromRawBoundaryMap(double extrusionDistance, List<Cluster> listOfClusters)
