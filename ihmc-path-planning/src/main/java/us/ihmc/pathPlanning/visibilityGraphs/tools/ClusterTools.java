@@ -67,8 +67,10 @@ public class ClusterTools
       return true;
    }
 
-   public static void extrudedNonNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
+   public static List<Point2D> extrudeRawPoints(int index, Cluster cluster, double extrusionDistance)
    {
+      List<Point2D> extrusion = new ArrayList<>();
+
       for (int i = 0; i < cluster.getRawPointsInLocal2D().size() - 2; i++)
       {
          Point2D point1 = cluster.getRawPointInLocal2D(i);
@@ -107,66 +109,27 @@ public class ClusterTools
 
          adjustedIntersection.scaleAdd(extrusionDistance, directionOfIntersectionExtrusion, point2);
 
-         cluster.addNonNavigableExtrusionInLocal(adjustedIntersection);
+         extrusion.add(adjustedIntersection);
 
          index = index + 2;
       }
 
-      if (cluster.isObstacleClosed() && !cluster.getNonNavigableExtrusionsInLocal().isEmpty())
+      if (cluster.isObstacleClosed() && !extrusion.isEmpty())
       {
-         cluster.addNonNavigableExtrusionInLocal(cluster.getNonNavigableExtrusionsInLocal().get(0));
+         extrusion.add(extrusion.get(0));
       }
+
+      return extrusion;
+   }
+
+   public static void extrudedNonNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
+   {
+      cluster.addNonNavigableExtrusionsInLocal(extrudeRawPoints(index, cluster, extrusionDistance));
    }
 
    public static void extrudedNavigableBoundary(int index, Cluster cluster, double extrusionDistance)
    {
-      for (int i = 0; i < cluster.getRawPointsInLocal2D().size() - 2; i++)
-      {
-         Point2D point1 = cluster.getRawPointInLocal2D(i);
-         Point2D point2 = cluster.getRawPointInLocal2D(i + 1);
-         Point2D point3 = cluster.getRawPointInLocal2D(i + 2);
-
-         Vector2D vec1 = new Vector2D();
-         Vector2D vec2 = new Vector2D();
-         vec1.sub(point2, point1);
-         vec2.sub(point3, point2);
-
-         Point2D normal1 = cluster.getSafeNormalInLocal(index);
-         Point2D normal2 = cluster.getSafeNormalInLocal(index + 2);
-
-         Point2D intersectionPoint = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(normal1, vec1, normal2, vec2);
-
-         if (intersectionPoint == null)
-         {
-            if (debug)
-               PrintTools.error("Failed to extrude navigable boundary for region " + index + " \n" + "point1: " + point1 + "\n" + "point2: " + point2 + "\n"
-                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2
-                     + "\n" + "extrusionDistance: " + extrusionDistance);
-            continue;
-         }
-
-         if (intersectionPoint.distance(normal1) < 1E-6)
-         {
-            intersectionPoint.interpolate(normal1, normal2, 0.5);
-         }
-
-         Vector2D normalIntersection = new Vector2D();
-         normalIntersection.sub(intersectionPoint, point2);
-         normalIntersection.normalize();
-
-         Point2D adjustedIntersection = new Point2D();
-         adjustedIntersection.scaleAdd(extrusionDistance, normalIntersection, point2);
-
-         cluster.addNavigableExtrusionInLocal(adjustedIntersection);
-
-         index = index + 2;
-      }
-
-      if (cluster.isObstacleClosed() && !cluster.getNavigableExtrusionsInLocal().isEmpty())
-      {
-         cluster.addNavigableExtrusionInLocal(cluster.getNavigableExtrusionInLocal(0));
-      }
-
+      cluster.addNavigableExtrusionsInLocal(extrudeRawPoints(index, cluster, extrusionDistance));
    }
 
    public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2, double extrusionDistance)
