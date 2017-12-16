@@ -54,6 +54,7 @@ public class ExportUnitTestAnchorPaneController
    @FXML
    private void exportPlanarRegion()
    {
+      messager.submitMessage(UIVisibilityGraphsTopics.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
       messager.submitMessage(UIVisibilityGraphsTopics.exportUnitTestDataFile, true);
    }
 }
