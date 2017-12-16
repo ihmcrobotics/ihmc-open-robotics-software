@@ -30,7 +30,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = true;
+   private final static boolean debug = false;
    private final static boolean CONNECT_GOAL_TO_CLOSEST_REGION = false;
    private final static boolean TRUNCATE_OBSTACLE_REGIONS = false;
 
@@ -166,15 +166,20 @@ public class NavigableRegionsManager
 
          long startSnappingTime = System.currentTimeMillis();
          Point3DReadOnly snappedGoalPosition = getSnappedPointFromVisibilityGraph(goal);
-         if (debug && snappedGoalPosition == null)
-         {
-            PrintTools.error("Snapping of goal returned null.");
-         }
          Point3DReadOnly snappedStartPosition = getSnappedPointFromVisibilityGraph(start);
-         if (debug && snappedStartPosition == null)
+
+         if (debug)
          {
-            PrintTools.error("Snapping of start returned null.");
+            if (snappedGoalPosition == null)
+            {
+               PrintTools.error("Snapping of goal returned null.");
+            }
+            if (snappedStartPosition == null)
+            {
+               PrintTools.error("Snapping of start returned null.");
+            }
          }
+
          if (snappedGoalPosition == null || snappedStartPosition == null)
          {
             throw new RuntimeException("Snapping start/goal from visibility graph has failed.");
