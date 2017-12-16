@@ -13,10 +13,9 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopic
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class UnitTestExporter
+public class VisibilityGraphsDataExporter
 {
    private final ExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CANCEL_AND_REPORT);
 
@@ -26,41 +25,28 @@ public class UnitTestExporter
    private AtomicReference<Point3D> start;
    private AtomicReference<Point3D> goal;
 
-   public UnitTestExporter(REAMessager messager)
+   public VisibilityGraphsDataExporter(REAMessager messager)
    {
       planarRegionsState = messager.createInput(UIVisibilityGraphsTopics.PlanarRegionData);
       start = messager.createInput(UIVisibilityGraphsTopics.StartPosition);
       goal = messager.createInput(UIVisibilityGraphsTopics.GoalPosition);
       dataDirectoryPath = messager.createInput(UIVisibilityGraphsTopics.exportUnitTestPath, null);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.exportUnitTestDataFile, this::exportPlanarRegionData);
+      messager.registerTopicListener(UIVisibilityGraphsTopics.exportUnitTestDataFile, this::exportVisibilityGraphsData);
    }
 
-   public UnitTestExporter(File dataDirectoryPath)
+   public VisibilityGraphsDataExporter(File dataDirectoryPath)
    {
       planarRegionsState = new AtomicReference<>(null);
       this.dataDirectoryPath = new AtomicReference<>(dataDirectoryPath.getAbsolutePath());
    }
 
-   public void exportPlanarRegionData(PlanarRegionsList planarRegionsList)
-   {
-      planarRegionsState.set(planarRegionsList);
-      exportPlanarRegionData(true);
-   }
-
-   public void exportPlanarRegionData(PlanarRegion planarRegion)
-   {
-      planarRegionsState.set(new PlanarRegionsList(planarRegion));
-      exportPlanarRegionData(true);
-   }
-
-   private void exportPlanarRegionData(boolean export)
+   private void exportVisibilityGraphsData(boolean export)
    {
       PlanarRegionsList planarRegionData = planarRegionsState.get();
-      if (planarRegionData != null)
-         executor.execute(() -> executeOnThread(planarRegionData));
+      executor.execute(() -> executeOnThread(planarRegionData, start.get(), goal.get()));
    }
 
-   private void executeOnThread(PlanarRegionsList planarRegionData)
+   private void executeOnThread(PlanarRegionsList planarRegionData, Point3D start, Point3D goal)
    {
       if (dataDirectoryPath.get() == null)
       {
@@ -68,9 +54,27 @@ public class UnitTestExporter
          return;
       }
 
+      if (planarRegionData == null)
+      {
+         PrintTools.error("No planar regions, not exporting the data.");
+         return;
+      }
+
+      if (start == null)
+      {
+         PrintTools.error("No start position, not exporting the data.");
+         return;
+      }
+
+      if (goal == null)
+      {
+         PrintTools.error("No goal position, not exporting the data.");
+         return;
+      }
+
       Path folderPath = Paths.get(dataDirectoryPath.get());
       String datasetName = VisibilityGraphsIOTools.createDefaultTimeStampedDatasetFolderName();
-      VisibilityGraphsIOTools.exportDataset(folderPath, datasetName, planarRegionData, start.get(), goal.get());
+      VisibilityGraphsIOTools.exportDataset(folderPath, datasetName, planarRegionData, start, goal);
    }
 
    public void stop()

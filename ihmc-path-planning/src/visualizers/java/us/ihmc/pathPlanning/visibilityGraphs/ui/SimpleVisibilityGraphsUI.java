@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.ExportUnitTestAnchorPaneController;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsDataExporterAnchorPaneController;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.SimpleUIMenuController;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.StartGoalAnchorPaneController;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsAnchorPaneController;
@@ -30,7 +30,7 @@ public class SimpleVisibilityGraphsUI
    private final VisibilityGraphStartGoalEditor startGoalEditor;
    private final VisibilityGraphStartGoalViewer startGoalViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
-   private final UnitTestExporter unitTestExporter;
+   private final VisibilityGraphsDataExporter dataExporter;
 
    @FXML
    private SimpleUIMenuController simpleUIMenuController;
@@ -39,10 +39,10 @@ public class SimpleVisibilityGraphsUI
    @FXML
    private VisibilityGraphsAnchorPaneController visibilityGraphsAnchorPaneController;
    @FXML
-   private ExportUnitTestAnchorPaneController exportUnitTestAnchorPaneController;
+   private VisibilityGraphsDataExporterAnchorPaneController visibilityGraphsDataExporterAnchorPaneController;
    @FXML
    private VisibilityGraphsParametersAnchorPaneController visibilityGraphsParametersAnchorPaneController;
-   
+
    public SimpleVisibilityGraphsUI(Stage primaryStage) throws IOException
    {
       this.primaryStage = primaryStage;
@@ -61,13 +61,12 @@ public class SimpleVisibilityGraphsUI
       startGoalAnchorPaneController.bindControls();
       visibilityGraphsAnchorPaneController.attachMessager(messager);
       visibilityGraphsAnchorPaneController.bindControls();
-      
-      exportUnitTestAnchorPaneController.attachMessager(messager);
+
+      visibilityGraphsDataExporterAnchorPaneController.attachMessager(messager);
       visibilityGraphsParametersAnchorPaneController.attachMessager(messager);
       visibilityGraphsParametersAnchorPaneController.bindControls();
-      
-      unitTestExporter = new UnitTestExporter(messager);
-      
+
+      dataExporter = new VisibilityGraphsDataExporter(messager);
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -107,6 +106,6 @@ public class SimpleVisibilityGraphsUI
       startGoalEditor.stop();
       startGoalViewer.stop();
       visibilityGraphsRenderer.stop();
-      unitTestExporter.stop();
+      dataExporter.stop();
    }
 }
