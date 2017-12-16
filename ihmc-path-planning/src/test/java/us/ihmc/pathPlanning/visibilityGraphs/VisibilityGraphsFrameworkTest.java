@@ -42,7 +42,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 {
    private static final long TIMEOUT = Long.MAX_VALUE; // 30000;
    private static final double START_GOAL_EPSILON = 1.0e-2;
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    private static boolean DEBUG = true;
 
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
@@ -117,7 +117,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       VisibilityGraphsUnitTestDataset dataset = datasetIterator.next();
 
-      while (datasetIterator.hasNext())
+      while (dataset != null)
       {
          if (VISUALIZE)
          {
@@ -143,7 +143,7 @@ public class VisibilityGraphsFrameworkTest extends Application
                ThreadTools.sleep(200);
             }
 
-            if (nextDatasetRequested.get())
+            if (nextDatasetRequested.get() && datasetIterator.hasNext())
             {
                dataset = datasetIterator.next();
             }
@@ -151,10 +151,14 @@ public class VisibilityGraphsFrameworkTest extends Application
             {
                dataset = datasetIterator.previous();
             }
+            else
+            {
+               dataset = null;
+            }
          }
          else
          {
-            dataset = datasetIterator.next();
+            dataset = datasetIterator.hasNext() ? datasetIterator.next() : null;
          }
       }
 
@@ -190,6 +194,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       catch (Exception e)
       {
          e.printStackTrace();
+         ThreadTools.sleep(100); // Give some time to the exception to print.
       }
 
       if (VISUALIZE)
