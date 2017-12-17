@@ -39,6 +39,10 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme Previous = apiFactory.createCategoryTheme("Next");
    private static final CategoryTheme Next = apiFactory.createCategoryTheme("Previous");
    private static final CategoryTheme All = apiFactory.createCategoryTheme("All");
+   private static final CategoryTheme Walker = apiFactory.createCategoryTheme("Walker");
+   private static final CategoryTheme Offset = apiFactory.createCategoryTheme("Offset");
+   private static final CategoryTheme Size = apiFactory.createCategoryTheme("Size");
+   private static final CategoryTheme Collision = apiFactory.createCategoryTheme("Collision");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -89,6 +93,9 @@ public class UIVisibilityGraphsTopics
    public static final Topic<String> CurrentDatasetPath = Root.child(UnitTest).child(Dataset).topic(Path);
    public static final Topic<Boolean> NextDatasetRequest = Root.child(UnitTest).child(Dataset).child(Next).topic(Request);
    public static final Topic<List<String>> AllDatasetPaths = Root.child(UnitTest).child(Dataset).child(All).topic(Paths);
+   public static final Topic<Double> WalkerOffsetHeight = Root.child(UnitTest).child(Walker).child(Offset).topic(Data);
+   public static final Topic<Double> WalkerSize = Root.child(UnitTest).child(Walker).child(Size).topic(Data);
+   public static final Topic<List<Point3D>> WalkerCollisionLocations = Root.child(UnitTest).child(Walker).child(Collision).topic(Data);
 
    public static final API API = apiFactory.getAPIAndCloseFactory();
 }
