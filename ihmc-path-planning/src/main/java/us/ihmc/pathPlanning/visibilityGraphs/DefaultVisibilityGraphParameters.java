@@ -1,10 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools.ExtrusionDistanceCalculator;
-
 public class DefaultVisibilityGraphParameters implements VisibilityGraphsParameters
 {
    @Override
@@ -65,25 +60,5 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    public int getPlanarRegionMinSize()
    {
       return 2;
-   }
-
-   @Override
-   public ExtrusionDistanceCalculator getExtrusionDistanceCalculator()
-   {
-      return new ExtrusionDistanceCalculator()
-      {
-         @Override
-         public double computeExtrusionDistance(Cluster clusterInExtrusion, Point2DReadOnly pointToExtrude, double obstacleHeight)
-         {
-            if (obstacleHeight < 0.0)
-               return 0.0;
-            if (obstacleHeight <= getTooHighToStepDistance())
-            {
-               double alpha = obstacleHeight / getTooHighToStepDistance();
-               return EuclidCoreTools.interpolate(getExtrusionDistanceIfNotTooHighToStep(), getExtrusionDistance(), alpha);
-            }
-            return getExtrusionDistance();
-         }
-      };
    }
 }

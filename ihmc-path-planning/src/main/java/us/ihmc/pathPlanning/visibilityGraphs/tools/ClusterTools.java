@@ -365,7 +365,6 @@ public class ClusterTools
       cluster.setHomeRegion(true);
       cluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
       cluster.setExtrusionSide(ExtrusionSide.INSIDE);
-      cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.1));
    }
 
    public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions,
@@ -380,16 +379,6 @@ public class ClusterTools
             clusters.add(cluster);
             cluster.setType(Type.LINE);
             cluster.setTransformToWorld(transformToWorld);
-
-            if (PlanarRegionTools.isRegionTooHighToStep(region, homeRegion, visibilityGraphsParameters.getTooHighToStepDistance()))
-            {
-               cluster.setAdditionalExtrusionDistance(0);
-            }
-            else
-            {
-               cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
-                     - visibilityGraphsParameters.getExtrusionDistance());
-            }
 
             ArrayList<Point3D> points = new ArrayList<>();
             RigidBodyTransform transToWorld = new RigidBodyTransform();
@@ -419,20 +408,6 @@ public class ClusterTools
             clusters.add(cluster);
             cluster.setType(Type.POLYGON);
             cluster.setTransformToWorld(transformToWorld);
-
-            Vector3D normal1 = PlanarRegionTools.calculateNormal(region);
-            if (Math.abs(normal1.getZ()) >= 0.5) //if its closer to being flat you can probably step on it -->> extrude less
-            {
-               if (PlanarRegionTools.isRegionTooHighToStep(region, homeRegion, visibilityGraphsParameters.getTooHighToStepDistance())) //is flat but too high to step so its an obstacle
-               {
-                  cluster.setAdditionalExtrusionDistance(0);
-               }
-               else
-               {
-                  cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
-                        - visibilityGraphsParameters.getExtrusionDistance());
-               }
-            }
 
             RigidBodyTransform transToWorld = new RigidBodyTransform();
             region.getTransformToWorld(transToWorld);

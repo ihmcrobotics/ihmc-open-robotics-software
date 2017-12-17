@@ -21,7 +21,6 @@ public class Cluster
    private final List<Point2D> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2D> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
-   private double extrusionDistance = 0.0;
    private boolean isDynamic = false;
    private String name;
    private Point2D observerInLocal;
@@ -129,16 +128,6 @@ public class Cluster
    public void setDynamic(boolean dynamic)
    {
       isDynamic = dynamic;
-   }
-
-   public void setAdditionalExtrusionDistance(double extrusionDistance)
-   {
-      this.extrusionDistance = extrusionDistance;
-   }
-
-   public double getAdditionalExtrusionDistance()
-   {
-      return extrusionDistance;
    }
 
    public void addRawPointInLocal(Point3DReadOnly pointInLocal)
