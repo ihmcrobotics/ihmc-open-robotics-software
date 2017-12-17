@@ -100,7 +100,14 @@ public class ClusterTools
 
          double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
 
-         if (Math.abs(previousEdge.getDirection().angle(nextEdge.getDirection())) >= 0.5 * Math.PI)
+         boolean shouldExtrudeCorner;
+
+         if (extrudeToTheLeft)
+            shouldExtrudeCorner = previousEdge.getDirection().angle(nextEdge.getDirection()) <= -0.5 * Math.PI;
+         else
+            shouldExtrudeCorner = previousEdge.getDirection().angle(nextEdge.getDirection()) >= 0.5 * Math.PI;
+
+         if (shouldExtrudeCorner)
          {
             extrusions.addAll(extrudeCorner(pointToExtrude, previousEdge, nextEdge, extrudeToTheLeft, 3, extrusionDistance));
          }
