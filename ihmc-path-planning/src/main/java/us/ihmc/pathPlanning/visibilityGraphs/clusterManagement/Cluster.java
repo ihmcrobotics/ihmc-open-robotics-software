@@ -72,6 +72,7 @@ public class Cluster
    {
       if (closed && !this.isObstacleClosed)
       {
+         // FIXME I feel like this covers a bug, in the sense that I find surprising to add the two first points to the end not only one.
          rawPointsLocal.add(rawPointsLocal.get(0));
          rawPointsLocal.add(rawPointsLocal.get(1));
       }
