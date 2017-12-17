@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools.ExtrusionDistanceCalculator;
+
 public interface VisibilityGraphsParameters
 {
    public int getNumberOfForcedConnections();
@@ -36,5 +38,10 @@ public interface VisibilityGraphsParameters
    default double getMaxDistanceToProjectStartGoalToClosestRegion()
    {
       return 0.15;
+   }
+
+   default ExtrusionDistanceCalculator getExtrusionDistanceCalculator()
+   {
+      return (c, p, h) -> getExtrusionDistance() + c.getAdditionalExtrusionDistance();
    }
 }
