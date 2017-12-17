@@ -363,7 +363,7 @@ public class ClusterTools
       cluster.setType(Type.POLYGON);
       cluster.setTransformToWorld(transformToWorld);
       cluster.setHomeRegion(true);
-      cluster.addRawPointsInLocal2D(homeRegion.getConcaveHull(), true);
+      cluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
       cluster.setExtrusionSide(ExtrusionSide.INSIDE);
       cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.1));
    }
@@ -407,7 +407,7 @@ public class ClusterTools
 
             //Convert to local frame
             Point3D[] extremes = linearRegression.getTheTwoPointsFurthestApart();
-            cluster.addRawPointsInWorld3D(extremes, false);
+            cluster.addRawPointsInWorld3D(extremes);
          }
       }
 
@@ -443,8 +443,6 @@ public class ClusterTools
                concaveHullVertexWorld.applyTransform(transToWorld);
                cluster.addRawPointInWorld(concaveHullVertexWorld);
             }
-
-            cluster.setClusterClosure(true);
          }
       }
 

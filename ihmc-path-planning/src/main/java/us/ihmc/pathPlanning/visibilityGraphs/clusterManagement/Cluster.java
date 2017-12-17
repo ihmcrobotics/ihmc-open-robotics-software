@@ -21,8 +21,6 @@ public class Cluster
    private final List<Point2D> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2D> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
-   // TODO Provide some info about the usage/meaning of these fields
-   private boolean isObstacleClosed = false;
    private double extrusionDistance = 0.0;
    private boolean isDynamic = false;
    private String name;
@@ -66,18 +64,6 @@ public class Cluster
    public ExtrusionSide getExtrusionSide()
    {
       return extrusionSide;
-   }
-
-   public void setClusterClosure(boolean closed)
-   {
-      if (closed && !this.isObstacleClosed)
-      {
-         // FIXME I feel like this covers a bug, in the sense that I find surprising to add the two first points to the end not only one.
-         rawPointsLocal.add(rawPointsLocal.get(0));
-         rawPointsLocal.add(rawPointsLocal.get(1));
-      }
-
-      this.isObstacleClosed = closed;
    }
 
    public void setType(Type type)
@@ -145,11 +131,6 @@ public class Cluster
       isDynamic = dynamic;
    }
 
-   public boolean isObstacleClosed()
-   {
-      return isObstacleClosed;
-   }
-
    public void setAdditionalExtrusionDistance(double extrusionDistance)
    {
       this.extrusionDistance = extrusionDistance;
@@ -171,45 +152,37 @@ public class Cluster
       addRawPointInLocal(toLocal3D(pointInWorld));
    }
 
-   public void addRawPointsInLocal2D(List<? extends Point2DReadOnly> pointsInLocal, boolean closed)
+   public void addRawPointsInLocal2D(List<? extends Point2DReadOnly> pointsInLocal)
    {
       List<Point3D> point3DsInLocal = pointsInLocal.stream().map(Point3D::new).collect(Collectors.toList());
-      addRawPointsInLocal3D(point3DsInLocal, closed);
+      addRawPointsInLocal3D(point3DsInLocal);
    }
 
-   public void addRawPointsInLocal3D(List<? extends Point3DReadOnly> pointsInLocal, boolean closed)
+   public void addRawPointsInLocal3D(List<? extends Point3DReadOnly> pointsInLocal)
    {
-      isObstacleClosed = closed;
       pointsInLocal.forEach(point -> rawPointsLocal.add(new Point3D(point)));
-
-      if (closed)
-      {
-         rawPointsLocal.add(new Point3D(pointsInLocal.get(0)));
-         rawPointsLocal.add(new Point3D(pointsInLocal.get(1)));
-      }
-
       centroidInLocal.set(EuclidGeometryTools.averagePoint3Ds(rawPointsLocal));
    }
 
-   public void addRawPointsInWorld3D(List<? extends Point3DReadOnly> pointsInWorld, boolean closed)
+   public void addRawPointsInWorld3D(List<? extends Point3DReadOnly> pointsInWorld)
    {
       List<Point3D> pointsInLocal = pointsInWorld.stream().map(this::toLocal3D).collect(Collectors.toList());
-      addRawPointsInLocal3D(pointsInLocal, closed);
+      addRawPointsInLocal3D(pointsInLocal);
    }
 
-   public void addRawPointsInLocal2D(Point2DReadOnly[] pointsInLocal, boolean closed)
+   public void addRawPointsInLocal2D(Point2DReadOnly[] pointsInLocal)
    {
-      addRawPointsInLocal2D(Arrays.asList(pointsInLocal), closed);
+      addRawPointsInLocal2D(Arrays.asList(pointsInLocal));
    }
 
-   public void addRawPointsInLocal3D(Point3DReadOnly[] pointsInLocal, boolean closed)
+   public void addRawPointsInLocal3D(Point3DReadOnly[] pointsInLocal)
    {
-      addRawPointsInLocal3D(Arrays.asList(pointsInLocal), closed);
+      addRawPointsInLocal3D(Arrays.asList(pointsInLocal));
    }
 
-   public void addRawPointsInWorld3D(Point3DReadOnly[] pointsInWorld, boolean closed)
+   public void addRawPointsInWorld3D(Point3DReadOnly[] pointsInWorld)
    {
-      addRawPointsInWorld3D(Arrays.asList(pointsInWorld), closed);
+      addRawPointsInWorld3D(Arrays.asList(pointsInWorld));
    }
 
    public int getNumberOfRawPoints()

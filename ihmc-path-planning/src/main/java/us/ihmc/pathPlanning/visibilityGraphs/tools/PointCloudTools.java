@@ -324,7 +324,7 @@ public class PointCloudTools
                if (!pointsTemp.isEmpty())
                {
                   //                  System.out.println("adding points");
-                  cluster.addRawPointsInWorld3D(pointsTemp, true);
+                  cluster.addRawPointsInWorld3D(pointsTemp);
                   pointsTemp.clear();
                }
 
@@ -405,7 +405,7 @@ public class PointCloudTools
          if (!pointsTemp.isEmpty())
          {
             //            System.out.println("adding points");
-            cluster.addRawPointsInWorld3D(pointsTemp, true);
+            cluster.addRawPointsInWorld3D(pointsTemp);
             pointsTemp.clear();
          }
 
