@@ -75,9 +75,21 @@ public class ClusterTools
 
    public static List<Point2D> extrudeRawPoints(boolean extrudedToTheLeft, Cluster cluster, ExtrusionDistanceCalculator calculator)
    {
+      if (cluster.getNumberOfRawPoints() == 2)
+      {
+         Point2D endpoint0 = cluster.getRawPointInLocal2D(0);
+         Point2D endpoint1 = cluster.getRawPointInLocal2D(1);
+         double obstacleHeight0 = cluster.getRawPointInLocal3D(0).getZ();
+         double obstacleHeight1 = cluster.getRawPointInLocal3D(1).getZ();
+         double extrusionDistance0 = calculator.computeExtrusionDistance(endpoint0, obstacleHeight0);
+         double extrusionDistance1 = calculator.computeExtrusionDistance(endpoint1, obstacleHeight1);
+
+         return extrudeLine(endpoint0, extrusionDistance0, endpoint1, extrusionDistance1, 5);
+      }
+
       List<Point2D> extrusions = new ArrayList<>();
 
-      for (int i = 1; i < cluster.getRawPointsInLocal2D().size() - 1; i++)
+      for (int i = 1; i < cluster.getNumberOfRawPoints() - 1; i++)
       {
          Point2D previousPoint = cluster.getRawPointInLocal2D(i - 1);
          Point2D pointToExtrude = cluster.getRawPointInLocal2D(i);
@@ -111,6 +123,7 @@ public class ClusterTools
          extrusions.add(extrusion);
       }
 
+      // FIXME I feel like this covers a bug. The loop should go to cluster.getNumberOfRawPoints() instead of (cluster.getNumberOfRawPoints()-1)
       if (cluster.isObstacleClosed() && !extrusions.isEmpty())
       {
          extrusions.add(extrusions.get(0));
