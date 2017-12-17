@@ -218,21 +218,23 @@ public class VisibilityTools
                                                                                                           clusters.get(clusters.size() - 1)
                                                                                                                   .getNonNavigableExtrusionsInLocal());
 
-         List<Connection> finalList = new ArrayList<>(connectionsInsideHomeRegion);
          for (Connection connection : connectionsInsideHomeRegion)
          {
-            for (Connection connectionToRemove : connectionsToRemove)
+            boolean addConnection = true;
+
+            for (int i = 0; i < connectionsToRemove.size(); i++)
             {
+               Connection connectionToRemove = connectionsToRemove.get(i);
+
                if (connection.epsilonEquals(connectionToRemove, 1E-5))
                {
-                  finalList.remove(connection);
+                  addConnection = false;
+                  break;
                }
             }
-         }
 
-         for (Connection connection : finalList)
-         {
-            masterListOfConnections.add(connection);
+            if (addConnection)
+               masterListOfConnections.add(connection);
          }
       }
       else
