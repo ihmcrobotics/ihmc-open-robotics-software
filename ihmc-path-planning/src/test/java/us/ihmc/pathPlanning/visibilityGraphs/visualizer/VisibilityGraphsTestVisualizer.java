@@ -57,6 +57,7 @@ public class VisibilityGraphsTestVisualizer
    private final ClusterMeshViewer clusterMeshViewer;
    private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
    private final NavigableRegionsInterConnectionViewer navigableRegionsInterConnectionViewer;
+   private final WalkerCollisionsViewer walkerCollisionsViewer;
 
    @FXML
    private BorderPane mainPane;
@@ -103,6 +104,7 @@ public class VisibilityGraphsTestVisualizer
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
       navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager, executorService);
       navigableRegionsInterConnectionViewer = new NavigableRegionsInterConnectionViewer(messager, executorService);
+      walkerCollisionsViewer = new WalkerCollisionsViewer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
@@ -110,6 +112,7 @@ public class VisibilityGraphsTestVisualizer
       view3dFactory.addNodeToView(clusterMeshViewer.getRoot());
       view3dFactory.addNodeToView(navigableRegionInnerVizMapMeshViewer.getRoot());
       view3dFactory.addNodeToView(navigableRegionsInterConnectionViewer.getRoot());
+      view3dFactory.addNodeToView(walkerCollisionsViewer.getRoot());
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
@@ -183,6 +186,7 @@ public class VisibilityGraphsTestVisualizer
       clusterMeshViewer.start();
       navigableRegionInnerVizMapMeshViewer.start();
       navigableRegionsInterConnectionViewer.start();
+      walkerCollisionsViewer.start();
    }
 
    public void stop()
@@ -193,6 +197,7 @@ public class VisibilityGraphsTestVisualizer
       clusterMeshViewer.stop();
       navigableRegionInnerVizMapMeshViewer.stop();
       navigableRegionsInterConnectionViewer.stop();
+      walkerCollisionsViewer.stop();
       messager.closeMessager();
       Platform.exit();
    }

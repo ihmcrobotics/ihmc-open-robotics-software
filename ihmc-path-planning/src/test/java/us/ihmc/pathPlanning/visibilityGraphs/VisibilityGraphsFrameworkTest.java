@@ -20,9 +20,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -80,6 +81,8 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusions);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowLocalGraphs, showRegionInnerConnections);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterConnections, showRegionInterConnections);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadius);
       }
    }
 
@@ -258,7 +261,10 @@ public class VisibilityGraphsFrameworkTest extends Application
                                   pathStart.geometricallyEquals(dataset.getStart(), START_GOAL_EPSILON));
 
       // "Walk" along the body path and assert that the walker does not go through any region.
+      int currentSegmentIndex = 0;
       Point3D walkerCurrentPosition = new Point3D(pathStart);
+      List<Point3D> collisions = new ArrayList<>();
+
       while (!walkerCurrentPosition.geometricallyEquals(pathEnd, 1.0e-3))
       {
          for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
@@ -286,24 +292,45 @@ public class VisibilityGraphsFrameworkTest extends Application
 
             for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
             {
-               distance = planarRegion.getConvexPolygon(i).distance(walkerBody2D);
+               double distanceXY = planarRegion.getConvexPolygon(i).distance(walkerBody2D);
+               distance = Math.sqrt(EuclidCoreTools.normSquared(distanceXY, walkerBody3D.getZ()));
 
                if (distance < walkerRadius)
                {
-                  errorMessages += fail(dataset, "Body path is going through a region");
-                  break;
+                  Point2D intersectionLocal = planarRegion.getConvexPolygon(i).orthogonalProjectionCopy(walkerBody2D);
+                  if (intersectionLocal == null) // walkerBody2D is inside the polygon
+                     intersectionLocal = walkerBody2D;
+                  Point3D intersectionWorld = toWorld(intersectionLocal, transformToWorld);
+                  errorMessages += fail(dataset, "Body path is going through a region at: " + intersectionWorld + ", distance from region: " + distance);
+                  collisions.add(intersectionWorld);
                }
             }
-            if (!errorMessages.isEmpty())
-               break;
          }
-         if (!errorMessages.isEmpty())
-            break;
 
-         walkerCurrentPosition = travelAlongBodyPath(walkerMarchingSpeed, walkerCurrentPosition, path);
+         Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
+         Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1);
+         Vector3D segmentDirection = new Vector3D();
+         segmentDirection.sub(segmentEnd, segmentStart);
+         segmentDirection.normalize();
+         walkerCurrentPosition.scaleAdd(walkerMarchingSpeed, segmentDirection, walkerCurrentPosition);
+         if (segmentStart.distance(segmentEnd) < segmentStart.distance(walkerCurrentPosition))
+         {
+            walkerCurrentPosition.set(segmentEnd);
+            currentSegmentIndex++;
+         }
       }
 
+      if (VISUALIZE)
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerCollisionLocations, collisions);
+
       return addPrefixToErrorMessages(dataset, errorMessages);
+   }
+
+   private static Point3D toWorld(Point2DReadOnly pointLocal, Transform transformToWorld)
+   {
+      Point3D inWorld = new Point3D(pointLocal);
+      transformToWorld.transform(inWorld);
+      return inWorld;
    }
 
    private static String addPrefixToErrorMessages(VisibilityGraphsUnitTestDataset dataset, String errorMessages)
@@ -313,34 +340,6 @@ public class VisibilityGraphsFrameworkTest extends Application
          return "\n" + dataset.getDatasetName() + errorMessages;
       else
          return "";
-   }
-
-   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
-   {
-      Point3D newPosition = new Point3D();
-
-      for (int i = 0; i < bodyPath.size() - 1; i++)
-      {
-         LineSegment3D segment = new LineSegment3D(bodyPath.get(i), bodyPath.get(i + 1));
-
-         if (segment.distance(startingPosition) < 1.0e-4)
-         {
-            Vector3D segmentDirection = segment.getDirection(true);
-            newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
-
-            if (segment.distance(newPosition) < 1.0e-4)
-            {
-               return newPosition;
-            }
-            else
-            {
-               distanceToTravel -= startingPosition.distance(segment.getSecondEndpoint());
-               startingPosition = new Point3D(segment.getSecondEndpoint());
-            }
-         }
-      }
-
-      return new Point3D(startingPosition);
    }
 
    private String fail(VisibilityGraphsUnitTestDataset dataset, String message)

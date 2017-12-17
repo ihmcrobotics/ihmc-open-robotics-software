@@ -52,6 +52,8 @@ public class BodyPathMeshViewer extends AnimationTimer
 
    private final AtomicReference<Pair<Mesh, Material>> bodyPathMeshToRender = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show, resetRequested;
+   private final AtomicReference<Double> walkerRadius;
+   private final AtomicReference<Double> walkerOffsetHeight;
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
    public BodyPathMeshViewer(REAMessager messager)
@@ -70,7 +72,9 @@ public class BodyPathMeshViewer extends AnimationTimer
 
       bodyPathMeshView.setMouseTransparent(true);
       bodyPathMeshView.setMaterial(new PhongMaterial(Color.YELLOW));
-      walker.setRadius(1.5 * BODYPATH_LINE_THICKNESS);
+
+      walkerRadius = messager.createInput(UIVisibilityGraphsTopics.WalkerSize, 1.0 * BODYPATH_LINE_THICKNESS);
+      walkerOffsetHeight = messager.createInput(UIVisibilityGraphsTopics.WalkerOffsetHeight, 0.0);
       walker.setMaterial(new PhongMaterial(Color.YELLOW));
 
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
@@ -119,6 +123,8 @@ public class BodyPathMeshViewer extends AnimationTimer
          if (show.get() && ! root.getChildren().contains(walker))
             root.getChildren().add(walker);
 
+         walker.setRadius(walkerRadius.get());
+
          double distance = currentWalkerDistanceInPath.getAndAdd(WALKER_SPEED);
          setWalkerPosition(PathTools.getPointAlongPathGivenDistanceFromStart(bodyPath, distance));
 
@@ -137,7 +143,7 @@ public class BodyPathMeshViewer extends AnimationTimer
          return;
       walker.setTranslateX(position.getX());
       walker.setTranslateY(position.getY());
-      walker.setTranslateZ(position.getZ());
+      walker.setTranslateZ(position.getZ() + walkerOffsetHeight.get());
    }
 
    private void processBodyPathOnThread(List<Point3DReadOnly> bodyPath)
