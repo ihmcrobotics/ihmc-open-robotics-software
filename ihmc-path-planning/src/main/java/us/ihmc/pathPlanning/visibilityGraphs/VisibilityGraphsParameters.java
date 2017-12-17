@@ -1,5 +1,8 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools.ExtrusionDistanceCalculator;
 
 public interface VisibilityGraphsParameters
@@ -42,6 +45,20 @@ public interface VisibilityGraphsParameters
 
    default ExtrusionDistanceCalculator getExtrusionDistanceCalculator()
    {
-      return (c, p, h) -> getExtrusionDistance() + c.getAdditionalExtrusionDistance();
+      return new ExtrusionDistanceCalculator()
+      {
+         @Override
+         public double computeExtrusionDistance(Cluster clusterInExtrusion, Point2DReadOnly pointToExtrude, double obstacleHeight)
+         {
+            if (obstacleHeight < 0.0)
+               return 0.0;
+            if (obstacleHeight <= getTooHighToStepDistance())
+            {
+               double alpha = obstacleHeight / getTooHighToStepDistance();
+               return EuclidCoreTools.interpolate(getExtrusionDistanceIfNotTooHighToStep(), getExtrusionDistance(), alpha);
+            }
+            return getExtrusionDistance();
+         }
+      };
    }
 }
