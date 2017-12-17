@@ -26,49 +26,6 @@ public class ClusterTools
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.01;
    private static final boolean debug = false;
 
-   public static int determineExtrusionSide(Cluster cluster, Point2DReadOnly observer)
-   {
-      int index = 0;
-
-      for (int i = 0; i < cluster.getNumberOfNormals(); i++)
-      {
-         if (isNormalVisible(cluster, i, observer))
-         {
-            index = i;
-            break;
-         }
-      }
-
-      if (index % 2 == 0)
-      {
-         index = 0;
-      }
-      else
-      {
-         index = 1;
-      }
-
-      return index;
-   }
-
-   private static boolean isNormalVisible(Cluster cluster, int normalIndex, Point2DReadOnly observer)
-   {
-      List<Point2D> rawPointsInLocal = cluster.getRawPointsInLocal2D();
-      for (int i = 1; i < rawPointsInLocal.size(); i++)
-      {
-         Point2D target = new Point2D(cluster.getNormalInLocal(normalIndex));
-
-         Point2D startPt = rawPointsInLocal.get(i - 1);
-         Point2D endPt = rawPointsInLocal.get(i);
-
-         if (EuclidGeometryTools.doLineSegment2DsIntersect(observer, target, startPt, endPt))
-         {
-            return false;
-         }
-      }
-      return true;
-   }
-
    public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ExtrusionDistanceCalculator calculator)
    {
       if (cluster.getNumberOfRawPoints() == 2)
@@ -236,35 +193,9 @@ public class ClusterTools
 
       if (cluster.getType() == Type.POLYGON)
       {
-         generateNormalsFromRawBoundaryMap(0.2, listOfClusters);
-
          boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
          cluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
          cluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, navigableCalculator));
-      }
-   }
-
-   public static void generateNormalsFromRawBoundaryMap(double extrusionDistance, List<Cluster> listOfClusters)
-   {
-      for (Cluster cluster : listOfClusters)
-      {
-         List<Point2D> rawPoints = cluster.getRawPointsInLocal2D();
-         for (int i = 0; i < rawPoints.size() - 1; i++)
-         {
-            Point2D first = rawPoints.get(i);
-            Point2D second = rawPoints.get(i + 1);
-            generateNormalsForSegment(first, second, cluster, extrusionDistance);
-         }
-      }
-   }
-
-   public static void generateNormalsForSegment(Point2DReadOnly first, Point2DReadOnly second, Cluster cluster, double extrusionDistance)
-   {
-      List<Point2D> points = EuclidGeometryTools.perpendicularBisectorSegment2D(first, second, 0.001);
-
-      for (Point2D normalPoint : points)
-      {
-         cluster.addNormalInLocal(normalPoint);
       }
    }
 
