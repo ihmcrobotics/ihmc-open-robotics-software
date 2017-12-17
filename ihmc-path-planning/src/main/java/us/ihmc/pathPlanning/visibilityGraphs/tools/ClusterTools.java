@@ -19,6 +19,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Type;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.ListWrappingIndexTools;
 
 public class ClusterTools
 {
@@ -68,7 +69,7 @@ public class ClusterTools
       return true;
    }
 
-   public static List<Point2D> extrudePolygon(boolean extrudedToTheLeft, Cluster cluster, ExtrusionDistanceCalculator calculator)
+   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ExtrusionDistanceCalculator calculator)
    {
       if (cluster.getNumberOfRawPoints() == 2)
       {
@@ -84,11 +85,13 @@ public class ClusterTools
 
       List<Point2D> extrusions = new ArrayList<>();
 
-      for (int i = 1; i < cluster.getNumberOfRawPoints() - 1; i++)
+      List<Point2D> rawPoints = cluster.getRawPointsInLocal2D();
+
+      for (int i = 0; i < cluster.getNumberOfRawPoints(); i++)
       {
-         Point2D previousPoint = cluster.getRawPointInLocal2D(i - 1);
-         Point2D pointToExtrude = cluster.getRawPointInLocal2D(i);
-         Point2D nextPoint = cluster.getRawPointInLocal2D(i + 1);
+         Point2D previousPoint = ListWrappingIndexTools.getPrevious(i, rawPoints);
+         Point2D pointToExtrude = rawPoints.get(i);
+         Point2D nextPoint = ListWrappingIndexTools.getNext(i, rawPoints);
 
          double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
 
@@ -97,32 +100,45 @@ public class ClusterTools
 
          double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
 
-         if (extrudedToTheLeft)
+         if (Math.abs(previousEdge.getDirection().angle(nextEdge.getDirection())) >= 0.5 * Math.PI)
          {
-            previousEdge.shiftToLeft(extrusionDistance);
-            nextEdge.shiftToLeft(extrusionDistance);
+            extrusions.addAll(extrudeCorner(pointToExtrude, previousEdge, nextEdge, extrudeToTheLeft, 3, extrusionDistance));
          }
          else
          {
-            previousEdge.shiftToRight(extrusionDistance);
-            nextEdge.shiftToRight(extrusionDistance);
+            if (extrudeToTheLeft)
+            {
+               previousEdge.shiftToLeft(extrusionDistance);
+               nextEdge.shiftToLeft(extrusionDistance);
+            }
+            else
+            {
+               previousEdge.shiftToRight(extrusionDistance);
+               nextEdge.shiftToRight(extrusionDistance);
+            }
+
+            Point2D extrusion = previousEdge.intersectionWith(nextEdge);
+            Vector2D extrusionDirection = new Vector2D();
+
+            if (extrusion == null)
+            {
+               extrusion = new Point2D();
+               EuclidGeometryTools.perpendicularVector2D(previousEdge.getDirection(), extrusionDirection);
+            }
+            else
+            {
+               extrusionDirection.sub(extrusion, pointToExtrude);
+               extrusionDirection.normalize();
+            }
+
+            extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
+
+            extrusions.add(extrusion);
          }
-
-         Point2D extrusion = previousEdge.intersectionWith(nextEdge);
-
-         Vector2D extrusionDirection = new Vector2D();
-         extrusionDirection.sub(extrusion, pointToExtrude);
-         extrusionDirection.normalize();
-         extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
-
-         extrusions.add(extrusion);
       }
 
-      // FIXME I feel like this covers a bug. The loop should go to cluster.getNumberOfRawPoints() instead of (cluster.getNumberOfRawPoints()-1)
-      if (cluster.isObstacleClosed() && !extrusions.isEmpty())
-      {
+      if (!extrusions.isEmpty())
          extrusions.add(extrusions.get(0));
-      }
 
       return extrusions;
    }
