@@ -33,7 +33,7 @@ public class NavigableRegionsManager
 {
    private final static boolean debug = false;
    private final static boolean CONNECT_GOAL_TO_CLOSEST_REGION = false;
-   private final static boolean TRUNCATE_OBSTACLE_REGIONS = false;
+   private final static boolean TRUNCATE_OBSTACLE_REGIONS = true;
 
    private final static int START_GOAL_ID = 0;
 
@@ -684,7 +684,7 @@ public class NavigableRegionsManager
       if (TRUNCATE_OBSTACLE_REGIONS)
       {
          double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
-         int minTruncatedSize = 5; // TODO Extract me!
+         int minTruncatedSize = 0; // TODO Extract me!
          double minTruncatedArea = 0.01; // TODO Extract me!
          regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
                                                                                                         depthThresholdForConvexDecomposition, minTruncatedSize,
