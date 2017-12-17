@@ -3,13 +3,14 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -128,53 +129,66 @@ public class ClusterTools
       cluster.addNavigableExtrusionsInLocal(extrudeRawPoints(extrudeToTheLeft, cluster, extrusionDistance));
    }
 
-   public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2, double extrusionDistance)
+   public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2, double extrusionDistance, int numberOfExtrusionsAtEndpoints)
    {
-      ArrayList<Point2D> points = new ArrayList<>();
-
-      Vector2D lineDirection = new Vector2D();
-      Point2D endExtrusion1 = new Point2D();
-      Point2D endExtrusion2 = new Point2D();
-
-      lineDirection.sub(endpoint2, endpoint1);
-      lineDirection.normalize();
-
-      endExtrusion1.scaleAdd(extrusionDistance, lineDirection, endpoint2);
-      endExtrusion2.scaleAdd(-extrusionDistance, lineDirection, endpoint1);
-
-      List<Point2D> perpendicularBisectorSegment2D = EuclidGeometryTools.perpendicularBisectorSegment2D(endpoint1, endpoint2, extrusionDistance);
-      Point2D midNormal1 = perpendicularBisectorSegment2D.get(0);
-      Point2D midNormal2 = perpendicularBisectorSegment2D.get(1);
-
-      points.add(endExtrusion2);
-      points.add(extrudeCorner(endpoint1, lineDirection, endExtrusion2, midNormal1, extrusionDistance));
-      points.add(midNormal1);
-      points.add(extrudeCorner(endpoint2, lineDirection, endExtrusion1, midNormal1, extrusionDistance));
-      points.add(endExtrusion1);
-      points.add(extrudeCorner(endpoint2, lineDirection, endExtrusion1, midNormal2, extrusionDistance));
-      points.add(midNormal2);
-      points.add(extrudeCorner(endpoint1, lineDirection, endExtrusion2, midNormal2, extrusionDistance));
-      points.add(endExtrusion2);
-
-      return points;
+      return extrudeLine(endpoint1, extrusionDistance, endpoint2, extrusionDistance, numberOfExtrusionsAtEndpoints);
    }
 
-   // FIXME That method is terrible
-   private static Point2D extrudeCorner(Point2DReadOnly pointOnLine, Vector2DReadOnly cornerNormal, Point2DReadOnly extrudedPoint1,
-                                        Point2DReadOnly extrudedPoint2, double extrusion)
+   public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, double extrusionDistance1, Point2DReadOnly endpoint2, double extrusionDistance2,
+                                           int numberOfExtrusionsAtEndpoints)
    {
-      Vector2D cornerTangent = EuclidGeometryTools.perpendicularVector2D(cornerNormal);
-      Vector2D vecExtrToCorner = new Vector2D();
+      List<Point2D> extrusions = new ArrayList<>();
+      Line2D edge1 = new Line2D(endpoint1, endpoint2);
+      Line2D edge2 = new Line2D(endpoint2, endpoint1);
 
-      Point2D inter1 = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(extrudedPoint1, cornerTangent, extrudedPoint2, cornerNormal);
+      List<Point2D> extrusions1 = extrudeCorner(endpoint1, edge2, edge1, true, numberOfExtrusionsAtEndpoints, extrusionDistance1);
+      List<Point2D> extrusions2 = extrudeCorner(endpoint2, edge1, edge2, true, numberOfExtrusionsAtEndpoints, extrusionDistance2);
+      extrusions.addAll(extrusions1);
+      extrusions.addAll(extrusions2);
+      extrusions.add(extrusions1.get(0));
 
-      vecExtrToCorner.sub(inter1, pointOnLine);
-      vecExtrToCorner.normalize();
+      return extrusions;
+   }
 
-      Point2D extrusion1 = new Point2D();
-      extrusion1.scaleAdd(extrusion, vecExtrToCorner, pointOnLine);
+   public static List<Point2D> extrudeCorner(Point2DReadOnly cornerPointToExtrude, Line2D previousEdge, Line2D nextEdge, boolean extrudeToTheLeft,
+                                             int numberOfExtrusions, double extrusionDistance)
+   {
+      List<Point2D> extrusions = new ArrayList<>();
 
-      return extrusion1;
+      Vector2D firstExtrusionDirection = EuclidGeometryTools.perpendicularVector2D(previousEdge.getDirection());
+      if (!extrudeToTheLeft)
+         firstExtrusionDirection.negate();
+      Point2D firstExtrusion = new Point2D();
+      firstExtrusion.scaleAdd(extrusionDistance, firstExtrusionDirection, cornerPointToExtrude);
+      extrusions.add(firstExtrusion);
+
+      Vector2D lastExtrusionDirection = EuclidGeometryTools.perpendicularVector2D(nextEdge.getDirection());
+      if (!extrudeToTheLeft)
+         lastExtrusionDirection.negate();
+      Point2D lastExtrusion = new Point2D();
+      lastExtrusion.scaleAdd(extrusionDistance, lastExtrusionDirection, cornerPointToExtrude);
+
+      if (numberOfExtrusions > 2)
+      {
+         double openingAngle = firstExtrusionDirection.angle(lastExtrusionDirection);
+         if (MathTools.epsilonEquals(Math.PI, Math.abs(openingAngle), 1.0e-7))
+            openingAngle = extrudeToTheLeft ? -Math.PI : Math.PI;
+
+         Vector2D extrusionDirection = new Vector2D();
+
+         for (int i = 1; i < numberOfExtrusions - 1; i++)
+         {
+            double alpha = i / (numberOfExtrusions - 1.0);
+            RotationMatrixTools.applyYawRotation(alpha * openingAngle, firstExtrusionDirection, extrusionDirection);
+            Point2D extrusion = new Point2D();
+            extrusion.scaleAdd(extrusionDistance, extrusionDirection, cornerPointToExtrude);
+            extrusions.add(extrusion);
+         }
+      }
+
+      extrusions.add(lastExtrusion);
+
+      return extrusions;
    }
 
    public static void extrudeCluster(Cluster cluster, Point2DReadOnly observer, double extrusionDistance, List<Cluster> listOfClusters)
@@ -184,8 +198,11 @@ public class ClusterTools
 
       if (cluster.getType() == Type.LINE)
       {
-         List<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist1);
-         List<Point2D> navExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist2);
+         int numberOfExtrusionsAtEndpoints = 5;
+         List<Point2D> nonNavExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist1,
+                                                                   numberOfExtrusionsAtEndpoints);
+         List<Point2D> navExtrusions = ClusterTools.extrudeLine(cluster.getRawPointInLocal2D(0), cluster.getRawPointInLocal2D(1), extrusionDist2,
+                                                                numberOfExtrusionsAtEndpoints);
 
          cluster.addNonNavigableExtrusionsInLocal(nonNavExtrusions);
          cluster.addNavigableExtrusionsInLocal(navExtrusions);
