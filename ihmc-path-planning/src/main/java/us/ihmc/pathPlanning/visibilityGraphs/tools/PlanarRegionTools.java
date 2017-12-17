@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -464,6 +465,21 @@ public class PlanarRegionTools
       return true;
    }
 
+   public static List<PlanarRegion> ensureClockwiseOrder(List<PlanarRegion> planarRegions)
+   {
+      List<PlanarRegion> copies = new ArrayList<>(planarRegions.size());
+
+      for (PlanarRegion planarRegion : planarRegions)
+      {
+         PlanarRegion copy = planarRegion.copy();
+         List<Point2DReadOnly> concaveHullVertices = Arrays.asList(copy.getConcaveHull());
+         ConcaveHullTools.ensureClockwiseOrdering(concaveHullVertices);
+         copies.add(copy);
+      }
+
+      return copies;
+   }
+
    public static List<PlanarRegion> filterPlanarRegionsByHullSize(int minNumberOfVertices, List<PlanarRegion> planarRegions)
    {
       if (minNumberOfVertices <= 0)
@@ -688,7 +704,8 @@ public class PlanarRegionTools
                truncatedConcaveHullVertices.add(new Point2D(intersection));
             }
          }
-         else if (signedDistance >= 0.0)
+         
+         if (signedDistance >= -epsilonDistance)
          {
             truncatedConcaveHullVertices.add(new Point2D(vertex2D));
          }
