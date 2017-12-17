@@ -17,7 +17,6 @@ public class Cluster
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private final List<Point3D> rawPointsLocal = new ArrayList<>();
-   private final List<Point2D> normalsInLocal = new ArrayList<>();
    private final List<Point2D> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2D> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
@@ -224,16 +223,6 @@ public class Cluster
       return rawPointsLocal.stream().map(Point2D::new).collect(Collectors.toList());
    }
 
-   public void addNormalInLocal(Point2DReadOnly normalInLocal)
-   {
-      normalsInLocal.add(new Point2D(normalInLocal));
-   }
-
-   public void addNormalInWorld(Point3DReadOnly normalInWorld)
-   {
-      normalsInLocal.add(toLocal2D(normalInWorld));
-   }
-
    public void addNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
    {
       navigableExtrusionsInLocal.add(new Point2D(navigableExtrusionInLocal));
@@ -342,31 +331,6 @@ public class Cluster
    public List<Point3D> getNonNavigableExtrusionsInWorld()
    {
       return nonNavigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
-   }
-
-   public int getNumberOfNormals()
-   {
-      return normalsInLocal.size();
-   }
-
-   public Point2D getNormalInLocal(int i)
-   {
-      return normalsInLocal.get(i);
-   }
-
-   public List<Point2D> getNormalsInLocal()
-   {
-      return normalsInLocal;
-   }
-
-   public Point3D getNormalInWorld(int i)
-   {
-      return toWorld3D(getNormalInLocal(i));
-   }
-
-   public List<Point3D> getNormalsInWorld()
-   {
-      return normalsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
    private Point3D toWorld3D(Point2DReadOnly pointInLocal)
