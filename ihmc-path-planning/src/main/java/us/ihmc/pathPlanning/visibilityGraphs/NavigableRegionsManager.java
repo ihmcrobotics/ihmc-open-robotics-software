@@ -73,6 +73,7 @@ public class NavigableRegionsManager
 
    public void setPlanarRegions(List<PlanarRegion> regions)
    {
+      regions = PlanarRegionTools.ensureClockwiseOrder(regions);
       regions = PlanarRegionTools.filterPlanarRegionsByArea(parameters.getPlanarRegionMinArea(), regions);
       regions = PlanarRegionTools.filterPlanarRegionsByHullSize(parameters.getPlanarRegionMinSize(), regions);
 
