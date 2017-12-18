@@ -72,7 +72,7 @@ public class StartGoalAnchorPaneController
       goalPositionProperty.bindBidirectionalZ(goalZSpinner.getValueFactory().valueProperty());
       messager.bindBidirectional(UIVisibilityGraphsTopics.GoalPosition, goalPositionProperty, false);
 
-      messager.registerTopicListener(UIVisibilityGraphsTopics.GlobalReset, reset -> clearStartGoalTextFields());
+      messager.registerJavaFXSyncedTopicListener(UIVisibilityGraphsTopics.GlobalReset, reset -> clearStartGoalTextFields());
    }
 
    private void clearStartGoalTextFields()
