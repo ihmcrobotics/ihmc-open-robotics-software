@@ -1,8 +1,22 @@
 package us.ihmc.simulationconstructionset;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import com.badlogic.gdx.Input;
+
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -13,6 +27,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 
 
@@ -27,9 +42,12 @@ public class LinkHollowCylinder extends Link
    public static final double aluminumDensityKgPerCubicM = 2800.0;
    private static final double wallThicknessPercentOfRadius = 0.2; // [0.1]
 
+   
+   private final Vector3D cylinderZAxisInWorld;
    protected final ReferenceFrame world = ReferenceFrame.getWorldFrame();
    protected final ReferenceFrame cylinderReferenceFrame;
 
+   private final boolean showJointGraphics;
    private final Graphics3DObject cylinderGeometry;
    private final Graphics3DObject boneGeometry;
 
@@ -66,10 +84,19 @@ public class LinkHollowCylinder extends Link
    }
 
    public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, Vector3D parentJointOffsetFromCoM,
-         AppearanceDefinition color)
+	         AppearanceDefinition color)
+   {
+	   this(name, cylinderZAxisInWorld, mass, length, radius, parentJointOffsetFromCoM, color, true);
+   }
+   
+   public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, Vector3D parentJointOffsetFromCoM,
+         AppearanceDefinition color, boolean showJointGraphics)
    {
       super(name);
 
+      this.showJointGraphics = showJointGraphics;
+      
+      this.cylinderZAxisInWorld = new Vector3D(cylinderZAxisInWorld);
       cylinderGeometry = createCylinderGeometryWithParentJointPoint(length, radius, color, cylinderZAxisInWorld, parentJointOffsetFromCoM);
       boneGeometry = createBoneGeometryWithParentJointPoint(length, radius, color, cylinderZAxisInWorld, parentJointOffsetFromCoM);
 
@@ -125,7 +152,10 @@ public class LinkHollowCylinder extends Link
    {
       Graphics3DObject ret = new Graphics3DObject();
       
-      addGraphics3DJointSphere(ret, 1.5 * radius);
+      if (showJointGraphics)
+      {
+    	  addGraphics3DJointSphere(ret, 1.5 * radius);
+      }
       addGraphics3DCylinder(ret, length, radius, color, cylinderZAxisInWorld, parentJointOffsetFromCoM);
 
       return ret;
@@ -152,7 +182,10 @@ public class LinkHollowCylinder extends Link
    {
       Graphics3DObject ret = new Graphics3DObject();
 
-      addGraphics3DJointSphere(ret, 1.5 * radius);
+      if (showJointGraphics)
+      {
+    	  addGraphics3DJointSphere(ret, 1.5 * radius);
+      }
       
       ret.translate(parentJointOffsetFromCoM);
 
@@ -264,4 +297,211 @@ public class LinkHollowCylinder extends Link
       linkGraphics.translate(0.0, 0.0, trimBothEndsByThisMuch);
       linkGraphics.addCylinder(linkVector.length() - trimBothEndsByThisMuch, linkThickness, color);
    }
+   
+   public void addModelGraphics(String fileName,  AppearanceDefinition color)
+   {
+		  AxisAngle cylinderRotationFromZup = EuclidGeometryTools.axisAngleFromZUpToVector3D(cylinderZAxisInWorld);
+		  Graphics3DObject linkGraphics = getLinkGraphics();
+		  linkGraphics.rotate(cylinderRotationFromZup);
+		 linkGraphics.addModelFile(fileName, color);
+   }
+   
+   public void addModelGraphics(String stlFileName, String jointName, String solidworksMassPropertiesTextFileName, AppearanceDefinition color)
+   {	   
+	   double mass = readScalarMassFromSolidworks(solidworksMassPropertiesTextFileName);
+	   Point3D comInWorld = readComPointInWorldFromSolidworks(solidworksMassPropertiesTextFileName);
+	   Matrix3D moiAtComExpressedInWorldMatrix = readMoiAboutComAlignedWithOutputCoordinatesFromSolidWorks(solidworksMassPropertiesTextFileName);	   
+	   
+	   String linkParentJointTransformFileName = jointName + "TransformToWorld.csv";
+	   RigidBodyTransform jointTransformToWorld = getRigidBodyTransform(linkParentJointTransformFileName);
+
+
+	   setMass(mass);
+
+	   Point3D comInLinkParentJointFrame = new Point3D();
+	   jointTransformToWorld.transform(comInWorld, comInLinkParentJointFrame);
+	   setComOffset(new Vector3D(comInLinkParentJointFrame));
+	   
+	   jointTransformToWorld.inverseTransform(moiAtComExpressedInWorldMatrix);
+//	   setMomentOfInertia(moiAtComExpressedInWorldMatrix);
+
+	   
+	   
+	   Graphics3DObject linkGraphics = getLinkGraphics();
+	   linkGraphics.identity();
+	   linkGraphics.transform(jointTransformToWorld);
+	   linkGraphics.translate(comInWorld);
+	   linkGraphics.addCoordinateSystem(0.1);
+	   linkGraphics.identity();
+	   
+	   AppearanceDefinition transparentBlack = YoAppearance.Black();
+	   transparentBlack.setTransparency(0.6);
+	   addEllipsoidFromMassProperties(transparentBlack);
+	   
+	   addModelGraphics(stlFileName, linkParentJointTransformFileName, color);
+   }
+   
+   public List<String> convertTextFileIntoListOfStringsByRow(String textFileName)
+   {
+	   List<String> ret;
+	   
+	   try
+	   {
+		   ret = Files.readAllLines(Paths.get(textFileName));
+	   } 
+	   catch (IOException e)
+	   {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		ret = null;
+	   }
+	   
+	   return ret;
+   }
+      
+   public double readScalarMassFromSolidworks(String fileName)
+   {
+	   List<String> list =  convertTextFileIntoListOfStringsByRow(fileName);
+	   
+	   String regex = "[^-0-9!\\.,]";
+	   int rowNumberWhereMassIsSpecified = 4;
+	   
+	   double ret = Double.parseDouble(list.get(rowNumberWhereMassIsSpecified).replaceAll(regex, ""));
+	   
+	   return ret;
+   }
+   
+   public Point3D readComPointInWorldFromSolidworks(String fileName)
+   {
+	   List<String> list = convertTextFileIntoListOfStringsByRow(fileName);
+	   
+	   String regex = "[^-0-9!\\.,]";
+	   
+	   double comX = Double.parseDouble(list.get(11).replaceAll(regex, ""));
+	   double comY = Double.parseDouble(list.get(12).replaceAll(regex, ""));
+	   double comZ = Double.parseDouble(list.get(13).replaceAll(regex, ""));
+	   
+	   Point3D ret = new Point3D(comX, comY, comZ);
+	   
+	   return ret;
+   }
+   
+   public Matrix3D readMoiAboutComAlignedWithOutputCoordinatesFromSolidWorks(String fileName)
+   {
+	   List<String> list = convertTextFileIntoListOfStringsByRow(fileName);
+	   
+	   String regex = "[^-=0-9!\\.,]";
+
+	   double[] moiAtCoMExpressedInWorldArray = new double[9];
+	   int moiStartRow = 23;
+	   int j = 0;
+	   
+	   for (int i = 0 ; i<3 ; i++)
+	   {
+		   int row = moiStartRow + i;
+		   String[] rowStringArray = list.get(row).replaceAll(regex, "").split("=");
+		   
+		   for (String string : rowStringArray)
+		   {
+			   if (! string.isEmpty())
+			   {
+				   System.out.println("Unit vec string: " + string);
+				   moiAtCoMExpressedInWorldArray[j] = Double.parseDouble(string);
+				   j++;
+			   }
+		   }
+	   }
+	   
+	   return new Matrix3D(moiAtCoMExpressedInWorldArray);
+   }
+   
+   public Matrix3D readPrincipicalMoiFromSolidworks(String fileName)
+   {
+	   List<String> list = convertTextFileIntoListOfStringsByRow(fileName);
+	   
+	   String regex = "[^-=0-9!\\.,]";
+	   
+	   double[] moiPrincipleAxesArray = new double[9];
+	   double[] moiEigenvalues = new double[3];
+	   int moiStartRow = 17;
+	   
+	   int j = 0;
+	   
+	   for (int i = 0 ; i<3 ; i++)
+	   {
+		   int row = moiStartRow + i;
+		   String[] rowStringArray = list.get(row).replaceAll(regex, "").split("=");
+		   
+		   String[] unitVecStringArray = rowStringArray[1].split(",");
+		   String moiString = rowStringArray[2];
+		   
+		   for (String string : unitVecStringArray)
+		   {
+//			   System.out.println("Unit vec string: " + string);
+			   moiPrincipleAxesArray[j] = Double.parseDouble(string);
+			   j++;
+		   }
+		   moiEigenvalues[i] = Double.parseDouble(moiString);
+//		   System.out.println("moiString: " + moiString);
+	   }
+	   
+	   Matrix3D moiPrincipleAxesMatrix = new Matrix3D(moiPrincipleAxesArray);
+	   Matrix3D eigenValueMatrix = new Matrix3D(moiEigenvalues[0], 0.0, 0.0, 0.0, moiEigenvalues[1], 0.0, 0.0, 0.0, moiEigenvalues[2]);
+	   Matrix3D ret = new Matrix3D(moiPrincipleAxesMatrix);
+	   ret.multiply(eigenValueMatrix);
+	   
+	   return ret;
+   }
+   
+   public void addModelGraphics(String stlFileName, String linkParentJointTransformFileName, AppearanceDefinition color)
+   {
+	   RigidBodyTransform jointTransformToWorld = getRigidBodyTransform(linkParentJointTransformFileName);
+	   
+	   Graphics3DObject linkGraphics = getLinkGraphics();
+	   linkGraphics.transform(jointTransformToWorld);
+	   linkGraphics.addModelFile(stlFileName, color);
+   }
+   
+   private RigidBodyTransform getRigidBodyTransform(String transformFileName)
+   {
+	   double [] transformArray = new double[16];
+	   
+	   ArrayList<Double> transformArrayToPack = new ArrayList<>();
+	   
+	   getDataColumnFromCSV(0, new File(transformFileName), transformArrayToPack);
+	   
+	   for (int i = 0; i < 15 ; i++)
+	   {
+		   transformArray[i] = transformArrayToPack.get(i);
+	   } 
+
+	   RigidBodyTransform ret = new RigidBodyTransform();
+	   ret.set(transformArray);
+	   ret.invert();
+	   
+	   return ret;
+   }
+	
+	private void getDataColumnFromCSV(int column, File csvFile, ArrayList<Double> arrayListToPack)
+	{
+		Scanner csvScanner;
+		try
+		{
+			csvScanner = new Scanner(csvFile);
+			
+			while( csvScanner.hasNext() )
+			{
+				String dataRow = csvScanner.next();
+				String[] dataRowArray = dataRow.split(",");
+				arrayListToPack.add( Double.parseDouble(dataRowArray[column]) );
+			}
+			csvScanner.close();
+		} 
+		catch (FileNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
+
 }
