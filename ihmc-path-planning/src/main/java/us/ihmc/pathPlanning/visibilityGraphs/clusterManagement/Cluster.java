@@ -129,15 +129,15 @@ public class Cluster
       isDynamic = dynamic;
    }
 
-   public void addRawPointInLocal(Point3DReadOnly pointInLocal)
+   public void addRawPointInLocal3D(Point3DReadOnly pointInLocal)
    {
       rawPointsLocal.add(new Point3D(pointInLocal));
       centroidInLocal.set(EuclidGeometryTools.averagePoint3Ds(rawPointsLocal));
    }
 
-   public void addRawPointInWorld(Point3DReadOnly pointInWorld)
+   public void addRawPointInWorld3D(Point3DReadOnly pointInWorld)
    {
-      addRawPointInLocal(toLocal3D(pointInWorld));
+      addRawPointInLocal3D(toLocal3D(pointInWorld));
    }
 
    public void addRawPointsInLocal2D(List<? extends Point2DReadOnly> pointsInLocal)
@@ -223,62 +223,62 @@ public class Cluster
       return rawPointsLocal.stream().map(Point2D::new).collect(Collectors.toList());
    }
 
-   public void addNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
+   public void addNavigableExtrusionInLocal2D(Point2DReadOnly navigableExtrusionInLocal)
    {
       navigableExtrusionsInLocal.add(new Point2D(navigableExtrusionInLocal));
    }
 
-   public void addNavigableExtrusionInWorld(Point3DReadOnly navigableExtrusionInWorld)
+   public void addNavigableExtrusionInWorld3D(Point3DReadOnly navigableExtrusionInWorld)
    {
       navigableExtrusionsInLocal.add(toLocal2D(navigableExtrusionInWorld));
    }
 
-   public void addNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
+   public void addNavigableExtrusionsInLocal2D(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
    {
-      navigableExtrusionInLocal.forEach(this::addNavigableExtrusionInLocal);
+      navigableExtrusionInLocal.forEach(this::addNavigableExtrusionInLocal2D);
    }
 
-   public void addNavigableExtrusionsInWorld(List<? extends Point3DReadOnly> navigableExtrusionInWorld)
+   public void addNavigableExtrusionsInWorld3D(List<? extends Point3DReadOnly> navigableExtrusionInWorld)
    {
-      navigableExtrusionInWorld.forEach(this::addNavigableExtrusionInWorld);
+      navigableExtrusionInWorld.forEach(this::addNavigableExtrusionInWorld3D);
    }
 
-   public void addFirstNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
+   public void addFirstNavigableExtrusionInLocal2D(Point2DReadOnly navigableExtrusionInLocal)
    {
       navigableExtrusionsInLocal.add(0, new Point2D(navigableExtrusionInLocal));
    }
 
-   public void addFirstNavigableExtrusionInWorld(Point3DReadOnly navigableExtrusionInWorld)
+   public void addFirstNavigableExtrusionInWorld3D(Point3DReadOnly navigableExtrusionInWorld)
    {
       navigableExtrusionsInLocal.add(0, toLocal2D(navigableExtrusionInWorld));
    }
 
-   public void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
+   public void addNonNavigableExtrusionInLocal2D(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsInLocal.add(new Point2D(nonNavigableExtrusionInLocal));
    }
 
-   public void addNonNavigableExtrusionInWorld(Point3DReadOnly nonNavigableExtrusionInWorld)
+   public void addNonNavigableExtrusionInWorld3D(Point3DReadOnly nonNavigableExtrusionInWorld)
    {
       nonNavigableExtrusionsInLocal.add(toLocal2D(nonNavigableExtrusionInWorld));
    }
 
-   public void addNonNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
+   public void addNonNavigableExtrusionsInLocal2D(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
    {
-      nonNavigableExtrusionInLocal.forEach(this::addNonNavigableExtrusionInLocal);
+      nonNavigableExtrusionInLocal.forEach(this::addNonNavigableExtrusionInLocal2D);
    }
 
-   public void addNonNavigableExtrusionsInWorld(List<? extends Point3DReadOnly> nonNavigableExtrusionInWorld)
+   public void addNonNavigableExtrusionsInWorld3D(List<? extends Point3DReadOnly> nonNavigableExtrusionInWorld)
    {
-      nonNavigableExtrusionInWorld.forEach(this::addNonNavigableExtrusionInWorld);
+      nonNavigableExtrusionInWorld.forEach(this::addNonNavigableExtrusionInWorld3D);
    }
 
-   public void addFirstNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
+   public void addFirstNonNavigableExtrusionInLocal2D(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsInLocal.add(0, new Point2D(nonNavigableExtrusionInLocal));
    }
 
-   public void addFirstNonNavigableExtrusionInWorld(Point3DReadOnly nonNavigableExtrusionInWorld)
+   public void addFirstNonNavigableExtrusionInWorld3D(Point3DReadOnly nonNavigableExtrusionInWorld)
    {
       nonNavigableExtrusionsInLocal.add(0, toLocal2D(nonNavigableExtrusionInWorld));
    }
@@ -288,22 +288,22 @@ public class Cluster
       return navigableExtrusionsInLocal.size();
    }
 
-   public Point2D getNavigableExtrusionInLocal(int i)
+   public Point2D getNavigableExtrusionInLocal2D(int i)
    {
       return navigableExtrusionsInLocal.get(i);
    }
 
-   public List<Point2D> getNavigableExtrusionsInLocal()
+   public List<Point2D> getNavigableExtrusionsInLocal2D()
    {
       return navigableExtrusionsInLocal;
    }
 
-   public Point3D getNavigableExtrusionInWorld(int i)
+   public Point3D getNavigableExtrusionInWorld3D(int i)
    {
-      return toWorld3D(getNavigableExtrusionInLocal(i));
+      return toWorld3D(getNavigableExtrusionInLocal2D(i));
    }
 
-   public List<Point3D> getNavigableExtrusionsInWorld()
+   public List<Point3D> getNavigableExtrusionsInWorld3D()
    {
       return navigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
@@ -313,22 +313,22 @@ public class Cluster
       return nonNavigableExtrusionsInLocal.size();
    }
 
-   public Point2D getNonNavigableExtrusionInLocal(int i)
+   public Point2D getNonNavigableExtrusionInLocal2D(int i)
    {
       return nonNavigableExtrusionsInLocal.get(i);
    }
 
-   public List<Point2D> getNonNavigableExtrusionsInLocal()
+   public List<Point2D> getNonNavigableExtrusionsInLocal2D()
    {
       return nonNavigableExtrusionsInLocal;
    }
 
-   public Point3D getNonNavigableExtrusionInWorld(int i)
+   public Point3D getNonNavigableExtrusionInWorld3D(int i)
    {
-      return toWorld3D(getNonNavigableExtrusionInLocal(i));
+      return toWorld3D(getNonNavigableExtrusionInLocal2D(i));
    }
 
-   public List<Point3D> getNonNavigableExtrusionsInWorld()
+   public List<Point3D> getNonNavigableExtrusionsInWorld3D()
    {
       return nonNavigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }

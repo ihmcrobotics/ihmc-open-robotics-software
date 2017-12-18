@@ -137,9 +137,9 @@ public class ClusterMeshViewer extends AnimationTimer
          {
             for (Point3D rawPoint : cluster.getRawPointsInWorld3D())
                rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
-            navigableExtrusionsMeshBuilder.addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS,
+            navigableExtrusionsMeshBuilder.addMultiLine(cluster.getNavigableExtrusionsInWorld3D(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS,
                                                         closeNavigableExtrusions.get());
-            nonNavigableExtrusionsMeshBuilder.addMultiLine(cluster.getNonNavigableExtrusionsInWorld(),
+            nonNavigableExtrusionsMeshBuilder.addMultiLine(cluster.getNonNavigableExtrusionsInWorld3D(),
                                                            VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, closeNonNavigableExtrusions.get());
          }
 

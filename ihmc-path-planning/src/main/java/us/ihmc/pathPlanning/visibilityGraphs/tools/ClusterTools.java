@@ -165,18 +165,18 @@ public class ClusterTools
 
          double extrusionDistance0 = nonNavigableCalculator.computeExtrusionDistance(cluster, endpoint0, obstacleHeight0);
          double extrusionDistance1 = nonNavigableCalculator.computeExtrusionDistance(cluster, endpoint1, obstacleHeight1);
-         cluster.addNonNavigableExtrusionsInLocal(extrudeLine(endpoint0, extrusionDistance0, endpoint1, extrusionDistance1, numberOfExtrusionsAtEndpoints));
+         cluster.addNonNavigableExtrusionsInLocal2D(extrudeLine(endpoint0, extrusionDistance0, endpoint1, extrusionDistance1, numberOfExtrusionsAtEndpoints));
 
          extrusionDistance0 = navigableCalculator.computeExtrusionDistance(cluster, endpoint0, obstacleHeight0);
          extrusionDistance1 = navigableCalculator.computeExtrusionDistance(cluster, endpoint1, obstacleHeight1);
-         cluster.addNavigableExtrusionsInLocal(extrudeLine(endpoint0, extrusionDistance0, endpoint1, extrusionDistance1, numberOfExtrusionsAtEndpoints));
+         cluster.addNavigableExtrusionsInLocal2D(extrudeLine(endpoint0, extrusionDistance0, endpoint1, extrusionDistance1, numberOfExtrusionsAtEndpoints));
       }
 
       if (cluster.getType() == Type.POLYGON)
       {
          boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
-         cluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
-         cluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, navigableCalculator));
+         cluster.addNonNavigableExtrusionsInLocal2D(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
+         cluster.addNavigableExtrusionsInLocal2D(extrudePolygon(extrudeToTheLeft, cluster, navigableCalculator));
       }
    }
 
@@ -212,7 +212,7 @@ public class ClusterTools
          double distOfPoint = Double.MAX_VALUE;
          Point3D closestPointInCluster = null;
 
-         for (Point3D point : cluster.getNonNavigableExtrusionsInWorld())
+         for (Point3D point : cluster.getNonNavigableExtrusionsInWorld3D())
          {
             double currentDistance = point.distanceSquared(pointToSortFrom);
             if (currentDistance < distOfPoint)
@@ -335,7 +335,7 @@ public class ClusterTools
             {
                Point3D concaveHullVertexWorld = new Point3D(region.getConcaveHull()[i]);
                concaveHullVertexWorld.applyTransform(transToWorld);
-               cluster.addRawPointInWorld(concaveHullVertexWorld);
+               cluster.addRawPointInWorld3D(concaveHullVertexWorld);
             }
          }
       }
