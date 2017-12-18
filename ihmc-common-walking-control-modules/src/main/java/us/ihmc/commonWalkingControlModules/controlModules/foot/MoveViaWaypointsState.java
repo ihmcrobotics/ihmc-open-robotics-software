@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
@@ -80,17 +81,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
    }
 
-   public void setWeight(double weight)
-   {
-      angularWeight.set(1.0, 1.0, 1.0);
-      angularWeight.scale(weight);
-      linearWeight.set(1.0, 1.0, 1.0);
-      linearWeight.scale(weight);
-
-      taskspaceControlState.setWeight(weight);
-   }
-
-   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
       this.angularWeight.set(angularWeight);
       this.linearWeight.set(linearWeight);

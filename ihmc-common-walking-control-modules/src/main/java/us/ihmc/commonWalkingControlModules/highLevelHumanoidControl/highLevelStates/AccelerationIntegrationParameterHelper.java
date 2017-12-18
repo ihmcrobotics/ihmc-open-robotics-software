@@ -27,7 +27,7 @@ public class AccelerationIntegrationParameterHelper
 
    private final WalkingHighLevelHumanoidController walkingController;
 
-   public AccelerationIntegrationParameterHelper(HighLevelControllerParameters parameters, List<String> positionControlledJoints, OneDoFJoint[] joints,
+   public AccelerationIntegrationParameterHelper(HighLevelControllerParameters parameters, OneDoFJoint[] joints,
                                                  WalkingHighLevelHumanoidController walkingController, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -41,45 +41,37 @@ public class AccelerationIntegrationParameterHelper
       ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", parameters.getJointAccelerationIntegrationParametersLoaded(),
                                                                 parameterJointNameMapLoaded, registry);
 
-      Map<String, OneDoFJoint> jointNameMap = new HashMap<>();
-      for (OneDoFJoint joint : joints)
-      {
-         jointNameMap.put(joint.getName(), joint);
-      }
+      jointNames = new String[joints.length];
+      jointsLoaded = new YoBoolean[joints.length];
+      accelerationIntegrationSettingsNoLoad = new JointAccelerationIntegrationParametersReadOnly[joints.length];
+      accelerationIntegrationSettingsLoaded = new JointAccelerationIntegrationParametersReadOnly[joints.length];
 
-      boolean integrateAllJoints = parameters.enableJointAccelerationIntegrationForAllJoints();
-      List<String> integratingJoints = getJointsWithAccelerationIntegration(positionControlledJoints, integrateAllJoints, joints);
-      jointNames = new String[integratingJoints.size()];
-      jointsLoaded = new YoBoolean[integratingJoints.size()];
-      accelerationIntegrationSettingsNoLoad = new JointAccelerationIntegrationParametersReadOnly[integratingJoints.size()];
-      accelerationIntegrationSettingsLoaded = new JointAccelerationIntegrationParametersReadOnly[integratingJoints.size()];
+      List<String> jointsWithoutParametersNoLoad = new ArrayList<>();
+      List<String> jointsWithoutParametersLoaded = new ArrayList<>();
 
-      for (int jointIdx = 0; jointIdx < integratingJoints.size(); jointIdx++)
+      for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
       {
-         String jointName = integratingJoints.get(jointIdx);
+         OneDoFJoint joint = joints[jointIdx];
+         String jointName = joint.getName();
          jointNames[jointIdx] = jointName;
          jointsLoaded[jointIdx] = new YoBoolean(jointName + "_isUnderLoad", registry);
-
-         OneDoFJoint joint = jointNameMap.get(jointName);
-         if (joint == null)
-         {
-            throw new RuntimeException("Joint " + jointName + " is not a " + OneDoFJoint.class.getSimpleName() + " on the robot.");
-         }
          jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = parameterJointNameMapNoLoad.get(jointName);
          if (integrationParametersNoLoad == null)
          {
-            PrintTools.warn("(NoLoad) No integration parameters for joint " + jointName + " defined. Using default values.");
+            jointsWithoutParametersNoLoad.add(jointName);
          }
          accelerationIntegrationSettingsNoLoad[jointIdx] = integrationParametersNoLoad;
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersLoaded = parameterJointNameMapLoaded.get(jointName);
-         if (integrationParametersLoaded == null)
-         {
-            PrintTools.warn("(Loaded) No integration parameters for joint " + jointName + " defined. Using No-Load parameters.");
-         }
          accelerationIntegrationSettingsLoaded[jointIdx] = integrationParametersLoaded;
+      }
+
+      if (!jointsWithoutParametersNoLoad.isEmpty())
+      {
+         PrintTools.warn("Got joints without acceleration integration parameters. Will use default values for:\n"
+               + jointsWithoutParametersNoLoad);
       }
    }
 
@@ -107,22 +99,5 @@ public class AccelerationIntegrationParameterHelper
    public JointAccelerationIntegrationCommand getJointAccelerationIntegrationCommand()
    {
       return jointAccelerationIntegrationCommand;
-   }
-
-   public static List<String> getJointsWithAccelerationIntegration(List<String> positionControlledJoints, boolean enableForAllJoints, OneDoFJoint[] joints)
-   {
-      List<String> ret = new ArrayList<>();
-      if (enableForAllJoints)
-      {
-         for (OneDoFJoint joint : joints)
-         {
-            ret.add(joint.getName());
-         }
-      }
-      else
-      {
-         ret.addAll(positionControlledJoints);
-      }
-      return ret;
    }
 }

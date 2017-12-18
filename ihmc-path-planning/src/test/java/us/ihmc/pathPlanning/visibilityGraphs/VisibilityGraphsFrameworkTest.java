@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javafx.application.Platform;
@@ -21,6 +20,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -96,7 +96,7 @@ public class VisibilityGraphsFrameworkTest
 
          NavigableRegionsManager manager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), filteredRegions, null);
 
-         ArrayList<Point3D> path = (ArrayList<Point3D>) manager.calculateBodyPath(start, goal);
+         List<Point3DReadOnly> path = manager.calculateBodyPath(start, goal);
 
          assertTrue("Path is null!", path != null);
          assertTrue("Path does not contain any waypoints", path.size() > 0);
@@ -104,7 +104,7 @@ public class VisibilityGraphsFrameworkTest
       }
    }
 
-   public void testPathSize(File file, ArrayList<Point3D> path)
+   public void testPathSize(File file, List<Point3DReadOnly> path)
    {
       BufferedReader br = null;
       FileReader fr = null;

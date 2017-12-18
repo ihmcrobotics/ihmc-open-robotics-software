@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "Camera" defined in LogProperties.idl. 
@@ -14,9 +11,9 @@ public class Camera
 {
     public Camera()
     {
-        	name_ = new StringBuilder(255); 
-        	videoFile_ = new StringBuilder(255); 
-        	timestampFile_ = new StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
+        	videoFile_ = new java.lang.StringBuilder(255); 
+        	timestampFile_ = new java.lang.StringBuilder(255); 
         
         
     }
@@ -39,12 +36,12 @@ public class Camera
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -67,12 +64,12 @@ public class Camera
         	videoFile_.append(videoFile);
         }
         
-        public String getVideoFileAsString()
+        public java.lang.String getVideoFileAsString()
         {
         	return getVideoFile().toString();
         }
 
-    public StringBuilder getVideoFile()
+    public java.lang.StringBuilder getVideoFile()
     {
         return videoFile_;
     }
@@ -84,12 +81,12 @@ public class Camera
         	timestampFile_.append(timestampFile);
         }
         
-        public String getTimestampFileAsString()
+        public java.lang.String getTimestampFileAsString()
         {
         	return getTimestampFile().toString();
         }
 
-    public StringBuilder getTimestampFile()
+    public java.lang.StringBuilder getTimestampFile()
     {
         return timestampFile_;
     }
@@ -100,7 +97,7 @@ public class Camera
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -122,7 +119,7 @@ public class Camera
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -147,9 +144,9 @@ public class Camera
 		return builder.toString();
     }
 
-    private StringBuilder name_; 
+    private java.lang.StringBuilder name_; 
     private boolean interlaced_; 
-    private StringBuilder videoFile_; 
-    private StringBuilder timestampFile_; 
+    private java.lang.StringBuilder videoFile_; 
+    private java.lang.StringBuilder timestampFile_; 
 
 }

@@ -5,14 +5,14 @@ import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
@@ -23,7 +23,7 @@ public class ClusterTools
 {
    private static final boolean debug = false;
 
-   public static int determineExtrusionSide(Cluster cluster, Point2D observer)
+   public static int determineExtrusionSide(Cluster cluster, Point2DReadOnly observer)
    {
       int index = 0;
 
@@ -48,7 +48,7 @@ public class ClusterTools
       return index;
    }
 
-   private static boolean isNormalVisible(Cluster cluster, int normalIndex, Point2D observer)
+   private static boolean isNormalVisible(Cluster cluster, int normalIndex, Point2DReadOnly observer)
    {
       List<Point2D> rawPointsInLocal = cluster.getRawPointsInLocal();
       for (int i = 1; i < rawPointsInLocal.size(); i++)
@@ -132,10 +132,10 @@ public class ClusterTools
 
          if (intersectionPoint == null)
          {
-            if(debug)
+            if (debug)
                PrintTools.error("Failed to extrude non-navigable boundary for region " + index + " \n" + "point1: " + point1 + "\n" + "point2: " + point2 + "\n"
-                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2 + "\n"
-                     + "extrusionDistance: " + extrusionDistance);
+                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2
+                     + "\n" + "extrusionDistance: " + extrusionDistance);
             continue;
          }
 
@@ -199,45 +199,26 @@ public class ClusterTools
 
          if (intersectionPoint == null)
          {
-            if(debug)
+            if (debug)
                PrintTools.error("Failed to extrude navigable boundary for region " + index + " \n" + "point1: " + point1 + "\n" + "point2: " + point2 + "\n"
-                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2 + "\n"
-                     + "extrusionDistance: " + extrusionDistance);
+                     + "point3: " + point3 + "\n" + "vec1: " + vec1 + "\n" + "vec2: " + vec2 + "\n" + "normal1: " + normal1 + "\n" + "normal2: " + normal2
+                     + "\n" + "extrusionDistance: " + extrusionDistance);
             continue;
          }
 
          if (intersectionPoint.distance(normal1) < 1E-6)
          {
-            double deltaX = (normal2.getX() - normal1.getX()) / 2.0;
-            double deltaY = (normal2.getY() - normal1.getY()) / 2.0;
-
-            intersectionPoint.setX(normal1.getX() + deltaX);
-            intersectionPoint.setY(normal2.getY() + deltaY);
+            intersectionPoint.interpolate(normal1, normal2, 0.5);
          }
 
-         Vector2D normalIntersection = new Vector2D(intersectionPoint.getX() - point2.getX(), intersectionPoint.getY() - point2.getY());
+         Vector2D normalIntersection = new Vector2D();
+         normalIntersection.sub(intersectionPoint, point2);
          normalIntersection.normalize();
 
-         Point2D adjustedIntersection = new Point2D(point2.getX() + normalIntersection.getX() * (extrusionDistance),
-                                                    point2.getY() + normalIntersection.getY() * (extrusionDistance));
+         Point2D adjustedIntersection = new Point2D();
+         adjustedIntersection.scaleAdd(extrusionDistance, normalIntersection, point2);
 
-         double x1 = point1.getX() + ((point2.getX() - point1.getX()) * 0.5);
-         double y1 = point1.getY() + ((point2.getY() - point1.getY()) * 0.5);
-         Point2D midPoint1 = new Point2D(x1, y1);
-
-         double x2 = point2.getX() + ((point3.getX() - point2.getX()) * 0.5);
-         double y2 = point2.getY() + ((point3.getY() - point2.getY()) * 0.5);
-         Point2D midPoint2 = new Point2D(x2, y2);
-
-         Vector2D vec21 = new Vector2D(normal1.getX() - midPoint1.getX(), normal1.getY() - midPoint1.getY());
-         Point2D safePoint1 = new Point2D(point2.getX() + vec21.getX() * 0.7, point2.getY() + vec21.getY() * 0.7);
-
-         Vector2D vec32 = new Vector2D(normal2.getX() - midPoint2.getX(), normal2.getY() - midPoint2.getY());
-         Point2D safePoint2 = new Point2D(point2.getX() + vec32.getX() * 0.7, point2.getY() + vec32.getY() * 0.7);
-
-         //         cluster.addNavigableExtrusionPoint(new Point3D(safePoint1.getX(), safePoint1.getY(), 0));
          cluster.addNavigableExtrusionInLocal(adjustedIntersection);
-         //         cluster.addNavigableExtrusionPoint(new Point3D(safePoint2.getX(), safePoint2.getY(), 0));
 
          index = index + 2;
       }
@@ -387,7 +368,7 @@ public class ClusterTools
       }
    }
 
-   public static ArrayList<Point2D> extrudeLine(Point2D pt1, Point2D pt2, double extrusionDistance)
+   public static ArrayList<Point2D> extrudeLine(Point2DReadOnly pt1, Point2DReadOnly pt2, double extrusionDistance)
    {
       ArrayList<Point2D> points = new ArrayList<>();
 
@@ -416,7 +397,8 @@ public class ClusterTools
    }
 
    // TODO That method isn't very clear
-   private static Point2D extrudeCorner(Point2D pointOnLine, Vector2D vec21, Point2D extrudedPoint1, Point2D extrudedPoint2, double extrusion)
+   private static Point2D extrudeCorner(Point2DReadOnly pointOnLine, Vector2DReadOnly vec21, Point2DReadOnly extrudedPoint1, Point2DReadOnly extrudedPoint2,
+                                        double extrusion)
    {
       Vector2D orthoVec = new Vector2D(vec21.getX() * Math.cos(Math.toRadians(90)) - vec21.getY() * Math.sin(Math.toRadians(90)),
                                        vec21.getX() * Math.sin(Math.toRadians(90)) + vec21.getY() * Math.cos(Math.toRadians(90)));
@@ -439,7 +421,7 @@ public class ClusterTools
       return extr1;
    }
 
-   public static void extrudeCluster(Cluster cluster, Point2D observer, double extrusionDistance, List<Cluster> listOfClusters)
+   public static void extrudeCluster(Cluster cluster, Point2DReadOnly observer, double extrusionDistance, List<Cluster> listOfClusters)
    {
       int extrusionIndex = 0;
       if (cluster.getType() == Type.LINE)
@@ -495,8 +477,6 @@ public class ClusterTools
             extrusionIndex = ClusterTools.determineExtrusionSide(cluster, observer);
          }
 
-         //         javaFXMultiColorMeshBuilder.addSphere(0.04f, cluster.getListOfSafeNormals().get(extrusionIndex), Color.RED);
-
          extrudePolygon(cluster, extrusionIndex, extrusionDistance);
       }
    }
@@ -508,48 +488,20 @@ public class ClusterTools
       double extrusionDist1 = extrusionDistance - 0.01;
       double extrusionDist2 = extrusionDistance;
 
-      //      if (cluster.isObstacleClosed())
-      //         extrudeFirstNonNavigable(extrusionIndex, cluster, extrusionDist1);
-
       ClusterTools.extrudedNonNavigableBoundary(extrusionIndex, cluster, extrusionDist1);
-
-      //      if (cluster.isObstacleClosed())
-      //         extrudeLastNonNavigable(cluster, extrusionIndex, extrusionDist1);
-
-      //      if (cluster.isObstacleClosed())
-      //         extrudeFirstNavigable(cluster, extrusionIndex, extrusionDist1);
-
       ClusterTools.extrudedNavigableBoundary(extrusionIndex, cluster, extrusionDist2);
-
-      //      if (cluster.isObstacleClosed())
-      //         extrudeLastNavigable(cluster, extrusionIndex, extrusionDist1);
    }
-   
+
    public static void generateNormalsFromRawBoundaryMap(double extrusionDistance, List<Cluster> listOfClusters)
    {
       for (Cluster cluster : listOfClusters)
       {
          List<Point2D> rawPoints = cluster.getRawPointsInLocal();
-         for (int i = 0; i < rawPoints.size(); i++)
+         for (int i = 0; i < rawPoints.size() - 1; i++)
          {
-            if (i < rawPoints.size() - 1)
-            {
-               Point2D first = rawPoints.get(i);
-               Point2D second = rawPoints.get(i + 1);
-               generateNormalsForSegment(first, second, cluster, extrusionDistance);
-
-               // TODO Remove following?
-               //               if(cluster.isObstacleClosed())
-               //               {
-               ////                  first = new Point2D(list.get(list.size() - 1).getX(), list.get(list.size() - 1).getY());
-               ////                  second = new Point2D(list.get(0).getX(), list.get(0).getY());
-               ////                  generateNormalsForSegment(first, second, cluster, extrusionDistance);
-               //
-               ////                  first = new Point2D(list.get(0).getX(), list.get(0).getY());
-               ////                  second = new Point2D(list.get(1).getX(), list.get(1).getY());
-               ////                  generateNormalsForSegment(first, second, cluster, extrusionDistance);
-               //               }
-            }
+            Point2D first = rawPoints.get(i);
+            Point2D second = rawPoints.get(i + 1);
+            generateNormalsForSegment(first, second, cluster, extrusionDistance);
          }
       }
    }
@@ -571,35 +523,101 @@ public class ClusterTools
       }
    }
 
-   
-   public static void classifyExtrusions(List<PlanarRegion> regionsToProject, PlanarRegion regionToProjectTo, List<PlanarRegion> lineObstaclesToPack, List<PlanarRegion> polygonObstaclesToPack, double zNormalThreshold)
+   public static void classifyExtrusions(List<PlanarRegion> regionsToProject, PlanarRegion regionToProjectTo, List<PlanarRegion> lineObstaclesToPack,
+                                         List<PlanarRegion> polygonObstaclesToPack, double zNormalThreshold)
    {
-      
-      for(PlanarRegion regionToProject : regionsToProject)
+
+      for (PlanarRegion regionToProject : regionsToProject)
       {
          Vector3D normal = PlanarRegionTools.calculateNormal(regionToProject);
 
          if (normal != null && regionToProject != regionToProjectTo)
          {
-            //         System.out.println(Math.abs(normal.getZ()) + "   " + VisibilityGraphsParameters.NORMAL_Z_THRESHOLD_FOR_POLYGON_OBSTACLES);
-
             if (Math.abs(normal.getZ()) < zNormalThreshold)
             {
-               //            System.out.println("Adding a line obstacle");
                lineObstaclesToPack.add(regionToProject);
             }
             else
             {
-               //            System.out.println("Adding a polygon obstacle");
                polygonObstaclesToPack.add(regionToProject);
             }
          }
-
-         //            System.out.println("Total obstacles to classify: " + regionsInsideHomeRegion.size() + "  Line obstacles: " + lineObstacleRegions.size()
-         //                  + "   Polygon obstacles: " + polygonObstacleRegions.size());
       }
    }
-   
+
+   public static Cluster getTheClosestCluster(Point3DReadOnly pointToSortFrom, List<Cluster> clusters)
+   {
+      double minDistance = Double.MAX_VALUE;
+      Cluster closestCluster = null;
+
+      for (Cluster cluster : clusters)
+      {
+         double distOfPoint = Double.MAX_VALUE;
+         Point3D closestPointInCluster = null;
+
+         for (Point3D point : cluster.getNonNavigableExtrusionsInWorld())
+         {
+            double currentDistance = point.distanceSquared(pointToSortFrom);
+            if (currentDistance < distOfPoint)
+            {
+               distOfPoint = currentDistance;
+               closestPointInCluster = point;
+            }
+         }
+
+         double currentDistance = closestPointInCluster.distanceSquared(pointToSortFrom);
+
+         if (currentDistance < minDistance)
+         {
+            minDistance = currentDistance;
+            closestCluster = cluster;
+         }
+      }
+
+      return closestCluster;
+   }
+
+   public static Point3D getTheClosestVisibleExtrusionPoint(Point3DReadOnly pointToSortFrom, List<Point3D> extrusionPoints)
+   {
+      double minDistance = Double.MAX_VALUE;
+      Point3D closestPoint = null;
+
+      for (Point3D point : extrusionPoints)
+      {
+         double currentDistance = point.distanceSquared(pointToSortFrom);
+         if (currentDistance < minDistance)
+         {
+            minDistance = currentDistance;
+            closestPoint = point;
+         }
+      }
+
+      return closestPoint;
+   }
+
+   public static Point3D getTheClosestVisibleExtrusionPoint(double alpha, Point3DReadOnly start, Point3DReadOnly goal,
+                                                            List<? extends Point3DReadOnly> extrusionPoints, PlanarRegion region)
+   {
+      double minWeight = Double.MAX_VALUE;
+      Point3DReadOnly closestPoint = null;
+
+      for (Point3DReadOnly point : extrusionPoints)
+      {
+         if (PlanarRegionTools.isPointInWorldInsideARegion(region, point))
+         {
+            double weight = alpha * goal.distance(point) + (1 - alpha) * start.distance(point);
+
+            if (weight < minWeight)
+            {
+               minWeight = weight;
+               closestPoint = point;
+            }
+         }
+      }
+
+      return new Point3D(closestPoint);
+   }
+
    public static void createClusterForHomeRegion(List<Cluster> clusters, RigidBodyTransform transformToWorld, PlanarRegion homeRegion, double extrusionDistance)
    {
       Cluster cluster = new Cluster();
@@ -607,26 +625,19 @@ public class ClusterTools
       cluster.setType(Type.POLYGON);
       cluster.setTransformToWorld(transformToWorld);
       cluster.setHomeRegion(true);
-
-      Point2D[] concaveHull = homeRegion.getConcaveHull();
-      for (Point2D vertex : concaveHull)
-      {
-         cluster.addRawPointInLocal(vertex);
-         //         javaFXMultiColorMeshBuilder.addSphere(0.05f, new Point3D(pointToProject.getX(), pointToProject.getY(), pointToProject.getZ()), Color.GREEN);
-      }
-
-      cluster.setClusterClosure(true);
+      cluster.addRawPointsInLocal(homeRegion.getConcaveHull(), true);
       cluster.setExtrusionSide(ExtrusionSide.INSIDE);
       cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.1));
    }
-   
-   public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions, List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformToWorld, VisibilityGraphsParameters visibilityGraphsParameters)
+
+   public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions,
+                                                List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformToWorld,
+                                                VisibilityGraphsParameters visibilityGraphsParameters)
    {
       for (PlanarRegion region : lineObstacleRegions)
       {
          if (regions.contains(region))
          {
-            //                        System.out.println("Creating a line cluster");
             Cluster cluster = new Cluster();
             clusters.add(cluster);
             cluster.setType(Type.LINE);
@@ -640,27 +651,17 @@ public class ClusterTools
             {
                cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
                      - visibilityGraphsParameters.getExtrusionDistance());
-
-               //               cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance - 0.01));
-               //               cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance * 0.6));
             }
 
-            Vector3D normal = PlanarRegionTools.calculateNormal(homeRegion);
             ArrayList<Point3D> points = new ArrayList<>();
+            RigidBodyTransform transToWorld = new RigidBodyTransform();
+            region.getTransformToWorld(transToWorld);
+
             for (int i = 0; i < region.getConvexHull().getNumberOfVertices(); i++)
             {
-               Point2D point2D = (Point2D) region.getConvexHull().getVertex(i);
-               Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-               FramePoint3D fpt = new FramePoint3D();
-               fpt.set(point3D);
-               RigidBodyTransform transToWorld = new RigidBodyTransform();
-               region.getTransformToWorld(transToWorld);
-               fpt.applyTransform(transToWorld);
-
-               Point3D pointToProject = fpt.getPoint();
-               Point3D projectedPoint = new Point3D();
-               EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal, projectedPoint);
-               points.add(projectedPoint);
+               Point3D concaveHullVertexWorld = new Point3D(region.getConvexHull().getVertex(i));
+               concaveHullVertexWorld.applyTransform(transToWorld);
+               points.add(concaveHullVertexWorld);
             }
 
             LinearRegression3D linearRegression = new LinearRegression3D(points);
@@ -668,24 +669,14 @@ public class ClusterTools
 
             //Convert to local frame
             Point3D[] extremes = linearRegression.getTheTwoPointsFurthestApart();
-            FramePoint3D extreme1Fpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), extremes[0]);
-            FramePoint3D extreme2Fpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), extremes[1]);
-
-            cluster.addRawPointInWorld(extreme1Fpt.getPoint());
-            cluster.addRawPointInWorld(extreme2Fpt.getPoint());
-
-            //                           javaFXMultiColorMeshBuilder.addLine(extreme1Fpt.getPoint(), extreme2Fpt.getPoint(), 0.005, Color.BLUE);
+            cluster.addRawPointsInWorld(extremes, false);
          }
       }
-
-      //      System.out.println(polygonObstacleRegions.size());
 
       for (PlanarRegion region : polygonObstacleRegions)
       {
          if (regions.contains(region))
          {
-            //            System.out.println("Creating a polygon cluster");
-
             Cluster cluster = new Cluster();
             clusters.add(cluster);
             cluster.setType(Type.POLYGON);
@@ -694,40 +685,25 @@ public class ClusterTools
             Vector3D normal1 = PlanarRegionTools.calculateNormal(region);
             if (Math.abs(normal1.getZ()) >= 0.5) //if its closer to being flat you can probably step on it -->> extrude less
             {
-               cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
-                     - visibilityGraphsParameters.getExtrusionDistance());
-               //               cluster.setAdditionalExtrusionDistance(-1.0 * (extrusionDistance * 0.7));
-
                if (PlanarRegionTools.isRegionTooHighToStep(region, homeRegion, visibilityGraphsParameters.getTooHighToStepDistance())) //is flat but too high to step so its an obstacle
                {
                   cluster.setAdditionalExtrusionDistance(0);
                }
                else
                {
-
+                  cluster.setAdditionalExtrusionDistance(visibilityGraphsParameters.getExtrusionDistanceIfNotTooHighToStep()
+                        - visibilityGraphsParameters.getExtrusionDistance());
                }
             }
 
-            Vector3D normal = PlanarRegionTools.calculateNormal(homeRegion);
+            RigidBodyTransform transToWorld = new RigidBodyTransform();
+            region.getTransformToWorld(transToWorld);
+
             for (int i = 0; i < region.getConcaveHullSize(); i++)
             {
-               Point2D point2D = (Point2D) region.getConcaveHull()[i];
-               Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-               FramePoint3D fpt = new FramePoint3D();
-               fpt.set(point3D);
-               RigidBodyTransform transToWorld = new RigidBodyTransform();
-               region.getTransformToWorld(transToWorld);
-               fpt.applyTransform(transToWorld);
-
-               Point3D pointToProject = fpt.getPoint();
-               Point3D projectedPoint = new Point3D();
-               EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal, projectedPoint);
-
-               FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), projectedPoint);
-
-               //               System.out.println(pointFpt);
-
-               cluster.addRawPointInWorld(pointFpt.getPoint());
+               Point3D concaveHullVertexWorld = new Point3D(region.getConcaveHull()[i]);
+               concaveHullVertexWorld.applyTransform(transToWorld);
+               cluster.addRawPointInWorld(concaveHullVertexWorld);
             }
 
             cluster.setClusterClosure(true);
@@ -742,7 +718,7 @@ public class ClusterTools
          }
       }
    }
-   
+
    public static void performExtrusions(Point2D initialObserver, double extrusionDistance, List<Cluster> clusters)
    {
       for (Cluster cluster : clusters)
