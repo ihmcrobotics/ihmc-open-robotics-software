@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Type;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
@@ -484,18 +485,5 @@ public class ClusterTools
       {
          ClusterTools.extrudeCluster(cluster, initialObserver, calculator, clusters);
       }
-   }
-
-   public static interface ExtrusionDistanceCalculator
-   {
-      /**
-       * @param clusterInExtrusion the cluster being extruded. Do not modify.
-       * @param pointToExtrude the coordinates of the point being extruded. Do not modify.
-       * @param obstacleHeight the height of the obstacle from which the point to extrude is
-       *           created.
-       * @return positive value representing the ditance between the raw points of a cluster and the
-       *         extrusion.
-       */
-      double computeExtrusionDistance(Cluster clusterInExtrusion, Point2DReadOnly pointToExtrude, double obstacleHeight);
    }
 }
