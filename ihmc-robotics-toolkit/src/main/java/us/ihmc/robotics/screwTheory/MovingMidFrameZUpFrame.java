@@ -10,7 +10,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class MovingMidFrameZUpFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = -4366874890640077338L;
    private final MovingReferenceFrame frameOne;
    private final MovingReferenceFrame frameTwo;
 

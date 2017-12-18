@@ -519,24 +519,20 @@ public class SkippyRobot extends Robot
 
    public YoDouble getQdd_z()
    {
-      // TODO Auto-generated method stub
       return rootJointIfSkippy.qdd_z;
    }
 
    public YoDouble getQ_hip()
    {
-      // TODO Auto-generated method stub
       return hipJoint.getQYoVariable();
    }
 
    public YoDouble getQd_hip()
    {
-      // TODO Auto-generated method stub
       return hipJoint.getQDYoVariable();
    }
    public YoDouble getQdd_hip()
    {
-      // TODO Auto-generated method stub
       return hipJoint.getQDDYoVariable();
    }
 

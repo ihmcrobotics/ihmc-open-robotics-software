@@ -27,8 +27,9 @@ public enum HumanoidBehaviorType
    TEST_SMOOTH_ICP_PLANNER,
    PUSH_AND_WALK,
    COLLABORATIVE_TASK,
-   FIRE_FIGHTING,
-   CUTTING_WALL;
+   FIRE_FIGHTING,   
+   CUTTING_WALL,
+   REPEATEDLY_WALK_FOOTSTEP_LIST;
 
    public static final HumanoidBehaviorType[] values = values();
 }

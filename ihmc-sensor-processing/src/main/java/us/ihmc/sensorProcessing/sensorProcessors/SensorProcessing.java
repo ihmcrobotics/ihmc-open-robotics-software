@@ -52,7 +52,7 @@ import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistency
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -1273,7 +1273,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * Use only for diagnostics.
     * @return The map with all the validity checkers.
     */
-   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder, List<String> jointsToIgnore)
+   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, JointDesiredOutputListReadOnly outputDataHolder, List<String> jointsToIgnore)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
 
@@ -1378,7 +1378,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return consistencyCheckerMap;
    }
 
-   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder)
+   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore, JointDesiredOutputListReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> delayEstimatorMap = new LinkedHashMap<>();
 
@@ -1397,7 +1397,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return delayEstimatorMap;
    }
 
-   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder)
+   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore, JointDesiredOutputListReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap = new LinkedHashMap<>();
 

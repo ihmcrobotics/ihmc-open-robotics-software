@@ -1,10 +1,10 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,12 +54,13 @@ public class RhinoBeetleSimInitialSetup
 
          robot.setPositionInWorld(positionInWorld);
 
-         FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
-         double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+         FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), rotation);
+         double[] yawPitchRoll = new double[3];
+         frameOrientation.getYawPitchRoll(yawPitchRoll);
          yawPitchRoll[0] = initialYaw;
          frameOrientation.setYawPitchRoll(yawPitchRoll);
 
-         robot.setOrientation(frameOrientation.getQuaternionCopy());
+         robot.setOrientation(frameOrientation);
          robot.update();
          robotInitialized = true;
       }

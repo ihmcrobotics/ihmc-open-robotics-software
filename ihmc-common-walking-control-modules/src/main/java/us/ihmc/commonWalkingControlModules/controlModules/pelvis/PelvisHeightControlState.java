@@ -13,12 +13,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -26,7 +27,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -132,7 +132,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * set the qp weights for the taskspace linear z command
     * @param linearWeight
     */
-   public void setWeights(Vector3D linearWeight)
+   public void setWeights(Vector3DReadOnly linearWeight)
    {
       taskspaceControlState.setWeights(null, linearWeight);
    }
@@ -305,7 +305,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    }
 
    private final FramePoint3D controlPosition = new FramePoint3D();
-   private final FrameOrientation controlOrientation = new FrameOrientation();
+   private final FrameQuaternion controlOrientation = new FrameQuaternion();
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();

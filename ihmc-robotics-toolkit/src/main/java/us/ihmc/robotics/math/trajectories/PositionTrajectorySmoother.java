@@ -199,11 +199,9 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

@@ -20,10 +20,11 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -31,7 +32,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -54,6 +55,9 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 {
@@ -146,7 +150,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
-      controllerCommunicatorServer.send(new HighLevelStateMessage(HighLevelState.WALKING));
+      controllerCommunicatorServer.send(new HighLevelStateMessage(WALKING));
 
       new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPI_communicator_server, packetRouter, "/ihmc_ros/atlas");
 
@@ -242,7 +246,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
-      packetCommunicatorClient.send(new HighLevelStateMessage(HighLevelState.WALKING));
+      packetCommunicatorClient.send(new HighLevelStateMessage(WALKING));
 
       for (int i = 0; i < 100; i++)
       {
@@ -298,7 +302,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       double gravity = -9.7925;
 
-      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, packetCommunicator);
+      HighLevelHumanoidControllerFactory controllerFactory = createHighLevelHumanoidControllerFactory(robotModel, packetCommunicator);
       RobotVisualizer robotVisualizer = null;
       ThreadDataSynchronizerInterface threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(null, robotModel, registry);
 
@@ -323,25 +327,36 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       return robotController;
    }
 
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator)
+
+   private HighLevelHumanoidControllerFactory createHighLevelHumanoidControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-      final HighLevelState initialBehavior;
-      initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
+      HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters, initialBehavior);
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames,
+                                                                                                    feetContactSensorNames, wristForceSensorNames, highLevelControllerParameters,
+                                                                                                    walkingControllerParameters, capturePointPlannerParameters);
 
       controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
 
-      return controllerFactory;
-   }
+      controllerFactory.useDefaultDoNothingControlState();
+      controllerFactory.useDefaultWalkingControlState();
 
+      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
+      controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
+
+      HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
+      controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
+      controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
+
+      return controllerFactory;
+
+   }
 }

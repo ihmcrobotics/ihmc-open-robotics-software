@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -610,7 +610,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getOrientationData(RigidBody endEffector, FrameOrientation orientationDataToPack, Type type)
+   public boolean getOrientationData(RigidBody endEffector, FrameQuaternion orientationDataToPack, Type type)
    {
       EnumMap<Type, Pair<YoFrameQuaternion, List<YoBoolean>>> endEffectorData = endEffectorOrientations.get(endEffector);
 

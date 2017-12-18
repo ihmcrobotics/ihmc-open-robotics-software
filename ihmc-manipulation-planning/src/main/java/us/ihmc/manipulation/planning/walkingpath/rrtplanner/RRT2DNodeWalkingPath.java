@@ -124,7 +124,5 @@ public class RRT2DNodeWalkingPath extends RRTNode
    @Override
    public void setRandomNodeData()
    {
-      // TODO Auto-generated method stub
-
    }
 }

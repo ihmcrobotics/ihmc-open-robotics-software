@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public interface QuadrupedStepStream
 {
@@ -30,5 +30,5 @@ public interface QuadrupedStepStream
    /**
     * Get the nominal body orientation at the current time step.
     */
-   void getBodyOrientation(FrameOrientation bodyOrientation);
+   void getBodyOrientation(FrameQuaternion bodyOrientation);
 }

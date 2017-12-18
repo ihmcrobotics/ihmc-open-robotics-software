@@ -225,7 +225,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       @Override
       public void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription)
       {
-         // TODO Auto-generated method stub
       }
 
 
@@ -389,14 +388,12 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       @Override
       public CollisionShapeDescription getTransformedCollisionShapeDescription()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public void computeTransformedCollisionShape()
       {
-         // TODO Auto-generated method stub
 
       }
 
@@ -409,14 +406,12 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       @Override
       public void setCollisionGroup(int groupMask)
       {
-         // TODO Auto-generated method stub
          
       }
 
       @Override
       public void setCollisionMask(int collisionMask)
       {
-         // TODO Auto-generated method stub
          
       }
 

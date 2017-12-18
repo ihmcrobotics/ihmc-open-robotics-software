@@ -1,12 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -17,7 +17,8 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputCon
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -25,9 +26,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 {
@@ -62,15 +60,6 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    private final YoDouble yoTime;
    private final YoDouble timeSolutionSentToController;
-   
-   private final YoInteger yoCountDoControl = new YoInteger("yoCountDoControl", registry);
-   
-   /*
-    * original 20.0, 0.02, 0.02. 
-    */
-   private static double handWeight = 50.0;
-   private static double chestWeight = 10.0;
-   private static double pelvisWeight = 10.0;
 
    public WholeBodyInverseKinematicsBehavior(FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
                                              CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
@@ -147,7 +136,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    }
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
 
    public void setDesiredHandPose(RobotSide robotSide, FramePose desiredHandPose)
    {
@@ -155,7 +144,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       setDesiredHandPose(robotSide, desiredPosition, desiredOrientation);
    }
 
-   public void setDesiredHandPose(RobotSide robotSide, FramePoint3D desiredHandPosition, FrameOrientation desiredHandOrientation)
+   public void setDesiredHandPose(RobotSide robotSide, FramePoint3D desiredHandPosition, FrameQuaternion desiredHandOrientation)
    {
       yoDesiredHandPositions.get(robotSide).setAndMatchFrame(desiredHandPosition);
       yoDesiredHandOrientations.get(robotSide).setAndMatchFrame(desiredHandOrientation);
@@ -174,12 +163,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void holdCurrentChestOrientation()
    {
-      FrameOrientation currentChestOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion currentChestOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
       yoDesiredChestOrientation.setAndMatchFrame(currentChestOrientation);
       chestSelectionMatrix.setToAngularSelectionOnly();
    }
 
-   public void setDesiredChestOrientation(FrameOrientation desiredChestOrientation)
+   public void setDesiredChestOrientation(FrameQuaternion desiredChestOrientation)
    {
       yoDesiredChestOrientation.setAndMatchFrame(desiredChestOrientation);
    }
@@ -192,12 +181,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void holdCurrentPelvisOrientation()
    {
-      FrameOrientation currentPelvisOrientation = new FrameOrientation(fullRobotModel.getPelvis().getBodyFixedFrame());
+      FrameQuaternion currentPelvisOrientation = new FrameQuaternion(fullRobotModel.getPelvis().getBodyFixedFrame());
       yoDesiredPelvisOrientation.setAndMatchFrame(currentPelvisOrientation);
       pelvisSelectionMatrix.setToAngularSelectionOnly();
    }
 
-   public void setDesiredPelvisOrientation(FrameOrientation desiredPelvisOrientation)
+   public void setDesiredPelvisOrientation(FrameQuaternion desiredPelvisOrientation)
    {
       yoDesiredPelvisOrientation.setAndMatchFrame(desiredPelvisOrientation);
    }
@@ -271,7 +260,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             KinematicsToolboxRigidBodyMessage handMessage = new KinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition,
                                                                                                   desiredHandOrientation);
-            handMessage.setWeight(handWeight);
+            handMessage.setWeight(20.0);
             handMessages.put(robotSide, handMessage);
          }
       }
@@ -286,7 +275,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          yoDesiredChestOrientation.get(desiredChestOrientation);
          RigidBody chest = fullRobotModel.getChest();
          chestMessage = new KinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
-         chestMessage.setWeight(chestWeight);
+         chestMessage.setWeight(0.02);
       }
 
       RigidBody pelvis = fullRobotModel.getPelvis();
@@ -301,7 +290,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          Quaternion desiredPelvisOrientation = new Quaternion();
          yoDesiredPelvisOrientation.get(desiredPelvisOrientation);
          pelvisMessage.setDesiredOrientation(desiredPelvisOrientation);
-         pelvisMessage.setWeight(pelvisWeight);
+         pelvisMessage.setWeight(0.02);
       }
 
       if (!yoDesiredPelvisPosition.containsNaN())
@@ -309,16 +298,15 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          Point3D desiredPelvisPosition = new Point3D();
          yoDesiredPelvisPosition.get(desiredPelvisPosition);
          pelvisMessage.setDesiredPosition(desiredPelvisPosition);
-         pelvisMessage.setWeight(pelvisWeight);
+         pelvisMessage.setWeight(0.02);
       }
    }
-   
+
    @Override
    public void doControl()
    {
       if (!hasSentMessageToController.getBooleanValue())
       {
-         yoCountDoControl.increment();
          for (RobotSide robotSide : RobotSide.values)
          {
             if (handMessages.get(robotSide) != null)
@@ -349,11 +337,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
 
          double deltaSolutionQuality = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality();
-         boolean isSolutionStable = deltaSolutionQuality > 0.0 && deltaSolutionQuality < 1.0e-5;
+         boolean isSolutionStable = deltaSolutionQuality > 0.0 && deltaSolutionQuality < 1.0e-6;
          boolean isSolutionGoodEnough = newestSolution.getSolutionQuality() < solutionQualityThreshold.getDoubleValue();
          boolean sendSolutionToController = isSolutionStable && isSolutionGoodEnough;
-         
-         PrintTools.info(""+yoCountDoControl.getIntegerValue()+" ");
          if (!isPaused())
          {
             if (isSolutionStable && !isSolutionGoodEnough)
@@ -362,7 +348,6 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             }
             else if (sendSolutionToController)
             {
-               PrintTools.info("cnt "+yoCountDoControl.getIntegerValue());
                solutionSentToController = newestSolution;
                outputConverter.setTrajectoryTime(trajectoryTime.getDoubleValue());
                WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();

@@ -6,30 +6,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -48,7 +48,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
-   private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
+   private Map<String, JointAccelerationIntegrationParameters> integrationSettings = null;
 
    private final LegConfigurationParameters legConfigurationParameters;
    private final ToeOffParameters toeOffParameters;
@@ -194,7 +194,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public PDGains getCoMHeightControlGains()
    {
-      PDGains gains = new PDGains("_CoMHeight");
+      PDGains gains = new PDGains();
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -213,7 +213,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       List<String> spineNames = new ArrayList<>();
       List<String> neckNames = new ArrayList<>();
@@ -230,17 +230,17 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
 
-      List<ImmutablePair<PIDGains, List<String>>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(spineGains, spineNames));
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(neckGains, neckNames));
-      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(armGains, armNames));
+      List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", spineGains, spineNames));
+      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", neckGains, neckNames));
+      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", armGains, armNames));
 
       return jointspaceGains;
    }
 
    private PIDGains createSpineControlGains()
    {
-      PIDGains spineGains = new PIDGains("_SpineJointGains");
+      PIDGains spineGains = new PIDGains();
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = 50.0;
@@ -262,7 +262,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private PIDGains createNeckControlGains()
    {
-      PIDGains gains = new PIDGains("_NeckJointGains");
+      PIDGains gains = new PIDGains();
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = 40.0;
@@ -280,7 +280,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private PIDGains createArmControlGains()
    {
-      PIDGains armGains = new PIDGains("_ArmJointGains");
+      PIDGains armGains = new PIDGains();
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
@@ -302,19 +302,19 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
    {
-      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceAngularGains = new ArrayList<>();
+      List<GroupParameter<PID3DGainsReadOnly>> taskspaceAngularGains = new ArrayList<>();
 
       PID3DGains chestAngularGains = createChestOrientationControlGains();
       List<String> chestGainBodies = new ArrayList<>();
       chestGainBodies.add(jointMap.getChestName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Chest", chestAngularGains, chestGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, chestGainBodies));
 
       PID3DGains headAngularGains = createHeadOrientationControlGains();
       List<String> headGainBodies = new ArrayList<>();
       headGainBodies.add(jointMap.getHeadName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Head", headAngularGains, headGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, headGainBodies));
 
       PID3DGains handAngularGains = createHandOrientationControlGains();
       List<String> handGainBodies = new ArrayList<>();
@@ -322,12 +322,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       {
          handGainBodies.add(jointMap.getHandName(robotSide));
       }
-      taskspaceAngularGains.add(new ImmutableTriple<>("Hand", handAngularGains, handGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, handGainBodies));
 
       PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
       List<String> pelvisGainBodies = new ArrayList<>();
       pelvisGainBodies.add(jointMap.getPelvisName());
-      taskspaceAngularGains.add(new ImmutableTriple<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
 
       return taskspaceAngularGains;
    }
@@ -407,9 +407,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
    {
-      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceLinearGains = new ArrayList<>();
+      List<GroupParameter<PID3DGainsReadOnly>> taskspaceLinearGains = new ArrayList<>();
 
       PID3DGains handLinearGains = createHandPositionControlGains();
       List<String> handGainBodies = new ArrayList<>();
@@ -417,7 +417,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       {
          handGainBodies.add(jointMap.getHandName(robotSide));
       }
-      taskspaceLinearGains.add(new ImmutableTriple<>("Hand", handLinearGains, handGainBodies));
+      taskspaceLinearGains.add(new GroupParameter<>("Hand", handLinearGains, handGainBodies));
 
       return taskspaceLinearGains;
    }
@@ -467,13 +467,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.2));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), -0.2);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.7);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfRightSide(-1.5));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 1.3);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.4);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.0));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.1);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfRightSide(-1.3));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 1.0);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
       }
 
       return jointHomeConfiguration;
@@ -492,71 +492,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       return bodyHomeConfiguration;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public List<String> getOrCreatePositionControlledJoints()
-   {
-      if (positionControlledJoints != null)
-         return positionControlledJoints;
-
-      positionControlledJoints = new ArrayList<String>();
-
-      if (target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO)
-      {
-         for (NeckJointName name : jointMap.getNeckJointNames())
-            positionControlledJoints.add(jointMap.getNeckJointName(name));
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL));
-            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH));
-            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL));
-         }
-      }
-
-      return positionControlledJoints;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
-   {
-      if (integrationSettings != null)
-         return integrationSettings;
-
-      integrationSettings = new HashMap<String, JointAccelerationIntegrationSettings>();
-
-      JointAccelerationIntegrationSettings neckJointSettings = new JointAccelerationIntegrationSettings();
-      neckJointSettings.setAlphaPosition(0.9996);
-      neckJointSettings.setAlphaVelocity(0.95);
-      neckJointSettings.setMaxPositionError(0.2);
-      neckJointSettings.setMaxVelocity(2.0);
-
-      for (NeckJointName name : jointMap.getNeckJointNames())
-         integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
-
-      JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
-      elbowJointSettings.setAlphaPosition(0.9998);
-      elbowJointSettings.setAlphaVelocity(0.86);
-      elbowJointSettings.setMaxPositionError(0.2);
-      elbowJointSettings.setMaxVelocity(2.0);
-
-      JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
-      wristJointSettings.setAlphaPosition(0.9995);
-      wristJointSettings.setAlphaVelocity(0.83);
-      wristJointSettings.setMaxPositionError(0.2);
-      wristJointSettings.setMaxVelocity(2.0);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), elbowJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), wristJointSettings);
-         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), wristJointSettings);
-      }
-
-      return integrationSettings;
    }
 
    @Override
@@ -821,5 +756,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public SteppingParameters getSteppingParameters()
    {
       return steppingParameters;
+   }
+
+   @Override
+   public double getMinSwingTrajectoryClearanceFromStanceFoot()
+   {
+      return 0.18;
    }
 }

@@ -11,7 +11,6 @@ import us.ihmc.robotics.geometry.FramePose;
  */
 public class MovingMidFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = 8048759607893248458L;
    private final MovingReferenceFrame frameOne, frameTwo;
    private final FramePose pose = new FramePose();
    private final FramePose poseOne = new FramePose();

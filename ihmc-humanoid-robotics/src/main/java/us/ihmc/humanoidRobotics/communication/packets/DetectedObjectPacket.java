@@ -23,7 +23,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
 
    public DetectedObjectPacket(Random random)
    {
-      pose = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      pose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       id = random.nextInt(255);
    }
    

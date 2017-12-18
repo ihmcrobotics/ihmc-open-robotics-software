@@ -17,6 +17,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -66,7 +67,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -82,12 +82,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieSensorInformation sensorInformation;
    private final ValkyrieJointMap jointMap;
    private final ValkyrieContactPointParameters contactPointParameters;
+   private final ValkyrieCalibrationParameters calibrationParameters;
    private final DRCHandType drcHandType = DRCHandType.VALKYRIE;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
    private final RobotTarget target;
    private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlanningParameters;
+   private final HighLevelControllerParameters highLevelControllerParameters;
 
    private final String[] resourceDirectories;
    {
@@ -123,6 +125,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap = new ValkyrieJointMap();
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
       sensorInformation = new ValkyrieSensorInformation(target);
+      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target == RobotTarget.REAL_ROBOT, jointMap);
+      calibrationParameters = new ValkyrieCalibrationParameters(jointMap);
       InputStream sdf = null;
 
       if(model.equalsIgnoreCase("DEFAULT"))
@@ -226,7 +230,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotJointMap getJointMap()
+   public ValkyrieJointMap getJointMap()
    {
       return jointMap;
    }
@@ -525,8 +529,19 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
+   }
+
+   @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
       return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller.xml");
+   }
+   
+   public ValkyrieCalibrationParameters getCalibrationParameters()
+   {
+      return calibrationParameters;
    }
 }

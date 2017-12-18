@@ -23,8 +23,7 @@ import javax.swing.JScrollPane;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjector;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjector.ProjectionMethod;
+import us.ihmc.commonWalkingControlModules.capturePoint.SmartCMPProjector.ProjectionMethod;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;

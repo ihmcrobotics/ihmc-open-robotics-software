@@ -4,13 +4,14 @@ package us.ihmc.robotics.controllers.pidGains;
  * Interface for SE3 PID gains consisting of two PID gains in 3D. One for the
  * position control and one for the orientation control.
  */
-public interface PIDSE3Gains
+public interface PIDSE3Gains extends PIDSE3GainsReadOnly
 {
    /**
     * Returns the gains to be used for the position control.
     *
     * @return the position PID gains.
     */
+   @Override
    public abstract PID3DGains getPositionGains();
 
    /**
@@ -18,6 +19,7 @@ public interface PIDSE3Gains
     *
     * @return the orientation PID gains.
     */
+   @Override
    public abstract PID3DGains getOrientationGains();
 
    /**
@@ -218,7 +220,7 @@ public interface PIDSE3Gains
     *
     * @param other the new gains.
     */
-   public default void set(PIDSE3Gains other)
+   public default void set(PIDSE3GainsReadOnly other)
    {
       setOrientationGains(other.getOrientationGains());
       setPositionGains(other.getPositionGains());

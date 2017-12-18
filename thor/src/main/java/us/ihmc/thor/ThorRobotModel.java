@@ -17,6 +17,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -47,6 +48,7 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.thor.configuration.ThorConfigurationRoot;
 import us.ihmc.thor.parameters.ThorCapturePointPlannerParameters;
 import us.ihmc.thor.parameters.ThorContactPointParameters;
+import us.ihmc.thor.parameters.ThorHighLevelControllerParameters;
 import us.ihmc.thor.parameters.ThorJointMap;
 import us.ihmc.thor.parameters.ThorSensorInformation;
 import us.ihmc.thor.parameters.ThorStateEstimatorParameters;
@@ -67,6 +69,7 @@ public class ThorRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
+   private final HighLevelControllerParameters highLevelControllerParameters;
    private final ThorSensorInformation sensorInformation;
    private final ThorJointMap jointMap;
    private final ThorContactPointParameters contactPointParameters;
@@ -156,6 +159,7 @@ public class ThorRobotModel implements DRCRobotModel, SDFDescriptionMutator
       capturePointPlannerParameters = new ThorCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new ThorWalkingControllerParameters(target, jointMap);
       stateEstimatorParamaters = new ThorStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
+      highLevelControllerParameters = new ThorHighLevelControllerParameters(jointMap);
       robotDescription = createRobotDescription();
    }
 
@@ -189,6 +193,12 @@ public class ThorRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public UIParameters getUIParameters()
    {
       return new ThorUIParameters();
+   }
+
+   @Override
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
    }
 
    @Override

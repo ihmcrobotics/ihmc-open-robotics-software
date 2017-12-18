@@ -16,6 +16,7 @@ import us.ihmc.avatar.environments.DarpaRoboticsChallengeFinalsEnvironment;
 import us.ihmc.avatar.simulationStarter.DRCSCStartingLocations;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -35,7 +36,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -71,7 +71,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 90000)
+   @Test(timeout = 180000)
    public void testWalkingUpStairs() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -119,7 +119,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 90000)
+   @Test(timeout = 180000)
    public void testFastWalkingUpStairs() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
