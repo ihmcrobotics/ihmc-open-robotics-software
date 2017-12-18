@@ -2,7 +2,6 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +28,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
-   private final static boolean CONNECT_GOAL_TO_CLOSEST_REGION = false;
    private final static boolean TRUNCATE_OBSTACLE_REGIONS = true;
 
    private final static int START_GOAL_ID = 0;
@@ -112,13 +110,6 @@ public class NavigableRegionsManager
 
       long endCreationTime = System.currentTimeMillis();
 
-      long startForcingPoints = System.currentTimeMillis();
-
-      if (CONNECT_GOAL_TO_CLOSEST_REGION)
-         connectToClosestRegions(goal, START_GOAL_ID);
-
-      long endForcingPoints = System.currentTimeMillis();
-
       boolean readyToRunBodyPath = createVisMapsForStartAndGoal(start, goal);
 
       createGlobalMapFromAlltheLocalMaps();
@@ -140,7 +131,6 @@ public class NavigableRegionsManager
                PrintTools.info("----Navigable Regions Manager Stats-----");
                PrintTools.info("Map creation completed in " + (endCreationTime - startCreatingMaps) + "ms");
                PrintTools.info("Connection completed in " + (endConnectingTime - startConnectingTime) + "ms");
-               PrintTools.info("Forcing points took: " + (endForcingPoints - startForcingPoints) + "ms");
                PrintTools.info("A* took: " + (System.currentTimeMillis() - aStarStartTime) + "ms");
                PrintTools.info("Total time to find solution was: " + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
             }
@@ -314,51 +304,6 @@ public class NavigableRegionsManager
       }
    }
 
-   private void connectToClosestRegions(Point3DReadOnly position, int positionId)
-   {
-      ArrayList<PlanarRegionDistance> planarRegionsDistance = new ArrayList<>();
-
-      for (NavigableRegion planner : navigableRegions)
-      {
-         double minDistance = Double.MAX_VALUE;
-         PlanarRegion homeRegion = planner.getHomeRegion();
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         homeRegion.getTransformToWorld(transformToWorld);
-
-         for (int i = 0; i < homeRegion.getConcaveHull().length; i++)
-         {
-            Point3D pointInWorld = new Point3D(homeRegion.getConcaveHull()[i]);
-            pointInWorld.applyTransform(transformToWorld);
-
-            double currentDistance = position.distanceSquared(pointInWorld);
-
-            if (currentDistance < minDistance)
-            {
-               minDistance = currentDistance;
-            }
-         }
-
-         planarRegionsDistance.add(new PlanarRegionDistance(homeRegion, minDistance));
-      }
-
-      planarRegionsDistance.sort(new PlanarRegionDistanceComparator());
-
-      PlanarRegion closestRegion = planarRegionsDistance.get(0).getRegion();
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      closestRegion.getTransformToWorld(transformToWorld);
-
-      for (int i = 0; i < closestRegion.getConcaveHull().length; i++)
-      {
-         Point3D pointInWorld = new Point3D(closestRegion.getConcaveHull()[i]);
-         pointInWorld.applyTransform(transformToWorld);
-
-         connectionPoints.add(new Connection(position, positionId, pointInWorld, closestRegion.getRegionId()));
-      }
-
-      if (debug)
-         System.out.println("Sorted: " + planarRegionsDistance.size() + " planar regions");
-   }
-
    private void connectLocalMaps()
    {
       if (debug)
@@ -511,48 +456,5 @@ public class NavigableRegionsManager
    public ArrayList<Connection> getConnectionPoints()
    {
       return connectionPoints;
-   }
-
-   private class PlanarRegionDistance implements Comparable<PlanarRegionDistance>
-   {
-      PlanarRegion region;
-      double distance;
-
-      public PlanarRegionDistance(PlanarRegion region, double distance)
-      {
-         this.region = region;
-         this.distance = distance;
-      }
-
-      public PlanarRegion getRegion()
-      {
-         return region;
-      }
-
-      @Override
-      public int compareTo(PlanarRegionDistance region)
-      {
-         if (distance > region.distance)
-         {
-            return 1;
-         }
-         else if (distance < region.distance)
-         {
-            return -1;
-         }
-         else
-         {
-            return 0;
-         }
-      }
-   }
-
-   private class PlanarRegionDistanceComparator implements Comparator<PlanarRegionDistance>
-   {
-      @Override
-      public int compare(PlanarRegionDistance region1, PlanarRegionDistance region2)
-      {
-         return region1.compareTo(region2);
-      }
    }
 }
