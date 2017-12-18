@@ -362,7 +362,7 @@ public class ClusterTools
    }
 
    public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions,
-                                                List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformToWorld,
+                                                List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformFromHomeToWorld,
                                                 VisibilityGraphsParameters visibilityGraphsParameters)
    {
       for (PlanarRegion region : lineObstacleRegions)
@@ -372,16 +372,17 @@ public class ClusterTools
             Cluster cluster = new Cluster();
             clusters.add(cluster);
             cluster.setType(Type.LINE);
-            cluster.setTransformToWorld(transformToWorld);
+            cluster.setTransformToWorld(transformFromHomeToWorld);
 
             ArrayList<Point3D> points = new ArrayList<>();
-            RigidBodyTransform transToWorld = new RigidBodyTransform();
-            region.getTransformToWorld(transToWorld);
+            RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
+            region.getTransformToWorld(transformFromOtherToHome);
+            transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
 
             for (int i = 0; i < region.getConvexHull().getNumberOfVertices(); i++)
             {
                Point3D concaveHullVertexWorld = new Point3D(region.getConvexHull().getVertex(i));
-               concaveHullVertexWorld.applyTransform(transToWorld);
+               concaveHullVertexWorld.applyTransform(transformFromOtherToHome);
                points.add(concaveHullVertexWorld);
             }
 
@@ -390,7 +391,7 @@ public class ClusterTools
 
             //Convert to local frame
             Point3D[] extremes = linearRegression.getTheTwoPointsFurthestApart();
-            cluster.addRawPointsInWorld3D(extremes);
+            cluster.addRawPointsInLocal3D(extremes);
          }
       }
 
@@ -401,16 +402,18 @@ public class ClusterTools
             Cluster cluster = new Cluster();
             clusters.add(cluster);
             cluster.setType(Type.POLYGON);
-            cluster.setTransformToWorld(transformToWorld);
+            cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
+            cluster.setTransformToWorld(transformFromHomeToWorld);
 
-            RigidBodyTransform transToWorld = new RigidBodyTransform();
-            region.getTransformToWorld(transToWorld);
+            RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
+            region.getTransformToWorld(transformFromOtherToHome);
+            transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
 
             for (int i = 0; i < region.getConcaveHullSize(); i++)
             {
-               Point3D concaveHullVertexWorld = new Point3D(region.getConcaveHull()[i]);
-               concaveHullVertexWorld.applyTransform(transToWorld);
-               cluster.addRawPointInWorld3D(concaveHullVertexWorld);
+               Point3D concaveHullVertexHome = new Point3D(region.getConcaveHull()[i]);
+               concaveHullVertexHome.applyTransform(transformFromOtherToHome);
+               cluster.addRawPointInLocal3D(concaveHullVertexHome);
             }
          }
       }
