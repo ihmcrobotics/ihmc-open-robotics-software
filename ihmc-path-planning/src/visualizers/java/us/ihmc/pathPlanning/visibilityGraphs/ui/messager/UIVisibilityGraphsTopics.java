@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Category;

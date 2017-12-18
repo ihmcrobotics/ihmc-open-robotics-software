@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+
 public class DefaultVisibilityGraphParameters implements VisibilityGraphsParameters
 {
    @Override
