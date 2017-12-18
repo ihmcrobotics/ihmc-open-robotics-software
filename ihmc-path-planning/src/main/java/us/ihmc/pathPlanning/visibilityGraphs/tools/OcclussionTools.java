@@ -18,7 +18,7 @@ public class OcclussionTools
          {
             ArrayList<Point2D> list2D = new ArrayList<>();
 
-            for (Point3D point3d : cluster.getNonNavigableExtrusionsInWorld())
+            for (Point3D point3d : cluster.getNonNavigableExtrusionsInWorld3D())
             {
                list2D.add(new Point2D(point3d));
             }
@@ -47,7 +47,7 @@ public class OcclussionTools
          {
             ArrayList<Point2D> list2D = new ArrayList<>();
 
-            for (Point3D point3d : cluster.getNonNavigableExtrusionsInWorld())
+            for (Point3D point3d : cluster.getNonNavigableExtrusionsInWorld3D())
             {
                list2D.add(new Point2D(point3d));
             }

@@ -85,7 +85,7 @@ public class VisibilityTools
       {
          if (!cluster.isDynamic())
          {
-            for (Point2D point : cluster.getNavigableExtrusionsInLocal())
+            for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
             {
                listOfObserverPoints.add(point);
             }
@@ -126,7 +126,7 @@ public class VisibilityTools
       {
          if (!cluster.isDynamic())
          {
-            for (Point2D point : cluster.getNavigableExtrusionsInLocal())
+            for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
             {
                listOfTargetPoints.add(point);
             }
@@ -171,7 +171,7 @@ public class VisibilityTools
    {
       for (Cluster cluster : clusters)
       {
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal()))
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal2D()))
          {
             return false;
          }
@@ -201,13 +201,13 @@ public class VisibilityTools
          for (Cluster cluster : filteredClusters)
          {
 
-            if (cluster.getNonNavigableExtrusionsInLocal().size() == 0)
+            if (cluster.getNonNavigableExtrusionsInLocal2D().size() == 0)
             {
                continue;
             }
 
             List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                     cluster.getNonNavigableExtrusionsInLocal());
+                                                                                                     cluster.getNonNavigableExtrusionsInLocal2D());
             for (Connection connection : filteredConnections)
             {
                connectionsToRemove.add(connection);
@@ -216,7 +216,7 @@ public class VisibilityTools
 
          List<Connection> connectionsInsideHomeRegion = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
                                                                                                           clusters.get(clusters.size() - 1)
-                                                                                                                  .getNonNavigableExtrusionsInLocal());
+                                                                                                                  .getNonNavigableExtrusionsInLocal2D());
 
          for (Connection connection : connectionsInsideHomeRegion)
          {
@@ -243,13 +243,13 @@ public class VisibilityTools
 
          for (Cluster cluster : filteredClusters)
          {
-            if (cluster.getNonNavigableExtrusionsInLocal().size() == 0)
+            if (cluster.getNonNavigableExtrusionsInLocal2D().size() == 0)
             {
                continue;
             }
 
             List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                     cluster.getNonNavigableExtrusionsInLocal());
+                                                                                                     cluster.getNonNavigableExtrusionsInLocal2D());
             for (Connection connection : filteredConnections)
             {
                masterListOfConnections.add(connection);

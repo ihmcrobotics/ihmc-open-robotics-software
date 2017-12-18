@@ -245,7 +245,7 @@ public class NavigableRegionsManager
          NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
          List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getAllClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
-         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
+         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld3D(),
                                                                                     regionContainingPoint.getHomeRegion());
 
          path = calculateBodyPath(start, closestExtrusion);
@@ -715,7 +715,7 @@ public class NavigableRegionsManager
 
       for (Cluster cluster : clusters)
       {
-         PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal(), parameters.getClusterResolution());
+         PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal2D(), parameters.getClusterResolution());
       }
 
       Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters, navigableRegionLocalPlanner.getRegionId());
@@ -740,7 +740,7 @@ public class NavigableRegionsManager
       {
          for (Cluster cluster : navigableRegion.getAllClusters())
          {
-            List<Point3D> nonNavigableExtrusionsInWorld = cluster.getNonNavigableExtrusionsInWorld();
+            List<Point3D> nonNavigableExtrusionsInWorld = cluster.getNonNavigableExtrusionsInWorld3D();
             int extrusionsSize = nonNavigableExtrusionsInWorld.size();
 
             if (extrusionsSize == 0)
@@ -783,7 +783,7 @@ public class NavigableRegionsManager
          {
             for (int j = 0; j < cluster.getNumberOfNavigableExtrusions(); j++)
             {
-               navigableExtrusions[j] = cluster.getNavigableExtrusionInWorld(j);
+               navigableExtrusions[j] = cluster.getNavigableExtrusionInWorld3D(j);
             }
          }
 
