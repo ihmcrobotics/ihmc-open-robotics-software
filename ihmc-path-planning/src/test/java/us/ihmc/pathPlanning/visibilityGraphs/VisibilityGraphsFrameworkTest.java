@@ -44,7 +44,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 {
    private static final long TIMEOUT = Long.MAX_VALUE; // 30000;
    private static final double START_GOAL_EPSILON = 1.0e-2;
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
    private static boolean DEBUG = true;
 
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
@@ -299,13 +299,25 @@ public class VisibilityGraphsFrameworkTest extends Application
 
             for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
             {
-               closestPoint = new Point3D(planarRegion.getConvexPolygon(i).orthogonalProjectionCopy(walkerBody2D));
+               ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
+               Point2D closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerBody2D);
+               if (closestPoint2D == null)
+               {
+                  if (convexPolygon.isPointInside(walkerBody2D))
+                  {
+                     errorMessages += fail(dataset, "Body path is going through a region."); // TODO figure out the proper intersection
+                     break;
+                  }
+                  else
+                  {
+                     throw new RuntimeException("Not usre what went wrong to here.");
+                  }
+               }
+               closestPoint = new Point3D(closestPoint2D);
                
                if (walkerShape.isInsideOrOnSurface(closestPoint))
                {
-                  Point2D intersectionLocal = planarRegion.getConvexPolygon(i).orthogonalProjectionCopy(walkerBody2D);
-                  if (intersectionLocal == null) // walkerBody2D is inside the polygon
-                     intersectionLocal = walkerBody2D;
+                  Point2D intersectionLocal = closestPoint2D;
                   Point3D intersectionWorld = toWorld(intersectionLocal, transformToWorld);
                   errorMessages += fail(dataset, "Body path is going through a region at: " + intersectionWorld);
                   collisions.add(intersectionWorld);
