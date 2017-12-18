@@ -1073,7 +1073,7 @@ public class ConvexPolygon2dTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         FramePoint2D pointToTest = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
+         FramePoint2D pointToTest = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
          @SuppressWarnings("unused")
          boolean isInside = polygon.isPointInside(pointToTest);
       }
@@ -1304,7 +1304,7 @@ public class ConvexPolygon2dTest
 
       for (int i = 0; i < numLineOfSightTests; i++)
       {
-         FramePoint2D randomPoint = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
+         FramePoint2D randomPoint = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
          if (!polygon.isPointInside(randomPoint))
          {
             randomOutsidePoints.add(randomPoint);

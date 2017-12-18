@@ -96,7 +96,7 @@ public class ConvexPolygon2dTestHelpers
       ArrayList<FrameConvexPolygon2d> ret = new ArrayList<FrameConvexPolygon2d>(numberOfPolygons);
       for (int i = 0; i < numberOfPolygons; i++)
       {
-         FramePoint2D center = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+         FramePoint2D center = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
 
          //       double x2A = xMin + widthMax/2.0 + random.nextDouble() * (xMax - xMin - widthMax);
          //       double x2B = xMin + widthMax/2.0 + random.nextDouble() * (xMax - xMin - widthMax);
@@ -121,8 +121,8 @@ public class ConvexPolygon2dTestHelpers
    public static FrameConvexPolygon2d generateRandomPolygon(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax,
          int numberOfPoints)
    {
-      FramePoint2D randomExtents1 = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
-      FramePoint2D randomExtents2 = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+      FramePoint2D randomExtents1 = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+      FramePoint2D randomExtents2 = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
 
       double xMin2 = Math.min(randomExtents1.getX(), randomExtents2.getX());
       double xMax2 = Math.max(randomExtents1.getX(), randomExtents2.getX());
@@ -144,7 +144,7 @@ public class ConvexPolygon2dTestHelpers
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         FramePoint2D randomPoint = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+         FramePoint2D randomPoint = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
 
          if (randomPoint.distance(zeroFramePoint) > (Math.max((xMax - xMin) / 2.0, (yMax - yMin) / 2.0)))
             continue;
@@ -162,7 +162,7 @@ public class ConvexPolygon2dTestHelpers
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         FramePoint2D randomPoint = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+         FramePoint2D randomPoint = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
 
          points.add(randomPoint);
       }

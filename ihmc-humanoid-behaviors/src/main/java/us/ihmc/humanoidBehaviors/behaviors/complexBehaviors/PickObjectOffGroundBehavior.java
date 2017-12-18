@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -18,7 +19,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
@@ -70,7 +70,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
                   grabLocation.getZ() + objectRadius + 0.25);
             atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(3);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
+            FrameQuaternion tmpOr = new FrameQuaternion(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
          }
@@ -87,7 +87,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
                   grabLocation.getZ() + objectRadius);
             atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(3);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
+            FrameQuaternion tmpOr = new FrameQuaternion(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
          }
@@ -140,7 +140,6 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return pipeLine.isDone();
    }
 

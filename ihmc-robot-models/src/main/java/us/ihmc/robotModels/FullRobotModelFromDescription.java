@@ -457,8 +457,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
          head = rigidBody;
       }
 
-      Set<String> lastSimulatedJoints = sdfJointNameMap.getLastSimulatedJoints();
-      if(lastSimulatedJoints != null && lastSimulatedJoints.contains(inverseDynamicsJoint.getName()))
+      Set<String> endEffectorJoints = sdfJointNameMap.getEndEffectorJoints();
+      if(endEffectorJoints != null && endEffectorJoints.contains(inverseDynamicsJoint.getName()))
       {
          Enum<?> endEffectorRobotSegment = sdfJointNameMap.getEndEffectorsRobotSegment(inverseDynamicsJoint.getName());
          endEffectors.put(endEffectorRobotSegment, rigidBody);

@@ -1,7 +1,6 @@
 package us.ihmc.atlas.commonWalkingControlModules;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumMap;
 
 import org.junit.Test;
 
@@ -19,6 +18,7 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
@@ -28,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
@@ -37,7 +36,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalking();
@@ -45,7 +44,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
    {
       super.testSlowerWalking();
@@ -53,7 +52,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
       super.testWalkingOverCinderBlockField();
@@ -61,14 +60,14 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testWalkingOverStairs() throws Exception
    {
       super.testWalkingOverStairs();
    }
 
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testDropOffsWhileWalking() throws Exception
    {
       double stepDownHeight = 0.08;
@@ -76,7 +75,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testSteppingDown() throws Exception
    {
       double stepDownHeight = 0.12;
@@ -84,7 +83,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testSteppingDownEveryTime() throws Exception
    {
       double stepLength = 0.35;
@@ -94,7 +93,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    /*
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testRandomHeightField() throws Exception
    {
       double maxStepIncrease = 0.07;
@@ -321,11 +320,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
          return true;
       }
 
+      @Override
       public double getRelaxationRate()
       {
          return 2.0;
       }
 
+      @Override
       public double getMinimumPelvisWeight()
       {
          return 0.5;
@@ -376,12 +377,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return 0.05;
       }
-
-      @Override
-      public Vector3D getPelvisAngularWeight()
-      {
-         return new Vector3D(5.0, 5.0, 5.0);
-      }
    }
 
    private class TestICPPlannerParameters extends AtlasContinuousCMPPlannerParameters
@@ -405,14 +400,14 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
       /** {@inheritDoc} */
       @Override
-      public List<Vector2D> getCoPOffsets()
+      public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
       {
          Vector2D entryOffset = new Vector2D(0.0, -0.005);
          Vector2D exitOffset = new Vector2D(0.0, 0.015);
 
-         List<Vector2D> copOffsets = new ArrayList<>();
-         copOffsets.add(entryOffset);
-         copOffsets.add(exitOffset);
+         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+         copOffsets.put(entryCoPName, entryOffset);
+         copOffsets.put(exitCoPName, exitOffset);
 
          return copOffsets;
       }

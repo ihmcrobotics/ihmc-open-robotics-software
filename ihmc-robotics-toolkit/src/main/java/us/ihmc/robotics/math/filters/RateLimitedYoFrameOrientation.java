@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 
 public class RateLimitedYoFrameOrientation extends YoFrameOrientation
@@ -92,7 +92,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
             yoFrameVectorUnfiltered.getRoll().getDoubleValue());
    }
 
-   public void update(FrameOrientation frameOrientationUnfiltered)
+   public void update(FrameQuaternion frameOrientationUnfiltered)
    {
       checkReferenceFrameMatch(frameOrientationUnfiltered);
       update(frameOrientationUnfiltered);

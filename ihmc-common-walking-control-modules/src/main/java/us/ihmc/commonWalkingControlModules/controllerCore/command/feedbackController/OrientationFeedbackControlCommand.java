@@ -4,15 +4,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackContr
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -183,11 +184,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameOrientation desiredOrientation)
+   public void set(FrameQuaternion desiredOrientation)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
 
-      desiredOrientation.getQuaternion(desiredOrientationInWorld);
+      desiredOrientationInWorld.set(desiredOrientation);
       desiredAngularVelocityInWorld.setToZero();
       feedForwardAngularAccelerationInWorld.setToZero();
    }
@@ -206,15 +207,15 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
+   public void set(FrameQuaternion desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
       desiredAngularVelocity.checkReferenceFrameMatch(worldFrame);
       feedForwardAngularAcceleration.checkReferenceFrameMatch(worldFrame);
 
-      desiredOrientation.getQuaternion(desiredOrientationInWorld);
-      desiredAngularVelocity.get(desiredAngularVelocityInWorld);
-      feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
+      desiredOrientationInWorld.set(desiredOrientation);
+      desiredAngularVelocityInWorld.set(desiredAngularVelocity);
+      feedForwardAngularAccelerationInWorld.set(feedForwardAngularAcceleration);
    }
 
    /**
@@ -228,15 +229,15 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param feedForwardAngularAcceleration describes the desired linear acceleration of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
     */
-   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
+   public void changeFrameAndSet(FrameQuaternion desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
       feedForwardAngularAcceleration.changeFrame(worldFrame);
 
-      desiredOrientation.getQuaternion(desiredOrientationInWorld);
-      desiredAngularVelocity.get(desiredAngularVelocityInWorld);
-      feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
+      desiredOrientationInWorld.set(desiredOrientation);
+      desiredAngularVelocityInWorld.set(desiredAngularVelocity);
+      feedForwardAngularAccelerationInWorld.set(feedForwardAngularAcceleration);
    }
 
    /**
@@ -293,18 +294,18 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param angular the weights to use for the angular part of this command. Not modified.
     * @param linear the weight to use for the linear part of this command. Not modified.
     */
-   public void setWeightsForSolver(Vector3D weight)
+   public void setWeightsForSolver(Vector3DReadOnly weight)
    {
       spatialAccelerationCommand.setAngularWeights(weight);
       spatialAccelerationCommand.setLinearWeightsToZero();
    }
 
-   public void getIncludingFrame(FrameOrientation desiredOrientationToPack)
+   public void getIncludingFrame(FrameQuaternion desiredOrientationToPack)
    {
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
    }
 
-   public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack,
+   public void getIncludingFrame(FrameQuaternion desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack,
                                  FrameVector3D feedForwardAngularAccelerationToPack)
    {
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);

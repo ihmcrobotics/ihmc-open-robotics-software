@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.AffineTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -43,8 +44,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this(namePrefix + nameSuffix, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance);
    }
 
-   public YoGraphicPosition(String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale, AppearanceDefinition appearance,
-         GraphicType type)
+   public YoGraphicPosition(String namePrefix, String nameSuffix, YoVariableRegistry registry, double scale, AppearanceDefinition appearance, GraphicType type)
    {
       this(namePrefix + nameSuffix, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance, type);
    }
@@ -134,6 +134,28 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       this.appearance = appearance;
    }
 
+   public void setPositionToNaN()
+   {
+      setPosition(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   public void setPosition(FramePoint3DReadOnly position)
+   {
+      position.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      setPosition((Tuple3DReadOnly) position);
+   }
+
+   public void setPosition(Tuple3DReadOnly position)
+   {
+      setPosition(position.getX(), position.getY(), position.getZ());
+   }
+
+   public void getPosition(FramePoint3D positionToPack)
+   {
+      positionToPack.setToZero(ReferenceFrame.getWorldFrame());
+      getPosition((Tuple3DBasics) positionToPack);
+   }
+
    public void setPosition(double x, double y, double z)
    {
       this.x.set(x);
@@ -142,42 +164,14 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
          this.z.set(z);
    }
 
-   public void setPositionToNaN()
+   public void getPosition(Tuple3DBasics positionToPack)
    {
-      setPosition(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   public void setPosition(Tuple3DBasics tuple3d)
-   {
-      setPosition(tuple3d.getX(), tuple3d.getY(), tuple3d.getZ());
-   }
-
-   public void setPosition(FramePoint3D position)
-   {
-      this.x.set(position.getX());
-      this.y.set(position.getY());
+      positionToPack.setX(this.getX());
+      positionToPack.setY(this.getY());
       if (this.z != null)
-         this.z.set(position.getZ());
-   }
-
-   public void getPosition(Point3D point3d)
-   {
-      point3d.setX(this.getX());
-      point3d.setY(this.getY());
-      if (this.z != null)
-         point3d.setZ(this.getZ());
+         positionToPack.setZ(this.getZ());
       else
-         point3d.setZ(0.0);
-   }
-
-   public void getPosition(FramePoint3D framePoint)
-   {
-      framePoint.setX(this.getX());
-      framePoint.setY(this.getY());
-      if (this.z != null)
-         framePoint.setZ(this.getZ());
-      else
-         framePoint.setZ(0.0);
+         positionToPack.setZ(0.0);
    }
 
    public double getX()
@@ -346,17 +340,17 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
    {
       if (z != null)
       {
-         return new YoDouble[] { x, y, z };
+         return new YoDouble[] {x, y, z};
       }
       else
       {
-         return new YoDouble[] { x, y };
+         return new YoDouble[] {x, y};
       }
    }
 
    public double[] getConstants()
    {
-      return new double[] { scale, type.ordinal() };
+      return new double[] {scale, type.ordinal()};
    }
 
    public AppearanceDefinition getAppearance()

@@ -13,11 +13,11 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
@@ -58,7 +58,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassVelocityPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort = new ControlFlowOutputPort<FrameVector3D>("centerOfMassAccelerationPort", controlFlowElement);
 
-      ControlFlowOutputPort<FrameOrientation> orientationPort = new ControlFlowOutputPort<FrameOrientation>("orientationPort", controlFlowElement);
+      ControlFlowOutputPort<FrameQuaternion> orientationPort = new ControlFlowOutputPort<FrameQuaternion>("orientationPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector3D> angularVelocityPort = new ControlFlowOutputPort<FrameVector3D>("angularVelocityPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector3D> angularAccelerationPort = new ControlFlowOutputPort<FrameVector3D>("angularAccelerationPort", controlFlowElement);
 
@@ -86,7 +86,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
          centerOfMassAccelerationPort.setData(new FrameVector3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
          RotationMatrix orientation = new RotationMatrix();
          orientation.set(RandomGeometry.nextAxisAngle(random));
-         orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
+         orientationPort.setData(new FrameQuaternion(ReferenceFrame.getWorldFrame(), orientation));
          angularVelocityPort.setData(new FrameVector3D(estimationFrame, RandomGeometry.nextVector3D(random)));
          angularAccelerationPort.setData(new FrameVector3D(estimationFrame, RandomGeometry.nextVector3D(random)));
 
@@ -133,12 +133,12 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassPositionPort.getData(), centerOfMassBack, epsilon);
    }
 
-   private void compareOrientation(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameOrientation> orientationPort, double epsilon)
+   private void compareOrientation(ReferenceFrame estimationFrame, ControlFlowOutputPort<FrameQuaternion> orientationPort, double epsilon)
    {
-      FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
+      FrameQuaternion estimationFrameOrientation = new FrameQuaternion(estimationFrame);
       estimationFrameOrientation.changeFrame(orientationPort.getData().getReferenceFrame());
-      RotationMatrix rotationBack = estimationFrameOrientation.getMatrix3dCopy();
-      RotationMatrix rotation = orientationPort.getData().getMatrix3dCopy();
+      RotationMatrix rotationBack = new RotationMatrix(estimationFrameOrientation);
+      RotationMatrix rotation = new RotationMatrix(orientationPort.getData());
       assertTrue(rotationBack.epsilonEquals(rotation, epsilon));
    }
 

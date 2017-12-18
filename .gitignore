@@ -9,18 +9,19 @@
 /src/*/bin
 
 # Top level directories in sub-projects
-*/classes
-*/bin
-*/out
 */target
-*/build
 */pit-reports
 */install
 */src/*/bin
 */src/*/build
 */src/*/out
+*/Configurations
 
 # directories to always ignore
+**/classes
+**/bin
+**/out
+**/build
 **/.gradle
 **/.project
 **/.classpath
@@ -43,7 +44,6 @@
 **/pitest
 **/pit-test
 **/pit-reports
-**/Configurations
 **/generated-src2
 
 
@@ -90,5 +90,3 @@
 **/.apdisk
 **/rebel.xml
 **/generatedTestSuites/*TestSuite.java
-
-!gradle/wrapper/gradle-wrapper.jar

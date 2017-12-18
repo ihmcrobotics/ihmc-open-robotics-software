@@ -1,6 +1,6 @@
 package us.ihmc.atlas.StepAdjustmentVisualizers;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -288,7 +288,6 @@ public class SpeedUpExampleGraphic
 
    private static class Vector2dZUpFrame extends ReferenceFrame
    {
-      private static final long serialVersionUID = -1810366869361449743L;
       private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();

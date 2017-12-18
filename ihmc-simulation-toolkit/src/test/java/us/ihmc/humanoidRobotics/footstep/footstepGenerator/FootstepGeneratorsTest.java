@@ -15,6 +15,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,7 +27,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -2185,8 +2185,8 @@ public class FootstepGeneratorsTest
 
       FramePoint3D leftPosition = new FramePoint3D(WORLD_FRAME, leftFootStartPoint.getX(), leftFootStartPoint.getY(), 0);
       FramePoint3D rightPosition = new FramePoint3D(WORLD_FRAME, rightFootStartPoint.getX(), rightFootStartPoint.getY(), 0);
-      FrameOrientation leftOrientation = new FrameOrientation(WORLD_FRAME, leftFootPose2d.getYaw(), 0.0, 0.0);
-      FrameOrientation rightOrientation = new FrameOrientation(WORLD_FRAME, rightFootPose2d.getYaw(), 0.0, 0.0);
+      FrameQuaternion leftOrientation = new FrameQuaternion(WORLD_FRAME, leftFootPose2d.getYaw(), 0.0, 0.0);
+      FrameQuaternion rightOrientation = new FrameQuaternion(WORLD_FRAME, rightFootPose2d.getYaw(), 0.0, 0.0);
 
       leftContactableFoot.setSoleFrame(leftPosition, leftOrientation);
       rightContactableFoot.setSoleFrame(rightPosition, rightOrientation);

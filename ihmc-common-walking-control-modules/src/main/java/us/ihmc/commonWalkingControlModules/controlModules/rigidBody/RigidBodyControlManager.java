@@ -10,12 +10,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
@@ -24,15 +23,16 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.yoVariables.parameters.EnumParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -46,9 +46,7 @@ public class RigidBodyControlManager
    private final YoVariableRegistry registry;
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
-   private final YoEnum<RigidBodyControlMode> defaultControlMode;
-
-   private final RigidBodyPositionControlHelper positionControlHelper;
+   private final EnumParameter<RigidBodyControlMode> defaultControlMode;
 
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
@@ -68,9 +66,9 @@ public class RigidBodyControlManager
    private final YoBoolean stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
-         Pose3D homePose, List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
-         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody,
-         YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  Pose3D homePose, Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
+                                  ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode, YoDouble yoTime,
+                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -80,14 +78,10 @@ public class RigidBodyControlManager
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
 
-      defaultControlMode = new YoEnum<>(namePrefix + "DefaultControlMode", registry, RigidBodyControlMode.class, true);
-      defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-
       jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
 
       initialJointPositions = new double[jointsToControl.length];
 
-      positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
       RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
@@ -95,7 +89,7 @@ public class RigidBodyControlManager
                                                                  jointControlHelper, graphicsListRegistry, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
-      if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
+      if (contactableBody != null)
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, jointControlHelper,
                                                                         graphicsListRegistry, registry);
       else
@@ -105,6 +99,13 @@ public class RigidBodyControlManager
          this.homePose = new FramePose(baseFrame, homePose);
       else
          this.homePose = null;
+
+      defaultControlMode = defaultControlMode == null ? RigidBodyControlMode.JOINTSPACE : defaultControlMode;
+      checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);
+      String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
+      this.defaultControlMode = new EnumParameter<>(namePrefix + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false,
+            defaultControlMode);
+      this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       allJointsEnabled = new YoBoolean(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
@@ -132,8 +133,8 @@ public class RigidBodyControlManager
       }
    }
 
-   public void setWeights(TObjectDoubleHashMap<String> jointspaceWeights, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight,
-         TObjectDoubleHashMap<String> userModeWeights)
+   public void setWeights(Map<String, DoubleProvider> jointspaceWeights, Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight,
+                          Map<String, DoubleProvider> userModeWeights)
    {
       jointspaceControlState.setDefaultWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
@@ -142,8 +143,8 @@ public class RigidBodyControlManager
          loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(Map<String, YoPIDGains> jointspaceGains, YoPID3DGains taskspaceOrientationGains,
-                        YoPID3DGains taskspacePositionGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains, PID3DGainsReadOnly taskspaceOrientationGains,
+                        PID3DGainsReadOnly taskspacePositionGains)
    {
       jointspaceControlState.setGains(jointspaceGains);
       taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
@@ -151,12 +152,11 @@ public class RigidBodyControlManager
          loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
-   public void setDefaultControlMode(RigidBodyControlMode defaultControlMode)
+   private static void checkDefaultControlMode(RigidBodyControlMode defaultControlMode, FramePose homePose, String bodyName)
    {
       if (defaultControlMode == null)
       {
-         this.defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         return;
+         throw new RuntimeException("Default control mode can not be null for body " + bodyName + ".");
       }
 
       if (defaultControlMode == RigidBodyControlMode.TASKSPACE && homePose == null)
@@ -166,10 +166,8 @@ public class RigidBodyControlManager
 
       if (defaultControlMode != RigidBodyControlMode.TASKSPACE && defaultControlMode != RigidBodyControlMode.JOINTSPACE)
       {
-         throw new RuntimeException("Only JOINTSPACE or TASKSPACE control modes are allowed as default modes.");
+         throw new RuntimeException("Only JOINTSPACE or TASKSPACE control modes are allowed as default modes for body " + bodyName + ".");
       }
-
-      this.defaultControlMode.set(defaultControlMode);
    }
 
    public void initialize()
@@ -192,8 +190,6 @@ public class RigidBodyControlManager
       }
 
       stateMachine.doAction();
-
-      positionControlHelper.update();
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -349,7 +345,7 @@ public class RigidBodyControlManager
 
    public void hold()
    {
-      switch (defaultControlMode.getEnumValue())
+      switch (defaultControlMode.getValue())
       {
       case JOINTSPACE:
          holdInJointspace();
@@ -358,16 +354,13 @@ public class RigidBodyControlManager
          holdInTaskspace();
          break;
       default:
-         PrintTools.warn("Default control mode " + defaultControlMode.getEnumValue() + " is not an implemented option.");
-         defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         hold();
-         break;
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
    public void goToHomeFromCurrent(double trajectoryTime)
    {
-      switch (defaultControlMode.getEnumValue())
+      switch (defaultControlMode.getValue())
       {
       case JOINTSPACE:
          jointspaceControlState.goHomeFromCurrent(trajectoryTime);
@@ -378,16 +371,13 @@ public class RigidBodyControlManager
          requestState(taskspaceControlState.getStateEnum());
          break;
       default:
-         PrintTools.warn("Default control mode " + defaultControlMode.getEnumValue() + " is not an implemented option.");
-         defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         goToHomeFromCurrent(trajectoryTime);
-         break;
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
    public void goHome(double trajectoryTime)
    {
-      switch (defaultControlMode.getEnumValue())
+      switch (defaultControlMode.getValue())
       {
       case JOINTSPACE:
          computeDesiredJointPositions(initialJointPositions);
@@ -401,10 +391,7 @@ public class RigidBodyControlManager
          requestState(taskspaceControlState.getStateEnum());
          break;
       default:
-         PrintTools.warn("Default control mode " + defaultControlMode.getEnumValue() + " is not an implemented option.");
-         defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
-         goHome(trajectoryTime);
-         break;
+         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
@@ -515,7 +502,6 @@ public class RigidBodyControlManager
    {
       inverseDynamicsCommandList.clear();
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
-      inverseDynamicsCommandList.addCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
 
       if (stateSwitched.getBooleanValue())
       {
@@ -532,11 +518,6 @@ public class RigidBodyControlManager
       return stateMachine.getCurrentState().getFeedbackControlCommand();
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
-   {
-      return positionControlHelper.getLowLevelOneDoFJointDesiredDataHolder();
-   }
-
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
@@ -549,4 +530,8 @@ public class RigidBodyControlManager
       return ret;
    }
 
+   public OneDoFJoint[] getControlledJoints()
+   {
+      return jointsToControl;
+   }
 }

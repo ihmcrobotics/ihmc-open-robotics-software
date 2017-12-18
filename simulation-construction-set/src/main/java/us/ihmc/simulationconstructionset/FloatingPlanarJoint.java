@@ -4,15 +4,16 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Plane;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingPlanarJointPhysics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingPlanarJointPhysics;
 
 public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 {
@@ -29,39 +30,47 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 
    public YoDouble getQ_t1()
    {
-	return q_t1;
+      return q_t1;
    }
+
    public YoDouble getQ_t2()
    {
-	return q_t2;
+      return q_t2;
    }
+
    public YoDouble getQd_t1()
    {
-	return qd_t1;
+      return qd_t1;
    }
+
    public YoDouble getQd_t2()
    {
-	return qd_t2;
+      return qd_t2;
    }
+
    public YoDouble getQ_rot()
    {
-	return q_rot;
+      return q_rot;
    }
+
    public YoDouble getQd_rot()
    {
-	return qd_rot;
+      return qd_rot;
    }
+
    public YoDouble getQdd_t1()
    {
-	return qdd_t1;
+      return qdd_t1;
    }
+
    public YoDouble getQdd_t2()
    {
-	return qdd_t2;
+      return qdd_t2;
    }
+
    public YoDouble getQdd_rot()
    {
-	return qdd_rot;
+      return qdd_rot;
    }
 
    YoVariableList floatingJointVars;
@@ -72,7 +81,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       physics = new FloatingPlanarJointPhysics(this);
    }
 
-   public FloatingPlanarJoint(String jname, Vector3D offset, Robot rob)
+   public FloatingPlanarJoint(String jname, Vector3DReadOnly offset, Robot rob)
    {
       this(jname, offset, rob, Plane.XZ);
       physics = new FloatingPlanarJointPhysics(this);
@@ -83,14 +92,14 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       this(jname, new Vector3D(), rob, type);
    }
 
-   public FloatingPlanarJoint(String jname, Vector3D offset, Robot rob, Plane type)
+   public FloatingPlanarJoint(String jname, Vector3DReadOnly offset, Robot rob, Plane type)
    {
       super(jname, offset, rob, 3);
       physics = new FloatingPlanarJointPhysics(this);
 
       this.type = type;
 
-      floatingJointVars = new YoVariableList(jname + " jointVars");    // rob.getVars();
+      floatingJointVars = new YoVariableList(jname + " jointVars"); // rob.getVars();
 
       String t1_name, t2_name, rot_name;
 
@@ -127,7 +136,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       qdd_t2 = new YoDouble("qdd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear acceleration", registry);
       qdd_rot = new YoDouble("qdd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular acceleration", registry);
 
-//    rob.getVars().addVariables(floatingJointVars);
+      //    rob.getVars().addVariables(floatingJointVars);
 
       this.setFloatingTransform3D(this.jointTransform3D);
 
@@ -139,7 +148,6 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       this(jname, varName, new Vector3D(), rob, type);
    }
 
-
    public FloatingPlanarJoint(String jname, String varName, Vector3D offset, Robot rob, Plane type)
    {
       super(jname, offset, rob, 6);
@@ -147,7 +155,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 
       this.type = type;
 
-      floatingJointVars = new YoVariableList(jname + " jointVars");    // rob.getVars();
+      floatingJointVars = new YoVariableList(jname + " jointVars"); // rob.getVars();
 
       String t1_name, t2_name, rot_name;
 
@@ -184,13 +192,12 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       qdd_t2 = new YoDouble("qdd_" + t2_name, "PlanarFloatingJoint " + t2_name + " linear acceleration", registry);
       qdd_rot = new YoDouble("qdd_" + rot_name, "PlanarFloatingJoint " + rot_name + " angular acceleration", registry);
 
-//    rob.getVars().addVariables(floatingJointVars);
+      //    rob.getVars().addVariables(floatingJointVars);
 
       this.setFloatingTransform3D(this.jointTransform3D);
 
       physics.u_i = null;
    }
-
 
    public void setCartesianPosition(double t1, double t2)
    {
@@ -206,7 +213,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       qd_t2.set(t2Dot);
    }
 
-   public void setCartesianPosition(Tuple2DBasics position, Tuple2DBasics velocity)
+   public void setCartesianPosition(Tuple2DReadOnly position, Tuple2DReadOnly velocity)
    {
       q_t1.set(position.getX());
       q_t2.set(position.getY());
@@ -214,7 +221,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       qd_t2.set(velocity.getY());
    }
 
-   public void setCartesianVelocity(Tuple2DBasics velocity)
+   public void setCartesianVelocity(Tuple2DReadOnly velocity)
    {
       qd_t1.set(velocity.getX());
       qd_t2.set(velocity.getY());
@@ -242,7 +249,6 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       this.qd_rot.set(thetaDot);
    }
 
-
    protected YoVariableList getJointVars()
    {
       return this.floatingJointVars;
@@ -253,7 +259,6 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
    {
       this.setFloatingTransform3D(this.jointTransform3D);
    }
-
 
    private Vector3D position = new Vector3D();
 
@@ -278,14 +283,15 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       t1.setTranslation(position);
    }
 
-
    public Plane getType()
    {
       return type;
    }
 
    private final double[] yawPitchRoll = new double[3];
-   @Override public void setRotationAndTranslation(RigidBodyTransform transform)
+
+   @Override
+   public void setRotationAndTranslation(RigidBodyTransform transform)
    {
       Quaternion rotation = new Quaternion();
       transform.getRotation(rotation);
@@ -312,7 +318,8 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       }
    }
 
-   @Override public void setVelocity(Tuple3DBasics velocity)
+   @Override
+   public void setVelocity(Tuple3DReadOnly velocity)
    {
       switch (type)
       {
@@ -328,7 +335,8 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       }
    }
 
-   @Override public void setAngularVelocityInBody(Vector3D angularVelocityInBody)
+   @Override
+   public void setAngularVelocityInBody(Vector3DReadOnly angularVelocityInBody)
    {
       switch (type)
       {
@@ -344,7 +352,8 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       }
    }
 
-   @Override public void getVelocity(FrameVector3D linearVelocityToPack)
+   @Override
+   public void getVelocity(FrameVector3D linearVelocityToPack)
    {
       switch (type)
       {
@@ -360,7 +369,8 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       }
    }
 
-   @Override public void getAngularVelocity(FrameVector3D angularVelocityToPack, ReferenceFrame bodyFrame)
+   @Override
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack, ReferenceFrame bodyFrame)
    {
       switch (type)
       {

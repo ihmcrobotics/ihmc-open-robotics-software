@@ -53,7 +53,7 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test(timeout = 60000)
+   @Test(timeout = 80000)
    public void testMultipleWaypoints() throws Exception
    {
       super.testMultipleWaypoints();
@@ -61,7 +61,7 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 21.1)
-   @Test(timeout = 40000)
+   @Test(timeout = 80000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
@@ -69,7 +69,15 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 58.7)
-   @Test(timeout = 60000)
+   @Test(timeout = 80000)
+   public void testSingleWaypointAndAbort() throws Exception
+   {
+      super.testSingleWaypointAndAbort();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 58.7)
+   @Test(timeout = 80000)
    public void testSingleWaypointAndWalk() throws Exception
    {
       super.testSingleWaypointAndWalk();
@@ -77,7 +85,7 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 23.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 80000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

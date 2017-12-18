@@ -1,42 +1,22 @@
 package us.ihmc.simulationconstructionset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.*;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableList;
+import static org.junit.Assert.*;
 
 public class DataFileWriterTest
 {
    private static final String TEST_DIRECTORY = "us/ihmc/simulationconstructionset/dataFileWriterTest/";
-
-   @Rule
-   public ExpectedException expectedException = ExpectedException.none();
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout=300000)
@@ -180,11 +160,9 @@ public class DataFileWriterTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test(timeout=300000, expected = EOFException.class)
    public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws IOException
    {
-      expectedException.expect(EOFException.class);
-
       Random rng = new Random();
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();

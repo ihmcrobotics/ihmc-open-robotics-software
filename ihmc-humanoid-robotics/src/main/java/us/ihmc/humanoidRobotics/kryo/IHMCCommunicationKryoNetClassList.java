@@ -26,9 +26,11 @@ import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestStereoPointCloudMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
@@ -90,7 +92,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliary
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingSpeed;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
@@ -437,7 +439,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // high levle state
       registerPacketClass(HighLevelStateMessage.class);
-      registerPacketClass(HighLevelState.class);
+      registerPacketClass(HighLevelControllerName.class);
       registerPacketClass(HighLevelStateChangeStatusMessage.class);
 
       // Recording
@@ -593,6 +595,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BoundingBoxesPacket.class);
 
       registerPacketClass(ObjectDetectorResultPacket.class);
+      registerPacketClass(RequestStereoPointCloudMessage.class);
+      registerPacketClass(StereoVisionPointCloudMessage.class);
+
       registerPacketClass(WholeBodyTrajectoryToolboxRequestPacket.class);
       registerPacketClass(WholeBodyTrajectoryToolboxOutputStatus.class);
       registerPacketClass(SetBooleanParameterPacket.class);

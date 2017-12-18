@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,7 +27,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -904,7 +904,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             {
                YoFramePose footIK = feetIKs.get(robotSide);
                FramePoint3D position = footIK.getPosition().getFramePointCopy();
-               FrameOrientation orientation = footIK.getOrientation().getFrameOrientationCopy();
+               FrameQuaternion orientation = footIK.getOrientation().getFrameOrientationCopy();
                FramePose framePose = new FramePose(position, orientation);
                framePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
                framePose.getPose(desiredTransform);

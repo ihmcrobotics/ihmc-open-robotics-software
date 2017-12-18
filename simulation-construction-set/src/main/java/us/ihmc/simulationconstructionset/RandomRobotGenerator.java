@@ -114,7 +114,7 @@ public class RandomRobotGenerator
       {
          FloatingJoint floatingJoint = (FloatingJoint) joint;
        
-         RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          floatingJoint.setRotationAndTranslation(randomTransform);
       }
       else if (joint instanceof FloatingPlanarJoint)

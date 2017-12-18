@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.interpolators;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -31,13 +31,13 @@ public class OrientationInterpolationCalculator
     * @param alphaDot the interpolation rate
     * @return the angular velocity of the interpolated frame, w.r.t. the startOrientation, expressed in the frame in which the orientations were expressed
     */
-   public void computeAngularVelocity(FrameVector3D angularVelocityToPack, FrameOrientation startOrientation, FrameOrientation endOrientation, double alphaDot)
+   public void computeAngularVelocity(FrameVector3D angularVelocityToPack, FrameQuaternion startOrientation, FrameQuaternion endOrientation, double alphaDot)
    {
       startOrientation.checkReferenceFrameMatch(endOrientation);
       ReferenceFrame frame = startOrientation.getReferenceFrame();
 
-      startOrientation.getQuaternion(startRotationQuaternion);
-      endOrientation.getQuaternion(endRotationQuaternion);
+      startRotationQuaternion.set(startOrientation);
+      endRotationQuaternion.set(endOrientation);
 
       computeAngularVelocity(angularVelocity, startRotationQuaternion, endRotationQuaternion, alphaDot);
 
@@ -71,7 +71,7 @@ public class OrientationInterpolationCalculator
     * @param alphaDoubleDot the interpolation acceleration
     * @return the angular acceleration of the interpolated frame, w.r.t. the startOrientation, expressed in the interpolated reference frame.
     */
-   public void computeAngularAcceleration(FrameVector3D angularAccelerationToPack, FrameOrientation startOrientation, FrameOrientation endOrientation, double alphaDoubleDot)
+   public void computeAngularAcceleration(FrameVector3D angularAccelerationToPack, FrameQuaternion startOrientation, FrameQuaternion endOrientation, double alphaDoubleDot)
    {
       computeAngularVelocity(angularAccelerationToPack, startOrientation, endOrientation, alphaDoubleDot); // it's really the same computation...
    }

@@ -24,7 +24,7 @@ public class MomentumTest
    {
       Random random = new Random(1776L);
       ReferenceFrame world = ReferenceFrame.getWorldFrame();
-      RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       // Transform3D transformToParent = new Transform3D();
 

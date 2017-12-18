@@ -55,6 +55,7 @@ public class TestYoVariableConnection
    public TestYoVariableConnection() throws IOException
    {
       new YoInteger("var5", registry);
+      new YoEnum<TestEnum>("var6", "", registry, TestEnum.class, true);
       parameterReader = new XmlParameterReader(getClass().getResourceAsStream("TestParameters.xml"));
       
       server.setSendKeepAlive(true);

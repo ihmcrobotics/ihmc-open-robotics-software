@@ -21,6 +21,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -34,7 +35,6 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationSpace;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.FunctionTrajectoryTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -221,11 +221,11 @@ public abstract class WholeBodyTrajectoryToolboxTest implements MultiRobotTestIn
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       RigidBody chest = fullRobotModel.getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
-      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
+      FrameQuaternion initialChestOrientation = new FrameQuaternion(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       ReferenceFrame pelvisControlFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      FrameQuaternion initialPelvisOrientation = new FrameQuaternion(pelvisControlFrame);
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
@@ -272,15 +272,16 @@ public abstract class WholeBodyTrajectoryToolboxTest implements MultiRobotTestIn
       boolean clockwise = true;
       double t0 = 0.0;
       double tf = 10.0;
-      FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart, clockwise, t0, tf);
+      FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart,
+                                                                                     clockwise, t0, tf);
 
-      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 0.0)));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute(0.0)));
 
-      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 3.0)));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute(3.0)));
 
-      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 6.0)));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute(6.0)));
 
-      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 9.0)));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute(9.0)));
 
       scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute(10.0)));
 

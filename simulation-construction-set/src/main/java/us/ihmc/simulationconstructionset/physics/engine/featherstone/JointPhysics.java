@@ -7,6 +7,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalTorque;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -518,7 +519,7 @@ public abstract class JointPhysics< J extends Joint>
    private final Vector3D tempOmegaCrossDeltaPVector = new Vector3D();
    private final Vector3D tempOmegaCrossOmegaCrossDeltaPVector = new Vector3D();
 
-   public void getLinearVelocityInBody(Vector3D linearVelocityInBodyToPack, Vector3D pointInBody)
+   public void getLinearVelocityInBody(Vector3DBasics linearVelocityInBodyToPack, Vector3DBasics pointInBody)
    {
       tempDeltaPVector.set(pointInBody);
       tempDeltaPVector.sub(owner.link.comOffset);
@@ -527,24 +528,24 @@ public abstract class JointPhysics< J extends Joint>
       linearVelocityInBodyToPack.add(v_i);
    }
 
-   public void getLinearVelocityInWorld(Vector3D linearVelocityInWorldToPack, Vector3D pointInBody)
+   public void getLinearVelocityInWorld(Vector3DBasics linearVelocityInWorldToPack, Vector3DBasics pointInBody)
    {
       getLinearVelocityInBody(linearVelocityInWorldToPack, pointInBody);
       owner.transformToNext.transform(linearVelocityInWorldToPack);
    }
 
-   public void getAngularVelocityInBody(Vector3D angularVelocityInBodyToPack)
+   public void getAngularVelocityInBody(Vector3DBasics angularVelocityInBodyToPack)
    {
       angularVelocityInBodyToPack.set(w_i);
    }
 
-   public void getAngularVelocityInWorld(Vector3D angularVelocityInWorldToPack)
+   public void getAngularVelocityInWorld(Vector3DBasics angularVelocityInWorldToPack)
    {
       getAngularVelocityInBody(angularVelocityInWorldToPack);
       owner.transformToNext.transform(angularVelocityInWorldToPack);
    }
 
-   public void getLinearAccelerationInBody(Vector3D linearAccelerationInBodyToPack, Vector3D pointInBody)
+   public void getLinearAccelerationInBody(Vector3DBasics linearAccelerationInBodyToPack, Vector3DBasics pointInBody)
    {
       tempDeltaPVector.set(pointInBody);
       tempDeltaPVector.sub(owner.link.comOffset);
@@ -558,18 +559,18 @@ public abstract class JointPhysics< J extends Joint>
    }
 
 
-   public void getLinearAccelerationInWorld(Vector3D linearAccelerationInWorldToPack, Vector3D pointInBody)
+   public void getLinearAccelerationInWorld(Vector3DBasics linearAccelerationInWorldToPack, Vector3DBasics pointInBody)
    {
       getLinearAccelerationInBody(linearAccelerationInWorldToPack, pointInBody);
       owner.transformToNext.transform(linearAccelerationInWorldToPack);
    }
 
-   public void getAngularAccelerationsInBodyFrame(Vector3D angularAccelerationToPack)
+   public void getAngularAccelerationsInBodyFrame(Vector3DBasics angularAccelerationToPack)
    {
       a_hat_i.getTop(angularAccelerationToPack);
    }
 
-   public void getAngularAccelerationsInWorld(Vector3D angularAccelerationInWorldToPack)
+   public void getAngularAccelerationsInWorld(Vector3DBasics angularAccelerationInWorldToPack)
    {
       getAngularAccelerationsInBodyFrame(angularAccelerationInWorldToPack);
       owner.transformToNext.transform(angularAccelerationInWorldToPack);
@@ -1658,7 +1659,11 @@ public abstract class JointPhysics< J extends Joint>
    {
       if (groundContactPointGroups != null)
       {
-         list.addAll(groundContactPointGroups.get(groundContactGroupIdentifier).getGroundContactPoints());
+         GroundContactPointGroup groundContactPointGroup = groundContactPointGroups.get(groundContactGroupIdentifier);
+         if(groundContactPointGroup != null)
+         {
+            list.addAll(groundContactPointGroup.getGroundContactPoints());
+         }
       }
 
       // Recurse over the children:
@@ -1834,7 +1839,7 @@ public abstract class JointPhysics< J extends Joint>
       return u_i;
    }
 
-   public void getJointAxis(Vector3D axisToPack)
+   public void getJointAxis(Vector3DBasics axisToPack)
    {
       if (u_i != null)
          axisToPack.set(u_i);

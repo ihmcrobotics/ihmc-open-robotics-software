@@ -5,6 +5,7 @@ import java.awt.Color;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -136,7 +136,7 @@ public class FootStepPlanner
    private final Point2D startPoint = new Point2D();
    private final FramePoint2D frameEndPoint = new FramePoint2D();
    private final FramePoint3D bodyPositionProjectedInFuture = new FramePoint3D();
-   private final FrameOrientation rotationAtEnd = new FrameOrientation();
+   private final FrameQuaternion rotationAtEnd = new FrameQuaternion();
    
    public void getDesiredFootPosition(RobotSextant robotSextant, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity, double swingTime, FramePoint3D framePointToPack)
    {

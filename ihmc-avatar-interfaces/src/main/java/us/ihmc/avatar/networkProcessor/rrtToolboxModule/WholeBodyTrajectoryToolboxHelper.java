@@ -2,14 +2,13 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.NormOps;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.RotationVectorConversion;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,8 +16,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -108,7 +105,7 @@ public class WholeBodyTrajectoryToolboxHelper
       DenseMatrix64F positionErrorQ = new DenseMatrix64F(3, 1);
       positionError.get(positionErrorQ);
 
-      FrameOrientation orientationError = new FrameOrientation(ReferenceFrame.getWorldFrame(), expected.getOrientation());
+      FrameQuaternion orientationError = new FrameQuaternion(ReferenceFrame.getWorldFrame(), expected.getOrientation());
       orientationError.changeFrame(solutionRigidBodyFrame);
       Vector3D rotationError = new Vector3D();
       RotationVectorConversion.convertQuaternionToRotationVector(orientationError.getQuaternion(), rotationError);
@@ -139,7 +136,7 @@ public class WholeBodyTrajectoryToolboxHelper
       DenseMatrix64F positionErrorQ = new DenseMatrix64F(3, 1);
       positionError.get(positionErrorQ);
 
-      FrameOrientation orientationError = new FrameOrientation(ReferenceFrame.getWorldFrame(), expected.getOrientation());
+      FrameQuaternion orientationError = new FrameQuaternion(ReferenceFrame.getWorldFrame(), expected.getOrientation());
       orientationError.changeFrame(solutionRigidBodyFrame);
       Vector3D rotationError = new Vector3D();
       RotationVectorConversion.convertQuaternionToRotationVector(orientationError.getQuaternion(), rotationError);

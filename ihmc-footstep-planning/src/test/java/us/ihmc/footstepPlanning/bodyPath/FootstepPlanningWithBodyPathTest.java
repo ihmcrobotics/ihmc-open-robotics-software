@@ -7,10 +7,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -30,6 +33,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
@@ -81,6 +85,7 @@ public class FootstepPlanningWithBodyPathTest
    }
 
    @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testMaze()
    {
       WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
@@ -94,9 +99,9 @@ public class FootstepPlanningWithBodyPathTest
 
       TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
       JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(regions, javaFXMultiColorMeshBuilder);
-      List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-      for (Point3D waypoint3d : path)
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), javaFXMultiColorMeshBuilder);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      for (Point3DReadOnly waypoint3d : path)
       {
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
       }

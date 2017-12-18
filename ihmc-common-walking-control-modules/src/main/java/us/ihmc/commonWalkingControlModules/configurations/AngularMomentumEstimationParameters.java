@@ -1,31 +1,22 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumSplineType;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumSplineType;
 
 public class AngularMomentumEstimationParameters
 {
-   /**
-    * Defines the percentage of the total robot mass that is to be considered as the swing leg
-    */
-   private double percentageSwingLegMass = 0.05;
-   /**
-    * Defines the percentage of the total robot mass that is to be considered as the support leg
-    */
-   private double percentageSupportLegMass = 0.05;
-
    public double getPercentageSwingLegMass()
    {
-      return percentageSwingLegMass;
+      return 0.05;
    }
 
    public double getPercentageSupportLegMass()
    {
-      return  percentageSupportLegMass;
+      return 0.05;
    }
 
    public double getPercentageBodyMass()
    {
-      return (1.0 - percentageSupportLegMass - percentageSwingLegMass);
+      return (1.0 - getPercentageSupportLegMass() - getPercentageSwingLegMass());
    }
 
    public double getSwingFootMaxLift()

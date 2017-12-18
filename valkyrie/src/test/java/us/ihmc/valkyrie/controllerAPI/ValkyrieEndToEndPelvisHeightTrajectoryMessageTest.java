@@ -27,7 +27,7 @@ public class ValkyrieEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndP
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.2)
-   @Test(timeout = 30000)
+   @Test(timeout = 100000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
@@ -35,9 +35,17 @@ public class ValkyrieEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndP
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.2)
-   @Test(timeout = 30000)
+   @Test(timeout = 100000)
    public void testSingleWaypointInUserMode() throws Exception
    {
       super.testSingleWaypointInUserMode();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 15.2)
+   @Test(timeout = 300000)
+   public void testSingleWaypointThenManualChange() throws Exception
+   {
+      super.testSingleWaypointThenManualChange();
    }
 }

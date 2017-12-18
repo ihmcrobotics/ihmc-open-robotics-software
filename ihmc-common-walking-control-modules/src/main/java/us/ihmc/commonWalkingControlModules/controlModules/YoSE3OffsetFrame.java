@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -7,7 +8,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -15,7 +15,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class YoSE3OffsetFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = 2800529580025439076L;
    private final Vector3D tempVector = new Vector3D();
    private final Quaternion tempQuaternion = new Quaternion();
    private final YoFrameVector translationToParent;
@@ -68,7 +67,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
     *            {@code this.getParent()}.
     */
-   public void setOffsetToParent(FrameTuple3D<?, ?> translationToParent, FrameOrientation rotationToParent)
+   public void setOffsetToParent(FrameTuple3D<?, ?> translationToParent, FrameQuaternion rotationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.set(rotationToParent);

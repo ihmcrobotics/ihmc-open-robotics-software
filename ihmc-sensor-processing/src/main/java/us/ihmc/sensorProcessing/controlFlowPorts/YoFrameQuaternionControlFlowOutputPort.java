@@ -2,13 +2,13 @@ package us.ihmc.sensorProcessing.controlFlowPorts;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 
 
-public class YoFrameQuaternionControlFlowOutputPort extends ControlFlowOutputPort<FrameOrientation>
+public class YoFrameQuaternionControlFlowOutputPort extends ControlFlowOutputPort<FrameQuaternion>
 {
    private final YoFrameQuaternion yoFrameQuaternion;
 
@@ -16,11 +16,11 @@ public class YoFrameQuaternionControlFlowOutputPort extends ControlFlowOutputPor
    {
       super(namePrefix, controlFlowElement);
       yoFrameQuaternion = new YoFrameQuaternion(namePrefix, frame, registry);
-      super.setData(new FrameOrientation(frame));
+      super.setData(new FrameQuaternion(frame));
    }
 
    @Override
-   public FrameOrientation getData()
+   public FrameQuaternion getData()
    {
       yoFrameQuaternion.getFrameOrientationIncludingFrame(super.getData());
 
@@ -28,7 +28,7 @@ public class YoFrameQuaternionControlFlowOutputPort extends ControlFlowOutputPor
    }
 
    @Override
-   public void setData(FrameOrientation data)
+   public void setData(FrameQuaternion data)
    {
       yoFrameQuaternion.set(data);
    }

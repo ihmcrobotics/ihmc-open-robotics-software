@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,7 +19,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
    protected final SideDependentList<YoFrameQuaternion> footstepOrientations = new SideDependentList<>();
 
    protected final FramePoint3D framePosition = new FramePoint3D();
-   protected final FrameOrientation frameOrientation = new FrameOrientation();
+   protected final FrameQuaternion frameOrientation = new FrameQuaternion();
 
    public AbstractDesiredFootstepCalculator(YoVariableRegistry parentRegistry)
    {
