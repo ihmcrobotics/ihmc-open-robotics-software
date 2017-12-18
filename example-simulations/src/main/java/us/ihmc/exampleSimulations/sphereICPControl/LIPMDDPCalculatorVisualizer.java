@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.BasicCoPPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.DiscreteOptimizationTrajectory;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.LIPMDDPCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -37,6 +36,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.trajectoryOptimization.DiscreteOptimizationTrajectory;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -243,20 +243,17 @@ public class LIPMDDPCalculatorVisualizer
       plotCoPPlan(trajectoryTime);
 
       DenseMatrix64F currentCoMState;
-      DenseMatrix64F currentControlState;
       if (useSimple)
       {
          currentCoMState = new DenseMatrix64F(4, 1);
-         currentControlState = new DenseMatrix64F(2, 1);
       }
       else
       {
          currentCoMState = new DenseMatrix64F(6, 1);
          currentCoMState.set(2, 0, 1.0);
-         currentControlState = new DenseMatrix64F(3, 1);
       }
 
-      ddp.initialize(currentCoMState, currentControlState, copPlanner.getCoPTrajectory());
+      ddp.initialize(currentCoMState, copPlanner.getCoPTrajectory());
       plotCoMPlan();
 
       while(true)
