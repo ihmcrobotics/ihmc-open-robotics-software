@@ -127,7 +127,7 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
          }
 
          RigidBodyTransform transformToWorld = navigableRegionLocalPlanner.getTransformToWorld();
-         VisibilityMap localVisibilityGraph = navigableRegionLocalPlanner.getLocalVisibilityGraph();
+         VisibilityMap localVisibilityGraph = navigableRegionLocalPlanner.getVisibilityGraphInLocal();
 
          for (Connection connection : localVisibilityGraph.getConnections())
          {

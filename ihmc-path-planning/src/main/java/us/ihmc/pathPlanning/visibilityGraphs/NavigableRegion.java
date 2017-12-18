@@ -19,8 +19,10 @@ public class NavigableRegion
    private List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
    private List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
    private List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
-   private PlanarRegion homeRegion;
-   private VisibilityMap localVisibilityMap;
+   private VisibilityMap visibilityMapInLocal = null;
+   private VisibilityMap visibilityMapInWorld = null;
+
+   private final PlanarRegion homeRegion;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public NavigableRegion(PlanarRegion homeRegion)
@@ -43,7 +45,7 @@ public class NavigableRegion
    {
       objectToTransformToWorld.applyTransform(transformToWorld);
    }
-   
+
    public void transformFromWorldToLocal(Transformable objectToTransformToWorld)
    {
       objectToTransformToWorld.applyInverseTransform(transformToWorld);
@@ -79,14 +81,26 @@ public class NavigableRegion
       return lineObstacleRegions;
    }
 
-   public void setVisibilityMap(VisibilityMap visibilityMap)
+   public void setVisibilityMapInLocal(VisibilityMap visibilityMap)
    {
-      localVisibilityMap = visibilityMap;
+      visibilityMapInLocal = visibilityMap;
    }
 
-   public VisibilityMap getLocalVisibilityGraph()
+   public VisibilityMap getVisibilityGraphInLocal()
    {
-      return localVisibilityMap;
+      return visibilityMapInLocal;
+   }
+
+   public VisibilityMap getVisibilityGraphInWorld()
+   {
+      if (visibilityMapInWorld == null)
+      {
+         visibilityMapInWorld = new VisibilityMap(visibilityMapInLocal.getConnections());
+         transformFromLocalToWorld(visibilityMapInWorld);
+         visibilityMapInWorld.computeVertices();
+      }
+
+      return visibilityMapInWorld;
    }
 
    public int getRegionId()
