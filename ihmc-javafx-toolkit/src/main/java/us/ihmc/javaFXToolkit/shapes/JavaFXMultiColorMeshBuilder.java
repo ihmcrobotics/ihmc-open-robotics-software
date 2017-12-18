@@ -7,7 +7,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -241,16 +240,16 @@ public class JavaFXMultiColorMeshBuilder
    public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color startColor, Color endColor)
    {
       MeshDataHolder lineMeshData = MeshDataGenerator.Line(x0, y0, z0, xf, yf, zf, lineWidth);
-      float expectedDistance = 2.0f * lineWidth * lineWidth;
 
       Point3D32[] vertices = lineMeshData.getVertices();
       TexCoord2f[] texturePoints = lineMeshData.getTexturePoints();
 
       Point3D32 start = new Point3D32(x0, y0, z0);
+      Point3D32 end = new Point3D32(xf, yf, zf);
 
       for (int i = 0; i < vertices.length; i++)
       {
-         if (MathTools.epsilonEquals(vertices[i].distanceSquared(start), expectedDistance, 1.0e-5))
+         if (vertices[i].distanceSquared(start) < vertices[i].distanceSquared(end))
             texturePoints[i].set(colorPalette.getTextureLocation(startColor));
          else
             texturePoints[i].set(colorPalette.getTextureLocation(endColor));

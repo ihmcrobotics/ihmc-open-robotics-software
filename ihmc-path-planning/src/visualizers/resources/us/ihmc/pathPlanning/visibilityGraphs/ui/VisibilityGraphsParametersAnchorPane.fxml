@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="244.0" prefWidth="1741.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsParametersAnchorPaneController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="244.0" prefWidth="1741.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.VisibilityGraphsParametersAnchorPaneController">
    <children>
       <GridPane hgap="5.0" layoutX="17.0" layoutY="5.0" prefHeight="141.0" prefWidth="1596.0">
          <columnConstraints>

@@ -1,85 +1,55 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
-public class ConnectionPoint3D implements Point3DBasics
+public class ConnectionPoint3D implements Point3DReadOnly
 {
    public static final double PRECISION = 0.001;
    public static final double INV_PRECISION = 1.0 / PRECISION;
 
-   private double x, y, z;
+   private final int regionId;
+   private final double x, y, z;
 
-   /**
-    * Creates a new connection point and initializes it coordinates to zero.
-    */
-   public ConnectionPoint3D()
+   public ConnectionPoint3D(int regionId)
    {
-      setToZero();
+      x = 0.0;
+      y = 0.0;
+      z = 0.0;
+      this.regionId = regionId;
    }
 
-   /**
-    * Creates a new connection point and initializes it with the given coordinates.
-    *
-    * @param x the x-coordinate.
-    * @param y the y-coordinate.
-    * @param z the z-coordinate.
-    */
-   public ConnectionPoint3D(double x, double y, double z)
+   public ConnectionPoint3D(ConnectionPoint3D other)
    {
-      set(x, y, z);
+      this(other, other.regionId);
    }
 
-   /**
-    * Creates a new connection point and initializes its component {@code x}, {@code y}, {@code z}
-    * in order from the given array.
-    *
-    * @param pointArray the array containing this point's coordinates. Not modified.
-    */
-   public ConnectionPoint3D(double[] pointArray)
-   {
-      set(pointArray);
-   }
-
-   /**
-    * Creates a new connection point and initializes its x and y components to
-    * {@code tuple2DReadOnly}.
-    *
-    * @param tuple2DReadOnly the tuple to copy the coordinates from. Not modified.
-    */
-   public ConnectionPoint3D(Tuple2DReadOnly tuple2DReadOnly)
-   {
-      set(tuple2DReadOnly);
-   }
-
-   /**
-    * Creates a new connection point and initializes it to {@code other}.
-    *
-    * @param other the tuple to copy the coordinates from. Not modified.
-    */
-   public ConnectionPoint3D(Tuple3DReadOnly other)
-   {
-      set(other);
-   }
-
-   @Override
-   public void setX(double x)
+   public ConnectionPoint3D(double x, double y, double z, int regionId)
    {
       this.x = x;
-   }
-
-   @Override
-   public void setY(double y)
-   {
       this.y = y;
+      this.z = z;
+      this.regionId = regionId;
    }
 
-   @Override
-   public void setZ(double z)
+   public ConnectionPoint3D(Tuple2DReadOnly tuple2DReadOnly, int regionId)
    {
-      this.z = z;
+      x = tuple2DReadOnly.getX();
+      y = tuple2DReadOnly.getY();
+      z = 0.0;
+      this.regionId = regionId;
+   }
+
+   public ConnectionPoint3D(Tuple3DReadOnly other, int regionId)
+   {
+      x = other.getX();
+      y = other.getY();
+      z = other.getZ();
+      this.regionId = regionId;
    }
 
    @Override
@@ -98,6 +68,11 @@ public class ConnectionPoint3D implements Point3DBasics
    public double getZ()
    {
       return z;
+   }
+
+   public int getRegionId()
+   {
+      return regionId;
    }
 
    public double getRoundedX()
@@ -146,6 +121,20 @@ public class ConnectionPoint3D implements Point3DBasics
 
    private static double round(double value)
    {
-      return ((int) value * INV_PRECISION) * PRECISION;
+      return (int) value * INV_PRECISION * PRECISION;
+   }
+
+   public ConnectionPoint3D applyTransform(Transform transform)
+   {
+      Point3D transformed = new Point3D(this);
+      transformed.applyTransform(transform);
+      return new ConnectionPoint3D(transformed, regionId);
+   }
+
+   public ConnectionPoint3D applyInverseTransform(Transform transform)
+   {
+      Point3D transformed = new Point3D(this);
+      transformed.applyInverseTransform(transform);
+      return new ConnectionPoint3D(transformed, regionId);
    }
 }

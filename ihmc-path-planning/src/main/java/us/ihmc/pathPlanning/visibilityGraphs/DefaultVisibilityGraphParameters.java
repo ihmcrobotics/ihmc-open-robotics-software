@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+
 public class DefaultVisibilityGraphParameters implements VisibilityGraphsParameters
 {
    @Override
@@ -59,6 +61,6 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public int getPlanarRegionMinSize()
    {
-      return 5;
+      return 2;
    }
 }
