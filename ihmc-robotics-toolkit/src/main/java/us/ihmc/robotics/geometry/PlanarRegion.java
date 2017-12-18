@@ -648,6 +648,16 @@ public class PlanarRegion
    }
 
    /**
+    * Retrieves and returns a copy of the normal of this planar region.
+    */
+   public Vector3D getNormal()
+   {
+      Vector3D normal = new Vector3D();
+      getNormal(normal);
+      return normal;
+   }
+
+   /**
     * Retrieves the normal of this planar region and stores it in the given {@link Vector3D}.
     *
     * @param normalToPack used to store the normal of this planar region.
