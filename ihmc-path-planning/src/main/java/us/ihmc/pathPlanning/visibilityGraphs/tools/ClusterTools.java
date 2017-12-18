@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.commons.MathTools;
@@ -19,10 +20,13 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Type;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.lists.ListWrappingIndexTools;
 
 public class ClusterTools
 {
+   private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
+   private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.20);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.01;
    private static final boolean debug = false;
 
@@ -41,6 +45,10 @@ public class ClusterTools
       {
          Point2D previousPoint = ListWrappingIndexTools.getPrevious(i, rawPoints);
          Point2D pointToExtrude = rawPoints.get(i);
+
+         if (pointToExtrude.distanceSquared(previousPoint) < POPPING_POLYGON_POINTS_THRESHOLD)
+            continue;
+
          Point2D nextPoint = ListWrappingIndexTools.getNext(i, rawPoints);
 
          double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
@@ -103,7 +111,7 @@ public class ClusterTools
          double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
 
          Line2D edgePrev = new Line2D(rawPoints.get(i - 1), pointToExtrude);
-         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i - 1));
+         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i + 1));
 
          boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
          double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
@@ -116,6 +124,7 @@ public class ClusterTools
          {
             Vector2D extrusionDirection = new Vector2D();
             extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
+            extrusionDirection.normalize();
             extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
 
             Point2D extrusion = new Point2D();
@@ -142,7 +151,7 @@ public class ClusterTools
          double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
 
          Line2D edgePrev = new Line2D(rawPoints.get(i + 1), pointToExtrude);
-         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i + 1));
+         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i - 1));
 
          boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
          double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
@@ -155,6 +164,7 @@ public class ClusterTools
          {
             Vector2D extrusionDirection = new Vector2D();
             extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
+            extrusionDirection.normalize();
             extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
 
             Point2D extrusion = new Point2D();
@@ -365,33 +375,74 @@ public class ClusterTools
                                                 List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformFromHomeToWorld,
                                                 VisibilityGraphsParameters visibilityGraphsParameters)
    {
+      Point3D mean = new Point3D();
+      Vector3D principalVector = new Vector3D();
+      PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+
       for (PlanarRegion region : lineObstacleRegions)
       {
          if (regions.contains(region))
          {
             Cluster cluster = new Cluster();
             clusters.add(cluster);
-            cluster.setType(Type.LINE);
+            cluster.setType(Type.MULTI_LINE);
+            cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
             cluster.setTransformToWorld(transformFromHomeToWorld);
 
-            ArrayList<Point3D> points = new ArrayList<>();
+            List<Point3D> rawPoints = new ArrayList<>();
             RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
             region.getTransformToWorld(transformFromOtherToHome);
             transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
 
             for (int i = 0; i < region.getConvexHull().getNumberOfVertices(); i++)
             {
-               Point3D concaveHullVertexWorld = new Point3D(region.getConvexHull().getVertex(i));
-               concaveHullVertexWorld.applyTransform(transformFromOtherToHome);
-               points.add(concaveHullVertexWorld);
+               Point3D concaveHullVertexHome = new Point3D(region.getConvexHull().getVertex(i));
+               concaveHullVertexHome.applyTransform(transformFromOtherToHome);
+               rawPoints.add(concaveHullVertexHome);
             }
 
-            LinearRegression3D linearRegression = new LinearRegression3D(points);
-            linearRegression.calculateRegression();
+            if (rawPoints.size() <= 2)
+            {
+               cluster.addRawPointsInLocal3D(rawPoints);
+               continue;
+            }
 
-            //Convert to local frame
-            Point3D[] extremes = linearRegression.getTheTwoPointsFurthestApart();
-            cluster.addRawPointsInLocal3D(extremes);
+            pca.clear();
+            rawPoints.forEach(p -> pca.addPoint(p.getX(), p.getY(), 0.0));
+            pca.compute();
+            pca.getMean(mean);
+            pca.getPrincipalVector(principalVector);
+            Line2D line = new Line2D(new Point2D(mean), new Vector2D(principalVector));
+            // Adjust the XY-coordinates to be on the line
+            rawPoints.stream().forEach(p -> p.set(line.orthogonalProjectionCopy(new Point2D(p))));
+            // Sort the points given their position on the line.
+            Collections.sort(rawPoints, (p1, p2) -> {
+               double t1 = line.parameterGivenPointOnLine(new Point2D(p1), Double.POSITIVE_INFINITY);
+               double t2 = line.parameterGivenPointOnLine(new Point2D(p2), Double.POSITIVE_INFINITY);
+               return t1 >= t2 ? 1 : -1;
+            });
+
+            if (rawPoints.get(0).distanceXY(rawPoints.get(rawPoints.size() - 1)) <= POPPING_MULTILINE_POINTS_THRESHOLD)
+            {
+               cluster.addRawPointInLocal3D(rawPoints.get(0));
+               cluster.addRawPointInLocal3D(rawPoints.get(rawPoints.size() - 1));
+            }
+            else
+            {
+               int index = 0;
+               // Look for points with same XY-coordinates and only keep the highest one.
+               while (index < rawPoints.size() - 1)
+               {
+                  Point3D pointCurr = rawPoints.get(index);
+                  Point3D pointNext = rawPoints.get(index + 1);
+
+                  if (pointCurr.distanceXYSquared(pointNext) < POPPING_MULTILINE_POINTS_THRESHOLD)
+                     rawPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
+                  else
+                     index++;
+               }
+               cluster.addRawPointsInLocal3D(rawPoints);
+            }
          }
       }
 

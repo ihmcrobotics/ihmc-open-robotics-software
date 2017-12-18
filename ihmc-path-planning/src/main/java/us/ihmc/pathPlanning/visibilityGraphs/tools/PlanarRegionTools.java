@@ -268,15 +268,43 @@ public class PlanarRegionTools
 
    public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions)
    {
+      List<NavigableRegion> containers = new ArrayList<>();
+
       for (NavigableRegion navigableRegion : navigableRegions)
       {
          if (isPointInWorldInsideARegion(navigableRegion.getHomeRegion(), point))
          {
-            return navigableRegion;
+            containers.add(navigableRegion);
          }
       }
 
-      return null;
+      if (containers.isEmpty())
+         return null;
+      if (containers.size() == 1)
+         return containers.get(0);
+
+      Point3D pointOnRegion = new Point3D();
+      Vector3D regionNormal = new Vector3D();
+
+      NavigableRegion closestContainer = containers.get(0);
+      closestContainer.getHomeRegion().getNormal(regionNormal);
+      closestContainer.getHomeRegion().getPointInRegion(pointOnRegion);
+      double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
+
+      for (int i = 1; i < containers.size(); i++)
+      {
+         NavigableRegion candidate = containers.get(i);
+         candidate.getHomeRegion().getNormal(regionNormal);
+         candidate.getHomeRegion().getPointInRegion(pointOnRegion);
+         double distance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
+         if (distance < minDistance)
+         {
+            closestContainer = candidate;
+            minDistance = distance;
+         }
+      }
+
+      return closestContainer;
    }
 
    public static boolean isPointInLocalInsideARegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)
@@ -704,7 +732,7 @@ public class PlanarRegionTools
                truncatedConcaveHullVertices.add(new Point2D(intersection));
             }
          }
-         
+
          if (signedDistance >= -epsilonDistance)
          {
             truncatedConcaveHullVertices.add(new Point2D(vertex2D));
