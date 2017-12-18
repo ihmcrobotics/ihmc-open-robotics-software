@@ -85,12 +85,9 @@ public class VisibilityTools
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
       {
-         if (!cluster.isDynamic())
+         for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
          {
-            for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
-            {
-               listOfObserverPoints.add(point);
-            }
+            listOfObserverPoints.add(point);
          }
       }
 
@@ -127,12 +124,9 @@ public class VisibilityTools
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
       {
-         if (!cluster.isDynamic())
+         for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
          {
-            for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
-            {
-               listOfTargetPoints.add(point);
-            }
+            listOfTargetPoints.add(point);
          }
       }
 

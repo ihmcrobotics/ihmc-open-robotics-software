@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -20,10 +19,6 @@ public class Cluster
    private final List<Point2D> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2D> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
-   private boolean isDynamic = false;
-   private String name;
-   private Point2D observerInLocal;
-   private Point2D centroidInLocal = new Point2D();
    private boolean isHomeRegion = false;
 
    public enum ExtrusionSide
@@ -74,16 +69,6 @@ public class Cluster
       return type;
    }
 
-   public Point2D getCentroidInLocal()
-   {
-      return centroidInLocal;
-   }
-
-   public Point3D getCentroidInWorld()
-   {
-      return toWorld3D(centroidInLocal);
-   }
-
    public void setTransformToWorld(RigidBodyTransform transform)
    {
       transformToWorld.set(transform);
@@ -94,45 +79,9 @@ public class Cluster
       return transformToWorld;
    }
 
-   public void setObserverInLocal(Point2DReadOnly observerInLocal)
-   {
-      this.observerInLocal = new Point2D(observerInLocal);
-   }
-
-   public Point2D getObserverInLocal()
-   {
-      return observerInLocal;
-   }
-
-   public Point3D getObserverInWorld()
-   {
-      return toWorld3D(observerInLocal);
-   }
-
-   public void setName(String name)
-   {
-      this.name = name;
-   }
-
-   public String getName()
-   {
-      return name;
-   }
-
-   public boolean isDynamic()
-   {
-      return isDynamic;
-   }
-
-   public void setDynamic(boolean dynamic)
-   {
-      isDynamic = dynamic;
-   }
-
    public void addRawPointInLocal3D(Point3DReadOnly pointInLocal)
    {
       rawPointsLocal.add(new Point3D(pointInLocal));
-      centroidInLocal.set(EuclidGeometryTools.averagePoint3Ds(rawPointsLocal));
    }
 
    public void addRawPointInWorld3D(Point3DReadOnly pointInWorld)
@@ -149,7 +98,6 @@ public class Cluster
    public void addRawPointsInLocal3D(List<? extends Point3DReadOnly> pointsInLocal)
    {
       pointsInLocal.forEach(point -> rawPointsLocal.add(new Point3D(point)));
-      centroidInLocal.set(EuclidGeometryTools.averagePoint3Ds(rawPointsLocal));
    }
 
    public void addRawPointsInWorld3D(List<? extends Point3DReadOnly> pointsInWorld)
