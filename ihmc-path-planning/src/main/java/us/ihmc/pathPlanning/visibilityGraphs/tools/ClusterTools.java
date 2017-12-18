@@ -52,51 +52,32 @@ public class ClusterTools
 
          double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
 
-         Line2D previousEdge = new Line2D(previousPoint, pointToExtrude);
-         Line2D nextEdge = new Line2D(pointToExtrude, nextPoint);
+         Line2D edgePrev = new Line2D(previousPoint, pointToExtrude);
+         Line2D edgeNext = new Line2D(pointToExtrude, nextPoint);
 
          double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
 
          boolean shouldExtrudeCorner;
 
          if (extrudeToTheLeft)
-            shouldExtrudeCorner = previousEdge.getDirection().angle(nextEdge.getDirection()) <= -0.5 * Math.PI;
+            shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
          else
-            shouldExtrudeCorner = previousEdge.getDirection().angle(nextEdge.getDirection()) >= 0.5 * Math.PI;
+            shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) >= 0.5 * Math.PI;
 
          if (shouldExtrudeCorner)
          {
-            extrusions.addAll(extrudeCorner(pointToExtrude, previousEdge, nextEdge, extrudeToTheLeft, 3, extrusionDistance));
+            extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, extrudeToTheLeft, 3, extrusionDistance));
          }
          else
          {
-            if (extrudeToTheLeft)
-            {
-               previousEdge.shiftToLeft(extrusionDistance);
-               nextEdge.shiftToLeft(extrusionDistance);
-            }
-            else
-            {
-               previousEdge.shiftToRight(extrusionDistance);
-               nextEdge.shiftToRight(extrusionDistance);
-            }
-
-            Point2D extrusion = previousEdge.intersectionWith(nextEdge);
             Vector2D extrusionDirection = new Vector2D();
+            extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
+            extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
+            if (!extrudeToTheLeft)
+               extrusionDirection.negate();
 
-            if (extrusion == null)
-            {
-               extrusion = new Point2D();
-               EuclidGeometryTools.perpendicularVector2D(previousEdge.getDirection(), extrusionDirection);
-            }
-            else
-            {
-               extrusionDirection.sub(extrusion, pointToExtrude);
-               extrusionDirection.normalize();
-            }
-
+            Point2D extrusion = new Point2D();
             extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
-
             extrusions.add(extrusion);
          }
       }
