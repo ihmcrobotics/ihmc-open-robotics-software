@@ -132,7 +132,7 @@ public class VisibilityGraphsTestVisualizer
       nextDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
       nextDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
 
-      messager.registerTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
+      messager.registerJavaFXSyncedTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
 
       Point3DProperty startProperty = new Point3DProperty(this, "startProperty", new Point3D(Double.NaN, Double.NaN, Double.NaN));
       Point3DProperty goalProperty = new Point3DProperty(this, "goalProperty", new Point3D(Double.NaN, Double.NaN, Double.NaN));
@@ -149,8 +149,8 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(ShowLocalGraphs, showRegionInnerConnectionsButton.selectedProperty(), false);
       messager.bindBidirectional(ShowInterConnections, showRegionInterConnectionsButton.selectedProperty(), false);
 
-      messager.registerTopicListener(UIVisibilityGraphsTopics.AllDatasetPaths, this::showDatasets);
-      messager.registerTopicListener(CurrentDatasetPath, path -> datasetsListView.getSelectionModel().select(path));
+      messager.registerJavaFXSyncedTopicListener(UIVisibilityGraphsTopics.AllDatasetPaths, this::showDatasets);
+      messager.registerJavaFXSyncedTopicListener(CurrentDatasetPath, path -> datasetsListView.getSelectionModel().select(path));
 
       datasetsListView.setOnMouseClicked(this::handleDatasetSelection);
    }
@@ -166,10 +166,8 @@ public class VisibilityGraphsTestVisualizer
 
    private void showDatasets(List<String> allDatasets)
    {
-      Platform.runLater(() -> {
-         datasetsListView.getItems().clear();
-         datasetsListView.getItems().addAll(allDatasets);
-      });
+      datasetsListView.getItems().clear();
+      datasetsListView.getItems().addAll(allDatasets);
    }
 
    public BooleanProperty getNextDatasetRequestedProperty()
