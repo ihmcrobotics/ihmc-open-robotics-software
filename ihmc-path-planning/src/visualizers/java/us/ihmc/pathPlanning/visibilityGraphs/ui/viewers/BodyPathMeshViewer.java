@@ -24,6 +24,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -52,7 +53,7 @@ public class BodyPathMeshViewer extends AnimationTimer
 
    private final AtomicReference<Pair<Mesh, Material>> bodyPathMeshToRender = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show, resetRequested;
-   private final AtomicReference<Double> walkerRadius;
+   private final AtomicReference<Vector3D> walkerSize;
    private final AtomicReference<Double> walkerOffsetHeight;
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
@@ -73,9 +74,10 @@ public class BodyPathMeshViewer extends AnimationTimer
       bodyPathMeshView.setMouseTransparent(true);
       bodyPathMeshView.setMaterial(new PhongMaterial(Color.YELLOW));
 
-      walkerRadius = messager.createInput(UIVisibilityGraphsTopics.WalkerSize, 1.0 * BODYPATH_LINE_THICKNESS);
+      walkerSize = messager.createInput(UIVisibilityGraphsTopics.WalkerSize, new Vector3D(0.25, 0.25, 0.5));
       walkerOffsetHeight = messager.createInput(UIVisibilityGraphsTopics.WalkerOffsetHeight, 0.0);
       walker.setMaterial(new PhongMaterial(Color.YELLOW));
+      walker.setRadius(1.0);
 
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       show = messager.createInput(UIVisibilityGraphsTopics.ShowBodyPath, true);
@@ -123,7 +125,9 @@ public class BodyPathMeshViewer extends AnimationTimer
          if (show.get() && ! root.getChildren().contains(walker))
             root.getChildren().add(walker);
 
-         walker.setRadius(walkerRadius.get());
+         walker.setScaleX(walkerSize.get().getX());
+         walker.setScaleY(walkerSize.get().getY());
+         walker.setScaleZ(walkerSize.get().getZ());
 
          double distance = currentWalkerDistanceInPath.getAndAdd(WALKER_SPEED);
          setWalkerPosition(PathTools.getPointAlongPathGivenDistanceFromStart(bodyPath, distance));
