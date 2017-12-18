@@ -42,7 +42,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest extends Application
 {
-   private static final long TIMEOUT = Long.MAX_VALUE; // 30000;
+   private static final long TIMEOUT = 30000; // Long.MAX_VALUE; // 
    private static final double START_GOAL_EPSILON = 1.0e-2;
    private static boolean VISUALIZE = true;
    private static boolean DEBUG = true;
