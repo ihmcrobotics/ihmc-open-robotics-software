@@ -17,9 +17,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
@@ -126,13 +124,12 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
             meshBuilders.put(regionId, meshBuilder);
          }
 
-         RigidBodyTransform transformToWorld = navigableRegionLocalPlanner.getTransformToWorld();
-         VisibilityMap localVisibilityGraph = navigableRegionLocalPlanner.getVisibilityGraphInLocal();
+         VisibilityMap visibilityGraphInWorld = navigableRegionLocalPlanner.getVisibilityGraphInWorld();
 
-         for (Connection connection : localVisibilityGraph.getConnections())
+         for (Connection connection : visibilityGraphInWorld.getConnections())
          {
-            Point3D edgeSource = toWorld(new Point2D(connection.getSourcePoint()), transformToWorld);
-            Point3D edgeTarget = toWorld(new Point2D(connection.getTargetPoint()), transformToWorld);
+            Point3DReadOnly edgeSource = connection.getSourcePoint();
+            Point3DReadOnly edgeTarget = connection.getTargetPoint();
             meshBuilder.addLine(edgeSource, edgeTarget, VisualizationParameters.VISBILITYMAP_LINE_THICKNESS);
          }
 
@@ -154,13 +151,6 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
    private Color getLineColor(int regionId)
    {
       return VizGraphsPlanarRegionViewer.getRegionColor(regionId).brighter();
-   }
-
-   private Point3D toWorld(Point2D localPoint, RigidBodyTransform transformToWorld)
-   {
-      Point3D worldPoint = new Point3D(localPoint);
-      transformToWorld.transform(worldPoint);
-      return worldPoint;
    }
 
    @Override
