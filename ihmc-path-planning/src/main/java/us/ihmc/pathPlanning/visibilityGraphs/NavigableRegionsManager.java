@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclussionTools;
@@ -34,8 +35,6 @@ public class NavigableRegionsManager
    private final static int START_GOAL_ID = 0;
 
    private List<PlanarRegion> regions;
-   private List<PlanarRegion> accesibleRegions = new ArrayList<>();
-   private List<PlanarRegion> obstacleRegions = new ArrayList<>();
    private List<NavigableRegion> navigableRegions = new ArrayList<>();
    private List<VisibilityMap> visMaps = new ArrayList<>();
    private SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
@@ -82,15 +81,9 @@ public class NavigableRegionsManager
    {
       navigableRegions.clear();
       visMaps.clear();
-      accesibleRegions.clear();
 
-      PlanarRegionTools.classifyRegions(regions, parameters.getNormalZThresholdForAccessibleRegions(), obstacleRegions, accesibleRegions);
-
-      for (PlanarRegion region : accesibleRegions)
-      {
-         createVisibilityGraphForRegion(region, null, null);
-      }
-
+      NavigableRegionFilter filter = parameters.getNavigableRegionFilter();
+      regions.stream().filter(filter::isPlanarRegionNavigable).forEach(this::createVisibilityGraphForRegion);
    }
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
@@ -412,7 +405,7 @@ public class NavigableRegionsManager
       }
    }
 
-   private void createVisibilityGraphForRegion(PlanarRegion region, Point3D startPos, Point3D goalPos)
+   private void createVisibilityGraphForRegion(PlanarRegion region)
    {
       if (debug)
       {
@@ -512,16 +505,6 @@ public class NavigableRegionsManager
    public List<NavigableRegion> getListOfLocalPlanners()
    {
       return navigableRegions;
-   }
-
-   public List<PlanarRegion> getListOfAccesibleRegions()
-   {
-      return accesibleRegions;
-   }
-
-   public List<PlanarRegion> getListOfObstacleRegions()
-   {
-      return obstacleRegions;
    }
 
    public ArrayList<Connection> getGlobalMapPoints()

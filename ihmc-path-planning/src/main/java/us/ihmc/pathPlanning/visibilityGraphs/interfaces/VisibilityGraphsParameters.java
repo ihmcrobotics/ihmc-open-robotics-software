@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface VisibilityGraphsParameters
 {
@@ -57,6 +58,18 @@ public interface VisibilityGraphsParameters
                return EuclidCoreTools.interpolate(getExtrusionDistanceIfNotTooHighToStep(), getExtrusionDistance(), alpha);
             }
             return getExtrusionDistance();
+         }
+      };
+   }
+
+   default NavigableRegionFilter getNavigableRegionFilter()
+   {
+      return new NavigableRegionFilter()
+      {
+         @Override
+         public boolean isPlanarRegionNavigable(PlanarRegion query)
+         {
+            return Math.abs(query.getNormal().getZ()) >= getNormalZThresholdForAccessibleRegions();
          }
       };
    }
