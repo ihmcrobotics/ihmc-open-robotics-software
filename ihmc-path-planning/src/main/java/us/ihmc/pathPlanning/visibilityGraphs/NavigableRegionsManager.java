@@ -35,7 +35,7 @@ public class NavigableRegionsManager
    private List<PlanarRegion> regions;
    private List<PlanarRegion> accesibleRegions = new ArrayList<>();
    private List<PlanarRegion> obstacleRegions = new ArrayList<>();
-   private List<NavigableRegion> listOfLocalPlanners = new ArrayList<>();
+   private List<NavigableRegion> navigableRegions = new ArrayList<>();
    private List<VisibilityMap> visMaps = new ArrayList<>();
    private SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
@@ -79,7 +79,7 @@ public class NavigableRegionsManager
 
    private void createIndividualVisMapsForRegions()
    {
-      listOfLocalPlanners.clear();
+      navigableRegions.clear();
       visMaps.clear();
       accesibleRegions.clear();
 
@@ -174,7 +174,7 @@ public class NavigableRegionsManager
 
       if (path == null)
       {
-         if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+         if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(navigableRegions.get(0), start, goal))
          {
             System.out.println("StraightLine available");
 
@@ -185,7 +185,7 @@ public class NavigableRegionsManager
             return path;
          }
 
-         NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
+         NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
          List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getAllClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld3D(),
@@ -204,10 +204,10 @@ public class NavigableRegionsManager
 
    private boolean createVisMapsForStartAndGoal(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      NavigableRegion startRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
+      NavigableRegion startRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
       Point3D startInRegionFrame = new Point3D(start);
       startRegion.transformFromWorldToLocal(startInRegionFrame);
-      NavigableRegion goalRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(goal, listOfLocalPlanners);
+      NavigableRegion goalRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(goal, navigableRegions);
       Point3D goalInRegionFrame = new Point3D(goal);
       goalRegion.transformFromWorldToLocal(goalInRegionFrame);
 
@@ -328,7 +328,7 @@ public class NavigableRegionsManager
    {
       ArrayList<PlanarRegionDistance> planarRegionsDistance = new ArrayList<>();
 
-      for (NavigableRegion planner : listOfLocalPlanners)
+      for (NavigableRegion planner : navigableRegions)
       {
          double minDistance = Double.MAX_VALUE;
          PlanarRegion homeRegion = planner.getHomeRegion();
@@ -376,7 +376,7 @@ public class NavigableRegionsManager
          PrintTools.info("Starting connectivity check");
       }
 
-      if (listOfLocalPlanners.size() > 1)
+      if (navigableRegions.size() > 1)
       {
          for (VisibilityMap sourceMap : visMaps)
          {
@@ -420,7 +420,7 @@ public class NavigableRegionsManager
 
       NavigableRegion navigableRegion = new NavigableRegion(region);
       processRegion(navigableRegion);
-      listOfLocalPlanners.add(navigableRegion);
+      navigableRegions.add(navigableRegion);
       visMaps.add(navigableRegion.getVisibilityGraphInWorld());
    }
 
@@ -487,11 +487,11 @@ public class NavigableRegionsManager
 
    public Point3D[][] getNavigableExtrusions()
    {
-      Point3D[][] allNavigableExtrusions = new Point3D[listOfLocalPlanners.size()][];
+      Point3D[][] allNavigableExtrusions = new Point3D[navigableRegions.size()][];
 
-      for (int i = 0; i < listOfLocalPlanners.size(); i++)
+      for (int i = 0; i < navigableRegions.size(); i++)
       {
-         NavigableRegion localPlanner = listOfLocalPlanners.get(i);
+         NavigableRegion localPlanner = navigableRegions.get(i);
          Point3D[] navigableExtrusions = new Point3D[localPlanner.getAllClusters().size()];
 
          for (Cluster cluster : localPlanner.getAllClusters())
@@ -510,7 +510,7 @@ public class NavigableRegionsManager
 
    public List<NavigableRegion> getListOfLocalPlanners()
    {
-      return listOfLocalPlanners;
+      return navigableRegions;
    }
 
    public List<PlanarRegion> getListOfAccesibleRegions()
