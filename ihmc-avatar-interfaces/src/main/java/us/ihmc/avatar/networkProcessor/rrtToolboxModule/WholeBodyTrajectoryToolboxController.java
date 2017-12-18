@@ -694,9 +694,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          manifoldCommands = null;
          if (commandInputManager.isNewCommandAvailable(WaypointBasedTrajectoryCommand.class))
          {
-            PrintTools.info("WaypointBasedTrajectoryCommand");
             trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
-            PrintTools.info("WaypointBasedTrajectoryCommand");
             if (trajectoryCommands.size() < 1)
                return false;
          }
