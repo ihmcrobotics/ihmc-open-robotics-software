@@ -88,6 +88,94 @@ public class ClusterTools
       return extrusions;
    }
 
+   public static List<Point2D> extrudeMultiLine(Cluster cluster, ExtrusionDistanceCalculator calculator, int numberOfExtrusionsAtEndpoints)
+   {
+      List<Point2D> extrusions = new ArrayList<>();
+      List<Point2D> rawPoints = cluster.getRawPointsInLocal2D();
+
+      if (rawPoints.size() >= 2)
+      { // Start
+         Point2D pointToExtrude = rawPoints.get(0);
+         double obstacleHeight = cluster.getRawPointInLocal3D(0).getZ();
+
+         Line2D edgePrev = new Line2D(rawPoints.get(1), pointToExtrude);
+         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(1));
+         double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
+         extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, numberOfExtrusionsAtEndpoints, extrusionDistance));
+      }
+
+      for (int i = 1; i < rawPoints.size() - 1; i++)
+      { // Go from start to end
+         Point2D pointToExtrude = rawPoints.get(i);
+         double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
+
+         Line2D edgePrev = new Line2D(rawPoints.get(i - 1), pointToExtrude);
+         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i - 1));
+
+         boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
+         double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
+
+         if (shouldExtrudeCorner)
+         {
+            extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, 3, extrusionDistance));
+         }
+         else
+         {
+            Vector2D extrusionDirection = new Vector2D();
+            extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
+            extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
+
+            Point2D extrusion = new Point2D();
+            extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
+            extrusions.add(extrusion);
+         }
+      }
+
+      if (rawPoints.size() >= 2)
+      { // End
+         int lastIndex = rawPoints.size() - 1;
+         Point2D pointToExtrude = rawPoints.get(lastIndex);
+         double obstacleHeight = cluster.getRawPointInLocal3D(lastIndex).getZ();
+
+         Line2D edgePrev = new Line2D(rawPoints.get(lastIndex - 1), pointToExtrude);
+         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(lastIndex - 1));
+         double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
+         extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, numberOfExtrusionsAtEndpoints, extrusionDistance));
+      }
+
+      for (int i = rawPoints.size() - 2; i >= 1; i--)
+      { // Go from end back to start
+         Point2D pointToExtrude = rawPoints.get(i);
+         double obstacleHeight = cluster.getRawPointInLocal3D(i).getZ();
+
+         Line2D edgePrev = new Line2D(rawPoints.get(i + 1), pointToExtrude);
+         Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i + 1));
+
+         boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
+         double extrusionDistance = calculator.computeExtrusionDistance(cluster, pointToExtrude, obstacleHeight);
+
+         if (shouldExtrudeCorner)
+         {
+            extrusions.addAll(extrudeCorner(pointToExtrude, edgePrev, edgeNext, true, 3, extrusionDistance));
+         }
+         else
+         {
+            Vector2D extrusionDirection = new Vector2D();
+            extrusionDirection.interpolate(edgePrev.getDirection(), edgeNext.getDirection(), 0.5);
+            extrusionDirection = EuclidGeometryTools.perpendicularVector2D(extrusionDirection);
+
+            Point2D extrusion = new Point2D();
+            extrusion.scaleAdd(extrusionDistance, extrusionDirection, pointToExtrude);
+            extrusions.add(extrusion);
+         }
+      }
+
+      if (!extrusions.isEmpty())
+         extrusions.add(extrusions.get(0));
+
+      return extrusions;
+   }
+
    public static List<Point2D> extrudeLine(Point2DReadOnly endpoint1, Point2DReadOnly endpoint2, double extrusionDistance, int numberOfExtrusionsAtEndpoints)
    {
       return extrudeLine(endpoint1, extrusionDistance, endpoint2, extrusionDistance, numberOfExtrusionsAtEndpoints);
