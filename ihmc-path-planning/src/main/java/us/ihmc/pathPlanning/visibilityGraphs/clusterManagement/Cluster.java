@@ -35,7 +35,7 @@ public class Cluster
 
    public enum Type
    {
-      LINE, POLYGON
+      LINE, MULTI_LINE, POLYGON
    };
 
    private Type type = Type.POLYGON;
