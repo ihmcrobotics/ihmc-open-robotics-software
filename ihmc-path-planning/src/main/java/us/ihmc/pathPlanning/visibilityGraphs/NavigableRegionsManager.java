@@ -206,10 +206,10 @@ public class NavigableRegionsManager
    {
       NavigableRegion startRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
       Point3D startInRegionFrame = new Point3D(start);
-      startRegion.getLocalReferenceFrame().getTransformToWorldFrame().inverseTransform(startInRegionFrame);
+      startRegion.transformFromWorldToLocal(startInRegionFrame);
       NavigableRegion goalRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(goal, listOfLocalPlanners);
       Point3D goalInRegionFrame = new Point3D(goal);
-      goalRegion.getLocalReferenceFrame().getTransformToWorldFrame().inverseTransform(goalInRegionFrame);
+      goalRegion.transformFromWorldToLocal(goalInRegionFrame);
 
       VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion.getRegionId(), startRegion, true);
       VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion.getRegionId(), goalRegion, true);
@@ -306,11 +306,9 @@ public class NavigableRegionsManager
       Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, pointRegionId, navigableRegion.getAllClusters(),
                                                                               navigableRegion.getRegionId(), ensureConnection);
 
-      RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
-
       VisibilityMap mapForSingleObserver = new VisibilityMap();
       mapForSingleObserver.setConnections(connections);
-      mapForSingleObserver.applyTransform(transformToWorld);
+      navigableRegion.transformFromLocalToWorld(mapForSingleObserver);
       mapForSingleObserver.computeVertices();
       return mapForSingleObserver;
    }
@@ -427,12 +425,10 @@ public class NavigableRegionsManager
       VisibilityMap localVisibilityMapInWorld = new VisibilityMap();
       visMaps.add(localVisibilityMapInWorld);
 
-      RigidBodyTransform transformToWorld = navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame();
-
       for (Connection connectionLocal : navigableRegionLocalPlanner.getLocalVisibilityGraph().getConnections())
       {
          Connection connectionWorld = new Connection(connectionLocal);
-         connectionWorld.applyTransform(transformToWorld);
+         navigableRegionLocalPlanner.transformFromLocalToWorld(connectionWorld);
          localVisibilityMapInWorld.addConnection(connectionWorld);
       }
 
@@ -463,7 +459,7 @@ public class NavigableRegionsManager
       }
 
       double normalZThresholdForPolygonObstacles = parameters.getNormalZThresholdForPolygonObstacles();
-      RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame();
+      RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getTransformToWorld();
       double extrusionDistance = parameters.getExtrusionDistance();
 
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, normalZThresholdForPolygonObstacles);

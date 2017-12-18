@@ -126,13 +126,13 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
             meshBuilders.put(regionId, meshBuilder);
          }
 
-         RigidBodyTransform transformToWorld = navigableRegionLocalPlanner.getLocalReferenceFrame().getTransformToWorldFrame();
+         RigidBodyTransform transformToWorld = navigableRegionLocalPlanner.getTransformToWorld();
          VisibilityMap localVisibilityGraph = navigableRegionLocalPlanner.getLocalVisibilityGraph();
 
          for (Connection connection : localVisibilityGraph.getConnections())
          {
-            Point3D edgeSource = toWorld(new Point2D(connection.getSourcePoint().getX(), connection.getSourcePoint().getY()), transformToWorld);
-            Point3D edgeTarget = toWorld(new Point2D(connection.getTargetPoint().getX(), connection.getTargetPoint().getY()), transformToWorld);
+            Point3D edgeSource = toWorld(new Point2D(connection.getSourcePoint()), transformToWorld);
+            Point3D edgeTarget = toWorld(new Point2D(connection.getTargetPoint()), transformToWorld);
             meshBuilder.addLine(edgeSource, edgeTarget, VisualizationParameters.VISBILITYMAP_LINE_THICKNESS);
          }
 
