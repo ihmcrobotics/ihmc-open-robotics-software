@@ -74,7 +74,9 @@ public class BodyPathMeshViewer extends AnimationTimer
       bodyPathMeshView.setMouseTransparent(true);
       bodyPathMeshView.setMaterial(new PhongMaterial(Color.YELLOW));
 
-      walkerSize = messager.createInput(UIVisibilityGraphsTopics.WalkerSize, new Vector3D(0.25, 0.25, 0.5));
+      Vector3D defaultSize = new Vector3D(1.0, 1.0, 1.0);
+      defaultSize.scale(1.5 * BODYPATH_LINE_THICKNESS);
+      walkerSize = messager.createInput(UIVisibilityGraphsTopics.WalkerSize, defaultSize);
       walkerOffsetHeight = messager.createInput(UIVisibilityGraphsTopics.WalkerOffsetHeight, 0.0);
       walker.setMaterial(new PhongMaterial(Color.YELLOW));
       walker.setRadius(1.0);
