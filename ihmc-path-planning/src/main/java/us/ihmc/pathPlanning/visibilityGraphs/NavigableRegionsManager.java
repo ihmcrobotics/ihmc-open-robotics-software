@@ -65,15 +65,18 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
    {
-      this.regions = regions;
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
+      setPlanarRegions(regions);
    }
 
    public void setPlanarRegions(List<PlanarRegion> regions)
    {
-      regions = PlanarRegionTools.ensureClockwiseOrder(regions);
-      regions = PlanarRegionTools.filterPlanarRegionsByArea(parameters.getPlanarRegionMinArea(), regions);
-      regions = PlanarRegionTools.filterPlanarRegionsByHullSize(parameters.getPlanarRegionMinSize(), regions);
+      if (regions != null)
+      {
+         regions = PlanarRegionTools.ensureClockwiseOrder(regions);
+         regions = PlanarRegionTools.filterPlanarRegionsByArea(parameters.getPlanarRegionMinArea(), regions);
+         regions = PlanarRegionTools.filterPlanarRegionsByHullSize(parameters.getPlanarRegionMinSize(), regions);
+      }
 
       this.regions = regions;
    }
