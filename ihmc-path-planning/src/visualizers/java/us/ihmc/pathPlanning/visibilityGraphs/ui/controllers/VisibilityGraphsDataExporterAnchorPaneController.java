@@ -13,8 +13,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopic
 
 public class VisibilityGraphsDataExporterAnchorPaneController
 {
-   private final DirectoryChooser planarRegionDirectoryChooser = new DirectoryChooser();
-   private final File defaultPlanarRegionDataFile;
+   private final DirectoryChooser directoryChooser = new DirectoryChooser();
+   private final File defaultDataFolder;
    private Window ownerWindow;
    private SimpleUIMessager messager;
 
@@ -26,7 +26,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
       File file = new File("..\\test\\resources\\" + VisibilityGraphsIOTools.DATA_FOLDER_NAME);
       if (!file.exists())
          file = new File(".");
-      defaultPlanarRegionDataFile = file;
+      defaultDataFolder = file;
    }
 
    public void setMainWindow(Window ownerWindow)
@@ -37,14 +37,14 @@ public class VisibilityGraphsDataExporterAnchorPaneController
    public void attachMessager(SimpleUIMessager messager)
    {
       this.messager = messager;
-      currentPlanarRegionDataFolderTextField.setText(defaultPlanarRegionDataFile.getAbsolutePath());
+      currentPlanarRegionDataFolderTextField.setText(defaultDataFolder.getAbsolutePath());
    }
 
    @FXML
    private void browsePlanarRegionOutputFolder()
    {
-      planarRegionDirectoryChooser.setInitialDirectory(defaultPlanarRegionDataFile);
-      File result = planarRegionDirectoryChooser.showDialog(ownerWindow);
+      directoryChooser.setInitialDirectory(defaultDataFolder);
+      File result = directoryChooser.showDialog(ownerWindow);
       if (result == null)
          return;
       String newPath = result.getAbsolutePath();
