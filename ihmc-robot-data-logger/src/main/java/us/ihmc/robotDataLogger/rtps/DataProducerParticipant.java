@@ -273,6 +273,9 @@ public class DataProducerParticipant
          announcement.getCameras().add().set(camera);
       }
 
+      String handshakeHash = HandshakeHashCalculator.calculateHash(handshake);
+      announcement.setReconnectKey(handshakeHash);
+      
       handshakePublisher.write(handshake);
       announcementPublisher.write(announcement);
       

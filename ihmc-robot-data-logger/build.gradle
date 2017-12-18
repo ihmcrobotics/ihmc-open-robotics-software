@@ -3,9 +3,12 @@ buildscript {
       maven {
          url "http://dl.bintray.com/ihmcrobotics/maven-release"
       }
+      maven {
+         url "http://dl.bintray.com/ihmcrobotics/maven-vendor"
+      }
    }
    dependencies {
-      classpath group: 'us.ihmc', name: 'IHMCPubSubGenerator', version: '0.3.2'
+      classpath group: 'us.ihmc', name: 'ihmc-pub-sub-generator', version: '0.3.7'
    }
 }
 
@@ -15,7 +18,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.2"
+      classpath "us.ihmc:ihmc-build:0.11.3"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -129,6 +132,8 @@ if (ihmc.isBuildRoot())
             execute "tar xf ./${distTarFile.name}"
             project.logger.lifecycle("Removing tarball from remote host")
             execute "rm -f ./${distTarFile.name}"
+            project.logger.lifecycle("Removing old version")         
+            execute "rm -rf IHMCLogger"
             project.logger.lifecycle("Moving Logger distribution in to place")
             execute "mv ./${distTarFile.name.replace(".tar", "")} IHMCLogger"
             project.logger.lifecycle("Logger deployment to remote host complete!")

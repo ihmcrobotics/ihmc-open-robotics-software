@@ -1,36 +1,33 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.lists.PairList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HoldPositionControllerState extends HighLevelControllerState
 {
-   private final YoVariableRegistry registry;
-
    private final JointDesiredOutputListReadOnly highLevelControllerOutput;
-   protected final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PairList<OneDoFJoint, YoDouble> jointSetpoints = new PairList<>();
 
    public HoldPositionControllerState(HighLevelControllerName stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                      JointDesiredOutputListReadOnly highLevelControllerOutput)
+                                      HighLevelControllerParameters highLevelControllerParameters, JointDesiredOutputListReadOnly highLevelControllerOutput)
    {
-      super(stateEnum);
+      super(stateEnum, highLevelControllerParameters, controllerToolbox);
 
       this.highLevelControllerOutput = highLevelControllerOutput;
-      String nameSuffix = stateEnum.name();
-      registry = new YoVariableRegistry(nameSuffix + getClass().getSimpleName());
-      nameSuffix = "_" + nameSuffix;
+      String nameSuffix = "_" + stateEnum.name();
 
-      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] controlledJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
@@ -69,10 +66,13 @@ public class HoldPositionControllerState extends HighLevelControllerState
          YoDouble desiredPosition = jointSetpoints.get(jointIndex).getRight();
 
          JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         lowLevelJointData.clear();
          lowLevelJointData.setDesiredPosition(desiredPosition.getDoubleValue());
          lowLevelJointData.setDesiredVelocity(0.0);
          lowLevelJointData.setDesiredAcceleration(0.0);
       }
+
+      lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
    @Override
@@ -80,12 +80,6 @@ public class HoldPositionControllerState extends HighLevelControllerState
    {
       // Do nothing
 
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
    }
 
    @Override

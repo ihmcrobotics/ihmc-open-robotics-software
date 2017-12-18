@@ -187,11 +187,11 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
-                                          LineSegment2D connectingEdge2Topack, int[][] verticesIndices)
+   static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
+                                          LineSegment2D connectingEdge2ToPack, int[][] verticesIndices)
    {
       connectingEdge1ToPack.set(polygon1.getVertex(verticesIndices[0][0]), polygon2.getVertex(verticesIndices[1][0]));
-      connectingEdge2Topack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
+      connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
    }
 
    /**
@@ -554,8 +554,8 @@ public class ConvexPolygonTools
       return new int[][] {{indexPStart, indexPEnd}, {indexQStart, indexQEnd}};
    }
 
-   private static boolean constructPolygonForIntersection(ArrayList<Boolean> decrementP, int[][][] crossingIndices, ConvexPolygon2D polygonP,
-                                                          ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
+   static boolean constructPolygonForIntersection(int[][][] crossingIndices, ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ,
+                                                          ConvexPolygon2D intersectingPolygonToPack)
    {
       int startIndexP1 = crossingIndices[0][0][0];
       int endIndexP1 = crossingIndices[0][0][1];
@@ -673,7 +673,7 @@ public class ConvexPolygonTools
          }
       }
 
-      boolean success = constructPolygonForIntersection(bridgeWasOnLeft, crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
+      boolean success = constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
       return success;
    }
 

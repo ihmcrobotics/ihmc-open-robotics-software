@@ -80,7 +80,7 @@ public class WandererRobotModel implements DRCRobotModel
 
       capturePointPlannerParameters = new WandererCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new WandererWalkingControllerParameters(jointMap, runningOnRealRobot);
-      highLevelControllerParameters = new WandererHighLevelControllerParameters();
+      highLevelControllerParameters = new WandererHighLevelControllerParameters(jointMap);
       robotDescription = createRobotDescription();
    }
 
@@ -281,14 +281,14 @@ public class WandererRobotModel implements DRCRobotModel
       System.err.println("Need to add access to stand prep joint angles.");
       return 0;
    }
-   
+
 
    @Override
    public DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return new DRCSimulationOutputWriterForControllerThread(humanoidFloatingRootJointRobot);
    }
-   
+
    @Override
    public JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {

@@ -11,12 +11,10 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -31,14 +29,14 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = false;
+   private final static boolean debug = true;
 
    private List<PlanarRegion> regions;
    private List<PlanarRegion> accesibleRegions = new ArrayList<>();
    private List<PlanarRegion> obstacleRegions = new ArrayList<>();
    private List<NavigableRegion> listOfLocalPlanners = new ArrayList<>();
    private List<VisibilityMap> visMaps = new ArrayList<>();
-   private SimpleWeightedGraph<Point3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+   private SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
    private JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder;
    private double pathLength = 0.0;
@@ -120,7 +118,7 @@ public class NavigableRegionsManager
 
    }
 
-   public List<Point3D> calculateBodyPath(Point3D start, Point3D goal)
+   public List<Point3DReadOnly> calculateBodyPath(Point3D start, Point3D goal)
    {
       connectionPoints.clear();
       globalMapPoints.clear();
@@ -154,28 +152,29 @@ public class NavigableRegionsManager
       long startCreatingMaps = System.currentTimeMillis();
 
       createIndividualVisMapsForRegions();
+
       long endCreationTime = System.currentTimeMillis();
 
       boolean readyToRunBodyPath = false;
-      if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+      //      if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+      //      {
+      //         readyToRunBodyPath = true;
+      //         globalMapPoints.add(new Connection(start, goal));
+      //      }
+      //      else
+      //      {
+      if (startProjected != null && goalProjected != null)
       {
-         readyToRunBodyPath = true;
-         globalMapPoints.add(new Connection(start, goal));
+         readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
       }
-      else
-      {
-         if(startProjected != null && goalProjected != null)
-         {
-            readyToRunBodyPath = createVisMapsForStartAndGoal(startProjected, goalProjected);
-         }
-      }
-
+      //      }
+      
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
       connectLocalMaps();
       long endConnectingTime = System.currentTimeMillis();
 
-      if(readyToRunBodyPath)
+      if (readyToRunBodyPath)
       {
          long startForcingPoints = System.currentTimeMillis();
          start = forceConnectionOrSnapPoint(start);
@@ -213,12 +212,12 @@ public class NavigableRegionsManager
          long endGlobalMapTime = System.currentTimeMillis();
 
          long startSnappingTime = System.currentTimeMillis();
-         Point3D snappedGoalPosition = getSnappedPointFromVisibilityGraph(goal);
+         Point3DReadOnly snappedGoalPosition = getSnappedPointFromVisibilityGraph(goal);
          if (debug && snappedGoalPosition == null)
          {
             PrintTools.error("Snapping of goal returned null.");
          }
-         Point3D snappedStartPosition = getSnappedPointFromVisibilityGraph(start);
+         Point3DReadOnly snappedStartPosition = getSnappedPointFromVisibilityGraph(start);
          if (debug && snappedStartPosition == null)
          {
             PrintTools.error("Snapping of start returned null.");
@@ -231,7 +230,7 @@ public class NavigableRegionsManager
 
          long aStarStartTime = System.currentTimeMillis();
 
-         List<Point3D> path = null;
+         List<Point3DReadOnly> path = null;
          if (snappedGoalPosition != null && snappedStartPosition != null)
          {
             path = calculatePathOnVisibilityGraph(snappedStartPosition, snappedGoalPosition);
@@ -263,50 +262,84 @@ public class NavigableRegionsManager
 
          return path;
       }
-      
+
       return null;
    }
 
-   public boolean createVisMapsForStartAndGoal(Point3D startProjected, Point3D goalProjected)
+   public List<Point3DReadOnly> calculateBodyPathWithOcclussions(Point3D start, Point3D goal)
    {
-      NavigableRegion region1 = null;
-      Point2D point1 = null;
+      List<Point3DReadOnly> path = calculateBodyPath(start, goal);
+      
+      if (path == null)
+      {
+         if (!OcclussionTools.IsTheGoalIntersectingAnyObstacles(listOfLocalPlanners.get(0), start, goal))
+         {
+            System.out.println("StraightLine available");
+
+            path = new ArrayList<>();
+            path.add(new Point3D(start));
+            path.add(goal);
+
+            return path;
+         }
+
+         NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
+         List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getClusters(), start, goal);
+         Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
+         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
+                                                                                    regionContainingPoint.getHomeRegion());
+         
+         path = calculateBodyPath(start, closestExtrusion);
+         path.add(goal);
+
+         return path;
+      }
+      else
+      {
+         return path;
+      }
+   }
+
+   public boolean createVisMapsForStartAndGoal(Point3DReadOnly startProjected, Point3DReadOnly goalProjected)
+   {
+      NavigableRegion startRegion = null;
+      Point2D startInRegionFrame = null;
 
       for (NavigableRegion navigableRegion : listOfLocalPlanners)
       {
-         FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), startProjected);
-         pointFpt.changeFrame(navigableRegion.getLocalReferenceFrame());
+         FramePoint3D frameStart = new FramePoint3D(ReferenceFrame.getWorldFrame(), startProjected);
+         frameStart.changeFrame(navigableRegion.getLocalReferenceFrame());
 
-         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), pointFpt.getPoint()))
+         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), frameStart))
          {
-            point1 = new Point2D(pointFpt.getPoint().getX(), pointFpt.getPoint().getY());
-            region1 = navigableRegion;
+            startInRegionFrame = new Point2D(frameStart);
+            startRegion = navigableRegion;
             break;
          }
       }
 
-      NavigableRegion region2 = null;
-      Point2D point2 = null;
+      NavigableRegion goalRegion = null;
+      Point2D goalInRegionFrame = null;
 
       for (NavigableRegion navigableRegion : listOfLocalPlanners)
       {
-         FramePoint3D pointFpt = new FramePoint3D(ReferenceFrame.getWorldFrame(), goalProjected);
-         pointFpt.changeFrame(navigableRegion.getLocalReferenceFrame());
+         FramePoint3D frameGoal = new FramePoint3D(ReferenceFrame.getWorldFrame(), goalProjected);
+         frameGoal.changeFrame(navigableRegion.getLocalReferenceFrame());
 
-         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), pointFpt.getPoint()))
+         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), frameGoal))
          {
-            point2 = new Point2D(pointFpt.getPoint().getX(), pointFpt.getPoint().getY());
-            region2 = navigableRegion;
+            goalInRegionFrame = new Point2D(frameGoal);
+            goalRegion = navigableRegion;
             break;
          }
       }
 
-      VisibilityMap startMap = createVisMapForSinglePointSource(point1, region1);
-      VisibilityMap goalMap = createVisMapForSinglePointSource(point2, region2);
+      VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion);
+      VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion);
 
-      if (region1 == region2)
+      if (startRegion == goalRegion)
       {
-         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(region1.getClusters(), point1, point2);
+         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(startRegion.getClusters(), startInRegionFrame, goalInRegionFrame);
          if (targetIsVisible)
          {
             globalMapPoints.add(new Connection(startProjected, goalProjected));
@@ -349,15 +382,15 @@ public class NavigableRegionsManager
       return planarRegions.get(index);
    }
 
-   private List<Point3D> calculatePathOnVisibilityGraph(Point3D start, Point3D goal)
+   private List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      ArrayList<DefaultWeightedEdge> solution = (ArrayList<DefaultWeightedEdge>) DijkstraShortestPath.findPathBetween(globalVisMap, start, goal);
+      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(globalVisMap, new ConnectionPoint3D(start), new ConnectionPoint3D(goal));
       return convertVisibilityGraphSolutionToPath(solution, start);
    }
 
-   private List<Point3D> convertVisibilityGraphSolutionToPath(ArrayList<DefaultWeightedEdge> solution, Point3D start)
+   private List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, Point3DReadOnly start)
    {
-      List<Point3D> path = new ArrayList<>();
+      List<Point3DReadOnly> path = new ArrayList<>();
       pathLength = 0.0;
       path.clear();
 
@@ -365,8 +398,8 @@ public class NavigableRegionsManager
       {
          for (DefaultWeightedEdge edge : solution)
          {
-            Point3D from = globalVisMap.getEdgeSource(edge);
-            Point3D to = globalVisMap.getEdgeTarget(edge);
+            Point3DReadOnly from = globalVisMap.getEdgeSource(edge);
+            Point3DReadOnly to = globalVisMap.getEdgeTarget(edge);
             pathLength = pathLength + from.distance(to);
 
             if (!path.contains(new Point3D(from)))
@@ -377,7 +410,7 @@ public class NavigableRegionsManager
 
          if (!path.get(0).epsilonEquals(start, 1e-5))
          {
-            Point3D pointOut = path.get(1);
+            Point3DReadOnly pointOut = path.get(1);
             path.remove(1);
             path.add(0, pointOut);
          }
@@ -425,8 +458,9 @@ public class NavigableRegionsManager
       int actualConnectionsAdded = 0;
       for (Connection pair : globalMapPoints)
       {
-         Point3D pt1 = pair.getSourcePoint();
-         Point3D pt2 = pair.getTargetPoint();
+         ConnectionPoint3D pt1 = pair.getSourcePoint();
+         ConnectionPoint3D pt2 = pair.getTargetPoint();
+
          if (!pt1.epsilonEquals(pt2, 1e-5))
          {
             globalVisMap.addVertex(pt1);
@@ -440,30 +474,17 @@ public class NavigableRegionsManager
       //      System.out.println("Actual connections added: " + actualConnectionsAdded);
    }
 
-   public VisibilityMap createVisMapForSinglePointSource(Point2D point, NavigableRegion navigableRegion)
+   public static VisibilityMap createVisMapForSinglePointSource(Point2D point, NavigableRegion navigableRegion)
    {
       HashSet<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, navigableRegion.getClusters());
 
-      VisibilityMap mapForSingleObserverLocal = new VisibilityMap();
-      mapForSingleObserverLocal.setConnections(connections);
+      RigidBodyTransform transformToWorld = navigableRegion.getLocalReferenceFrame().getTransformToWorldFrame();
 
-      VisibilityMap mapForSingleObserverWorld = new VisibilityMap();
-
-      for (Connection connection : mapForSingleObserverLocal.getConnections())
-      {
-         Point2D edgeSource = new Point2D(connection.getSourcePoint().getX(), connection.getSourcePoint().getY());
-         Point2D edgeTarget = new Point2D(connection.getTargetPoint().getX(), connection.getTargetPoint().getY());
-
-         FramePoint3D pt1 = new FramePoint3D(navigableRegion.getLocalReferenceFrame(), new Point3D(edgeSource.getX(), edgeSource.getY(), 0));
-         pt1.changeFrame(ReferenceFrame.getWorldFrame());
-         FramePoint3D pt2 = new FramePoint3D(navigableRegion.getLocalReferenceFrame(), new Point3D(edgeTarget.getX(), edgeTarget.getY(), 0));
-         pt2.changeFrame(ReferenceFrame.getWorldFrame());
-
-         mapForSingleObserverWorld.addConnection(new Connection(pt1.getPoint(), pt2.getPoint()));
-      }
-
-      mapForSingleObserverWorld.computeVertices();
-      return mapForSingleObserverWorld;
+      VisibilityMap mapForSingleObserver = new VisibilityMap();
+      mapForSingleObserver.setConnections(connections);
+      mapForSingleObserver.applyTransform(transformToWorld);
+      mapForSingleObserver.computeVertices();
+      return mapForSingleObserver;
    }
 
    public NavigableRegion getTheRegionContainingThePoint(Point3D point, Point2D pointToPack)
@@ -483,11 +504,11 @@ public class NavigableRegionsManager
       return null;
    }
 
-   public Point3D getSnappedPointFromVisibilityGraph(Point3D position)
+   public Point3DReadOnly getSnappedPointFromVisibilityGraph(Point3D position)
    {
       for (DefaultWeightedEdge edge : globalVisMap.edgeSet())
       {
-         Point3D source = globalVisMap.getEdgeSource(edge);
+         Point3DReadOnly source = globalVisMap.getEdgeSource(edge);
 
          if (Math.abs(source.getX() - position.getX()) < 0.001)
          {
@@ -500,7 +521,7 @@ public class NavigableRegionsManager
             }
          }
 
-         Point3D target = globalVisMap.getEdgeTarget(edge);
+         Point3DReadOnly target = globalVisMap.getEdgeTarget(edge);
 
          if (Math.abs(target.getX() - position.getX()) < 0.001)
          {
@@ -557,7 +578,7 @@ public class NavigableRegionsManager
 
       distancePoints.sort(new DistancePointComparator());
 
-      ArrayList<Point3D> filteredList = new ArrayList<>();
+      ArrayList<Point3DReadOnly> filteredList = new ArrayList<>();
 
       for (DistancePoint point : distancePoints)
       {
@@ -568,13 +589,13 @@ public class NavigableRegionsManager
 
       //      System.out.println("After filtering: " + filteredList.size());
 
-      Iterator<Point3D> it = filteredList.iterator();
+      Iterator<Point3DReadOnly> it = filteredList.iterator();
 
-      Point3D pointToSnapTo = null;
+      Point3DReadOnly pointToSnapTo = null;
       while (it.hasNext())
       {
-         Point3D source = it.next();
-         Point3D target = it.next();
+         Point3DReadOnly source = it.next();
+         Point3DReadOnly target = it.next();
 
          //Cannot add an edge where the source is equal to the target!
          if (!source.epsilonEquals(desiredPointToSnap, 1e-5))
@@ -586,7 +607,7 @@ public class NavigableRegionsManager
          }
       }
 
-      return pointToSnapTo;
+      return new Point3D(pointToSnapTo);
    }
 
    private void forceConnectionToPoint(Point3D position)
@@ -610,19 +631,19 @@ public class NavigableRegionsManager
 
       distancePoints.sort(new DistancePointComparator());
 
-      ArrayList<Point3D> listOfOrderedPoints = new ArrayList<>();
+      ArrayList<Point3DReadOnly> listOfOrderedPoints = new ArrayList<>();
 
       for (DistancePoint point : distancePoints)
       {
          listOfOrderedPoints.add(point.point);
       }
 
-      Iterator<Point3D> it = listOfOrderedPoints.iterator();
+      Iterator<Point3DReadOnly> it = listOfOrderedPoints.iterator();
 
       int index = 0;
       while (it.hasNext() && index < parameters.getNumberOfForcedConnections())
       {
-         Point3D closestPoint = it.next();
+         Point3DReadOnly closestPoint = it.next();
 
          //Cannot add an edge where the source is equal to the target!
          if (!closestPoint.epsilonEquals(position, 1e-5))
@@ -690,17 +711,17 @@ public class NavigableRegionsManager
       {
          for (VisibilityMap sourceMap : visMaps)
          {
-            HashSet<Point3D> sourcePoints = sourceMap.getVertices();
+            HashSet<Point3DReadOnly> sourcePoints = sourceMap.getVertices();
 
-            for (Point3D sourcePt : sourcePoints)
+            for (Point3DReadOnly sourcePt : sourcePoints)
             {
                for (VisibilityMap targetMap : visMaps)
                {
                   if (sourceMap != targetMap)
                   {
-                     HashSet<Point3D> targetPoints = targetMap.getVertices();
+                     HashSet<Point3DReadOnly> targetPoints = targetMap.getVertices();
 
-                     for (Point3D targetPt : targetPoints)
+                     for (Point3DReadOnly targetPt : targetPoints)
                      {
                         boolean distanceOk = sourcePt.distance(targetPt) < parameters.getMinimumConnectionDistanceForRegions();
                         boolean heightOk = Math.abs(sourcePt.getZ() - targetPt.getZ()) < parameters.getTooHighToStepDistance();
@@ -759,11 +780,6 @@ public class NavigableRegionsManager
       List<Cluster> clusters = new ArrayList<>();
 
       regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(navigableRegionLocalPlanner.getHomeRegion(), regions);
-
-      if (debug)
-      {
-         System.out.println(regionsInsideHomeRegion.size());
-      }
 
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, navigableRegionLocalPlanner.getHomeRegion(), lineObstacleRegions, polygonObstacleRegions,
                                       parameters.getNormalZThresholdForPolygonObstacles());
@@ -835,24 +851,13 @@ public class NavigableRegionsManager
             }
 
             Point2D[] homePointsArr = new Point2D[cluster.getNonNavigableExtrusionsInWorld().size()];
-            ArrayList<Point2D> points = new ArrayList<>();
+
             for (int i = 0; i < cluster.getNonNavigableExtrusionsInWorld().size(); i++)
             {
-               Point3D extrusion = cluster.getNonNavigableExtrusionsInWorld().get(i);
-               Point2D point2D = new Point2D(extrusion.getX(), extrusion.getY());
-               homePointsArr[i] = point2D;
-               points.add(point2D);
+               homePointsArr[i] = new Point2D(cluster.getNonNavigableExtrusionsInWorld().get(i));
             }
 
-            Point2D centroid = EuclidGeometryTools.averagePoint2Ds(points);
-
-            Vector2D directionToCentroid = new Vector2D(centroid.getX() - pointToCheck.getX(), centroid.getY() - pointToCheck.getY());
-            directionToCentroid.normalize();
-            directionToCentroid.scale(10);
-
-            Point2D endPoint = new Point2D(pointToCheck.getX() + directionToCentroid.getX(), pointToCheck.getY() + directionToCentroid.getY());
-
-            if (PlanarRegionTools.isPointInsidePolygon(homePointsArr, new Point2D(pointToCheck.getX(), pointToCheck.getY()), endPoint))
+            if (PlanarRegionTools.isPointInsidePolygon(homePointsArr, new Point2D(pointToCheck)))
             {
                index++;
 
@@ -917,10 +922,10 @@ public class NavigableRegionsManager
 
    private class DistancePoint implements Comparable<DistancePoint>
    {
-      Point3D point;
+      Point3DReadOnly point;
       double distance;
 
-      public DistancePoint(Point3D point, double distance)
+      public DistancePoint(Point3DReadOnly point, double distance)
       {
          this.point = point;
          this.distance = distance;

@@ -1,7 +1,6 @@
 package us.ihmc.atlas.commonWalkingControlModules;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumMap;
 
 import org.junit.Test;
 
@@ -19,6 +18,7 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
@@ -28,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
@@ -378,12 +377,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       {
          return 0.05;
       }
-
-      @Override
-      public Vector3D getPelvisAngularWeight()
-      {
-         return new Vector3D(5.0, 5.0, 5.0);
-      }
    }
 
    private class TestICPPlannerParameters extends AtlasContinuousCMPPlannerParameters
@@ -407,14 +400,14 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
       /** {@inheritDoc} */
       @Override
-      public List<Vector2D> getCoPOffsets()
+      public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
       {
          Vector2D entryOffset = new Vector2D(0.0, -0.005);
          Vector2D exitOffset = new Vector2D(0.0, 0.015);
 
-         List<Vector2D> copOffsets = new ArrayList<>();
-         copOffsets.add(entryOffset);
-         copOffsets.add(exitOffset);
+         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+         copOffsets.put(entryCoPName, entryOffset);
+         copOffsets.put(exitCoPName, exitOffset);
 
          return copOffsets;
       }

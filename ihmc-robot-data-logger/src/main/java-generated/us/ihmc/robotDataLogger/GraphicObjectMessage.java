@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "GraphicObjectMessage" defined in Handshake.idl. 
@@ -14,10 +11,10 @@ public class GraphicObjectMessage
 {
     public GraphicObjectMessage()
     {
-        	name_ = new StringBuilder(255); 
-        	yoVariableIndex_ = new IDLSequence.Integer (1024, "type_3");
-        	constants_ = new IDLSequence.Double (128, "type_6");
-        	appearance_ = new us.ihmc.robotDataLogger.AppearanceDefinitionMessage();listName_ = new StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
+        	yoVariableIndex_ = new us.ihmc.idl.IDLSequence.Integer (1024, "type_3");
+        	constants_ = new us.ihmc.idl.IDLSequence.Double (128, "type_6");
+        	appearance_ = new us.ihmc.robotDataLogger.AppearanceDefinitionMessage();listName_ = new java.lang.StringBuilder(255); 
         
         
     }
@@ -49,26 +46,26 @@ public class GraphicObjectMessage
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
 
         
 
-    public IDLSequence.Integer  getYoVariableIndex()
+    public us.ihmc.idl.IDLSequence.Integer  getYoVariableIndex()
     {
         return yoVariableIndex_;
     }
 
         
 
-    public IDLSequence.Double  getConstants()
+    public us.ihmc.idl.IDLSequence.Double  getConstants()
     {
         return constants_;
     }
@@ -87,12 +84,12 @@ public class GraphicObjectMessage
         	listName_.append(listName);
         }
         
-        public String getListNameAsString()
+        public java.lang.String getListNameAsString()
         {
         	return getListName().toString();
         }
 
-    public StringBuilder getListName()
+    public java.lang.StringBuilder getListName()
     {
         return listName_;
     }
@@ -103,7 +100,7 @@ public class GraphicObjectMessage
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -129,7 +126,7 @@ public class GraphicObjectMessage
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -163,10 +160,10 @@ public class GraphicObjectMessage
     }
 
     private int type_; 
-    private StringBuilder name_; 
-    private IDLSequence.Integer  yoVariableIndex_; 
-    private IDLSequence.Double  constants_; 
+    private java.lang.StringBuilder name_; 
+    private us.ihmc.idl.IDLSequence.Integer  yoVariableIndex_; 
+    private us.ihmc.idl.IDLSequence.Double  constants_; 
     private us.ihmc.robotDataLogger.AppearanceDefinitionMessage appearance_; 
-    private StringBuilder listName_; 
+    private java.lang.StringBuilder listName_; 
 
 }

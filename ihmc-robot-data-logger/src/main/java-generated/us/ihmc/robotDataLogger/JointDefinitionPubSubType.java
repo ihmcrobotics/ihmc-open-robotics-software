@@ -1,13 +1,5 @@
 package us.ihmc.robotDataLogger;
 
-import java.io.IOException;
-
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.common.SerializedPayload;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.IDLSequence;
-
 /**
 * 
 * Topic data type of the struct "JointDefinition" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
@@ -16,9 +8,9 @@ import us.ihmc.idl.IDLSequence;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDataLogger.JointDefinition>
+public class JointDefinitionPubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.JointDefinition>
 {
-	public static final String name = "us::ihmc::robotDataLogger::JointDefinition";
+	public static final java.lang.String name = "us::ihmc::robotDataLogger::JointDefinition";
 	
 	
 	
@@ -27,19 +19,19 @@ public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDat
         
     }
 
-	private final CDR serializeCDR = new CDR();
-	private final CDR deserializeCDR = new CDR();
+	private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
+	private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
     
     @Override
-   public void serialize(us.ihmc.robotDataLogger.JointDefinition data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(us.ihmc.robotDataLogger.JointDefinition data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
       serializeCDR.finishSerialize();
    }
    @Override
-   public void deserialize(SerializedPayload serializedPayload, us.ihmc.robotDataLogger.JointDefinition data) throws IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.JointDefinition data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -55,9 +47,9 @@ public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDat
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 	
 	    return current_alignment - initial_alignment;
@@ -73,15 +65,15 @@ public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDat
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 	
 	    return current_alignment - initial_alignment;
 	}
 	
-   public static void write(us.ihmc.robotDataLogger.JointDefinition data, CDR cdr)
+   public static void write(us.ihmc.robotDataLogger.JointDefinition data, us.ihmc.idl.CDR cdr)
    {
 
 	    if(data.getName().length() <= 255)
@@ -92,7 +84,7 @@ public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDat
 
    }
 
-   public static void read(us.ihmc.robotDataLogger.JointDefinition data, CDR cdr)
+   public static void read(us.ihmc.robotDataLogger.JointDefinition data, us.ihmc.idl.CDR cdr)
    {
 
 	    	cdr.read_type_d(data.getName());	
@@ -102,7 +94,7 @@ public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDat
    }
    
 	@Override
-	public final void serialize(us.ihmc.robotDataLogger.JointDefinition data, InterchangeSerializer ser)
+	public final void serialize(us.ihmc.robotDataLogger.JointDefinition data, us.ihmc.idl.InterchangeSerializer ser)
 	{
 			    ser.write_type_d("name", data.getName());
 			    
@@ -111,7 +103,7 @@ public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDat
 	}
 	
 	@Override
-	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.JointDefinition data)
+	public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.JointDefinition data)
 	{
 	    			ser.read_type_d("name", data.getName());	
 	    	    
@@ -136,21 +128,21 @@ public class JointDefinitionPubSubType implements TopicDataType<us.ihmc.robotDat
    @Override
    public int getTypeSize()
    {
-      return CDR.getTypeSize(getMaxCdrSerializedSize());
+      return us.ihmc.idl.CDR.getTypeSize(getMaxCdrSerializedSize());
    }
 
    @Override
-   public String getName()
+   public java.lang.String getName()
    {
       return name;
    }
    
-   public void serialize(us.ihmc.robotDataLogger.JointDefinition data, CDR cdr)
+   public void serialize(us.ihmc.robotDataLogger.JointDefinition data, us.ihmc.idl.CDR cdr)
 	{
 		write(data, cdr);
 	}
 
-   public void deserialize(us.ihmc.robotDataLogger.JointDefinition data, CDR cdr)
+   public void deserialize(us.ihmc.robotDataLogger.JointDefinition data, us.ihmc.idl.CDR cdr)
    {
         read(data, cdr);
    }

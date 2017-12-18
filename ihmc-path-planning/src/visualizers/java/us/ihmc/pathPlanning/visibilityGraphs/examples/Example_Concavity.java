@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -81,7 +82,7 @@ public class Example_Concavity extends Application
       meshBuilder.addSphere(0.01, start, Color.GREEN);
       meshBuilder.addSphere(0.01, goal, Color.RED);
 
-      List<Point3D> bodyPath = manager.calculateBodyPath(start, goal);
+      List<Point3DReadOnly> bodyPath = manager.calculateBodyPath(start, goal);
 
       meshBuilder.addMultiLine(bodyPath, 0.01, Color.YELLOW, false);
 

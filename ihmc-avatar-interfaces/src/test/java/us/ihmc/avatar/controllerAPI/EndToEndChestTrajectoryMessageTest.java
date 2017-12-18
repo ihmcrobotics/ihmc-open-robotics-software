@@ -317,12 +317,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    private void assertAngularWeightsMatchDefault(RigidBody rigidBody, SimulationConstructionSet scs)
    {
       String prefix = rigidBody.getName() + "Taskspace";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "AngularWeightX_RO");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "AngularWeightY_RO");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "AngularWeightZ_RO");
-      YoDouble defaultAngularWeightX = (YoDouble) scs.getVariable(prefix + "DefaultAngularWeightX");
-      YoDouble defaultAngularWeightY = (YoDouble) scs.getVariable(prefix + "DefaultAngularWeightY");
-      YoDouble defaultAngularWeightZ = (YoDouble) scs.getVariable(prefix + "DefaultAngularWeightZ");
+      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightZ");
+      YoDouble defaultAngularWeightX = (YoDouble) scs.getVariable("ChestAngularWeightX");
+      YoDouble defaultAngularWeightY = (YoDouble) scs.getVariable("ChestAngularWeightY");
+      YoDouble defaultAngularWeightZ = (YoDouble) scs.getVariable("ChestAngularWeightZ");
       assertEquals(defaultAngularWeightX.getDoubleValue(), angularWeightX.getDoubleValue(), 1e-8);
       assertEquals(defaultAngularWeightY.getDoubleValue(), angularWeightY.getDoubleValue(), 1e-8);
       assertEquals(defaultAngularWeightZ.getDoubleValue(), angularWeightZ.getDoubleValue(), 1e-8);
@@ -333,12 +333,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
 //      AngularWeightX
       String prefix = rigidBody.getName() + "Taskspace";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "AngularWeightX_RO");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "AngularWeightY_RO");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "AngularWeightZ_RO");
-//      YoDouble linearWeightX = (YoDouble) scs.getVariable(prefix + "LinearWeightX_RO");
-//      YoDouble linearWeightY = (YoDouble) scs.getVariable(prefix + "LinearWeightY_RO");
-//      YoDouble linearWeightZ = (YoDouble) scs.getVariable(prefix + "LinearWeightZ_RO");
+      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentAngularWeightZ");
+//      YoDouble linearWeightX = (YoDouble) scs.getVariable(prefix + "CurrentLinearWeightX");
+//      YoDouble linearWeightY = (YoDouble) scs.getVariable(prefix + "CurrentLinearWeightY");
+//      YoDouble linearWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentLinearWeightZ");
 
       assertEquals(xWeight, angularWeightX.getDoubleValue(), 1e-8);
       assertEquals(yWeight, angularWeightY.getDoubleValue(), 1e-8);

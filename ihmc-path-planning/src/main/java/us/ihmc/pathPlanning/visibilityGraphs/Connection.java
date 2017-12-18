@@ -1,25 +1,40 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
-public class Connection
+public class Connection implements Transformable
 {
-   private Point3D point1;
-   private Point3D point2;
+   private ConnectionPoint3D source;
+   private ConnectionPoint3D target;
 
-   public Connection(Point3D point1, Point3D point2)
+   public Connection(Point3DReadOnly source, Point3DReadOnly target)
    {
-      this.point1 = point1;
-      this.point2 = point2;
+      this.source = new ConnectionPoint3D(source);
+      this.target = new ConnectionPoint3D(target);
    }
 
-   public Point3D getSourcePoint()
+   public ConnectionPoint3D getSourcePoint()
    {
-      return point1;
+      return source;
    }
 
-   public Point3D getTargetPoint()
+   public ConnectionPoint3D getTargetPoint()
    {
-      return point2;
+      return target;
+   }
+
+   public void applyTransform(Transform transform)
+   {
+      source.applyTransform(transform);
+      target.applyTransform(transform);
+   }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      source.applyInverseTransform(transform);
+      target.applyInverseTransform(transform);
    }
 }
