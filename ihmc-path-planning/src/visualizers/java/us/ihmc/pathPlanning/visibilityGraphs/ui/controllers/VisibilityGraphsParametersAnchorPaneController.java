@@ -3,7 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.javaFXToolkit.StringConverterTools;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty;

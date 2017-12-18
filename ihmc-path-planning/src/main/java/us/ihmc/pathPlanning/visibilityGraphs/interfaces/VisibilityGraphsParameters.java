@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs;
+package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
