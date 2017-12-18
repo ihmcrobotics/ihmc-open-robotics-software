@@ -418,21 +418,10 @@ public class NavigableRegionsManager
          PrintTools.info("Creating a visibility graph for region with ID:" + region.getRegionId());
       }
 
-      NavigableRegion navigableRegionLocalPlanner = new NavigableRegion(region);
-      processRegion(navigableRegionLocalPlanner);
-      listOfLocalPlanners.add(navigableRegionLocalPlanner);
-
-      VisibilityMap localVisibilityMapInWorld = new VisibilityMap();
-      visMaps.add(localVisibilityMapInWorld);
-
-      for (Connection connectionLocal : navigableRegionLocalPlanner.getLocalVisibilityGraph().getConnections())
-      {
-         Connection connectionWorld = new Connection(connectionLocal);
-         navigableRegionLocalPlanner.transformFromLocalToWorld(connectionWorld);
-         localVisibilityMapInWorld.addConnection(connectionWorld);
-      }
-
-      localVisibilityMapInWorld.computeVertices();
+      NavigableRegion navigableRegion = new NavigableRegion(region);
+      processRegion(navigableRegion);
+      listOfLocalPlanners.add(navigableRegion);
+      visMaps.add(navigableRegion.getVisibilityGraphInWorld());
    }
 
    private void processRegion(NavigableRegion navigableRegionLocalPlanner)
@@ -493,7 +482,7 @@ public class NavigableRegionsManager
       navigableRegionLocalPlanner.setRegionsInsideHomeRegion(regionsInsideHomeRegion);
       navigableRegionLocalPlanner.setLineObstacleRegions(lineObstacleRegions);
       navigableRegionLocalPlanner.setPolygonObstacleRegions(polygonObstacleRegions);
-      navigableRegionLocalPlanner.setVisibilityMap(visibilityMap);
+      navigableRegionLocalPlanner.setVisibilityMapInLocal(visibilityMap);
    }
 
    public Point3D[][] getNavigableExtrusions()
