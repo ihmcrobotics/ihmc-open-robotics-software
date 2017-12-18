@@ -423,6 +423,7 @@ public class ClusterTools
                return t1 >= t2 ? 1 : -1;
             });
 
+            // FIXME Problem with the obstacle height.
             if (rawPoints.get(0).distanceXY(rawPoints.get(rawPoints.size() - 1)) <= POPPING_MULTILINE_POINTS_THRESHOLD)
             {
                cluster.addRawPointInLocal3D(rawPoints.get(0));
