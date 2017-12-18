@@ -17,9 +17,15 @@ public class VisibilityMap implements Transformable
       connections = new HashSet<>();
    }
 
-   public VisibilityMap(HashSet<Connection> connections)
+   public VisibilityMap(Set<Connection> connections)
    {
       this.connections = connections;
+   }
+
+   public VisibilityMap(VisibilityMap other)
+   {
+      this.connections = new HashSet<>(other.connections);
+      computeVertices();
    }
 
    public void setConnections(Collection<Connection> connections)
