@@ -28,10 +28,10 @@ public class Cluster
 
    public enum ExtrusionSide
    {
-      AUTO, INSIDE, OUTSIDE
+      INSIDE, OUTSIDE
    };
 
-   private ExtrusionSide extrusionSide = ExtrusionSide.AUTO;
+   private ExtrusionSide extrusionSide = ExtrusionSide.OUTSIDE;
 
    public enum Type
    {
