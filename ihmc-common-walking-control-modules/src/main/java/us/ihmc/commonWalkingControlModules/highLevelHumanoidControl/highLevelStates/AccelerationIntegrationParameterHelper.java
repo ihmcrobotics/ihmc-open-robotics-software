@@ -47,8 +47,6 @@ public class AccelerationIntegrationParameterHelper
       accelerationIntegrationSettingsLoaded = new JointAccelerationIntegrationParametersReadOnly[joints.length];
 
       List<String> jointsWithoutParametersNoLoad = new ArrayList<>();
-      List<String> jointsWithoutParametersLoaded = new ArrayList<>();
-
       for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
       {
          OneDoFJoint joint = joints[jointIdx];
