@@ -423,7 +423,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationAmplitudes));
       
-      //rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
+      
+      
+      
+      
+      
       
       
       int maxNumberOfIterations = 10000;

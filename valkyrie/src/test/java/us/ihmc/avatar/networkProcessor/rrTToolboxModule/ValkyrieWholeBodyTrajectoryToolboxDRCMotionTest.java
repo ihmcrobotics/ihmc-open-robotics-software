@@ -137,7 +137,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
       configuration.setMaximumExpansionSize(1000);
 
       // trajectory message
-      List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
+      List<WaypointBasedTrajectoryMessage> trajectories = new ArrayList<>();
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
 
       double timeResolution = trajectoryTime / 100.0;
@@ -153,19 +153,32 @@ public class ValkyrieWholeBodyTrajectoryToolboxDRCMotionTest extends AvatarWhole
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
       selectionMatrix.resetSelection();
-      WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
+      WaypointBasedTrajectoryMessage trajectoryHand = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
 
-      trajectory.setControlFramePose(handControlFrames.get(robotSide));
+      trajectoryHand.setControlFramePose(handControlFrames.get(robotSide));
 
-      handTrajectories.add(trajectory);
+      trajectories.add(trajectoryHand);
 
       ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+      
+      // keep sight on trajectory.
+      RigidBody head = fullRobotModel.getHead();
+      SelectionMatrix6D selectionMatrixHead = new SelectionMatrix6D();
+      selectionMatrixHead.clearSelection();      
+      selectionMatrixHead.selectLinearY(true);
+      selectionMatrixHead.selectLinearZ(true);
+      
+      WaypointBasedTrajectoryMessage trajectoryHead = createTrajectoryMessage(head, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrixHead);
+
+      trajectoryHead.setControlFramePosition(new Point3D(0.5, 0.0, 0.0));
+
+      trajectories.add(trajectoryHead);
 
       // run test      
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, trajectories, null, rigidBodyConfigurations);
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
