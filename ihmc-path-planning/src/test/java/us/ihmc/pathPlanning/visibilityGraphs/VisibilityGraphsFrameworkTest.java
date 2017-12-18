@@ -44,7 +44,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 {
    private static final long TIMEOUT = Long.MAX_VALUE; // 30000;
    private static final double START_GOAL_EPSILON = 1.0e-2;
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    private static boolean DEBUG = true;
 
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);

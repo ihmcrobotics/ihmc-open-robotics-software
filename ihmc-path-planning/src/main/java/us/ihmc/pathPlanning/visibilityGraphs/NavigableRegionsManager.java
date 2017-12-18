@@ -13,8 +13,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -137,7 +135,8 @@ public class NavigableRegionsManager
 
       if (start == null)
       {
-         throw new RuntimeException("Visibility graph unable to snap the start point to the closest point in the graph");
+         PrintTools.error("Visibility graph unable to snap the start point to the closest point in the graph");
+         return null;
       }
 
       goal = forceConnectionOrSnapPoint(goal, START_GOAL_ID);
@@ -147,7 +146,8 @@ public class NavigableRegionsManager
 
       if (goal == null)
       {
-         throw new RuntimeException("Visibility graph unable to snap the goal point to the closest point in the graph");
+         PrintTools.error("Visibility graph unable to snap the goal point to the closest point in the graph");
+         return null;
       }
 
       long endForcingPoints = System.currentTimeMillis();
@@ -169,22 +169,17 @@ public class NavigableRegionsManager
          Point3DReadOnly snappedGoalPosition = getSnappedPointFromVisibilityGraph(goal);
          Point3DReadOnly snappedStartPosition = getSnappedPointFromVisibilityGraph(start);
 
-         if (debug)
+         if (snappedGoalPosition == null)
          {
-            if (snappedGoalPosition == null)
-            {
-               PrintTools.error("Snapping of goal returned null.");
-            }
-            if (snappedStartPosition == null)
-            {
-               PrintTools.error("Snapping of start returned null.");
-            }
+            PrintTools.error("Snapping of goal returned null.");
+            return null;
+         }
+         if (snappedStartPosition == null)
+         {
+            PrintTools.error("Snapping of start returned null.");
+            return null;
          }
 
-         if (snappedGoalPosition == null || snappedStartPosition == null)
-         {
-            throw new RuntimeException("Snapping start/goal from visibility graph has failed.");
-         }
          long endSnappingTime = System.currentTimeMillis();
 
          long aStarStartTime = System.currentTimeMillis();
@@ -261,44 +256,21 @@ public class NavigableRegionsManager
 
    private boolean createVisMapsForStartAndGoal(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      NavigableRegion startRegion = null;
-      Point2D startInRegionFrame = null;
+      NavigableRegion startRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, listOfLocalPlanners);
+      Point3D startInRegionFrame = new Point3D(start);
+      startRegion.getLocalReferenceFrame().getTransformToWorldFrame().inverseTransform(startInRegionFrame);
+      NavigableRegion goalRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(goal, listOfLocalPlanners);
+      Point3D goalInRegionFrame = new Point3D(goal);
+      goalRegion.getLocalReferenceFrame().getTransformToWorldFrame().inverseTransform(goalInRegionFrame);
 
-      for (NavigableRegion navigableRegion : listOfLocalPlanners)
-      {
-         FramePoint3D frameStart = new FramePoint3D(ReferenceFrame.getWorldFrame(), start);
-         frameStart.changeFrame(navigableRegion.getLocalReferenceFrame());
-
-         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), frameStart))
-         {
-            startInRegionFrame = new Point2D(frameStart);
-            startRegion = navigableRegion;
-            break;
-         }
-      }
-
-      NavigableRegion goalRegion = null;
-      Point2D goalInRegionFrame = null;
-
-      for (NavigableRegion navigableRegion : listOfLocalPlanners)
-      {
-         FramePoint3D frameGoal = new FramePoint3D(ReferenceFrame.getWorldFrame(), goal);
-         frameGoal.changeFrame(navigableRegion.getLocalReferenceFrame());
-
-         if (PlanarRegionTools.isPointInLocalInsideARegion(navigableRegion.getHomeRegion(), frameGoal))
-         {
-            goalInRegionFrame = new Point2D(frameGoal);
-            goalRegion = navigableRegion;
-            break;
-         }
-      }
-
-      VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion.getRegionId(), startRegion, true);
-      VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion.getRegionId(), goalRegion, true);
+      Point2D start2D = new Point2D(startInRegionFrame);
+      Point2D goal2D = new Point2D(goalInRegionFrame);
+      VisibilityMap startMap = createVisMapForSinglePointSource(start2D, startRegion.getRegionId(), startRegion, true);
+      VisibilityMap goalMap = createVisMapForSinglePointSource(goal2D, goalRegion.getRegionId(), goalRegion, true);
 
       if (startRegion == goalRegion)
       {
-         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(startRegion.getAllClusters(), startInRegionFrame, goalInRegionFrame);
+         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(startRegion.getAllClusters(), start2D, goal2D);
          if (targetIsVisible)
          {
             globalMapPoints.add(new Connection(start, startRegion.getRegionId(), goal, goalRegion.getRegionId()));
@@ -352,7 +324,6 @@ public class NavigableRegionsManager
             path.remove(1);
             path.add(0, pointOut);
          }
-
 
          if (debug)
             PrintTools.info("Visibility graph successfully found a solution");
@@ -428,28 +399,16 @@ public class NavigableRegionsManager
       {
          Point3DReadOnly source = globalVisMap.getEdgeSource(edge);
 
-         if (Math.abs(source.getX() - position.getX()) < 0.001)
+         if (source.epsilonEquals(position, 0.001))
          {
-            if (Math.abs(source.getY() - position.getY()) < 0.001)
-            {
-               if (Math.abs(source.getZ() - position.getZ()) < 0.001)
-               {
-                  return source;
-               }
-            }
+            return source;
          }
 
          Point3DReadOnly target = globalVisMap.getEdgeTarget(edge);
 
-         if (Math.abs(target.getX() - position.getX()) < 0.001)
+         if (target.epsilonEquals(position, 0.001))
          {
-            if (Math.abs(target.getY() - position.getY()) < 0.001)
-            {
-               if (Math.abs(target.getZ() - position.getZ()) < 0.001)
-               {
-                  return target;
-               }
-            }
+            return target;
          }
       }
 
