@@ -9,6 +9,8 @@ import java.util.Set;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -115,11 +117,12 @@ public class VisibilityTools
       return connections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId,
+   public static Set<Connection> createStaticVisibilityMap(Point3DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId,
                                                            boolean ensureConnection)
    {
       Set<Connection> connections = new HashSet<>();
       List<Point2D> listOfTargetPoints = new ArrayList<>();
+      Point2D observer2D = new Point2D(observer);
 
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
@@ -137,13 +140,13 @@ public class VisibilityTools
       {
          Point2D target = listOfTargetPoints.get(j);
 
-         if (observer.distance(target) > MAGIC_NUMBER)
+         if (observer.distanceXY(target) > MAGIC_NUMBER)
          {
-            boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer, target);
+            boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer2D, target);
 
             if (targetIsVisible)
             {
-               connections.add(new Connection(observer, observerRegionId, target, clustersRegionId));
+               connections.add(new Connection(observer, observerRegionId, new Point3D(target), clustersRegionId));
             }
          }
       }
@@ -152,16 +155,17 @@ public class VisibilityTools
       {
          Point2D closestTarget = null;
          double minDistance = Double.POSITIVE_INFINITY;
+
          for (Point2D target : listOfTargetPoints)
          {
-            double targetDistance = target.distanceSquared(observer);
+            double targetDistance = target.distanceXYSquared(observer);
             if (targetDistance < minDistance)
             {
                closestTarget = target;
                minDistance = targetDistance;
             }
          }
-         connections.add(new Connection(observer, observerRegionId, closestTarget, clustersRegionId));
+         connections.add(new Connection(observer, observerRegionId, new Point3D(closestTarget), clustersRegionId));
       }
 
       return connections;
