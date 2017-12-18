@@ -15,7 +15,7 @@ public class ClusterToolsTest
 {
    private static final double EPSILON = 1.0e-12;
 
-   @Test
+   @Test(timeout = 10000)
    public void testExtrudeLine() throws Exception
    {
       Point2D endpoint1 = new Point2D(0.0, 0.0);
@@ -35,7 +35,7 @@ public class ClusterToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, -0.5), extrusions.get(index++), EPSILON);
    }
 
-   @Test
+   @Test(timeout = 10000)
    public void testExtrudeCorner()
    {
       Point2D previous = new Point2D(1.0, 0.0);
