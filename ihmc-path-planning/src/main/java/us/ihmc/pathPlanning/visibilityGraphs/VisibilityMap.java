@@ -1,27 +1,39 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class VisibilityMap implements Transformable
 {
-   private HashSet<Connection> connections;
-   private HashSet<Point3DReadOnly> vertices;
+   private Set<Connection> connections;
+   private Set<ConnectionPoint3D> vertices;
 
    public VisibilityMap()
    {
       connections = new HashSet<>();
    }
 
-   public VisibilityMap(HashSet<Connection> connections)
+   public VisibilityMap(Set<Connection> connections)
    {
       this.connections = connections;
    }
 
-   public void setConnections(HashSet<Connection> connections)
+   public VisibilityMap(VisibilityMap other)
+   {
+      this.connections = new HashSet<>(other.connections);
+      computeVertices();
+   }
+
+   public void setConnections(Collection<Connection> connections)
+   {
+      this.connections = new HashSet<>(connections);
+   }
+
+   public void setConnections(Set<Connection> connections)
    {
       this.connections = connections;
    }
@@ -31,7 +43,7 @@ public class VisibilityMap implements Transformable
       connections.add(connection);
    }
 
-   public void addConnections(HashSet<Connection> connections)
+   public void addConnections(Set<Connection> connections)
    {
       this.connections.addAll(connections);
    }
@@ -46,14 +58,19 @@ public class VisibilityMap implements Transformable
       }
    }
 
-   public HashSet<Point3DReadOnly> getVertices()
+   public Set<ConnectionPoint3D> getVertices()
    {
       return vertices;
    }
 
-   public HashSet<Connection> getConnections()
+   public Set<Connection> getConnections()
    {
       return connections;
+   }
+
+   public boolean isEmpty()
+   {
+      return connections.isEmpty();
    }
 
    @Override

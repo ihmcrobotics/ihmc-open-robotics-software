@@ -1,24 +1,30 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityTools
 {
-   public static boolean isPointVisible(Point2D observer, Point2D targetPoint, List<Point2D> listOfPointsInCluster)
+   private static final double MAGIC_NUMBER = 0.01;
+
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster)
    {
       for (int i = 0; i < listOfPointsInCluster.size() - 1; i++)
       {
-         Point2D first = listOfPointsInCluster.get(i);
-         Point2D second = listOfPointsInCluster.get(i + 1);
+         Point2DReadOnly first = listOfPointsInCluster.get(i);
+         Point2DReadOnly second = listOfPointsInCluster.get(i + 1);
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
@@ -28,14 +34,14 @@ public class VisibilityTools
       return true;
    }
 
-   public static ArrayList<Connection> getConnectionsThatAreInsideRegion(ArrayList<Connection> connections, PlanarRegion region)
+   public static List<Connection> getConnectionsThatAreInsideRegion(Collection<Connection> connections, PlanarRegion region)
    {
-      ArrayList<Connection> filteredConnections = new ArrayList<>();
+      List<Connection> filteredConnections = new ArrayList<>();
 
       for (Connection connection : connections)
       {
 
-         if (PlanarRegionTools.areBothPointsInsidePolygon(new Point2D(connection.getSourcePoint()), new Point2D(connection.getTargetPoint()), region))
+         if (PlanarRegionTools.areBothPointsInsidePolygon(connection.getSourcePoint2D(), connection.getTargetPoint2D(), region))
          {
             filteredConnections.add(connection);
          }
@@ -44,15 +50,14 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static ArrayList<Connection> getConnectionsThatAreInsideRegion(ArrayList<Connection> connections, List<Point2D> polygon)
+   public static List<Connection> getConnectionsThatAreInsideRegion(Collection<Connection> connections, List<? extends Point2DReadOnly> polygon)
    {
-      ArrayList<Connection> filteredConnections = new ArrayList<>();
+      List<Connection> filteredConnections = new ArrayList<>();
 
       for (Connection connection : connections)
       {
 
-         if (PlanarRegionTools.areBothPointsInsidePolygon(new Point2D(connection.getSourcePoint().getX(), connection.getSourcePoint().getY()),
-                                                          new Point2D(connection.getTargetPoint().getX(), connection.getTargetPoint().getY()), polygon))
+         if (PlanarRegionTools.areBothPointsInsidePolygon(connection.getSourcePoint2D(), connection.getTargetPoint2D(), polygon))
          {
             filteredConnections.add(connection);
          }
@@ -61,11 +66,11 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static HashSet<Connection> createStaticVisibilityMap(Point2D start, Point2D goal, List<Cluster> clusters)
+   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly start, Point2DReadOnly goal, List<Cluster> clusters, int regionId)
    {
-      HashSet<Connection> connections = new HashSet<>();
+      Set<Connection> connections = new HashSet<>();
 
-      ArrayList<Point2D> listOfObserverPoints = new ArrayList<>();
+      List<Point2DReadOnly> listOfObserverPoints = new ArrayList<>();
 
       if (start != null)
       {
@@ -80,30 +85,27 @@ public class VisibilityTools
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
       {
-         if (!cluster.isDynamic())
+         for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
          {
-            for (Point2D point : cluster.getNavigableExtrusionsInLocal())
-            {
-               listOfObserverPoints.add(point);
-            }
+            listOfObserverPoints.add(point);
          }
       }
 
       for (int i = 0; i < listOfObserverPoints.size(); i++)
       {
-         Point2D observer = listOfObserverPoints.get(i);
+         Point2DReadOnly observer = listOfObserverPoints.get(i);
 
          for (int j = i + 1; j < listOfObserverPoints.size(); j++)
          {
-            Point2D target = listOfObserverPoints.get(j);
+            Point2DReadOnly target = listOfObserverPoints.get(j);
 
-            if (observer.distance(target) > 0.01)
+            if (observer.distance(target) > MAGIC_NUMBER)
             {
                boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer, target);
 
                if (targetIsVisible)
                {
-                  connections.add(new Connection(new Point3D(observer), new Point3D(target)));
+                  connections.add(new Connection(observer, regionId, target, regionId));
                }
             }
          }
@@ -112,20 +114,19 @@ public class VisibilityTools
       return connections;
    }
 
-   public static HashSet<Connection> createStaticVisibilityMap(Point2D observer, List<Cluster> clusters)
+   public static Set<Connection> createStaticVisibilityMap(Point3DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId,
+                                                           boolean ensureConnection)
    {
-      HashSet<Connection> connections = new HashSet<>();
-      ArrayList<Point2D> listOfTargetPoints = new ArrayList<>();
+      Set<Connection> connections = new HashSet<>();
+      List<Point2D> listOfTargetPoints = new ArrayList<>();
+      Point2D observer2D = new Point2D(observer);
 
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
       {
-         if (!cluster.isDynamic())
+         for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
          {
-            for (Point2D point : cluster.getNavigableExtrusionsInLocal())
-            {
-               listOfTargetPoints.add(point);
-            }
+            listOfTargetPoints.add(point);
          }
       }
 
@@ -133,25 +134,42 @@ public class VisibilityTools
       {
          Point2D target = listOfTargetPoints.get(j);
 
-         if (observer.distance(target) > 0.01)
+         if (observer.distanceXY(target) > MAGIC_NUMBER)
          {
-            boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer, target);
+            boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer2D, target);
 
             if (targetIsVisible)
             {
-               connections.add(new Connection(new Point3D(observer), new Point3D(target)));
+               connections.add(new Connection(observer, observerRegionId, new Point3D(target), clustersRegionId));
             }
          }
+      }
+
+      if (ensureConnection && connections.isEmpty())
+      {
+         Point2D closestTarget = null;
+         double minDistance = Double.POSITIVE_INFINITY;
+
+         for (Point2D target : listOfTargetPoints)
+         {
+            double targetDistance = target.distanceXYSquared(observer);
+            if (targetDistance < minDistance)
+            {
+               closestTarget = target;
+               minDistance = targetDistance;
+            }
+         }
+         connections.add(new Connection(observer, observerRegionId, new Point3D(closestTarget), clustersRegionId));
       }
 
       return connections;
    }
 
-   public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2D observer, Point2D targetPoint)
+   public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
    {
       for (Cluster cluster : clusters)
       {
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal()))
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal2D()))
          {
             return false;
          }
@@ -159,69 +177,63 @@ public class VisibilityTools
 
       return true;
    }
-   
-   public static ArrayList<Connection> removeConnectionsFromExtrusionsOutsideRegions(ArrayList<Connection> connections, PlanarRegion homeRegion)
-   {
-      ArrayList<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connections, homeRegion);
 
-      return filteredConnections;
+   public static List<Connection> removeConnectionsFromExtrusionsOutsideRegions(Collection<Connection> connections, PlanarRegion homeRegion)
+   {
+      return VisibilityTools.getConnectionsThatAreInsideRegion(connections, homeRegion);
    }
-   
-   public static ArrayList<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(ArrayList<Connection> connectionsToClean, List<Cluster> clusters)
-   {
-      ArrayList<Connection> masterListOfConnections = new ArrayList<>();
 
-      ArrayList<Cluster> filteredClusters = new ArrayList<>();
+   public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(Collection<Connection> connectionsToClean, List<Cluster> clusters)
+   {
+      List<Connection> masterListOfConnections = new ArrayList<>();
+      List<Cluster> filteredClusters = new ArrayList<>();
+
       if (clusters.size() > 1)
       {
          for (int i = 0; i < clusters.size() - 1; i++)
          {
             filteredClusters.add(clusters.get(i));
          }
-         
-         ArrayList<Connection> connectionsToRemove = new ArrayList<>();
+
+         List<Connection> connectionsToRemove = new ArrayList<>();
          for (Cluster cluster : filteredClusters)
          {
 
-            if (cluster.getNonNavigableExtrusionsInLocal().size() == 0)
+            if (cluster.getNonNavigableExtrusionsInLocal2D().size() == 0)
             {
                continue;
             }
 
-            ArrayList<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                          cluster.getNonNavigableExtrusionsInLocal());
+            List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
+                                                                                                     cluster.getNonNavigableExtrusionsInLocal2D());
             for (Connection connection : filteredConnections)
             {
                connectionsToRemove.add(connection);
             }
          }
 
+         List<Connection> connectionsInsideHomeRegion = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
+                                                                                                          clusters.get(clusters.size() - 1)
+                                                                                                                  .getNonNavigableExtrusionsInLocal2D());
 
-         ArrayList<Connection> connectionsInsideHomeRegion = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                               clusters.get(clusters.size() - 1)
-                                                                                                                       .getNonNavigableExtrusionsInLocal());
-
-         int index = 0;
-
-         ArrayList<Connection> finalList = (ArrayList<Connection>) connectionsInsideHomeRegion.clone();
          for (Connection connection : connectionsInsideHomeRegion)
          {
-            for (Connection connectionToRemove : connectionsToRemove)
+            boolean addConnection = true;
+
+            for (int i = 0; i < connectionsToRemove.size(); i++)
             {
-               if (connection.getSourcePoint().epsilonEquals(connectionToRemove.getSourcePoint(), 1E-5)
-                     && connection.getTargetPoint().epsilonEquals(connectionToRemove.getTargetPoint(), 1E-5))
+               Connection connectionToRemove = connectionsToRemove.get(i);
+
+               if (connection.epsilonEquals(connectionToRemove, 1E-5))
                {
-                  finalList.remove(connection);
-                  index++;
+                  addConnection = false;
+                  break;
                }
             }
-         }
 
-         for (Connection connection : finalList)
-         {
-            masterListOfConnections.add(connection);
+            if (addConnection)
+               masterListOfConnections.add(connection);
          }
-
       }
       else
       {
@@ -229,13 +241,13 @@ public class VisibilityTools
 
          for (Cluster cluster : filteredClusters)
          {
-            if (cluster.getNonNavigableExtrusionsInLocal().size() == 0)
+            if (cluster.getNonNavigableExtrusionsInLocal2D().size() == 0)
             {
                continue;
             }
-            
-            ArrayList<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                          cluster.getNonNavigableExtrusionsInLocal());
+
+            List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
+                                                                                                     cluster.getNonNavigableExtrusionsInLocal2D());
             for (Connection connection : filteredConnections)
             {
                masterListOfConnections.add(connection);
@@ -245,6 +257,5 @@ public class VisibilityTools
 
       return masterListOfConnections;
    }
-
 
 }

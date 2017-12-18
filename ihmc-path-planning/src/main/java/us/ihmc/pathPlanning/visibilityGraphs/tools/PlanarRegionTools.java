@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.signedDistanceFromPoint3DToPlane3D;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,13 +23,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionTools
 {
-   private static final boolean debug = false;
-
    /**
     * Finds and returns the closest point the the provided point on the planar regions.
     */
@@ -98,11 +100,22 @@ public class PlanarRegionTools
     */
    public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, PlanarRegionsList regions)
    {
+      return projectPointToPlanesVertically(point, regions.getPlanarRegionsAsList());
+   }
+
+   /**
+    * Projects the given point onto a planar region from the list. The projection is done along the
+    * z axis in world frame and if there is multiple regions that the point can be projected onto,
+    * the highest intersection point will be returned.
+    * <p>
+    * Will return null if the is no planar region above or below the point.
+    */
+   public static Point3D projectPointToPlanesVertically(Point3DReadOnly point, List<PlanarRegion> regions)
+   {
       Line3D projectionLine = new Line3D(point, new Vector3D(0.0, 0.0, 1.0));
       Point3D highestIntersection = null;
-      PlanarRegion highestRegion = null;
 
-      for (PlanarRegion region : regions.getPlanarRegionsAsList())
+      for (PlanarRegion region : regions)
       {
          Point3D intersection = intersectRegionWithLine(region, projectionLine);
 
@@ -114,7 +127,6 @@ public class PlanarRegionTools
          if (highestIntersection == null || highestIntersection.getZ() < intersection.getZ())
          {
             highestIntersection = intersection;
-            highestRegion = region;
          }
       }
 
@@ -254,17 +266,45 @@ public class PlanarRegionTools
       return null;
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3D point, List<NavigableRegion> navigableRegions)
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions)
    {
+      List<NavigableRegion> containers = new ArrayList<>();
+
       for (NavigableRegion navigableRegion : navigableRegions)
       {
          if (isPointInWorldInsideARegion(navigableRegion.getHomeRegion(), point))
          {
-            return navigableRegion;
+            containers.add(navigableRegion);
          }
       }
 
-      return null;
+      if (containers.isEmpty())
+         return null;
+      if (containers.size() == 1)
+         return containers.get(0);
+
+      Point3D pointOnRegion = new Point3D();
+      Vector3D regionNormal = new Vector3D();
+
+      NavigableRegion closestContainer = containers.get(0);
+      closestContainer.getHomeRegion().getNormal(regionNormal);
+      closestContainer.getHomeRegion().getPointInRegion(pointOnRegion);
+      double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
+
+      for (int i = 1; i < containers.size(); i++)
+      {
+         NavigableRegion candidate = containers.get(i);
+         candidate.getHomeRegion().getNormal(regionNormal);
+         candidate.getHomeRegion().getPointInRegion(pointOnRegion);
+         double distance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
+         if (distance < minDistance)
+         {
+            closestContainer = candidate;
+            minDistance = distance;
+         }
+      }
+
+      return closestContainer;
    }
 
    public static boolean isPointInLocalInsideARegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)
@@ -288,9 +328,9 @@ public class PlanarRegionTools
       { // Picking an edge that is not parallel to the ray.
          Point2DReadOnly edgeStart = polygon[i];
          Point2DReadOnly edgeEnd = polygon[(i + 1) % polygon.length];
-         Vector2D edgeDirection =  new Vector2D();
+         Vector2D edgeDirection = new Vector2D();
          edgeDirection.sub(edgeEnd, edgeStart);
-         
+
          pointOnArbitraryEdge.interpolate(edgeStart, edgeEnd, 0.5);
          rayDirection.sub(pointOnArbitraryEdge, rayOrigin);
 
@@ -333,7 +373,7 @@ public class PlanarRegionTools
       return numberOfIntersections % 2 != 0;
    }
 
-   public static boolean areBothPointsInsidePolygon(Point2D point1, Point2D point2, PlanarRegion homeRegion)
+   public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, PlanarRegion homeRegion)
    {
       boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point1);
       boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point2);
@@ -341,7 +381,7 @@ public class PlanarRegionTools
       return startIsInside && goalIsInside;
    }
 
-   public static boolean areBothPointsInsidePolygon(Point2D point1, Point2D point2, List<Point2D> pointsInPolygon)
+   public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, List<? extends Point2DReadOnly> pointsInPolygon)
    {
       Point2D[] pointsArr = pointsInPolygon.toArray(new Point2D[pointsInPolygon.size()]);
       boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point1);
@@ -453,6 +493,21 @@ public class PlanarRegionTools
       return true;
    }
 
+   public static List<PlanarRegion> ensureClockwiseOrder(List<PlanarRegion> planarRegions)
+   {
+      List<PlanarRegion> copies = new ArrayList<>(planarRegions.size());
+
+      for (PlanarRegion planarRegion : planarRegions)
+      {
+         PlanarRegion copy = planarRegion.copy();
+         List<Point2DReadOnly> concaveHullVertices = Arrays.asList(copy.getConcaveHull());
+         ConcaveHullTools.ensureClockwiseOrdering(concaveHullVertices);
+         copies.add(copy);
+      }
+
+      return copies;
+   }
+
    public static List<PlanarRegion> filterPlanarRegionsByHullSize(int minNumberOfVertices, List<PlanarRegion> planarRegions)
    {
       if (minNumberOfVertices <= 0)
@@ -469,7 +524,7 @@ public class PlanarRegionTools
       return planarRegions.stream().filter(region -> computePlanarRegionArea(region) >= minArea).collect(Collectors.toList());
    }
 
-   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3D capsuleStart, Point3D capsuleEnd, double capsuleRadius,
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStart, Point3DReadOnly capsuleEnd, double capsuleRadius,
                                                                            List<PlanarRegion> planarRegions)
    {
       return filterPlanarRegionsWithBoundingCapsule(new LineSegment3D(capsuleStart, capsuleEnd), capsuleRadius, planarRegions);
@@ -518,29 +573,7 @@ public class PlanarRegionTools
       return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal);
    }
 
-   public static void classifyRegions(List<PlanarRegion> regionsToClassify, double zNormalThreshold, List<PlanarRegion> obstacleRegionsToPack,
-                                      List<PlanarRegion> accessibleRegionsToPack)
-   {
-      Vector3D normal = new Vector3D();
-
-      for (PlanarRegion region : regionsToClassify)
-      {
-         if (!region.isEmpty())
-         {
-            region.getNormal(normal);
-            if (Math.abs(normal.getZ()) < zNormalThreshold)
-            {
-               obstacleRegionsToPack.add(region);
-            }
-            else
-            {
-               accessibleRegionsToPack.add(region);
-            }
-         }
-      }
-   }
-
-   public static List<PlanarRegion> filterRegionsThatAreAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
+   public static List<PlanarRegion> keepOnlyRegionsThatAreEntirelyAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
    {
       List<PlanarRegion> filteredList = new ArrayList<>();
       for (PlanarRegion region : regionsToCheck)
@@ -556,35 +589,159 @@ public class PlanarRegionTools
 
    public static boolean isRegionAboveHomeRegion(PlanarRegion regionToCheck, PlanarRegion homeRegion)
    {
+      RigidBodyTransform transformFromHomeToWorld = new RigidBodyTransform();
+      homeRegion.getTransformToWorld(transformFromHomeToWorld);
+
       for (int i = 0; i < homeRegion.getConcaveHull().length; i++)
       {
-         Point2D point2D = (Point2D) homeRegion.getConcaveHull()[i];
-         Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-         FramePoint3D homeRegionPoint = new FramePoint3D();
-         homeRegionPoint.set(point3D);
-         RigidBodyTransform transToWorld = new RigidBodyTransform();
-         homeRegion.getTransformToWorld(transToWorld);
-         homeRegionPoint.applyTransform(transToWorld);
+         RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
+         regionToCheck.getTransformToWorld(transformFromOtherToHome);
+         transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
 
          for (int j = 0; j < regionToCheck.getConcaveHull().length; j++)
          {
-            Point2D point2D1 = (Point2D) regionToCheck.getConcaveHull()[j];
-            Point3D point3D1 = new Point3D(point2D1.getX(), point2D1.getY(), 0);
-            FramePoint3D otherRegionPoint = new FramePoint3D();
-            otherRegionPoint.set(point3D1);
-            RigidBodyTransform transToWorld1 = new RigidBodyTransform();
-            regionToCheck.getTransformToWorld(transToWorld1);
-            otherRegionPoint.applyTransform(transToWorld1);
+            Point3D otherRegionPoint = new Point3D(regionToCheck.getConcaveHull()[j]);
+            otherRegionPoint.applyTransform(transformFromOtherToHome);
 
-            if (homeRegionPoint.getZ() > otherRegionPoint.getZ())
-            {
-               //               System.out.println("Region is below home");
+            if (otherRegionPoint.getZ() < 0.0)
                return false;
-            }
          }
       }
-      //      System.out.println("Region is above home");
       return true;
+   }
+
+   public static List<PlanarRegion> filterRegionsByTruncatingVerticesBeneathHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion,
+                                                                                       double depthThresholdForConvexDecomposition, int minTruncatedSize,
+                                                                                       double minTruncatedArea)
+   {
+      List<PlanarRegion> filteredList = new ArrayList<>();
+      Point3D pointOnPlane = new Point3D();
+      Vector3D planeNormal = new Vector3D();
+
+      homeRegion.getPointInRegion(pointOnPlane);
+      homeRegion.getNormal(planeNormal);
+
+      for (PlanarRegion regionToCheck : regionsToCheck)
+      {
+         PlanarRegion truncatedPlanarRegion = truncatePlanarRegionIfIntersectingWithPlane(pointOnPlane, planeNormal, regionToCheck,
+                                                                                          depthThresholdForConvexDecomposition, minTruncatedSize,
+                                                                                          minTruncatedArea);
+         if (truncatedPlanarRegion != null)
+            filteredList.add(truncatedPlanarRegion);
+      }
+
+      return filteredList;
+   }
+
+   /**
+    * Truncate the given planar region {@code planarRegionToTuncate} with the plane such that only
+    * the part that is <b>above</b> the plane remains.
+    * 
+    * @param pointOnPlane a point on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param planarRegionToTruncate the original planar region to be truncated. Not modified.
+    * @param depthThresholdForConvexDecomposition used to recompute the convex decomposition of the
+    *           planar region when it has been truncated.
+    * @param minTruncatedSize the minimum number of concave hull vertices for the truncated region
+    *           to be created.
+    * @param minTruncatedArea the minimum area for the truncated region to be created.
+    * @return the truncated planar region which is completely above the plane, or {@code null} if
+    *         the given planar region is completely underneath the plane or if it is too small
+    *         according to {@code minTruncatedSize} and {@code minTruncatedArea}.
+    */
+   public static PlanarRegion truncatePlanarRegionIfIntersectingWithPlane(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal,
+                                                                          PlanarRegion planarRegionToTruncate, double depthThresholdForConvexDecomposition,
+                                                                          int minTruncatedSize, double minTruncatedArea)
+   {
+      Point3D pointOnRegion = new Point3D();
+      Vector3D regionNormal = new Vector3D();
+      planarRegionToTruncate.getPointInRegion(pointOnRegion);
+      planarRegionToTruncate.getNormal(regionNormal);
+
+      if (EuclidGeometryTools.areVector3DsParallel(planeNormal, regionNormal, Math.toRadians(3.0)))
+      { // The region and the plane are parallel, check which one is above the other.
+         double signedDistance = signedDistanceFromPoint3DToPlane3D(pointOnRegion, pointOnPlane, planeNormal);
+         if (signedDistance < 0.0)
+            return null; // The region is underneath
+         else
+            return planarRegionToTruncate; // The region is above
+      }
+
+      Point3D pointOnPlaneInRegionFrame = new Point3D(pointOnPlane);
+      Vector3D planeNormalInRegionFrame = new Vector3D(planeNormal);
+
+      RigidBodyTransform transformFromRegionToWorld = new RigidBodyTransform();
+      planarRegionToTruncate.getTransformToWorld(transformFromRegionToWorld);
+      pointOnPlaneInRegionFrame.applyInverseTransform(transformFromRegionToWorld);
+      planeNormalInRegionFrame.applyInverseTransform(transformFromRegionToWorld);
+
+      Point2DReadOnly vertex2D = planarRegionToTruncate.getConcaveHullVertex(planarRegionToTruncate.getConcaveHullSize() - 1);
+      Point3D vertex3D = new Point3D(vertex2D);
+      double previousSignedDistance = signedDistanceFromPoint3DToPlane3D(vertex3D, pointOnPlaneInRegionFrame, planeNormalInRegionFrame);
+
+      Point3D previousVertex3D = vertex3D;
+
+      List<Point2D> truncatedConcaveHullVertices = new ArrayList<>();
+
+      boolean isRegionEntirelyAbove = true;
+      double epsilonDistance = 1.0e-10;
+
+      for (int i = 0; i < planarRegionToTruncate.getConcaveHullSize(); i++)
+      {
+         vertex2D = planarRegionToTruncate.getConcaveHullVertex(i);
+         vertex3D = new Point3D(vertex2D);
+
+         double signedDistance = signedDistanceFromPoint3DToPlane3D(vertex3D, pointOnPlaneInRegionFrame, planeNormalInRegionFrame);
+         isRegionEntirelyAbove &= signedDistance >= -epsilonDistance;
+
+         if (signedDistance * previousSignedDistance < 0.0)
+         {
+            if (Math.abs(signedDistance) <= epsilonDistance)
+            {
+               truncatedConcaveHullVertices.add(new Point2D(vertex2D));
+            }
+            else if (Math.abs(previousSignedDistance) > epsilonDistance)
+            {
+               Vector3D edgeDirection = new Vector3D();
+               edgeDirection.sub(vertex3D, previousVertex3D);
+               Point3D intersection = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(pointOnPlaneInRegionFrame, planeNormalInRegionFrame,
+                                                                                                     vertex3D, previousVertex3D);
+
+               truncatedConcaveHullVertices.add(new Point2D(intersection));
+            }
+         }
+
+         if (signedDistance >= -epsilonDistance)
+         {
+            truncatedConcaveHullVertices.add(new Point2D(vertex2D));
+         }
+
+         previousVertex3D = vertex3D;
+         previousSignedDistance = signedDistance;
+      }
+
+      if (isRegionEntirelyAbove)
+         return planarRegionToTruncate;
+
+      if (truncatedConcaveHullVertices.isEmpty())
+         return null; // The region is completely underneath
+
+      if (minTruncatedSize > 0 && truncatedConcaveHullVertices.size() < minTruncatedSize)
+         return null; // The resulting region is too small
+
+      List<ConvexPolygon2D> truncatedConvexPolygons = new ArrayList<>();
+      ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
+                                                                 truncatedConvexPolygons);
+
+      double totalArea = truncatedConvexPolygons.stream().mapToDouble(ConvexPolygon2D::getArea).sum();
+      if (totalArea < minTruncatedArea)
+         return null; // The resulting region is too small
+
+      Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
+      truncatedConcaveHullVertices.toArray(concaveHullVertices);
+      PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, concaveHullVertices, truncatedConvexPolygons);
+      truncatedRegion.setRegionId(planarRegionToTruncate.getRegionId());
+      return truncatedRegion;
    }
 
    public static boolean isRegionTooHighToStep(PlanarRegion regionToProject, PlanarRegion regionToProjectTo, double tooHighToStepThreshold)
