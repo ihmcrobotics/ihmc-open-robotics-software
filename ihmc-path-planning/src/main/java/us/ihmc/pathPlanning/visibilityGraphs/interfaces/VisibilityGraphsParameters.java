@@ -3,7 +3,6 @@ package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools.ExtrusionDistanceCalculator;
 
 public interface VisibilityGraphsParameters
 {
