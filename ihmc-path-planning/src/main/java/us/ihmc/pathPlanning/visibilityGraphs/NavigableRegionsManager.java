@@ -37,7 +37,6 @@ public class NavigableRegionsManager
    private List<PlanarRegion> regions;
    private List<NavigableRegion> navigableRegions = new ArrayList<>();
    private List<VisibilityMap> visMaps = new ArrayList<>();
-   private SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
    private final VisibilityGraphsParameters parameters;
 
@@ -129,14 +128,10 @@ public class NavigableRegionsManager
 
       if (readyToRunBodyPath)
       {
-         long startGlobalMapTime = System.currentTimeMillis();
-         createGlobalVisibilityGraph();
-         long endGlobalMapTime = System.currentTimeMillis();
-
          long aStarStartTime = System.currentTimeMillis();
 
          List<Point3DReadOnly> path = null;
-         path = calculatePathOnVisibilityGraph(start, goal, globalVisMap);
+         path = calculatePathOnVisibilityGraph(start, goal, globalMapPoints);
 
          if (debug)
          {
@@ -146,7 +141,6 @@ public class NavigableRegionsManager
                PrintTools.info("Map creation completed in " + (endCreationTime - startCreatingMaps) + "ms");
                PrintTools.info("Connection completed in " + (endConnectingTime - startConnectingTime) + "ms");
                PrintTools.info("Forcing points took: " + (endForcingPoints - startForcingPoints) + "ms");
-               PrintTools.info("Global Map creation took " + (endGlobalMapTime - startGlobalMapTime) + "ms");
                PrintTools.info("A* took: " + (System.currentTimeMillis() - aStarStartTime) + "ms");
                PrintTools.info("Total time to find solution was: " + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
             }
@@ -227,12 +221,34 @@ public class NavigableRegionsManager
       return true;
    }
 
-   private static List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal,
-                                                                       Graph<ConnectionPoint3D, DefaultWeightedEdge> graph)
+   private static List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal, Collection<Connection> globalMapPoints)
    {
+      SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graph = createGlobalVisibilityGraph(globalMapPoints);
       List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(graph, new ConnectionPoint3D(start, START_GOAL_ID),
                                                                                 new ConnectionPoint3D(goal, START_GOAL_ID));
       return convertVisibilityGraphSolutionToPath(solution, start, graph);
+   }
+
+   private static SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> createGlobalVisibilityGraph(Collection<Connection> globalMapPoints)
+   {
+      SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+
+      for (Connection pair : globalMapPoints)
+      {
+         ConnectionPoint3D pt1 = pair.getSourcePoint();
+         ConnectionPoint3D pt2 = pair.getTargetPoint();
+
+         if (!pt1.epsilonEquals(pt2, 1.0e-3))
+         {
+            globalVisMap.addVertex(pt1);
+            globalVisMap.addVertex(pt2);
+            DefaultWeightedEdge edge = new DefaultWeightedEdge();
+            globalVisMap.addEdge(pt1, pt2, edge);
+            globalVisMap.setEdgeWeight(edge, pt1.distance(pt2));
+         }
+      }
+
+      return globalVisMap;
    }
 
    private static List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, Point3DReadOnly start,
@@ -272,26 +288,6 @@ public class NavigableRegionsManager
       }
 
       return path;
-   }
-
-   private void createGlobalVisibilityGraph()
-   {
-      globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
-
-      for (Connection pair : globalMapPoints)
-      {
-         ConnectionPoint3D pt1 = pair.getSourcePoint();
-         ConnectionPoint3D pt2 = pair.getTargetPoint();
-
-         if (!pt1.geometricallyEquals(pt2, 1.0e-3))
-         {
-            globalVisMap.addVertex(pt1);
-            globalVisMap.addVertex(pt2);
-            DefaultWeightedEdge edge = new DefaultWeightedEdge();
-            globalVisMap.addEdge(pt1, pt2, edge);
-            globalVisMap.setEdgeWeight(edge, pt1.distance(pt2));
-         }
-      }
    }
 
    private static VisibilityMap createVisMapForSinglePointSource(Point3DReadOnly point, int pointRegionId, NavigableRegion navigableRegion,
