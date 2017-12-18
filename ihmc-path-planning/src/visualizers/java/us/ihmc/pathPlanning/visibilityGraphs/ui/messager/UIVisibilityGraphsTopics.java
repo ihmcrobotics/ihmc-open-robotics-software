@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.messager;
 import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
@@ -94,7 +95,7 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> NextDatasetRequest = Root.child(UnitTest).child(Dataset).child(Next).topic(Request);
    public static final Topic<List<String>> AllDatasetPaths = Root.child(UnitTest).child(Dataset).child(All).topic(Paths);
    public static final Topic<Double> WalkerOffsetHeight = Root.child(UnitTest).child(Walker).child(Offset).topic(Data);
-   public static final Topic<Double> WalkerSize = Root.child(UnitTest).child(Walker).child(Size).topic(Data);
+   public static final Topic<Vector3D> WalkerSize = Root.child(UnitTest).child(Walker).child(Size).topic(Data);
    public static final Topic<List<Point3D>> WalkerCollisionLocations = Root.child(UnitTest).child(Walker).child(Collision).topic(Data);
 
    public static final API API = apiFactory.getAPIAndCloseFactory();

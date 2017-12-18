@@ -20,8 +20,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Ellipsoid3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
@@ -56,8 +57,8 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final boolean showRegionInnerConnections = false;
    private static final boolean showRegionInterConnections = false;
 
-   private static final double walkerOffsetHeight = 0.7;
-   private static final double walkerRadius = 0.5;
+   private static final double walkerOffsetHeight = 0.75;
+   private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
    private static final double walkerMarchingSpeed = 0.05;
 
    @Before
@@ -82,7 +83,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.ShowLocalGraphs, showRegionInnerConnections);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterConnections, showRegionInterConnections);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
-         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadius);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
    }
 
@@ -204,7 +205,8 @@ public class VisibilityGraphsFrameworkTest extends Application
          PrintTools.info("Processing file: " + dataset.getDatasetName());
       }
 
-      NavigableRegionsManager manager = new NavigableRegionsManager();
+      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
+      NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
 
       if (VISUALIZE)
@@ -264,6 +266,8 @@ public class VisibilityGraphsFrameworkTest extends Application
       int currentSegmentIndex = 0;
       Point3D walkerCurrentPosition = new Point3D(pathStart);
       List<Point3D> collisions = new ArrayList<>();
+      Ellipsoid3D walkerShape = new Ellipsoid3D();
+      walkerShape.setRadii(walkerRadii);
 
       while (!walkerCurrentPosition.geometricallyEquals(pathEnd, 1.0e-3))
       {
@@ -273,14 +277,17 @@ public class VisibilityGraphsFrameworkTest extends Application
             walkerBody3D.addZ(walkerOffsetHeight);
 
             Plane3D plane = planarRegion.getPlane();
-            double distance = plane.distance(walkerBody3D);
-            if (distance > walkerRadius)
+            walkerShape.setPose(walkerBody3D, new Quaternion());
+            Point3D closestPoint = plane.orthogonalProjectionCopy(walkerBody3D);
+
+            if (!walkerShape.isInsideOrOnSurface(closestPoint))
                continue;
 
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             planarRegion.getTransformToWorld(transformToWorld);
             walkerBody3D.applyInverseTransform(transformToWorld);
             Point2D walkerBody2D = new Point2D(walkerBody3D);
+            walkerShape.applyInverseTransform(transformToWorld);
 
             if (planarRegion.getNumberOfConvexPolygons() == 0)
             {
@@ -292,16 +299,15 @@ public class VisibilityGraphsFrameworkTest extends Application
 
             for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
             {
-               double distanceXY = planarRegion.getConvexPolygon(i).distance(walkerBody2D);
-               distance = Math.sqrt(EuclidCoreTools.normSquared(distanceXY, walkerBody3D.getZ()));
-
-               if (distance < walkerRadius)
+               closestPoint = new Point3D(planarRegion.getConvexPolygon(i).orthogonalProjectionCopy(walkerBody2D));
+               
+               if (walkerShape.isInsideOrOnSurface(closestPoint))
                {
                   Point2D intersectionLocal = planarRegion.getConvexPolygon(i).orthogonalProjectionCopy(walkerBody2D);
                   if (intersectionLocal == null) // walkerBody2D is inside the polygon
                      intersectionLocal = walkerBody2D;
                   Point3D intersectionWorld = toWorld(intersectionLocal, transformToWorld);
-                  errorMessages += fail(dataset, "Body path is going through a region at: " + intersectionWorld + ", distance from region: " + distance);
+                  errorMessages += fail(dataset, "Body path is going through a region at: " + intersectionWorld);
                   collisions.add(intersectionWorld);
                }
             }
