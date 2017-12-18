@@ -17,7 +17,7 @@
  *
  * Required properties:
  *
- * hyphenatedName = your-project-hyphenated
+ * kebabCasedName = your-project-hyphenated
  * pascalCasedName = YourProjectPascalCased
  * extraSourceSets = [] (ex. ["test", "visualizers"]
  * publishMode = SNAPSHOT (default)
@@ -47,7 +47,6 @@ import us.ihmc.build.IHMCSettingsConfigurator
  */
 def ihmcSettingsConfigurator = new IHMCSettingsConfigurator(settings, logger, ext)
 ihmcSettingsConfigurator.checkRequiredPropertiesAreSet() // Give friendly errors for unset properties
-ihmcSettingsConfigurator.configureProjectName(hyphenatedName) // rootProject.name = hyphenatedName
 ihmcSettingsConfigurator.configureExtraSourceSets(extraSourceSets) // Setup source sets to be multi-project subprojects
 
 if (Boolean.valueOf(includeBuildsFromWorkspace))

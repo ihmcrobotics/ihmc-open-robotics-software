@@ -11,7 +11,6 @@ buildscript {
 import us.ihmc.build.IHMCSettingsConfigurator
 
 def ihmcSettingsConfigurator = new IHMCSettingsConfigurator(settings, logger, ext)
-ihmcSettingsConfigurator.configureProjectName(hyphenatedName) // rootProject.name = hyphenatedName
 ihmcSettingsConfigurator.configureAsGroupOfProjects() // isProjectGroup = true
 
 if (Boolean.valueOf(includeBuildsFromWorkspace))
