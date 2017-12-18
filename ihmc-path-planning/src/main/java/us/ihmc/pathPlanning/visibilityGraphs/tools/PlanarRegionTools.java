@@ -573,28 +573,6 @@ public class PlanarRegionTools
       return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal);
    }
 
-   public static void classifyRegions(List<PlanarRegion> regionsToClassify, double zNormalThreshold, List<PlanarRegion> obstacleRegionsToPack,
-                                      List<PlanarRegion> accessibleRegionsToPack)
-   {
-      Vector3D normal = new Vector3D();
-
-      for (PlanarRegion region : regionsToClassify)
-      {
-         if (!region.isEmpty())
-         {
-            region.getNormal(normal);
-            if (Math.abs(normal.getZ()) < zNormalThreshold)
-            {
-               obstacleRegionsToPack.add(region);
-            }
-            else
-            {
-               accessibleRegionsToPack.add(region);
-            }
-         }
-      }
-   }
-
    public static List<PlanarRegion> keepOnlyRegionsThatAreEntirelyAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
    {
       List<PlanarRegion> filteredList = new ArrayList<>();
