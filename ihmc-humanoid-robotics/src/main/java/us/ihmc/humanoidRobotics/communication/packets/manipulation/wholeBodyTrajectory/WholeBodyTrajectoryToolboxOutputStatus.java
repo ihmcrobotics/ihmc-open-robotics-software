@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.SettablePacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 
 public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<WholeBodyTrajectoryToolboxOutputStatus>
 {
@@ -20,8 +19,6 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<Whole
    public double[] trajectoryTimes;
    public KinematicsToolboxOutputStatus[] robotConfigurations;
 
-   public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-
    public WholeBodyTrajectoryToolboxOutputStatus()
    {
 
@@ -37,7 +34,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<Whole
    {
       setPlanningResult(other.planningResult);
 
-      if(other.robotConfigurations != null)
+      if (other.robotConfigurations != null)
       {
          int numberOfConfigurations = other.robotConfigurations.length;
 
@@ -49,14 +46,11 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<Whole
             trajectoryTimes[i] = other.trajectoryTimes[i];
             robotConfigurations[i] = new KinematicsToolboxOutputStatus(other.robotConfigurations[i]);
          }
-
-         wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage(other.wholeBodyTrajectoryMessage);   
       }
       else
       {
          trajectoryTimes = null;
          robotConfigurations = null;
-         wholeBodyTrajectoryMessage = null;
       }
    }
 
@@ -96,16 +90,6 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<Whole
       this.trajectoryTimes = trajectoryTimes;
    }
 
-   public void setWholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
-   {
-      this.wholeBodyTrajectoryMessage = wholeBodyTrajectoryMessage;
-   }
-
-   public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
-   {
-      return wholeBodyTrajectoryMessage;
-   }
-
    public double getTrajectoryTime()
    {
       return trajectoryTimes[trajectoryTimes.length - 1];
@@ -137,11 +121,6 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<Whole
          {
             return false;
          }
-      }
-
-      if (!wholeBodyTrajectoryMessage.epsilonEquals(other.wholeBodyTrajectoryMessage, epsilon))
-      {
-         return false;
       }
 
       return true;
