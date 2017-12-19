@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionViewer.RADIUS;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionViewer.startOpaqueMaterial;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionViewer.startTransparentMaterial;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionViewer.goalOpaqueMaterial;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionViewer.goalTransparentMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.RADIUS;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startOpaqueMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startTransparentMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
 
 public class StartGoalOrientationViewer extends AnimationTimer
 {
