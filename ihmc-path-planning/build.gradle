@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.3"
+      classpath "us.ihmc:ihmc-build:0.11.4"
       classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
 
    }
@@ -31,6 +31,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'us.ihmc', name: 'robot-environment-awareness', version: groupDependencyVersion
 }
 
 visualizersDependencies {
@@ -42,6 +43,7 @@ visualizersDependencies {
 }
 
 testDependencies {
+   compile ihmc.sourceSetProject("visualizers")
    compile group: 'junit', name: 'junit', version: '4.12'
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion

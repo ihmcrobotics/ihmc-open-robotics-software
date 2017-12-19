@@ -6,6 +6,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -21,7 +22,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    private final FramePose goalPose = new FramePose();
    private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(40);
 
-   private final FootstepPlanningRequestPacket.FootstepPlannerType plannerToUse = FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL;
+   private final FootstepPlannerType plannerToUse = FootstepPlannerType.PLANAR_REGION_BIPEDAL;
 
    public WalkToFiducialBehavior(CommunicationBridgeInterface communicationBridge)
    {

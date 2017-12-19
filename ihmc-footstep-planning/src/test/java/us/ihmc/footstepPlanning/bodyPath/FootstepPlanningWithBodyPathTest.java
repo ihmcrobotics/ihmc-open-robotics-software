@@ -29,7 +29,6 @@ import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
@@ -97,10 +96,8 @@ public class FootstepPlanningWithBodyPathTest
       startPos = PlanarRegionTools.projectPointToPlanes(startPos, new PlanarRegionsList(regions));
       goalPos = PlanarRegionTools.projectPointToPlanes(goalPos, new PlanarRegionsList(regions));
 
-      TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
-      JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters(), javaFXMultiColorMeshBuilder);
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
+      List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
       for (Point3DReadOnly waypoint3d : path)
       {
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));

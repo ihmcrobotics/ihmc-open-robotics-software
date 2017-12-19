@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,15 +25,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public double timeout;
    public boolean requestDebugPacket = false;
    public int planId = NO_PLAN_ID;
-
-   public enum FootstepPlannerType
-   {
-      PLANAR_REGION_BIPEDAL,
-      PLAN_THEN_SNAP,
-      A_STAR,
-      SIMPLE_BODY_PATH,
-      VIS_GRAPH_WITH_A_STAR
-   }
 
    public FootstepPlanningRequestPacket()
    {
