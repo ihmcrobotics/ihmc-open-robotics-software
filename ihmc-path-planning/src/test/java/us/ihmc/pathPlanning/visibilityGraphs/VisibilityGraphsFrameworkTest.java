@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -21,6 +27,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Ellipsoid3D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -39,14 +46,25 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest extends Application
 {
+   // Set that to MAX_VALUE when visualizing. Before pushing, it has to be reset to a reasonable value.
    private static final long TIMEOUT = Long.MAX_VALUE; // 30000; // 
+   // Threshold used to assert that the body path starts and ends where we asked it to.
    private static final double START_GOAL_EPSILON = 1.0e-2;
+
+   // This guy has to be static so it can be shutdown when the UI closes.
+   private static final ExecutorService executorService = Executors.newCachedThreadPool();
+
+   // Whether to start the UI or not.
    private static boolean VISUALIZE = true;
+   // For enabling helpful prints.
    private static boolean DEBUG = true;
 
+   // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
    private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
+   // Because JavaFX will create a fresh new instance of VisibilityGraphsFrameworkTest, the ui has to be static so there is only one instance and we can refer to it in the test part.
    private static VisibilityGraphsTestVisualizer ui;
 
+   // Default UI parameters which should be changeable on the fly
    private static final boolean showBodyPath = true;
    private static final boolean showClusterRawPoints = false;
    private static final boolean showClusterNavigableExtrusions = false;
@@ -54,6 +72,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final boolean showRegionInnerConnections = false;
    private static final boolean showRegionInterConnections = false;
 
+   // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
    private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
    private static final double walkerMarchingSpeed = 0.05;
@@ -68,6 +87,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       {
          messager.startMessager();
 
+         // Did not find a better solution for starting JavaFX and still be able to move on.
          new Thread(() -> launch()).start();
 
          while (ui == null)
@@ -79,8 +99,6 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusions);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowLocalGraphs, showRegionInnerConnections);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterConnections, showRegionInterConnections);
-         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
-         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
    }
 
@@ -94,10 +112,26 @@ public class VisibilityGraphsFrameworkTest extends Application
    @Test(timeout = TIMEOUT)
    public void testSolutionForEachDatasetWithoutOcclusion() throws Exception
    {
-      runAssertionsOnAllDatasets();
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+      }
+      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
    }
 
-   private void runAssertionsOnAllDatasets() throws Exception
+   @Test(timeout = TIMEOUT)
+   public void testSolutionForEachDatasetNoOcclusionSimulateDynamicReplanning() throws Exception
+   {
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
+      }
+      runAssertionsOnAllDatasets(dataset -> runAssertionsNoOcclusionSimulateDynamicReplanning(dataset, 0.20, 1000));
+   }
+
+   private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner) throws Exception
    {
       List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(getClass());
 
@@ -107,6 +141,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       }
 
       AtomicReference<Boolean> previousDatasetRequested = null;
+      AtomicReference<Boolean> reloadDatasetRequested = null;
       AtomicReference<Boolean> nextDatasetRequested = null;
       AtomicReference<String> requestedDatasetPathReference = null;
 
@@ -116,6 +151,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
 
          nextDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.NextDatasetRequest, false);
+         reloadDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
          previousDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
          requestedDatasetPathReference = messager.createInput(UIVisibilityGraphsTopics.CurrentDatasetPath, null);
       }
@@ -137,7 +173,12 @@ public class VisibilityGraphsFrameworkTest extends Application
             messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getDatasetName());
          }
 
-         String errorMessagesForCurrentFile = runAssertionsOnDataset(dataset);
+         if (DEBUG)
+         {
+            PrintTools.info("Processing file: " + dataset.getDatasetName());
+         }
+
+         String errorMessagesForCurrentFile = datasetTestRunner.testDataset(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
@@ -145,9 +186,10 @@ public class VisibilityGraphsFrameworkTest extends Application
          if (VISUALIZE)
          {
             messager.submitMessage(UIVisibilityGraphsTopics.NextDatasetRequest, false);
+            messager.submitMessage(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
             messager.submitMessage(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
 
-            while (!nextDatasetRequested.get() && !previousDatasetRequested.get() && dataset.getDatasetName().equals(requestedDatasetPathReference.get()))
+            while (!nextDatasetRequested.get() && !reloadDatasetRequested.get() && !previousDatasetRequested.get() && dataset.getDatasetName().equals(requestedDatasetPathReference.get()))
             {
                if (!messager.isMessagerOpen())
                   return; // The ui has been closed
@@ -155,7 +197,11 @@ public class VisibilityGraphsFrameworkTest extends Application
                ThreadTools.sleep(200);
             }
 
-            if (nextDatasetRequested.get() && currentDatasetIndex < allDatasets.size() - 1)
+            if (reloadDatasetRequested.get())
+            {
+               continue;
+            }
+            else if (nextDatasetRequested.get() && currentDatasetIndex < allDatasets.size() - 1)
             {
                currentDatasetIndex++;
                dataset = allDatasets.get(currentDatasetIndex);
@@ -200,31 +246,139 @@ public class VisibilityGraphsFrameworkTest extends Application
                         errorMessages.isEmpty());
    }
 
-   private String runAssertionsOnDataset(VisibilityGraphsUnitTestDataset dataset)
+   private String runAssertionsWithoutOcclusion(VisibilityGraphsUnitTestDataset dataset)
    {
-      if (DEBUG)
-      {
-         PrintTools.info("Processing file: " + dataset.getDatasetName());
-      }
+      String datasetName = dataset.getDatasetName();
 
-      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
-      NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
+
+      Point3D start = dataset.getStart();
+      Point3D goal = dataset.getGoal();
 
       if (VISUALIZE)
       {
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
-         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());
-         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, dataset.getGoal());
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, start);
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);
       }
 
+      String errorMessages = calculateAndTestVizGraphsBodyPath(datasetName, start, goal, planarRegionsList);
+
+      return addPrefixToErrorMessages(datasetName, errorMessages);
+   }
+
+   private String runAssertionsNoOcclusionSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed, int maxSolveTimeInMilliseconds)
+   {
+      String datasetName = dataset.getDatasetName();
+
+      PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
+
+      Point3D start = dataset.getStart();
+      Point3D goal = dataset.getGoal();
+      AtomicReference<Boolean> stopWalkerRequest = null;
+
+      if (VISUALIZE)
+      {
+         stopWalkerRequest = messager.createInput(UIVisibilityGraphsTopics.StopWalker, false);
+         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, start);
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);
+      }
+
+      String errorMessages = "";
+
+      List<Point3DReadOnly> latestBodyPath = new ArrayList<>();
+
+      Point3D walkerPosition = new Point3D(start);
+
+      while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
+      {
+         Future<String> task = executorService.submit(() -> calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, planarRegionsList,
+                                                                                              latestBodyPath));
+
+         try
+         {
+            errorMessages += task.get(maxSolveTimeInMilliseconds, TimeUnit.MILLISECONDS);
+         }
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+         catch (ExecutionException e)
+         {
+            e.getCause().printStackTrace();
+         }
+         catch (TimeoutException e)
+         {
+            // The VizGraphs took too long.
+            errorMessages += fail(datasetName, "Took too long to compute a new body path.");
+         }
+
+         if (!errorMessages.isEmpty())
+            return addPrefixToErrorMessages(datasetName, errorMessages);
+
+         if (VISUALIZE)
+         {
+            messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, new Point3D(walkerPosition));
+         }
+
+         if (stopWalkerRequest != null && stopWalkerRequest.get())
+         {
+            messager.submitMessage(UIVisibilityGraphsTopics.StopWalker, false);
+            break;
+         }
+
+         walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath));
+      }
+
+      return addPrefixToErrorMessages(datasetName, errorMessages);
+   }
+
+   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
+   {
+      Point3D newPosition = new Point3D();
+
+      for (int i = 0; i < bodyPath.size() - 1; i++)
+      {
+         LineSegment3D segment = new LineSegment3D(bodyPath.get(i), bodyPath.get(i + 1));
+
+         if (segment.distance(startingPosition) < 1.0e-4)
+         {
+            Vector3D segmentDirection = segment.getDirection(true);
+            newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
+
+            if (segment.distance(newPosition) < 1.0e-4)
+            {
+               return newPosition;
+            }
+            else
+            {
+               distanceToTravel -= startingPosition.distance(segment.getSecondEndpoint());
+               startingPosition = new Point3D(segment.getSecondEndpoint());
+            }
+         }
+      }
+
+      return new Point3D(startingPosition);
+   }
+
+   private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList)
+   {
+      return calculateAndTestVizGraphsBodyPath(datasetName, start, goal, planarRegionsList, null);
+   }
+
+   private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
+                                                    List<Point3DReadOnly> bodyPathToPack)
+   {
+      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
+      NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = null;
 
       try
       {
-         path = manager.calculateBodyPath(dataset.getStart(), dataset.getGoal());
+         path = manager.calculateBodyPath(start, goal);
       }
       catch (Exception e)
       {
@@ -242,10 +396,16 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getConnectionPoints());
       }
 
-      String errorMessages = basicBodyPathSanityChecks(dataset, path);
+      String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
 
       if (!errorMessages.isEmpty())
-         return addPrefixToErrorMessages(dataset, errorMessages); // Cannot test anything else when path does not pass the basic sanity checks.
+         return errorMessages; // Cannot test anything else when path does not pass the basic sanity checks.
+
+      if (bodyPathToPack != null)
+      {
+         bodyPathToPack.clear();
+         bodyPathToPack.addAll(path);
+      }
 
       // "Walk" along the body path and assert that the walker does not go through any region.
       int currentSegmentIndex = 0;
@@ -262,7 +422,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          walkerBody3D.addZ(walkerOffsetHeight);
          walkerShape.setPosition(walkerBody3D);
 
-         errorMessages += walkerCollisionChecks(dataset.getDatasetName(), walkerShape, planarRegionsList, collisions);
+         errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions);
 
          Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
          Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1);
@@ -282,7 +442,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerCollisionLocations, collisions);
       }
 
-      return addPrefixToErrorMessages(dataset, errorMessages);
+      return errorMessages;
    }
 
    private String walkerCollisionChecks(String datasetName, Ellipsoid3D walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack)
@@ -344,11 +504,6 @@ public class VisibilityGraphsFrameworkTest extends Application
       return errorMessages;
    }
 
-   private String basicBodyPathSanityChecks(VisibilityGraphsUnitTestDataset dataset, List<? extends Point3DReadOnly> path)
-   {
-      return basicBodyPathSanityChecks(dataset.getDatasetName(), dataset.getStart(), dataset.getGoal(), path);
-   }
-
    private String basicBodyPathSanityChecks(String datasetName, Point3DReadOnly start, Point3DReadOnly goal, List<? extends Point3DReadOnly> path)
    {
       String errorMessages = "";
@@ -371,11 +526,10 @@ public class VisibilityGraphsFrameworkTest extends Application
       return errorMessages;
    }
 
-   private static String addPrefixToErrorMessages(VisibilityGraphsUnitTestDataset dataset, String errorMessages)
+   private static String addPrefixToErrorMessages(String datasetName, String errorMessages)
    {
-
       if (!errorMessages.isEmpty())
-         return "\n" + dataset.getDatasetName() + errorMessages;
+         return "\n" + datasetName + errorMessages;
       else
          return "";
    }
@@ -406,5 +560,11 @@ public class VisibilityGraphsFrameworkTest extends Application
    public void stop() throws Exception
    {
       ui.stop();
+      executorService.shutdownNow();
+   }
+
+   private static interface DatasetTestRunner
+   {
+      String testDataset(VisibilityGraphsUnitTestDataset dataset);
    }
 }
