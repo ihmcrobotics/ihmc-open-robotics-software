@@ -53,8 +53,6 @@ public class ContactableCylinderRobot extends ContactableRobot
       
       afterRootJointFrame = new ReferenceFrame("rootJointFrame", worldFrame)
       {
-         private static final long serialVersionUID = -5359633108342066963L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

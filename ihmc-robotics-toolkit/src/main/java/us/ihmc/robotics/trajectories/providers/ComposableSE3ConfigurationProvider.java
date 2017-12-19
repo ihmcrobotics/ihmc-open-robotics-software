@@ -1,7 +1,7 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 
 /**
  * @author twan
@@ -18,7 +18,7 @@ public class ComposableSE3ConfigurationProvider implements SE3ConfigurationProvi
       this.orientationProvider = orientationProvider;
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationProvider.getOrientation(orientationToPack);
    }

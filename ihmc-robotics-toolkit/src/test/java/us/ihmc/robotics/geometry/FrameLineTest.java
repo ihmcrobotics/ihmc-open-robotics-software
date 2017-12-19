@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -150,7 +151,7 @@ public class FrameLineTest
 
    private ReferenceFrame createRandomFrame(ReferenceFrame parentFrame, Random random)
    {
-      FrameOrientation orientation = new FrameOrientation(parentFrame, createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0),
+      FrameQuaternion orientation = new FrameQuaternion(parentFrame, createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0),
             createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0), createRandomDouble(random, -Math.PI / 3.0, Math.PI / 3.0));
 
       OrientationFrame frame = new OrientationFrame(orientation);

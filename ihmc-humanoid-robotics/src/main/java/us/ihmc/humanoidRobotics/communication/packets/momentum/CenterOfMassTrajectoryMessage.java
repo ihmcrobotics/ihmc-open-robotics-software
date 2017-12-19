@@ -30,8 +30,8 @@ public class CenterOfMassTrajectoryMessage extends QueueableMessage<CenterOfMass
       for (int i = 0; i < random.nextInt(10) + 1; i++)
       {
          TrajectoryPoint3D point = new TrajectoryPoint3D();
-         point.setPosition(EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
-         point.setVelocity(EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         point.setPosition(EuclidCoreRandomTools.nextPoint3D(random, 1.0));
+         point.setVelocity(EuclidCoreRandomTools.nextPoint3D(random, 1.0));
          point.setTime(time);
          comTrajectory.add(point);
          time += random.nextDouble();

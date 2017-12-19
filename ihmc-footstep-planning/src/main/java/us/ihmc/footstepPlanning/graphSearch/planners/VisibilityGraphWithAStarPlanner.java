@@ -15,6 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -195,7 +196,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
          try
          {
-            List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
 
             if (path == null || path.size() < 2)
             {
@@ -206,7 +207,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
                return yoResult.getEnumValue();
             }
 
-            for (Point3D waypoint3d : path)
+            for (Point3DReadOnly waypoint3d : path)
             {
                waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
             }
@@ -295,6 +296,25 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
             bodyPathPoints.get(i).setToNaN();
          }
       }
+   }
+
+   public Point3D[][] getNavigableRegions()
+   {
+      return navigableRegionsManager.getNavigableExtrusions();
+   }
+
+   public List<Point2D> getBodyPathWaypoints()
+   {
+      return waypoints;
+   }
+
+   public Pose2D getLowLevelPlannerGoal()
+   {
+      Pose2D goalPose2d = new Pose2D();
+      double pathLength = bodyPath.computePathLength(0.0);
+      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
+      bodyPath.getPointAlongPath(alpha, goalPose2d);
+      return goalPose2d;
    }
 
    public BodyPathPlanner getBodyPathPlanner()

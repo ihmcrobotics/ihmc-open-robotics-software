@@ -13,18 +13,17 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.FootstepAngularMomentumPredictor;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCoPTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -33,7 +32,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
@@ -78,7 +76,7 @@ public class FootstepAngularMomentumPredictorTest
    private final YoDouble omega = new YoDouble("AngularMomentumTestOmega", testRegistry); // Taking the for Atlas
    private final FramePoint3D currentLocation = new FramePoint3D();
    private final FrameVector3D walkingDirectionUnitVector = new FrameVector3D();
-   private final FrameOrientation robotOrientation = new FrameOrientation();
+   private final FrameQuaternion robotOrientation = new FrameQuaternion();
    private final QuaternionBasedTransform rightTransform = new QuaternionBasedTransform(new Quaternion(0.0, 0.0, Math.sin(-Math.PI / 4.0),
                                                                                                        Math.cos(-Math.PI / 4.0)),
                                                                                         new FramePoint3D());

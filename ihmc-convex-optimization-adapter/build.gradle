@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.5"
+      classpath "us.ihmc:ihmc-build:0.11.3"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -23,22 +23,22 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.26'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
    compile group: 'com.github.vincentfk', name: 'joptimizer', version: '3.3.0'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
    compile group: 'org.ojalgo', name: 'ojalgo', version: '40.0.0'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
-   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
+   compile group: "junit", name: "junit", version: "4.12"
    compile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
 }

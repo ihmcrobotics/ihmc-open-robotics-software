@@ -48,4 +48,12 @@ public class AtlasSwingTrajectoryTest extends DRCSwingTrajectoryTest
    {
       super.testReallyHighFootstep();
    }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 36.0)
+   @Test(timeout = 300000)
+   public void testSelfCollisionAvoidance() throws SimulationExceededMaximumTimeException
+   {
+      super.testSelfCollisionAvoidance();
+   }
 }

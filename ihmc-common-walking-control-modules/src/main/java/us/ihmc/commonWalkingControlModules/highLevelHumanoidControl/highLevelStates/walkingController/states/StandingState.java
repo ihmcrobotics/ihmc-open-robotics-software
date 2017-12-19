@@ -9,8 +9,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

@@ -15,7 +15,6 @@ import javax.swing.JScrollPane;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.MomentumRecoveryControlModule;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;

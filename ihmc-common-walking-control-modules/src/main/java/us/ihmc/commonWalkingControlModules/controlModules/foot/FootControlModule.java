@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -40,7 +41,19 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN
+      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN;
+
+      public boolean isLoaded()
+      {
+         switch (this)
+         {
+         case FULL:
+         case TOES:
+            return true;
+         default:
+            return false;
+         }
+      }
    }
 
    private static final double coefficientOfFriction = 0.8;
@@ -168,16 +181,8 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
-   public void setWeights(double highFootWeight, double defaultFootWeight)
-   {
-      swingState.setWeight(defaultFootWeight);
-      moveViaWaypointsState.setWeight(defaultFootWeight);
-      touchdownState.setWeight(defaultFootWeight);
-      onToesState.setWeight(highFootWeight);
-      supportState.setWeight(highFootWeight);
-   }
-
-   public void setWeights(Vector3D highAngularFootWeight, Vector3D highLinearFootWeight, Vector3D defaultAngularFootWeight, Vector3D defaultLinearFootWeight)
+   public void setWeights(Vector3DReadOnly highAngularFootWeight, Vector3DReadOnly highLinearFootWeight, Vector3DReadOnly defaultAngularFootWeight,
+                          Vector3DReadOnly defaultLinearFootWeight)
    {
       swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);

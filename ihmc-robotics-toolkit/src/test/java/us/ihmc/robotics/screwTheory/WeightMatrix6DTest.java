@@ -117,7 +117,7 @@ public class WeightMatrix6DTest
          assertTrue(Double.isNaN(angularPart.getYAxisWeight()));
          assertTrue(Double.isNaN(angularPart.getZAxisWeight()));
 
-         ReferenceFrame randomFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
+         ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
          weightMatrix6D.setWeightFrame(randomFrame);
          assertTrue(randomFrame == weightMatrix6D.getLinearWeightFrame());
          assertTrue(randomFrame == weightMatrix6D.getAngularWeightFrame());
@@ -172,13 +172,13 @@ public class WeightMatrix6DTest
       WeightMatrix3D angularPart3D = new WeightMatrix3D();
       WeightMatrix3D linearPart3D = new WeightMatrix3D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -266,13 +266,13 @@ public class WeightMatrix6DTest
       Random random = new Random(456465L);
       WeightMatrix6D weightMatrix6D = new WeightMatrix6D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)

@@ -3,24 +3,16 @@ package us.ihmc.wholeBodyController.diagnostics;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -30,9 +22,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JointTorqueOffsetEstimatorController extends HighLevelBehavior implements RobotController, JointTorqueOffsetEstimator
+public class JointTorqueOffsetEstimatorController implements RobotController, JointTorqueOffsetEstimator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -62,20 +58,21 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates;
 
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final YoBoolean hasReachedMaximumTorqueOffset = new YoBoolean("hasReachedMaximumTorqueOffset", registry);
 
-   public JointTorqueOffsetEstimatorController(HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
-   {
-      super(HighLevelState.CALIBRATION);
+   private final YoDouble currentTime;
 
+   public JointTorqueOffsetEstimatorController(WholeBodySetpointParameters wholeBodySetpointParameters,
+                                               HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
+   {
       this.bipedSupportPolygons = highLevelControllerToolbox.getBipedSupportPolygons();
       this.footContactStates = highLevelControllerToolbox.getFootContactStates();
       this.controllerToolbox = highLevelControllerToolbox;
       this.torqueOffsetPrinter = torqueOffsetPrinter;
       this.fullRobotModel = highLevelControllerToolbox.getFullRobotModel();
+      this.currentTime = highLevelControllerToolbox.getYoTime();
 
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
@@ -104,67 +101,11 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          pdControllers.put(joint, controller);
 
          YoDouble desiredPosition = new YoDouble("q_d_calib_" + jointName, registry);
+         desiredPosition.set(wholeBodySetpointParameters.getSetpoint(jointName));
          desiredPositions.put(joint, desiredPosition);
       }
 
-      initializeDesiredPositions();
       setDefaultPDControllerGains();
-   }
-
-   private final AtomicBoolean enableEstimationAtomic = new AtomicBoolean(false);
-   private final AtomicBoolean disableEstimationAtomic = new AtomicBoolean(false);
-
-   @Override
-   public void enableJointTorqueOffsetEstimationAtomic(boolean enable)
-   {
-      if (enable)
-         enableEstimationAtomic.set(true);
-      else
-         disableEstimationAtomic.set(true);
-   }
-
-   private void initializeDesiredPositions()
-   {
-      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
-      humanoidJointPoseList.createCalibrationPose();
-      SideDependentList<ArrayList<OneDoFJoint>> armJointList = humanoidJointPoseList.getArmJoints(fullRobotModel);
-      SideDependentList<double[]> armJointAngleList = humanoidJointPoseList.getArmJointAngles();
-
-      SideDependentList<ArrayList<OneDoFJoint>> legJointList = humanoidJointPoseList.getLegJoints(fullRobotModel);
-      SideDependentList<double[]> legJointAngleList = humanoidJointPoseList.getLegJointAngles();
-
-      ArrayList<OneDoFJoint> spineJoints = humanoidJointPoseList.getSpineJoints(fullRobotModel);
-      double[] spineJointAngles = humanoidJointPoseList.getSpineJointAngles();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ArrayList<OneDoFJoint> armJoints = armJointList.get(robotSide);
-         double[] armJointAngles = armJointAngleList.get(robotSide);
-
-         for (int i = 0; i < armJoints.size(); i++)
-         {
-            OneDoFJoint armJoint = armJoints.get(i);
-            if (hasTorqueOffsetForJoint(armJoint))
-               desiredPositions.get(armJoint).set(armJointAngles[i]);
-         }
-
-         ArrayList<OneDoFJoint> legJoints = legJointList.get(robotSide);
-         double[] legJointAngles = legJointAngleList.get(robotSide);
-
-         for (int i = 0; i < legJoints.size(); i++)
-         {
-            OneDoFJoint legJoint = legJoints.get(i);
-            if (hasTorqueOffsetForJoint(legJoint))
-               desiredPositions.get(legJoint).set(legJointAngles[i]);
-         }
-      }
-
-      for (int i = 0; i < spineJoints.size(); i++)
-      {
-         OneDoFJoint spineJoint = spineJoints.get(i);
-         if (hasTorqueOffsetForJoint(spineJoint))
-            desiredPositions.get(spineJoint).set(spineJointAngles[i]);
-      }
    }
 
    public void attachJointTorqueOffsetProcessor(JointTorqueOffsetProcessor jointTorqueOffsetProcessor)
@@ -181,11 +122,6 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    @Override
    public void doControl()
    {
-      if (enableEstimationAtomic.getAndSet(false))
-         estimateTorqueOffset.set(true);
-      if (disableEstimationAtomic.getAndSet(false))
-         estimateTorqueOffset.set(false);
-
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
       controllerToolbox.update();
 
@@ -201,11 +137,10 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
       if (exportJointTorqueOffsetsToFile.getBooleanValue() && torqueOffsetPrinter != null)
       {
          exportJointTorqueOffsetsToFile.set(false);
-         torqueOffsetPrinter.printTorqueOffsets(this);
+         exportTorqueOffsets();
       }
 
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(oneDoFJoints);
-      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    public void updateDiagnosticsWhenHangingHelpers()
@@ -224,7 +159,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
       {
          OneDoFJoint joint = oneDoFJoints.get(i);
          if (hasTorqueOffsetForJoint(joint))
-         updatePDController(joint, getTimeInCurrentState());
+            updatePDController(joint, currentTime.getDoubleValue());
       }
    }
 
@@ -240,7 +175,8 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
       if (diagnosticsWhenHangingHelper != null)
       {
          tau = diagnosticsWhenHangingHelper.getTorqueToApply(tau, estimateTorqueOffset.getBooleanValue(), maximumTorqueOffset.getDoubleValue());
-         if (hasReachedMaximumTorqueOffset.getBooleanValue() && Math.abs(diagnosticsWhenHangingHelper.getTorqueOffset()) == maximumTorqueOffset.getDoubleValue())
+         if (hasReachedMaximumTorqueOffset.getBooleanValue()
+               && Math.abs(diagnosticsWhenHangingHelper.getTorqueOffset()) == maximumTorqueOffset.getDoubleValue())
          {
             PrintTools.warn(this, "Reached maximum torque for at least one joint.");
             hasReachedMaximumTorqueOffset.set(true);
@@ -350,25 +286,17 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setProportionalGain(16.0);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setDerivativeGain(1.0);
-
       }
    }
 
-   @Override
-   public void doAction()
+   public void estimateTorqueOffset(boolean estimate)
    {
-      doControl();
+      estimateTorqueOffset.set(estimate);
    }
 
-   @Override
-   public void doTransitionIntoAction()
+   public void exportTorqueOffsets()
    {
-      initialize();
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
+      torqueOffsetPrinter.printTorqueOffsets(this);
    }
 
    public void transferTorqueOffsetsToOutputWriter()
@@ -389,15 +317,9 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
       }
    }
 
-   @Override
-   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
-   }
-
-   @Override
-   public ControllerCoreCommand getControllerCoreCommand()
-   {
-      return controllerCoreCommand;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    @Override
@@ -441,6 +363,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    @Override
    public String getDescription()
    {
-      return "Controller for estimating the joint torque offsets. It is based on " + DiagnosticsWhenHangingController.class.getSimpleName() + ".";
+      return "Controller for estimating the joint torque offsets. It is based on " + DiagnosticsWhenHangingControllerState.class.getSimpleName() + ".";
    }
+
 }

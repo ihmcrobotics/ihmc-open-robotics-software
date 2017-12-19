@@ -1,0 +1,301 @@
+package us.ihmc.pathPlanning.visibilityGraphs.tools;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
+import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+public class VisibilityGraphsIOTools
+{
+   public static final String DATA_FOLDER_NAME = "us/ihmc/pathPlanning/visibilityGraphs/data";
+   private static final String VIZ_GRAPHS_DATA_FOLDER_SUFFIX = "VizGraphs";
+   public static final String INPUTS_PARAMETERS_FILENAME = "VizGraphsInputs.txt";
+
+   private static final String PATH_SIZE_FIELD_OPEN = "<PathSize,";
+   private static final String PATH_SIZE_FIELD_END = ",PathSize>";
+
+   private static final String START_FIELD_OPEN = "<Start,";
+   private static final String START_FIELD_CLOSE = ",Start>";
+
+   private static final String GOAL_FIELD_OPEN = "<Goal,";
+   private static final String GOAL_FIELD_END = ",Goal>";
+
+   public static boolean exportDataset(Path containingFolder, String datasetName, PlanarRegionsList planarRegionsList, Point3DReadOnly start,
+                                       Point3DReadOnly goal)
+   {
+      File datasetFolder = new File(containingFolder + File.separator + datasetName);
+      if (datasetFolder.exists())
+         return false;
+      boolean success = datasetFolder.mkdir();
+      if (!success)
+         return false;
+
+      Path planarRegionsFolder = Paths.get(datasetFolder.getPath() + File.separator + PlanarRegionFileTools.createDefaultTimeStampedFolderName());
+      success = PlanarRegionFileTools.exportPlanarRegionData(planarRegionsFolder, planarRegionsList);
+      if (!success)
+         return false;
+
+      success = exportParameters(datasetFolder, start, goal);
+      if (!success)
+         return false;
+
+      return true;
+   }
+
+   private static boolean exportParameters(File containingFolder, Point3DReadOnly start, Point3DReadOnly goal)
+   {
+      if (containingFolder == null || !containingFolder.exists())
+      {
+         PrintTools.error("The given folder does not exist or is null.");
+         return false;
+      }
+
+      if (start == null || goal == null)
+      {
+         PrintTools.error("Must export start AND goal.");
+         return false;
+      }
+
+      File parametersFile = new File(containingFolder.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME);
+      writeField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, () -> getPoint3DString(start));
+      writeField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, () -> getPoint3DString(goal));
+
+      return true;
+   }
+
+   /**
+    * Generates a default timestamped name that can be used to generate automated and unique
+    * folders.
+    * 
+    * @return a {@code String} of the form: "20171201_163422_VizGraphs".
+    */
+   public static String createDefaultTimeStampedDatasetFolderName()
+   {
+      return PlanarRegionFileTools.getDate() + "_" + VIZ_GRAPHS_DATA_FOLDER_SUFFIX;
+   }
+
+   public static boolean isWindows()
+   {
+      String OS = System.getProperty("os.name").toLowerCase();
+      return (OS.contains("win"));
+   }
+
+   private static String getPoint3DString(Point3DReadOnly point3D)
+   {
+      return EuclidCoreIOTools.getStringOf("", "", ",", point3D.getX(), point3D.getY(), point3D.getZ());
+   }
+
+   private static Point3D parsePoint3D(String stringPoint3D)
+   {
+      double x = Double.parseDouble(stringPoint3D.substring(0, stringPoint3D.indexOf(",")));
+      stringPoint3D = stringPoint3D.substring(stringPoint3D.indexOf(",") + 1);
+      double y = Double.parseDouble(stringPoint3D.substring(0, stringPoint3D.indexOf(",")));
+      stringPoint3D = stringPoint3D.substring(stringPoint3D.indexOf(",") + 1);
+      double z = Double.parseDouble(stringPoint3D.substring(0));
+
+      return new Point3D(x, y, z);
+   }
+
+   private static <T> T parseField(File file, String fieldOpen, String fieldClose, Parser<T> parser)
+   {
+      BufferedReader br = null;
+      FileReader fr = null;
+
+      try
+      {
+         fr = new FileReader(file);
+         br = new BufferedReader(fr);
+
+         String sCurrentLine;
+
+         while ((sCurrentLine = br.readLine()) != null)
+         {
+            if (sCurrentLine.contains(fieldOpen) && sCurrentLine.contains(fieldClose))
+            {
+               return parser.parse(sCurrentLine.substring(fieldOpen.length(), sCurrentLine.indexOf(fieldClose)));
+            }
+         }
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+
+      } finally
+      {
+         try
+         {
+            if (br != null)
+               br.close();
+
+            if (fr != null)
+               fr.close();
+         }
+         catch (IOException ex)
+         {
+            ex.printStackTrace();
+         }
+      }
+      return null;
+   }
+
+   private static void writeField(File file, String fieldOpen, String fieldClose, Writer writer)
+   {
+      BufferedWriter bw = null;
+
+      try
+      {
+         if (!file.exists())
+            file.createNewFile();
+
+         FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+         bw = new BufferedWriter(fw);
+
+         bw.write(fieldOpen + writer.getStringToWrite() + fieldClose);
+         bw.newLine();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      } finally
+      {
+         try
+         {
+            if (bw != null)
+               bw.close();
+         }
+         catch (IOException ex)
+         {
+            ex.printStackTrace();
+         }
+      }
+   }
+
+   private static interface Parser<T>
+   {
+      T parse(String string);
+   }
+
+   private static interface Writer
+   {
+      String getStringToWrite();
+   }
+
+   public static File getDataResource(Class<?> loadingClass)
+   {
+      String pathString = loadingClass.getClassLoader().getResource(DATA_FOLDER_NAME).getPath();
+      if (isWindows())
+         pathString = pathString.substring(1, pathString.length());
+
+      return Paths.get(pathString).toFile();
+   }
+
+   public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets(Class<?> loadingClass)
+   {
+      File mainDataFolder = getDataResource(loadingClass);
+
+      return Arrays.stream(mainDataFolder.listFiles()).map(VisibilityGraphsIOTools::loadDataset).collect(Collectors.toList());
+   }
+
+   public static VisibilityGraphsUnitTestDataset loadDataset(File datasetFolder)
+   {
+      if (!datasetFolder.isDirectory())
+      {
+         throw new RuntimeException("The data folder should only contain valid datasets for visibility graphs. Bad file: " + datasetFolder);
+      }
+
+      return new VisibilityGraphsUnitTestDataset(datasetFolder);
+   }
+
+   public static class VisibilityGraphsUnitTestDataset
+   {
+      private final File file;
+
+      private final int expectedPathSize;
+      private final Point3D start;
+      private final Point3D goal;
+      private final PlanarRegionsList planarRegionsList;
+
+      private VisibilityGraphsUnitTestDataset(File file)
+      {
+         this.file = file;
+         String expectedParametersFileName = file.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME;
+
+         List<File> children = Arrays.asList(file.listFiles());
+         File parametersFile = children.stream().filter(child -> child.getName().endsWith(INPUTS_PARAMETERS_FILENAME)).findFirst().orElse(null);
+
+         if (parametersFile == null || !parametersFile.getAbsolutePath().equals(expectedParametersFileName))
+            throw new RuntimeException("Could not find the parmeter file: " + expectedParametersFileName);
+
+         File planarRegionFile = children.stream().filter(child -> child.isDirectory()).findFirst().orElse(null);
+
+         if (planarRegionFile == null)
+            throw new RuntimeException("Could not find the planar region directory.");
+
+         expectedPathSize = parsePathSize(parametersFile);
+         start = parseField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
+         goal = parseField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
+         planarRegionsList = PlanarRegionDataImporter.importPlanRegionData(planarRegionFile);
+
+         if (start == null)
+            throw new RuntimeException("Could not load the start position. Data file: " + parametersFile);
+         if (goal == null)
+            throw new RuntimeException("Could not load the goal position. Data file: " + parametersFile);
+         if (planarRegionsList == null)
+            throw new RuntimeException("Could not load the planar regions. Data file: " + planarRegionFile);
+      }
+
+      private static int parsePathSize(File file)
+      {
+         Integer pathSize = parseField(file, PATH_SIZE_FIELD_OPEN, PATH_SIZE_FIELD_END, Integer::valueOf);
+         if (pathSize == null)
+            return -1;
+         else
+            return pathSize.intValue();
+      }
+
+      public String getDatasetName()
+      {
+         return file.getName();
+      }
+
+      public Point3D getStart()
+      {
+         return new Point3D(start);
+      }
+
+      public Point3D getGoal()
+      {
+         return new Point3D(goal);
+      }
+
+      public PlanarRegionsList getPlanarRegionsList()
+      {
+         return planarRegionsList;
+      }
+
+      public boolean hasExpectedPathSize()
+      {
+         return expectedPathSize > 0;
+      }
+
+      public int getExpectedPathSize()
+      {
+         return expectedPathSize;
+      }
+   }
+}

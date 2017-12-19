@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -13,6 +14,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
+import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -132,7 +135,7 @@ public class MotionQPInputCalculator
 
       privilegedConfigurationHandler.computePrivilegedJointAccelerations();
 
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       motionQPInputToPack.setUseWeightScalar(false);
 
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
@@ -168,7 +171,7 @@ public class MotionQPInputCalculator
 
       privilegedConfigurationHandler.computePrivilegedJointVelocities();
 
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       motionQPInputToPack.setUseWeightScalar(false);
 
       DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
@@ -218,7 +221,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
       // If the task is setup as a hard constraint, there is no need for a weight matrix.
       if (!commandToConvert.isHardConstraint())
       {
@@ -227,7 +230,7 @@ public class MotionQPInputCalculator
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-         CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
@@ -335,17 +338,18 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
+      ConstraintType constraintType = commandToConvert.getConstraintType();
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(constraintType);
       // If the task is setup as a hard constraint, there is no need for a weight matrix.
-      if (!commandToConvert.isHardConstraint())
+      if (constraintType == ConstraintType.OBJECTIVE)
       {
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-         CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+         DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
@@ -441,13 +445,13 @@ public class MotionQPInputCalculator
 
       motionQPInputToPack.reshape(taskSize);
       motionQPInputToPack.setUseWeightScalar(false);
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
@@ -485,13 +489,13 @@ public class MotionQPInputCalculator
 
       motionQPInputToPack.reshape(taskSize);
       motionQPInputToPack.setUseWeightScalar(false);
-      motionQPInputToPack.setIsMotionConstraint(false);
+      motionQPInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      CommonOps.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      DiagonalMatrixTools.postMult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, motionQPInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
@@ -525,7 +529,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY :ConstraintType.OBJECTIVE);
       motionQPInputToPack.taskJacobian.zero();
       motionQPInputToPack.taskWeightMatrix.zero();
       motionQPInputToPack.setUseWeightScalar(false);
@@ -565,7 +569,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY :ConstraintType.OBJECTIVE);
       motionQPInputToPack.taskJacobian.zero();
       motionQPInputToPack.taskWeightMatrix.zero();
       motionQPInputToPack.setUseWeightScalar(false);
@@ -595,7 +599,7 @@ public class MotionQPInputCalculator
    private void recordTaskJacobian(DenseMatrix64F taskJacobian)
    {
       int taskSize = taskJacobian.getNumRows();
-      allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs);
+      allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs, true);
       CommonOps.insert(taskJacobian, allTaskJacobian, allTaskJacobian.getNumRows() - taskSize, 0);
    }
 

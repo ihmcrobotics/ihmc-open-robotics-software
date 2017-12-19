@@ -5,7 +5,7 @@ import java.util.Map;
 
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotController.RobotController;

@@ -3,11 +3,11 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -116,7 +116,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientation.set(constantPose.getYaw(), constantPose.getPitch(), constantPose.getRoll());
    }
 
-   public void setConstantPose(FramePoint3D constantPosition, FrameOrientation constantOrientation)
+   public void setConstantPose(FramePoint3D constantPosition, FrameQuaternion constantOrientation)
    {
       this.position.set(position);
       this.orientation.set(orientation);
@@ -159,7 +159,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAcceleration(accelerationToPack);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -174,7 +174,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       angularAccelerationToPack.setToZero(orientation.getReferenceFrame());
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);
@@ -202,11 +202,9 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

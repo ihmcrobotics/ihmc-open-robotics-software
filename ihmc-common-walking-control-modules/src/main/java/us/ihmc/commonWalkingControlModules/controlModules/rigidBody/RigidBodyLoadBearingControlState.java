@@ -9,10 +9,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -20,8 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -76,12 +77,18 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final RigidBodyTransform contactToJointTransform = new RigidBodyTransform();
 
    private final FramePoint3D desiredContactPosition = new FramePoint3D(worldFrame);
-   private final FrameOrientation desiredContactOrientation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion desiredContactOrientation = new FrameQuaternion(worldFrame);
    private final FramePoint3D currentContactPosition = new FramePoint3D(worldFrame);
-   private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion currentContactOrientation = new FrameQuaternion(worldFrame);
 
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
+
+   private PID3DGainsReadOnly taskspaceOrientationGains;
+   private PID3DGainsReadOnly taskspacePositionGains;
+
+   private Vector3DReadOnly taskspaceAngularWeight;
+   private Vector3DReadOnly taskspaceLinearWeight;
 
    public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, YoDouble yoTime,
          RigidBodyJointControlHelper jointControlHelper, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -132,15 +139,16 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       hideGraphics();
    }
 
-   public void setWeights(Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight)
+   public void setWeights(Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight)
    {
-      spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
+      this.taskspaceAngularWeight = taskspaceAngularWeight;
+      this.taskspaceLinearWeight = taskspaceLinearWeight;
    }
 
-   public void setGains(YoPID3DGains taskspaceOrientationGains, YoPID3DGains taskspacePositionGains)
+   public void setGains(PID3DGainsReadOnly taskspaceOrientationGains, PID3DGainsReadOnly taskspacePositionGains)
    {
-      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
-      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
+      this.taskspaceOrientationGains = taskspaceOrientationGains;
+      this.taskspacePositionGains = taskspacePositionGains;
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -186,6 +194,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(desiredContactPosition, zeroInWorld, zeroInWorld);
       spatialFeedbackControlCommand.set(desiredContactOrientation, zeroInWorld, zeroInWorld);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
+
+      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
+      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
+      spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
 
       if (hybridModeActive.getBooleanValue())
       {

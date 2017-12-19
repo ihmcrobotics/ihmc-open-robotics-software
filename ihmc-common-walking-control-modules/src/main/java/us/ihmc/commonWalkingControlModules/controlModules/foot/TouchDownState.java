@@ -15,14 +15,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameLineSegment;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -195,7 +195,7 @@ public class TouchDownState extends AbstractFootControlState
     * @param finalFootOrientation the final orientation trajectory desired, this should be the ground orientation. 
     */
    public void initialize(FramePose initialFootPose, FrameVector3D initialFootLinearVelocity,
-         FrameVector3D initialFootAngularVelocity, FrameOrientation finalFootOrientation)
+         FrameVector3D initialFootAngularVelocity, FrameQuaternion finalFootOrientation)
    {
       //We're only using the orientation here. If you want to switch to holding X and Y, be careful, as the swing tracks position in a weird frame, 
       //and once in contact, the desired position would need to be consistent with current desireds, but transformed to somewhere on the contact line
@@ -297,7 +297,7 @@ public class TouchDownState extends AbstractFootControlState
       feedbackControlCommand.setWeightForSolver(weight);
    }
 
-   public void setWeights(Vector3D angular, Vector3D linear)
+   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       feedbackControlCommand.setWeightsForSolver(angular, linear);
    }
@@ -334,6 +334,7 @@ public class TouchDownState extends AbstractFootControlState
          this.cop.setIncludingFrame(cop);
       }
 
+      @Override
       public int compare(YoContactPoint o1, YoContactPoint o2)
       {
          o1.getPosition2d(cp1);
@@ -360,6 +361,7 @@ public class TouchDownState extends AbstractFootControlState
       private final FramePoint3D cp1 = new FramePoint3D();
       private final FramePoint3D cp2 = new FramePoint3D();
       
+      @Override
       public int compare(YoContactPoint o1, YoContactPoint o2)
       {
          o1.getPosition(cp1);

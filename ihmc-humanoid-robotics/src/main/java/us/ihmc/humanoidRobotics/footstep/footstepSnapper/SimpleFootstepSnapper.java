@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -14,7 +15,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -76,7 +76,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
 
       //set to the sole pose
       FramePoint3D position = new FramePoint3D();
-      FrameOrientation orientation = new FrameOrientation();
+      FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
       originalFootstep.setLocation(position.getPoint());
       originalFootstep.setOrientation(orientation.getQuaternion());

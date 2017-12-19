@@ -116,7 +116,7 @@ public class SelectionMatrix6DTest
 
          assertNull(selectionMatrix6D.getAngularSelectionFrame());
          assertNull(selectionMatrix6D.getLinearSelectionFrame());
-         ReferenceFrame randomFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
+         ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
          selectionMatrix6D.setSelectionFrame(randomFrame);
          assertTrue(randomFrame == selectionMatrix6D.getAngularSelectionFrame());
          assertTrue(randomFrame == selectionMatrix6D.getLinearSelectionFrame());
@@ -161,13 +161,13 @@ public class SelectionMatrix6DTest
       SelectionMatrix3D angularPart3D = new SelectionMatrix3D();
       SelectionMatrix3D linearPart3D = new SelectionMatrix3D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -207,8 +207,8 @@ public class SelectionMatrix6DTest
                DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(6, 1);
                DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(6, 1);
 
-               FrameVector3D randomAngularVector = EuclidFrameRandomTools.generateRandomFrameVector3D(random, destinationFrame);
-               FrameVector3D randomLinearVector = EuclidFrameRandomTools.generateRandomFrameVector3D(random, destinationFrame);
+               FrameVector3D randomAngularVector = EuclidFrameRandomTools.nextFrameVector3D(random, destinationFrame);
+               FrameVector3D randomLinearVector = EuclidFrameRandomTools.nextFrameVector3D(random, destinationFrame);
                DenseMatrix64F originalVector = new DenseMatrix64F(6, 1);
                randomAngularVector.get(0, originalVector);
                randomLinearVector.get(3, originalVector);
@@ -255,13 +255,13 @@ public class SelectionMatrix6DTest
       Random random = new Random(456465L);
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)

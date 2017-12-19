@@ -12,13 +12,13 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
@@ -198,7 +198,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(random, 0.5);
 
       FramePoint3D handEndEffectorPositionFK = getHandEndEffectorPosition();
-      FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
+      FrameQuaternion handEndEffectorOrientationFK = getHandEndEffectorOrientation();
 
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = false;
@@ -224,7 +224,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          fullRobotModel.updateFrames();
 
          FramePoint3D handEndEffectorPositionFK = getHandEndEffectorPosition();
-         FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
+         FrameQuaternion handEndEffectorOrientationFK = getHandEndEffectorOrientation();
 
          if (VISUALIZE)
          {
@@ -263,7 +263,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       assertTrue(percentPassed > 0.96);
    }
 
-   public boolean testAPose(Random random, FramePoint3D handEndEffectorPositionFK, FrameOrientation handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
+   public boolean testAPose(Random random, FramePoint3D handEndEffectorPositionFK, FrameQuaternion handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
                             double errorThreshold, boolean updateListenersEachStep)
    {
       testPositionForwardKinematics.set(handEndEffectorPositionFK);
@@ -272,18 +272,17 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       solveForArmPoseWithInverseKinematics(random, handEndEffectorOrientationFK, handEndEffectorPositionFK, initialGuessForTests, updateListenersEachStep);
 
       FramePoint3D handEndEffectorPositionIK = getHandEndEffectorPosition();
-      FrameOrientation handEndEffectorOrientationIK = getHandEndEffectorOrientation();
+      FrameQuaternion handEndEffectorOrientationIK = getHandEndEffectorOrientation();
 
       testPositionInverseKinematics.set(handEndEffectorPositionIK);
       testOrientationInverseKinematics.set(handEndEffectorOrientationIK);
 
       positionError.set(handEndEffectorPositionFK.distance(handEndEffectorPositionIK));
 
-      FrameOrientation errorOrientation = new FrameOrientation();
-      errorOrientation.setOrientationFromOneToTwo(handEndEffectorOrientationFK, handEndEffectorOrientationIK);
+      FrameQuaternion errorOrientation = new FrameQuaternion();
+      errorOrientation.difference(handEndEffectorOrientationIK, handEndEffectorOrientationFK);
 
-      AxisAngle axisAngle = new AxisAngle();
-      errorOrientation.getAxisAngle(axisAngle);
+      AxisAngle axisAngle = new AxisAngle(errorOrientation);
       orientationError.set(axisAngle.getAngle());
 
       if (PRINT_OUT_TROUBLESOME && (positionError.getDoubleValue() > errorThreshold))
@@ -312,7 +311,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return positionErrorAcceptable && orientationErrorAcceptable;
    }
 
-   private void solveForArmPoseWithInverseKinematics(Random random, FrameOrientation desiredOrientation, FramePoint3D desiredPosition,
+   private void solveForArmPoseWithInverseKinematics(Random random, FrameQuaternion desiredOrientation, FramePoint3D desiredPosition,
            InitialGuessForTests initialGuessForTests, boolean updateListenersEachStep)
    {
       FramePose handPose = new FramePose(worldFrame);
@@ -379,10 +378,10 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return successfulSolve;
    }
 
-   private FrameOrientation getHandEndEffectorOrientation()
+   private FrameQuaternion getHandEndEffectorOrientation()
    {
       ReferenceFrame handEndEffectorFrame = fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame();
-      FrameOrientation handEndEffectorOrientation = new FrameOrientation(handEndEffectorFrame);
+      FrameQuaternion handEndEffectorOrientation = new FrameQuaternion(handEndEffectorFrame);
 
       handEndEffectorOrientation.changeFrame(worldFrame);
 
