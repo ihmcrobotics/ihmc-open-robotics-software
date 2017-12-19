@@ -40,6 +40,8 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> resetRequested;
    private final AtomicReference<Boolean> show;
 
+   private final AtomicReference<List<NavigableRegion>> newRequestReference;
+
    public NavigableRegionInnerVizMapMeshViewer(REAMessager messager)
    {
       this(messager, null);
@@ -57,7 +59,7 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       show = messager.createInput(UIVisibilityGraphsTopics.ShowLocalGraphs, false);
       messager.registerTopicListener(UIVisibilityGraphsTopics.ShowLocalGraphs, this::handleShowThreadSafe);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.NavigableRegionData, this::processNavigableRegionsOnThread);
+      newRequestReference = messager.createInput(UIVisibilityGraphsTopics.NavigableRegionData, null);
       root.setMouseTransparent(true);
    }
 
@@ -98,6 +100,14 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
             root.getChildren().clear();
             root.getChildren().addAll(regionVisMapToRender.values());
          }
+      }
+
+      if (show.get())
+      {
+         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
+         
+         if (newRequest != null)
+            processNavigableRegionsOnThread(newRequest);
       }
    }
 
