@@ -42,6 +42,7 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean setupInverseKinematicsSolver = false;
    private boolean setupVirtualModelControlSolver = false;
 
+   private final boolean deactivateAccelerationIntegrationInWBC;
    private final AccelerationIntegrationParameterHelper accelerationIntegrationParameterHelper;
 
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
@@ -81,6 +82,7 @@ public class WalkingControllerState extends HighLevelControllerState
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
+      deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
       accelerationIntegrationParameterHelper = new AccelerationIntegrationParameterHelper(highLevelControllerParameters, controlledOneDofJoints,
                                                                                           walkingController, registry);
 
@@ -147,7 +149,10 @@ public class WalkingControllerState extends HighLevelControllerState
       accelerationIntegrationParameterHelper.update();
 
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
-      controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationParameterHelper.getJointAccelerationIntegrationCommand());
+      if (!deactivateAccelerationIntegrationInWBC)
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationParameterHelper.getJointAccelerationIntegrationCommand());
+      }
       controllerCoreCommand.completeLowLevelJointData(getStateSpecificJointSettings());
 
       controllerCoreTimer.startMeasurement();

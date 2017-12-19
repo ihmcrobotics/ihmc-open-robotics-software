@@ -84,4 +84,16 @@ public interface HighLevelControllerParameters
    {
       return null;
    }
+
+   /**
+    * Provides the option to deactivate the integration of the desired accelerations inside the whole body
+    * controller. This can be used if the acceleration should be integrated in the robot specific joint
+    * controllers (e.g. because they have a higher loop rate).
+    *
+    * @return whether the acceleration integration should be deactivated in the whole body controller
+    */
+   public default boolean deactivateAccelerationIntegrationInTheWBC()
+   {
+      return false;
+   }
 }
