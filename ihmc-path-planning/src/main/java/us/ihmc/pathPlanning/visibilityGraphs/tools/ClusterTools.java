@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -399,7 +400,7 @@ public class ClusterTools
                rawPointsInLocal.add(concaveHullVertexHome);
             }
 
-            cluster.addRawPointsInLocal3D(filterRawPointsForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
+            cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
          }
       }
 
@@ -435,55 +436,99 @@ public class ClusterTools
       }
    }
 
-   static List<Point3D> filterRawPointsForMultiLineExtrusion(List<? extends Point3DReadOnly> rawPointsToFilter, double poppingPointsDistanceThreshold)
+   /**
+    * 
+    * 
+    * @param verticalPolygonVertices
+    * @param poppingPointsDistanceSquaredThreshold
+    * @return
+    */
+   static List<Point3D> filterVerticalPolygonForMultiLineExtrusion(List<? extends Point3DReadOnly> verticalPolygonVertices,
+                                                                   double poppingPointsDistanceSquaredThreshold)
    {
       // Making a deep copy
-      List<Point3D> filteredRawPoints = rawPointsToFilter.stream().map(Point3D::new).collect(Collectors.toList());
+      List<Point3D> filteredPoints = verticalPolygonVertices.stream().map(Point3D::new).collect(Collectors.toList());
 
-      if (rawPointsToFilter.size() <= 2)
-         return filteredRawPoints;
-
+      if (verticalPolygonVertices.size() <= 2)
+         return filteredPoints;
 
       Point3D mean = new Point3D();
       Vector3D principalVector = new Vector3D();
       PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 
       pca.clear();
-      filteredRawPoints.forEach(p -> pca.addPoint(p.getX(), p.getY(), 0.0));
+      filteredPoints.forEach(p -> pca.addPoint(p.getX(), p.getY(), 0.0));
       pca.compute();
       pca.getMean(mean);
       pca.getPrincipalVector(principalVector);
       Line2D line = new Line2D(new Point2D(mean), new Vector2D(principalVector));
-      // Adjust the XY-coordinates to be on the line
-      filteredRawPoints.stream().forEach(p -> p.set(line.orthogonalProjectionCopy(new Point2D(p))));
+      // Projecting the points in the 2D plane described by the z-axis and the line direction
+      List<Point2D> projectedPoints = new ArrayList<>();
+      for (Point3D point : filteredPoints)
+      {
+         double x = line.parameterGivenPointOnLine(new Point2D(point), Double.POSITIVE_INFINITY);
+         double z = point.getZ();
+         projectedPoints.add(new Point2D(x, z));
+      }
+
+      for (int pointIndex = 0; pointIndex < projectedPoints.size(); pointIndex++)
+      {
+         Point3D point = filteredPoints.get(pointIndex);
+         Point2D projectedPoint = projectedPoints.get(pointIndex);
+
+         for (int edgeIndex = 0; edgeIndex < projectedPoints.size(); edgeIndex++)
+         {
+            Point2D edgeStart = projectedPoints.get(edgeIndex);
+            Point2D edgeEnd = ListWrappingIndexTools.getNext(edgeIndex, projectedPoints);
+
+            // Check if the point is between start and end
+            double signedDistanceToStart = edgeStart.getX() - projectedPoint.getX();
+            double signedDistanceToEnd = edgeEnd.getX() - projectedPoint.getX();
+            if (signedDistanceToStart * signedDistanceToEnd > 0.0)
+               continue; // If same sign, the edge is not above/below the point, keep going.
+            // The edge is above or below the point, let's compute the edge height at the point x-coordinate
+            double alpha = EuclidGeometryTools.percentageAlongLineSegment2D(projectedPoint, edgeStart, edgeEnd);
+            double height = EuclidCoreTools.interpolate(edgeStart.getY(), edgeEnd.getY(), alpha);
+
+            point.setZ(Math.max(height, point.getZ()));
+         }
+
+         // Adjust the XY-coordinates to be on the line
+         point.set(line.pointOnLineGivenParameter(projectedPoint.getX()));
+      }
+
       // Sort the points given their position on the line.
-      Collections.sort(filteredRawPoints, (p1, p2) -> {
+      Collections.sort(filteredPoints, (p1, p2) -> {
          double t1 = line.parameterGivenPointOnLine(new Point2D(p1), Double.POSITIVE_INFINITY);
          double t2 = line.parameterGivenPointOnLine(new Point2D(p2), Double.POSITIVE_INFINITY);
          return t1 >= t2 ? 1 : -1;
       });
 
       // FIXME Problem with the obstacle height.
-      if (filteredRawPoints.get(0).distanceXY(filteredRawPoints.get(filteredRawPoints.size() - 1)) <= poppingPointsDistanceThreshold)
+      if (filteredPoints.get(0).distanceXYSquared(filteredPoints.get(filteredPoints.size() - 1)) <= poppingPointsDistanceSquaredThreshold)
       {
-         Collections.swap(filteredRawPoints, 1, filteredRawPoints.size() - 1);
-         return filteredRawPoints.subList(0, 2);
+         double maxHeight = filteredPoints.stream().map(Point3D::getZ).max((d1, d2) -> Double.compare(d1, d2)).get();
+         List<Point3D> endpoints = new ArrayList<>();
+         endpoints.add(filteredPoints.get(0));
+         endpoints.add(filteredPoints.get(filteredPoints.size() - 1));
+         endpoints.forEach(p -> p.setZ(maxHeight));
+         return endpoints;
       }
       else
       {
          int index = 0;
          // Look for points with same XY-coordinates and only keep the highest one.
-         while (index < filteredRawPoints.size() - 1)
+         while (index < filteredPoints.size() - 1)
          {
-            Point3D pointCurr = filteredRawPoints.get(index);
-            Point3D pointNext = filteredRawPoints.get(index + 1);
+            Point3D pointCurr = filteredPoints.get(index);
+            Point3D pointNext = filteredPoints.get(index + 1);
 
-            if (pointCurr.distanceXYSquared(pointNext) < poppingPointsDistanceThreshold)
-               filteredRawPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
+            if (pointCurr.distanceXYSquared(pointNext) < poppingPointsDistanceSquaredThreshold)
+               filteredPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
             else
                index++;
          }
-         return filteredRawPoints;
+         return filteredPoints;
       }
    }
 
