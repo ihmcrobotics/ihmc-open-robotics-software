@@ -1,14 +1,18 @@
 package us.ihmc.pathPlanning.visibilityGraphs.visualizer;
 
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.CurrentDatasetPath;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalEditModeEnabled;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalPosition;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NextDatasetRequest;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PlanarRegionData;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PreviousDatasetRequest;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterConnections;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowLocalGraphs;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowPlanarRegions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartEditModeEnabled;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartPosition;
 
 import java.io.IOException;
@@ -42,8 +46,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionInnerVizMapMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionsInterConnectionViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityGraphStartGoalViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VizGraphsPlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
 
 public class VisibilityGraphsTestVisualizer
 {
@@ -51,8 +55,8 @@ public class VisibilityGraphsTestVisualizer
 
    private final Stage primaryStage;
    private final SimpleUIMessager messager;
-   private final VizGraphsPlanarRegionViewer planarRegionViewer;
-   private final VisibilityGraphStartGoalViewer startGoalViewer;
+   private final PlanarRegionViewer planarRegionViewer;
+   private final StartGoalPositionViewer startGoalViewer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
    private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
@@ -98,8 +102,8 @@ public class VisibilityGraphsTestVisualizer
 
       bindUIControls();
 
-      planarRegionViewer = new VizGraphsPlanarRegionViewer(messager);
-      startGoalViewer = new VisibilityGraphStartGoalViewer(messager);
+      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
+      startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
       navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager, executorService);
