@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.ComputePathTopic;
