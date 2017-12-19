@@ -11,9 +11,9 @@ import javafx.stage.Stage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.PlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 
 import java.io.IOException;
