@@ -97,7 +97,7 @@ public class FootstepPlanningWithBodyPathTest
       goalPos = PlanarRegionTools.projectPointToPlanes(goalPos, new PlanarRegionsList(regions));
 
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
       for (Point3DReadOnly waypoint3d : path)
       {
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
