@@ -9,6 +9,8 @@ import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.*;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityGraphsRenderer;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.ui;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
