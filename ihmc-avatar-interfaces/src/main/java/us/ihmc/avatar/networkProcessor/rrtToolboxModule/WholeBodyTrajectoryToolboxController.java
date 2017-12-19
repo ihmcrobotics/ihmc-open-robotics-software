@@ -272,6 +272,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void generateMotion()
    {
+      // TODO : WholeBodyTrajectoryBehavior should be created.
+      // TODO : WholeBodyTrajectoryToolboxOutputConverter should be used.
+      
       updateTimer(motionGenerationComputationTime, motionGenerationStartTime);
 
       /*
@@ -427,18 +430,14 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                }
                else if (manifoldCommands != null)
                {  
-                  //Pose3D testFrame = tree.getLastNodeAdded().getSpatialData().getTestFrame(manifoldCommands);
                   Pose3D testFrame = toolboxData.getTestFrame(tree.getLastNodeAdded());
 
                   testFramePose.setPosition(testFrame.getPosition());
                   testFramePose.setOrientation(testFrame.getOrientation());
                   testFrameViz.setVisible(true);
                   testFrameViz.update();
-                  
 
                   // TODO : terminal condition for manifold command.
-//                  if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
-//                     isExpandingTerminalCondition = true;
                   if(toolboxData.getMaximumDistanceFromManifolds(tree.getLastNodeAdded()) < 0.05)
                      isExpandingTerminalCondition = true;
                }
