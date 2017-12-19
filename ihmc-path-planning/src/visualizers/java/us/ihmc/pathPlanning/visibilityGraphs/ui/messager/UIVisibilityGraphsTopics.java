@@ -46,6 +46,7 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme Size = apiFactory.createCategoryTheme("Size");
    private static final CategoryTheme Collision = apiFactory.createCategoryTheme("Collision");
    private static final CategoryTheme Animation = apiFactory.createCategoryTheme("Animation");
+   private static final CategoryTheme Shadow = apiFactory.createCategoryTheme("Shadow");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -105,6 +106,7 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Vector3D> WalkerSize = Root.child(UnitTest).child(Walker).child(Size).topic(Data);
    public static final Topic<List<Point3D>> WalkerCollisionLocations = Root.child(UnitTest).child(Walker).child(Collision).topic(Data);
    public static final Topic<Boolean> StopWalker = Root.child(UnitTest).child(Walker).topic(Stop);
+   public static final Topic<PlanarRegionsList> ShadowPlanarRegionData = Root.child(PlanarRegion).child(Shadow).topic(Data);
 
    public static final API API = apiFactory.getAPIAndCloseFactory();
 }

@@ -1,23 +1,25 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
-import javafx.scene.shape.Mesh;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
-import javafx.util.Pair;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
+import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
@@ -29,58 +31,48 @@ public class PlanarRegionViewer
    private static final boolean VERBOSE = true;
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
-   private final MeshView planarRegionMeshView = new MeshView();
+   private final Group root = new Group();
 
-   private final AtomicReference<Pair<Mesh, Material>> graphicsToRender = new AtomicReference<>(null);
-   private Pair<Mesh, Material> graphicsRendered = null;
-   private final TextureColorPalette2D colorPalette = new TextureColorPalette2D();
+   private final AtomicReference<List<MeshView>> graphicsToRender = new AtomicReference<>(null);
+   private List<MeshView> graphicsRendered = null;
+
+   private final AtomicDouble opacity = new AtomicDouble(1.0);
 
    private final AnimationTimer renderMeshAnimation;
+   private final AtomicReference<Boolean> show;
 
    public PlanarRegionViewer(REAMessager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
    {
-      colorPalette.setHueBrightnessBased(0.9);
       messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
-      messager.registerTopicListener(showPlanarRegionsTopic, this::handleShowThreadSafe);
+      show = messager.createInput(showPlanarRegionsTopic, true);
 
       renderMeshAnimation = new AnimationTimer()
       {
          @Override
          public void handle(long now)
          {
-            Pair<Mesh, Material> localReference = graphicsToRender.getAndSet(null);
+            if (!show.get())
+               root.getChildren().clear();               
+
+            List<MeshView> localReference = graphicsToRender.getAndSet(null);
 
             if (localReference != null)
             {
                if (VERBOSE)
                   PrintTools.info(this, "Rendering new planar regions.");
                graphicsRendered = localReference;
-               planarRegionMeshView.setMesh(localReference.getKey());
-               planarRegionMeshView.setMaterial(localReference.getValue());
+               root.getChildren().clear();
             }
+
+            if (graphicsRendered != null && show.get() && root.getChildren().isEmpty())
+               root.getChildren().addAll(graphicsRendered);
          }
       };
    }
 
-   private void handleShowThreadSafe(boolean show)
+   public void setOpacity(double newOpacity)
    {
-      if (Platform.isFxApplicationThread())
-         handleShow(show);
-      else
-         Platform.runLater(() -> handleShow(show));
-   }
-
-   private void handleShow(boolean show)
-   {
-      if (!show)
-      {
-         planarRegionMeshView.setMesh(null);
-      }
-      else if (graphicsRendered != null)
-      {
-         planarRegionMeshView.setMesh(graphicsRendered.getKey());
-         planarRegionMeshView.setMaterial(graphicsRendered.getValue());
-      }
+      opacity.set(newOpacity);
    }
 
    public void start()
@@ -103,43 +95,49 @@ public class PlanarRegionViewer
    {
       if (VERBOSE)
          PrintTools.info(this, "Creating mesh and material for new planar regions.");
-      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
+      List<MeshView> regionMeshViews = new ArrayList<>();
 
       for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
       {
+         JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
 
          int regionId = planarRegion.getRegionId();
-         Color regionColor = getRegionColor(regionId);
          planarRegion.getTransformToWorld(transformToWorld);
 
-         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, regionColor, true);
+         meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
          {
             ConvexPolygon2D convexPolygon2d = planarRegion.getConvexPolygon(polygonIndex);
-            regionColor = Color.hsb(regionColor.getHue(), 0.9, 0.5 + 0.5 * ((double) polygonIndex / (double) planarRegion.getNumberOfConvexPolygons()));
-            meshBuilder.addPolygon(transformToWorld, convexPolygon2d, regionColor);
+            meshBuilder.addPolygon(transformToWorld, convexPolygon2d);
          }
+
+         MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
+         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId, opacity.get())));
+         regionMeshViews.add(regionMeshView);
       }
 
-      Material material = meshBuilder.generateMaterial();
-      Mesh mesh = meshBuilder.generateMesh();
-      graphicsToRender.set(new Pair<>(mesh, material));
+      graphicsToRender.set(regionMeshViews);
    }
 
 
    public static Color getRegionColor(int regionId)
    {
+      return getRegionColor(regionId, 1.0);
+   }
+
+   public static Color getRegionColor(int regionId, double opacity)
+   {
       java.awt.Color awtColor = new java.awt.Color(regionId);
-      return Color.rgb(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue());
+      return Color.rgb(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue(), opacity);
    }
 
    public Node getRoot()
    {
-      return planarRegionMeshView;
+      return root;
    }
 }
