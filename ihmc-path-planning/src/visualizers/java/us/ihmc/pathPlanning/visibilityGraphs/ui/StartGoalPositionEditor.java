@@ -33,13 +33,13 @@ public class StartGoalPositionEditor extends AnimationTimer
    private final AtomicReference<Boolean> startEditModeEnabled;
    private final AtomicReference<Boolean> goalEditModeEnabled;
 
-   private final Topic startEditModeEnabledTopic;
-   private final Topic goalEditModeEnabledTopic;
-   private final Topic startPositionTopic;
-   private final Topic goalPositionTopic;
+   private final Topic<Boolean> startEditModeEnabledTopic;
+   private final Topic<Boolean> goalEditModeEnabledTopic;
+   private final Topic<Point3D> startPositionTopic;
+   private final Topic<Point3D> goalPositionTopic;
 
-   public StartGoalPositionEditor(REAMessager messager, Node sceneNode, Topic startEditModeEnabledTopic, Topic goalEditModeEnabledTopic,
-                                  Topic startPositionTopic, Topic goalPositionTopic)
+   public StartGoalPositionEditor(REAMessager messager, Node sceneNode, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
+                                  Topic<Point3D> startPositionTopic, Topic<Point3D> goalPositionTopic)
    {
       this.messager = messager;
       this.sceneNode = sceneNode;

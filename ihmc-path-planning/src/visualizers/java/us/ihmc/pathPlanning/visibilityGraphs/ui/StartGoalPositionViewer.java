@@ -9,8 +9,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class StartGoalPositionViewer extends AnimationTimer
 {
@@ -36,8 +36,8 @@ public class StartGoalPositionViewer extends AnimationTimer
    private final AtomicReference<Point3D> startPositionReference;
    private final AtomicReference<Point3D> goalPositionReference;
 
-   public StartGoalPositionViewer(REAMessager messager, Topic startEditModeEnabledTopic, Topic goalEditModeEnabledTopic,
-                                  Topic startPositionTopic, Topic goalPositionTopic)
+   public StartGoalPositionViewer(REAMessager messager, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
+                                  Topic<Point3D> startPositionTopic, Topic<Point3D> goalPositionTopic)
    {
       startSphere.setMouseTransparent(true);
       goalSphere.setMouseTransparent(true);
