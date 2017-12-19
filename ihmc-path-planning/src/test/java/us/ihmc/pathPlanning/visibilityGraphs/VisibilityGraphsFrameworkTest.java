@@ -22,14 +22,11 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Ellipsoid3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
@@ -42,7 +39,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest extends Application
 {
-   private static final long TIMEOUT = 30000; // Long.MAX_VALUE; // 
+   private static final long TIMEOUT = Long.MAX_VALUE; // 30000; // 
    private static final double START_GOAL_EPSILON = 1.0e-2;
    private static boolean VISUALIZE = true;
    private static boolean DEBUG = true;
@@ -240,30 +237,15 @@ public class VisibilityGraphsFrameworkTest extends Application
          messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getConnectionPoints());
       }
 
-      String errorMessages = "";
-
-      errorMessages += assertTrue(dataset, "Path is null!", path != null);
-      if (!errorMessages.isEmpty())
-         return addPrefixToErrorMessages(dataset, errorMessages); // Cannot test anything else when no path is returned.
-
-      errorMessages += assertTrue(dataset, "Path does not contain any waypoints", path.size() > 0);
+      String errorMessages = basicBodyPathSanityChecks(dataset, path);
 
       if (!errorMessages.isEmpty())
-         return addPrefixToErrorMessages(dataset, errorMessages); // Cannot test anything else when no path is returned.
-
-      if (dataset.hasExpectedPathSize())
-         errorMessages += assertTrue(dataset, "Path size is not equal: expected = " + dataset.getExpectedPathSize() + ", actual = " + path.size(),
-                                     path.size() == dataset.getExpectedPathSize());
-
-      Point3DReadOnly pathEnd = path.get(path.size() - 1);
-      Point3DReadOnly pathStart = path.get(0);
-      errorMessages += assertTrue(dataset, "Body path does not end at desired goal position: desired = " + dataset.getGoal() + ", actual = " + pathEnd,
-                                  pathEnd.geometricallyEquals(dataset.getGoal(), START_GOAL_EPSILON));
-      errorMessages += assertTrue(dataset, "Body path does not start from desired start position: desired = " + dataset.getStart() + ", actual = " + pathStart,
-                                  pathStart.geometricallyEquals(dataset.getStart(), START_GOAL_EPSILON));
+         return addPrefixToErrorMessages(dataset, errorMessages); // Cannot test anything else when path does not pass the basic sanity checks.
 
       // "Walk" along the body path and assert that the walker does not go through any region.
       int currentSegmentIndex = 0;
+      Point3DReadOnly pathStart = path.get(0);
+      Point3DReadOnly pathEnd = path.get(path.size() - 1);
       Point3D walkerCurrentPosition = new Point3D(pathStart);
       List<Point3D> collisions = new ArrayList<>();
       Ellipsoid3D walkerShape = new Ellipsoid3D();
@@ -271,59 +253,11 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       while (!walkerCurrentPosition.geometricallyEquals(pathEnd, 1.0e-3))
       {
-         for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
-         {
-            Point3D walkerBody3D = new Point3D(walkerCurrentPosition);
-            walkerBody3D.addZ(walkerOffsetHeight);
+         Point3D walkerBody3D = new Point3D(walkerCurrentPosition);
+         walkerBody3D.addZ(walkerOffsetHeight);
+         walkerShape.setPosition(walkerBody3D);
 
-            Plane3D plane = planarRegion.getPlane();
-            walkerShape.setPose(walkerBody3D, new Quaternion());
-            Point3D closestPoint = plane.orthogonalProjectionCopy(walkerBody3D);
-
-            if (!walkerShape.isInsideOrOnSurface(closestPoint))
-               continue;
-
-            RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            planarRegion.getTransformToWorld(transformToWorld);
-            walkerBody3D.applyInverseTransform(transformToWorld);
-            Point2D walkerBody2D = new Point2D(walkerBody3D);
-            walkerShape.applyInverseTransform(transformToWorld);
-
-            if (planarRegion.getNumberOfConvexPolygons() == 0)
-            {
-               List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(Arrays.asList(planarRegion.getConcaveHull()));
-               double depthThreshold = 0.05;
-               List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
-               ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHullVertices, depthThreshold, convexPolygons);
-            }
-
-            for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
-            {
-               ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
-               Point2D closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerBody2D);
-               if (closestPoint2D == null)
-               {
-                  if (convexPolygon.isPointInside(walkerBody2D))
-                  {
-                     errorMessages += fail(dataset, "Body path is going through a region."); // TODO figure out the proper intersection
-                     break;
-                  }
-                  else
-                  {
-                     throw new RuntimeException("Not usre what went wrong to here.");
-                  }
-               }
-               closestPoint = new Point3D(closestPoint2D);
-               
-               if (walkerShape.isInsideOrOnSurface(closestPoint))
-               {
-                  Point2D intersectionLocal = closestPoint2D;
-                  Point3D intersectionWorld = toWorld(intersectionLocal, transformToWorld);
-                  errorMessages += fail(dataset, "Body path is going through a region at: " + intersectionWorld);
-                  collisions.add(intersectionWorld);
-               }
-            }
-         }
+         errorMessages += walkerCollisionChecks(dataset.getDatasetName(), walkerShape, planarRegionsList, collisions);
 
          Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
          Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1);
@@ -339,16 +273,97 @@ public class VisibilityGraphsFrameworkTest extends Application
       }
 
       if (VISUALIZE)
+      {
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerCollisionLocations, collisions);
+      }
 
       return addPrefixToErrorMessages(dataset, errorMessages);
    }
 
-   private static Point3D toWorld(Point2DReadOnly pointLocal, Transform transformToWorld)
+   private String walkerCollisionChecks(String datasetName, Ellipsoid3D walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack)
    {
-      Point3D inWorld = new Point3D(pointLocal);
-      transformToWorld.transform(inWorld);
-      return inWorld;
+      String errorMessages = "";
+      walkerShapeWorld = new Ellipsoid3D(walkerShapeWorld); // Make a copy to ensure we are not modifying the argument
+
+      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+      {
+         Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
+
+         Plane3D plane = planarRegion.getPlane();
+         Point3D closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
+
+         if (!walkerShapeWorld.isInsideOrOnSurface(closestPoint))
+            continue; // Not even close to the region plane, let's keep going.
+
+         Ellipsoid3D walkerShapeLocal = new Ellipsoid3D(walkerShapeWorld);
+         planarRegion.transformFromWorldToLocal(walkerShapeLocal);
+         walkerPosition3D.set(walkerShapeLocal.getPosition());
+         Point2D walkerPosition2D = new Point2D(walkerPosition3D);
+
+         if (planarRegion.getNumberOfConvexPolygons() == 0)
+         {
+            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(Arrays.asList(planarRegion.getConcaveHull()));
+            double depthThreshold = 0.05;
+            List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
+            ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHullVertices, depthThreshold, convexPolygons);
+         }
+
+         for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
+         {
+            ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
+            Point2D closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
+            if (closestPoint2D == null)
+            {
+               if (convexPolygon.isPointInside(walkerPosition2D))
+               {
+                  errorMessages += fail(datasetName, "Body path is going through a region."); // TODO figure out the proper intersection
+                  break;
+               }
+               else
+               {
+                  throw new RuntimeException("Not usre what went wrong to here.");
+               }
+            }
+            closestPoint = new Point3D(closestPoint2D);
+
+            if (walkerShapeLocal.isInsideOrOnSurface(closestPoint))
+            {
+               Point2D intersectionLocal = closestPoint2D;
+               Point3D intersectionWorld = new Point3D(intersectionLocal);
+               planarRegion.transformFromLocalToWorld(intersectionWorld);
+               errorMessages += fail(datasetName, "Body path is going through a region at: " + intersectionWorld);
+               collisionsToPack.add(intersectionWorld);
+            }
+         }
+      }
+      return errorMessages;
+   }
+
+   private String basicBodyPathSanityChecks(VisibilityGraphsUnitTestDataset dataset, List<? extends Point3DReadOnly> path)
+   {
+      return basicBodyPathSanityChecks(dataset.getDatasetName(), dataset.getStart(), dataset.getGoal(), path);
+   }
+
+   private String basicBodyPathSanityChecks(String datasetName, Point3DReadOnly start, Point3DReadOnly goal, List<? extends Point3DReadOnly> path)
+   {
+      String errorMessages = "";
+      errorMessages += assertTrue(datasetName, "Path is null!", path != null);
+      if (!errorMessages.isEmpty())
+         return errorMessages; // Cannot test anything else when no path is returned.
+
+      errorMessages += assertTrue(datasetName, "Path does not contain any waypoints", path.size() > 0);
+
+      if (!errorMessages.isEmpty())
+         return errorMessages; // Cannot test anything else when no path is returned.
+
+      Point3DReadOnly pathEnd = path.get(path.size() - 1);
+      Point3DReadOnly pathStart = path.get(0);
+      errorMessages += assertTrue(datasetName, "Body path does not end at desired goal position: desired = " + goal + ", actual = " + pathEnd,
+                                  pathEnd.geometricallyEquals(goal, START_GOAL_EPSILON));
+      errorMessages += assertTrue(datasetName, "Body path does not start from desired start position: desired = " + start + ", actual = " + pathStart,
+                                  pathStart.geometricallyEquals(start, START_GOAL_EPSILON));
+
+      return errorMessages;
    }
 
    private static String addPrefixToErrorMessages(VisibilityGraphsUnitTestDataset dataset, String errorMessages)
@@ -360,17 +375,17 @@ public class VisibilityGraphsFrameworkTest extends Application
          return "";
    }
 
-   private String fail(VisibilityGraphsUnitTestDataset dataset, String message)
+   private String fail(String datasetName, String message)
    {
-      return assertTrue(dataset, message, false);
+      return assertTrue(datasetName, message, false);
    }
 
-   private String assertTrue(VisibilityGraphsUnitTestDataset dataset, String message, boolean condition)
+   private String assertTrue(String datasetName, String message, boolean condition)
    {
       if (VISUALIZE || DEBUG)
       {
          if (!condition)
-            PrintTools.error(dataset.getDatasetName() + ": " + message);
+            PrintTools.error(datasetName + ": " + message);
       }
       return !condition ? "\n" + message : "";
    }
