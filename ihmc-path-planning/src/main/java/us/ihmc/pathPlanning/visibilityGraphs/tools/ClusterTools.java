@@ -3,10 +3,12 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -376,10 +378,6 @@ public class ClusterTools
                                                 List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformFromHomeToWorld,
                                                 VisibilityGraphsParameters visibilityGraphsParameters)
    {
-      Point3D mean = new Point3D();
-      Vector3D principalVector = new Vector3D();
-      PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-
       for (PlanarRegion region : lineObstacleRegions)
       {
          if (regions.contains(region))
@@ -390,7 +388,7 @@ public class ClusterTools
             cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
             cluster.setTransformToWorld(transformFromHomeToWorld);
 
-            List<Point3D> rawPoints = new ArrayList<>();
+            List<Point3D> rawPointsInLocal = new ArrayList<>();
             RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
             region.getTransformToWorld(transformFromOtherToHome);
             transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
@@ -399,52 +397,10 @@ public class ClusterTools
             {
                Point3D concaveHullVertexHome = new Point3D(region.getConvexHull().getVertex(i));
                concaveHullVertexHome.applyTransform(transformFromOtherToHome);
-               rawPoints.add(concaveHullVertexHome);
+               rawPointsInLocal.add(concaveHullVertexHome);
             }
 
-            if (rawPoints.size() <= 2)
-            {
-               cluster.addRawPointsInLocal3D(rawPoints);
-               continue;
-            }
-
-            pca.clear();
-            rawPoints.forEach(p -> pca.addPoint(p.getX(), p.getY(), 0.0));
-            pca.compute();
-            pca.getMean(mean);
-            pca.getPrincipalVector(principalVector);
-            Line2D line = new Line2D(new Point2D(mean), new Vector2D(principalVector));
-            // Adjust the XY-coordinates to be on the line
-            rawPoints.stream().forEach(p -> p.set(line.orthogonalProjectionCopy(new Point2D(p))));
-            // Sort the points given their position on the line.
-            Collections.sort(rawPoints, (p1, p2) -> {
-               double t1 = line.parameterGivenPointOnLine(new Point2D(p1), Double.POSITIVE_INFINITY);
-               double t2 = line.parameterGivenPointOnLine(new Point2D(p2), Double.POSITIVE_INFINITY);
-               return t1 >= t2 ? 1 : -1;
-            });
-
-            // FIXME Problem with the obstacle height.
-            if (rawPoints.get(0).distanceXY(rawPoints.get(rawPoints.size() - 1)) <= POPPING_MULTILINE_POINTS_THRESHOLD)
-            {
-               cluster.addRawPointInLocal3D(rawPoints.get(0));
-               cluster.addRawPointInLocal3D(rawPoints.get(rawPoints.size() - 1));
-            }
-            else
-            {
-               int index = 0;
-               // Look for points with same XY-coordinates and only keep the highest one.
-               while (index < rawPoints.size() - 1)
-               {
-                  Point3D pointCurr = rawPoints.get(index);
-                  Point3D pointNext = rawPoints.get(index + 1);
-
-                  if (pointCurr.distanceXYSquared(pointNext) < POPPING_MULTILINE_POINTS_THRESHOLD)
-                     rawPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
-                  else
-                     index++;
-               }
-               cluster.addRawPointsInLocal3D(rawPoints);
-            }
+            cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
          }
       }
 
@@ -477,6 +433,102 @@ public class ClusterTools
          {
             System.out.println("Created a cluster of type: " + cluster.getType() + " with " + cluster.getRawPointsInLocal2D().size() + " points");
          }
+      }
+   }
+
+   /**
+    * 
+    * 
+    * @param verticalPolygonVertices
+    * @param poppingPointsDistanceSquaredThreshold
+    * @return
+    */
+   static List<Point3D> filterVerticalPolygonForMultiLineExtrusion(List<? extends Point3DReadOnly> verticalPolygonVertices,
+                                                                   double poppingPointsDistanceSquaredThreshold)
+   {
+      // Making a deep copy
+      List<Point3D> filteredPoints = verticalPolygonVertices.stream().map(Point3D::new).collect(Collectors.toList());
+
+      if (verticalPolygonVertices.size() <= 2)
+         return filteredPoints;
+
+      Point3D mean = new Point3D();
+      Vector3D principalVector = new Vector3D();
+      PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+
+      pca.clear();
+      filteredPoints.forEach(p -> pca.addPoint(p.getX(), p.getY(), 0.0));
+      pca.compute();
+      pca.getMean(mean);
+      pca.getPrincipalVector(principalVector);
+      Line2D line = new Line2D(new Point2D(mean), new Vector2D(principalVector));
+      // Projecting the points in the 2D plane described by the z-axis and the line direction
+      List<Point2D> projectedPoints = new ArrayList<>();
+      for (Point3D point : filteredPoints)
+      {
+         double x = line.parameterGivenPointOnLine(new Point2D(point), Double.POSITIVE_INFINITY);
+         double z = point.getZ();
+         projectedPoints.add(new Point2D(x, z));
+      }
+
+      for (int pointIndex = 0; pointIndex < projectedPoints.size(); pointIndex++)
+      {
+         Point3D point = filteredPoints.get(pointIndex);
+         Point2D projectedPoint = projectedPoints.get(pointIndex);
+
+         for (int edgeIndex = 0; edgeIndex < projectedPoints.size(); edgeIndex++)
+         {
+            Point2D edgeStart = projectedPoints.get(edgeIndex);
+            Point2D edgeEnd = ListWrappingIndexTools.getNext(edgeIndex, projectedPoints);
+
+            // Check if the point is between start and end
+            double signedDistanceToStart = edgeStart.getX() - projectedPoint.getX();
+            double signedDistanceToEnd = edgeEnd.getX() - projectedPoint.getX();
+            if (signedDistanceToStart * signedDistanceToEnd > 0.0)
+               continue; // If same sign, the edge is not above/below the point, keep going.
+            // The edge is above or below the point, let's compute the edge height at the point x-coordinate
+            double alpha = EuclidGeometryTools.percentageAlongLineSegment2D(projectedPoint, edgeStart, edgeEnd);
+            double height = EuclidCoreTools.interpolate(edgeStart.getY(), edgeEnd.getY(), alpha);
+
+            point.setZ(Math.max(height, point.getZ()));
+         }
+
+         // Adjust the XY-coordinates to be on the line
+         point.set(line.pointOnLineGivenParameter(projectedPoint.getX()));
+      }
+
+      // Sort the points given their position on the line.
+      Collections.sort(filteredPoints, (p1, p2) -> {
+         double t1 = line.parameterGivenPointOnLine(new Point2D(p1), Double.POSITIVE_INFINITY);
+         double t2 = line.parameterGivenPointOnLine(new Point2D(p2), Double.POSITIVE_INFINITY);
+         return t1 >= t2 ? 1 : -1;
+      });
+
+      // FIXME Problem with the obstacle height.
+      if (filteredPoints.get(0).distanceXYSquared(filteredPoints.get(filteredPoints.size() - 1)) <= poppingPointsDistanceSquaredThreshold)
+      {
+         double maxHeight = filteredPoints.stream().map(Point3D::getZ).max((d1, d2) -> Double.compare(d1, d2)).get();
+         List<Point3D> endpoints = new ArrayList<>();
+         endpoints.add(filteredPoints.get(0));
+         endpoints.add(filteredPoints.get(filteredPoints.size() - 1));
+         endpoints.forEach(p -> p.setZ(maxHeight));
+         return endpoints;
+      }
+      else
+      {
+         int index = 0;
+         // Look for points with same XY-coordinates and only keep the highest one.
+         while (index < filteredPoints.size() - 1)
+         {
+            Point3D pointCurr = filteredPoints.get(index);
+            Point3D pointNext = filteredPoints.get(index + 1);
+
+            if (pointCurr.distanceXYSquared(pointNext) < poppingPointsDistanceSquaredThreshold)
+               filteredPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
+            else
+               index++;
+         }
+         return filteredPoints;
       }
    }
 
