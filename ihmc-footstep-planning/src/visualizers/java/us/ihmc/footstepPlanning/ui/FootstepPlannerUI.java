@@ -2,10 +2,14 @@ package us.ihmc.footstepPlanning.ui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.Camera;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
@@ -18,6 +22,8 @@ import static us.ihmc.footstepPlanning.ui.FootstepPlannerUserInterfaceAPI.*;
 
 public class FootstepPlannerUI
 {
+   private static final boolean VERBOSE = true;
+
    private final SimpleUIMessager messager = new SimpleUIMessager(FootstepPlannerUserInterfaceAPI.API);
    private final Stage primaryStage;
    private final BorderPane mainPane;
@@ -27,6 +33,7 @@ public class FootstepPlannerUI
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final FootstepPathRenderer pathRenderer;
+   private final StartGoalOrientationEditor orientationEditor;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -55,6 +62,7 @@ public class FootstepPlannerUI
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       startGoalTabController.bindControls();
+      footstepPlannerParametersUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -66,6 +74,7 @@ public class FootstepPlannerUI
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic, StartPositionTopic,
                                                     GoalPositionTopic);
+      this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathRenderer = new FootstepPathRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
@@ -77,6 +86,7 @@ public class FootstepPlannerUI
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
       startGoalEditor.start();
+      orientationEditor.start();
       pathRenderer.start();
 
       mainPane.setCenter(subScene);
