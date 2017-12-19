@@ -39,11 +39,13 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme Dataset = apiFactory.createCategoryTheme("Dataset");
    private static final CategoryTheme Previous = apiFactory.createCategoryTheme("Next");
    private static final CategoryTheme Next = apiFactory.createCategoryTheme("Previous");
+   private static final CategoryTheme Reload = apiFactory.createCategoryTheme("Reload");
    private static final CategoryTheme All = apiFactory.createCategoryTheme("All");
    private static final CategoryTheme Walker = apiFactory.createCategoryTheme("Walker");
    private static final CategoryTheme Offset = apiFactory.createCategoryTheme("Offset");
    private static final CategoryTheme Size = apiFactory.createCategoryTheme("Size");
    private static final CategoryTheme Collision = apiFactory.createCategoryTheme("Collision");
+   private static final CategoryTheme Animation = apiFactory.createCategoryTheme("Animation");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -52,6 +54,7 @@ public class UIVisibilityGraphsTopics
    private static final TypedTopicTheme<Boolean> Close = apiFactory.createTypedTopicTheme("Close");
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
    private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
+   private static final TypedTopicTheme<Boolean> Stop = apiFactory.createTypedTopicTheme("Stop");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
@@ -90,13 +93,18 @@ public class UIVisibilityGraphsTopics
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
 
    // Topics for the test visualizer
+   // TODO Need to figure out a better way to declare these guys, in part to be able to separate the main UI topics from the test topics.
+   public static final Topic<Boolean> ReloadDatasetRequest = Root.child(UnitTest).child(Dataset).child(Reload).topic(Request);
    public static final Topic<Boolean> PreviousDatasetRequest = Root.child(UnitTest).child(Dataset).child(Previous).topic(Request);
    public static final Topic<String> CurrentDatasetPath = Root.child(UnitTest).child(Dataset).topic(Path);
    public static final Topic<Boolean> NextDatasetRequest = Root.child(UnitTest).child(Dataset).child(Next).topic(Request);
    public static final Topic<List<String>> AllDatasetPaths = Root.child(UnitTest).child(Dataset).child(All).topic(Paths);
+   public static final Topic<Boolean> EnableWalkerAnimation = Root.child(UnitTest).child(Walker).child(Animation).topic(Enable);
+   public static final Topic<Point3D> WalkerPosition = Root.child(UnitTest).child(Walker).topic(Position);
    public static final Topic<Double> WalkerOffsetHeight = Root.child(UnitTest).child(Walker).child(Offset).topic(Data);
    public static final Topic<Vector3D> WalkerSize = Root.child(UnitTest).child(Walker).child(Size).topic(Data);
    public static final Topic<List<Point3D>> WalkerCollisionLocations = Root.child(UnitTest).child(Walker).child(Collision).topic(Data);
+   public static final Topic<Boolean> StopWalker = Root.child(UnitTest).child(Walker).topic(Stop);
 
    public static final API API = apiFactory.getAPIAndCloseFactory();
 }
