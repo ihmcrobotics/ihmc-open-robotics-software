@@ -5,12 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -56,9 +50,6 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final long TIMEOUT = Long.MAX_VALUE; // 30000; // 
    // Threshold used to assert that the body path starts and ends where we asked it to.
    private static final double START_GOAL_EPSILON = 1.0e-2;
-
-   // This guy has to be static so it can be shutdown when the UI closes.
-   private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
    // Whether to start the UI or not.
    private static boolean VISUALIZE = true;
@@ -293,7 +284,7 @@ public class VisibilityGraphsFrameworkTest extends Application
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private String runAssertionsNoOcclusionSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed, int maxSolveTimeInMilliseconds)
+   private String runAssertionsNoOcclusionSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed, long maxSolveTimeInMilliseconds)
    {
       String datasetName = dataset.getDatasetName();
 
@@ -319,26 +310,11 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
       {
-         Future<String> task = executorService.submit(() -> calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, planarRegionsList,
-                                                                                              latestBodyPath));
-
-         try
-         {
-            errorMessages += task.get(maxSolveTimeInMilliseconds, TimeUnit.MILLISECONDS);
-         }
-         catch (InterruptedException e)
-         {
-            e.printStackTrace();
-         }
-         catch (ExecutionException e)
-         {
-            e.getCause().printStackTrace();
-         }
-         catch (TimeoutException e)
-         {
-            // The VizGraphs took too long.
+         long startTime = System.currentTimeMillis();
+         errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, planarRegionsList, latestBodyPath);
+         long endTime = System.currentTimeMillis();
+         if (endTime - startTime > maxSolveTimeInMilliseconds)
             errorMessages += fail(datasetName, "Took too long to compute a new body path.");
-         }
 
          if (!errorMessages.isEmpty())
             return addPrefixToErrorMessages(datasetName, errorMessages);
@@ -361,7 +337,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    private String runAssertionsSimulateOcclusionAndDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed,
-                                                                     int maxSolveTimeInMilliseconds)
+                                                                     long maxSolveTimeInMilliseconds)
    {
       String datasetName = dataset.getDatasetName();
 
@@ -399,26 +375,11 @@ public class VisibilityGraphsFrameworkTest extends Application
          if (VISUALIZE)
             messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, knownRegions);
 
-         Future<String> task = executorService.submit(() -> calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, visibleRegions,
-                                                                                              latestBodyPath));
-
-         try
-         {
-            errorMessages += task.get(maxSolveTimeInMilliseconds, TimeUnit.MILLISECONDS);
-         }
-         catch (InterruptedException e)
-         {
-            e.printStackTrace();
-         }
-         catch (ExecutionException e)
-         {
-            e.getCause().printStackTrace();
-         }
-         catch (TimeoutException e)
-         {
-            // The VizGraphs took too long.
+         long startTime = System.currentTimeMillis();
+         errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, visibleRegions, latestBodyPath);
+         long endTime = System.currentTimeMillis();
+         if (endTime - startTime > maxSolveTimeInMilliseconds)
             errorMessages += fail(datasetName, "Took too long to compute a new body path.");
-         }
 
          if (!errorMessages.isEmpty())
             return addPrefixToErrorMessages(datasetName, errorMessages);
@@ -780,7 +741,6 @@ public class VisibilityGraphsFrameworkTest extends Application
    public void stop() throws Exception
    {
       ui.stop();
-      executorService.shutdownNow();
    }
 
    private static interface DatasetTestRunner
