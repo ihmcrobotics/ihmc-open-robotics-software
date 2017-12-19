@@ -196,7 +196,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
          try
          {
-            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+            List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
 
             if (path == null || path.size() < 2)
             {
