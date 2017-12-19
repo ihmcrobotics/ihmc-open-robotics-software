@@ -1,7 +1,8 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -10,6 +11,7 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ClusterToolsTest
 {
@@ -33,6 +35,23 @@ public class ClusterToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.5, 0.0), extrusions.get(index++), EPSILON);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, -0.5), extrusions.get(index++), EPSILON);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, -0.5), extrusions.get(index++), EPSILON);
+   }
+
+   @Test(timeout = 10000)
+   public void testFilterVerticalPolygonForMultiLineExtrusion() throws Exception
+   {
+      List<Point3D> rawPoints = new ArrayList<>();
+      double expectedObstacleHeight = 1.0;
+      rawPoints.add(new Point3D(0.0, 0.0, expectedObstacleHeight));
+      rawPoints.add(new Point3D(expectedObstacleHeight, 0.0, expectedObstacleHeight));
+      rawPoints.add(new Point3D(0.5, 0.0, 0.0));
+
+      List<Point3D> filteredRawPoints = ClusterTools.filterVerticalPolygonForMultiLineExtrusion(rawPoints, 0.0);
+
+      for (Point3D filteredRawPoint : filteredRawPoints)
+      {
+         assertEquals(expectedObstacleHeight, filteredRawPoint.getZ(), EPSILON);
+      }
    }
 
    @Test(timeout = 10000)
