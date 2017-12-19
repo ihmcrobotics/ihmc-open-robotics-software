@@ -57,6 +57,7 @@ public class VisibilityGraphsTestVisualizer
    private final Stage primaryStage;
    private final SimpleUIMessager messager;
    private final PlanarRegionViewer planarRegionViewer;
+   private final PlanarRegionViewer planarRegionShadowViewer;
    private final StartGoalPositionViewer startGoalViewer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
@@ -104,6 +105,8 @@ public class VisibilityGraphsTestVisualizer
       bindUIControls();
 
       planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
+      planarRegionShadowViewer = new PlanarRegionViewer(messager, UIVisibilityGraphsTopics.ShadowPlanarRegionData, ShowPlanarRegions);
+      planarRegionShadowViewer.setOpacity(0.);
       startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
@@ -112,6 +115,7 @@ public class VisibilityGraphsTestVisualizer
       walkerCollisionsViewer = new WalkerCollisionsViewer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(planarRegionShadowViewer.getRoot());
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(clusterMeshViewer.getRoot());
@@ -198,6 +202,7 @@ public class VisibilityGraphsTestVisualizer
    {
       primaryStage.show();
       planarRegionViewer.start();
+      planarRegionShadowViewer.start();
       startGoalViewer.start();
       bodyPathMeshViewer.start();
       clusterMeshViewer.start();
@@ -209,6 +214,7 @@ public class VisibilityGraphsTestVisualizer
    public void stop()
    {
       planarRegionViewer.stop();
+      planarRegionShadowViewer.stop();
       startGoalViewer.stop();
       bodyPathMeshViewer.stop();
       clusterMeshViewer.stop();
