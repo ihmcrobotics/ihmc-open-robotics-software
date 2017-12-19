@@ -27,6 +27,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.post.SceneProcessor;
+import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
@@ -508,6 +509,12 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
    @Override
    public void cleanup()
    {
+   }
+
+   @Override
+   public void setProfiler(AppProfiler profiler)
+   {
+      
    }
    
 
