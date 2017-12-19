@@ -135,6 +135,8 @@ public class VisibilityGraphsTestVisualizer
       previousDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
       nextDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
       nextDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+      datasetsListView.disableProperty().bind(previousDatasetButton.selectedProperty());
+      datasetsListView.disableProperty().bind(nextDatasetButton.selectedProperty());
 
       messager.registerJavaFXSyncedTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
 
