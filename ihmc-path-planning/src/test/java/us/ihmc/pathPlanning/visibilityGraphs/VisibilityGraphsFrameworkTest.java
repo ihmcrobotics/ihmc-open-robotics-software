@@ -92,7 +92,12 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
-   public void testASolutionExists() throws Exception
+   public void testSolutionForEachDatasetWithoutOcclusion() throws Exception
+   {
+      runAssertionsOnAllDatasets();
+   }
+
+   private void runAssertionsOnAllDatasets() throws Exception
    {
       List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(getClass());
 
@@ -132,7 +137,7 @@ public class VisibilityGraphsFrameworkTest extends Application
             messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getDatasetName());
          }
 
-         String errorMessagesForCurrentFile = testFile(dataset);
+         String errorMessagesForCurrentFile = runAssertionsOnDataset(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
@@ -195,7 +200,7 @@ public class VisibilityGraphsFrameworkTest extends Application
                         errorMessages.isEmpty());
    }
 
-   private String testFile(VisibilityGraphsUnitTestDataset dataset)
+   private String runAssertionsOnDataset(VisibilityGraphsUnitTestDataset dataset)
    {
       if (DEBUG)
       {
