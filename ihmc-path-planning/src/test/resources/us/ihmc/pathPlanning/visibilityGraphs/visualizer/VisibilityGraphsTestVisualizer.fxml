@@ -64,10 +64,12 @@
                         <HBox spacing="5.0">
                            <children>
                               <ToggleButton fx:id="previousDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Previous" HBox.hgrow="ALWAYS" />
+                              <ToggleButton fx:id="reloadDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Reload" />
                               <ToggleButton fx:id="nextDatasetButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Next" HBox.hgrow="ALWAYS" />
                            </children>
                         </HBox>
                         <ListView fx:id="datasetsListView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                        <ToggleButton fx:id="stopWalkingToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Stop walking!!!" />
                      </children>
                   </VBox>
                </children>
