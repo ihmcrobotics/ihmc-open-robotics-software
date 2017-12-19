@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Line2D;
@@ -376,10 +377,6 @@ public class ClusterTools
                                                 List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformFromHomeToWorld,
                                                 VisibilityGraphsParameters visibilityGraphsParameters)
    {
-      Point3D mean = new Point3D();
-      Vector3D principalVector = new Vector3D();
-      PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-
       for (PlanarRegion region : lineObstacleRegions)
       {
          if (regions.contains(region))
@@ -390,7 +387,7 @@ public class ClusterTools
             cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
             cluster.setTransformToWorld(transformFromHomeToWorld);
 
-            List<Point3D> rawPoints = new ArrayList<>();
+            List<Point3D> rawPointsInLocal = new ArrayList<>();
             RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
             region.getTransformToWorld(transformFromOtherToHome);
             transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
@@ -399,52 +396,10 @@ public class ClusterTools
             {
                Point3D concaveHullVertexHome = new Point3D(region.getConvexHull().getVertex(i));
                concaveHullVertexHome.applyTransform(transformFromOtherToHome);
-               rawPoints.add(concaveHullVertexHome);
+               rawPointsInLocal.add(concaveHullVertexHome);
             }
 
-            if (rawPoints.size() <= 2)
-            {
-               cluster.addRawPointsInLocal3D(rawPoints);
-               continue;
-            }
-
-            pca.clear();
-            rawPoints.forEach(p -> pca.addPoint(p.getX(), p.getY(), 0.0));
-            pca.compute();
-            pca.getMean(mean);
-            pca.getPrincipalVector(principalVector);
-            Line2D line = new Line2D(new Point2D(mean), new Vector2D(principalVector));
-            // Adjust the XY-coordinates to be on the line
-            rawPoints.stream().forEach(p -> p.set(line.orthogonalProjectionCopy(new Point2D(p))));
-            // Sort the points given their position on the line.
-            Collections.sort(rawPoints, (p1, p2) -> {
-               double t1 = line.parameterGivenPointOnLine(new Point2D(p1), Double.POSITIVE_INFINITY);
-               double t2 = line.parameterGivenPointOnLine(new Point2D(p2), Double.POSITIVE_INFINITY);
-               return t1 >= t2 ? 1 : -1;
-            });
-
-            // FIXME Problem with the obstacle height.
-            if (rawPoints.get(0).distanceXY(rawPoints.get(rawPoints.size() - 1)) <= POPPING_MULTILINE_POINTS_THRESHOLD)
-            {
-               cluster.addRawPointInLocal3D(rawPoints.get(0));
-               cluster.addRawPointInLocal3D(rawPoints.get(rawPoints.size() - 1));
-            }
-            else
-            {
-               int index = 0;
-               // Look for points with same XY-coordinates and only keep the highest one.
-               while (index < rawPoints.size() - 1)
-               {
-                  Point3D pointCurr = rawPoints.get(index);
-                  Point3D pointNext = rawPoints.get(index + 1);
-
-                  if (pointCurr.distanceXYSquared(pointNext) < POPPING_MULTILINE_POINTS_THRESHOLD)
-                     rawPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
-                  else
-                     index++;
-               }
-               cluster.addRawPointsInLocal3D(rawPoints);
-            }
+            cluster.addRawPointsInLocal3D(filterRawPointsForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
          }
       }
 
@@ -477,6 +432,58 @@ public class ClusterTools
          {
             System.out.println("Created a cluster of type: " + cluster.getType() + " with " + cluster.getRawPointsInLocal2D().size() + " points");
          }
+      }
+   }
+
+   static List<Point3D> filterRawPointsForMultiLineExtrusion(List<? extends Point3DReadOnly> rawPointsToFilter, double poppingPointsDistanceThreshold)
+   {
+      // Making a deep copy
+      List<Point3D> filteredRawPoints = rawPointsToFilter.stream().map(Point3D::new).collect(Collectors.toList());
+
+      if (rawPointsToFilter.size() <= 2)
+         return filteredRawPoints;
+
+
+      Point3D mean = new Point3D();
+      Vector3D principalVector = new Vector3D();
+      PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+
+      pca.clear();
+      filteredRawPoints.forEach(p -> pca.addPoint(p.getX(), p.getY(), 0.0));
+      pca.compute();
+      pca.getMean(mean);
+      pca.getPrincipalVector(principalVector);
+      Line2D line = new Line2D(new Point2D(mean), new Vector2D(principalVector));
+      // Adjust the XY-coordinates to be on the line
+      filteredRawPoints.stream().forEach(p -> p.set(line.orthogonalProjectionCopy(new Point2D(p))));
+      // Sort the points given their position on the line.
+      Collections.sort(filteredRawPoints, (p1, p2) -> {
+         double t1 = line.parameterGivenPointOnLine(new Point2D(p1), Double.POSITIVE_INFINITY);
+         double t2 = line.parameterGivenPointOnLine(new Point2D(p2), Double.POSITIVE_INFINITY);
+         return t1 >= t2 ? 1 : -1;
+      });
+
+      // FIXME Problem with the obstacle height.
+      if (filteredRawPoints.get(0).distanceXY(filteredRawPoints.get(filteredRawPoints.size() - 1)) <= poppingPointsDistanceThreshold)
+      {
+         Collections.swap(filteredRawPoints, 1, filteredRawPoints.size() - 1);
+         return filteredRawPoints.subList(0, 2);
+      }
+      else
+      {
+         int index = 0;
+         // Look for points with same XY-coordinates and only keep the highest one.
+         while (index < filteredRawPoints.size() - 1)
+         {
+            Point3D pointCurr = filteredRawPoints.get(index);
+            Point3D pointNext = filteredRawPoints.get(index + 1);
+
+            if (pointCurr.distanceXYSquared(pointNext) < poppingPointsDistanceThreshold)
+               filteredRawPoints.remove(pointCurr.getZ() <= pointNext.getZ() ? index : index + 1);
+            else
+               index++;
+         }
+         return filteredRawPoints;
       }
    }
 
