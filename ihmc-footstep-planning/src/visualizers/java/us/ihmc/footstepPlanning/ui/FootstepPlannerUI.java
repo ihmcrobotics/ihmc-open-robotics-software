@@ -26,12 +26,16 @@ public class FootstepPlannerUI
    private final StartGoalPositionEditor startGoalEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
+   private final FootstepPathRenderer pathRenderer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
 
    @FXML
    private StartGoalTabController startGoalTabController;
+
+   @FXML
+   private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
 
    public FootstepPlannerUI(Stage primaryStage) throws IOException
    {
@@ -46,6 +50,7 @@ public class FootstepPlannerUI
 
       footstepPlannerMenuUIController.attachMessager(messager);
       startGoalTabController.attachMessager(messager);
+      footstepPlannerParametersUIController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -61,15 +66,18 @@ public class FootstepPlannerUI
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic, StartPositionTopic,
                                                     GoalPositionTopic);
+      this.pathRenderer = new FootstepPathRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
+      view3dFactory.addNodeToView(pathRenderer.getRoot());
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
       startGoalEditor.start();
+      pathRenderer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -88,5 +96,6 @@ public class FootstepPlannerUI
    public void stop()
    {
       planarRegionViewer.stop();
+      pathRenderer.stop();
    }
 }

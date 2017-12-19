@@ -47,4 +47,5 @@ visualizersDependencies {
    compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: groupDependencyVersion
 }
