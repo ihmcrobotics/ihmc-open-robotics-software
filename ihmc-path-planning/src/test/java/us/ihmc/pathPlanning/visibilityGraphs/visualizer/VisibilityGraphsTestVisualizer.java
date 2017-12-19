@@ -97,7 +97,7 @@ public class VisibilityGraphsTestVisualizer
       Pane root = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
+      view3dFactory.addCameraController(0.05, 150.0, true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
