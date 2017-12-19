@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBeha
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.RepeatedlyWalkFootstepListBehavior;
@@ -296,10 +295,6 @@ public class IHMCHumanoidBehaviorManager
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, referenceFrames, walkingControllerParameters, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
-
-      CuttingWallBehaviorStateMachine cuttingWallBehavior = new CuttingWallBehaviorStateMachine(robotModelFactory, behaviorCommunicationBridge, yoTime,
-                                                                                                fullRobotModel, referenceFrames);
-      dispatcher.addBehavior(HumanoidBehaviorType.CUTTING_WALL, cuttingWallBehavior);
 
       RepeatedlyWalkFootstepListBehavior repeatedlyWalkFootstepListBehavior = new RepeatedlyWalkFootstepListBehavior(behaviorCommunicationBridge,
                                                                                                                      walkingControllerParameters, yoTime,

@@ -86,21 +86,4 @@ public class CTTreeTools
       double randomTimeData = value * trajectoryTime;
       node.setTimeData(randomTimeData);
    }
-
-   public static ConfigurationSpace getConfigurationSpace(CTTaskNode node, RobotSide robotSide)
-   {
-      ConfigurationSpace configurationSpace = new ConfigurationSpace();
-      if (robotSide == RobotSide.LEFT)
-      {
-         configurationSpace.setTranslation(node.getNodeData(5), node.getNodeData(6), node.getNodeData(7));
-         configurationSpace.setRotation(node.getNodeData(8), node.getNodeData(9), node.getNodeData(10));
-      }
-      else
-      {
-         configurationSpace.setTranslation(node.getNodeData(11), node.getNodeData(12), node.getNodeData(13));
-         configurationSpace.setRotation(node.getNodeData(14), node.getNodeData(15), node.getNodeData(16));
-      }
-
-      return configurationSpace;
-   }
 }
