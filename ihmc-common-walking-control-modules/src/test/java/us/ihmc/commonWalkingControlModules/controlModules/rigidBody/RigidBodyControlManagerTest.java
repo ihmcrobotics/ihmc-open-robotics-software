@@ -19,14 +19,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -37,11 +38,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -51,6 +51,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -136,10 +138,10 @@ public class RigidBodyControlManagerTest
       manager.compute();
 
       double trajectoryTime = 1.0;
-      Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
-      Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
-      Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
-      Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+      Point3D position = EuclidCoreRandomTools.nextPoint3D(random);
+      Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random);
+      Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
+      Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
       SE3Message message = new SE3Message(1, worldFrame);
       message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
@@ -178,13 +180,13 @@ public class RigidBodyControlManagerTest
       FramePoint3D desiredPosition = new FramePoint3D();
       FrameVector3D desiredLinearVelocity = new FrameVector3D();
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
-      FrameOrientation desiredOrientation = new FrameOrientation();
+      FrameQuaternion desiredOrientation = new FrameQuaternion();
       FrameVector3D desiredAngularVelocity = new FrameVector3D();
       FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
       FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
-      FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
+      FrameQuaternion initialOrientation = new FrameQuaternion(bodyFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);
 
@@ -201,7 +203,7 @@ public class RigidBodyControlManagerTest
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), desiredPosition.getPoint(), epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
-         EuclidCoreTestTools.assertQuaternionEqualsSmart(initialOrientation.getQuaternion(), desiredOrientation.getQuaternion(), epsilon);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialOrientation.getQuaternion(), desiredOrientation.getQuaternion(), epsilon);
       }
 
       // go forward to the end of the trajectory
@@ -219,7 +221,7 @@ public class RigidBodyControlManagerTest
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition.getPoint(), epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
-         EuclidCoreTestTools.assertQuaternionEqualsSmart(orientation, desiredOrientation.getQuaternion(), epsilon);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientation, desiredOrientation.getQuaternion(), epsilon);
 
          EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity.getVector(), epsilon);
          EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity.getVector(), epsilon);
@@ -273,22 +275,22 @@ public class RigidBodyControlManagerTest
 
       double trajectoryTime = 1.0;
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
 
       ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(referenceFrames);
       for (int i = 0; i < 50; i++)
       {
-         Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
-         Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
-         Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
-         Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+         Point3D position = EuclidCoreRandomTools.nextPoint3D(random);
+         Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random);
+         Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
          SE3Message message = new SE3Message(1, worldFrame);
          message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
@@ -335,7 +337,7 @@ public class RigidBodyControlManagerTest
 
          ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
          FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
-         FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
+         FrameQuaternion initialOrientation = new FrameQuaternion(bodyFrame);
          initialPosition.changeFrame(worldFrame);
          initialOrientation.changeFrame(worldFrame);
 
@@ -392,13 +394,13 @@ public class RigidBodyControlManagerTest
       manager.compute();
 
       double trajectoryTime = 1.0;
-      Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
-      Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
-      Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
-      Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+      Point3D position = EuclidCoreRandomTools.nextPoint3D(random);
+      Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random);
+      Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
+      Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-      Point3D controlFramePosition = EuclidCoreRandomTools.generateRandomPoint3D(random);
-      Quaternion controlFrameOrientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
+      Point3D controlFramePosition = EuclidCoreRandomTools.nextPoint3D(random);
+      Quaternion controlFrameOrientation = EuclidCoreRandomTools.nextQuaternion(random);
 
       SE3Message message = new SE3Message(1, worldFrame);
       message.setControlFramePosition(controlFramePosition);
@@ -416,17 +418,17 @@ public class RigidBodyControlManagerTest
       FramePoint3D desiredPosition = new FramePoint3D();
       FrameVector3D desiredLinearVelocity = new FrameVector3D();
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
-      FrameOrientation desiredOrientation = new FrameOrientation();
+      FrameQuaternion desiredOrientation = new FrameQuaternion();
       FrameVector3D desiredAngularVelocity = new FrameVector3D();
       FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
-      FrameOrientation actualControlFrameOrientation = new FrameOrientation();
+      FrameQuaternion actualControlFrameOrientation = new FrameQuaternion();
       FramePoint3D actualControlFramePosition = new FramePoint3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("TestControlFrame", bodyFrame);
       controlFrame.setPoseAndUpdate(controlFramePosition, controlFrameOrientation);
       FramePoint3D initialPosition = new FramePoint3D(controlFrame);
-      FrameOrientation initialOrientation = new FrameOrientation(controlFrame);
+      FrameQuaternion initialOrientation = new FrameQuaternion(controlFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);
 
@@ -443,13 +445,13 @@ public class RigidBodyControlManagerTest
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), desiredPosition.getPoint(), epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
-         EuclidCoreTestTools.assertQuaternionEqualsSmart(initialOrientation.getQuaternion(), desiredOrientation.getQuaternion(), 1e-10);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialOrientation.getQuaternion(), desiredOrientation.getQuaternion(), 1e-10);
 
          taskspaceCommand.getControlFramePoseIncludingFrame(actualControlFramePosition, actualControlFrameOrientation);
          actualControlFramePosition.checkReferenceFrameMatch(bodyFrame);
          actualControlFrameOrientation.checkReferenceFrameMatch(bodyFrame);
          EuclidCoreTestTools.assertTuple3DEquals(controlFramePosition, actualControlFramePosition.getPoint(), epsilon);
-         EuclidCoreTestTools.assertQuaternionEqualsSmart(controlFrameOrientation, actualControlFrameOrientation.getQuaternion(), epsilon);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(controlFrameOrientation, actualControlFrameOrientation.getQuaternion(), epsilon);
       }
 
       // go forward to the end of the trajectory
@@ -467,7 +469,7 @@ public class RigidBodyControlManagerTest
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition.getPoint(), epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
-         EuclidCoreTestTools.assertQuaternionEqualsSmart(orientation, desiredOrientation.getQuaternion(), epsilon);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientation, desiredOrientation.getQuaternion(), epsilon);
 
          EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity.getVector(), epsilon);
          EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity.getVector(), epsilon);
@@ -497,10 +499,6 @@ public class RigidBodyControlManagerTest
       homeConfiguration.put(joint1.getName(), q1_home);
       homeConfiguration.put(joint2.getName(), q2_home);
 
-      // no position controlled joints
-      List<String> positionControlledJointNames = new ArrayList<>();
-      Map<String, JointAccelerationIntegrationSettings> integrationSettings = new HashMap<>();
-
       // add some possible trajectory frames
       Collection<ReferenceFrame> trajectoryFrames = new ArrayList<>();
       trajectoryFrames.add(link1.getBodyFixedFrame());
@@ -515,26 +513,30 @@ public class RigidBodyControlManagerTest
       ReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
 
-      return new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, positionControlledJointNames, integrationSettings,
-            trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, null, testRegistry);
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, trajectoryFrames, controlFrame,
+                                                                    baseFrame, contactableBody, null, yoTime, null, testRegistry);
+      new DefaultParameterReader().readParametersInRegistry(testRegistry);
+      return manager;
    }
 
    private void setGainsAndWeights(RigidBodyControlManager manager)
    {
       // setup gains and weights to be all zero with weights 1.0
-      Map<String, YoPIDGains> jointspaceGains = new HashMap<>();
+      Map<String, PIDGainsReadOnly> jointspaceGains = new HashMap<>();
       jointspaceGains.put(joint1.getName(), new YoPIDGains("Joint1Gains", testRegistry));
       jointspaceGains.put(joint2.getName(), new YoPIDGains("Joint2Gains", testRegistry));
       YoPID3DGains taskspaceOrientationGains = new SymmetricYoPIDSE3Gains("OrientationGains", testRegistry);
       YoPID3DGains taskspacePositionGains = new SymmetricYoPIDSE3Gains("PositionGains", testRegistry);
-      TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
-      jointspaceWeights.put(joint1.getName(), 1.0);
-      jointspaceWeights.put(joint2.getName(), 1.0);
+      YoDouble weight = new YoDouble("JointWeights", testRegistry);
+      weight.set(1.0);
+      Map<String, DoubleProvider> jointspaceWeights = new HashMap<>();
+      jointspaceWeights.put(joint1.getName(), weight);
+      jointspaceWeights.put(joint2.getName(), weight);
+      Map<String, DoubleProvider> userModeWeights = new HashMap<>();
+      userModeWeights.put(joint1.getName(), weight);
+      userModeWeights.put(joint2.getName(), weight);
       Vector3D taskspaceAngularWeight = new Vector3D(1.0, 1.0, 1.0);
       Vector3D taskspaceLinearWeight = new Vector3D(1.0, 1.0, 1.0);
-      TObjectDoubleHashMap<String> userModeWeights = new TObjectDoubleHashMap<>();
-      userModeWeights.put(joint1.getName(), 1.0);
-      userModeWeights.put(joint2.getName(), 1.0);
 
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);

@@ -1,138 +1,90 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
-public class PlanarRegionBaseOfCliffAvoider
+public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
 {
-   private boolean visualize = true;
-   
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final FootstepPlannerParameters parameters;
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
 
-   private final YoFrameVector yoShiftVectorInSoleFrame = new YoFrameVector("shiftVectorInSoleFrame", null, registry);
-   private final YoDouble maximumCliffXInSoleFrame = new YoDouble("maximumCliffXInSoleFrame", registry);
-   private final YoDouble maximumCliffYInSoleFrame = new YoDouble("maximumCliffYInSoleFrame", registry);
-   private final YoDouble maximumCliffZInSoleFrame = new YoDouble("maximumCliffZInSoleFrame", registry);
+   private PlanarRegionsList planarRegionsList;
+   private FootstepNode startNode;
 
-   private final YoGraphicPosition beforeAdjustmentPosition, afterAdjustmentPosition;
-
-   //TODO: Put in parameters or use the actual footstep for these checks...
-   private static final double forwardBackForSidewaysLook = 0.1;
-
-   public PlanarRegionBaseOfCliffAvoider(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      parentRegistry.addChild(registry);
-      
-      if (yoGraphicsListRegistry == null)
-      {
-         visualize = false;
-      }
-
-      if (visualize)
-      {
-         beforeAdjustmentPosition = new YoGraphicPosition("beforeAdjustmentPosition", "", registry, 0.02, YoAppearance.Red());
-         afterAdjustmentPosition = new YoGraphicPosition("afterAdjustmentPosition", "", registry, 0.02, YoAppearance.Green());
-         yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), beforeAdjustmentPosition);
-         yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), afterAdjustmentPosition);
-      }
-      else
-      {
-         beforeAdjustmentPosition = null;
-         afterAdjustmentPosition = null;
-      }
+      this.parameters = parameters;
+      this.footPolygons = footPolygons;
    }
 
-   public void shiftAwayFromCliffBottoms(YoFootstepPlannerParameters parameters, PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform)
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      double cliffHeightToShiftAwayFrom = parameters.getCliffHeightToShiftAwayFrom();
+      this.planarRegionsList = planarRegionsList;
+   }
+
+   @Override
+   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   {
+      this.startNode = startNode;
+   }
+
+   public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
+   {
+      if(startNode != null && startNode.equals(node))
+         return true;
+
+      if(planarRegionsList == null)
+         return true;
+
+      if(parameters.getMinimumDistanceFromCliffBottoms() <= 0.0 || Double.isInfinite(parameters.getCliffHeightToAvoid()))
+         return true;
+
+      double cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
       double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
 
-      if ((cliffHeightToShiftAwayFrom <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
-         return;
+      if ((cliffHeightToAvoid <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
+         return true;
+
+      RigidBodyTransform soleTransform = new RigidBodyTransform();
+      FootstepNodeTools.getNodeTransform(node, soleTransform);
 
       RigidBodyTransform inverseSoleTransform = new RigidBodyTransform(soleTransform);
       inverseSoleTransform.invert();
 
-      //TODO: Too many hard coded numbers around here...
-
-      LineSegment2D middleToLeft = new LineSegment2D(0.0, 0.0, 0.0, minimumDistanceFromCliffBottoms);
-      LineSegment2D middleToRight = new LineSegment2D(0.0, 0.0, 0.0, -minimumDistanceFromCliffBottoms);
-      LineSegment2D frontToLeft = new LineSegment2D(forwardBackForSidewaysLook, 0.0, forwardBackForSidewaysLook, minimumDistanceFromCliffBottoms);
-      LineSegment2D frontToRight = new LineSegment2D(forwardBackForSidewaysLook, 0.0, forwardBackForSidewaysLook, -minimumDistanceFromCliffBottoms);
-      LineSegment2D backToLeft = new LineSegment2D(-forwardBackForSidewaysLook, 0.0, -forwardBackForSidewaysLook, minimumDistanceFromCliffBottoms);
-      LineSegment2D backToRight = new LineSegment2D(-forwardBackForSidewaysLook, 0.0, -forwardBackForSidewaysLook, -minimumDistanceFromCliffBottoms);
-      
-      LineSegment2D backToBackFurther = new LineSegment2D(-0.0, 0.0, -minimumDistanceFromCliffBottoms, 0.0);
-      LineSegment2D frontToFrontFurther = new LineSegment2D(-0.0, 0.0, minimumDistanceFromCliffBottoms, 0.0);
-
       ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
-      lineSegmentsInSoleFrame.add(middleToLeft);
-      lineSegmentsInSoleFrame.add(middleToRight);
-      lineSegmentsInSoleFrame.add(frontToLeft);
-      lineSegmentsInSoleFrame.add(frontToRight);
-      lineSegmentsInSoleFrame.add(backToLeft);
-      lineSegmentsInSoleFrame.add(backToRight);
-      lineSegmentsInSoleFrame.add(backToBackFurther);
-      lineSegmentsInSoleFrame.add(frontToFrontFurther);
+      ConvexPolygon2D footPolygon = footPolygons.get(node.getRobotSide());
+      for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly point1 = footPolygon.getVertex(i);
+         Point2DReadOnly point2 = footPolygon.getVertex((i + 1) % footPolygon.getNumberOfVertices());
+
+         Point2D averagePoint = EuclidGeometryTools.averagePoint2Ds(Arrays.asList(point1, point2));
+         Point2D extendedPoint = new Point2D(averagePoint);
+         extendedPoint.scale(1.0 + (minimumDistanceFromCliffBottoms / averagePoint.distanceFromOrigin()));
+         lineSegmentsInSoleFrame.add(new LineSegment2D(averagePoint.getX(), averagePoint.getY(), extendedPoint.getX(), extendedPoint.getY()));
+      }
 
       Point3D highestPointInSoleFrame = new Point3D();
       LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
-      maximumCliffZInSoleFrame.set(findHighestPointInOriginalSoleFrame(planarRegionsList, soleTransform, inverseSoleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame));
-      maximumCliffXInSoleFrame.set(highestPointInSoleFrame.getX());
-      maximumCliffYInSoleFrame.set(highestPointInSoleFrame.getY());
 
-      if (maximumCliffZInSoleFrame.getDoubleValue() > cliffHeightToShiftAwayFrom)
-      {
-         Vector2D shiftVectorInSoleFrame = new Vector2D(highestPointInSoleFrame.getX(), highestPointInSoleFrame.getY());
-         shiftVectorInSoleFrame.sub(highestLineSegmentInSoleFrame.getFirstEndpointCopy());
-
-         if (shiftVectorInSoleFrame.length() < minimumDistanceFromCliffBottoms)
-         {
-            double distanceToShift = minimumDistanceFromCliffBottoms - shiftVectorInSoleFrame.length();
-            shiftVectorInSoleFrame.normalize();
-            shiftVectorInSoleFrame.scale(-distanceToShift);
-            
-            yoShiftVectorInSoleFrame.set(shiftVectorInSoleFrame.getX(), shiftVectorInSoleFrame.getY(), 0.0);
-            //TODO: This may shift a foot into another obstacle. Need something more here...
-
-            if (visualize)
-            {
-               Point3D solePosition = new Point3D();
-               soleTransform.getTranslation(solePosition);
-               beforeAdjustmentPosition.setPosition(solePosition);
-            }
-
-            FootstepNodeTools.shiftInSoleFrame(shiftVectorInSoleFrame, soleTransform);
-
-            if(visualize)
-            {
-               Point3D solePosition = new Point3D();
-               soleTransform.getTranslation(solePosition);
-               afterAdjustmentPosition.setPosition(solePosition);
-            }
-         }
-      }
-
-      // The following is just to display the graph better...
-      if (Double.isInfinite(maximumCliffZInSoleFrame.getDoubleValue()))
-      {
-         maximumCliffZInSoleFrame.set(-0.02);
-      }
+      double maximumCliffZInSoleFrame = findHighestPointInOriginalSoleFrame(planarRegionsList, soleTransform, inverseSoleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame);
+      return maximumCliffZInSoleFrame < cliffHeightToAvoid;
    }
    
    private double findHighestPointInOriginalSoleFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, RigidBodyTransform inverseSoleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,

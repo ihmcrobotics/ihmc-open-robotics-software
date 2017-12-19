@@ -178,7 +178,6 @@ public class ValidNodesStateMachineBehavior extends StateMachineBehavior<RRTExpa
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
    }
 
    private class WaitingResultBehavior extends AbstractBehavior

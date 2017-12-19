@@ -79,7 +79,9 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             currentJoint.getOffset(jointOffset); 
     
             RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);
-            
+            currentIDJoint.setJointLimitLower(currentJoint.getJointLowerLimit());
+            currentIDJoint.setJointLimitUpper(currentJoint.getJointUpperLimit());
+
             ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);

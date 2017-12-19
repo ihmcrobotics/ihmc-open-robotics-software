@@ -411,8 +411,8 @@ public class GeometryToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         randomPoint.setIncludingFrame(EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0));
-         randomVector.setIncludingFrame(EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+         randomPoint.setIncludingFrame(EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0));
+         randomVector.setIncludingFrame(EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
 
          ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
          ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);
@@ -435,7 +435,7 @@ public class GeometryToolsTest
       double yaw;
       FramePoint3D result;
 
-      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       yaw = randomAngle(r);
@@ -446,7 +446,7 @@ public class GeometryToolsTest
       assertEquals("not equal", -1528.2007328131492, result.getY(), epsilon);
       assertEquals("not equal", 2998.298763316407, result.getZ(), epsilon);
 
-      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       yaw = randomAngle(r);
@@ -457,7 +457,7 @@ public class GeometryToolsTest
       assertEquals("not equal", -3773.703916968001, result.getY(), epsilon);
       assertEquals("not equal", -3313.247345650209, result.getZ(), epsilon);
 
-      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       yaw = randomAngle(r);
@@ -483,7 +483,7 @@ public class GeometryToolsTest
       double pitch;
       FramePoint3D result;
 
-      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
@@ -494,7 +494,7 @@ public class GeometryToolsTest
       assertEquals("not equal", 1443.7013411938358, result.getY(), epsilon);
       assertEquals("not equal", 11103.259343203952, result.getZ(), epsilon);
 
-      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);
@@ -505,7 +505,7 @@ public class GeometryToolsTest
       assertEquals("not equal", 3010.5651766598717, result.getY(), epsilon);
       assertEquals("not equal", -3513.344540982049, result.getZ(), epsilon);
 
-      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       pitch = randomAngle(r);

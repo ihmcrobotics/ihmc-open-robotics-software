@@ -192,13 +192,13 @@ diag
 <Title>
 General
 </Title>
-<Entry Boxes>enableOutput,startStandprep,selectedJointPair,requestedHighLevelState,manualModeICPOffset,jointVelocityAlphaFilter</Entry Boxes>
+<Entry Boxes>enableOutput,startStandprep,selectedJointPair,requestedHighLevelControllerName,manualModeICPOffset,jointVelocityAlphaFilter</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 UserStep
 </Title>
-<Entry Boxes>userStepsToTake,userStepFirstSide,userStepLength,userStepWidth,userStepsTakeEm,kpPelvisOrientation,kpXYLinearSwingFoot,kpZLinearSwingFoot,kpXYAngularSwingFoot,kpZAngularSwingFoot,swingTime,kpChestOrientation,captureKpParallel,captureKpOrthogonal,zetaPelvisOrientation,transferTime,r_leg_knymotorDamping,enableOutput,startStandprep,selectedJointPair,requestedHighLevelState,manualModeICPOffset,jointVelocityAlphaFilter,userStepSideways,kpCoMHeight,zetaCoMHeight,userStepYaw</Entry Boxes>
+<Entry Boxes>userStepsToTake,userStepFirstSide,userStepLength,userStepWidth,userStepsTakeEm,kpPelvisOrientation,kpXYLinearSwingFoot,kpZLinearSwingFoot,kpXYAngularSwingFoot,kpZAngularSwingFoot,swingTime,kpChestOrientation,captureKpParallel,captureKpOrthogonal,zetaPelvisOrientation,transferTime,r_leg_knymotorDamping,enableOutput,startStandprep,selectedJointPair,requestedHighLevelControllerName,manualModeICPOffset,jointVelocityAlphaFilter,userStepSideways,kpCoMHeight,zetaCoMHeight,userStepYaw</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>

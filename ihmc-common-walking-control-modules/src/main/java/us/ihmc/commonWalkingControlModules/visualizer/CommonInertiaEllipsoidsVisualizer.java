@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -18,7 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -183,7 +183,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
          tempCoMPosition.changeFrame(worldFrame);
          tempCoMPosition.add(inertiaEllipsoidGhostOffset.getFrameVectorCopy());
 
-         FrameOrientation orientation = new FrameOrientation(comData.rigidBody.getBodyFixedFrame());
+         FrameQuaternion orientation = new FrameQuaternion(comData.rigidBody.getBodyFixedFrame());
          orientation.changeFrame(worldFrame);
 
          comData.position.set(tempCoMPosition);

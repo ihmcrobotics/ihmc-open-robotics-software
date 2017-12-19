@@ -2,6 +2,7 @@ package us.ihmc.thor.visualizers;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -12,7 +13,7 @@ public class ThorSimpleRemoteVisualizer implements SCSVisualizerStateListener
 
    public ThorSimpleRemoteVisualizer(int bufferSize)
    {
-      ThorSimpleSCSVisualizer scsVisualizer = new ThorSimpleSCSVisualizer(bufferSize);
+      SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(true);
 

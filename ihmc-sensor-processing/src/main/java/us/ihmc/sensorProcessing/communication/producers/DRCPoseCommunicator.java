@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,14 +29,16 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.AuxiliaryRobotDataProvider;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-// fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
+// fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate
+// consumer
 public class DRCPoseCommunicator implements RawOutputWriter
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
    private final NetClassList netClassList;
 
-//   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
+   //   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
    private final PeriodicThreadScheduler scheduler;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -45,23 +46,25 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final SensorTimestampHolder sensorTimestampHolder;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
-//   private final SideDependentList<String> wristForceSensorNames;
+   //   private final SideDependentList<String> wristForceSensorNames;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
-   
+
    // puts the state data into the ring buffer for the output thread
-    private final Vector3D32[] imuLinearAccelerations;
-    private final Vector3D32[] rawImuAngularVelocities;
-    private final RotationMatrix[] imuOrientationsAsMatrix;
-    private final Quaternion32[] imuOrientations;
+   private final Vector3D32[] imuLinearAccelerations;
+   private final Vector3D32[] rawImuAngularVelocities;
+   private final RotationMatrix[] imuOrientationsAsMatrix;
+   private final Quaternion32[] imuOrientations;
 
    private final SideDependentList<ReferenceFrame> wristForceSensorFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ForceSensorDistalMassCompensator> wristForceSensorDistalMassCompensators = new SideDependentList<ForceSensorDistalMassCompensator>();
 
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
 
-   public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, AuxiliaryRobotDataProvider auxiliaryRobotDataProvider,
-         GlobalDataProducer dataProducer, SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
-         RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation, PeriodicThreadScheduler scheduler, NetClassList netClassList)
+   public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
+                              AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, GlobalDataProducer dataProducer,
+                              SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
+                              RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation,
+                              PeriodicThreadScheduler scheduler, NetClassList netClassList)
    {
       this.dataProducer = dataProducer;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
@@ -71,24 +74,23 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.scheduler = scheduler;
       this.netClassList = netClassList;
 
-
-      if(sensorInformation != null)
+      if (sensorInformation != null)
       {
          SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-         if(wristForceSensorNames != null && !wristForceSensorNames.isEmpty())
+         if (wristForceSensorNames != null && !wristForceSensorNames.isEmpty())
          {
-            setupForceSensorMassCompensators(estimatorModel, wristForceSensorNames);         
+            setupForceSensorMassCompensators(estimatorModel, wristForceSensorNames);
          }
       }
 
       IMUDefinition[] imuDefinitions = estimatorModel.getIMUDefinitions();
-      
+
       int numberOfImuSensors = imuDefinitions.length;
       imuLinearAccelerations = new Vector3D32[numberOfImuSensors];
       rawImuAngularVelocities = new Vector3D32[numberOfImuSensors];
       imuOrientationsAsMatrix = new RotationMatrix[numberOfImuSensors];
       imuOrientations = new Quaternion32[numberOfImuSensors];
-      
+
       for (int imuSensorIndex = 0; imuSensorIndex < numberOfImuSensors; imuSensorIndex++)
       {
          imuLinearAccelerations[imuSensorIndex] = new Vector3D32();
@@ -98,7 +100,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }
       ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
       OneDoFJoint[] joints = jointConfigurationGathererAndProducer.getJoints();
-      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions, imuDefinitions, auxiliaryRobotDataProvider), 16);
+      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions,
+                                                                                                                            imuDefinitions,
+                                                                                                                            auxiliaryRobotDataProvider),
+                                                                                          16);
       startWriterThread();
    }
 
@@ -146,7 +151,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   robotConfigurationDataRingBuffer.flush();
                }
             }
-            catch(Throwable throwable)
+            catch (Throwable throwable)
             {
                throwable.printStackTrace();
             }
@@ -180,7 +185,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
       return getName();
    }
 
-
    // puts the state data into the ring buffer for the output thread
    @Override
    public void write()
@@ -195,30 +199,29 @@ public class DRCPoseCommunicator implements RawOutputWriter
       long timestamp = sensorTimestampHolder.getVisionSensorTimestamp();
       long pps = sensorTimestampHolder.getSensorHeadPPSTimestamp();
       jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, state);
-      
-      if(sensorRawOutputMapReadOnly != null)
+
+      if (sensorRawOutputMapReadOnly != null)
       {
          List<? extends IMUSensorReadOnly> imuRawOutputs = sensorRawOutputMapReadOnly.getIMURawOutputs();
          for (int sensorNumber = 0; sensorNumber < imuRawOutputs.size(); sensorNumber++)
          {
-            IMUSensorReadOnly imuSensor =  imuRawOutputs.get(sensorNumber);
+            IMUSensorReadOnly imuSensor = imuRawOutputs.get(sensorNumber);
             IMUPacket imuPacketToPack = state.getImuPacketForSensor(sensorNumber);
-            
+
             imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
             imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
             imuOrientations[sensorNumber].set(imuOrientationsAsMatrix[sensorNumber]);
             imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
-            
+
             imuPacketToPack.set(imuLinearAccelerations[sensorNumber], imuOrientations[sensorNumber], rawImuAngularVelocities[sensorNumber]);
          }
          state.setAuxiliaryRobotData(sensorRawOutputMapReadOnly.getAuxiliaryRobotData());
       }
-      
+
       state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
 
-      
       LastPacket lastPacket = dataProducer.getLastPacket();
-      if(lastPacket != null)
+      if (lastPacket != null)
       {
          state.setLastReceivedPacketTypeID(netClassList.getID(lastPacket.getPacket()));
          state.setLastReceivedPacketUniqueId(lastPacket.getUniqueId());
@@ -230,7 +233,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          state.setLastReceivedPacketUniqueId(-1);
          state.setLastReceivedPacketRobotTimestamp(-1);
       }
-      
+
       robotConfigurationDataRingBuffer.commit();
    }
 
@@ -241,7 +244,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
       private final IMUDefinition[] imuDefinitions;
       private final AuxiliaryRobotDataProvider auxiliaryRobotDataProvider;
 
-      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions, AuxiliaryRobotDataProvider auxiliaryRobotDataProvider)
+      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions,
+                                           AuxiliaryRobotDataProvider auxiliaryRobotDataProvider)
       {
          this.joints = joints;
          this.forceSensorDefinitions = forceSensorDefinitions;
@@ -252,17 +256,18 @@ public class DRCPoseCommunicator implements RawOutputWriter
       @Override
       public RobotConfigurationData newInstance()
       {
-         if(auxiliaryRobotDataProvider != null)
+         if (auxiliaryRobotDataProvider != null)
          {
-            return new RobotConfigurationData(joints, forceSensorDefinitions, auxiliaryRobotDataProvider.newAuxiliaryRobotDataInstance(), imuDefinitions);            
+            return new RobotConfigurationData(joints, forceSensorDefinitions, auxiliaryRobotDataProvider.newAuxiliaryRobotDataInstance(), imuDefinitions);
          }
          else
          {
-            return new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);                        
+            return new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
          }
       }
 
    }
+
    public void stop()
    {
       scheduler.shutdown();

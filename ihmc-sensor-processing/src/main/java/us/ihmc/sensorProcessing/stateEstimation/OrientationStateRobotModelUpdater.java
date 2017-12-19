@@ -6,10 +6,10 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.ControlFlowPort;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -19,7 +19,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 public class OrientationStateRobotModelUpdater extends AbstractControlFlowElement implements Runnable
 {
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
-   private final ControlFlowPort<FrameOrientation> orientationPort;
+   private final ControlFlowPort<FrameQuaternion> orientationPort;
    private final ControlFlowPort<FrameVector3D> angularVelocityPort;
 
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
@@ -28,7 +28,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
    // Constructor in case of use as a ControlFlowElement
    public OrientationStateRobotModelUpdater(ControlFlowGraph controlFlowGraph,
            ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort,
-           ControlFlowOutputPort<FrameOrientation> orientationOutputPort, ControlFlowOutputPort<FrameVector3D> angularVelocityOutputPort)
+           ControlFlowOutputPort<FrameQuaternion> orientationOutputPort, ControlFlowOutputPort<FrameVector3D> angularVelocityOutputPort)
    {
       this.orientationPort = createInputPort("orientationInputPort");
       this.angularVelocityPort = createInputPort("angularVelocityInputPort");
@@ -36,7 +36,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       this.inverseDynamicsStructureOutputPort = createOutputPort("inverseDynamicsStructureOutputPort");
 
       controlFlowGraph.connectElements(inverseDynamicsStructureOutputPort, inverseDynamicsStructureInputPort);
-      controlFlowGraph.connectElements(orientationOutputPort, (ControlFlowInputPort<FrameOrientation>) orientationPort);
+      controlFlowGraph.connectElements(orientationOutputPort, (ControlFlowInputPort<FrameQuaternion>) orientationPort);
       controlFlowGraph.connectElements(angularVelocityOutputPort, (ControlFlowInputPort<FrameVector3D>) angularVelocityPort);
 
       this.inverseDynamicsStructureInputPort.setData(inverseDynamicsStructureOutputPort.getData());
@@ -45,7 +45,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
    // Constructor in case of use as a Runnable
    public OrientationStateRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
-           ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort)
+           ControlFlowOutputPort<FrameQuaternion> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort)
    {
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
       this.inverseDynamicsStructureOutputPort = null;
@@ -118,11 +118,11 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       rootJointAngularVelocityToPack.add(tempEstimationLinkAngularVelocity, tempRootToEstimationAngularVelocity);
    }
 
-   private final FrameOrientation tempOrientationEstimatinLink = new FrameOrientation(ReferenceFrame.getWorldFrame());    // worldframe just for initializing
+   private final FrameQuaternion tempOrientationEstimatinLink = new FrameQuaternion(ReferenceFrame.getWorldFrame());    // worldframe just for initializing
    private final RigidBodyTransform tempEstimationLinkToWorld = new RigidBodyTransform();
    private final RigidBodyTransform tempRootJointToWorld = new RigidBodyTransform();
 
-   private void updateRootJointRotation(FloatingInverseDynamicsJoint rootJoint, FrameOrientation estimationLinkOrientation, ReferenceFrame estimationFrame)
+   private void updateRootJointRotation(FloatingInverseDynamicsJoint rootJoint, FrameQuaternion estimationLinkOrientation, ReferenceFrame estimationFrame)
    {
       tempOrientationEstimatinLink.setIncludingFrame(estimationLinkOrientation);
 
@@ -134,11 +134,11 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       rootJoint.setRotation(rootJointRotation);
    }
 
-   private void computeEstimationLinkToWorldTransform(RigidBodyTransform estimationLinkToWorldToPack, FrameOrientation estimationLinkOrientation)
+   private void computeEstimationLinkToWorldTransform(RigidBodyTransform estimationLinkToWorldToPack, FrameQuaternion estimationLinkOrientation)
    {
       // R_{estimation}^{w}
       estimationLinkOrientation.changeFrame(worldFrame);
-      estimationLinkOrientation.getTransform3D(estimationLinkToWorldToPack);
+      estimationLinkToWorldToPack.setRotation(estimationLinkOrientation);
    }
 
    private final RigidBodyTransform tempRootJointFrameToEstimationFrame = new RigidBodyTransform();
@@ -180,7 +180,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       waitUntilComputationIsDone();
    }
 
-   public void initializeOrientionToActual(FrameOrientation actualOrientation)
+   public void initializeOrientionToActual(FrameQuaternion actualOrientation)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
       updateRootJointRotation(inverseDynamicsStructure.getRootJoint(), actualOrientation, inverseDynamicsStructure.getEstimationFrame());

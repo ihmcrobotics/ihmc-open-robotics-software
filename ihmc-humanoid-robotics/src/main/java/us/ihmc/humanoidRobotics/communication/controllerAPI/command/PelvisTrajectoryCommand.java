@@ -9,6 +9,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<PelvisTrajectoryCommand, PelvisTrajectoryMessage>
 {
+   private boolean enableUserPelvisControl = false;
    private boolean enableUserPelvisControlDuringWalking = false;
 
    public PelvisTrajectoryCommand()
@@ -18,14 +19,15 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
 
    public PelvisTrajectoryCommand(Random random)
    {
-      super(EuclidFrameRandomTools.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
-            EuclidFrameRandomTools.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+      super(EuclidFrameRandomTools.nextReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
    }
 
    @Override
    public void set(PelvisTrajectoryCommand other)
    {
       setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControl(other.isEnableUserPelvisControl());
       super.set(other);
    }
 
@@ -33,6 +35,7 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisTrajectoryMessage message)
    {
       setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControl(message.isEnableUserPelvisControl());
       super.set(resolver, message);
    }
 
@@ -40,6 +43,7 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
    public void set(PelvisTrajectoryMessage message)
    {
       setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControl(message.isEnableUserPelvisControl());
       super.set(message);
    }
 
@@ -51,6 +55,16 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
+   }
+
+   public boolean isEnableUserPelvisControl()
+   {
+      return enableUserPelvisControl;
+   }
+
+   public void setEnableUserPelvisControl(boolean enableUserPelvisControl)
+   {
+      this.enableUserPelvisControl = enableUserPelvisControl;
    }
 
    @Override

@@ -65,8 +65,6 @@ public class PlanarRegionFileTools
    {
       try
       {
-         if (folderPath.toFile().exists())
-            return false;
          Files.createDirectories(folderPath);
          writePlanarRegionsData(folderPath, planarRegionData);
          return true;

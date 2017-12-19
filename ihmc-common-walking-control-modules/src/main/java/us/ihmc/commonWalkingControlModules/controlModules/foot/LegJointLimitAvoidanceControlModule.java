@@ -7,6 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -63,7 +63,7 @@ public class LegJointLimitAvoidanceControlModule
    private YoFramePose originalDesiredYoPose;
    private FramePose originalDesiredPose;
    private FramePoint3D adjustedDesiredPosition;
-   private FrameOrientation adjustedDesiredOrientation;
+   private FrameQuaternion adjustedDesiredOrientation;
    private YoFramePose adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
    private YoFrameVector originalDesiredLinearVelocity;
@@ -121,7 +121,7 @@ public class LegJointLimitAvoidanceControlModule
          adjustedDesiredPose = new YoFramePose(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
          desiredTransform = new RigidBodyTransform();
          adjustedDesiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
-         adjustedDesiredOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+         adjustedDesiredOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
       }
 
       percentJointRangeForThreshold = new YoDouble(prefix + "percentJointRangeForThreshold", registry);
@@ -169,7 +169,7 @@ public class LegJointLimitAvoidanceControlModule
       }
    }
 
-   public void correctSwingFootTrajectory(FramePoint3D desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocityOfOrigin,
+   public void correctSwingFootTrajectory(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation, FrameVector3D desiredLinearVelocityOfOrigin,
          FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearAccelerationOfOrigin, FrameVector3D desiredAngularAcceleration)
 
    {

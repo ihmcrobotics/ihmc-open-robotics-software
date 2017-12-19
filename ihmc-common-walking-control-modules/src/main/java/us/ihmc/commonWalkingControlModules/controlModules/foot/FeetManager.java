@@ -22,7 +22,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -117,16 +117,8 @@ public class FeetManager
       parentRegistry.addChild(registry);
    }
 
-   public void setWeights(double highFootWeight, double defaultFootWeight)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModule.setWeights(highFootWeight, defaultFootWeight);
-      }
-   }
-
-   public void setWeights(Vector3D highAngularFootWeight, Vector3D highLinearFootWeight, Vector3D defaultAngularFootWeight, Vector3D defaultLinearFootWeight)
+   public void setWeights(Vector3DReadOnly highAngularFootWeight, Vector3DReadOnly highLinearFootWeight, Vector3DReadOnly defaultAngularFootWeight,
+                          Vector3DReadOnly defaultLinearFootWeight)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

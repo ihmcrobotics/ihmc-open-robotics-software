@@ -1,25 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.ICPAdjustmentOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -31,8 +26,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -321,27 +316,39 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public List<Vector2D> getCoPOffsets()
+      public CoPPointName getExitCoPName()
+      {
+         return CoPPointName.TOE_COP;
+      }
+
+      @Override
+      public CoPPointName getEntryCoPName()
+      {
+         return CoPPointName.HEEL_COP;
+      }
+
+      @Override
+      public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
       {
          Vector2D entryOffset = new Vector2D();
          Vector2D exitOffset = new Vector2D();
 
-         List<Vector2D> copOffsets = new ArrayList<>();
-         copOffsets.add(entryOffset);
-         copOffsets.add(exitOffset);
+         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+         copOffsets.put(getEntryCoPName(), entryOffset);
+         copOffsets.put(getExitCoPName(), exitOffset);
 
          return copOffsets;
       }
 
       @Override
-      public List<Vector2D> getCoPForwardOffsetBounds()
+      public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
       {
          Vector2D entryOffset = new Vector2D();
          Vector2D exitOffset = new Vector2D();
 
-         List<Vector2D> copOffsets = new ArrayList<>();
-         copOffsets.add(entryOffset);
-         copOffsets.add(exitOffset);
+         EnumMap<CoPPointName, Vector2D> copOffsets = new EnumMap<>(CoPPointName.class);
+         copOffsets.put(getEntryCoPName(), entryOffset);
+         copOffsets.put(getExitCoPName(), exitOffset);
 
          return copOffsets;
       }
@@ -353,49 +360,42 @@ public class ICPAdjustmentOptimizationControllerTest
       @Override
       public boolean useOptimizationBasedICPController()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
       @Override
       public double nominalHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double minimumHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double maximumHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getSecondContactThresholdForceIgnoringCoP()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getOmega0()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public MomentumOptimizationSettings getMomentumOptimizationSettings()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
@@ -408,161 +408,138 @@ public class ICPAdjustmentOptimizationControllerTest
       @Override
       public double getMinimumSwingTimeForDisturbanceRecovery()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getMaxICPErrorBeforeSingleSupportY()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getMaxICPErrorBeforeSingleSupportX()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getMaximumLegLengthForSingularityAvoidance()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public String[] getJointsToIgnoreInController()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public double getICPErrorThresholdToSpeedUpSwing()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getHighCoPDampingDurationToPreventFootShakies()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public FootSwitchType getFootSwitchType()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public double getDefaultTransferTime()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getDefaultSwingTime()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getContactThresholdHeight()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getContactThresholdForce()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getCoPThresholdFraction()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public double getCoPErrorThresholdForHighCoPDamping()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public boolean finishSingleSupportWhenICPPlannerIsDone()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
       @Override
       public double defaultOffsetHeightAboveAnkle()
       {
-         // TODO Auto-generated method stub
          return 0;
       }
 
       @Override
       public PIDSE3Gains getToeOffFootControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public PIDSE3Gains getSwingFootControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public ICPControlGains createICPControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public PIDSE3Gains getHoldPositionFootControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public PDGains getCoMHeightControlGains()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
       @Override
       public boolean allowAutomaticManipulationAbort()
       {
-         // TODO Auto-generated method stub
          return false;
       }
 
@@ -673,7 +650,6 @@ public class ICPAdjustmentOptimizationControllerTest
       @Override
       public SteppingParameters getSteppingParameters()
       {
-         // TODO Auto-generated method stub
          return null;
       }
    };

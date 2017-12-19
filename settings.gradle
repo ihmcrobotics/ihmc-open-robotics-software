@@ -4,14 +4,13 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.5"
+      classpath "us.ihmc:ihmc-build:0.11.3"
    }
 }
 
 import us.ihmc.build.IHMCSettingsConfigurator
 
 def ihmcSettingsConfigurator = new IHMCSettingsConfigurator(settings, logger, ext)
-ihmcSettingsConfigurator.configureProjectName(hyphenatedName) // rootProject.name = hyphenatedName
 ihmcSettingsConfigurator.configureAsGroupOfProjects() // isProjectGroup = true
 
 if (Boolean.valueOf(includeBuildsFromWorkspace))

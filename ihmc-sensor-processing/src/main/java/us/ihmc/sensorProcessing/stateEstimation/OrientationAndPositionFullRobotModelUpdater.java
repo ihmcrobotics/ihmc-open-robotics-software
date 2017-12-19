@@ -3,12 +3,12 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -31,7 +31,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort;
 
-   private final ControlFlowOutputPort<FrameOrientation> orientationPort;
+   private final ControlFlowOutputPort<FrameQuaternion> orientationPort;
    private final ControlFlowOutputPort<FrameVector3D> angularVelocityPort;
    private final ControlFlowOutputPort<FrameVector3D> angularAccelerationPort;
 
@@ -44,7 +44,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
 
    public OrientationAndPositionFullRobotModelUpdater(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
            ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort,
-           ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
+           ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort, ControlFlowOutputPort<FrameQuaternion> orientationPort,
            ControlFlowOutputPort<FrameVector3D> angularVelocityPort, ControlFlowOutputPort<FrameVector3D> angularAccelerationPort)
    {
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
@@ -246,7 +246,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
    }
 
    private final FramePoint3D tempCenterOfMassPositionState = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   private final FrameOrientation tempOrientationState = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion tempOrientationState = new FrameQuaternion(ReferenceFrame.getWorldFrame());
    private final RigidBodyTransform tempEstimationLinkToWorld = new RigidBodyTransform();
    private final RigidBodyTransform tempRootJointToWorld = new RigidBodyTransform();
 
@@ -266,7 +266,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
    private final Vector3D tempEstimationLinkPositionVector3d = new Vector3D();
 
    private void computeEstimationLinkTransform(ReferenceFrame estimationFrame, RigidBodyTransform estimationLinkToWorldToPack, FramePoint3D centerOfMassWorld,
-           FrameOrientation estimationLinkOrientation)
+           FrameQuaternion estimationLinkOrientation)
    {
       // r^{estimation}
       tempCenterOfMassBody.setToZero(estimationFrame);
@@ -275,7 +275,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
 
       // R_{estimation}^{w}
       estimationLinkOrientation.changeFrame(worldFrame);
-      estimationLinkOrientation.getTransform3D(estimationLinkToWorldToPack);
+      estimationLinkToWorldToPack.setRotation(estimationLinkOrientation);
 
       // R_{estimation}^{w} * r^{estimation}
       tempCenterOfMassBody.get(tempCenterOfMassBodyVector3d);

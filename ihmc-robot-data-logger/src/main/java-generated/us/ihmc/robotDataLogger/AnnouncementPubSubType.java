@@ -1,13 +1,5 @@
 package us.ihmc.robotDataLogger;
 
-import java.io.IOException;
-
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.common.SerializedPayload;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.IDLSequence;
-
 /**
 * 
 * Topic data type of the struct "Announcement" defined in "Announcement.idl". Use this class to provide the TopicDataType to a Participant. 
@@ -16,9 +8,9 @@ import us.ihmc.idl.IDLSequence;
 * Do not update this file directly, edit Announcement.idl instead.
 *
 */
-public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLogger.Announcement>
+public class AnnouncementPubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.Announcement>
 {
-	public static final String name = "us::ihmc::robotDataLogger::Announcement";
+	public static final java.lang.String name = "us::ihmc::robotDataLogger::Announcement";
 	
 	
 	
@@ -27,19 +19,19 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
         
     }
 
-	private final CDR serializeCDR = new CDR();
-	private final CDR deserializeCDR = new CDR();
+	private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
+	private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
     
     @Override
-   public void serialize(us.ihmc.robotDataLogger.Announcement data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(us.ihmc.robotDataLogger.Announcement data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
       serializeCDR.finishSerialize();
    }
    @Override
-   public void deserialize(SerializedPayload serializedPayload, us.ihmc.robotDataLogger.Announcement data) throws IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.Announcement data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -55,19 +47,21 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 127; ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.CameraAnnouncementPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
 	    current_alignment += us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.getMaxCdrSerializedSize(current_alignment);
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+	    current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 	
 	    return current_alignment - initial_alignment;
@@ -83,25 +77,27 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getHostName().length() + 1;
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getHostName().length() + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getReconnectKey().length() + 1;
+
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getCameras().size(); ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.CameraAnnouncementPubSubType.getCdrSerializedSize(data.getCameras().get(a), current_alignment);}
 
 	    current_alignment += us.ihmc.robotDataLogger.ModelFileDescriptionPubSubType.getCdrSerializedSize(data.getModelFileDescription(), current_alignment);
-	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+	    current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 	
 	    return current_alignment - initial_alignment;
 	}
 	
-   public static void write(us.ihmc.robotDataLogger.Announcement data, CDR cdr)
+   public static void write(us.ihmc.robotDataLogger.Announcement data, us.ihmc.idl.CDR cdr)
    {
 
 	    if(data.getIdentifier().length() <= 255)
@@ -116,6 +112,10 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	    cdr.write_type_d(data.getHostName());else
 	        throw new RuntimeException("hostName field exceeds the maximum length");
 
+	    if(data.getReconnectKey().length() <= 255)
+	    cdr.write_type_d(data.getReconnectKey());else
+	        throw new RuntimeException("reconnectKey field exceeds the maximum length");
+
 	    if(data.getCameras().size() <= 127)
 	    cdr.write_type_e(data.getCameras());else
 	        throw new RuntimeException("cameras field exceeds the maximum length");
@@ -125,7 +125,7 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	    cdr.write_type_7(data.getLog());
    }
 
-   public static void read(us.ihmc.robotDataLogger.Announcement data, CDR cdr)
+   public static void read(us.ihmc.robotDataLogger.Announcement data, us.ihmc.idl.CDR cdr)
    {
 
 	    	cdr.read_type_d(data.getIdentifier());	
@@ -133,6 +133,8 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	    	cdr.read_type_d(data.getName());	
 
 	    	cdr.read_type_d(data.getHostName());	
+
+	    	cdr.read_type_d(data.getReconnectKey());	
 
 	    	cdr.read_type_e(data.getCameras());	
 
@@ -143,13 +145,15 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
    }
    
 	@Override
-	public final void serialize(us.ihmc.robotDataLogger.Announcement data, InterchangeSerializer ser)
+	public final void serialize(us.ihmc.robotDataLogger.Announcement data, us.ihmc.idl.InterchangeSerializer ser)
 	{
 			    ser.write_type_d("identifier", data.getIdentifier());
 			    
 			    ser.write_type_d("name", data.getName());
 			    
 			    ser.write_type_d("hostName", data.getHostName());
+			    
+			    ser.write_type_d("reconnectKey", data.getReconnectKey());
 			    
 			    ser.write_type_e("cameras", data.getCameras());
 			    
@@ -161,13 +165,15 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
 	}
 	
 	@Override
-	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.Announcement data)
+	public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.Announcement data)
 	{
 	    			ser.read_type_d("identifier", data.getIdentifier());	
 	    	    
 	    			ser.read_type_d("name", data.getName());	
 	    	    
 	    			ser.read_type_d("hostName", data.getHostName());	
+	    	    
+	    			ser.read_type_d("reconnectKey", data.getReconnectKey());	
 	    	    
 	    			ser.read_type_e("cameras", data.getCameras());	
 	    	    
@@ -194,21 +200,21 @@ public class AnnouncementPubSubType implements TopicDataType<us.ihmc.robotDataLo
    @Override
    public int getTypeSize()
    {
-      return CDR.getTypeSize(getMaxCdrSerializedSize());
+      return us.ihmc.idl.CDR.getTypeSize(getMaxCdrSerializedSize());
    }
 
    @Override
-   public String getName()
+   public java.lang.String getName()
    {
       return name;
    }
    
-   public void serialize(us.ihmc.robotDataLogger.Announcement data, CDR cdr)
+   public void serialize(us.ihmc.robotDataLogger.Announcement data, us.ihmc.idl.CDR cdr)
 	{
 		write(data, cdr);
 	}
 
-   public void deserialize(us.ihmc.robotDataLogger.Announcement data, CDR cdr)
+   public void deserialize(us.ihmc.robotDataLogger.Announcement data, us.ihmc.idl.CDR cdr)
    {
         read(data, cdr);
    }

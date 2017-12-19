@@ -56,7 +56,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
    @Override
    protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (YoDouble) scs.getVariable("MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
+      return (YoDouble) scs.getVariable("HighLevelHumanoidControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
                                                 "v1PelvisOrientationErrorMagnitude");
    }
 

@@ -109,7 +109,6 @@ public class HandDrillManipulationEnvironment implements CommonAvatarEnvironment
    @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
-      // TODO Auto-generated method stub
 
    }
 }

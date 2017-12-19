@@ -32,8 +32,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       this.height = height;
       this.radius = radius;
       this.location = location;
-      RigidBodyTransform bottomTransform = transformToBottomOfCylinder();
-      cylinder = new Cylinder3D(bottomTransform, height, radius);
+      cylinder = new Cylinder3D(location, height, radius);
 
       Box3D box = new Box3D(location, radius * 2, radius * 2, height);
       Point3D[] vertices = box.getVertices();

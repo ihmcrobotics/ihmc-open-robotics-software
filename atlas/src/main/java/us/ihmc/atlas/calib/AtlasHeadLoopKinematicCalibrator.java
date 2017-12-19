@@ -43,6 +43,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -50,7 +51,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -177,8 +177,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       ypLeftEE.set(leftEE);
       ypRightEE.set(rightEE);
 
-      yposeLeftEE.set(leftEE, new FrameOrientation(CalibUtil.world));
-      yposeRightEE.set(rightEE, new FrameOrientation(CalibUtil.world));
+      yposeLeftEE.set(leftEE, new FrameQuaternion(CalibUtil.world));
+      yposeRightEE.set(rightEE, new FrameQuaternion(CalibUtil.world));
 
       updateBoard(index);
    }

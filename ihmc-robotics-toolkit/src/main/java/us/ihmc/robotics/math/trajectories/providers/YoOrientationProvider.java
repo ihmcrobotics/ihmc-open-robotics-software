@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -14,7 +14,7 @@ public class YoOrientationProvider implements OrientationProvider
       this.frameOrientation = frameOrientation;
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       frameOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }

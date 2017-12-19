@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -22,7 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -205,7 +205,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if(Math.abs(yawAngleChange) > yawMaxAnglePerStep.getDoubleValue())
     	  yawAngleChange = yawMaxAnglePerStep.getDoubleValue()*Math.signum(yawAngleChange);
       
-      FrameOrientation orientation = new FrameOrientation(stanceSoleFrame, yawAngleChange, 0.0, 0.0);
+      FrameQuaternion orientation = new FrameQuaternion(stanceSoleFrame, yawAngleChange, 0.0, 0.0);
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
@@ -297,42 +297,36 @@ public class PushAndWalkBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorAborted()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 }
