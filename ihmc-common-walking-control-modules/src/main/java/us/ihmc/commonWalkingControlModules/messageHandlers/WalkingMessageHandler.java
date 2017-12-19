@@ -491,14 +491,22 @@ public class WalkingMessageHandler
    private final Quaternion actualFootOrientationInWorld = new Quaternion();
    private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
+   private final FootstepStatus footstepStatus = new FootstepStatus();
 
    public void reportFootstepStarted(RobotSide robotSide, FramePose desiredFootPoseInWorld, FramePose actualFootPoseInWorld)
    {
       desiredFootPoseInWorld.getPose(desiredFootPositionInWorld, desiredFootOrientationInWorld);
       actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
-      statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.STARTED, currentFootstepIndex.getIntegerValue(),
-            desiredFootPositionInWorld, desiredFootOrientationInWorld,
-            actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
+
+      footstepStatus.setStatus(FootstepStatus.Status.STARTED);
+      footstepStatus.setRobotSide(robotSide);
+      footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
+      footstepStatus.setActualFootOrientationInWorld(actualFootOrientationInWorld);
+      footstepStatus.setActualFootPositionInWorld(actualFootPositionInWorld);
+      footstepStatus.setDesiredFootOrientationInWorld(desiredFootOrientationInWorld);
+      footstepStatus.setDesiredFootPositionInWorld(desiredFootPositionInWorld);
+      statusOutputManager.reportStatusMessage(footstepStatus);
+
       executingFootstep.set(true);
 
       if (yoTime != null)
@@ -508,16 +516,27 @@ public class WalkingMessageHandler
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)
    {
       actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
-      statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.COMPLETED, currentFootstepIndex.getIntegerValue(),
-            actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
+      desiredFootOrientationInWorld.setToNaN();
+      desiredFootPositionInWorld.setToNaN();
+
+      footstepStatus.setStatus(FootstepStatus.Status.COMPLETED);
+      footstepStatus.setRobotSide(robotSide);
+      footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
+      footstepStatus.setActualFootOrientationInWorld(actualFootOrientationInWorld);
+      footstepStatus.setActualFootPositionInWorld(actualFootPositionInWorld);
+      footstepStatus.setDesiredFootOrientationInWorld(desiredFootOrientationInWorld);
+      footstepStatus.setDesiredFootPositionInWorld(desiredFootPositionInWorld);
+      statusOutputManager.reportStatusMessage(footstepStatus);
+
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
       executingFootstep.set(false);
    }
 
+   private final WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
+
    public void reportWalkingStarted()
    {
-      WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.STARTED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING);
@@ -527,7 +546,6 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
-      WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.COMPLETED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       isWalking.set(false);
@@ -666,15 +684,17 @@ public class WalkingMessageHandler
       footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
+   private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+
    public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
    {
       Footstep transferFromFootstep = getFootstepAtCurrentLocation(transferToSide.getOppositeSide());
       Footstep transferToFootstep = getFootstepAtCurrentLocation(transferToSide);
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
       transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
+      transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
 
       if (getCurrentNumberOfFootsteps() > 0)
       {
@@ -692,10 +712,10 @@ public class WalkingMessageHandler
    {
       Footstep transferFromFootstep = getFootstepAtCurrentLocation(swingSide.getOppositeSide());
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
       transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
+      transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
 
       if (getCurrentNumberOfFootsteps() > 0)
       {
