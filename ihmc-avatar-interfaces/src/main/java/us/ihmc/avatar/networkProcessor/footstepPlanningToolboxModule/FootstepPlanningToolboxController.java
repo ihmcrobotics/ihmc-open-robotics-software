@@ -233,15 +233,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       return true;
    }
 
-   public HumanoidReferenceFrames createHumanoidReferenceFrames(FullHumanoidRobotModel fullHumanoidRobotModel)
-   {
-      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
-      robotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
-
-      packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-      return robotDataReceiver.getReferenceFrames();
-   }
-
    private void sendMessageToUI(String message)
    {
       TextToSpeechPacket packet = new TextToSpeechPacket(message);
