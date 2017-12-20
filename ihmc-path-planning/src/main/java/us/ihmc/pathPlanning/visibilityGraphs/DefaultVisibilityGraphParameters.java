@@ -43,7 +43,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getTooHighToStepDistance()
    {
-      return 0.6;
+      return 0.2;
    }
 
    @Override
