@@ -28,6 +28,7 @@ import us.ihmc.robotics.lists.ListWrappingIndexTools;
 
 public class ClusterTools
 {
+   private static final double HALF_PI = 0.5 * Math.PI;
    private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.20);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
@@ -63,9 +64,9 @@ public class ClusterTools
          boolean shouldExtrudeCorner;
 
          if (extrudeToTheLeft)
-            shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
+            shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -HALF_PI;
          else
-            shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) >= 0.5 * Math.PI;
+            shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) >= HALF_PI;
 
          if (shouldExtrudeCorner)
          {
@@ -115,7 +116,7 @@ public class ClusterTools
          Line2D edgePrev = new Line2D(rawPoints.get(i - 1), pointToExtrude);
          Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i + 1));
 
-         boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
+         boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -HALF_PI;
          double extrusionDistance = calculator.computeExtrusionDistance(pointToExtrude, obstacleHeight);
 
          if (shouldExtrudeCorner)
@@ -155,7 +156,7 @@ public class ClusterTools
          Line2D edgePrev = new Line2D(rawPoints.get(i + 1), pointToExtrude);
          Line2D edgeNext = new Line2D(pointToExtrude, rawPoints.get(i - 1));
 
-         boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -0.5 * Math.PI;
+         boolean shouldExtrudeCorner = edgePrev.getDirection().angle(edgeNext.getDirection()) <= -HALF_PI;
          double extrusionDistance = calculator.computeExtrusionDistance(pointToExtrude, obstacleHeight);
 
          if (shouldExtrudeCorner)
