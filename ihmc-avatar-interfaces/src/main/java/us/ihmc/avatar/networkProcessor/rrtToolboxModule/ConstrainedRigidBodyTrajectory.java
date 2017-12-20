@@ -44,6 +44,9 @@ public class ConstrainedRigidBodyTrajectory
 
    private final boolean hasTrajectoryCommand;
 
+   private double weight;
+   private static double DEFAULT_WEIGHT = 20.0;
+
    // For given trajectory and appending exploration transform.
    public ConstrainedRigidBodyTrajectory(RigidBody rigidBody, WaypointBasedTrajectoryCommand trajectoryCommand,
                                          RigidBodyExplorationConfigurationCommand explorationCommand)
@@ -62,6 +65,10 @@ public class ConstrainedRigidBodyTrajectory
          controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
          this.controlFramePose.set(controlFramePose.getGeometryObject());
          this.hasTrajectoryCommand = true;
+         if (Double.isNaN(trajectoryCommand.getWeight()))
+            weight = DEFAULT_WEIGHT;
+         else
+            weight = trajectoryCommand.getWeight();
       }
       else
       {
@@ -74,6 +81,7 @@ public class ConstrainedRigidBodyTrajectory
 
          controlFramePose.setToZero();
          this.hasTrajectoryCommand = false;
+         weight = DEFAULT_WEIGHT;
       }
 
       explorationSelectionMatrix.clearSelection();
@@ -179,7 +187,7 @@ public class ConstrainedRigidBodyTrajectory
       message.setDesiredPose(desiredEndEffectorPose);
       message.setControlFramePose(controlFramePose);
       message.setSelectionMatrix(getSelectionMatrix());
-      message.setWeight(20.0); // Sylvain's value :: 0.5
+      message.setWeight(weight); // Sylvain's value :: 0.5
 
       return message;
    }

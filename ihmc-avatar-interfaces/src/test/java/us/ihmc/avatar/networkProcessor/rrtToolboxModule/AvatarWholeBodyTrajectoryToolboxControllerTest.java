@@ -504,7 +504,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
             if (rigidBodyOfOutputFullRobotModel == null)
             {
-               PrintTools.info("there is no rigid body");
+               if (VERBOSE)
+                  PrintTools.info("there is no rigid body");
                fail("there is no rigid body");
             }
             else
@@ -512,8 +513,10 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                RigidBodyTransform solutionRigidBodyTransform = rigidBodyOfOutputFullRobotModel.getBodyFixedFrame().getTransformToWorldFrame();
                Pose3D solutionRigidBodyPose = new Pose3D(solutionRigidBodyTransform);
 
-               solutionRigidBodyPose.appendTransform(new RigidBodyTransform(trajectory.controlFrameOrientationInEndEffector,
-                                                                            trajectory.controlFramePositionInEndEffector));
+               if (trajectory.controlFramePositionInEndEffector != null)
+                  solutionRigidBodyPose.appendTransform(new RigidBodyTransform(new Quaternion(), trajectory.controlFramePositionInEndEffector));
+               if (trajectory.controlFrameOrientationInEndEffector != null)
+                  solutionRigidBodyPose.appendTransform(new RigidBodyTransform(trajectory.controlFrameOrientationInEndEffector, new Point3D()));
 
                Pose3D givenRigidBodyPose = trajectory.getPose(configurationTime);
 
@@ -522,6 +525,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
                double orientationError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryOrientationError(solutionRigidBodyPose, givenRigidBodyPose,
                                                                                                             explorationMessage, trajectory);
+
                if (VERBOSE)
                   PrintTools.info("" + positionError + " " + orientationError);
 

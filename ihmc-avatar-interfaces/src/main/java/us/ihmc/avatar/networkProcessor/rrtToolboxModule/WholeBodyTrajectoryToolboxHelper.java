@@ -96,7 +96,8 @@ public class WholeBodyTrajectoryToolboxHelper
       }
    }
 
-   public static double computeTrajectoryPositionError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage, WaypointBasedTrajectoryMessage trajectory)
+   public static double computeTrajectoryPositionError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage,
+                                                       WaypointBasedTrajectoryMessage trajectory)
    {
       PoseReferenceFrame solutionRigidBodyFrame = new PoseReferenceFrame("solutionRigidBodyFrame", ReferenceFrame.getWorldFrame());
       solutionRigidBodyFrame.setPoseAndUpdate(new Point3D(solution.getPosition()), new Quaternion(solution.getOrientation()));
@@ -113,28 +114,32 @@ public class WholeBodyTrajectoryToolboxHelper
       DenseMatrix64F rotationErrorQ = new DenseMatrix64F(3, 1);
       rotationError.get(rotationErrorQ);
 
-      ConfigurationSpaceName[] degreesOfFreedomToExplore = explorationMessage.degreesOfFreedomToExplore;
-      for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
+      if (explorationMessage != null)
       {
-         if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
-               || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Z)
-            positionErrorQ.zero();
-         if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.ROLL || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.PITCH
-               || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.YAW)
-            rotationErrorQ.zero();
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = explorationMessage.degreesOfFreedomToExplore;
+         for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
+         {
+            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
+                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Z)
+               positionErrorQ.zero();
+            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.ROLL || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.PITCH
+                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.YAW)
+               rotationErrorQ.zero();
+         }
       }
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
       trajectory.getSelectionMatrix(selectionMatrix);
-      if(!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
+      if (!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
          positionErrorQ.zero();
-      if(!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
+      if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
          rotationErrorQ.zero();
-      
+
       return NormOps.normP2(positionErrorQ);
    }
 
-   public static double computeTrajectoryOrientationError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage, WaypointBasedTrajectoryMessage trajectory)
+   public static double computeTrajectoryOrientationError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage,
+                                                          WaypointBasedTrajectoryMessage trajectory)
    {
       PoseReferenceFrame solutionRigidBodyFrame = new PoseReferenceFrame("solutionRigidBodyFrame", ReferenceFrame.getWorldFrame());
       solutionRigidBodyFrame.setPoseAndUpdate(new Point3D(solution.getPosition()), new Quaternion(solution.getOrientation()));
@@ -151,22 +156,25 @@ public class WholeBodyTrajectoryToolboxHelper
       DenseMatrix64F rotationErrorQ = new DenseMatrix64F(3, 1);
       rotationError.get(rotationErrorQ);
 
-      ConfigurationSpaceName[] degreesOfFreedomToExplore = explorationMessage.degreesOfFreedomToExplore;
-      for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
+      if (explorationMessage != null)
       {
-         if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
-               || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Z)
-            positionErrorQ.zero();
-         if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.ROLL || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.PITCH
-               || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.YAW)
-            rotationErrorQ.zero();
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = explorationMessage.degreesOfFreedomToExplore;
+         for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
+         {
+            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
+                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Z)
+               positionErrorQ.zero();
+            if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.ROLL || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.PITCH
+                  || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.YAW)
+               rotationErrorQ.zero();
+         }
       }
-      
+
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
       trajectory.getSelectionMatrix(selectionMatrix);
-      if(!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
+      if (!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
          positionErrorQ.zero();
-      if(!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
+      if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
          rotationErrorQ.zero();
 
       return NormOps.normP2(rotationErrorQ);
