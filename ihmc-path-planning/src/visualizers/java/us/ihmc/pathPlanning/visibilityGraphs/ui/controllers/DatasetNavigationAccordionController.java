@@ -38,7 +38,6 @@ public class DatasetNavigationAccordionController
       testDataFolder = new File("..\\test\\resources\\" + VisibilityGraphsIOTools.DATA_FOLDER_NAME);
       if (!testDataFolder.exists())
          throw new RuntimeException("Wrong path to the test data folder, please update me.");
-
    }
 
    public void attachMessager(SimpleUIMessager messager)
@@ -53,7 +52,6 @@ public class DatasetNavigationAccordionController
 
    public void bindControls()
    {
-      datasetNavigationAccordion.getPanes().get(0).setExpanded(true);
    }
 
    @FXML
