@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;

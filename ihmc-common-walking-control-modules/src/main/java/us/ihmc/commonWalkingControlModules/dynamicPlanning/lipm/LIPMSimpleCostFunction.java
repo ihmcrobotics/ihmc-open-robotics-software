@@ -1,27 +1,34 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.SimpleLIPMDynamics.controlVectorSize;
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.SimpleLIPMDynamics.stateVectorSize;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDynamics.stateVectorSize;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDynamics.controlVectorSize;
 
-public class SimpleLIPMTerminalCostFunction implements LQCostFunction
+public class LIPMSimpleCostFunction implements LQCostFunction
 {
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);
 
-   public SimpleLIPMTerminalCostFunction()
-   {
-      Q.set(0, 0, 1e3);
-      Q.set(1, 1, 1e3);
-      Q.set(2, 2, 1e6);
-      Q.set(3, 3, 1e6);
+   /**
+    * This is a cost of the form 0.5 (X - X_d)^T Q (X - X_d) + 0.5 (U - U_d)^T R (U - U_d)
+    */
 
-      R.set(0, 0, 0.0);
-      R.set(1, 1, 0.0);
+   public LIPMSimpleCostFunction()
+   {
+      Q.set(0, 0, 1e-6);
+      Q.set(1, 1, 1e-6);
+      Q.set(2, 2, 1e1);
+      Q.set(3, 3, 1e-6);
+      Q.set(4, 4, 1e-6);
+      Q.set(5, 5, 1e-6);
+
+      R.set(0, 0, 1e2);
+      R.set(1, 1, 1e2);
+      R.set(2, 2, 1e-6);
    }
 
    private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);
@@ -50,10 +57,10 @@ public class SimpleLIPMTerminalCostFunction implements LQCostFunction
    }
 
    /** L_u(X_k, U_k) */
-   public void getCostControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVecotr,
-                               DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                                      DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
    {
-      CommonOps.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
+      CommonOps.subtract(controlVector, desiredControlVector, tempControlMatrix);
       DiagonalMatrixTools.preMult(R, tempControlMatrix, matrixToPack);
    }
 
@@ -75,7 +82,7 @@ public class SimpleLIPMTerminalCostFunction implements LQCostFunction
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
    }
 
-   /** L_ux(X_k, U_k) */
+   /** L_xu(X_k, U_k) */
    public void getCostControlGradientOfStateGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(stateVectorSize, controlVectorSize);
