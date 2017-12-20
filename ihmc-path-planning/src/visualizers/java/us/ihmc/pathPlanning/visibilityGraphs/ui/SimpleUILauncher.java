@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 
 public class SimpleUILauncher extends Application
 {
-   private static final boolean SHOW_FILE_CHOOSER_ON_START = true;
+   private static final boolean SHOW_FILE_CHOOSER_ON_START = false;
 
    private SimpleVisibilityGraphsUI ui;
    
