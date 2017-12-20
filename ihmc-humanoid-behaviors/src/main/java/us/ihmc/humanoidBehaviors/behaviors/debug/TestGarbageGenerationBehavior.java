@@ -18,95 +18,105 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TestGarbageGenerationBehavior extends AbstractBehavior
 {
-   private static final double swingTime = 1.2;
-   private static final double transferTime = 0.8;
-   private static final double sendStepsInterval = 10.0;
-   private static final double sendChestInterval = 5.0;
-   private static final double sendArmInterval = 3.0;
+   private static final double sendInterval = 0.5;
+   private static final int trajectoryPoints = 50;
+   private static final int steps = 4;
 
    private final HumanoidReferenceFrames referenceFrames;
-   private final YoStopwatch stepTimer;
-   private final YoStopwatch chestTimer;
-   private final YoStopwatch armTimer;
+   private final YoStopwatch timer;
 
    public TestGarbageGenerationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {
       super(communicationBridge);
       this.referenceFrames = referenceFrames;
-      stepTimer = new YoStopwatch(yoTime);
-      chestTimer = new YoStopwatch(yoTime);
-      armTimer = new YoStopwatch(yoTime);
+      timer = new YoStopwatch(yoTime);
    }
 
    @Override
    public void doControl()
    {
-      if (stepTimer.totalElapsed() > sendStepsInterval)
+      if (timer.totalElapsed() > sendInterval)
       {
-         ReferenceFrame leftSoleFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
+         sendPacketToUI(new TextToSpeechPacket("Sending messages."));
 
-         FramePose stepPoseLeft = new FramePose(leftSoleFrame);
-         FramePose stepPoseRight = new FramePose(leftSoleFrame);
-         stepPoseRight.setY(-0.25);
+         sendFootsteps();
+         sendChestTrajectory();
+         sendArmTrajectory();
 
-         stepPoseLeft.changeFrame(ReferenceFrame.getWorldFrame());
-         stepPoseRight.changeFrame(ReferenceFrame.getWorldFrame());
+         timer.reset();
+      }
+   }
 
-         FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+   private void sendArmTrajectory()
+   {
+      double[] leftArmHome = new double[] {0.78, -0.1, 3.0, 1.8, -0.3, 0.7, 0.15};
+      ArmTrajectoryMessage armTrajectory = new ArmTrajectoryMessage(RobotSide.LEFT, leftArmHome.length, trajectoryPoints);
+      for (int i = 0; i < trajectoryPoints; i++)
+      {
+         double percent = i / (double) (trajectoryPoints - 1);
+         for (int jointIdx = 0; jointIdx < leftArmHome.length; jointIdx++)
+         {
+            armTrajectory.setTrajectoryPoint(jointIdx, i, percent, leftArmHome[jointIdx], 0.0);
+         }
+      }
+
+      sendPacketToController(armTrajectory);
+   }
+
+   private void sendChestTrajectory()
+   {
+      ReferenceFrame pelvisZUp = referenceFrames.getPelvisZUpFrame();
+      ChestTrajectoryMessage chestTrajectory = new ChestTrajectoryMessage(trajectoryPoints);
+      chestTrajectory.getFrameInformation().setTrajectoryReferenceFrame(pelvisZUp);
+      chestTrajectory.getFrameInformation().setDataReferenceFrame(pelvisZUp);
+
+      for (int i = 0; i < trajectoryPoints; i++)
+      {
+         double percent = i / (double) (trajectoryPoints - 1);
+         chestTrajectory.setTrajectoryPoint(i, percent, new Quaternion(), new Vector3D(), pelvisZUp);
+      }
+
+      sendPacketToController(chestTrajectory);
+   }
+
+   double initialZHeight = Double.NaN;
+
+   private void sendFootsteps()
+   {
+      ReferenceFrame leftSoleFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
+
+      FramePose stepPoseLeft = new FramePose(leftSoleFrame);
+      FramePose stepPoseRight = new FramePose(leftSoleFrame);
+      stepPoseRight.setY(-0.25);
+
+      stepPoseLeft.changeFrame(ReferenceFrame.getWorldFrame());
+      stepPoseRight.changeFrame(ReferenceFrame.getWorldFrame());
+
+      if (Double.isNaN(initialZHeight))
+      {
+         initialZHeight = stepPoseLeft.getZ();
+      }
+      else
+      {
+         stepPoseLeft.setZ(initialZHeight);
+         stepPoseRight.setZ(initialZHeight);
+      }
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(1.2, 0.8);
+      for (int i = 0; i < steps / 2; i++)
+      {
          footsteps.add(new FootstepDataMessage(RobotSide.LEFT, stepPoseLeft.getPosition(), stepPoseLeft.getOrientation()));
          footsteps.add(new FootstepDataMessage(RobotSide.RIGHT, stepPoseRight.getPosition(), stepPoseRight.getOrientation()));
-
-         sendPacket(new TextToSpeechPacket("Sending 2 Steps..."));
-         sendPacketToController(footsteps);
-         stepTimer.reset();
       }
 
-      if (chestTimer.totalElapsed() > sendChestInterval)
-      {
-         ReferenceFrame pelvisZUp = referenceFrames.getPelvisZUpFrame();
-
-         int points = 50;
-         ChestTrajectoryMessage chestTrajectory = new ChestTrajectoryMessage(points);
-         chestTrajectory.getFrameInformation().setTrajectoryReferenceFrame(pelvisZUp);
-         chestTrajectory.getFrameInformation().setDataReferenceFrame(pelvisZUp);
-
-         for (int i = 0; i < points; i++)
-         {
-            double percent = (double) i / (double) (points - 1);
-            chestTrajectory.setTrajectoryPoint(0, percent, new Quaternion(), new Vector3D(), pelvisZUp);
-         }
-
-         sendPacket(new TextToSpeechPacket("Sending Chest Trajectory with " + points + " points."));
-         sendPacketToController(chestTrajectory);
-         stepTimer.reset();
-      }
-
-      if (armTimer.totalElapsed() > sendArmInterval)
-      {
-         double[] leftArmHome = new double[] {0.79, -0.1, 3.0, 1.8, -0.3, 0.7, 0.15};
-         int points = 50;
-
-         ArmTrajectoryMessage armTrajectory = new ArmTrajectoryMessage(RobotSide.LEFT, leftArmHome.length, points);
-         for (int i = 0; i < points; i++)
-         {
-            double percent = (double) i / (double) (points - 1);
-            for (int jointIdx = 0; jointIdx < leftArmHome.length; jointIdx++)
-            {
-               armTrajectory.setTrajectoryPoint(jointIdx, i, percent, leftArmHome[jointIdx], 0.0);
-            }
-         }
-
-         sendPacket(new TextToSpeechPacket("Sending Left Arm Trajectory with " + points + " points."));
-         sendPacketToController(armTrajectory);
-         stepTimer.reset();
-      }
+      sendPacketToController(footsteps);
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      sendPacket(new TextToSpeechPacket("Starting GC behavior."));
-      stepTimer.reset();
+      sendPacketToUI(new TextToSpeechPacket("Starting GC behavior."));
+      timer.reset();
    }
 
    @Override
@@ -122,7 +132,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    @Override
    public void onBehaviorResumed()
    {
-      stepTimer.reset();
+      timer.reset();
    }
 
    @Override
