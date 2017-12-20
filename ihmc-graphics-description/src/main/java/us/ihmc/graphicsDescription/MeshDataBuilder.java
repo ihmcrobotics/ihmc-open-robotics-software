@@ -1,10 +1,13 @@
 package us.ihmc.graphicsDescription;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -258,6 +261,20 @@ public class MeshDataBuilder
 
    /**
     * Add a series of connected 3D lines to this builder.
+    * @param transform the transform to apply to the points. Not modified. 
+    * @param points coordinates of the line end points. Not modified. 
+    * @param lineWidth width of the lines.
+    * @param close whether the end of the given array of points should be connected to the beginning or not.
+    */
+   public void addMultiLine(RigidBodyTransform transform, List<? extends Point2DReadOnly> points, double lineWidth, boolean close)
+   {
+      List<Point3D> point3Ds = points.stream().map(Point3D::new).collect(Collectors.toList());
+      point3Ds.forEach(transform::transform);
+      addMultiLine(point3Ds, lineWidth, close);
+   }
+
+   /**
+    * Add a series of connected 3D lines to this builder.
     * @param points coordinates of the line end points. Not modified. 
     * @param lineWidth width of the lines.
     * @param close whether the end of the given array of points should be connected to the beginning or not.
@@ -315,6 +332,16 @@ public class MeshDataBuilder
     * @param polygon the polygon's 2D vertices. Not modified.
     */
    public void addPolygon(RigidBodyTransform transformToWorld, List<Point2D> polygon)
+   {
+      addMesh(MeshDataGenerator.Polygon(transformToWorld, polygon));
+   }
+
+   /**
+    * Add a 2D polygon to this builder. 
+    * @param transformToWorld the transform from the polygon's local coordinates to world. Not modified.
+    * @param polygon the polygon to render.
+    */
+   public void addPolygon(RigidBodyTransform transformToWorld, ConvexPolygon2D polygon)
    {
       addMesh(MeshDataGenerator.Polygon(transformToWorld, polygon));
    }

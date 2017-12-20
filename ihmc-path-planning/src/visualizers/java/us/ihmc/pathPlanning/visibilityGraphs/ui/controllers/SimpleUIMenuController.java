@@ -26,7 +26,7 @@ public class SimpleUIMenuController
    private REAMessager messager;
    private Window ownerWindow;
 
-   private PlanarRegionsList loadedPlanarRegions = null;
+   private File loadedFile = null;
 
    public SimpleUIMenuController()
    {
@@ -56,9 +56,10 @@ public class SimpleUIMenuController
 
       File[] vizGraphsParameterFile = result.listFiles((FilenameFilter) (dir, name) -> name.equals(VisibilityGraphsIOTools.INPUTS_PARAMETERS_FILENAME));
       if (vizGraphsParameterFile != null && vizGraphsParameterFile.length == 1)
-         loadedPlanarRegions = PlanarRegionFileTools.importPlanRegionData(result.listFiles(File::isDirectory)[0]);
+         loadedFile = result.listFiles(File::isDirectory)[0];
       else
-         loadedPlanarRegions = PlanarRegionFileTools.importPlanRegionData(result);
+         loadedFile = result;
+      PlanarRegionsList loadedPlanarRegions = PlanarRegionFileTools.importPlanRegionData(loadedFile);
       directoryChooser.setInitialDirectory(result.getParentFile());
 
       if (loadedPlanarRegions != null)
@@ -74,12 +75,18 @@ public class SimpleUIMenuController
          if (VERBOSE)
             PrintTools.info(this, "Failed to load planar regions.");
          reloadMenuItem.setDisable(true);
+         loadedFile = null;
       }
    }
 
    @FXML
    public void reloadPlanarRegion()
    {
+      if (loadedFile == null)
+         return;
+
+      PlanarRegionsList loadedPlanarRegions = PlanarRegionFileTools.importPlanRegionData(loadedFile);
+
       if (loadedPlanarRegions != null)
       {
          if (VERBOSE)
