@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -95,7 +96,7 @@ public class WholeBodyTrajectoryToolboxHelper
       }
    }
 
-   public static double computeTrajectoryPositionError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage)
+   public static double computeTrajectoryPositionError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage, WaypointBasedTrajectoryMessage trajectory)
    {
       PoseReferenceFrame solutionRigidBodyFrame = new PoseReferenceFrame("solutionRigidBodyFrame", ReferenceFrame.getWorldFrame());
       solutionRigidBodyFrame.setPoseAndUpdate(new Point3D(solution.getPosition()), new Quaternion(solution.getOrientation()));
@@ -123,10 +124,17 @@ public class WholeBodyTrajectoryToolboxHelper
             rotationErrorQ.zero();
       }
 
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      trajectory.getSelectionMatrix(selectionMatrix);
+      if(!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
+         positionErrorQ.zero();
+      if(!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
+         rotationErrorQ.zero();
+      
       return NormOps.normP2(positionErrorQ);
    }
 
-   public static double computeTrajectoryOrientationError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage)
+   public static double computeTrajectoryOrientationError(Pose3D solution, Pose3D expected, RigidBodyExplorationConfigurationMessage explorationMessage, WaypointBasedTrajectoryMessage trajectory)
    {
       PoseReferenceFrame solutionRigidBodyFrame = new PoseReferenceFrame("solutionRigidBodyFrame", ReferenceFrame.getWorldFrame());
       solutionRigidBodyFrame.setPoseAndUpdate(new Point3D(solution.getPosition()), new Quaternion(solution.getOrientation()));
@@ -153,6 +161,13 @@ public class WholeBodyTrajectoryToolboxHelper
                || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.YAW)
             rotationErrorQ.zero();
       }
+      
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      trajectory.getSelectionMatrix(selectionMatrix);
+      if(!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
+         positionErrorQ.zero();
+      if(!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
+         rotationErrorQ.zero();
 
       return NormOps.normP2(rotationErrorQ);
    }
