@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.trajectoryOptimization.ContinuousHybridDynamics;
-import us.ihmc.trajectoryOptimization.DiscreteHybridDynamics;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
