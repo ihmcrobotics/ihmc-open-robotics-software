@@ -32,8 +32,6 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel, fullHumanoidRobotModel, statusOutputManager, packetCommunicator,
                                                                                 registry, yoGraphicsListRegistry, Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
-      
-      packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, footstepPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }
 
