@@ -27,6 +27,8 @@ public class WaypointBasedTrajectoryCommand
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final FramePose controlFramePose = new FramePose();
+   
+   private double weight;
 
    @Override
    public void clear()
@@ -37,6 +39,7 @@ public class WaypointBasedTrajectoryCommand
       waypoints.clear();
       controlFramePose.setToNaN(ReferenceFrame.getWorldFrame());
       selectionMatrix.resetSelection();
+      weight = Double.NaN;
    }
 
    @Override
@@ -56,6 +59,8 @@ public class WaypointBasedTrajectoryCommand
       selectionMatrix.set(other.selectionMatrix);
 
       controlFramePose.setIncludingFrame(other.controlFramePose);
+      
+      weight = other.weight;
    }
 
    @Override
@@ -84,6 +89,8 @@ public class WaypointBasedTrajectoryCommand
 
       message.getControlFramePose(endEffector, controlFramePose);
       message.getSelectionMatrix(selectionMatrix);
+      
+      weight = message.weight;
    }
 
    public RigidBody getEndEffector()
@@ -119,6 +126,11 @@ public class WaypointBasedTrajectoryCommand
    public FramePose getControlFramePose()
    {
       return controlFramePose;
+   }
+   
+   public double getWeight()
+   {
+      return weight;
    }
 
    @Override

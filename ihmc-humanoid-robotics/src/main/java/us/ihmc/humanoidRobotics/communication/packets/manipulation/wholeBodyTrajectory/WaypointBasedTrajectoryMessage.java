@@ -39,6 +39,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
     * end-effector.
     */
    public Quaternion32 controlFrameOrientationInEndEffector;
+   
+   public double weight = Double.NaN;
 
    public WaypointBasedTrajectoryMessage()
    {
@@ -70,6 +72,11 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
       this.waypointTimes = waypointTimes;
       this.waypoints = waypoints;
+   }
+   
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
    }
 
    /**
@@ -347,6 +354,9 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       if (!angularSelectionMatrix.epsilonEquals(other.angularSelectionMatrix, epsilon))
          return false;
       if (!linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
+         return false;
+      
+      if(weight != other.weight)
          return false;
 
       return true;

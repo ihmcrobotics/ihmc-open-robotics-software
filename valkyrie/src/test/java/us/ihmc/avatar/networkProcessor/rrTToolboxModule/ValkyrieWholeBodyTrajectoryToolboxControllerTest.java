@@ -207,7 +207,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
                                                                                                                      handFunction, selectionMatrixHead);
 
       trajectoryHead.setControlFramePosition(new Point3D(0.5, 0.0, 0.0));
-
+      trajectoryHead.setWeight(0.01);
       trajectories.add(trajectoryHead);
 
       // run test      
@@ -261,6 +261,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
 
+      // to hold left hand.
       //rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
 
       // run test      
