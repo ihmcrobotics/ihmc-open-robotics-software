@@ -6,6 +6,7 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NextDatasetRequest;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PlanarRegionData;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PreviousDatasetRequest;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ReloadDatasetRequest;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
@@ -56,6 +57,7 @@ public class VisibilityGraphsTestVisualizer
    private final Stage primaryStage;
    private final SimpleUIMessager messager;
    private final PlanarRegionViewer planarRegionViewer;
+   private final PlanarRegionViewer planarRegionShadowViewer;
    private final StartGoalPositionViewer startGoalViewer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
@@ -70,7 +72,7 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private TextField currentDatasetTextField;
    @FXML
-   private ToggleButton previousDatasetButton, nextDatasetButton;
+   private ToggleButton previousDatasetButton, reloadDatasetButton, nextDatasetButton, stopWalkingToggleButton;
 
    @FXML
    private ToggleButton showClusterRawPointsButton;
@@ -95,7 +97,7 @@ public class VisibilityGraphsTestVisualizer
       Pane root = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
+      view3dFactory.addCameraController(0.05, 150.0, true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
@@ -103,6 +105,8 @@ public class VisibilityGraphsTestVisualizer
       bindUIControls();
 
       planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
+      planarRegionShadowViewer = new PlanarRegionViewer(messager, UIVisibilityGraphsTopics.ShadowPlanarRegionData, ShowPlanarRegions);
+      planarRegionShadowViewer.setOpacity(0.);
       startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
@@ -111,6 +115,7 @@ public class VisibilityGraphsTestVisualizer
       walkerCollisionsViewer = new WalkerCollisionsViewer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(planarRegionShadowViewer.getRoot());
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(clusterMeshViewer.getRoot());
@@ -129,12 +134,26 @@ public class VisibilityGraphsTestVisualizer
    private void bindUIControls()
    {
       messager.bindBidirectional(PreviousDatasetRequest, previousDatasetButton.selectedProperty(), false);
+      messager.bindBidirectional(ReloadDatasetRequest, reloadDatasetButton.selectedProperty(), false);
       messager.bindBidirectional(NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
 
       previousDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      previousDatasetButton.disableProperty().bind(reloadDatasetButton.selectedProperty());
       previousDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+
+      reloadDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      reloadDatasetButton.disableProperty().bind(reloadDatasetButton.selectedProperty());
+      reloadDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+
       nextDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      nextDatasetButton.disableProperty().bind(reloadDatasetButton.selectedProperty());
       nextDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+
+      datasetsListView.disableProperty().bind(previousDatasetButton.selectedProperty());
+      datasetsListView.disableProperty().bind(reloadDatasetButton.selectedProperty());
+      datasetsListView.disableProperty().bind(nextDatasetButton.selectedProperty());
+
+      messager.bindBidirectional(UIVisibilityGraphsTopics.StopWalker, stopWalkingToggleButton.selectedProperty(), false);
 
       messager.registerJavaFXSyncedTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
 
@@ -183,6 +202,7 @@ public class VisibilityGraphsTestVisualizer
    {
       primaryStage.show();
       planarRegionViewer.start();
+      planarRegionShadowViewer.start();
       startGoalViewer.start();
       bodyPathMeshViewer.start();
       clusterMeshViewer.start();
@@ -194,6 +214,7 @@ public class VisibilityGraphsTestVisualizer
    public void stop()
    {
       planarRegionViewer.stop();
+      planarRegionShadowViewer.stop();
       startGoalViewer.stop();
       bodyPathMeshViewer.stop();
       clusterMeshViewer.stop();

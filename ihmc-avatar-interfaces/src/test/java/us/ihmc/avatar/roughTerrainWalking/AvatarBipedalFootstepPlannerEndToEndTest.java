@@ -240,13 +240,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
 
       FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose, plannerType);
-      requestPacket.setAssumeFlatGround(false);
-      toolboxCommunicator.send(requestPacket);
-
-      blockingSimulationRunner.simulateAndBlock(1.0);
-
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-      toolboxCommunicator.send(planarRegionsListMessage);
+      requestPacket.setPlanarRegionsListMessage(planarRegionsListMessage);
+      toolboxCommunicator.send(requestPacket);
 
       while(outputStatus.get() == null)
       {

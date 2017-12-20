@@ -7,14 +7,19 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
 public class PlanarRegionsListExamples
@@ -106,6 +111,30 @@ public class PlanarRegionsListExamples
       generator.translate(0.6 + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
       generator.addRectangle(0.6, courseWidth);
       
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList generateSteppingStoneField(double steppingStoneWidth, double steppingStoneLength, double stepWidth, double stepLength, int numberOfSteps)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double platformLength = 0.6;
+      double platformWidth = 1.0;
+
+      generator.addRectangle(platformLength, platformWidth);
+      generator.translate(0.5 * platformLength, 0.0, 0.0);
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         RobotSide side = (i % 2 == 0) ? RobotSide.LEFT : RobotSide.RIGHT;
+         double xOffset = stepLength;
+         double yOffset = side.negateIfRightSide(0.5 * stepWidth);
+         generator.translate(xOffset, yOffset, 0.0);
+         generator.addRectangle(steppingStoneLength, steppingStoneWidth);
+      }
+
+      generator.translate(stepLength + 0.5 * platformLength, 0.0, 0.0);
+      generator.addRectangle(platformLength, platformWidth);
       return generator.getPlanarRegionsList();
    }
 
@@ -429,7 +458,8 @@ public class PlanarRegionsListExamples
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
-      PlanarRegionsList planarRegionsList = createMazeEnvironment();
+//      PlanarRegionsList planarRegionsList = createMazeEnvironment();
+      PlanarRegionsList planarRegionsList = generateSteppingStoneField(0.1, 0.1, 0.25, 0.3, 6);
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
                                                                                                 false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();

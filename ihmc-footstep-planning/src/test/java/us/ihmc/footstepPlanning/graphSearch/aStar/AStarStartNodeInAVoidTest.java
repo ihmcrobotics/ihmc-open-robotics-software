@@ -64,14 +64,6 @@ public class AStarStartNodeInAVoidTest
             PlanningTestTools.runPlanner(planner, initialStanceFootPose3d, initialStanceFootSide, goalPose3d, planarRegionsList, !visualize);
 
       if (visualize)
-      {
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-         {
-            FramePose pose = new FramePose();
-            footstepPlan.getFootstep(i).getSoleFramePose(pose);
-            System.out.println(pose);
-         }
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose3d);
-      }
    }
 }

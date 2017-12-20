@@ -43,6 +43,8 @@ public class ClusterMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> showNonNavigableExtrusions;
    private final AtomicReference<Boolean> closeNonNavigableExtrusions;
 
+   private final AtomicReference<List<NavigableRegion>> newRequestReference;
+
    public ClusterMeshViewer(REAMessager messager)
    {
       this(messager, null);
@@ -63,7 +65,7 @@ public class ClusterMeshViewer extends AnimationTimer
       closeNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.CloseClusterNavigableExtrusions, false);
       showNonNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, false);
       closeNonNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.CloseClusterNonNavigableExtrusions, false);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.NavigableRegionData, this::processNavigableRegionsOnThread);
+      newRequestReference = messager.createInput(UIVisibilityGraphsTopics.NavigableRegionData, null);
       root.setMouseTransparent(true);
       root.getChildren().addAll(rawPointsGroup, navigableExtrusionsGroup, nonNavigableExtrusionsGroup);
    }
@@ -110,6 +112,14 @@ public class ClusterMeshViewer extends AnimationTimer
 
          if (showNonNavigableExtrusions.get())
             nonNavigableExtrusionsGroup.getChildren().addAll(nonNavigableExtrusionsRender.values());
+      }
+
+      if (showRawPoints.get() || showNavigableExtrusions.get() || showNonNavigableExtrusions.get())
+      {
+         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
+         
+         if (newRequest != null)
+            processNavigableRegionsOnThread(newRequest);
       }
    }
 
