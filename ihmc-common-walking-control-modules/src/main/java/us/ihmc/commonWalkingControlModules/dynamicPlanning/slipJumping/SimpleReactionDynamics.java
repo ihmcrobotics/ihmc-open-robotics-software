@@ -20,6 +20,8 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
 
    private final ContinuousSimpleReactionDynamics continuousDynamics;
    private final DenseMatrix64F continuousDynamicsMatrix = new DenseMatrix64F(stateVectorSize / 2, 1);
+   private final DenseMatrix64F continuousDynamicsStateGradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+   private final DenseMatrix64F continuousDynamicsControlGradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
 
    public SimpleReactionDynamics(double deltaT, double pendulumMass, double gravityZ)
    {
@@ -83,68 +85,46 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
 
       continuousDynamics.getDynamics(hybridState, currentState, currentControl, continuousDynamicsMatrix);
 
-      /*
       switch (hybridState)
       {
       case FLIGHT:
          matrixToPack.set(x, 0, x_k + flightDuration * xDot_k);
          matrixToPack.set(y, 0, y_k + flightDuration * yDot_k);
-         matrixToPack.set(z, 0, z_k + flightDuration * zDot_k - 0.5 * flightDuration * flightDuration * gravityZ);
+         matrixToPack.set(z, 0, z_k + flightDuration * zDot_k);
          matrixToPack.set(thetaX, 0, thetaX_k + flightDuration * thetaXDot_k);
          matrixToPack.set(thetaY, 0, thetaY_k + flightDuration * thetaYDot_k);
          matrixToPack.set(thetaZ, 0, thetaZ_k + flightDuration * thetaZDot_k);
 
          matrixToPack.set(xDot, 0, xDot_k);
          matrixToPack.set(yDot, 0, yDot_k);
-         matrixToPack.set(zDot, 0, zDot_k - flightDuration * gravityZ);
+         matrixToPack.set(zDot, 0, zDot_k);
          matrixToPack.set(thetaXDot, 0, thetaXDot_k);
          matrixToPack.set(thetaYDot, 0, thetaYDot_k);
          matrixToPack.set(thetaZDot, 0, thetaZDot_k);
 
+         MatrixTools.addMatrixBlock(matrixToPack, x, 0, continuousDynamicsMatrix, x, 0, stateVectorSize / 2, 1, 0.5 * flightDuration * flightDuration);
+         MatrixTools.addMatrixBlock(matrixToPack, xDot, 0, continuousDynamicsMatrix, x, 0, stateVectorSize / 2, 1, flightDuration);
+
          break;
-
       case STANCE:
-         double fX_k = currentControl.get(fx, 0);
-         double fY_k = currentControl.get(fy, 0);
-         double fZ_k = currentControl.get(fz, 0);
-         double tauX_k = currentControl.get(tauX, 0);
-         double tauY_k = currentControl.get(tauY, 0);
-         double tauZ_k = currentControl.get(tauZ, 0);
+         matrixToPack.set(x, 0, x_k + deltaT * xDot_k);
+         matrixToPack.set(y, 0, y_k + deltaT * yDot_k);
+         matrixToPack.set(z, 0, z_k + deltaT * zDot_k);
+         matrixToPack.set(thetaX, 0, thetaX_k + deltaT * thetaXDot_k);
+         matrixToPack.set(thetaY, 0, thetaY_k + deltaT * thetaYDot_k);
+         matrixToPack.set(thetaZ, 0, thetaZ_k + deltaT * thetaZDot_k);
 
-         matrixToPack.set(x, 0, x_k + deltaT * xDot_k + 0.5 * deltaT2 * fX_k / pendulumMass);
-         matrixToPack.set(y, 0, y_k + deltaT * yDot_k + 0.5 * deltaT2 * fY_k / pendulumMass);
-         matrixToPack.set(z, 0, z_k + deltaT * zDot_k + 0.5 * deltaT2 * (fZ_k / pendulumMass - gravityZ));
-         matrixToPack.set(thetaX, 0, thetaX_k + deltaT * thetaXDot_k + 0.5 * deltaT2 * tauX_k / inertia.getX());
-         matrixToPack.set(thetaY, 0, thetaY_k + deltaT * thetaYDot_k + 0.5 * deltaT2 * tauY_k / inertia.getY());
-         matrixToPack.set(thetaZ, 0, thetaZ_k + deltaT * thetaZDot_k + 0.5 * deltaT2 * tauZ_k / inertia.getZ());
+         matrixToPack.set(xDot, 0, xDot_k);
+         matrixToPack.set(yDot, 0, yDot_k);
+         matrixToPack.set(zDot, 0, zDot_k);
+         matrixToPack.set(thetaXDot, 0, thetaXDot_k);
+         matrixToPack.set(thetaYDot, 0, thetaYDot_k);
+         matrixToPack.set(thetaZDot, 0, thetaZDot_k);
 
-         matrixToPack.set(xDot, 0, xDot_k + deltaT * fX_k / pendulumMass);
-         matrixToPack.set(yDot, 0, yDot_k + deltaT * fY_k / pendulumMass);
-         matrixToPack.set(zDot, 0, zDot_k + deltaT * (fZ_k / pendulumMass - gravityZ));
-         matrixToPack.set(thetaXDot, 0, thetaXDot_k + deltaT * tauX_k / inertia.getX());
-         matrixToPack.set(thetaYDot, 0, thetaYDot_k + deltaT * tauY_k / inertia.getY());
-         matrixToPack.set(thetaZDot, 0, thetaZDot_k + deltaT * tauZ_k / inertia.getZ());
-
+         MatrixTools.addMatrixBlock(matrixToPack, x, 0, continuousDynamicsMatrix, x, 0, stateVectorSize / 2, 1, 0.5 * deltaT2);
+         MatrixTools.addMatrixBlock(matrixToPack, xDot, 0, continuousDynamicsMatrix, x, 0, stateVectorSize / 2, 1, deltaT);
          break;
       }
-      */
-
-      matrixToPack.set(x, 0, x_k + flightDuration * xDot_k);
-      matrixToPack.set(y, 0, y_k + flightDuration * yDot_k);
-      matrixToPack.set(z, 0, z_k + flightDuration * zDot_k);
-      matrixToPack.set(thetaX, 0, thetaX_k + flightDuration * thetaXDot_k);
-      matrixToPack.set(thetaY, 0, thetaY_k + flightDuration * thetaYDot_k);
-      matrixToPack.set(thetaZ, 0, thetaZ_k + flightDuration * thetaZDot_k);
-
-      matrixToPack.set(xDot, 0, xDot_k);
-      matrixToPack.set(yDot, 0, yDot_k);
-      matrixToPack.set(zDot, 0, zDot_k);
-      matrixToPack.set(thetaXDot, 0, thetaXDot_k);
-      matrixToPack.set(thetaYDot, 0, thetaYDot_k);
-      matrixToPack.set(thetaZDot, 0, thetaZDot_k);
-
-      MatrixTools.addMatrixBlock(matrixToPack, x, 0, continuousDynamicsMatrix, x, 0, stateVectorSize / 2, 1, 0.5 * flightDuration * flightDuration);
-      MatrixTools.addMatrixBlock(matrixToPack, xDot, 0, continuousDynamicsMatrix, x, 0, stateVectorSize / 2, 1, flightDuration);
    }
 
    @Override
@@ -156,6 +136,7 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
       if (matrixToPack.numCols != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
 
+      continuousDynamics.getDynamicsStateGradient(hybridState, currentState, currentControl, continuousDynamicsStateGradient);
       matrixToPack.zero();
       CommonOps.setIdentity(matrixToPack);
 
@@ -168,6 +149,10 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
          matrixToPack.set(thetaX, thetaXDot, flightDuration);
          matrixToPack.set(thetaY, thetaYDot, flightDuration);
          matrixToPack.set(thetaZ, thetaZDot, flightDuration);
+
+         MatrixTools.addMatrixBlock(matrixToPack, x, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, 0.5 * flightDuration * flightDuration);
+         MatrixTools.addMatrixBlock(matrixToPack, xDot, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, flightDuration);
+
          break;
       case STANCE:
          matrixToPack.set(x, xDot, deltaT);
@@ -176,6 +161,10 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
          matrixToPack.set(thetaX, thetaXDot, deltaT);
          matrixToPack.set(thetaY, thetaYDot, deltaT);
          matrixToPack.set(thetaZ, thetaZDot, deltaT);
+
+         MatrixTools.addMatrixBlock(matrixToPack, x, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, 0.5 * deltaT2);
+         MatrixTools.addMatrixBlock(matrixToPack, xDot, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, deltaT);
+
          break;
       }
 
@@ -190,23 +179,21 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
       if (matrixToPack.numCols != controlVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
 
+      continuousDynamics.getDynamicsControlGradient(hybridState, currentState, currentControl, continuousDynamicsControlGradient);
+
       matrixToPack.zero();
 
       switch (hybridState)
       {
       case FLIGHT:
-         matrixToPack.set(x, fx, deltaT / pendulumMass);
-         matrixToPack.set(y, fy, deltaT / pendulumMass);
-         matrixToPack.set(z, fz, deltaT / pendulumMass);
-         matrixToPack.set(thetaX, tauX, deltaT / inertia.getX());
-         matrixToPack.set(thetaY, tauY, deltaT / inertia.getY());
-         matrixToPack.set(thetaZ, tauZ, deltaT / inertia.getZ());
-         matrixToPack.set(xDot, fx, deltaT / pendulumMass);
-         matrixToPack.set(yDot, fy, deltaT / pendulumMass);
-         matrixToPack.set(zDot, fz, deltaT / pendulumMass);
-         matrixToPack.set(thetaXDot, tauX, deltaT / inertia.getX());
-         matrixToPack.set(thetaYDot, tauY, deltaT / inertia.getY());
-         matrixToPack.set(thetaZDot, tauZ, deltaT / inertia.getZ());
+         MatrixTools.addMatrixBlock(matrixToPack, x, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, 0.5 * flightDuration * flightDuration);
+         MatrixTools.addMatrixBlock(matrixToPack, xDot, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, flightDuration);
+
+         break;
+      case STANCE:
+         MatrixTools.addMatrixBlock(matrixToPack, x, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, 0.5 * deltaT2);
+         MatrixTools.addMatrixBlock(matrixToPack, xDot, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, deltaT);
+
          break;
       }
    }

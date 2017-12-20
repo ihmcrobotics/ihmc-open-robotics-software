@@ -69,15 +69,15 @@ public class LIPMSimpleCostFunctionTest
    {
       DenseMatrix64F Q = new DenseMatrix64F(6, 6);
       DenseMatrix64F R = new DenseMatrix64F(3, 3);
-      Q.set(0, 0, 1e-4);
-      Q.set(1, 1, 1e-4);
-      Q.set(2, 2, 10);
-      Q.set(3, 3, 1e-2);
-      Q.set(4, 4, 1e-2);
-      Q.set(5, 5, 1e-2);
+      Q.set(0, 0, 1e-6);
+      Q.set(1, 1, 1e-6);
+      Q.set(2, 2, 1e1);
+      Q.set(3, 3, 1e-6);
+      Q.set(4, 4, 1e-6);
+      Q.set(5, 5, 1e-6);
 
-      R.set(0, 0, 1);
-      R.set(1, 1, 1);
+      R.set(0, 0, 1e2);
+      R.set(1, 1, 1e2);
       R.set(2, 2, 1e-6);
 
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -129,15 +129,15 @@ public class LIPMSimpleCostFunctionTest
    {
       DenseMatrix64F Q = new DenseMatrix64F(6, 6);
       DenseMatrix64F R = new DenseMatrix64F(3, 3);
-      Q.set(0, 0, 1e-4);
-      Q.set(1, 1, 1e-4);
-      Q.set(2, 2, 10);
-      Q.set(3, 3, 1e-2);
-      Q.set(4, 4, 1e-2);
-      Q.set(5, 5, 1e-2);
+      Q.set(0, 0, 1e-6);
+      Q.set(1, 1, 1e-6);
+      Q.set(2, 2, 1e1);
+      Q.set(3, 3, 1e-6);
+      Q.set(4, 4, 1e-6);
+      Q.set(5, 5, 1e-6);
 
-      R.set(0, 0, 1);
-      R.set(1, 1, 1);
+      R.set(0, 0, 1e2);
+      R.set(1, 1, 1e2);
       R.set(2, 2, 1e-6);
 
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
@@ -216,12 +216,12 @@ public class LIPMSimpleCostFunctionTest
    public void testComputeCostStateHessian()
    {
       DenseMatrix64F Q = new DenseMatrix64F(6, 6);
-      Q.set(0, 0, 1e-4);
-      Q.set(1, 1, 1e-4);
-      Q.set(2, 2, 10);
-      Q.set(3, 3, 1e-2);
-      Q.set(4, 4, 1e-2);
-      Q.set(5, 5, 1e-2);
+      Q.set(0, 0, 1e-6);
+      Q.set(1, 1, 1e-6);
+      Q.set(2, 2, 1e1);
+      Q.set(3, 3, 1e-6);
+      Q.set(4, 4, 1e-6);
+      Q.set(5, 5, 1e-6);
 
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
 
