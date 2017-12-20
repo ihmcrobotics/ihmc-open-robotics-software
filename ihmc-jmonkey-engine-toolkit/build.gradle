@@ -28,7 +28,9 @@ mainDependencies {
    compile group: "org.jmonkeyengine", name: "jme3-terrain", version: "3.2.0-171208"
    compile group: "org.jmonkeyengine", name: "jme3-plugins", version: "3.2.0-171208"
    compile group: "org.jmonkeyengine", name: "jme3-dae", version: "3.2.0-171208"
-   compile group: "org.jmonkeyengine", name: "jme3-lwjgl3", version: "3.2.0-171208"
+   // Only one version of lwjgl can be used at a time (sealed JARs), we require 2.9.3
+   // for Canvas
+   // compile group: "org.jmonkeyengine", name: "jme3-lwjgl3", version: "3.2.0-171208"
    compile(group: "org.jmonkeyengine", name: "jme3-lwjgl", version: "3.2.0-171208") {
       //Exclude incompatible version of jinput
       exclude group: "net.java.jinput", module: "jinput"
