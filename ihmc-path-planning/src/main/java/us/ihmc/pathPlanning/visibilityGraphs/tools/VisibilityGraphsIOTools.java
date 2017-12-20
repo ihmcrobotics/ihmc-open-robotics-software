@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -209,6 +210,70 @@ public class VisibilityGraphsIOTools
       File mainDataFolder = getDataResource(loadingClass);
 
       return Arrays.stream(mainDataFolder.listFiles()).map(VisibilityGraphsIOTools::loadDataset).collect(Collectors.toList());
+   }
+
+   /**
+    * Loads either directly the planar regions from the given file, or from the first child
+    * directory if the file is a visibility graphs dataset.
+    * 
+    * @param inputFile the file to load the planar regions from. Can be an actual planar regions
+    *           data file or a visibility graphs dataset file.
+    * @return the loaded planar regions or {@code null} if not able to load them.
+    */
+   public static PlanarRegionsList importPlanarRegionData(File inputFile)
+   {
+      return PlanarRegionFileTools.importPlanRegionData(adjustPlanarRegionsDataFile(inputFile));
+   }
+
+   /**
+    * Adjust the file path such that the given file is returned if it is a planar regions file, or
+    * the first child directory is returned if it is a visibility graphs dataset file.
+    * 
+    * @param inputFile the planar regions file to be adjusted. Can be an actual planar regions data
+    *           file or a visibility graphs dataset file.
+    * @return
+    */
+   private static File adjustPlanarRegionsDataFile(File inputFile)
+   {
+      File[] vizGraphsParameterFile = inputFile.listFiles((FilenameFilter) (dir, name) -> name.equals(VisibilityGraphsIOTools.INPUTS_PARAMETERS_FILENAME));
+      if (vizGraphsParameterFile != null && vizGraphsParameterFile.length == 1)
+         inputFile = inputFile.listFiles(File::isDirectory)[0];
+      return inputFile;
+   }
+
+   public static String[] getPlanarRegionAndVizGraphsFilenames(File parentFolder)
+   {
+      if (!parentFolder.exists() || !parentFolder.isDirectory())
+         return null;
+
+      return Arrays.stream(parentFolder.listFiles(file -> isVisibilityGraphsDataset(file) || PlanarRegionFileTools.isPlanarRegionFile(file))).map(File::getName)
+                   .toArray(String[]::new);
+   }
+
+   public static String[] getSubDirectoriesNames(File parentFolder)
+   {
+      if (!parentFolder.exists() || !parentFolder.isDirectory())
+         return null;
+
+      return Arrays.stream(parentFolder.listFiles(File::isDirectory)).map(File::getName).toArray(String[]::new);
+   }
+
+   public static boolean isVisibilityGraphsDataset(File dataFolder)
+   {
+      if (dataFolder == null || !dataFolder.exists() || !dataFolder.isDirectory())
+         return false;
+
+      File[] paramsFiles = dataFolder.listFiles((dir, name) -> name.equals(INPUTS_PARAMETERS_FILENAME));
+
+      if (paramsFiles == null || paramsFiles.length != 1)
+         return false;
+
+      File[] planarRegionFolders = dataFolder.listFiles(File::isDirectory);
+
+      if (planarRegionFolders == null || planarRegionFolders.length != 1)
+         return false;
+
+      return PlanarRegionFileTools.isPlanarRegionFile(planarRegionFolders[0]);
    }
 
    public static VisibilityGraphsUnitTestDataset loadDataset(File datasetFolder)
