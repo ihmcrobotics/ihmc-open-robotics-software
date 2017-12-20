@@ -10,7 +10,10 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 {
    public long rigidBodyNameBasedHashCode;
    public ConfigurationSpaceName[] degreesOfFreedomToExplore;
-   public double[] explorationRangeAmplitudes;
+   //public double[] explorationRangeAmplitudes;
+
+   public double[] explorationRangeUpperLimits;
+   public double[] explorationRangeLowerLimits;
 
    /**
     * To set enable exploration for all degree of freedom, do not send this message.
@@ -54,6 +57,17 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore,
+                                                   double[] explorationRangeUpperLimits, double[] explorationRangeLowerLimits)
+   {
+      if (degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length)
+         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
+
+      this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
+      setExplorationConfigurationSpaces(degreesOfFreedomToExplore, explorationRangeUpperLimits, explorationRangeLowerLimits);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
    public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
    {
       if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
@@ -61,7 +75,25 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
                + ", explorationRangeLowerLimits.length = ");
 
       this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
-      this.explorationRangeAmplitudes = explorationRangeAmplitudes;
+      this.explorationRangeUpperLimits = new double[degreesOfFreedomToExplore.length];
+      this.explorationRangeLowerLimits = new double[degreesOfFreedomToExplore.length];
+      for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
+      {
+         explorationRangeUpperLimits[i] = explorationRangeAmplitudes[i];
+         explorationRangeLowerLimits[i] = -explorationRangeAmplitudes[i];
+      }
+   }
+
+   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeUpperLimits,
+                                                 double[] explorationRangeLowerLimits)
+   {
+      if (degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length)
+         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
+               + ", explorationRangeLowerLimits.length = ");
+
+      this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
+      this.explorationRangeUpperLimits = explorationRangeUpperLimits;
+      this.explorationRangeLowerLimits = explorationRangeLowerLimits;
    }
 
    public long getRigidBodyNameBasedHashCode()
@@ -80,10 +112,15 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    {
       return degreesOfFreedomToExplore[i];
    }
-   
-   public double getExplorationAmplitude(int i)
+
+   public double getExplorationRangeUpperLimits(int i)
    {
-      return explorationRangeAmplitudes[i];
+      return explorationRangeUpperLimits[i];
+   }
+
+   public double getExplorationRangeLowerLimits(int i)
+   {
+      return explorationRangeLowerLimits[i];
    }
 
    @Override
@@ -93,7 +130,9 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
          return false;
       if (!Arrays.equals(degreesOfFreedomToExplore, other.degreesOfFreedomToExplore))
          return false;
-      if (!ArrayTools.deltaEquals(explorationRangeAmplitudes, other.explorationRangeAmplitudes, epsilon))
+      if (!ArrayTools.deltaEquals(explorationRangeUpperLimits, other.explorationRangeUpperLimits, epsilon))
+         return false;
+      if (!ArrayTools.deltaEquals(explorationRangeLowerLimits, other.explorationRangeLowerLimits, epsilon))
          return false;
       return true;
    }

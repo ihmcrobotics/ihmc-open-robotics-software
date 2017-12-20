@@ -296,11 +296,17 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
 
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
 
+      /**
+       * BIT   @link https://arxiv.org/pdf/1405.5848.pdf
+       * RABIT @link https://www.ri.cmu.edu/pub_files/2016/5/main.pdf.
+       * Implement BIT, RABIT for adaptive random regions.
+       */
       // test for position only.
       ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,};
-      double[] explorationAmplitudes = {0.9, 0.3, 0.4};
+      double[] explorationUpperLimits = {1.3, 0.2, 0.2};
+      double[] explorationLowerLimits = {-0.0, -0.2, -0.2};
 
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationAmplitudes));
+      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationUpperLimits, explorationLowerLimits));
 
       int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, null, reachingManifolds, rigidBodyConfigurations);
