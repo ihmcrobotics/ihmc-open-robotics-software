@@ -87,7 +87,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      simulationTestingParameters.setKeepSCSUp(false);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -232,7 +232,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
-      
+
       // trajectory message, exploration message
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
@@ -391,54 +391,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
-   @Test
-   public void testReaching() throws Exception, UnreasonableAccelerationException
-   {
-      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
-    
-      WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
-      configuration.setInitialConfigration(fullRobotModel);
-      configuration.setMaximumExpansionSize(2300);
-      
-      RigidBody hand = fullRobotModel.getHand(RobotSide.RIGHT);
-      List<ReachingManifoldMessage> reachingManifolds = new ArrayList<>();
-      
-      ReachingManifoldMessage reachingManifold = new ReachingManifoldMessage(hand);
-
-      reachingManifold.setOrigin(new Point3D(0.7, -0.2, 1.0), new Quaternion());
-
-      ConfigurationSpaceName[] manifoldSpaces = {YAW, PITCH, ConfigurationSpaceName.X};
-      double[] lowerLimits = new double[] {-Math.PI * 0.5, -Math.PI * 0.5, -0.1};
-      double[] upperLimits = new double[] {Math.PI * 0.5, Math.PI * 0.5, 0.0};
-      reachingManifold.setManifold(manifoldSpaces, lowerLimits, upperLimits);
-      reachingManifolds.add(reachingManifold);
-
-      List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
-      
-//      ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, YAW, PITCH, ROLL};
-//      double[] explorationAmplitudes = {0.8, 0.3, 0.8, Math.PI*0.25, Math.PI*0.25, Math.PI*0.25};
-      
-      ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,};
-      double[] explorationAmplitudes = {0.9, 0.3, 0.4};
-      
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationAmplitudes));
-      
-      
-      
-      
-      
-      
-      
-      
-      int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, null, reachingManifolds, rigidBodyConfigurations);
-
-      // run toolbox
-      runReachingTest(message, maxNumberOfIterations);
-      
-      PrintTools.info("END");
-   }
-
    protected void runTrajectoryTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
    {
       List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
@@ -467,7 +419,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       double trajectoryTime = tf - t0;
 
       commandInputManager.submitMessage(message);
-      
+
       WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
 
       if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
@@ -499,14 +451,14 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(manifold, 0.01, YoAppearance.AliceBlue()));
          }
       }
-      
+
       commandInputManager.submitMessage(message);
-      
+
       WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
-      
+
       // TODO
       // tracking
-      
+
       if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
          assertNotNull("The toolbox is done but did not report a solution.", solution);
       else
@@ -565,14 +517,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
                Pose3D givenRigidBodyPose = trajectory.getPose(configurationTime);
 
-               SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-               trajectory.getSelectionMatrix(selectionMatrix);
-
                double positionError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryPositionError(solutionRigidBodyPose, givenRigidBodyPose,
-                                                                                                      explorationMessage);
+                                                                                                      explorationMessage, trajectory);
 
                double orientationError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryOrientationError(solutionRigidBodyPose, givenRigidBodyPose,
-                                                                                                            explorationMessage);
+                                                                                                            explorationMessage, trajectory);
                if (VERBOSE)
                   PrintTools.info("" + positionError + " " + orientationError);
 
