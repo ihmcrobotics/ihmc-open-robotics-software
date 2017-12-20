@@ -20,7 +20,10 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    private RigidBody rigidBody;
    private final List<ConfigurationSpaceName> degreesOfFreedomToExplore = new ArrayList<>();
 
-   private final TDoubleArrayList explorationRangeAmplitudes = new TDoubleArrayList();
+   //private final TDoubleArrayList explorationRangeAmplitudes = new TDoubleArrayList();
+
+   private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
+   private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
 
    public RigidBodyExplorationConfigurationCommand()
    {
@@ -33,7 +36,8 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();
       for (int i = 0; i < configurationSpaces.length; i++)
          this.degreesOfFreedomToExplore.add(configurationSpaces[i]);
-      this.explorationRangeAmplitudes.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationAmplitudeArray(configurationSpaces));
+      this.explorationRangeUpperLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(configurationSpaces));
+      this.explorationRangeLowerLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(configurationSpaces));
    }
 
    @Override
@@ -42,7 +46,8 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       rigidBodyNameBasedashCode = NameBasedHashCodeTools.NULL_HASHCODE;
       rigidBody = null;
       degreesOfFreedomToExplore.clear();
-      explorationRangeAmplitudes.reset();
+      explorationRangeUpperLimits.reset();
+      explorationRangeLowerLimits.reset();
    }
 
    @Override
@@ -56,7 +61,8 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       for (int i = 0; i < other.getNumberOfDegreesOfFreedomToExplore(); i++)
       {
          degreesOfFreedomToExplore.add(other.degreesOfFreedomToExplore.get(i));
-         explorationRangeAmplitudes.add(other.explorationRangeAmplitudes.get(i));
+         explorationRangeUpperLimits.add(other.explorationRangeUpperLimits.get(i));
+         explorationRangeLowerLimits.add(other.explorationRangeLowerLimits.get(i));
       }
    }
 
@@ -81,7 +87,8 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       for (int i = 0; i < message.getNumberOfDegreesOfFreedomToExplore(); i++)
       {
          degreesOfFreedomToExplore.add(message.getDegreeOfFreedomToExplore(i));
-         explorationRangeAmplitudes.add(message.getExplorationAmplitude(i));
+         explorationRangeUpperLimits.add(message.getExplorationRangeUpperLimits(i));
+         explorationRangeLowerLimits.add(message.getExplorationRangeLowerLimits(i));
       }
    }
 
@@ -100,9 +107,14 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       return degreesOfFreedomToExplore.get(i);
    }
 
-   public double getExplorationAmplitude(int i)
+   public double getExplorationRangeUpperLimits(int i)
    {
-      return explorationRangeAmplitudes.get(i);
+      return explorationRangeUpperLimits.get(i);
+   }
+
+   public double getExplorationRangeLowerLimits(int i)
+   {
+      return explorationRangeLowerLimits.get(i);
    }
 
    @Override

@@ -8,36 +8,12 @@ public enum ConfigurationSpaceName
 
    public double getDefaultExplorationLowerLimit()
    {
-      switch (this)
-      {
-      case X:
-      case Y:
-      case Z:
-         return -1.0;
-      case ROLL:
-      case PITCH:
-      case YAW:
-         return -0.5*Math.PI;
-      default:
-         throw new RuntimeException("Unexpected value: " + this);
-      }
+      return -getDefaultExplorationAmplitude();
    }
 
    public double getDefaultExplorationUpperLimit()
    {
-      switch (this)
-      {
-      case X:
-      case Y:
-      case Z:
-         return 1.0;
-      case ROLL:
-      case PITCH:
-      case YAW:
-         return 0.5*Math.PI;
-      default:
-         throw new RuntimeException("Unexpected value: " + this);
-      }
+      return getDefaultExplorationAmplitude();
    }
 
    public double getDefaultExplorationAmplitude()
@@ -51,12 +27,12 @@ public enum ConfigurationSpaceName
       case ROLL:
       case PITCH:
       case YAW:
-         return 0.25*Math.PI;
+         return 0.25 * Math.PI;
       default:
          throw new RuntimeException("Unexpected value: " + this);
       }
    }
-   
+
    public RigidBodyTransform getLocalRigidBodyTransform(double configuration)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
