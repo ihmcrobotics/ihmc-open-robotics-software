@@ -1,8 +1,9 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDynamics;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
