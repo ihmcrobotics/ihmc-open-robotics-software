@@ -244,7 +244,7 @@ public class ClusterTools
       return extrusions;
    }
 
-   public static void extrudeCluster(Cluster cluster, Point2DReadOnly observer, ExtrusionDistanceCalculator calculator, List<Cluster> listOfClusters)
+   public static void extrudeCluster(Cluster cluster, ExtrusionDistanceCalculator calculator, List<Cluster> listOfClusters)
    {
       ExtrusionDistanceCalculator nonNavigableCalculator = (c, p, h) -> calculator.computeExtrusionDistance(c, p, h) - NAV_TO_NON_NAV_DISTANCE;
       ExtrusionDistanceCalculator navigableCalculator = (c, p, h) -> calculator.computeExtrusionDistance(c, p, h);
@@ -532,11 +532,11 @@ public class ClusterTools
       }
    }
 
-   public static void performExtrusions(Point2D initialObserver, ExtrusionDistanceCalculator calculator, List<Cluster> clusters)
+   public static void performExtrusions(ExtrusionDistanceCalculator calculator, List<Cluster> clusters)
    {
       for (Cluster cluster : clusters)
       {
-         ClusterTools.extrudeCluster(cluster, initialObserver, calculator, clusters);
+         ClusterTools.extrudeCluster(cluster, calculator, clusters);
       }
    }
 }
