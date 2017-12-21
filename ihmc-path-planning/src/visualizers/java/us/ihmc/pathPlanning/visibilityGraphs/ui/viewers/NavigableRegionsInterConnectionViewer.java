@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,6 +15,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
@@ -54,7 +54,7 @@ public class NavigableRegionsInterConnectionViewer extends AnimationTimer
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       show = messager.createInput(UIVisibilityGraphsTopics.ShowLocalGraphs, false);
       messager.registerTopicListener(UIVisibilityGraphsTopics.ShowInterConnections, this::handleShowThreadSafe);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.InterRegionConnectionData, this::processInterConnectionsOnThread);
+      messager.registerTopicListener(UIVisibilityGraphsTopics.InterRegionVisibilityMap, this::processInterConnectionsOnThread);
    }
 
    private void handleShowThreadSafe(boolean show)
@@ -73,18 +73,18 @@ public class NavigableRegionsInterConnectionViewer extends AnimationTimer
          connectionsMeshView.setMesh(connectionsMeshRendered);
    }
 
-   private void processInterConnectionsOnThread(List<Connection> interConnections)
+   private void processInterConnectionsOnThread(InterRegionVisibilityMap interRegionVisibilityMap)
    {
-      executorService.execute(() -> processInterConnections(interConnections));
+      executorService.execute(() -> processInterConnections(interRegionVisibilityMap));
    }
 
-   private void processInterConnections(List<Connection> interConnections)
+   private void processInterConnections(InterRegionVisibilityMap interRegionVisibilityMap)
    {
       if (VERBOSE)
          PrintTools.info(this, "Building mesh for inter-connections.");
       JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
 
-      for (Connection connection : interConnections)
+      for (Connection connection : interRegionVisibilityMap.getVisibilityMapInWorld())
          meshBuilder.addLine(connection.getSourcePoint(), connection.getTargetPoint(), VisualizationParameters.INTER_REGION_CONNECTIVITY_LINE_THICKNESS);
       connectionsMeshToRender.set(meshBuilder.generateMesh());
    }

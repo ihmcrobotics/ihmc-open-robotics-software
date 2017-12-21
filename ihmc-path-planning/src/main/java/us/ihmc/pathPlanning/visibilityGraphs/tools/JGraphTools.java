@@ -13,15 +13,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 public class JGraphTools
 {
-   public static List<Point3DReadOnly> calculatePathOnVisibilityGraph(ConnectionPoint3D start, ConnectionPoint3D goal, Collection<Connection> interConnections,
+   public static List<Point3DReadOnly> calculatePathOnVisibilityGraph(ConnectionPoint3D start, ConnectionPoint3D goal,
                                                                       Collection<VisibilityMapHolder> allVisibilityMapHolders)
    {
-      SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graph = createGlobalVisibilityGraph(interConnections, allVisibilityMapHolders);
+      SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graph = createGlobalVisibilityGraph(allVisibilityMapHolders);
       List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(graph, start, goal);
       return convertVisibilityGraphSolutionToPath(solution, start, graph);
    }
@@ -75,14 +74,11 @@ public class JGraphTools
       connections.forEach(connection -> addConnectionToGraph(connection, graphToUpdate));
    }
 
-   public static SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> createGlobalVisibilityGraph(Collection<Connection> interConnections,
-                                                                                                         Collection<VisibilityMapHolder> allVisibilityMapHolders)
+   public static SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> createGlobalVisibilityGraph(Collection<VisibilityMapHolder> allVisibilityMapHolders)
    {
       SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-      addConnectionsToGraph(interConnections, globalVisMap);
-      allVisibilityMapHolders.stream().map(VisibilityMapHolder::getVisibilityMapInWorld).map(VisibilityMap::getConnections)
-                             .forEach(connections -> addConnectionsToGraph(connections, globalVisMap));
+      allVisibilityMapHolders.stream().map(VisibilityMapHolder::getVisibilityMapInWorld).forEach(map -> addConnectionsToGraph(map, globalVisMap));
 
       return globalVisMap;
    }

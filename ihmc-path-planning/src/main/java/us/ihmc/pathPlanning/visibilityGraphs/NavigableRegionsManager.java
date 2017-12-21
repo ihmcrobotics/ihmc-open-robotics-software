@@ -32,7 +32,7 @@ public class NavigableRegionsManager
 
    private final VisibilityGraphsParameters parameters;
 
-   private List<Connection> interRegionConnections;
+   private InterRegionVisibilityMap interRegionVisibilityMap;
 
    public NavigableRegionsManager()
    {
@@ -97,16 +97,17 @@ public class NavigableRegionsManager
          }
       }
 
-      interRegionConnections = computeInterRegionConnections(navigableRegions, parameters.getInterRegionConnectionFilter());
+      interRegionVisibilityMap = createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
       visibilityMapHolders.addAll(navigableRegions);
       visibilityMapHolders.add(startMap);
       visibilityMapHolders.add(goalMap);
+      visibilityMapHolders.add(interRegionVisibilityMap);
 
       ConnectionPoint3D startConnection = new ConnectionPoint3D(start, START_GOAL_ID);
       ConnectionPoint3D goalConnection = new ConnectionPoint3D(goal, START_GOAL_ID);
-      List<Point3DReadOnly> path = JGraphTools.calculatePathOnVisibilityGraph(startConnection, goalConnection, interRegionConnections, visibilityMapHolders);
+      List<Point3DReadOnly> path = JGraphTools.calculatePathOnVisibilityGraph(startConnection, goalConnection, visibilityMapHolders);
 
       if (debug)
       {
@@ -157,9 +158,10 @@ public class NavigableRegionsManager
       }
    }
 
-   private static List<Connection> computeInterRegionConnections(List<NavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
+   private static InterRegionVisibilityMap createInterRegionVisibilityMap(List<NavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
    {
-      List<Connection> interRegionConnections = new ArrayList<>();
+      InterRegionVisibilityMap map = new InterRegionVisibilityMap();
+
       if (debug)
       {
          PrintTools.info("Starting connectivity check");
@@ -184,14 +186,14 @@ public class NavigableRegionsManager
 
                   if (filter.isConnectionValid(source, target))
                   {
-                     interRegionConnections.add(new Connection(source, target));
+                     map.addConnection(source, target);
                   }
                }
             }
          }
       }
 
-      return interRegionConnections;
+      return map;
    }
 
    public Point3D[][] getNavigableExtrusions()
@@ -232,8 +234,8 @@ public class NavigableRegionsManager
       return navigableRegions;
    }
 
-   public List<Connection> getInterRegionConnections()
+   public InterRegionVisibilityMap getInterRegionConnections()
    {
-      return interRegionConnections;
+      return interRegionVisibilityMap;
    }
 }
