@@ -117,7 +117,7 @@ public class VisibilityGraphsRenderer
 
          messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, bodyPath);
          messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, navigableRegionsManager.getListOfLocalPlanners());
-         messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, navigableRegionsManager.getConnectionPoints());
+         messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, navigableRegionsManager.getInterRegionConnections());
       }
       catch (Exception e)
       {
