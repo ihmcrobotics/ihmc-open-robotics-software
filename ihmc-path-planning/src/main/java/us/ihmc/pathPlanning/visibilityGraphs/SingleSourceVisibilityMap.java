@@ -33,6 +33,26 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
       visibilityMapInWorld.computeVertices();
    }
 
+   public void addConnectionInWorld(Connection connectionInWorld)
+   {
+      visibilityMapInWorld.addConnection(connectionInWorld);
+      visibilityMapInWorld.computeVertices();
+      Connection connectionInLocal = new Connection(connectionInWorld);
+      hostRegion.transformFromWorldToLocal(connectionInLocal);
+      visibilityMapInLocal.addConnection(connectionInLocal);
+      visibilityMapInLocal.computeVertices();
+   }
+
+   public void addConnectionInLocal(Connection connectionInLocal)
+   {
+      visibilityMapInLocal.addConnection(connectionInLocal);
+      visibilityMapInLocal.computeVertices();
+      Connection connectionInWorld = new Connection(connectionInLocal);
+      hostRegion.transformFromLocalToWorld(connectionInWorld);
+      visibilityMapInWorld.addConnection(connectionInWorld);
+      visibilityMapInWorld.computeVertices();
+   }
+
    public Point3DReadOnly getSourceInWorld()
    {
       return sourceInWorld;
@@ -42,7 +62,7 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
    {
       return sourceInLocal;
    }
-   
+
    public Point2D getSourceInLocal2D()
    {
       return new Point2D(sourceInLocal);
