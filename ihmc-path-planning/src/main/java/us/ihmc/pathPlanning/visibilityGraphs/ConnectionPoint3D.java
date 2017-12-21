@@ -14,6 +14,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
 
    private final int regionId;
    private final double x, y, z;
+   private final int hashCode;
 
    public ConnectionPoint3D(int regionId)
    {
@@ -21,6 +22,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
       y = 0.0;
       z = 0.0;
       this.regionId = regionId;
+      hashCode = computeHashCode();
    }
 
    public ConnectionPoint3D(ConnectionPoint3D other)
@@ -34,6 +36,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
       this.y = y;
       this.z = z;
       this.regionId = regionId;
+      hashCode = computeHashCode();
    }
 
    public ConnectionPoint3D(Tuple2DReadOnly tuple2DReadOnly, int regionId)
@@ -42,6 +45,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
       y = tuple2DReadOnly.getY();
       z = 0.0;
       this.regionId = regionId;
+      hashCode = computeHashCode();
    }
 
    public ConnectionPoint3D(Tuple3DReadOnly other, int regionId)
@@ -50,6 +54,16 @@ public class ConnectionPoint3D implements Point3DReadOnly
       y = other.getY();
       z = other.getZ();
       this.regionId = regionId;
+      hashCode = computeHashCode();
+   }
+
+   private int computeHashCode()
+   {
+      long bits = 1L;
+      bits = 31L * bits + Double.doubleToLongBits(getRoundedX());
+      bits = 31L * bits + Double.doubleToLongBits(getRoundedY());
+      bits = 31L * bits + Double.doubleToLongBits(getRoundedZ());
+      return (int) (bits ^ bits >> 32);
    }
 
    @Override
@@ -93,11 +107,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
    @Override
    public int hashCode()
    {
-      long bits = 1L;
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedX());
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedY());
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedZ());
-      return (int) (bits ^ bits >> 32);
+      return hashCode;
    }
 
    @Override
@@ -122,9 +132,9 @@ public class ConnectionPoint3D implements Point3DReadOnly
       return "ConnectionPoint3D: " + EuclidCoreIOTools.getTuple3DString(this);
    }
 
-   private static double round(double value)
+   static double round(double value)
    {
-      return (int) value * INV_PRECISION * PRECISION;
+      return Math.round(value * INV_PRECISION) * PRECISION;
    }
 
    public ConnectionPoint3D applyTransform(Transform transform)
