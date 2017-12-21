@@ -453,12 +453,15 @@ public class PlanarRegionTools
       return false;
    }
 
-   public static ArrayList<PlanarRegion> determineWhichRegionsAreInside(PlanarRegion containingRegion, List<PlanarRegion> otherRegionsEx)
+   public static List<PlanarRegion> determineWhichRegionsAreInside(PlanarRegion containingRegion, List<PlanarRegion> otherRegionsEx)
    {
-      ArrayList<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
+      List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
 
       for (PlanarRegion otherRegion : otherRegionsEx)
       {
+         if (containingRegion == otherRegion)
+            continue;
+
          if (PlanarRegionTools.isPartOfTheRegionInside(otherRegion, containingRegion))
          {
             regionsInsideHomeRegion.add(otherRegion);
