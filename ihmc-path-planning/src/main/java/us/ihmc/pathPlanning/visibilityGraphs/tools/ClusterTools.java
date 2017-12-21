@@ -362,20 +362,28 @@ public class ClusterTools
       return new Point3D(closestPoint);
    }
 
-   public static void createClusterForHomeRegion(List<Cluster> clusters, RigidBodyTransform transformToWorld, PlanarRegion homeRegion)
+   public static Cluster createHomeRegionCluster(PlanarRegion homeRegion)
    {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      homeRegion.getTransformToWorld(transformToWorld);
+
       Cluster cluster = new Cluster();
-      clusters.add(cluster);
       cluster.setType(Type.POLYGON);
       cluster.setTransformToWorld(transformToWorld);
-      cluster.setHomeRegion(true);
       cluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
       cluster.setExtrusionSide(ExtrusionSide.INSIDE);
+
+      return cluster;
    }
 
-   public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions,
-                                                List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformFromHomeToWorld)
+   public static List<Cluster> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> lineObstacleRegions,
+                                                      List<PlanarRegion> polygonObstacleRegions)
    {
+      RigidBodyTransform transformFromHomeToWorld = new RigidBodyTransform();
+      homeRegion.getTransformToWorld(transformFromHomeToWorld);
+
+      List<Cluster> clusters = new ArrayList<>();
+
       for (PlanarRegion region : lineObstacleRegions)
       {
          Cluster cluster = new Cluster();
@@ -426,6 +434,7 @@ public class ClusterTools
             System.out.println("Created a cluster of type: " + cluster.getType() + " with " + cluster.getRawPointsInLocal2D().size() + " points");
          }
       }
+      return clusters;
    }
 
    /**

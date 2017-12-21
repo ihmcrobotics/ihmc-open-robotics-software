@@ -14,22 +14,41 @@ import us.ihmc.robotics.geometry.PlanarRegion;
  */
 public class NavigableRegion implements VisibilityMapHolder
 {
+   private final PlanarRegion homeRegion;
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
    private List<Cluster> allClusters = new ArrayList<>();
-   private List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
-   private List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
-   private List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
    private VisibilityMap visibilityMapInLocal = null;
    private VisibilityMap visibilityMapInWorld = null;
-
-   private final PlanarRegion homeRegion;
-   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public NavigableRegion(PlanarRegion homeRegion)
    {
       this.homeRegion = homeRegion;
       homeRegion.getTransformToWorld(transformToWorld);
+   }
+
+   public void setHomeRegionCluster(Cluster homeCluster)
+   {
+      this.homeRegionCluster = homeCluster;
+      allClusters.add(homeCluster);
+   }
+
+   public void addObstacleClusters(Iterable<Cluster> obstacleClusters)
+   {
+      obstacleClusters.forEach(this::addObstacleCluster);
+   }
+
+   public void addObstacleCluster(Cluster obstacleCluster)
+   {
+      obstacleClusters.add(obstacleCluster);
+      allClusters.add(obstacleCluster);
+   }
+
+   public void setVisibilityMapInLocal(VisibilityMap visibilityMap)
+   {
+      visibilityMapInLocal = visibilityMap;
    }
 
    public PlanarRegion getHomeRegion()
@@ -42,6 +61,21 @@ public class NavigableRegion implements VisibilityMapHolder
       return new RigidBodyTransform(transformToWorld);
    }
 
+   public Cluster getHomeRegionCluster()
+   {
+      return homeRegionCluster;
+   }
+
+   public List<Cluster> getObstacleClusters()
+   {
+      return obstacleClusters;
+   }
+
+   public List<Cluster> getAllClusters()
+   {
+      return allClusters;
+   }
+
    public void transformFromLocalToWorld(Transformable objectToTransformToWorld)
    {
       objectToTransformToWorld.applyTransform(transformToWorld);
@@ -50,41 +84,6 @@ public class NavigableRegion implements VisibilityMapHolder
    public void transformFromWorldToLocal(Transformable objectToTransformToWorld)
    {
       objectToTransformToWorld.applyInverseTransform(transformToWorld);
-   }
-
-   public void setRegionsInsideHomeRegion(List<PlanarRegion> regionsInsideHomeRegion)
-   {
-      this.regionsInsideHomeRegion = regionsInsideHomeRegion;
-   }
-
-   public List<PlanarRegion> getRegionsInside()
-   {
-      return regionsInsideHomeRegion;
-   }
-
-   public void setPolygonObstacleRegions(List<PlanarRegion> polygonObstacleRegions)
-   {
-      this.polygonObstacleRegions = polygonObstacleRegions;
-   }
-
-   public List<PlanarRegion> getPolygonObstacleRegions()
-   {
-      return polygonObstacleRegions;
-   }
-
-   public void setLineObstacleRegions(List<PlanarRegion> lineObstacleRegions)
-   {
-      this.lineObstacleRegions = lineObstacleRegions;
-   }
-
-   public List<PlanarRegion> getLineObstacleRegions()
-   {
-      return lineObstacleRegions;
-   }
-
-   public void setVisibilityMapInLocal(VisibilityMap visibilityMap)
-   {
-      visibilityMapInLocal = visibilityMap;
    }
 
    @Override
@@ -110,32 +109,5 @@ public class NavigableRegion implements VisibilityMapHolder
       }
 
       return visibilityMapInWorld;
-   }
-
-   public int getRegionId()
-   {
-      return homeRegion.getRegionId();
-   }
-
-   public void setClusters(List<Cluster> clusters)
-   {
-      allClusters = clusters;
-      homeRegionCluster = allClusters.stream().filter(cluster -> !cluster.isHomeRegion()).findFirst().orElse(null);
-      allClusters.stream().filter(cluster -> !cluster.isHomeRegion()).forEach(obstacleClusters::add);
-   }
-
-   public Cluster getHomeRegionCluster()
-   {
-      return homeRegionCluster;
-   }
-
-   public List<Cluster> getObstacleClusters()
-   {
-      return obstacleClusters;
-   }
-
-   public List<Cluster> getAllClusters()
-   {
-      return allClusters;
    }
 }

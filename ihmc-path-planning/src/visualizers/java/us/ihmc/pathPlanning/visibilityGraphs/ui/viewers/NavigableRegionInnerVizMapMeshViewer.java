@@ -126,7 +126,7 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
 
       for (NavigableRegion navigableRegionLocalPlanner : navigableRegionLocalPlanners)
       {
-         int regionId = navigableRegionLocalPlanner.getRegionId();
+         int regionId = navigableRegionLocalPlanner.getMapId();
          JavaFXMeshBuilder meshBuilder = meshBuilders.get(regionId);
          if (meshBuilder == null)
          {
