@@ -39,8 +39,8 @@ public class NavigableRegionsManager
 
    private final VisibilityGraphsParameters parameters;
 
-   private ArrayList<Connection> connectionPoints = new ArrayList<>();
-   private ArrayList<Connection> globalMapPoints = new ArrayList<>();
+   private List<Connection> interRegionConnections;
+   private List<Connection> globalMapPoints = new ArrayList<>();
 
    public NavigableRegionsManager()
    {
@@ -86,7 +86,6 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      connectionPoints.clear();
       globalMapPoints.clear();
 
       if (start == null)
@@ -115,7 +114,7 @@ public class NavigableRegionsManager
 
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
-      connectLocalMaps();
+      interRegionConnections = computeInterRegionConnections();
       long endConnectingTime = System.currentTimeMillis();
 
       if (readyToRunBodyPath)
@@ -305,47 +304,47 @@ public class NavigableRegionsManager
       }
    }
 
-   private void connectLocalMaps()
+   private List<Connection> computeInterRegionConnections()
    {
+      List<Connection> interRegionConnections = new ArrayList<>();
       if (debug)
       {
          PrintTools.info("Starting connectivity check");
       }
       double minimumConnectionDistanceSquaredForRegions = MathTools.square(parameters.getMinimumConnectionDistanceForRegions());
 
-      if (navigableRegions.size() > 1)
+      for (int sourceMapIndex = 0; sourceMapIndex < visMaps.size(); sourceMapIndex++)
       {
-         for (int sourceMapIndex = 0; sourceMapIndex < visMaps.size(); sourceMapIndex++)
+         VisibilityMap sourceMap = visMaps.get(sourceMapIndex);
+         Set<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
+
+         for (ConnectionPoint3D source : sourcePoints)
          {
-            VisibilityMap sourceMap = visMaps.get(sourceMapIndex);
-            Set<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
-
-            for (ConnectionPoint3D source : sourcePoints)
+            for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < visMaps.size(); targetMapIndex++)
             {
-               for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < visMaps.size(); targetMapIndex++)
+               VisibilityMap targetMap = visMaps.get(targetMapIndex);
+
+               Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
+
+               for (ConnectionPoint3D target : targetPoints)
                {
-                  VisibilityMap targetMap = visMaps.get(targetMapIndex);
+                  if (source.getRegionId() == target.getRegionId())
+                     continue;
 
-                  Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
+                  boolean distanceOk = source.distanceSquared(target) < minimumConnectionDistanceSquaredForRegions;
+                  boolean heightOk = Math.abs(source.getZ() - target.getZ()) < parameters.getTooHighToStepDistance();
 
-                  for (ConnectionPoint3D target : targetPoints)
+                  if (distanceOk && heightOk)
                   {
-                     if (source.getRegionId() == target.getRegionId())
-                        continue;
-
-                     boolean distanceOk = source.distanceSquared(target) < minimumConnectionDistanceSquaredForRegions;
-                     boolean heightOk = Math.abs(source.getZ() - target.getZ()) < parameters.getTooHighToStepDistance();
-
-                     if (distanceOk && heightOk)
-                     {
-                        connectionPoints.add(new Connection(source, target));
-                        globalMapPoints.add(new Connection(source, target));
-                     }
+                     interRegionConnections.add(new Connection(source, target));
+                     globalMapPoints.add(new Connection(source, target));
                   }
                }
             }
          }
       }
+
+      return interRegionConnections;
    }
 
    private void createVisibilityGraphForRegion(PlanarRegion region)
@@ -450,13 +449,13 @@ public class NavigableRegionsManager
       return navigableRegions;
    }
 
-   public ArrayList<Connection> getGlobalMapPoints()
+   public List<Connection> getGlobalMapPoints()
    {
       return globalMapPoints;
    }
 
-   public ArrayList<Connection> getConnectionPoints()
+   public List<Connection> getInterRegionConnections()
    {
-      return connectionPoints;
+      return interRegionConnections;
    }
 }
