@@ -416,6 +416,16 @@ public class NavigableRegionsManager
       return allNavigableExtrusions;
    }
 
+   public VisibilityMapHolder getStartMap()
+   {
+      return startMap;
+   }
+
+   public VisibilityMapHolder getGoalMap()
+   {
+      return goalMap;
+   }
+
    public List<NavigableRegion> getNavigableRegions()
    {
       return navigableRegions;
