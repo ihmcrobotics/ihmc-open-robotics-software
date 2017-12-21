@@ -73,7 +73,35 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
    @Override
    public boolean epsilonEquals(Connection other, double epsilon)
    {
-      return source.epsilonEquals(other.source, epsilon) && target.epsilonEquals(other.target, epsilon) || source.epsilonEquals(other.target, epsilon) && target.epsilonEquals(other.source, epsilon);
+      return source.epsilonEquals(other.source, epsilon) && target.epsilonEquals(other.target, epsilon)
+            || source.epsilonEquals(other.target, epsilon) && target.epsilonEquals(other.source, epsilon);
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return source.hashCode() + target.hashCode();
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      try
+      {
+         return equals((Connection) obj);
+      }
+      catch (ClassCastException e)
+      {
+         return false;
+      }
+   }
+
+   public boolean equals(Connection other)
+   {
+      if (other == null)
+         return false;
+      else
+         return (source.equals(other.source) && target.equals(other.target)) || (source.equals(other.target) && target.equals(other.source));
    }
 
    @Override
