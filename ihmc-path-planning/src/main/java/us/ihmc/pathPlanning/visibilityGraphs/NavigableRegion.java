@@ -6,12 +6,13 @@ import java.util.List;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 /**
  * User: Matt Date: 1/14/13
  */
-public class NavigableRegion
+public class NavigableRegion implements VisibilityMapHolder
 {
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
@@ -86,11 +87,19 @@ public class NavigableRegion
       visibilityMapInLocal = visibilityMap;
    }
 
+   @Override
+   public int getMapId()
+   {
+      return homeRegion.getRegionId();
+   }
+
+   @Override
    public VisibilityMap getVisibilityMapInLocal()
    {
       return visibilityMapInLocal;
    }
 
+   @Override
    public VisibilityMap getVisibilityMapInWorld()
    {
       if (visibilityMapInWorld == null)
