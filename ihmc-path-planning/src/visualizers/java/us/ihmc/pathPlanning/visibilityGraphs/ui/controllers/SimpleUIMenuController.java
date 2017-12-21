@@ -8,6 +8,7 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
@@ -59,8 +60,24 @@ public class SimpleUIMenuController
          loadedFile = result.listFiles(File::isDirectory)[0];
       else
          loadedFile = result;
+      loadAndSubmitPlanarRegions();
+   }
+
+   @FXML
+   public void reloadPlanarRegion()
+   {
+      if (loadedFile == null)
+      {
+         reloadMenuItem.setDisable(true);
+         return;
+      }
+      loadAndSubmitPlanarRegions();
+   }
+
+   private void loadAndSubmitPlanarRegions()
+   {
       PlanarRegionsList loadedPlanarRegions = PlanarRegionFileTools.importPlanRegionData(loadedFile);
-      directoryChooser.setInitialDirectory(result.getParentFile());
+      directoryChooser.setInitialDirectory(loadedFile.getParentFile());
 
       if (loadedPlanarRegions != null)
       {
@@ -68,6 +85,8 @@ public class SimpleUIMenuController
             PrintTools.info(this, "Loaded planar regions, broadcasting data.");
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, new Point3D());
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, new Point3D());
          reloadMenuItem.setDisable(false);
       }
       else
@@ -76,23 +95,6 @@ public class SimpleUIMenuController
             PrintTools.info(this, "Failed to load planar regions.");
          reloadMenuItem.setDisable(true);
          loadedFile = null;
-      }
-   }
-
-   @FXML
-   public void reloadPlanarRegion()
-   {
-      if (loadedFile == null)
-         return;
-
-      PlanarRegionsList loadedPlanarRegions = PlanarRegionFileTools.importPlanRegionData(loadedFile);
-
-      if (loadedPlanarRegions != null)
-      {
-         if (VERBOSE)
-            PrintTools.info(this, "Loaded planar regions, broadcasting data.");
-         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
-         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
       }
    }
 }

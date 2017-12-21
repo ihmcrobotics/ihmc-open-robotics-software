@@ -80,19 +80,6 @@ public class StartGoalAnchorPaneController
       goalPositionProperty.bindBidirectionalY(goalYSpinner.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalZ(goalZSpinner.getValueFactory().valueProperty());
       messager.bindBidirectional(UIVisibilityGraphsTopics.GoalPosition, goalPositionProperty, false);
-
-      messager.registerJavaFXSyncedTopicListener(UIVisibilityGraphsTopics.GlobalReset, reset -> clearStartGoalTextFields());
-   }
-
-   private void clearStartGoalTextFields()
-   {
-      startXSpinner.valueFactoryProperty().getValue().setValue(0.0);
-      startYSpinner.valueFactoryProperty().getValue().setValue(0.0);
-      startZSpinner.valueFactoryProperty().getValue().setValue(0.0);
-
-      goalXSpinner.valueFactoryProperty().getValue().setValue(0.0);
-      goalYSpinner.valueFactoryProperty().getValue().setValue(0.0);
-      goalZSpinner.valueFactoryProperty().getValue().setValue(0.0);
    }
 
    private DoubleSpinnerValueFactory createStartGoalValueFactory()

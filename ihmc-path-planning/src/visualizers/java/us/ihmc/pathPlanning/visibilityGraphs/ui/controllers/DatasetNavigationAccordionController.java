@@ -11,6 +11,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
@@ -111,6 +112,7 @@ public class DatasetNavigationAccordionController
       if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(dataFile))
       {
          VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(dataFile);
+         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());
          messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, dataset.getGoal());
@@ -118,7 +120,10 @@ public class DatasetNavigationAccordionController
       else
       {
          PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(dataFile);
+         messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, new Point3D());
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, new Point3D());
       }
    }
 
