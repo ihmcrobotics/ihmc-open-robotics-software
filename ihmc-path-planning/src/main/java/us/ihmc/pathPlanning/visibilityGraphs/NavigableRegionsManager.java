@@ -17,17 +17,12 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclussionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class NavigableRegionsManager
@@ -94,22 +89,10 @@ public class NavigableRegionsManager
       regions = PlanarRegionTools.filterPlanarRegionsWithBoundingCapsule(start, goal, parameters.getExplorationDistanceFromStartGoal(), regions);
 
       long startBodyPathComputation = System.currentTimeMillis();
-      long startCreatingMaps = System.currentTimeMillis();
 
-      PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
-      NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
-      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
-      double clusterResolution = parameters.getClusterResolution();
-      ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
-      navigableRegions = regions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable)
-                                .map(region -> createNavigableRegion(region, regions, orthogonalAngle, clusterResolution, planarRegionFilter,
-                                                                     extrusionDistanceCalculator))
-                                .collect(Collectors.toList());
-
-      long endCreationTime = System.currentTimeMillis();
-
-      startMap = createSingleSourceVisibilityMap(start, navigableRegions);
-      goalMap = createSingleSourceVisibilityMap(goal, navigableRegions);
+      navigableRegions = VisibilityGraphsFactory.createNavigableRegions(regions, parameters);
+      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions);
+      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions);
 
       if (startMap.getHostRegion() == goalMap.getHostRegion())
       {
@@ -119,16 +102,12 @@ public class NavigableRegionsManager
          }
       }
 
-      long startConnectingTime = System.currentTimeMillis();
       interRegionConnections = computeInterRegionConnections(navigableRegions, parameters.getInterRegionConnectionFilter());
-      long endConnectingTime = System.currentTimeMillis();
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
       visibilityMapHolders.addAll(navigableRegions);
       visibilityMapHolders.add(startMap);
       visibilityMapHolders.add(goalMap);
-
-      long aStarStartTime = System.currentTimeMillis();
 
       List<Point3DReadOnly> path = null;
       path = calculatePathOnVisibilityGraph(start, goal, interRegionConnections, visibilityMapHolders);
@@ -137,10 +116,6 @@ public class NavigableRegionsManager
       {
          if (path != null)
          {
-            PrintTools.info("----Navigable Regions Manager Stats-----");
-            PrintTools.info("Map creation completed in " + (endCreationTime - startCreatingMaps) + "ms");
-            PrintTools.info("Connection completed in " + (endConnectingTime - startConnectingTime) + "ms");
-            PrintTools.info("A* took: " + (System.currentTimeMillis() - aStarStartTime) + "ms");
             PrintTools.info("Total time to find solution was: " + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
          }
          else
@@ -184,18 +159,6 @@ public class NavigableRegionsManager
       {
          return path;
       }
-   }
-
-   private static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions)
-
-   {
-      NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions);
-      Point3D sourceInLocal = new Point3D(source);
-      hostRegion.transformFromWorldToLocal(sourceInLocal);
-      int mapId = hostRegion.getMapId();
-
-      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(sourceInLocal, mapId, hostRegion.getAllClusters(), mapId, true);
-      return new SingleSourceVisibilityMap(source, connections, hostRegion);
    }
 
    private static List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal, Collection<Connection> interConnections,
@@ -313,56 +276,6 @@ public class NavigableRegionsManager
       }
 
       return interRegionConnections;
-   }
-
-   private static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, double orthogonalAngle, double clusterResolution,
-                                                        PlanarRegionFilter filter, ExtrusionDistanceCalculator extrusionDistanceCalculator)
-   {
-      if (debug)
-      {
-         PrintTools.info("Creating a visibility graph for region with ID:" + region.getRegionId());
-      }
-
-      NavigableRegion navigableRegion = new NavigableRegion(region);
-      List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
-      List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
-      List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
-      PlanarRegion homeRegion = navigableRegion.getHomeRegion();
-
-      regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, allRegions);
-      double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
-      regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
-                                                                                                     depthThresholdForConvexDecomposition, filter);
-
-      ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
-      Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion);
-      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, lineObstacleRegions, polygonObstacleRegions);
-
-      navigableRegion.setHomeRegionCluster(homeRegionCluster);
-      navigableRegion.addObstacleClusters(obstacleClusters);
-
-      if (debug)
-      {
-         System.out.println("Extruding obstacles...");
-      }
-
-      ClusterTools.performExtrusions(extrusionDistanceCalculator, navigableRegion.getAllClusters());
-
-      for (Cluster cluster : navigableRegion.getAllClusters())
-      {
-         PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal2D(), clusterResolution);
-      }
-
-      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(navigableRegion.getAllClusters(), navigableRegion);
-
-      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
-      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, navigableRegion.getAllClusters());
-
-      VisibilityMap visibilityMap = new VisibilityMap();
-      visibilityMap.setConnections(connectionsForMap);
-      navigableRegion.setVisibilityMapInLocal(visibilityMap);
-
-      return navigableRegion;
    }
 
    public Point3D[][] getNavigableExtrusions()
