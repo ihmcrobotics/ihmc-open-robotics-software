@@ -12,7 +12,7 @@ public interface VisibilityGraphsParameters
 {
    public int getNumberOfForcedConnections();
 
-   public double getMinimumConnectionDistanceForRegions();
+   public double getMaxInterRegionConnectionLength();
 
    public double getNormalZThresholdForAccessibleRegions();
 
@@ -94,11 +94,10 @@ public interface VisibilityGraphsParameters
 
    default InterRegionConnectionFilter getInterRegionConnectionFilter()
    {
+      final double maxLengthSquared = MathTools.square(getMaxInterRegionConnectionLength());
+      final double maxDeltaHeight = getTooHighToStepDistance();
       return new InterRegionConnectionFilter()
       {
-         double maxLengthSquared = MathTools.square(getMinimumConnectionDistanceForRegions());
-         double maxDeltaHeight = getTooHighToStepDistance();
-
          @Override
          public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
          {

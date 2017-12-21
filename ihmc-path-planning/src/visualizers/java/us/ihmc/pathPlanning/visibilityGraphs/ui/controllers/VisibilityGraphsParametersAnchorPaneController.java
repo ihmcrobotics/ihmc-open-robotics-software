@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import us.ihmc.javaFXToolkit.StringConverterTools;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
@@ -15,7 +16,7 @@ public class VisibilityGraphsParametersAnchorPaneController
    @FXML
    private Slider numberOfForcedConnectionsSlider;
    @FXML
-   private Slider minConnectionDistanceForRegionsSlider;
+   private Slider maxInterRegionConnectionLengthSlider;
    @FXML
    private Slider normalZThresholdForAccessibleRegionsSlider;
    @FXML
@@ -49,11 +50,11 @@ public class VisibilityGraphsParametersAnchorPaneController
 
    public void bindControls()
    {
-      minConnectionDistanceForRegionsSlider.setLabelFormatter(StringConverterTools.metersToRoundedMillimeters());
+      maxInterRegionConnectionLengthSlider.setLabelFormatter(StringConverterTools.metersToRoundedCentimeters());
       regionOrthogonalAngleSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
 
       property.binBidirectionalNumberOfForcedConnections(numberOfForcedConnectionsSlider.valueProperty());
-      property.binBidirectionalMinimumConnectionDistanceForRegions(minConnectionDistanceForRegionsSlider.valueProperty());
+      property.binBidirectionalMaxInterRegionConnectionLength(maxInterRegionConnectionLengthSlider.valueProperty());
       property.binBidirectionalNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegionsSlider.valueProperty());
       property.binBidirectionalRegionOrthogonalAngle(regionOrthogonalAngleSlider.valueProperty());
       property.binBidirectionalExtrusionDistance(extrusionDistanceSlider.valueProperty());

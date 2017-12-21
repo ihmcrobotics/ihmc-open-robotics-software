@@ -10,7 +10,7 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
    private final YoVariableRegistry registry = new YoVariableRegistry("VisibilityGraphParameters");
 
    private final YoInteger numberOfForcedConnections = new YoInteger("numberOfForcedConnections", registry);
-   private final YoDouble minimumConnectionDistanceForRegions = new YoDouble("minimumConnectionDistanceForRegions", registry);
+   private final YoDouble maxInterRegionConnectionLength = new YoDouble("maxInterRegionConnectionLength", registry);
    private final YoDouble normalZThresholdForAccessibleRegions = new YoDouble("normalZThresholdForAccessibleRegions", registry);
    private final YoDouble maxAngleBeforeOrthogonal = new YoDouble("normalZThresholdForPolygonObstacles", registry);
    private final YoDouble extrusionDistance = new YoDouble("extrusionDistance", registry);
@@ -22,7 +22,7 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
    public YoVisibilityGraphParameters(VisibilityGraphsParameters defaults, YoVariableRegistry parentRegistry)
    {
       this.numberOfForcedConnections.set(defaults.getNumberOfForcedConnections());
-      this.minimumConnectionDistanceForRegions.set(defaults.getMinimumConnectionDistanceForRegions());
+      this.maxInterRegionConnectionLength.set(defaults.getMaxInterRegionConnectionLength());
       this.normalZThresholdForAccessibleRegions.set(defaults.getNormalZThresholdForAccessibleRegions());
       this.maxAngleBeforeOrthogonal.set(defaults.getRegionOrthogonalAngle());
       this.extrusionDistance.set(defaults.getExtrusionDistance());
@@ -41,9 +41,9 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
    }
 
    @Override
-   public double getMinimumConnectionDistanceForRegions()
+   public double getMaxInterRegionConnectionLength()
    {
-      return minimumConnectionDistanceForRegions.getDoubleValue();
+      return maxInterRegionConnectionLength.getDoubleValue();
    }
 
    @Override
