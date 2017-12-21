@@ -4,14 +4,12 @@ import static us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools.isPoin
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
@@ -22,7 +20,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = false;
+   final static boolean debug = false;
 
    final static int START_GOAL_ID = 0;
 
@@ -97,7 +95,7 @@ public class NavigableRegionsManager
          }
       }
 
-      interRegionVisibilityMap = createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
+      interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
       visibilityMapHolders.addAll(navigableRegions);
@@ -156,44 +154,6 @@ public class NavigableRegionsManager
       {
          return path;
       }
-   }
-
-   private static InterRegionVisibilityMap createInterRegionVisibilityMap(List<NavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
-   {
-      InterRegionVisibilityMap map = new InterRegionVisibilityMap();
-
-      if (debug)
-      {
-         PrintTools.info("Starting connectivity check");
-      }
-      for (int sourceMapIndex = 0; sourceMapIndex < navigableRegions.size(); sourceMapIndex++)
-      {
-         VisibilityMap sourceMap = navigableRegions.get(sourceMapIndex).getVisibilityMapInWorld();
-         Set<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
-
-         for (ConnectionPoint3D source : sourcePoints)
-         {
-            for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < navigableRegions.size(); targetMapIndex++)
-            {
-               VisibilityMap targetMap = navigableRegions.get(targetMapIndex).getVisibilityMapInWorld();
-
-               Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
-
-               for (ConnectionPoint3D target : targetPoints)
-               {
-                  if (source.getRegionId() == target.getRegionId())
-                     continue;
-
-                  if (filter.isConnectionValid(source, target))
-                  {
-                     map.addConnection(source, target);
-                  }
-               }
-            }
-         }
-      }
-
-      return map;
    }
 
    public Point3D[][] getNavigableExtrusions()
