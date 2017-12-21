@@ -86,12 +86,12 @@ public class NavigableRegion
       visibilityMapInLocal = visibilityMap;
    }
 
-   public VisibilityMap getVisibilityGraphInLocal()
+   public VisibilityMap getVisibilityMapInLocal()
    {
       return visibilityMapInLocal;
    }
 
-   public VisibilityMap getVisibilityGraphInWorld()
+   public VisibilityMap getVisibilityMapInWorld()
    {
       if (visibilityMapInWorld == null)
       {
@@ -110,7 +110,7 @@ public class NavigableRegion
 
    public void setClusters(List<Cluster> clusters)
    {
-      this.allClusters = clusters;
+      allClusters = clusters;
       homeRegionCluster = allClusters.stream().filter(cluster -> !cluster.isHomeRegion()).findFirst().orElse(null);
       allClusters.stream().filter(cluster -> !cluster.isHomeRegion()).forEach(obstacleClusters::add);
    }

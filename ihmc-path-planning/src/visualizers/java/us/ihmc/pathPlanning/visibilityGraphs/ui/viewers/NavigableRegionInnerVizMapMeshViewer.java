@@ -134,7 +134,7 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
             meshBuilders.put(regionId, meshBuilder);
          }
 
-         VisibilityMap visibilityGraphInWorld = navigableRegionLocalPlanner.getVisibilityGraphInWorld();
+         VisibilityMap visibilityGraphInWorld = navigableRegionLocalPlanner.getVisibilityMapInWorld();
 
          for (Connection connection : visibilityGraphInWorld.getConnections())
          {
