@@ -266,6 +266,7 @@ public class ClusterTools
       default:
          throw new RuntimeException("Unhandled cluster type: " + cluster.getType());
       }
+      cluster.updateBoundingBox();
    }
 
    public static void classifyExtrusions(List<PlanarRegion> regionsToProject, PlanarRegion regionToProjectTo, List<PlanarRegion> lineObstaclesToPack,
@@ -348,7 +349,7 @@ public class ClusterTools
 
       for (Point3DReadOnly point : extrusionPoints)
       {
-         if (PlanarRegionTools.isPointInWorldInsideARegion(region, point))
+         if (PlanarRegionTools.isPointInWorldInsidePlanarRegion(region, point))
          {
             double weight = alpha * goal.distance(point) + (1 - alpha) * start.distance(point);
 

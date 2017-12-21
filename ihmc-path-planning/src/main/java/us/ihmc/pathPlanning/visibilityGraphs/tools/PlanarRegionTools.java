@@ -27,6 +27,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.lists.ListWrappingIndexTools;
 
 public class PlanarRegionTools
 {
@@ -158,7 +159,7 @@ public class PlanarRegionTools
       }
 
       // checking convex hull here - might be better to check all polygons to avoid false positive
-      if (isPointInWorldInsideARegion(region, intersectionWithPlane))
+      if (isPointInWorldInsidePlanarRegion(region, intersectionWithPlane))
       {
          return intersectionWithPlane;
       }
@@ -235,7 +236,7 @@ public class PlanarRegionTools
    {
       for (PlanarRegion region : regions)
       {
-         if (isPointInWorldInsideARegion(region, pointToCheck))
+         if (isPointInWorldInsidePlanarRegion(region, pointToCheck))
          {
             return true;
          }
@@ -244,20 +245,11 @@ public class PlanarRegionTools
       return false;
    }
 
-   public static boolean isPointInWorldInsideARegion(PlanarRegion region, Point3DReadOnly pointInWorldToCheck)
-   {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(transformToWorld);
-      Point3D pointInLocalToCheck = new Point3D();
-      transformToWorld.inverseTransform(pointInWorldToCheck, pointInLocalToCheck);
-      return isPointInLocalInsideARegion(region, pointInLocalToCheck);
-   }
-
    public static PlanarRegion getRegionContainingThisPoint(Point3D point, List<PlanarRegion> regions)
    {
       for (PlanarRegion region : regions)
       {
-         if (isPointInWorldInsideARegion(region, point))
+         if (isPointInWorldInsidePlanarRegion(region, point))
          {
             return region;
          }
@@ -272,7 +264,7 @@ public class PlanarRegionTools
 
       for (NavigableRegion navigableRegion : navigableRegions)
       {
-         if (isPointInWorldInsideARegion(navigableRegion.getHomeRegion(), point))
+         if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomeRegion(), point))
          {
             containers.add(navigableRegion);
          }
@@ -307,14 +299,35 @@ public class PlanarRegionTools
       return closestContainer;
    }
 
-   public static boolean isPointInLocalInsideARegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)
+   public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion region, Point3DReadOnly pointInWorldToCheck)
    {
-      return isPointInsidePolygon(region.getConcaveHull(), new Point2D(pointInLocalToCheck));
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      region.getTransformToWorld(transformToWorld);
+      Point3D pointInLocalToCheck = new Point3D();
+      transformToWorld.inverseTransform(pointInWorldToCheck, pointInLocalToCheck);
+      return isPointInLocalInsidePlanarRegion(region, pointInLocalToCheck);
+   }
+
+   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)
+   {
+      return isPointInLocalInsidePlanarRegion(region, new Point2D(pointInLocalToCheck));
+   }
+
+   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point2DReadOnly pointInLocalToCheck)
+   {
+      if (!planarRegion.getConvexHull().getBoundingBox().isInsideInclusive(pointInLocalToCheck))
+         return false;
+      return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
    }
 
    public static boolean isPointInsidePolygon(Point2DReadOnly[] polygon, Point2DReadOnly pointToCheck)
    {
-      if (polygon.length < 3)
+      return isPointInsidePolygon(Arrays.asList(polygon), pointToCheck);
+   }
+
+   public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, Point2DReadOnly pointToCheck)
+   {
+      if (polygon.size() < 3)
       {
          return false;
       }
@@ -324,10 +337,10 @@ public class PlanarRegionTools
 
       Point2D pointOnArbitraryEdge = new Point2D();
 
-      for (int i = 0; i < polygon.length; i++)
+      for (int i = 0; i < polygon.size(); i++)
       { // Picking an edge that is not parallel to the ray.
-         Point2DReadOnly edgeStart = polygon[i];
-         Point2DReadOnly edgeEnd = polygon[(i + 1) % polygon.length];
+         Point2DReadOnly edgeStart = polygon.get(i);
+         Point2DReadOnly edgeEnd = ListWrappingIndexTools.getNext(i, polygon);
          Vector2D edgeDirection = new Vector2D();
          edgeDirection.sub(edgeEnd, edgeStart);
 
@@ -345,10 +358,10 @@ public class PlanarRegionTools
       Point2D previousIntersection = null;
       Point2D currentIntersection = null;
 
-      for (int i = 0; i < polygon.length; i++)
+      for (int i = 0; i < polygon.size(); i++)
       {
-         Point2DReadOnly edgeStart = polygon[i];
-         Point2DReadOnly edgeEnd = polygon[(i + 1) % polygon.length];
+         Point2DReadOnly edgeStart = polygon.get(i);
+         Point2DReadOnly edgeEnd = ListWrappingIndexTools.getNext(i, polygon);
 
          currentIntersection = intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, edgeStart, edgeEnd);
 
@@ -375,8 +388,8 @@ public class PlanarRegionTools
 
    public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, PlanarRegion homeRegion)
    {
-      boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point1);
-      boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(homeRegion.getConcaveHull(), point2);
+      boolean startIsInside = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point1);
+      boolean goalIsInside = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point2);
 
       return startIsInside && goalIsInside;
    }
