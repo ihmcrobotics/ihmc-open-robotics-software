@@ -1,7 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -32,7 +34,7 @@ public interface VisibilityGraphsParameters
    {
       return 0.0;
    }
-   
+
    default int getPlanarRegionMinSize()
    {
       return 0;
@@ -70,6 +72,26 @@ public interface VisibilityGraphsParameters
          public boolean isPlanarRegionNavigable(PlanarRegion query)
          {
             return Math.abs(query.getNormal().getZ()) >= getNormalZThresholdForAccessibleRegions();
+         }
+      };
+   }
+
+   default InterRegionConnectionFilter getInterRegionConnectionFilter()
+   {
+      return new InterRegionConnectionFilter()
+      {
+         double maxLengthSquared = MathTools.square(getMinimumConnectionDistanceForRegions());
+         double maxDeltaHeight = getTooHighToStepDistance();
+
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
+               return false;
+            if (source.distanceSquared(target) > maxLengthSquared)
+               return false;
+
+            return true;
          }
       };
    }
