@@ -4,7 +4,9 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalEditModeEnabled;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalPosition;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PlanarRegionData;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalPosition;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowPlanarRegions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartPosition;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartEditModeEnabled;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartPosition;
 
@@ -98,7 +100,10 @@ public class SimpleVisibilityGraphsUI
       startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       startGoalEditor.start();
 
-      startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
+      startGoalViewer = new StartGoalPositionViewer(messager);
+      startGoalViewer.setEditStartGoalTopics(StartEditModeEnabled, GoalEditModeEnabled);
+      startGoalViewer.setPositionStartGoalTopics(StartPosition, GoalPosition);
+      startGoalViewer.setShowStartGoalTopics(ShowStartPosition, ShowGoalPosition);
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
       startGoalViewer.start();
       visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
