@@ -58,7 +58,7 @@ public interface VisibilityGraphsParameters
     */
    default double getRegionOrthogonalAngle()
    {
-      return Math.toRadians(85.0);
+      return Math.toRadians(75.0);
    }
 
    default ExtrusionDistanceCalculator getExtrusionDistanceCalculator()
@@ -94,10 +94,11 @@ public interface VisibilityGraphsParameters
 
    default InterRegionConnectionFilter getInterRegionConnectionFilter()
    {
-      final double maxLengthSquared = MathTools.square(getMaxInterRegionConnectionLength());
-      final double maxDeltaHeight = getTooHighToStepDistance();
       return new InterRegionConnectionFilter()
       {
+         private final double maxLengthSquared = MathTools.square(getMaxInterRegionConnectionLength());
+         private final double maxDeltaHeight = getTooHighToStepDistance();
+
          @Override
          public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
          {

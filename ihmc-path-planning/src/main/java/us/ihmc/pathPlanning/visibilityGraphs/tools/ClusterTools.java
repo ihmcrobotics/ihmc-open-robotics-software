@@ -271,14 +271,14 @@ public class ClusterTools
    public static void classifyExtrusions(List<PlanarRegion> regionsToProject, PlanarRegion regionToProjectTo, List<PlanarRegion> lineObstaclesToPack,
                                          List<PlanarRegion> polygonObstaclesToPack, double orthogonalAngle)
    {
+      Vector3D referenceNormal = regionToProjectTo.getNormal();
       double zThresholdBeforeOrthogonal = Math.cos(orthogonalAngle);
 
       for (PlanarRegion regionToProject : regionsToProject)
       {
-         Vector3D normal = regionToProject.getNormal();
-         regionToProjectTo.transformFromWorldToLocal(normal);
+         Vector3D otherNormal = regionToProject.getNormal();
 
-         if (Math.abs(normal.getZ()) < zThresholdBeforeOrthogonal)
+         if (Math.abs(otherNormal.dot(referenceNormal)) < zThresholdBeforeOrthogonal)
          {
             lineObstaclesToPack.add(regionToProject);
          }
