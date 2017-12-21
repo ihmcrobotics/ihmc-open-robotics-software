@@ -36,7 +36,7 @@ public class VisibilityGraphsRenderer
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
    private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
-   private final NavigableRegionsInterConnectionViewer navigableRegionsInterConnectionViewer;
+   private final InterRegionConnectionsViewer interRegionConnectionsViewer;
 
    private final REAMessager messager;
 
@@ -53,9 +53,9 @@ public class VisibilityGraphsRenderer
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
       navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager, executorService);
-      navigableRegionsInterConnectionViewer = new NavigableRegionsInterConnectionViewer(messager, executorService);
+      interRegionConnectionsViewer = new InterRegionConnectionsViewer(messager, executorService);
 
-      root.getChildren().addAll(bodyPathMeshViewer.getRoot(), navigableRegionInnerVizMapMeshViewer.getRoot(), navigableRegionsInterConnectionViewer.getRoot(), clusterMeshViewer.getRoot());
+      root.getChildren().addAll(bodyPathMeshViewer.getRoot(), navigableRegionInnerVizMapMeshViewer.getRoot(), interRegionConnectionsViewer.getRoot(), clusterMeshViewer.getRoot());
    }
 
    public void clear()
@@ -70,7 +70,7 @@ public class VisibilityGraphsRenderer
       bodyPathMeshViewer.start();
       clusterMeshViewer.start();
       navigableRegionInnerVizMapMeshViewer.start();
-      navigableRegionsInterConnectionViewer.start();
+      interRegionConnectionsViewer.start();
    }
 
    public void stop()
@@ -78,7 +78,7 @@ public class VisibilityGraphsRenderer
       bodyPathMeshViewer.stop();
       clusterMeshViewer.stop();
       navigableRegionInnerVizMapMeshViewer.start();
-      navigableRegionsInterConnectionViewer.stop();
+      interRegionConnectionsViewer.stop();
       executorService.shutdownNow();
    }
 
