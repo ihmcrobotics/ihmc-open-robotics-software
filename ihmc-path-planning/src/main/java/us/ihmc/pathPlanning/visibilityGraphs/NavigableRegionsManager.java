@@ -38,7 +38,6 @@ public class NavigableRegionsManager
    private List<PlanarRegion> regions;
    private SingleSourceVisibilityMap startMap, goalMap;
    private List<NavigableRegion> navigableRegions = new ArrayList<>();
-   private List<VisibilityMap> visMaps = new ArrayList<>();
 
    private final VisibilityGraphsParameters parameters;
 
@@ -81,7 +80,6 @@ public class NavigableRegionsManager
    private void createIndividualVisMapsForRegions()
    {
       navigableRegions.clear();
-      visMaps.clear();
 
       NavigableRegionFilter filter = parameters.getNavigableRegionFilter();
       regions.stream().filter(filter::isPlanarRegionNavigable).forEach(this::createVisibilityGraphForRegion);
@@ -115,8 +113,9 @@ public class NavigableRegionsManager
 
       startMap = createSingleSourceVisibilityMap(start, navigableRegions);
       goalMap = createSingleSourceVisibilityMap(goal, navigableRegions);
-      visMaps.add(startMap.getVisibilityMapInWorld());
-      visMaps.add(goalMap.getVisibilityMapInWorld());
+      navigableRegions.stream().map(NavigableRegion::getVisibilityMapInWorld).map(VisibilityMap::getConnections).forEach(globalMapPoints::addAll);
+      globalMapPoints.addAll(startMap.getVisibilityMapInWorld().getConnections());
+      globalMapPoints.addAll(goalMap.getVisibilityMapInWorld().getConnections());
 
       if (startMap.getHostRegion() == goalMap.getHostRegion())
       {
@@ -126,9 +125,8 @@ public class NavigableRegionsManager
          }
       }
 
-      createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
-      interRegionConnections = computeInterRegionConnections();
+      interRegionConnections = computeInterRegionConnections(navigableRegions);
       long endConnectingTime = System.currentTimeMillis();
 
 
@@ -270,18 +268,7 @@ public class NavigableRegionsManager
       return path;
    }
 
-   private void createGlobalMapFromAlltheLocalMaps()
-   {
-      for (VisibilityMap map : visMaps)
-      {
-         for (Connection connection : map.getConnections())
-         {
-            globalMapPoints.add(new Connection(connection.getSourcePoint(), connection.getTargetPoint()));
-         }
-      }
-   }
-
-   private List<Connection> computeInterRegionConnections()
+   private List<Connection> computeInterRegionConnections(List<NavigableRegion> navigableRegions)
    {
       List<Connection> interRegionConnections = new ArrayList<>();
       if (debug)
@@ -290,16 +277,16 @@ public class NavigableRegionsManager
       }
       double minimumConnectionDistanceSquaredForRegions = MathTools.square(parameters.getMinimumConnectionDistanceForRegions());
 
-      for (int sourceMapIndex = 0; sourceMapIndex < visMaps.size(); sourceMapIndex++)
+      for (int sourceMapIndex = 0; sourceMapIndex < navigableRegions.size(); sourceMapIndex++)
       {
-         VisibilityMap sourceMap = visMaps.get(sourceMapIndex);
+         VisibilityMap sourceMap = navigableRegions.get(sourceMapIndex).getVisibilityMapInWorld();
          Set<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
 
          for (ConnectionPoint3D source : sourcePoints)
          {
-            for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < visMaps.size(); targetMapIndex++)
+            for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < navigableRegions.size(); targetMapIndex++)
             {
-               VisibilityMap targetMap = visMaps.get(targetMapIndex);
+               VisibilityMap targetMap = navigableRegions.get(targetMapIndex).getVisibilityMapInWorld();
 
                Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
 
@@ -334,7 +321,6 @@ public class NavigableRegionsManager
       NavigableRegion navigableRegion = new NavigableRegion(region);
       processRegion(navigableRegion);
       navigableRegions.add(navigableRegion);
-      visMaps.add(navigableRegion.getVisibilityMapInWorld());
    }
 
    private void processRegion(NavigableRegion navigableRegionLocalPlanner)
