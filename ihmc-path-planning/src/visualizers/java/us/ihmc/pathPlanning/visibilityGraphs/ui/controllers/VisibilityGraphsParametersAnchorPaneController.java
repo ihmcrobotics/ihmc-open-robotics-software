@@ -64,6 +64,8 @@ public class VisibilityGraphsParametersAnchorPaneController
       property.binBidirectionalPlanarRegionMinArea(planarRegionMinAreaSlider.valueProperty());
       property.binBidirectionalPlanarRegionMinSize(planarRegionMinSizeSlider.valueProperty());
 
+      property.set(new SettableVisibilityGraphsParameters(new DefaultVisibilityGraphParameters())); // Make sure the sliders are to the default values
+
       messager.bindBidirectional(UIVisibilityGraphsTopics.VisibilityGraphsParameters, property, createConverter(), true);
    }
 
