@@ -276,19 +276,15 @@ public class ClusterTools
       for (PlanarRegion regionToProject : regionsToProject)
       {
          Vector3D normal = regionToProject.getNormal();
+         regionToProjectTo.transformFromWorldToLocal(normal);
 
-         if (regionToProject != regionToProjectTo)
+         if (Math.abs(normal.getZ()) < zThresholdBeforeOrthogonal)
          {
-            regionToProjectTo.transformFromWorldToLocal(normal);
-
-            if (Math.abs(normal.getZ()) < zThresholdBeforeOrthogonal)
-            {
-               lineObstaclesToPack.add(regionToProject);
-            }
-            else
-            {
-               polygonObstaclesToPack.add(regionToProject);
-            }
+            lineObstaclesToPack.add(regionToProject);
+         }
+         else
+         {
+            polygonObstaclesToPack.add(regionToProject);
          }
       }
    }
@@ -382,50 +378,44 @@ public class ClusterTools
    {
       for (PlanarRegion region : lineObstacleRegions)
       {
-         if (regions.contains(region))
+         Cluster cluster = new Cluster();
+         clusters.add(cluster);
+         cluster.setType(Type.MULTI_LINE);
+         cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
+         cluster.setTransformToWorld(transformFromHomeToWorld);
+
+         List<Point3D> rawPointsInLocal = new ArrayList<>();
+         RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
+         region.getTransformToWorld(transformFromOtherToHome);
+         transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
+
+         for (int i = 0; i < region.getConvexHull().getNumberOfVertices(); i++)
          {
-            Cluster cluster = new Cluster();
-            clusters.add(cluster);
-            cluster.setType(Type.MULTI_LINE);
-            cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
-            cluster.setTransformToWorld(transformFromHomeToWorld);
-
-            List<Point3D> rawPointsInLocal = new ArrayList<>();
-            RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
-            region.getTransformToWorld(transformFromOtherToHome);
-            transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
-
-            for (int i = 0; i < region.getConvexHull().getNumberOfVertices(); i++)
-            {
-               Point3D concaveHullVertexHome = new Point3D(region.getConvexHull().getVertex(i));
-               concaveHullVertexHome.applyTransform(transformFromOtherToHome);
-               rawPointsInLocal.add(concaveHullVertexHome);
-            }
-
-            cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
+            Point3D concaveHullVertexHome = new Point3D(region.getConvexHull().getVertex(i));
+            concaveHullVertexHome.applyTransform(transformFromOtherToHome);
+            rawPointsInLocal.add(concaveHullVertexHome);
          }
+
+         cluster.addRawPointsInLocal3D(filterVerticalPolygonForMultiLineExtrusion(rawPointsInLocal, POPPING_MULTILINE_POINTS_THRESHOLD));
       }
 
       for (PlanarRegion region : polygonObstacleRegions)
       {
-         if (regions.contains(region))
+         Cluster cluster = new Cluster();
+         clusters.add(cluster);
+         cluster.setType(Type.POLYGON);
+         cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
+         cluster.setTransformToWorld(transformFromHomeToWorld);
+
+         RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
+         region.getTransformToWorld(transformFromOtherToHome);
+         transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
+
+         for (int i = 0; i < region.getConcaveHullSize(); i++)
          {
-            Cluster cluster = new Cluster();
-            clusters.add(cluster);
-            cluster.setType(Type.POLYGON);
-            cluster.setExtrusionSide(ExtrusionSide.OUTSIDE);
-            cluster.setTransformToWorld(transformFromHomeToWorld);
-
-            RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
-            region.getTransformToWorld(transformFromOtherToHome);
-            transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
-
-            for (int i = 0; i < region.getConcaveHullSize(); i++)
-            {
-               Point3D concaveHullVertexHome = new Point3D(region.getConcaveHull()[i]);
-               concaveHullVertexHome.applyTransform(transformFromOtherToHome);
-               cluster.addRawPointInLocal3D(concaveHullVertexHome);
-            }
+            Point3D concaveHullVertexHome = new Point3D(region.getConcaveHull()[i]);
+            concaveHullVertexHome.applyTransform(transformFromOtherToHome);
+            cluster.addRawPointInLocal3D(concaveHullVertexHome);
          }
       }
 
