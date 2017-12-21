@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
@@ -79,7 +79,7 @@ public class UIVisibilityGraphsTopics
 
    public static final Topic<List<Point3DReadOnly>> BodyPathData = Root.child(VisibilityGraphs).child(BodyPath).topic(Data);
    public static final Topic<List<NavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).child(NavigableRegion).topic(Data);
-   public static final Topic<List<Connection>> InterRegionConnectionData = Root.child(VisibilityGraphs).child(NavigableRegion).child(InterConnection).topic(Data);
+   public static final Topic<InterRegionVisibilityMap> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(NavigableRegion).child(InterConnection).topic(Data);
 
    public static final Topic<Boolean> VisibilityGraphsComputePath = Root.child(VisibilityGraphs).topic(ComputePath);
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParameters = Root.child(VisibilityGraphs).topic(Parameters);
