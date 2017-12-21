@@ -350,12 +350,9 @@ public class NavigableRegionsManager
       }
 
       RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getTransformToWorld();
-      double extrusionDistance = parameters.getExtrusionDistance();
-
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
-      ClusterTools.createClustersFromRegions(homeRegion, regionsInsideHomeRegion, lineObstacleRegions, polygonObstacleRegions, clusters, transformToWorldFrame,
-                                             parameters);
-      ClusterTools.createClusterForHomeRegion(clusters, transformToWorldFrame, homeRegion, extrusionDistance);
+      ClusterTools.createClustersFromRegions(homeRegion, regionsInsideHomeRegion, lineObstacleRegions, polygonObstacleRegions, clusters, transformToWorldFrame, parameters);
+      ClusterTools.createClusterForHomeRegion(clusters, transformToWorldFrame, homeRegion);
 
       if (debug)
       {
