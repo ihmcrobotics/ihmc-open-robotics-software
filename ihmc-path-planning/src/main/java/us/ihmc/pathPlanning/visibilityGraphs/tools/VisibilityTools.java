@@ -185,77 +185,29 @@ public class VisibilityTools
 
    public static List<Connection> removeConnectionsFromExtrusionsInsideNoGoZones(Collection<Connection> connectionsToClean, List<Cluster> clusters)
    {
-      List<Connection> masterListOfConnections = new ArrayList<>();
-      List<Cluster> filteredClusters = new ArrayList<>();
+      List<Connection> validConnections = new ArrayList<>(connectionsToClean);
 
-      if (clusters.size() > 1)
+      for (Cluster cluster : clusters)
       {
-         for (int i = 0; i < clusters.size() - 1; i++)
-         {
-            filteredClusters.add(clusters.get(i));
-         }
-
-         List<Connection> connectionsToRemove = new ArrayList<>();
-         for (Cluster cluster : filteredClusters)
-         {
-
-            if (cluster.getNonNavigableExtrusionsInLocal2D().size() == 0)
-            {
-               continue;
-            }
-
-            List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                     cluster.getNonNavigableExtrusionsInLocal2D());
-            for (Connection connection : filteredConnections)
-            {
-               connectionsToRemove.add(connection);
-            }
-         }
-
-         List<Connection> connectionsInsideHomeRegion = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                          clusters.get(clusters.size() - 1)
-                                                                                                                  .getNonNavigableExtrusionsInLocal2D());
-
-         for (Connection connection : connectionsInsideHomeRegion)
-         {
-            boolean addConnection = true;
-
-            for (int i = 0; i < connectionsToRemove.size(); i++)
-            {
-               Connection connectionToRemove = connectionsToRemove.get(i);
-
-               if (connection.epsilonEquals(connectionToRemove, 1E-5))
-               {
-                  addConnection = false;
-                  break;
-               }
-            }
-
-            if (addConnection)
-               masterListOfConnections.add(connection);
-         }
-      }
-      else
-      {
-         filteredClusters.addAll(clusters);
-
-         for (Cluster cluster : filteredClusters)
-         {
-            if (cluster.getNonNavigableExtrusionsInLocal2D().size() == 0)
-            {
-               continue;
-            }
-
-            List<Connection> filteredConnections = VisibilityTools.getConnectionsThatAreInsideRegion(connectionsToClean,
-                                                                                                     cluster.getNonNavigableExtrusionsInLocal2D());
-            for (Connection connection : filteredConnections)
-            {
-               masterListOfConnections.add(connection);
-            }
-         }
+         validConnections = getValidConnections(validConnections, cluster);
       }
 
-      return masterListOfConnections;
+      return validConnections;
    }
 
+   public static List<Connection> getValidConnections(Collection<Connection> connections, Cluster cluster)
+   {
+      List<Connection> filteredConnections = new ArrayList<>();
+
+      for (Connection connection : connections)
+      {
+         Point2D source = connection.getSourcePoint2D();
+         Point2D target = connection.getTargetPoint2D();
+
+         if (!cluster.isInsideNonNavigableZone(source) && !cluster.isInsideNonNavigableZone(target))
+            filteredConnections.add(connection);
+      }
+
+      return filteredConnections;
+   }
 }
