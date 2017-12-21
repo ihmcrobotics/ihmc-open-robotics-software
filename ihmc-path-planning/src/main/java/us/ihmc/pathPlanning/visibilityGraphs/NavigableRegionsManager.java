@@ -18,6 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
@@ -323,6 +324,10 @@ public class NavigableRegionsManager
 
    private void processRegion(NavigableRegion navigableRegionLocalPlanner)
    {
+      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
+      ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
+      double clusterResolution = parameters.getClusterResolution();
+
       List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
       List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
       List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
@@ -344,11 +349,10 @@ public class NavigableRegionsManager
          regionsInsideHomeRegion = PlanarRegionTools.keepOnlyRegionsThatAreEntirelyAboveHomeRegion(regionsInsideHomeRegion, homeRegion);
       }
 
-      double normalZThresholdForPolygonObstacles = parameters.getNormalZThresholdForPolygonObstacles();
       RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getTransformToWorld();
       double extrusionDistance = parameters.getExtrusionDistance();
 
-      ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, normalZThresholdForPolygonObstacles);
+      ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
       ClusterTools.createClustersFromRegions(homeRegion, regionsInsideHomeRegion, lineObstacleRegions, polygonObstacleRegions, clusters, transformToWorldFrame,
                                              parameters);
       ClusterTools.createClusterForHomeRegion(clusters, transformToWorldFrame, homeRegion, extrusionDistance);
@@ -358,11 +362,11 @@ public class NavigableRegionsManager
          System.out.println("Extruding obstacles...");
       }
 
-      ClusterTools.performExtrusions(parameters.getExtrusionDistanceCalculator(), clusters);
+      ClusterTools.performExtrusions(extrusionDistanceCalculator, clusters);
 
       for (Cluster cluster : clusters)
       {
-         PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal2D(), parameters.getClusterResolution());
+         PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal2D(), clusterResolution);
       }
 
       Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(clusters, navigableRegionLocalPlanner);
