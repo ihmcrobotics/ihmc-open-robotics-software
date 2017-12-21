@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -73,5 +74,11 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
    public boolean epsilonEquals(Connection other, double epsilon)
    {
       return source.epsilonEquals(other.source, epsilon) && target.epsilonEquals(other.target, epsilon) || source.epsilonEquals(other.target, epsilon) && target.epsilonEquals(other.source, epsilon);
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Connection: source = " + EuclidCoreIOTools.getTuple3DString(source) + ", target = " + EuclidCoreIOTools.getTuple3DString(target);
    }
 }
