@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.4"
+      classpath "us.ihmc:ihmc-build:0.11.8"
    }
 }
 
@@ -14,10 +14,6 @@ import us.ihmc.build.IHMCSettingsConfigurator
  * Browse source at https://github.com/ihmcrobotics/ihmc-build
  */
 def ihmcSettingsConfigurator = new IHMCSettingsConfigurator(settings, logger, ext)
-ihmcSettingsConfigurator.checkRequiredPropertiesAreSet() // Give friendly errors for unset properties
-ihmcSettingsConfigurator.configureExtraSourceSets(extraSourceSets) // Setup source sets to be multi-project subprojects
-
-if (Boolean.valueOf(includeBuildsFromWorkspace))
-{
-   ihmcSettingsConfigurator.findAndIncludeCompositeBuilds() // Search workspace and `includeBuild` matches
-}
+ihmcSettingsConfigurator.checkRequiredPropertiesAreSet()
+ihmcSettingsConfigurator.configureExtraSourceSets(extraSourceSets)
+ihmcSettingsConfigurator.findAndIncludeCompositeBuilds()
