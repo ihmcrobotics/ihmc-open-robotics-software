@@ -10,7 +10,6 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 {
    public long rigidBodyNameBasedHashCode;
    public ConfigurationSpaceName[] degreesOfFreedomToExplore;
-   //public double[] explorationRangeAmplitudes;
 
    public double[] explorationRangeUpperLimits;
    public double[] explorationRangeLowerLimits;
