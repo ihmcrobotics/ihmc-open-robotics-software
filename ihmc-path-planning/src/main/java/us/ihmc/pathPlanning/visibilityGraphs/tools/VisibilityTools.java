@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -66,27 +67,25 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point2DReadOnly start, Point2DReadOnly goal, List<Cluster> clusters, int regionId)
+   public static Set<Connection> createStaticVisibilityMap(List<Cluster> clusters, NavigableRegion navigableRegion)
    {
+      int regionId = navigableRegion.getMapId();
       Set<Connection> connections = new HashSet<>();
 
       List<Point2DReadOnly> listOfObserverPoints = new ArrayList<>();
-
-      if (start != null)
-      {
-         listOfObserverPoints.add(start);
-      }
-
-      if (goal != null)
-      {
-         listOfObserverPoints.add(goal);
-      }
 
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
       {
          for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
          {
+            if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(navigableRegion.getHomeRegion(), point))
+               continue;
+
+            boolean isNonNavigable = clusters.stream().filter(c -> c.isInsideNonNavigableZone(point)).findFirst().isPresent();
+            if (isNonNavigable)
+               continue;
+
             listOfObserverPoints.add(point);
          }
       }
