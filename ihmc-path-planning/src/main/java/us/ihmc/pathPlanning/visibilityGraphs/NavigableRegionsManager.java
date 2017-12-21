@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jgrapht.Graph;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -37,7 +38,7 @@ public class NavigableRegionsManager
 
    private List<PlanarRegion> regions;
    private SingleSourceVisibilityMap startMap, goalMap;
-   private List<NavigableRegion> navigableRegions = new ArrayList<>();
+   private List<NavigableRegion> navigableRegions;
 
    private final VisibilityGraphsParameters parameters;
 
@@ -76,14 +77,6 @@ public class NavigableRegionsManager
       this.regions = regions;
    }
 
-   private void createIndividualVisMapsForRegions()
-   {
-      navigableRegions.clear();
-
-      NavigableRegionFilter filter = parameters.getNavigableRegionFilter();
-      regions.stream().filter(filter::isPlanarRegionNavigable).forEach(this::createVisibilityGraphForRegion);
-   }
-
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
       if (start == null)
@@ -104,7 +97,9 @@ public class NavigableRegionsManager
       long startBodyPathComputation = System.currentTimeMillis();
       long startCreatingMaps = System.currentTimeMillis();
 
-      createIndividualVisMapsForRegions();
+      NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
+      navigableRegions = regions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable).map(this::createVisibilityGraphForRegion)
+                                .collect(Collectors.toList());
 
       long endCreationTime = System.currentTimeMillis();
 
@@ -314,7 +309,7 @@ public class NavigableRegionsManager
       return interRegionConnections;
    }
 
-   private void createVisibilityGraphForRegion(PlanarRegion region)
+   private NavigableRegion createVisibilityGraphForRegion(PlanarRegion region)
    {
       if (debug)
       {
@@ -323,7 +318,7 @@ public class NavigableRegionsManager
 
       NavigableRegion navigableRegion = new NavigableRegion(region);
       processRegion(navigableRegion);
-      navigableRegions.add(navigableRegion);
+      return navigableRegion;
    }
 
    private void processRegion(NavigableRegion navigableRegionLocalPlanner)
