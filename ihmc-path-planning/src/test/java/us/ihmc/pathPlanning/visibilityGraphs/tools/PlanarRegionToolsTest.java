@@ -56,7 +56,7 @@ public class PlanarRegionToolsTest
       expectedVerticesInWorld[0].addZ(0.001);
       expectedVerticesInWorld[3].addZ(0.001);
 
-      PlanarRegion truncatedSquare = PlanarRegionTools.truncatePlanarRegionIfIntersectingWithPlane(groundOrigin, groundNormal, verticalSquare, 0.05, 0, 0);
+      PlanarRegion truncatedSquare = PlanarRegionTools.truncatePlanarRegionIfIntersectingWithPlane(groundOrigin, groundNormal, verticalSquare, 0.05, null);
       RigidBodyTransform truncatedTransform = new RigidBodyTransform();
       truncatedSquare.getTransformToWorld(truncatedTransform);
       EuclidCoreTestTools.assertRigidBodyTransformGeometricallyEquals(squarePose, truncatedTransform, EPSILON);
