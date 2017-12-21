@@ -10,6 +10,7 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -310,34 +311,35 @@ public class NavigableRegionsManager
       {
          PrintTools.info("Starting connectivity check");
       }
+      double minimumConnectionDistanceSquaredForRegions = MathTools.square(parameters.getMinimumConnectionDistanceForRegions());
 
       if (navigableRegions.size() > 1)
       {
-         for (VisibilityMap sourceMap : visMaps)
+         for (int sourceMapIndex = 0; sourceMapIndex < visMaps.size(); sourceMapIndex++)
          {
+            VisibilityMap sourceMap = visMaps.get(sourceMapIndex);
             Set<ConnectionPoint3D> sourcePoints = sourceMap.getVertices();
 
-            for (ConnectionPoint3D sourcePt : sourcePoints)
+            for (ConnectionPoint3D source : sourcePoints)
             {
-               for (VisibilityMap targetMap : visMaps)
+               for (int targetMapIndex = sourceMapIndex + 1; targetMapIndex < visMaps.size(); targetMapIndex++)
                {
-                  if (sourceMap != targetMap)
+                  VisibilityMap targetMap = visMaps.get(targetMapIndex);
+
+                  Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
+
+                  for (ConnectionPoint3D target : targetPoints)
                   {
-                     Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
+                     if (source.getRegionId() == target.getRegionId())
+                        continue;
 
-                     for (ConnectionPoint3D targetPt : targetPoints)
+                     boolean distanceOk = source.distanceSquared(target) < minimumConnectionDistanceSquaredForRegions;
+                     boolean heightOk = Math.abs(source.getZ() - target.getZ()) < parameters.getTooHighToStepDistance();
+
+                     if (distanceOk && heightOk)
                      {
-                        if (sourcePt.getRegionId() == targetPt.getRegionId())
-                           continue;
-
-                        boolean distanceOk = sourcePt.distance(targetPt) < parameters.getMinimumConnectionDistanceForRegions();
-                        boolean heightOk = Math.abs(sourcePt.getZ() - targetPt.getZ()) < parameters.getTooHighToStepDistance();
-
-                        if (distanceOk && heightOk)
-                        {
-                           connectionPoints.add(new Connection(sourcePt, targetPt));
-                           globalMapPoints.add(new Connection(sourcePt, targetPt));
-                        }
+                        connectionPoints.add(new Connection(source, target));
+                        globalMapPoints.add(new Connection(source, target));
                      }
                   }
                }
