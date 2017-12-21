@@ -15,8 +15,6 @@ public interface VisibilityGraphsParameters
 
    public double getNormalZThresholdForAccessibleRegions();
 
-   public double getNormalZThresholdForPolygonObstacles();
-
    public double getExtrusionDistance();
 
    public double getExtrusionDistanceIfNotTooHighToStep();
@@ -43,6 +41,23 @@ public interface VisibilityGraphsParameters
    default double getMaxDistanceToProjectStartGoalToClosestRegion()
    {
       return 0.15;
+   }
+
+   /**
+    * Defines the angle from which two regions are considered orthogonal.
+    * <p>
+    * It is used to determine if a region should be projected onto another as a polygon or a line.
+    * </p>
+    * <p>
+    * It should be close to 90 degrees.
+    * </p>
+    * 
+    * @return the angle threshold to use to determine if a line or polygon projection method should
+    *         be used.
+    */
+   default double getRegionOrthogonalAngle()
+   {
+      return Math.toRadians(85.0);
    }
 
    default ExtrusionDistanceCalculator getExtrusionDistanceCalculator()

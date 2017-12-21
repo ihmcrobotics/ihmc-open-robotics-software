@@ -19,7 +19,7 @@ public class VisibilityGraphsParametersAnchorPaneController
    @FXML
    private Slider normalZThresholdForAccessibleRegionsSlider;
    @FXML
-   private Slider normalZThresholdForPolygonObstaclesSlider;
+   private Slider regionOrthogonalAngleSlider;
    @FXML
    private Slider extrusionDistanceSlider;
    @FXML
@@ -50,11 +50,12 @@ public class VisibilityGraphsParametersAnchorPaneController
    public void bindControls()
    {
       minConnectionDistanceForRegionsSlider.setLabelFormatter(StringConverterTools.metersToRoundedMillimeters());
+      regionOrthogonalAngleSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
 
       property.binBidirectionalNumberOfForcedConnections(numberOfForcedConnectionsSlider.valueProperty());
       property.binBidirectionalMinimumConnectionDistanceForRegions(minConnectionDistanceForRegionsSlider.valueProperty());
       property.binBidirectionalNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegionsSlider.valueProperty());
-      property.binBidirectionalNormalZThresholdForPolygonObstacles(normalZThresholdForPolygonObstaclesSlider.valueProperty());
+      property.binBidirectionalRegionOrthogonalAngle(regionOrthogonalAngleSlider.valueProperty());
       property.binBidirectionalExtrusionDistance(extrusionDistanceSlider.valueProperty());
       property.binBidirectionalExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStepSlider.valueProperty());
       property.binBidirectionalTooHighToStepDistance(tooHighToStepDistanceSlider.valueProperty());
