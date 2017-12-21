@@ -27,9 +27,9 @@
          </rowConstraints>
          <children>
             <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Number of forced connections" wrapText="true" />
-            <Slider fx:id="numberOfForcedConnectionsSlider" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="5.0" GridPane.columnIndex="1" />
-            <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Min connection distance for regions (mm)" wrapText="true" GridPane.rowIndex="1" />
-            <Slider fx:id="minConnectionDistanceForRegionsSlider" blockIncrement="0.005" majorTickUnit="0.005" max="0.02" minorTickCount="4" prefHeight="38.0" prefWidth="77.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Slider fx:id="numberOfForcedConnectionsSlider" majorTickUnit="5.0" max="20.0" minorTickCount="4" prefWidth="215.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="5.0" GridPane.columnIndex="1" />
+            <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Max inter-region connection length (cm)" wrapText="true" GridPane.rowIndex="1" />
+            <Slider fx:id="maxInterRegionConnectionLengthSlider" blockIncrement="0.05" majorTickUnit="0.1" max="0.8" minorTickCount="9" prefHeight="38.0" prefWidth="77.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Normal z-value for accessible regions" wrapText="true" GridPane.rowIndex="2" />
             <Label maxWidth="1.7976931348623157E308" text="Region orthogonal angle" wrapText="true" GridPane.rowIndex="3" />
             <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Extrusion distance" wrapText="true" GridPane.columnIndex="2" />
@@ -38,7 +38,7 @@
             <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Cluster resolution" wrapText="true" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             <Slider fx:id="normalZThresholdForAccessibleRegionsSlider" blockIncrement="0.1" majorTickUnit="0.2" max="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Slider fx:id="regionOrthogonalAngleSlider" blockIncrement="0.0436332" majorTickUnit="0.0872665" max="1.57079632679" min="0.78539816339" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.48353" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Slider fx:id="extrusionDistanceSlider" majorTickUnit="0.5" max="2.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.8" GridPane.columnIndex="3" />
+            <Slider fx:id="extrusionDistanceSlider" majorTickUnit="0.5" max="2.0" minorTickCount="4" prefWidth="215.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.8" GridPane.columnIndex="3" />
             <Slider fx:id="extrusionDistanceIfNotTooHighToStepSlider" majorTickUnit="0.5" max="2.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.25" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Slider fx:id="tooHighToStepDistanceSlider" majorTickUnit="0.2" max="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.5" GridPane.columnIndex="3" GridPane.rowIndex="2" />
             <Slider fx:id="clusterResolutionSlider" majorTickUnit="0.2" max="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.5" GridPane.columnIndex="3" GridPane.rowIndex="3" />

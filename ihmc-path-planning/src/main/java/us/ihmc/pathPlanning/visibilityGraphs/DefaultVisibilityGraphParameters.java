@@ -11,7 +11,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    }
 
    @Override
-   public double getMinimumConnectionDistanceForRegions()
+   public double getMaxInterRegionConnectionLength()
    {
       return 0.55;
    }

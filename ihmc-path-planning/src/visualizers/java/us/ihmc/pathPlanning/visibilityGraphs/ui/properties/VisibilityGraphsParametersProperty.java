@@ -9,7 +9,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 public class VisibilityGraphsParametersProperty extends ParametersProperty<SettableVisibilityGraphsParameters>
 {
    private IntegerField numberOfForcedConnections = new IntegerField(SettableVisibilityGraphsParameters::getNumberOfForcedConnections, (p, v) -> p.setNumberOfForcedConnections(v));
-   private DoubleField minimumConnectionDistanceForRegions = new DoubleField(SettableVisibilityGraphsParameters::getMinimumConnectionDistanceForRegions, (p, v) -> p.setMinimumConnectionDistanceForRegions(v));
+   private DoubleField maxInterRegionConnectionLength = new DoubleField(SettableVisibilityGraphsParameters::getMaxInterRegionConnectionLength, (p, v) -> p.setMaxInterRegionConnectionLength(v));
    private DoubleField normalZThresholdForAccessibleRegions = new DoubleField(SettableVisibilityGraphsParameters::getNormalZThresholdForAccessibleRegions, (p, v) -> p.setNormalZThresholdForAccessibleRegions(v));
    private DoubleField regionOrthogonalAngle = new DoubleField(SettableVisibilityGraphsParameters::getRegionOrthogonalAngle, (p, v) -> p.setRegionOrthogonalAngle(v));
    private DoubleField extrusionDistance = new DoubleField(SettableVisibilityGraphsParameters::getExtrusionDistance, (p, v) -> p.setExtrusionDistance(v));
@@ -30,9 +30,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       bindFieldBidirectionalToNumberProperty(property, numberOfForcedConnections);
    }
 
-   public void binBidirectionalMinimumConnectionDistanceForRegions(Property<? extends Number> property)
+   public void binBidirectionalMaxInterRegionConnectionLength(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, minimumConnectionDistanceForRegions);
+      bindFieldBidirectionalToNumberProperty(property, maxInterRegionConnectionLength);
    }
 
    public void binBidirectionalNormalZThresholdForAccessibleRegions(Property<? extends Number> property)
@@ -89,7 +89,7 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
    public static class SettableVisibilityGraphsParameters implements VisibilityGraphsParameters
    {
       private int numberOfForcedConnections;
-      private double minimumConnectionDistanceForRegions;
+      private double maxInterRegionConnectionLength;
       private double normalZThresholdForAccessibleRegions;
       private double regionOrthogonalAngle;
       private double extrusionDistance;
@@ -108,7 +108,7 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       public SettableVisibilityGraphsParameters(VisibilityGraphsParameters parameters)
       {
          setNumberOfForcedConnections(parameters.getNumberOfForcedConnections());
-         setMinimumConnectionDistanceForRegions(parameters.getMinimumConnectionDistanceForRegions());
+         setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
          setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
          setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
          setExtrusionDistance(parameters.getExtrusionDistance());
@@ -127,9 +127,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       }
 
       @Override
-      public double getMinimumConnectionDistanceForRegions()
+      public double getMaxInterRegionConnectionLength()
       {
-         return minimumConnectionDistanceForRegions;
+         return maxInterRegionConnectionLength;
       }
 
       @Override
@@ -191,9 +191,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
          this.numberOfForcedConnections = numberOfForcedConnections;
       }
 
-      public void setMinimumConnectionDistanceForRegions(double minimumConnectionDistanceForRegions)
+      public void setMaxInterRegionConnectionLength(double maxInterRegionConnectionLength)
       {
-         this.minimumConnectionDistanceForRegions = minimumConnectionDistanceForRegions;
+         this.maxInterRegionConnectionLength = maxInterRegionConnectionLength;
       }
 
       public void setNormalZThresholdForAccessibleRegions(double normalZThresholdForAccessibleRegions)
