@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -107,8 +108,18 @@ public class DatasetNavigationAccordionController
 
       String filename = listViewOwner.getSelectionModel().getSelectedItem();
       File dataFile = findChildFile(dataFolder, filename);
-      PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(dataFile);
-      messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
+      if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(dataFile))
+      {
+         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(dataFile);
+         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
+         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, dataset.getGoal());
+      }
+      else
+      {
+         PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(dataFile);
+         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
+      }
    }
 
    private static File findChildFile(File folder, String childFilename)
