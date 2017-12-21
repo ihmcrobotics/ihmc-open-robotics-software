@@ -20,7 +20,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
-public class NavigableRegionsInterConnectionViewer extends AnimationTimer
+public class InterRegionConnectionsViewer extends AnimationTimer
 {
    private static final boolean VERBOSE = false;
 
@@ -34,12 +34,12 @@ public class NavigableRegionsInterConnectionViewer extends AnimationTimer
    private final AtomicReference<Boolean> resetRequested;
    private final AtomicReference<Boolean> show;
 
-   public NavigableRegionsInterConnectionViewer(REAMessager messager)
+   public InterRegionConnectionsViewer(REAMessager messager)
    {
       this(messager, null);
    }
 
-   public NavigableRegionsInterConnectionViewer(REAMessager messager, ExecutorService executorService)
+   public InterRegionConnectionsViewer(REAMessager messager, ExecutorService executorService)
    {
       isExecutorServiceProvided = executorService == null;
 

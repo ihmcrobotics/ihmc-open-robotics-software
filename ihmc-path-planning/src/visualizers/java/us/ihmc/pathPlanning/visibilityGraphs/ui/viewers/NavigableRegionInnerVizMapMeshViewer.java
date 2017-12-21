@@ -15,7 +15,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
@@ -28,8 +27,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
 public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
 {
-   private static final boolean VERBOSE = false;
-
    private final boolean isExecutorServiceProvided;
    private final ExecutorService executorService;
 
@@ -118,9 +115,6 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
 
    private void processNavigableRegions(List<NavigableRegion> navigableRegionLocalPlanners)
    {
-      if (VERBOSE)
-         PrintTools.info(NavigableRegionsInterConnectionViewer.class, "Processing navigable regions.");
-
       Map<Integer, JavaFXMeshBuilder> meshBuilders = new HashMap<>();
       Map<Integer, Material> materials = new HashMap<>();
 
