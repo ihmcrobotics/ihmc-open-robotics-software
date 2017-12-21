@@ -97,7 +97,14 @@ public class NavigableRegionsManager
       long startCreatingMaps = System.currentTimeMillis();
 
       NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
-      navigableRegions = regions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable).map(this::createVisibilityGraphForRegion)
+      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
+      double clusterResolution = parameters.getClusterResolution();
+      int minRegionSize = parameters.getPlanarRegionMinSize();
+      double minRegionArea = parameters.getPlanarRegionMinArea();
+      ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
+      navigableRegions = regions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable)
+                                .map(region -> createNavigableRegion(region, regions, orthogonalAngle, clusterResolution, minRegionSize, minRegionArea,
+                                                                     extrusionDistanceCalculator))
                                 .collect(Collectors.toList());
 
       long endCreationTime = System.currentTimeMillis();
@@ -181,7 +188,7 @@ public class NavigableRegionsManager
    }
 
    private static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions)
-   
+
    {
       NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions);
       Point3D sourceInLocal = new Point3D(source);
@@ -309,7 +316,8 @@ public class NavigableRegionsManager
       return interRegionConnections;
    }
 
-   private NavigableRegion createVisibilityGraphForRegion(PlanarRegion region)
+   private static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, double orthogonalAngle, double clusterResolution,
+                                                 int minRegionSize, double minRegionArea, ExtrusionDistanceCalculator extrusionDistanceCalculator)
    {
       if (debug)
       {
@@ -317,28 +325,16 @@ public class NavigableRegionsManager
       }
 
       NavigableRegion navigableRegion = new NavigableRegion(region);
-      processRegion(navigableRegion);
-      return navigableRegion;
-   }
-
-   private void processRegion(NavigableRegion navigableRegion)
-   {
-      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
-      ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
-      double clusterResolution = parameters.getClusterResolution();
-      int minTruncatedSize = parameters.getPlanarRegionMinSize();
-      double minTruncatedArea = parameters.getPlanarRegionMinArea();
-
       List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
       List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
       List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
       PlanarRegion homeRegion = navigableRegion.getHomeRegion();
 
-      regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, regions);
+      regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, allRegions);
       double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
       regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
-                                                                                                     depthThresholdForConvexDecomposition, minTruncatedSize,
-                                                                                                     minTruncatedArea);
+                                                                                                     depthThresholdForConvexDecomposition, minRegionSize,
+                                                                                                     minRegionArea);
 
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
       Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion);
@@ -367,6 +363,8 @@ public class NavigableRegionsManager
       VisibilityMap visibilityMap = new VisibilityMap();
       visibilityMap.setConnections(connectionsForMap);
       navigableRegion.setVisibilityMapInLocal(visibilityMap);
+
+      return navigableRegion;
    }
 
    public Point3D[][] getNavigableExtrusions()
