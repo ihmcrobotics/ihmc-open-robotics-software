@@ -1,6 +1,8 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalEditModeEnabled;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalPosition;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartPosition;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartEditModeEnabled;
 
 import javafx.fxml.FXML;
@@ -14,6 +16,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 
 public class StartGoalAnchorPaneController
 {
+   @FXML
+   private ToggleButton showStartToggleButton;
+   @FXML
+   private ToggleButton showGoalToggleButton;
    @FXML
    private ToggleButton placeStartToggleButton;
    @FXML
@@ -55,6 +61,9 @@ public class StartGoalAnchorPaneController
    {
       setupControls();
 
+      messager.bindBidirectional(ShowStartPosition, showStartToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowGoalPosition, showGoalToggleButton.selectedProperty(), false);
+      
       messager.bindBidirectional(StartEditModeEnabled, placeStartToggleButton.selectedProperty(), false);
       messager.bindBidirectional(StartEditModeEnabled, placeGoalToggleButton.disableProperty(), false);
 

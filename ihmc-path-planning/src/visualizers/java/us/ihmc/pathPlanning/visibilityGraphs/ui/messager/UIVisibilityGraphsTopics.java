@@ -72,6 +72,8 @@ public class UIVisibilityGraphsTopics
 
    public static final Topic<Boolean> StartEditModeEnabled = Root.child(Start).child(EditMode).topic(Enable);
    public static final Topic<Boolean> GoalEditModeEnabled = Root.child(Goal).child(EditMode).topic(Enable);
+   public static final Topic<Boolean> ShowStartPosition = Root.child(Start).topic(Show);
+   public static final Topic<Boolean> ShowGoalPosition = Root.child(Goal).topic(Show);
    public static final Topic<Point3D> StartPosition = Root.child(Start).topic(Position);
    public static final Topic<Point3D> GoalPosition = Root.child(Goal).topic(Position);
 
