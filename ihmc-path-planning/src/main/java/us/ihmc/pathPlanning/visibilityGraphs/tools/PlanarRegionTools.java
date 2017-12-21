@@ -427,7 +427,7 @@ public class PlanarRegionTools
       ConvexPolygon2D homeConvexPol = new ConvexPolygon2D(homePointsArr);
       homeConvexPol.update();
 
-      Vector3D normal = calculateNormal(containingRegion);
+      Vector3D normal = containingRegion.getNormal();
 
       for (int i = 0; i < regionToCheck.getConvexHull().getNumberOfVertices(); i++)
       {
@@ -451,13 +451,6 @@ public class PlanarRegionTools
       }
 
       return false;
-   }
-
-   public static Vector3D calculateNormal(PlanarRegion region)
-   {
-      Vector3D normal = new Vector3D();
-      region.getNormal(normal);
-      return normal;
    }
 
    public static ArrayList<PlanarRegion> determineWhichRegionsAreInside(PlanarRegion containingRegion, List<PlanarRegion> otherRegionsEx)
@@ -577,15 +570,6 @@ public class PlanarRegionTools
       Point3D point3D = new Point3D(point2D);
       transform.transform(point3D);
       return point3D;
-   }
-
-   public static Point3D projectPointToPlane(Point3DReadOnly pointToProject, PlanarRegion regionToProjectTo)
-   {
-      Vector3D normal = calculateNormal(regionToProjectTo);
-      Point2D point2D = (Point2D) regionToProjectTo.getConvexHull().getVertex(0);
-      Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-
-      return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal);
    }
 
    public static List<PlanarRegion> keepOnlyRegionsThatAreEntirelyAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
@@ -757,33 +741,6 @@ public class PlanarRegionTools
       PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, concaveHullVertices, truncatedConvexPolygons);
       truncatedRegion.setRegionId(planarRegionToTruncate.getRegionId());
       return truncatedRegion;
-   }
-
-   public static boolean isRegionTooHighToStep(PlanarRegion regionToProject, PlanarRegion regionToProjectTo, double tooHighToStepThreshold)
-   {
-      Vector3D normal = PlanarRegionTools.calculateNormal(regionToProjectTo);
-
-      for (int i = 0; i < regionToProject.getConvexHull().getNumberOfVertices(); i++)
-      {
-         Point2D point2D = (Point2D) regionToProject.getConvexHull().getVertex(i);
-         Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-         FramePoint3D fpt = new FramePoint3D();
-         fpt.set(point3D);
-         RigidBodyTransform transToWorld = new RigidBodyTransform();
-         regionToProject.getTransformToWorld(transToWorld);
-         fpt.applyTransform(transToWorld);
-
-         Point3D pointToProject = fpt.getPoint();
-         Point3D projectedPoint = new Point3D();
-         EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal, projectedPoint);
-
-         if (pointToProject.distance(projectedPoint) >= tooHighToStepThreshold)
-         {
-            return true;
-         }
-      }
-
-      return false;
    }
 
    public static boolean doRay2DAndLineSegment2DIntersect(Point2DReadOnly rayOrigin, Vector2DReadOnly rayDirection, Point2DReadOnly lineSegmentStart,

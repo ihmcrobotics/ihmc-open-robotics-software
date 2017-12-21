@@ -275,7 +275,7 @@ public class ClusterTools
 
       for (PlanarRegion regionToProject : regionsToProject)
       {
-         Vector3D normal = PlanarRegionTools.calculateNormal(regionToProject);
+         Vector3D normal = regionToProject.getNormal();
 
          if (normal != null && regionToProject != regionToProjectTo)
          {
