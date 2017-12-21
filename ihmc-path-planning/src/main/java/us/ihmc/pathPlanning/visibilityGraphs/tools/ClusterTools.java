@@ -21,7 +21,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Type;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ExtrusionDistanceCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.lists.ListWrappingIndexTools;
@@ -379,8 +378,7 @@ public class ClusterTools
    }
 
    public static void createClustersFromRegions(PlanarRegion homeRegion, List<PlanarRegion> regions, List<PlanarRegion> lineObstacleRegions,
-                                                List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformFromHomeToWorld,
-                                                VisibilityGraphsParameters visibilityGraphsParameters)
+                                                List<PlanarRegion> polygonObstacleRegions, List<Cluster> clusters, RigidBodyTransform transformFromHomeToWorld)
    {
       for (PlanarRegion region : lineObstacleRegions)
       {
