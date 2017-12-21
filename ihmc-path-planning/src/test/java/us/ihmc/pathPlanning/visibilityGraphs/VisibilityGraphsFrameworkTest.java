@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
@@ -52,7 +53,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    // For enabling helpful prints.
    private static boolean DEBUG = true;
 
@@ -284,7 +285,8 @@ public class VisibilityGraphsFrameworkTest extends Application
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private String runAssertionsNoOcclusionSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed, long maxSolveTimeInMilliseconds)
+   private String runAssertionsNoOcclusionSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed,
+                                                                    long maxSolveTimeInMilliseconds)
    {
       String datasetName = dataset.getDatasetName();
 
@@ -437,7 +439,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
                                                     List<Point3DReadOnly> bodyPathToPack)
    {
-      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
+      VisibilityGraphsParameters parameters = createTestParameters();
       NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -746,5 +748,17 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static interface DatasetTestRunner
    {
       String testDataset(VisibilityGraphsUnitTestDataset dataset);
+   }
+
+   private static VisibilityGraphsParameters createTestParameters()
+   {
+      return new DefaultVisibilityGraphParameters()
+      {
+         @Override
+         public double getTooHighToStepDistance()
+         {
+            return 0.6;
+         }
+      };
    }
 }
