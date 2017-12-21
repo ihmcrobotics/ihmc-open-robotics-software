@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools.isPointVisibleForStaticMaps;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +36,7 @@ public class NavigableRegionsManager
    private final static int START_GOAL_ID = 0;
 
    private List<PlanarRegion> regions;
+   private SingleSourceVisibilityMap startMap, goalMap;
    private List<NavigableRegion> navigableRegions = new ArrayList<>();
    private List<VisibilityMap> visMaps = new ArrayList<>();
 
@@ -110,40 +113,47 @@ public class NavigableRegionsManager
 
       long endCreationTime = System.currentTimeMillis();
 
-      boolean readyToRunBodyPath = createVisMapsForStartAndGoal(start, goal);
+      startMap = createSingleSourceVisibilityMap(start, navigableRegions);
+      goalMap = createSingleSourceVisibilityMap(goal, navigableRegions);
+      visMaps.add(startMap.getVisibilityMapInWorld());
+      visMaps.add(goalMap.getVisibilityMapInWorld());
+
+      if (startMap.getHostRegion() == goalMap.getHostRegion())
+      {
+         if (isPointVisibleForStaticMaps(startMap.getHostRegion().getAllClusters(), startMap.getSourceInLocal2D(), goalMap.getSourceInLocal2D()))
+         {
+            globalMapPoints.add(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
+         }
+      }
 
       createGlobalMapFromAlltheLocalMaps();
       long startConnectingTime = System.currentTimeMillis();
       interRegionConnections = computeInterRegionConnections();
       long endConnectingTime = System.currentTimeMillis();
 
-      if (readyToRunBodyPath)
+
+      long aStarStartTime = System.currentTimeMillis();
+
+      List<Point3DReadOnly> path = null;
+      path = calculatePathOnVisibilityGraph(start, goal, globalMapPoints);
+
+      if (debug)
       {
-         long aStarStartTime = System.currentTimeMillis();
-
-         List<Point3DReadOnly> path = null;
-         path = calculatePathOnVisibilityGraph(start, goal, globalMapPoints);
-
-         if (debug)
+         if (path != null)
          {
-            if (path != null)
-            {
-               PrintTools.info("----Navigable Regions Manager Stats-----");
-               PrintTools.info("Map creation completed in " + (endCreationTime - startCreatingMaps) + "ms");
-               PrintTools.info("Connection completed in " + (endConnectingTime - startConnectingTime) + "ms");
-               PrintTools.info("A* took: " + (System.currentTimeMillis() - aStarStartTime) + "ms");
-               PrintTools.info("Total time to find solution was: " + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
-            }
-            else
-            {
-               PrintTools.info("NO BODY PATH SOLUTION WAS FOUND!" + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
-            }
+            PrintTools.info("----Navigable Regions Manager Stats-----");
+            PrintTools.info("Map creation completed in " + (endCreationTime - startCreatingMaps) + "ms");
+            PrintTools.info("Connection completed in " + (endConnectingTime - startConnectingTime) + "ms");
+            PrintTools.info("A* took: " + (System.currentTimeMillis() - aStarStartTime) + "ms");
+            PrintTools.info("Total time to find solution was: " + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
          }
-
-         return path;
+         else
+         {
+            PrintTools.info("NO BODY PATH SOLUTION WAS FOUND!" + (System.currentTimeMillis() - startBodyPathComputation) + "ms");
+         }
       }
 
-      return null;
+      return path;
    }
 
    public List<Point3DReadOnly> calculateBodyPathWithOcclussions(Point3D start, Point3D goal)
@@ -180,35 +190,15 @@ public class NavigableRegionsManager
       }
    }
 
-   private boolean createVisMapsForStartAndGoal(Point3DReadOnly start, Point3DReadOnly goal)
+   private static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions)
    {
-      NavigableRegion startRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
-      Point3D startInRegionFrame = new Point3D(start);
-      startRegion.transformFromWorldToLocal(startInRegionFrame);
-      NavigableRegion goalRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(goal, navigableRegions);
-      Point3D goalInRegionFrame = new Point3D(goal);
-      goalRegion.transformFromWorldToLocal(goalInRegionFrame);
+      NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions);
+      Point3D sourceInLocal = new Point3D(source);
+      hostRegion.transformFromWorldToLocal(sourceInLocal);
+      int mapId = hostRegion.getMapId();
 
-      VisibilityMap startMap = createVisMapForSinglePointSource(startInRegionFrame, startRegion.getRegionId(), startRegion, true);
-      VisibilityMap goalMap = createVisMapForSinglePointSource(goalInRegionFrame, goalRegion.getRegionId(), goalRegion, true);
-
-      if (startRegion == goalRegion)
-      {
-         Point2D start2D = new Point2D(startInRegionFrame);
-         Point2D goal2D = new Point2D(goalInRegionFrame);
-         boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(startRegion.getAllClusters(), start2D, goal2D);
-         if (targetIsVisible)
-         {
-            globalMapPoints.add(new Connection(start, startRegion.getRegionId(), goal, goalRegion.getRegionId()));
-         }
-      }
-
-      if (startMap.isEmpty() || goalMap.isEmpty())
-         return false;
-
-      visMaps.add(startMap);
-      visMaps.add(goalMap);
-      return true;
+      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(sourceInLocal, mapId, hostRegion.getAllClusters(), mapId, true);
+      return new SingleSourceVisibilityMap(source, connections, hostRegion);
    }
 
    private static List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal, Collection<Connection> globalMapPoints)
@@ -278,19 +268,6 @@ public class NavigableRegionsManager
       }
 
       return path;
-   }
-
-   private static VisibilityMap createVisMapForSinglePointSource(Point3DReadOnly point, int pointRegionId, NavigableRegion navigableRegion,
-                                                                 boolean ensureConnection)
-   {
-      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(point, pointRegionId, navigableRegion.getAllClusters(),
-                                                                              navigableRegion.getRegionId(), ensureConnection);
-
-      VisibilityMap mapForSingleObserver = new VisibilityMap();
-      mapForSingleObserver.setConnections(connections);
-      navigableRegion.transformFromLocalToWorld(mapForSingleObserver);
-      mapForSingleObserver.computeVertices();
-      return mapForSingleObserver;
    }
 
    private void createGlobalMapFromAlltheLocalMaps()
