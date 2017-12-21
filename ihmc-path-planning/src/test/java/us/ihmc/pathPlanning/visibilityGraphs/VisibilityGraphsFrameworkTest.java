@@ -459,8 +459,8 @@ public class VisibilityGraphsFrameworkTest extends Application
          {
             messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
          }
-         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, manager.getListOfLocalPlanners());
-         messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getConnectionPoints());
+         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, manager.getNavigableRegions());
+         messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, manager.getInterRegionConnections());
       }
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);

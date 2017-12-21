@@ -416,7 +416,7 @@ public class NavigableRegionsManager
       return allNavigableExtrusions;
    }
 
-   public List<NavigableRegion> getListOfLocalPlanners()
+   public List<NavigableRegion> getNavigableRegions()
    {
       return navigableRegions;
    }

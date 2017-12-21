@@ -116,7 +116,7 @@ public class VisibilityGraphsRenderer
          List<Point3DReadOnly> bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
 
          messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, bodyPath);
-         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, navigableRegionsManager.getListOfLocalPlanners());
+         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, navigableRegionsManager.getNavigableRegions());
          messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, navigableRegionsManager.getInterRegionConnections());
       }
       catch (Exception e)
