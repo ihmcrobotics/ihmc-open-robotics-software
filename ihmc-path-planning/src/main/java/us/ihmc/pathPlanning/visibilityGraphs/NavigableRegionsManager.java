@@ -12,12 +12,12 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -120,7 +120,7 @@ public class NavigableRegionsManager
       }
 
       long startConnectingTime = System.currentTimeMillis();
-      interRegionConnections = computeInterRegionConnections(navigableRegions);
+      interRegionConnections = computeInterRegionConnections(navigableRegions, parameters.getInterRegionConnectionFilter());
       long endConnectingTime = System.currentTimeMillis();
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
@@ -277,15 +277,13 @@ public class NavigableRegionsManager
       return path;
    }
 
-   private List<Connection> computeInterRegionConnections(List<NavigableRegion> navigableRegions)
+   private static List<Connection> computeInterRegionConnections(List<NavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
    {
       List<Connection> interRegionConnections = new ArrayList<>();
       if (debug)
       {
          PrintTools.info("Starting connectivity check");
       }
-      double minimumConnectionDistanceSquaredForRegions = MathTools.square(parameters.getMinimumConnectionDistanceForRegions());
-
       for (int sourceMapIndex = 0; sourceMapIndex < navigableRegions.size(); sourceMapIndex++)
       {
          VisibilityMap sourceMap = navigableRegions.get(sourceMapIndex).getVisibilityMapInWorld();
@@ -304,10 +302,7 @@ public class NavigableRegionsManager
                   if (source.getRegionId() == target.getRegionId())
                      continue;
 
-                  boolean distanceOk = source.distanceSquared(target) < minimumConnectionDistanceSquaredForRegions;
-                  boolean heightOk = Math.abs(source.getZ() - target.getZ()) < parameters.getTooHighToStepDistance();
-
-                  if (distanceOk && heightOk)
+                  if (filter.isConnectionValid(source, target))
                   {
                      interRegionConnections.add(new Connection(source, target));
                   }
