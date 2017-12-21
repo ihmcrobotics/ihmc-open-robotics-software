@@ -15,7 +15,6 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -369,9 +368,7 @@ public class NavigableRegionsManager
          System.out.println("Extruding obstacles...");
       }
 
-      // TODO The use of Double.MAX_VALUE for the observer seems rather risky. I'm actually surprised that it works.
-      //      clusterMgr.performExtrusions(new Point2D(Double.MAX_VALUE, Double.MAX_VALUE), parameters.getExtrusionDistance());
-      ClusterTools.performExtrusions(new Point2D(Double.MAX_VALUE, Double.MAX_VALUE), parameters.getExtrusionDistanceCalculator(), clusters);
+      ClusterTools.performExtrusions(parameters.getExtrusionDistanceCalculator(), clusters);
 
       for (Cluster cluster : clusters)
       {
