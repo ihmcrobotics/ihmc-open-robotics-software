@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclussionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -42,7 +43,6 @@ public class NavigableRegionsManager
    private final VisibilityGraphsParameters parameters;
 
    private List<Connection> interRegionConnections;
-   private List<Connection> globalMapPoints = new ArrayList<>();
 
    public NavigableRegionsManager()
    {
@@ -87,8 +87,6 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      globalMapPoints.clear();
-
       if (start == null)
       {
          throw new RuntimeException("Start is null!.");
@@ -113,15 +111,12 @@ public class NavigableRegionsManager
 
       startMap = createSingleSourceVisibilityMap(start, navigableRegions);
       goalMap = createSingleSourceVisibilityMap(goal, navigableRegions);
-      navigableRegions.stream().map(NavigableRegion::getVisibilityMapInWorld).map(VisibilityMap::getConnections).forEach(globalMapPoints::addAll);
-      globalMapPoints.addAll(startMap.getVisibilityMapInWorld().getConnections());
-      globalMapPoints.addAll(goalMap.getVisibilityMapInWorld().getConnections());
 
       if (startMap.getHostRegion() == goalMap.getHostRegion())
       {
          if (isPointVisibleForStaticMaps(startMap.getHostRegion().getAllClusters(), startMap.getSourceInLocal2D(), goalMap.getSourceInLocal2D()))
          {
-            globalMapPoints.add(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
+            startMap.addConnectionInWorld(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
          }
       }
 
@@ -129,11 +124,15 @@ public class NavigableRegionsManager
       interRegionConnections = computeInterRegionConnections(navigableRegions);
       long endConnectingTime = System.currentTimeMillis();
 
+      List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
+      visibilityMapHolders.addAll(navigableRegions);
+      visibilityMapHolders.add(startMap);
+      visibilityMapHolders.add(goalMap);
 
       long aStarStartTime = System.currentTimeMillis();
 
       List<Point3DReadOnly> path = null;
-      path = calculatePathOnVisibilityGraph(start, goal, globalMapPoints);
+      path = calculatePathOnVisibilityGraph(start, goal, interRegionConnections, visibilityMapHolders);
 
       if (debug)
       {
@@ -199,34 +198,45 @@ public class NavigableRegionsManager
       return new SingleSourceVisibilityMap(source, connections, hostRegion);
    }
 
-   private static List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal, Collection<Connection> globalMapPoints)
+   private static List<Point3DReadOnly> calculatePathOnVisibilityGraph(Point3DReadOnly start, Point3DReadOnly goal, Collection<Connection> interConnections,
+                                                                       Collection<VisibilityMapHolder> allVisibilityMapHolders)
    {
-      SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graph = createGlobalVisibilityGraph(globalMapPoints);
+      SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graph = createGlobalVisibilityGraph(interConnections, allVisibilityMapHolders);
       List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(graph, new ConnectionPoint3D(start, START_GOAL_ID),
                                                                                 new ConnectionPoint3D(goal, START_GOAL_ID));
       return convertVisibilityGraphSolutionToPath(solution, start, graph);
    }
 
-   private static SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> createGlobalVisibilityGraph(Collection<Connection> globalMapPoints)
+   private static SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> createGlobalVisibilityGraph(Collection<Connection> interConnections,
+                                                                                                          Collection<VisibilityMapHolder> allVisibilityMapHolders)
    {
       SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-      for (Connection pair : globalMapPoints)
-      {
-         ConnectionPoint3D pt1 = pair.getSourcePoint();
-         ConnectionPoint3D pt2 = pair.getTargetPoint();
-
-         if (!pt1.epsilonEquals(pt2, 1.0e-3))
-         {
-            globalVisMap.addVertex(pt1);
-            globalVisMap.addVertex(pt2);
-            DefaultWeightedEdge edge = new DefaultWeightedEdge();
-            globalVisMap.addEdge(pt1, pt2, edge);
-            globalVisMap.setEdgeWeight(edge, pt1.distance(pt2));
-         }
-      }
+      addConnectionsToGraph(interConnections, globalVisMap);
+      allVisibilityMapHolders.stream().map(VisibilityMapHolder::getVisibilityMapInWorld).map(VisibilityMap::getConnections)
+                             .forEach(connections -> addConnectionsToGraph(connections, globalVisMap));
 
       return globalVisMap;
+   }
+
+   private static void addConnectionsToGraph(Iterable<Connection> connections, SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graphToUpdate)
+   {
+      connections.forEach(connection -> addConnectionToGraph(connection, graphToUpdate));
+   }
+
+   private static void addConnectionToGraph(Connection connection, SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graphToUpdate)
+   {
+      ConnectionPoint3D source = connection.getSourcePoint();
+      ConnectionPoint3D target = connection.getTargetPoint();
+
+      if (!source.epsilonEquals(target, 1.0e-3))
+      {
+         graphToUpdate.addVertex(source);
+         graphToUpdate.addVertex(target);
+         DefaultWeightedEdge edge = new DefaultWeightedEdge();
+         graphToUpdate.addEdge(source, target, edge);
+         graphToUpdate.setEdgeWeight(edge, source.distance(target));
+      }
    }
 
    private static List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, Point3DReadOnly start,
@@ -301,7 +311,6 @@ public class NavigableRegionsManager
                   if (distanceOk && heightOk)
                   {
                      interRegionConnections.add(new Connection(source, target));
-                     globalMapPoints.add(new Connection(source, target));
                   }
                }
             }
@@ -410,11 +419,6 @@ public class NavigableRegionsManager
    public List<NavigableRegion> getListOfLocalPlanners()
    {
       return navigableRegions;
-   }
-
-   public List<Connection> getGlobalMapPoints()
-   {
-      return globalMapPoints;
    }
 
    public List<Connection> getInterRegionConnections()
