@@ -20,8 +20,6 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    private RigidBody rigidBody;
    private final List<ConfigurationSpaceName> degreesOfFreedomToExplore = new ArrayList<>();
 
-   //private final TDoubleArrayList explorationRangeAmplitudes = new TDoubleArrayList();
-
    private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
    private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
 
