@@ -45,7 +45,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopic
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionInnerVizMapMeshViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.InterRegionConnectionsViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
@@ -61,7 +61,7 @@ public class VisibilityGraphsTestVisualizer
    private final StartGoalPositionViewer startGoalViewer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
-   private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
+   private final NavigableRegionViewer navigableRegionMeshViewer;
    private final InterRegionConnectionsViewer interRegionConnectionsViewer;
    private final WalkerCollisionsViewer walkerCollisionsViewer;
 
@@ -110,7 +110,7 @@ public class VisibilityGraphsTestVisualizer
       startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager, executorService);
+      navigableRegionMeshViewer = new NavigableRegionViewer(messager, executorService);
       interRegionConnectionsViewer = new InterRegionConnectionsViewer(messager, executorService);
       walkerCollisionsViewer = new WalkerCollisionsViewer(messager);
 
@@ -119,7 +119,7 @@ public class VisibilityGraphsTestVisualizer
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(clusterMeshViewer.getRoot());
-      view3dFactory.addNodeToView(navigableRegionInnerVizMapMeshViewer.getRoot());
+      view3dFactory.addNodeToView(navigableRegionMeshViewer.getRoot());
       view3dFactory.addNodeToView(interRegionConnectionsViewer.getRoot());
       view3dFactory.addNodeToView(walkerCollisionsViewer.getRoot());
 
@@ -206,7 +206,7 @@ public class VisibilityGraphsTestVisualizer
       startGoalViewer.start();
       bodyPathMeshViewer.start();
       clusterMeshViewer.start();
-      navigableRegionInnerVizMapMeshViewer.start();
+      navigableRegionMeshViewer.start();
       interRegionConnectionsViewer.start();
       walkerCollisionsViewer.start();
    }
@@ -218,7 +218,7 @@ public class VisibilityGraphsTestVisualizer
       startGoalViewer.stop();
       bodyPathMeshViewer.stop();
       clusterMeshViewer.stop();
-      navigableRegionInnerVizMapMeshViewer.stop();
+      navigableRegionMeshViewer.stop();
       interRegionConnectionsViewer.stop();
       walkerCollisionsViewer.stop();
       messager.closeMessager();

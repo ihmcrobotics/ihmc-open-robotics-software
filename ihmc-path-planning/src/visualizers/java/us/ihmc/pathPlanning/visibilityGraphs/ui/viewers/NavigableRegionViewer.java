@@ -25,7 +25,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
 
-public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
+public class NavigableRegionViewer extends AnimationTimer
 {
    private final boolean isExecutorServiceProvided;
    private final ExecutorService executorService;
@@ -39,12 +39,12 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
 
    private final AtomicReference<List<NavigableRegion>> newRequestReference;
 
-   public NavigableRegionInnerVizMapMeshViewer(REAMessager messager)
+   public NavigableRegionViewer(REAMessager messager)
    {
       this(messager, null);
    }
 
-   public NavigableRegionInnerVizMapMeshViewer(REAMessager messager, ExecutorService executorService)
+   public NavigableRegionViewer(REAMessager messager, ExecutorService executorService)
    {
       isExecutorServiceProvided = executorService == null;
 
@@ -102,7 +102,7 @@ public class NavigableRegionInnerVizMapMeshViewer extends AnimationTimer
       if (show.get())
       {
          List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
-         
+
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
