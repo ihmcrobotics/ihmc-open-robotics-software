@@ -367,7 +367,7 @@ public class ClusterTools
       return new Point3D(closestPoint);
    }
 
-   public static void createClusterForHomeRegion(List<Cluster> clusters, RigidBodyTransform transformToWorld, PlanarRegion homeRegion, double extrusionDistance)
+   public static void createClusterForHomeRegion(List<Cluster> clusters, RigidBodyTransform transformToWorld, PlanarRegion homeRegion)
    {
       Cluster cluster = new Cluster();
       clusters.add(cluster);
