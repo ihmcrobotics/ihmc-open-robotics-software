@@ -33,7 +33,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
-   private final static boolean TRUNCATE_OBSTACLE_REGIONS = true;
 
    private final static int START_GOAL_ID = 0;
 
@@ -327,6 +326,8 @@ public class NavigableRegionsManager
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
       double clusterResolution = parameters.getClusterResolution();
+      int minTruncatedSize = parameters.getPlanarRegionMinSize();
+      double minTruncatedArea = parameters.getPlanarRegionMinArea();
 
       List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
       List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
@@ -335,19 +336,10 @@ public class NavigableRegionsManager
       PlanarRegion homeRegion = navigableRegionLocalPlanner.getHomeRegion();
 
       regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, regions);
-      if (TRUNCATE_OBSTACLE_REGIONS)
-      {
-         double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
-         int minTruncatedSize = 0; // TODO Extract me!
-         double minTruncatedArea = 0.01; // TODO Extract me!
-         regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
-                                                                                                        depthThresholdForConvexDecomposition, minTruncatedSize,
-                                                                                                        minTruncatedArea);
-      }
-      else
-      {
-         regionsInsideHomeRegion = PlanarRegionTools.keepOnlyRegionsThatAreEntirelyAboveHomeRegion(regionsInsideHomeRegion, homeRegion);
-      }
+      double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
+      regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
+                                                                                                     depthThresholdForConvexDecomposition, minTruncatedSize,
+                                                                                                     minTruncatedArea);
 
       RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getTransformToWorld();
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
