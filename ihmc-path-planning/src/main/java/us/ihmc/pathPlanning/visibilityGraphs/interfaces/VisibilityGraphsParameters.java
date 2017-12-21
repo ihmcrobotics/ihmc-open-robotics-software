@@ -5,6 +5,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface VisibilityGraphsParameters
@@ -107,6 +108,22 @@ public interface VisibilityGraphsParameters
                return false;
 
             return true;
+         }
+      };
+   }
+
+   default PlanarRegionFilter getPlanarRegionFilter()
+   {
+      return new PlanarRegionFilter()
+      {
+         @Override
+         public boolean isPlanarRegionRelevant(PlanarRegion region)
+         {
+            if (region.getConcaveHullSize() < getPlanarRegionMinSize())
+               return false;
+            if (!Double.isFinite(getPlanarRegionMinArea()) || getPlanarRegionMinArea() <= 0.0)
+               return true;
+            return PlanarRegionTools.computePlanarRegionArea(region) >= getPlanarRegionMinArea();
          }
       };
    }

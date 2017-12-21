@@ -20,6 +20,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
@@ -69,8 +70,7 @@ public class NavigableRegionsManager
       if (regions != null)
       {
          regions = PlanarRegionTools.ensureClockwiseOrder(regions);
-         regions = PlanarRegionTools.filterPlanarRegionsByArea(parameters.getPlanarRegionMinArea(), regions);
-         regions = PlanarRegionTools.filterPlanarRegionsByHullSize(parameters.getPlanarRegionMinSize(), regions);
+         regions = regions.stream().filter(parameters.getPlanarRegionFilter()::isPlanarRegionRelevant).collect(Collectors.toList());
       }
 
       this.regions = regions;
@@ -96,14 +96,13 @@ public class NavigableRegionsManager
       long startBodyPathComputation = System.currentTimeMillis();
       long startCreatingMaps = System.currentTimeMillis();
 
+      PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       double clusterResolution = parameters.getClusterResolution();
-      int minRegionSize = parameters.getPlanarRegionMinSize();
-      double minRegionArea = parameters.getPlanarRegionMinArea();
       ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
       navigableRegions = regions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable)
-                                .map(region -> createNavigableRegion(region, regions, orthogonalAngle, clusterResolution, minRegionSize, minRegionArea,
+                                .map(region -> createNavigableRegion(region, regions, orthogonalAngle, clusterResolution, planarRegionFilter,
                                                                      extrusionDistanceCalculator))
                                 .collect(Collectors.toList());
 
@@ -317,7 +316,7 @@ public class NavigableRegionsManager
    }
 
    private static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, double orthogonalAngle, double clusterResolution,
-                                                 int minRegionSize, double minRegionArea, ExtrusionDistanceCalculator extrusionDistanceCalculator)
+                                                        PlanarRegionFilter filter, ExtrusionDistanceCalculator extrusionDistanceCalculator)
    {
       if (debug)
       {
@@ -333,8 +332,7 @@ public class NavigableRegionsManager
       regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, allRegions);
       double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
       regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
-                                                                                                     depthThresholdForConvexDecomposition, minRegionSize,
-                                                                                                     minRegionArea);
+                                                                                                     depthThresholdForConvexDecomposition, filter);
 
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
       Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion);

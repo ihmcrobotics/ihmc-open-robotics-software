@@ -23,6 +23,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -613,8 +614,7 @@ public class PlanarRegionTools
    }
 
    public static List<PlanarRegion> filterRegionsByTruncatingVerticesBeneathHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion,
-                                                                                       double depthThresholdForConvexDecomposition, int minTruncatedSize,
-                                                                                       double minTruncatedArea)
+                                                                                       double depthThresholdForConvexDecomposition, PlanarRegionFilter filter)
    {
       List<PlanarRegion> filteredList = new ArrayList<>();
       Point3D pointOnPlane = new Point3D();
@@ -626,8 +626,7 @@ public class PlanarRegionTools
       for (PlanarRegion regionToCheck : regionsToCheck)
       {
          PlanarRegion truncatedPlanarRegion = truncatePlanarRegionIfIntersectingWithPlane(pointOnPlane, planeNormal, regionToCheck,
-                                                                                          depthThresholdForConvexDecomposition, minTruncatedSize,
-                                                                                          minTruncatedArea);
+                                                                                          depthThresholdForConvexDecomposition, filter);
          if (truncatedPlanarRegion != null)
             filteredList.add(truncatedPlanarRegion);
       }
@@ -644,16 +643,14 @@ public class PlanarRegionTools
     * @param planarRegionToTruncate the original planar region to be truncated. Not modified.
     * @param depthThresholdForConvexDecomposition used to recompute the convex decomposition of the
     *           planar region when it has been truncated.
-    * @param minTruncatedSize the minimum number of concave hull vertices for the truncated region
-    *           to be created.
-    * @param minTruncatedArea the minimum area for the truncated region to be created.
+    * @param filter the filter used to determine if the truncated region is to be created.
     * @return the truncated planar region which is completely above the plane, or {@code null} if
     *         the given planar region is completely underneath the plane or if it is too small
     *         according to {@code minTruncatedSize} and {@code minTruncatedArea}.
     */
    public static PlanarRegion truncatePlanarRegionIfIntersectingWithPlane(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal,
                                                                           PlanarRegion planarRegionToTruncate, double depthThresholdForConvexDecomposition,
-                                                                          int minTruncatedSize, double minTruncatedArea)
+                                                                          PlanarRegionFilter filter)
    {
       Point3D pointOnRegion = new Point3D();
       Vector3D regionNormal = new Vector3D();
@@ -728,22 +725,18 @@ public class PlanarRegionTools
       if (truncatedConcaveHullVertices.isEmpty())
          return null; // The region is completely underneath
 
-      if (minTruncatedSize > 0 && truncatedConcaveHullVertices.size() < minTruncatedSize)
-         return null; // The resulting region is too small
-
       List<ConvexPolygon2D> truncatedConvexPolygons = new ArrayList<>();
       ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
                                                                  truncatedConvexPolygons);
-
-      double totalArea = truncatedConvexPolygons.stream().mapToDouble(ConvexPolygon2D::getArea).sum();
-      if (totalArea < minTruncatedArea)
-         return null; // The resulting region is too small
 
       Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
       truncatedConcaveHullVertices.toArray(concaveHullVertices);
       PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, concaveHullVertices, truncatedConvexPolygons);
       truncatedRegion.setRegionId(planarRegionToTruncate.getRegionId());
-      return truncatedRegion;
+      if (filter == null || filter.isPlanarRegionRelevant(truncatedRegion))
+         return truncatedRegion;
+      else
+         return null;
    }
 
    public static boolean doRay2DAndLineSegment2DIntersect(Point2DReadOnly rayOrigin, Vector2DReadOnly rayDirection, Point2DReadOnly lineSegmentStart,
