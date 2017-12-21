@@ -5,11 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 
 public class Cluster
 {
@@ -18,6 +20,8 @@ public class Cluster
    private final List<Point3D> rawPointsLocal = new ArrayList<>();
    private final List<Point2D> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2D> nonNavigableExtrusionsInLocal = new ArrayList<>();
+
+   private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D();
 
    private boolean isHomeRegion = false;
 
@@ -37,6 +41,27 @@ public class Cluster
 
    public Cluster()
    {
+   }
+
+   public void updateBoundingBox()
+   {
+      nonNavigableExtrusionsInLocal.forEach(nonNavigableExtrusionsBoundingBox::updateToIncludePoint);
+   }
+
+   public boolean isInsideNonNavigableZone(Point2DReadOnly query)
+   {
+      if (extrusionSide == ExtrusionSide.INSIDE)
+      {
+         if (!nonNavigableExtrusionsBoundingBox.isInsideInclusive(query))
+            return true;
+         return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
+      }
+      else
+      {
+         if (!nonNavigableExtrusionsBoundingBox.isInsideInclusive(query))
+            return false;
+         return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
+      }
    }
 
    public void setHomeRegion(boolean isHomeRegion)
