@@ -103,11 +103,14 @@ public class ConnectionPoint3D implements Point3DReadOnly
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == null)
+         return false;
+
       try
       {
          return epsilonEquals((Tuple3DReadOnly) obj, PRECISION);
       }
-      catch (ClassCastException | NullPointerException e)
+      catch (ClassCastException e)
       {
          return false;
       }
