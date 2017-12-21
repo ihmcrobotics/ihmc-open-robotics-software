@@ -357,7 +357,7 @@ public class NavigableRegionsManager
       NavigableRegion navigableRegion = new NavigableRegion(region);
       processRegion(navigableRegion);
       navigableRegions.add(navigableRegion);
-      visMaps.add(navigableRegion.getVisibilityGraphInWorld());
+      visMaps.add(navigableRegion.getVisibilityMapInWorld());
    }
 
    private void processRegion(NavigableRegion navigableRegionLocalPlanner)
