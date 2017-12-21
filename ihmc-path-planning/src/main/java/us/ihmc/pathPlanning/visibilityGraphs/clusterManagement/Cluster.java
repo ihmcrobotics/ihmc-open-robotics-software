@@ -23,8 +23,6 @@ public class Cluster
 
    private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D();
 
-   private boolean isHomeRegion = false;
-
    public enum ExtrusionSide
    {
       INSIDE, OUTSIDE
@@ -62,16 +60,6 @@ public class Cluster
             return false;
          return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
       }
-   }
-
-   public void setHomeRegion(boolean isHomeRegion)
-   {
-      this.isHomeRegion = isHomeRegion;
-   }
-
-   public boolean isHomeRegion()
-   {
-      return isHomeRegion;
    }
 
    public void setExtrusionSide(ExtrusionSide extrusionSide)

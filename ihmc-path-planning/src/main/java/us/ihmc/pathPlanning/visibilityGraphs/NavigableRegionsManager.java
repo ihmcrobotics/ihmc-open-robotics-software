@@ -14,7 +14,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -165,7 +164,7 @@ public class NavigableRegionsManager
          }
 
          NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
-         List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getAllClusters(), start, goal);
+         List<Cluster> intersectingClusters = OcclussionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld3D(),
                                                                                     regionContainingPoint.getHomeRegion());
@@ -182,6 +181,7 @@ public class NavigableRegionsManager
    }
 
    private static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions)
+   
    {
       NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions);
       Point3D sourceInLocal = new Point3D(source);
@@ -321,7 +321,7 @@ public class NavigableRegionsManager
       return navigableRegion;
    }
 
-   private void processRegion(NavigableRegion navigableRegionLocalPlanner)
+   private void processRegion(NavigableRegion navigableRegion)
    {
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
@@ -332,8 +332,7 @@ public class NavigableRegionsManager
       List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
       List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
       List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
-      List<Cluster> clusters = new ArrayList<>();
-      PlanarRegion homeRegion = navigableRegionLocalPlanner.getHomeRegion();
+      PlanarRegion homeRegion = navigableRegion.getHomeRegion();
 
       regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, regions);
       double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
@@ -341,36 +340,33 @@ public class NavigableRegionsManager
                                                                                                      depthThresholdForConvexDecomposition, minTruncatedSize,
                                                                                                      minTruncatedArea);
 
-      RigidBodyTransform transformToWorldFrame = navigableRegionLocalPlanner.getTransformToWorld();
       ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
-      ClusterTools.createClustersFromRegions(homeRegion, regionsInsideHomeRegion, lineObstacleRegions, polygonObstacleRegions, clusters, transformToWorldFrame);
-      ClusterTools.createClusterForHomeRegion(clusters, transformToWorldFrame, homeRegion);
+      Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion);
+      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, lineObstacleRegions, polygonObstacleRegions);
+
+      navigableRegion.setHomeRegionCluster(homeRegionCluster);
+      navigableRegion.addObstacleClusters(obstacleClusters);
 
       if (debug)
       {
          System.out.println("Extruding obstacles...");
       }
 
-      ClusterTools.performExtrusions(extrusionDistanceCalculator, clusters);
+      ClusterTools.performExtrusions(extrusionDistanceCalculator, navigableRegion.getAllClusters());
 
-      for (Cluster cluster : clusters)
+      for (Cluster cluster : navigableRegion.getAllClusters())
       {
          PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal2D(), clusterResolution);
       }
 
-      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(clusters, navigableRegionLocalPlanner);
+      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(navigableRegion.getAllClusters(), navigableRegion);
 
       connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
-      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, clusters);
+      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, navigableRegion.getAllClusters());
 
       VisibilityMap visibilityMap = new VisibilityMap();
       visibilityMap.setConnections(connectionsForMap);
-
-      navigableRegionLocalPlanner.setClusters(clusters);
-      navigableRegionLocalPlanner.setRegionsInsideHomeRegion(regionsInsideHomeRegion);
-      navigableRegionLocalPlanner.setLineObstacleRegions(lineObstacleRegions);
-      navigableRegionLocalPlanner.setPolygonObstacleRegions(polygonObstacleRegions);
-      navigableRegionLocalPlanner.setVisibilityMapInLocal(visibilityMap);
+      navigableRegion.setVisibilityMapInLocal(visibilityMap);
    }
 
    public Point3D[][] getNavigableExtrusions()
