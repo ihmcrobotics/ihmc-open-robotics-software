@@ -375,7 +375,7 @@ public class NavigableRegionsManager
          PointCloudTools.doBrakeDownOn2DPoints(cluster.getNavigableExtrusionsInLocal2D(), parameters.getClusterResolution());
       }
 
-      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(null, null, clusters, navigableRegionLocalPlanner.getRegionId());
+      Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(clusters, navigableRegionLocalPlanner);
 
       connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
       connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, clusters);

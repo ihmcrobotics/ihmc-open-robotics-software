@@ -317,6 +317,8 @@ public class PlanarRegionTools
    {
       if (!planarRegion.getConvexHull().getBoundingBox().isInsideInclusive(pointInLocalToCheck))
          return false;
+      if (!planarRegion.getConvexHull().isPointInside(pointInLocalToCheck))
+         return false;
       return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
    }
 
