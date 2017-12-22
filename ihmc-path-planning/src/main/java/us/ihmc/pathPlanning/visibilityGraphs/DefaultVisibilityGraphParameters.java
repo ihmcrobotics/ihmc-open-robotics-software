@@ -5,12 +5,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParamete
 public class DefaultVisibilityGraphParameters implements VisibilityGraphsParameters
 {
    @Override
-   public int getNumberOfForcedConnections()
-   {
-      return 5;
-   }
-
-   @Override
    public double getMaxInterRegionConnectionLength()
    {
       return 0.55;

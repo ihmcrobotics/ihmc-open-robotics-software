@@ -8,7 +8,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class VisibilityGraphsParametersProperty extends ParametersProperty<SettableVisibilityGraphsParameters>
 {
-   private IntegerField numberOfForcedConnections = new IntegerField(SettableVisibilityGraphsParameters::getNumberOfForcedConnections, (p, v) -> p.setNumberOfForcedConnections(v));
    private DoubleField maxInterRegionConnectionLength = new DoubleField(SettableVisibilityGraphsParameters::getMaxInterRegionConnectionLength, (p, v) -> p.setMaxInterRegionConnectionLength(v));
    private DoubleField normalZThresholdForAccessibleRegions = new DoubleField(SettableVisibilityGraphsParameters::getNormalZThresholdForAccessibleRegions, (p, v) -> p.setNormalZThresholdForAccessibleRegions(v));
    private DoubleField regionOrthogonalAngle = new DoubleField(SettableVisibilityGraphsParameters::getRegionOrthogonalAngle, (p, v) -> p.setRegionOrthogonalAngle(v));
@@ -23,11 +22,6 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
    public VisibilityGraphsParametersProperty(Object bean, String name)
    {
       super(bean, name, new SettableVisibilityGraphsParameters());
-   }
-
-   public void binBidirectionalNumberOfForcedConnections(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, numberOfForcedConnections);
    }
 
    public void binBidirectionalMaxInterRegionConnectionLength(Property<? extends Number> property)
@@ -88,7 +82,6 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
 
    public static class SettableVisibilityGraphsParameters implements VisibilityGraphsParameters
    {
-      private int numberOfForcedConnections;
       private double maxInterRegionConnectionLength;
       private double normalZThresholdForAccessibleRegions;
       private double regionOrthogonalAngle;
@@ -107,7 +100,6 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
 
       public SettableVisibilityGraphsParameters(VisibilityGraphsParameters parameters)
       {
-         setNumberOfForcedConnections(parameters.getNumberOfForcedConnections());
          setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
          setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
          setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
@@ -118,12 +110,6 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
          setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
          setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());
          setPlanarRegionMinSize(parameters.getPlanarRegionMinSize());
-      }
-
-      @Override
-      public int getNumberOfForcedConnections()
-      {
-         return numberOfForcedConnections;
       }
 
       @Override
@@ -184,11 +170,6 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       public int getPlanarRegionMinSize()
       {
          return planarRegionMinSize;
-      }
-
-      public void setNumberOfForcedConnections(int numberOfForcedConnections)
-      {
-         this.numberOfForcedConnections = numberOfForcedConnections;
       }
 
       public void setMaxInterRegionConnectionLength(double maxInterRegionConnectionLength)
