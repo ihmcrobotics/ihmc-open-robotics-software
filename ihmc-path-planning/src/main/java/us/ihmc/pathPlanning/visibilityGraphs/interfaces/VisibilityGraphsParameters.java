@@ -4,7 +4,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -54,12 +53,27 @@ public interface VisibilityGraphsParameters
       return Math.toRadians(75.0);
    }
 
-   default ExtrusionDistanceCalculator getExtrusionDistanceCalculator()
+   /**
+    * The constant extrusion distance to use when extruding the hull of a navigable region.
+    * 
+    * @return
+    */
+   default double getNavigationBoundsExtrusion()
    {
-      return new ExtrusionDistanceCalculator()
+      return 0.05;
+   }
+
+   /**
+    * This calculator is used when extruding the projection of an obstacle onto a navigable region.
+    * 
+    * @return the calculator use for obstacle extrusion.
+    */
+   default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
+   {
+      return new ObstacleExtrusionDistanceCalculator()
       {
          @Override
-         public double computeExtrusionDistance(Cluster clusterInExtrusion, Point2DReadOnly pointToExtrude, double obstacleHeight)
+         public double computeExtrusionDistance(Point2DReadOnly pointToExtrude, double obstacleHeight)
          {
             if (obstacleHeight < 0.0)
                return 0.0;
