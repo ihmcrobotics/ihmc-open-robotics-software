@@ -3,13 +3,11 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("VisibilityGraphParameters");
 
-   private final YoInteger numberOfForcedConnections = new YoInteger("numberOfForcedConnections", registry);
    private final YoDouble maxInterRegionConnectionLength = new YoDouble("maxInterRegionConnectionLength", registry);
    private final YoDouble normalZThresholdForAccessibleRegions = new YoDouble("normalZThresholdForAccessibleRegions", registry);
    private final YoDouble maxAngleBeforeOrthogonal = new YoDouble("normalZThresholdForPolygonObstacles", registry);
@@ -21,7 +19,6 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
 
    public YoVisibilityGraphParameters(VisibilityGraphsParameters defaults, YoVariableRegistry parentRegistry)
    {
-      this.numberOfForcedConnections.set(defaults.getNumberOfForcedConnections());
       this.maxInterRegionConnectionLength.set(defaults.getMaxInterRegionConnectionLength());
       this.normalZThresholdForAccessibleRegions.set(defaults.getNormalZThresholdForAccessibleRegions());
       this.maxAngleBeforeOrthogonal.set(defaults.getRegionOrthogonalAngle());
@@ -32,12 +29,6 @@ public class YoVisibilityGraphParameters implements VisibilityGraphsParameters
       this.explorationDistance.set(defaults.getExplorationDistanceFromStartGoal());
 
       parentRegistry.addChild(registry);
-   }
-
-   @Override
-   public int getNumberOfForcedConnections()
-   {
-      return numberOfForcedConnections.getIntegerValue();
    }
 
    @Override

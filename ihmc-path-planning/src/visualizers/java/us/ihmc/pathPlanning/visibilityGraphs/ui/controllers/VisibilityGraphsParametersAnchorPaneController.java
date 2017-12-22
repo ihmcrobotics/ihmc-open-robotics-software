@@ -14,8 +14,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.MessageBidirectionalBindi
 public class VisibilityGraphsParametersAnchorPaneController
 {
    @FXML
-   private Slider numberOfForcedConnectionsSlider;
-   @FXML
    private Slider maxInterRegionConnectionLengthSlider;
    @FXML
    private Slider normalZThresholdForAccessibleRegionsSlider;
@@ -53,7 +51,6 @@ public class VisibilityGraphsParametersAnchorPaneController
       maxInterRegionConnectionLengthSlider.setLabelFormatter(StringConverterTools.metersToRoundedCentimeters());
       regionOrthogonalAngleSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
 
-      property.binBidirectionalNumberOfForcedConnections(numberOfForcedConnectionsSlider.valueProperty());
       property.binBidirectionalMaxInterRegionConnectionLength(maxInterRegionConnectionLengthSlider.valueProperty());
       property.binBidirectionalNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegionsSlider.valueProperty());
       property.binBidirectionalRegionOrthogonalAngle(regionOrthogonalAngleSlider.valueProperty());

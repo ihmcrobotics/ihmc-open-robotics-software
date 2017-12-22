@@ -10,8 +10,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface VisibilityGraphsParameters
 {
-   public int getNumberOfForcedConnections();
-
    public double getMaxInterRegionConnectionLength();
 
    public double getNormalZThresholdForAccessibleRegions();
