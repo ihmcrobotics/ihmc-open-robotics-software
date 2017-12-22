@@ -37,11 +37,6 @@ public interface VisibilityGraphsParameters
       return 0;
    }
 
-   default double getMaxDistanceToProjectStartGoalToClosestRegion()
-   {
-      return 0.15;
-   }
-
    /**
     * Defines the angle from which two regions are considered orthogonal.
     * <p>
