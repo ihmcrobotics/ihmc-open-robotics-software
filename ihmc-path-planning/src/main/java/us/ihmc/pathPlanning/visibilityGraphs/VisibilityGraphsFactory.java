@@ -27,7 +27,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class VisibilityGraphsFactory
 {
    private static final double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
-   private static final double HOST_REGION_EPSILON = 0.03;
 
    public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
    {
@@ -116,15 +115,17 @@ public class VisibilityGraphsFactory
     * @param source the single source used to build the visibility map.
     * @param navigableRegions the list of navigable regions among which the host is to be found. Not
     *           modified.
+    * @param searchHostEpsilon espilon used during the search. When positive, it is equivalent to
+    *           growing all the regions before testing if the {@code source} is inside.
     * @param potentialFallbackMap in case the source is located in a non accessible zone, the
     *           fallback map might be used to connect the source. Additional connections may be
     *           added to the map.
     * @return the new map or {@code null} if a host region could not be found.
     */
    public static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions,
-                                                                           VisibilityMap potentialFallbackMap)
+                                                                           double searchHostEpsilon, VisibilityMap potentialFallbackMap)
    {
-      NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions, HOST_REGION_EPSILON);
+      NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions, searchHostEpsilon);
 
       if (hostRegion == null)
          return null;
