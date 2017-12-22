@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -98,10 +99,8 @@ public class VisibilityTools
       return connections;
    }
 
-   public static Set<Connection> createStaticVisibilityMap(Point3DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId,
-                                                           boolean ensureConnection)
+   public static Set<Connection> createStaticVisibilityMap(Point3DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId)
    {
-      boolean isObserverInsideNonNavigableZone = false;
       Set<Connection> connections = new HashSet<>();
       List<Point2D> listOfTargetPoints = new ArrayList<>();
       Point2D observer2D = new Point2D(observer);
@@ -109,8 +108,8 @@ public class VisibilityTools
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
       {
-         if (!isObserverInsideNonNavigableZone)
-            isObserverInsideNonNavigableZone = cluster.isInsideNonNavigableZone(observer2D);
+         if (cluster.isInsideNonNavigableZone(observer2D))
+            return Collections.emptySet();
 
          for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
          {
@@ -118,39 +117,19 @@ public class VisibilityTools
          }
       }
 
-      if (!isObserverInsideNonNavigableZone)
+      for (int j = 0; j < listOfTargetPoints.size(); j++)
       {
-         for (int j = 0; j < listOfTargetPoints.size(); j++)
+         Point2D target = listOfTargetPoints.get(j);
+
+         if (observer.distanceXYSquared(target) > MAGIC_NUMBER)
          {
-            Point2D target = listOfTargetPoints.get(j);
-            
-            if (observer.distanceXYSquared(target) > MAGIC_NUMBER)
+            boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer2D, target);
+
+            if (targetIsVisible)
             {
-               boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer2D, target);
-               
-               if (targetIsVisible)
-               {
-                  connections.add(new Connection(observer, observerRegionId, new Point3D(target), clustersRegionId));
-               }
+               connections.add(new Connection(observer, observerRegionId, new Point3D(target), clustersRegionId));
             }
          }
-      }
-
-      if (ensureConnection && connections.isEmpty())
-      {
-         Point2D closestTarget = null;
-         double minDistance = Double.POSITIVE_INFINITY;
-
-         for (Point2D target : listOfTargetPoints)
-         {
-            double targetDistance = target.distanceXYSquared(observer);
-            if (targetDistance < minDistance)
-            {
-               closestTarget = target;
-               minDistance = targetDistance;
-            }
-         }
-         connections.add(new Connection(observer, observerRegionId, new Point3D(closestTarget), clustersRegionId));
       }
 
       return connections;
