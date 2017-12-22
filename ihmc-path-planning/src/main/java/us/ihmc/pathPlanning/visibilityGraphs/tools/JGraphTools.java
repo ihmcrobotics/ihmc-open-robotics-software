@@ -57,6 +57,22 @@ public class JGraphTools
          previousTarget = connection.getTargetPoint();
       }
 
+      // Filter out zigzags
+      for (int i = 0; i < connections.size() - 1; i++)
+      {
+         Connection curr = connections.get(i);
+         Connection next = connections.get(i + 1);
+
+         double distanceToNextSquared = next.distanceSquared(curr.getSourcePoint());
+
+         if (distanceToNextSquared < 1.0e-5)
+         {
+            ConnectionPoint3D newPoint = next.orthogonalProjection(curr.getSourcePoint(), curr.getSourcePoint().getRegionId());
+            connections.set(i, new Connection(curr.getSourcePoint(), newPoint));
+            connections.set(i + 1, new Connection(newPoint, next.getTargetPoint()));
+         }
+      }
+
       List<Point3DReadOnly> path = new ArrayList<>();
       path.add(start);
       connections.forEach(connection -> path.add(connection.getTargetPoint()));
