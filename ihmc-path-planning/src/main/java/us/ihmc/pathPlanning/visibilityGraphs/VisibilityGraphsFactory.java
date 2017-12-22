@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -100,14 +101,37 @@ public class VisibilityGraphsFactory
    }
 
    public static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions)
-
    {
       NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions);
       Point3D sourceInLocal = new Point3D(source);
       hostRegion.transformFromWorldToLocal(sourceInLocal);
       int mapId = hostRegion.getMapId();
 
-      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(sourceInLocal, mapId, hostRegion.getAllClusters(), mapId, true);
+      Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(sourceInLocal, mapId, hostRegion.getAllClusters(), mapId);
+
+      if (connections.isEmpty())
+      {
+         double minDistance = Double.POSITIVE_INFINITY;
+         ConnectionPoint3D closestConnectionPoint = null;
+         ConnectionPoint3D startConnectionPoint = new ConnectionPoint3D(sourceInLocal, mapId);
+
+         VisibilityMap hostMapInLocal = hostRegion.getVisibilityMapInLocal();
+         hostMapInLocal.computeVertices();
+
+         for (ConnectionPoint3D connectionPoint : hostMapInLocal.getVertices())
+         {
+            double distance = connectionPoint.distanceSquared(sourceInLocal);
+
+            if (distance < minDistance)
+            {
+               minDistance = distance;
+               closestConnectionPoint = connectionPoint;
+            }
+         }
+         connections = new HashSet<>();
+         connections.add(new Connection(startConnectionPoint, closestConnectionPoint));
+      }
+
       return new SingleSourceVisibilityMap(source, connections, hostRegion);
    }
 
