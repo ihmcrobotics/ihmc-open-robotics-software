@@ -1,6 +1,8 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,13 +28,31 @@ public class VisibilityGraphsFactory
 
    public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
    {
+      if (allRegions.isEmpty())
+         return null;
+
+      List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
+
       NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
 
-      return allRegions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable).map(region -> createNavigableRegion(region, allRegions, parameters))
-                       .collect(Collectors.toList());
+      for (int candidateIndex = 0; candidateIndex < allRegions.size(); candidateIndex++)
+      {
+         PlanarRegion candidate = allRegions.get(candidateIndex);
+
+         List<PlanarRegion> otherRegions = new ArrayList<>(allRegions);
+         Collections.swap(otherRegions, candidateIndex, otherRegions.size() - 1);
+         otherRegions.remove(otherRegions.size() - 1);
+
+         if (!navigableRegionFilter.isPlanarRegionNavigable(candidate, otherRegions))
+            continue;
+
+         navigableRegions.add(createNavigableRegion(candidate, otherRegions, parameters));
+      }
+
+      return navigableRegions;
    }
 
-   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, VisibilityGraphsParameters parameters)
    {
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
@@ -40,11 +60,11 @@ public class VisibilityGraphsFactory
       NavigableExtrusionDistanceCalculator navigableCalculator = parameters.getNavigableExtrusionDistanceCalculator();
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegion(region, allRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter, navigableCalculator,
+      return createNavigableRegion(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter, navigableCalculator,
                                    obstacleCalculator);
    }
 
-   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, double orthogonalAngle, double clusterResolution,
+   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
                                                        ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
                                                        NavigableExtrusionDistanceCalculator navigableCalculator,
                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator)
@@ -52,9 +72,8 @@ public class VisibilityGraphsFactory
       NavigableRegion navigableRegion = new NavigableRegion(region);
       PlanarRegion homeRegion = navigableRegion.getHomeRegion();
 
-      List<PlanarRegion> obstacleRegions = allRegions.stream().filter(candidate -> candidate != homeRegion)
-                                                     .filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
-                                                     .collect(Collectors.toList());
+      List<PlanarRegion> obstacleRegions = otherRegions.stream().filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
+                                                       .collect(Collectors.toList());
 
       double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
       obstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion, depthThresholdForConvexDecomposition,

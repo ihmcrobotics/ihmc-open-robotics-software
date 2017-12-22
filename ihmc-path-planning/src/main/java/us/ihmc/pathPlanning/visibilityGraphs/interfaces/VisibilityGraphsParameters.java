@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 
+import java.util.List;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -99,7 +101,7 @@ public interface VisibilityGraphsParameters
       return new NavigableRegionFilter()
       {
          @Override
-         public boolean isPlanarRegionNavigable(PlanarRegion query)
+         public boolean isPlanarRegionNavigable(PlanarRegion query, List<PlanarRegion> allOtherRegions)
          {
             return Math.abs(query.getNormal().getZ()) >= getNormalZThresholdForAccessibleRegions();
          }
