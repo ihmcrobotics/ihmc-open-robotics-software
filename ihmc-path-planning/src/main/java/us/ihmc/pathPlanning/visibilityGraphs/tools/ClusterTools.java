@@ -30,7 +30,7 @@ public class ClusterTools
 {
    private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.20);
-   private static final double NAV_TO_NON_NAV_DISTANCE = 0.01;
+   private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
 
    public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
    {
