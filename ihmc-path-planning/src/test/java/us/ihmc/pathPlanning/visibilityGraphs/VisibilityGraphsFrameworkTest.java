@@ -79,6 +79,18 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static final int rays = 5000;
    private static final double rayLengthSquared = MathTools.square(5.0);
 
+   private static VisibilityGraphsParameters createTestParameters()
+   {
+      return new DefaultVisibilityGraphParameters()
+      {
+         @Override
+         public double getTooHighToStepDistance()
+         {
+            return 0.6;
+         }
+      };
+   }
+
    @Before
    public void setup() throws InterruptedException, IOException
    {
@@ -748,17 +760,5 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static interface DatasetTestRunner
    {
       String testDataset(VisibilityGraphsUnitTestDataset dataset);
-   }
-
-   private static VisibilityGraphsParameters createTestParameters()
-   {
-      return new DefaultVisibilityGraphParameters()
-      {
-         @Override
-         public double getTooHighToStepDistance()
-         {
-            return 0.6;
-         }
-      };
    }
 }
