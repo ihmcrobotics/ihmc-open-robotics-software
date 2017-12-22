@@ -1,11 +1,13 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class Connection implements Transformable, EpsilonComparable<Connection>
@@ -57,6 +59,23 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
       return new Point2D(target);
    }
 
+   public double distanceSquared(Point3DReadOnly query)
+   {
+      return EuclidGeometryTools.distanceSquaredFromPoint3DToLineSegment3D(query, source, target);
+   }
+
+   public double percentageAlongConnection(Point3DReadOnly query)
+   {
+      return EuclidGeometryTools.percentageAlongLineSegment3D(query, source, target);
+   }
+
+   public ConnectionPoint3D getPointGivenPercentage(double percentage, int regionId)
+   {
+      Point3D result = new Point3D();
+      result.interpolate(source, target, percentage);
+      return new ConnectionPoint3D(result, regionId);
+   }
+
    public void flip()
    {
       ConnectionPoint3D temp = source;
@@ -68,7 +87,7 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
    {
       return source.distance(target);
    }
-   
+
    public double lengthSquared()
    {
       return source.distanceSquared(target);
