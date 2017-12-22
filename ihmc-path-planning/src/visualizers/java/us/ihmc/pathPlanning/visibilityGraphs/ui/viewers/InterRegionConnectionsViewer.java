@@ -15,7 +15,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.InterRegionVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
@@ -52,8 +52,8 @@ public class InterRegionConnectionsViewer extends AnimationTimer
       connectionsMeshView.setMaterial(new PhongMaterial(Color.CRIMSON));
 
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
-      show = messager.createInput(UIVisibilityGraphsTopics.ShowLocalGraphs, false);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.ShowInterConnections, this::handleShowThreadSafe);
+      show = messager.createInput(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, false);
+      messager.registerTopicListener(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, this::handleShowThreadSafe);
       messager.registerTopicListener(UIVisibilityGraphsTopics.InterRegionVisibilityMap, this::processInterConnectionsOnThread);
    }
 
@@ -73,12 +73,12 @@ public class InterRegionConnectionsViewer extends AnimationTimer
          connectionsMeshView.setMesh(connectionsMeshRendered);
    }
 
-   private void processInterConnectionsOnThread(InterRegionVisibilityMap interRegionVisibilityMap)
+   private void processInterConnectionsOnThread(VisibilityMapHolder interRegionVisibilityMap)
    {
       executorService.execute(() -> processInterConnections(interRegionVisibilityMap));
    }
 
-   private void processInterConnections(InterRegionVisibilityMap interRegionVisibilityMap)
+   private void processInterConnections(VisibilityMapHolder interRegionVisibilityMap)
    {
       if (VERBOSE)
          PrintTools.info(this, "Building mesh for inter-connections.");

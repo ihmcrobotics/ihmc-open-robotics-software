@@ -79,7 +79,11 @@ public class VisibilityMapHolderViewer extends AnimationTimer
       if (show.get())
       {
          if (rootChildren.isEmpty())
-            rootChildren.add(mapToRender.get());
+         {
+            MeshView newMeshView = mapToRender.get();
+            if (newMeshView != null)
+               rootChildren.add(newMeshView);
+         }
 
          VisibilityMapHolder newData = newDataReference.getAndSet(null);
          if (newData != null)

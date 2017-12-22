@@ -5,9 +5,9 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Category;
@@ -22,12 +22,11 @@ public class UIVisibilityGraphsTopics
    private static final APIFactory apiFactory = new APIFactory();
 
    private static final CategoryTheme VisibilityGraphs = apiFactory.createCategoryTheme("VisibilityGraphs");
-   private static final CategoryTheme LocalGraphs = apiFactory.createCategoryTheme("LocalGraphs");
-   private static final CategoryTheme Connections = apiFactory.createCategoryTheme("Connections");
+   private static final CategoryTheme Map = apiFactory.createCategoryTheme("Map");
    private static final CategoryTheme BodyPath = apiFactory.createCategoryTheme("BodyPath");
    private static final CategoryTheme Cluster = apiFactory.createCategoryTheme("Cluster");
    private static final CategoryTheme RawPoints = apiFactory.createCategoryTheme("RawPoints");
-   private static final CategoryTheme InterConnection = apiFactory.createCategoryTheme("InterConnection");
+   private static final CategoryTheme InterRegion = apiFactory.createCategoryTheme("InterRegion");
    private static final CategoryTheme NavigableRegion = apiFactory.createCategoryTheme("NavigableRegion");
    private static final CategoryTheme NavigableExtrusions = apiFactory.createCategoryTheme("NavigableExtrusions");
    private static final CategoryTheme NonNavigableExtrusions = apiFactory.createCategoryTheme("NonNavigableExtrusions");
@@ -52,7 +51,6 @@ public class UIVisibilityGraphsTopics
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
-   private static final TypedTopicTheme<Boolean> Close = apiFactory.createTypedTopicTheme("Close");
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
    private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
    private static final TypedTopicTheme<Boolean> Stop = apiFactory.createTypedTopicTheme("Stop");
@@ -78,20 +76,25 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Point3D> GoalPosition = Root.child(Goal).topic(Position);
 
    public static final Topic<List<Point3DReadOnly>> BodyPathData = Root.child(VisibilityGraphs).child(BodyPath).topic(Data);
+   
+   public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = Root.child(VisibilityGraphs).child(NavigableRegion).child(Map).topic(Show);
+   public static final Topic<Boolean> ShowInterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Show);
+   public static final Topic<Boolean> ShowStartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Show);
+   public static final Topic<Boolean> ShowGoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Show);
+
    public static final Topic<List<NavigableRegion>> NavigableRegionData = Root.child(VisibilityGraphs).child(NavigableRegion).topic(Data);
-   public static final Topic<InterRegionVisibilityMap> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(NavigableRegion).child(InterConnection).topic(Data);
+   public static final Topic<List<? extends VisibilityMapHolder>> NavigableRegionVisibilityMap = Root.child(VisibilityGraphs).child(NavigableRegion).child(Map).topic(Data);
+   public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Data);
+   public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
+   public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);
 
    public static final Topic<Boolean> VisibilityGraphsComputePath = Root.child(VisibilityGraphs).topic(ComputePath);
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParameters = Root.child(VisibilityGraphs).topic(Parameters);
    public static final Topic<Boolean> ShowBodyPath = Root.child(VisibilityGraphs).child(BodyPath).topic(Show);
-   public static final Topic<Boolean> ShowLocalGraphs = Root.child(VisibilityGraphs).child(LocalGraphs).topic(Show);
-   public static final Topic<Boolean> ShowInterConnections = Root.child(VisibilityGraphs).child(Connections).topic(Show);
    public static final Topic<Boolean> ShowPlanarRegions = Root.child(PlanarRegion).topic(Show);
    public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).child(RawPoints).topic(Show);
    public static final Topic<Boolean> ShowClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NavigableExtrusions).topic(Show);
-   public static final Topic<Boolean> CloseClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NavigableExtrusions).topic(Close);
    public static final Topic<Boolean> ShowClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigableExtrusions).topic(Show);
-   public static final Topic<Boolean> CloseClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigableExtrusions).topic(Close);
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
 
