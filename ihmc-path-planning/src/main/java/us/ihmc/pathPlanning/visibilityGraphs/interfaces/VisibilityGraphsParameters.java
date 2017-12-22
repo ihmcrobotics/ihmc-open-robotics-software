@@ -103,7 +103,7 @@ public interface VisibilityGraphsParameters
          @Override
          public boolean isPlanarRegionNavigable(PlanarRegion query, List<PlanarRegion> allOtherRegions)
          {
-            return Math.abs(query.getNormal().getZ()) >= getNormalZThresholdForAccessibleRegions();
+            return query.getNormal().getZ() >= getNormalZThresholdForAccessibleRegions();
          }
       };
    }
