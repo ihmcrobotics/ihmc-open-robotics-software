@@ -42,7 +42,7 @@ public class ClusterTools
       return extrudePolygon(extrudeToTheLeft, rawPoints, extrusionDistances);
    }
 
-   private static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2D> pointsToExtrude, double[] extrusionDistances)
+   static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2D> pointsToExtrude, double[] extrusionDistances)
    {
       if (pointsToExtrude.size() == 2)
       {

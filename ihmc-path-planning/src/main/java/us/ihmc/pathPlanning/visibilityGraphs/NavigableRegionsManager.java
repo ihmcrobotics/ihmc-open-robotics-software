@@ -90,14 +90,26 @@ public class NavigableRegionsManager
       startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, interRegionVisibilityMap.getVisibilityMapInLocal());
       goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, interRegionVisibilityMap.getVisibilityMapInLocal());
 
-      if (startMap.getHostRegion() == goalMap.getHostRegion())
+      if (goalMap == null)
+         return null;
+
+      if (startMap != null)
       {
-         if (isPointVisibleForStaticMaps(startMap.getHostRegion().getAllClusters(), startMap.getSourceInLocal2D(), goalMap.getSourceInLocal2D()))
+         if (startMap.getHostRegion() == goalMap.getHostRegion())
          {
-            startMap.addConnectionInWorld(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
+            if (isPointVisibleForStaticMaps(startMap.getHostRegion().getAllClusters(), startMap.getSourceInLocal2D(), goalMap.getSourceInLocal2D()))
+            {
+               startMap.addConnectionInWorld(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
+            }
          }
       }
+      else
+      {
+         startMap = VisibilityGraphsFactory.connectToFallbackMap(start, START_GOAL_ID, 1.0e-3, interRegionVisibilityMap.getVisibilityMapInLocal());
+      }
 
+      if (startMap == null)
+         return null;
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
       visibilityMapHolders.addAll(navigableRegions);
