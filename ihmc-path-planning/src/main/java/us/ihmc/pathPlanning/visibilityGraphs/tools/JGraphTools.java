@@ -20,8 +20,16 @@ public class JGraphTools
                                                                       Collection<VisibilityMapHolder> allVisibilityMapHolders)
    {
       SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graph = createGlobalVisibilityGraph(allVisibilityMapHolders);
-      List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(graph, start, goal);
-      return convertVisibilityGraphSolutionToPath(solution, start, graph);
+      try
+      {
+         List<DefaultWeightedEdge> solution = DijkstraShortestPath.findPathBetween(graph, start, goal);
+         return convertVisibilityGraphSolutionToPath(solution, start, graph);
+      }
+      catch (IllegalArgumentException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
    }
 
    public static List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, ConnectionPoint3D start,
