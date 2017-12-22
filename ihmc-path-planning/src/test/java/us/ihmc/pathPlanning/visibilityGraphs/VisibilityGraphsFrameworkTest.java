@@ -494,6 +494,9 @@ public class VisibilityGraphsFrameworkTest extends Application
             messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
          }
          messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, manager.getNavigableRegions());
+         messager.submitMessage(UIVisibilityGraphsTopics.StartVisibilityMap, manager.getStartMap());
+         messager.submitMessage(UIVisibilityGraphsTopics.GoalVisibilityMap, manager.getGoalMap());
+         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionVisibilityMap, manager.getNavigableRegions());
          messager.submitMessage(UIVisibilityGraphsTopics.InterRegionVisibilityMap, manager.getInterRegionConnections());
       }
 
