@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ExtrusionDistanceCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
@@ -37,7 +37,7 @@ public class VisibilityGraphsFactory
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       double clusterResolution = parameters.getClusterResolution();
-      ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
       return createNavigableRegion(region, allRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
                                    extrusionDistanceCalculator);
@@ -45,7 +45,7 @@ public class VisibilityGraphsFactory
 
    public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, double orthogonalAngle, double clusterResolution,
                                                        ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
-                                                       ExtrusionDistanceCalculator extrusionDistanceCalculator)
+                                                       ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
       List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
