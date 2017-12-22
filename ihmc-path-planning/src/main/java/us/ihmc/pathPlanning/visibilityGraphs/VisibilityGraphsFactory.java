@@ -27,6 +27,11 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class VisibilityGraphsFactory
 {
    private static final double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
+   /**
+    * I believe these filters are now not useful anymore, but I haven't had the time to make sure
+    * they're obsolete. When disabled, everything still looks good.
+    */
+   private static final boolean ENABLE_GREEDY_FILTERS = true;
 
    public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
    {
@@ -90,8 +95,11 @@ public class VisibilityGraphsFactory
 
       Collection<Connection> connectionsForMap = VisibilityTools.createStaticVisibilityMap(navigableRegion.getAllClusters(), navigableRegion);
 
-      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
-      connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, navigableRegion.getAllClusters());
+      if (ENABLE_GREEDY_FILTERS)
+      {
+         connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsOutsideRegions(connectionsForMap, homeRegion);
+         connectionsForMap = VisibilityTools.removeConnectionsFromExtrusionsInsideNoGoZones(connectionsForMap, navigableRegion.getAllClusters());
+      }
 
       VisibilityMap visibilityMap = new VisibilityMap();
       visibilityMap.setConnections(connectionsForMap);
