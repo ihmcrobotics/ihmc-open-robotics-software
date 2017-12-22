@@ -19,7 +19,7 @@ import javafx.util.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -45,11 +45,10 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class VisibilityGraphsFrameworkTest extends Application
 {
    // Set that to MAX_VALUE when visualizing. Before pushing, it has to be reset to a reasonable value.
-   private static final long TIMEOUT = Long.MAX_VALUE; // 30000; // 
+   private static final long TIMEOUT = 100000; // Long.MAX_VALUE; // 
    // Threshold used to assert that the body path starts and ends where we asked it to.
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
@@ -144,6 +143,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
+   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = {IntegrationCategory.FAST})
    public void testDatasetsWithoutOcclusion() throws Exception
    {
       if (VISUALIZE)
@@ -156,23 +156,25 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsNoOcclusionSimulateDynamicReplanning() throws Exception
    {
       if (VISUALIZE)
       {
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsNoOcclusionSimulateDynamicReplanning(dataset, 0.20, 1000));
+      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, false));
    }
 
    @Test(timeout = TIMEOUT)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsSimulateOcclusionAndDynamicReplanning() throws Exception
    {
       if (VISUALIZE)
       {
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateOcclusionAndDynamicReplanning(dataset, 0.20, 1000));
+      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, true));
    }
 
    private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner) throws Exception
@@ -317,8 +319,8 @@ public class VisibilityGraphsFrameworkTest extends Application
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private String runAssertionsNoOcclusionSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed,
-                                                                    long maxSolveTimeInMilliseconds)
+   private String runAssertionsSimulateDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed, long maxSolveTimeInMilliseconds,
+                                                         boolean simulateOcclusions)
    {
       String datasetName = dataset.getDatasetName();
 
@@ -331,60 +333,10 @@ public class VisibilityGraphsFrameworkTest extends Application
       if (VISUALIZE)
       {
          stopWalkerRequest = messager.createInput(UIVisibilityGraphsTopics.StopWalker, false);
-         messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
-         messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, start);
-         messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);
-      }
-
-      String errorMessages = "";
-
-      List<Point3DReadOnly> latestBodyPath = new ArrayList<>();
-
-      Point3D walkerPosition = new Point3D(start);
-
-      while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
-      {
-         long startTime = System.currentTimeMillis();
-         errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, planarRegionsList, latestBodyPath);
-         long endTime = System.currentTimeMillis();
-         if (endTime - startTime > maxSolveTimeInMilliseconds)
-            errorMessages += fail(datasetName, "Took too long to compute a new body path.");
-
-         if (!errorMessages.isEmpty())
-            return addPrefixToErrorMessages(datasetName, errorMessages);
-
-         if (VISUALIZE)
-         {
-            messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, new Point3D(walkerPosition));
-         }
-
-         if (stopWalkerRequest != null && stopWalkerRequest.get())
-         {
-            messager.submitMessage(UIVisibilityGraphsTopics.StopWalker, false);
-            break;
-         }
-
-         walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath));
-      }
-
-      return addPrefixToErrorMessages(datasetName, errorMessages);
-   }
-
-   private String runAssertionsSimulateOcclusionAndDynamicReplanning(VisibilityGraphsUnitTestDataset dataset, double walkerSpeed,
-                                                                     long maxSolveTimeInMilliseconds)
-   {
-      String datasetName = dataset.getDatasetName();
-
-      PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
-
-      Point3D start = dataset.getStart();
-      Point3D goal = dataset.getGoal();
-      AtomicReference<Boolean> stopWalkerRequest = null;
-
-      if (VISUALIZE)
-      {
-         stopWalkerRequest = messager.createInput(UIVisibilityGraphsTopics.StopWalker, false);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShadowPlanarRegionData, planarRegionsList);
+         if (simulateOcclusions)
+            messager.submitMessage(UIVisibilityGraphsTopics.ShadowPlanarRegionData, planarRegionsList);
+         else
+            messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, planarRegionsList);
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, start);
          messager.submitMessage(UIVisibilityGraphsTopics.GoalPosition, goal);
       }
@@ -397,17 +349,25 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       PlanarRegionsList knownRegions = new PlanarRegionsList();
 
-      while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
+      while (!walkerPosition.geometricallyEquals(goal, 1.0e-3))
       {
-         Point3D observer = new Point3D();
-         observer.set(walkerPosition);
-         observer.addZ(0.8);
-         Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, observer, knownRegions);
-         knownRegions = result.getKey(); // For next iteration
-         PlanarRegionsList visibleRegions = result.getKey();
+         PlanarRegionsList visibleRegions = planarRegionsList;
+
+         if (simulateOcclusions)
+         {
+            Point3D observer = new Point3D();
+            observer.set(walkerPosition);
+            observer.addZ(0.8);
+            Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, observer, knownRegions);
+            knownRegions = result.getKey(); // For next iteration
+            visibleRegions = result.getKey();
+         }
 
          if (VISUALIZE)
-            messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, knownRegions);
+         {
+            if (simulateOcclusions)
+               messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, knownRegions);
+         }
 
          long startTime = System.currentTimeMillis();
          errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, visibleRegions, latestBodyPath);
@@ -430,6 +390,12 @@ public class VisibilityGraphsFrameworkTest extends Application
          }
 
          walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath));
+
+         if (VISUALIZE)
+         {
+            if (!messager.isMessagerOpen())
+               return addPrefixToErrorMessages(datasetName, errorMessages); // The ui has been closed
+         }
       }
 
       return addPrefixToErrorMessages(datasetName, errorMessages);
