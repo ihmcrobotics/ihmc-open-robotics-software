@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
@@ -87,6 +88,19 @@ public class VisibilityGraphsFrameworkTest extends Application
          public double getTooHighToStepDistance()
          {
             return 0.6;
+         }
+
+         @Override
+         public NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
+         {
+            return new NavigableExtrusionDistanceCalculator()
+            {
+               @Override
+               public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+               {
+                  return 0.01;
+               }
+            };
          }
       };
    }
