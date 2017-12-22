@@ -117,6 +117,7 @@ public class VisibilityTools
    public static Set<Connection> createStaticVisibilityMap(Point3DReadOnly observer, int observerRegionId, List<Cluster> clusters, int clustersRegionId,
                                                            boolean ensureConnection)
    {
+      boolean isObserverInsideNonNavigableZone = false;
       Set<Connection> connections = new HashSet<>();
       List<Point2D> listOfTargetPoints = new ArrayList<>();
       Point2D observer2D = new Point2D(observer);
@@ -124,23 +125,29 @@ public class VisibilityTools
       // Add all navigable points (including dynamic objects) to a list
       for (Cluster cluster : clusters)
       {
+         if (!isObserverInsideNonNavigableZone)
+            isObserverInsideNonNavigableZone = cluster.isInsideNonNavigableZone(observer2D);
+
          for (Point2D point : cluster.getNavigableExtrusionsInLocal2D())
          {
             listOfTargetPoints.add(point);
          }
       }
 
-      for (int j = 0; j < listOfTargetPoints.size(); j++)
+      if (!isObserverInsideNonNavigableZone)
       {
-         Point2D target = listOfTargetPoints.get(j);
-
-         if (observer.distanceXYSquared(target) > MAGIC_NUMBER)
+         for (int j = 0; j < listOfTargetPoints.size(); j++)
          {
-            boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer2D, target);
-
-            if (targetIsVisible)
+            Point2D target = listOfTargetPoints.get(j);
+            
+            if (observer.distanceXYSquared(target) > MAGIC_NUMBER)
             {
-               connections.add(new Connection(observer, observerRegionId, new Point3D(target), clustersRegionId));
+               boolean targetIsVisible = isPointVisibleForStaticMaps(clusters, observer2D, target);
+               
+               if (targetIsVisible)
+               {
+                  connections.add(new Connection(observer, observerRegionId, new Point3D(target), clustersRegionId));
+               }
             }
          }
       }
