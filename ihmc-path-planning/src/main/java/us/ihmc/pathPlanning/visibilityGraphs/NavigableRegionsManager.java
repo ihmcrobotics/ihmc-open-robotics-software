@@ -86,8 +86,9 @@ public class NavigableRegionsManager
       long startBodyPathComputation = System.currentTimeMillis();
 
       navigableRegions = VisibilityGraphsFactory.createNavigableRegions(regions, parameters);
-      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions);
-      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions);
+      interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
+      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, interRegionVisibilityMap.getVisibilityMapInLocal());
+      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, interRegionVisibilityMap.getVisibilityMapInLocal());
 
       if (startMap.getHostRegion() == goalMap.getHostRegion())
       {
@@ -97,7 +98,6 @@ public class NavigableRegionsManager
          }
       }
 
-      interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
 
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
       visibilityMapHolders.addAll(navigableRegions);
