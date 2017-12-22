@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public class ConnectionPoint3D implements Point3DReadOnly
 {
-   public static final double PRECISION = 0.001;
-   public static final double INV_PRECISION = 1.0 / PRECISION;
+   public static final double PRECISION     = 1.0e-4;
+   public static final double INV_PRECISION = 1.0e+4;
 
    private final int regionId;
    private final double x, y, z;
@@ -124,6 +124,12 @@ public class ConnectionPoint3D implements Point3DReadOnly
       {
          return false;
       }
+   }
+
+   @Override
+   public boolean equals(Tuple3DReadOnly other)
+   {
+      return epsilonEquals(other, PRECISION);
    }
 
    @Override

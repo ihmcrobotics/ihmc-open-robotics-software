@@ -9,7 +9,6 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.ConnectionPoint3D;
@@ -25,31 +24,34 @@ public class JGraphTools
       return convertVisibilityGraphSolutionToPath(solution, start, graph);
    }
 
-   public static List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, Point3DReadOnly start,
+   public static List<Point3DReadOnly> convertVisibilityGraphSolutionToPath(List<DefaultWeightedEdge> solution, ConnectionPoint3D start,
                                                                             Graph<ConnectionPoint3D, DefaultWeightedEdge> graph)
    {
       if (solution == null)
          return null;
 
-      List<Point3DReadOnly> path = new ArrayList<>();
+      List<Connection> connections = new ArrayList<>();
+
       for (DefaultWeightedEdge edge : solution)
       {
-         Point3DReadOnly from = graph.getEdgeSource(edge);
-         Point3DReadOnly to = graph.getEdgeTarget(edge);
-
-         if (!path.contains(new Point3D(from)))
-            path.add(new Point3D(from));
-         if (!path.contains(new Point3D(to)))
-            path.add(new Point3D(to));
+         ConnectionPoint3D source = graph.getEdgeSource(edge);
+         ConnectionPoint3D target = graph.getEdgeTarget(edge);
+         connections.add(new Connection(source, target));
       }
 
-      // FIXME Sylvain: it looks like this is to cover a bug.
-      if (!path.get(0).epsilonEquals(start, 1e-5))
+
+      ConnectionPoint3D previousTarget = start;
+
+      for (Connection connection : connections)
       {
-         Point3DReadOnly pointOut = path.get(1);
-         path.remove(1);
-         path.add(0, pointOut);
+         if (!connection.getSourcePoint().equals(previousTarget))
+            connection.flip();
+         previousTarget = connection.getTargetPoint();
       }
+
+      List<Point3DReadOnly> path = new ArrayList<>();
+      path.add(start);
+      connections.forEach(connection -> path.add(connection.getTargetPoint()));
 
       return path;
    }
@@ -81,5 +83,12 @@ public class JGraphTools
       allVisibilityMapHolders.stream().map(VisibilityMapHolder::getVisibilityMapInWorld).forEach(map -> addConnectionsToGraph(map, globalVisMap));
 
       return globalVisMap;
+   }
+
+   public static SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> createGraphFromConnections(Iterable<Connection> connections)
+   {
+      SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+      addConnectionsToGraph(connections, graph);
+      return graph;
    }
 }

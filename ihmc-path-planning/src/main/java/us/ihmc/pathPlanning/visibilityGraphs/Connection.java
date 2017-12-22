@@ -57,6 +57,24 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
       return new Point2D(target);
    }
 
+   public void flip()
+   {
+      ConnectionPoint3D temp = source;
+      source = target;
+      target = temp;
+   }
+
+   public double length()
+   {
+      return source.distance(target);
+   }
+   
+   public double lengthSquared()
+   {
+      return source.distanceSquared(target);
+   }
+
+   @Override
    public void applyTransform(Transform transform)
    {
       source = source.applyTransform(transform);
