@@ -100,7 +100,28 @@ public class VisibilityGraphsFactory
       return navigableRegion;
    }
 
-   public static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions)
+   /**
+    * Creates a visibility map using the given {@code source} and connect it to all the visibility
+    * connection points of the host region's map.
+    * <p>
+    * The host region is defined as the region that contains the given {@code source}.
+    * </p>
+    * <p>
+    * When the source is located inside non accessible zone on the host region, it then either
+    * connected to the closest connection point of the host region's map or the closest connection
+    * from the given {@code potentialFallbackMap}, whichever is the closest.
+    * </p>
+    * 
+    * @param source the single source used to build the visibility map.
+    * @param navigableRegions the list of navigable regions among which the host is to be found. Not
+    *           modified.
+    * @param potentialFallbackMap in case the source is located in a non accessible zone, the
+    *           fallback map might be used to connect the source. Additional connections may be
+    *           added to the map.
+    * @return
+    */
+   public static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions,
+                                                                           VisibilityMap potentialFallbackMap)
    {
       NavigableRegion hostRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(source, navigableRegions);
       Point3D sourceInLocal = new Point3D(source);
@@ -109,30 +130,73 @@ public class VisibilityGraphsFactory
 
       Set<Connection> connections = VisibilityTools.createStaticVisibilityMap(sourceInLocal, mapId, hostRegion.getAllClusters(), mapId);
 
-      if (connections.isEmpty())
+      if (!connections.isEmpty())
+         return new SingleSourceVisibilityMap(source, connections, hostRegion);
+
+      connections = new HashSet<>();
+
+      double minDistance = Double.POSITIVE_INFINITY;
+      ConnectionPoint3D closestHostPoint = null;
+
+      VisibilityMap hostMapInLocal = hostRegion.getVisibilityMapInLocal();
+      hostMapInLocal.computeVertices();
+
+      for (ConnectionPoint3D connectionPoint : hostMapInLocal.getVertices())
       {
-         double minDistance = Double.POSITIVE_INFINITY;
-         ConnectionPoint3D closestConnectionPoint = null;
-         ConnectionPoint3D startConnectionPoint = new ConnectionPoint3D(sourceInLocal, mapId);
+         double distance = connectionPoint.distanceSquared(sourceInLocal);
 
-         VisibilityMap hostMapInLocal = hostRegion.getVisibilityMapInLocal();
-         hostMapInLocal.computeVertices();
-
-         for (ConnectionPoint3D connectionPoint : hostMapInLocal.getVertices())
+         if (distance < minDistance)
          {
-            double distance = connectionPoint.distanceSquared(sourceInLocal);
-
-            if (distance < minDistance)
-            {
-               minDistance = distance;
-               closestConnectionPoint = connectionPoint;
-            }
+            minDistance = distance;
+            closestHostPoint = connectionPoint;
          }
-         connections = new HashSet<>();
-         connections.add(new Connection(startConnectionPoint, closestConnectionPoint));
       }
 
-      return new SingleSourceVisibilityMap(source, connections, hostRegion);
+      Connection closestFallbackConnection = null;
+
+      for (Connection connection : potentialFallbackMap)
+      {
+         double distance = connection.distanceSquared(source);
+
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+            closestFallbackConnection = connection;
+            closestHostPoint = null;
+         }
+      }
+
+      if (closestHostPoint != null)
+      { // Make the connection to the host
+         ConnectionPoint3D sourceConnectionPoint = new ConnectionPoint3D(sourceInLocal, mapId);
+         connections.add(new Connection(sourceConnectionPoint, closestHostPoint));
+         return new SingleSourceVisibilityMap(source, connections, hostRegion);
+      }
+      else
+      { // Make the connection to the fallback map
+         ConnectionPoint3D sourceConnectionPoint = new ConnectionPoint3D(source, mapId);
+         double percentage = closestFallbackConnection.percentageAlongConnection(source);
+         double epsilon = 1.0e-3;
+         if (percentage <= epsilon)
+         {
+            connections.add(new Connection(sourceConnectionPoint, closestFallbackConnection.getSourcePoint()));
+         }
+         else if (percentage >= 1.0 - epsilon)
+         {
+            connections.add(new Connection(sourceConnectionPoint, closestFallbackConnection.getTargetPoint()));
+         }
+         else
+         { // Let's create an connection point on the connection.
+            ConnectionPoint3D newConnectionPoint = closestFallbackConnection.getPointGivenPercentage(percentage, mapId);
+
+            potentialFallbackMap.addConnection(new Connection(closestFallbackConnection.getSourcePoint(), newConnectionPoint));
+            potentialFallbackMap.addConnection(new Connection(newConnectionPoint, closestFallbackConnection.getTargetPoint()));
+
+            connections.add(new Connection(sourceConnectionPoint, newConnectionPoint));
+         }
+
+         return new SingleSourceVisibilityMap(source, mapId, connections);
+      }
    }
 
    public static InterRegionVisibilityMap createInterRegionVisibilityMap(List<NavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
