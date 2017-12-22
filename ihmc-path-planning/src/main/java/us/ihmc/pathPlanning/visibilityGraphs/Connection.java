@@ -69,6 +69,12 @@ public class Connection implements Transformable, EpsilonComparable<Connection>
       return EuclidGeometryTools.percentageAlongLineSegment3D(query, source, target);
    }
 
+   public ConnectionPoint3D orthogonalProjection(Point3DReadOnly pointToProject, int regionId)
+   {
+      Point3D projection = EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(pointToProject, source, target);
+      return new ConnectionPoint3D(projection, regionId);
+   }
+
    public ConnectionPoint3D getPointGivenPercentage(double percentage, int regionId)
    {
       Point3D result = new Point3D();
