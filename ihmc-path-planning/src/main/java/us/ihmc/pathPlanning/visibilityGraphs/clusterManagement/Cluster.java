@@ -269,6 +269,11 @@ public class Cluster
       return navigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
+   public BoundingBox2D getNonNavigableExtrusionsBoundingBox()
+   {
+      return nonNavigableExtrusionsBoundingBox;
+   }
+
    public int getNumberOfNonNavigableExtrusions()
    {
       return nonNavigableExtrusionsInLocal.size();
