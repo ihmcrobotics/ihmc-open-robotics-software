@@ -12,6 +12,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
@@ -37,24 +38,29 @@ public class VisibilityGraphsFactory
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       double clusterResolution = parameters.getClusterResolution();
       ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
-      return createNavigableRegion(region, allRegions, orthogonalAngle, clusterResolution, planarRegionFilter, extrusionDistanceCalculator);
+      ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
+      return createNavigableRegion(region, allRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
+                                   extrusionDistanceCalculator);
    }
 
    public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, double orthogonalAngle, double clusterResolution,
-                                                       PlanarRegionFilter filter, ExtrusionDistanceCalculator extrusionDistanceCalculator)
+                                                       ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
+                                                       ExtrusionDistanceCalculator extrusionDistanceCalculator)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
       List<PlanarRegion> lineObstacleRegions = new ArrayList<>();
       List<PlanarRegion> polygonObstacleRegions = new ArrayList<>();
-      List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
       PlanarRegion homeRegion = navigableRegion.getHomeRegion();
 
-      regionsInsideHomeRegion = PlanarRegionTools.determineWhichRegionsAreInside(homeRegion, allRegions);
-      double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
-      regionsInsideHomeRegion = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(regionsInsideHomeRegion, homeRegion,
-                                                                                                     depthThresholdForConvexDecomposition, filter);
+      List<PlanarRegion> obstacleRegions = allRegions.stream().filter(candidate -> candidate != homeRegion)
+                                                     .filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
+                                                     .collect(Collectors.toList());
 
-      ClusterTools.classifyExtrusions(regionsInsideHomeRegion, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
+      double depthThresholdForConvexDecomposition = 0.05; // TODO Extract me!
+      obstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion, depthThresholdForConvexDecomposition,
+                                                                                             filter);
+
+      ClusterTools.classifyExtrusions(obstacleRegions, homeRegion, lineObstacleRegions, polygonObstacleRegions, orthogonalAngle);
       Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion);
       List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, lineObstacleRegions, polygonObstacleRegions);
 

@@ -11,7 +11,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -406,103 +405,69 @@ public class PlanarRegionTools
       return startIsInside && goalIsInside;
    }
 
-   public static boolean isPartOfTheRegionInside(PlanarRegion regionToCheck, PlanarRegion containingRegion)
+   /**
+    * Check if the projection of at least one vertex of {@code regionA} is inside {@code regionB}.
+    * <p>
+    * The sign of {@code epsilon} is equivalent to performing the test against {@code regionB}
+    * shrunk by {@code Math.abs(epsilon)} if {@code epsilon < 0.0}, or against the {@code regionB}
+    * enlarged by {@code epsilon} if {@code epsilon > 0.0}.
+    * </p>
+    * 
+    * @param regionA the query. Not modified.
+    * @param regionB the reference. Not modified.
+    * @param epsilon the tolerance to use during the test.
+    * @return {@code true} if region A is at least partially above or below region B, {@code false}
+    *         otherwise.
+    */
+   public static boolean isRegionAOverlapingWithRegionB(PlanarRegion regionA, PlanarRegion regionB, double epsilon)
    {
-      ArrayList<Point3D> pointsToCalculateCentroid = new ArrayList<>();
-      Point2D[] homePointsArr = new Point2D[containingRegion.getConvexHull().getNumberOfVertices()];
-      for (int i = 0; i < containingRegion.getConvexHull().getNumberOfVertices(); i++)
+      RigidBodyTransform transformFromBToWorld = new RigidBodyTransform();
+      regionB.getTransformToWorld(transformFromBToWorld);
+      RigidBodyTransform transformFromAToB = new RigidBodyTransform();
+      regionA.getTransformToWorld(transformFromAToB);
+      transformFromAToB.preMultiplyInvertOther(transformFromBToWorld);
+
+      ConvexPolygon2D convexHullB = regionB.getConvexHull();
+
+      for (int i = 0; i < regionA.getConvexHull().getNumberOfVertices(); i++)
       {
-         Point2D point2D = (Point2D) containingRegion.getConvexHull().getVertex(i);
-         Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-         FramePoint3D fpt = new FramePoint3D();
-         fpt.set(point3D);
-         RigidBodyTransform transToWorld = new RigidBodyTransform();
-         containingRegion.getTransformToWorld(transToWorld);
-         fpt.applyTransform(transToWorld);
-         Point3D transformedPt = fpt.getPoint();
-
-         homePointsArr[i] = new Point2D(transformedPt.getX(), transformedPt.getY());
-         pointsToCalculateCentroid.add(new Point3D(transformedPt.getX(), transformedPt.getY(), transformedPt.getZ()));
-      }
-
-      ConvexPolygon2D homeConvexPol = new ConvexPolygon2D(homePointsArr);
-      homeConvexPol.update();
-
-      Vector3D normal = containingRegion.getNormal();
-
-      for (int i = 0; i < regionToCheck.getConvexHull().getNumberOfVertices(); i++)
-      {
-         Point2D point2D = (Point2D) regionToCheck.getConvexHull().getVertex(i);
-         Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-         FramePoint3D fpt = new FramePoint3D();
-         fpt.set(point3D);
-         RigidBodyTransform transToWorld = new RigidBodyTransform();
-         regionToCheck.getTransformToWorld(transToWorld);
-         fpt.applyTransform(transToWorld);
-
-         Point3D pointToProject = fpt.getPoint();
-         Point3D projectedPointFromOtherRegion = new Point3D();
-
-         EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, point3D, normal, projectedPointFromOtherRegion);
-
-         if (homeConvexPol.isPointInside(new Point2D(projectedPointFromOtherRegion)))
-         {
+         Point3D vertexA3D = new Point3D(regionA.getConvexHull().getVertex(i));
+         transformFromAToB.transform(vertexA3D);
+         Point2D vertexA2D = new Point2D(vertexA3D);
+         if (convexHullB.getBoundingBox().isInsideEpsilon(vertexA2D, epsilon) && convexHullB.isPointInside(vertexA2D, epsilon))
             return true;
-         }
       }
 
       return false;
    }
 
-   public static List<PlanarRegion> determineWhichRegionsAreInside(PlanarRegion containingRegion, List<PlanarRegion> otherRegionsEx)
+   /**
+    * From the local coordinates of the {@code regionB}, this method computes and return the minimum
+    * z-coordinate among the vertices of {@code regionA}'s concave hull.
+    * 
+    * @param regionA the query. Not modified.
+    * @param regionB the reference. Not modified.
+    * @return the height of the lowest vertex of {@code regionA} above {@code regionB}. The returned
+    *         value is negative if the lowest vertex is below {@code regionB}.
+    */
+   public static double computeMinHeightOfRegionAAboveRegionB(PlanarRegion regionA, PlanarRegion regionB)
    {
-      List<PlanarRegion> regionsInsideHomeRegion = new ArrayList<>();
+      RigidBodyTransform transformFromBToWorld = new RigidBodyTransform();
+      regionB.getTransformToWorld(transformFromBToWorld);
+      RigidBodyTransform transformFromAToB = new RigidBodyTransform();
+      regionA.getTransformToWorld(transformFromAToB);
+      transformFromAToB.preMultiplyInvertOther(transformFromBToWorld);
 
-      for (PlanarRegion otherRegion : otherRegionsEx)
+      double minZ = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < regionA.getConvexHull().getNumberOfVertices(); i++)
       {
-         if (containingRegion == otherRegion)
-            continue;
-
-         if (PlanarRegionTools.isPartOfTheRegionInside(otherRegion, containingRegion))
-         {
-            regionsInsideHomeRegion.add(otherRegion);
-         }
+         Point3D vertexA3D = new Point3D(regionA.getConcaveHull()[i]);
+         transformFromAToB.transform(vertexA3D);
+         minZ = Math.min(minZ, vertexA3D.getZ());
       }
 
-      return regionsInsideHomeRegion;
-   }
-
-   public static boolean areAllPointsBelowTheRegion(PlanarRegion regionToCheck, PlanarRegion homeRegion)
-   {
-      for (int i = 0; i < homeRegion.getConcaveHull().length; i++)
-      {
-         Point2D point2D = (Point2D) homeRegion.getConcaveHull()[i];
-         Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-         FramePoint3D homeRegionPoint = new FramePoint3D();
-         homeRegionPoint.set(point3D);
-         RigidBodyTransform transToWorld = new RigidBodyTransform();
-         homeRegion.getTransformToWorld(transToWorld);
-         homeRegionPoint.applyTransform(transToWorld);
-
-         for (int j = 0; j < regionToCheck.getConcaveHull().length; j++)
-         {
-            Point2D point2D1 = (Point2D) regionToCheck.getConcaveHull()[j];
-            Point3D point3D1 = new Point3D(point2D1.getX(), point2D1.getY(), 0);
-            FramePoint3D otherRegionPoint = new FramePoint3D();
-            otherRegionPoint.set(point3D1);
-            RigidBodyTransform transToWorld1 = new RigidBodyTransform();
-            regionToCheck.getTransformToWorld(transToWorld1);
-            otherRegionPoint.applyTransform(transToWorld1);
-
-            System.out.println(homeRegionPoint.getZ() + "   " + homeRegionPoint.getZ());
-            if (homeRegionPoint.getZ() + 0.1 < otherRegionPoint.getZ())
-            {
-               return false;
-            }
-         }
-      }
-
-      return true;
+      return minZ;
    }
 
    public static List<PlanarRegion> ensureClockwiseOrder(List<PlanarRegion> planarRegions)
