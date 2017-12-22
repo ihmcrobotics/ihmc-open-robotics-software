@@ -43,7 +43,7 @@ public class VisibilityTools
       for (Connection connection : connections)
       {
 
-         if (PlanarRegionTools.areBothPointsInsidePolygon(connection.getSourcePoint2D(), connection.getTargetPoint2D(), region))
+         if (PlanarRegionTools.areBothPointsInsidePlanarRegion(connection.getSourcePoint2D(), connection.getTargetPoint2D(), region))
          {
             filteredConnections.add(connection);
          }

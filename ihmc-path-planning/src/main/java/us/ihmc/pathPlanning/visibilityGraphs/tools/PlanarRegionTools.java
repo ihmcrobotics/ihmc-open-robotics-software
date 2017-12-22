@@ -232,19 +232,6 @@ public class PlanarRegionTools
       return closestPoint.epsilonEquals(point, epsilon);
    }
 
-   public static boolean isPointInsideAnyRegion(List<PlanarRegion> regions, Point3DReadOnly pointToCheck)
-   {
-      for (PlanarRegion region : regions)
-      {
-         if (isPointInWorldInsidePlanarRegion(region, pointToCheck))
-         {
-            return true;
-         }
-      }
-
-      return false;
-   }
-
    public static PlanarRegion getRegionContainingThisPoint(Point3D point, List<PlanarRegion> regions)
    {
       for (PlanarRegion region : regions)
@@ -388,7 +375,7 @@ public class PlanarRegionTools
       return numberOfIntersections % 2 != 0;
    }
 
-   public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, PlanarRegion homeRegion)
+   public static boolean areBothPointsInsidePlanarRegion(Point2DReadOnly point1, Point2DReadOnly point2, PlanarRegion homeRegion)
    {
       if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point1))
          return false;
