@@ -68,12 +68,14 @@ public class NavigableRegionsManager
    {
       if (start == null)
       {
-         throw new RuntimeException("Start is null!.");
+         PrintTools.error("Start is null!");
+         return null;
       }
 
       if (goal == null)
       {
-         throw new RuntimeException("Goal is null!.");
+         PrintTools.error("Goal is null!");
+         return null;
       }
 
       if (debug)
