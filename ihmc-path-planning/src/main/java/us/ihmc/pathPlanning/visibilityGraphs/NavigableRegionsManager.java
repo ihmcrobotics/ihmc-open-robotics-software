@@ -87,8 +87,11 @@ public class NavigableRegionsManager
 
       navigableRegions = VisibilityGraphsFactory.createNavigableRegions(regions, parameters);
       interRegionVisibilityMap = VisibilityGraphsFactory.createInterRegionVisibilityMap(navigableRegions, parameters.getInterRegionConnectionFilter());
-      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, interRegionVisibilityMap.getVisibilityMapInLocal());
-      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, interRegionVisibilityMap.getVisibilityMapInLocal());
+      double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
+      startMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(start, navigableRegions, searchHostEpsilon,
+                                                                         interRegionVisibilityMap.getVisibilityMapInLocal());
+      goalMap = VisibilityGraphsFactory.createSingleSourceVisibilityMap(goal, navigableRegions, searchHostEpsilon,
+                                                                        interRegionVisibilityMap.getVisibilityMapInLocal());
 
       if (goalMap == null)
          return null;

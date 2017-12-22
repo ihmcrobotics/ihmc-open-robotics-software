@@ -56,6 +56,20 @@ public interface VisibilityGraphsParameters
    }
 
    /**
+    * This epsilon is is used when searching to which region the start/goal belongs to.
+    * <p>
+    * A positive value corresponds to growing all the regions before testing if the start/goal is
+    * inside.
+    * </p>
+    * 
+    * @return the value of the epsilon to use.
+    */
+   default double getSearchHostRegionEpsilon()
+   {
+      return 0.03;
+   }
+
+   /**
     * The constant extrusion distance to use when extruding the hull of a navigable region.
     * 
     * @return
