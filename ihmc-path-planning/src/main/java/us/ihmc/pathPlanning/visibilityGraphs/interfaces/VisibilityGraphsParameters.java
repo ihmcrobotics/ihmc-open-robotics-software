@@ -58,9 +58,16 @@ public interface VisibilityGraphsParameters
     * 
     * @return
     */
-   default double getNavigationBoundsExtrusion()
+   default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
    {
-      return 0.05;
+      return new NavigableExtrusionDistanceCalculator()
+      {
+         @Override
+         public double computeExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+         {
+            return getExtrusionDistanceIfNotTooHighToStep();
+         }
+      };
    }
 
    /**
