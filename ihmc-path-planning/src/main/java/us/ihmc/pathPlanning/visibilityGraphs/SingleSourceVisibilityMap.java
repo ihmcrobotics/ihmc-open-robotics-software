@@ -33,6 +33,19 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
       visibilityMapInWorld.computeVertices();
    }
 
+   public SingleSourceVisibilityMap(Point3DReadOnly source, int mapId, Set<Connection> connections)
+   {
+      sourceInLocal = new Point3D(source);
+      sourceInWorld = sourceInLocal;
+      this.mapId = mapId;
+
+      visibilityMapInLocal = new VisibilityMap(connections);
+      visibilityMapInWorld = visibilityMapInLocal;
+
+      hostRegion = null;
+      transformToWorld = new RigidBodyTransform();
+   }
+
    public void addConnectionInWorld(Connection connectionInWorld)
    {
       visibilityMapInWorld.addConnection(connectionInWorld);
