@@ -125,4 +125,22 @@ public interface VisibilityGraphsParameters
          }
       };
    }
+
+   default ObstacleRegionFilter getObstacleRegionFilter()
+   {
+      return new ObstacleRegionFilter()
+      {
+         @Override
+         public boolean isRegionValidObstacle(PlanarRegion query, PlanarRegion navigableRegion)
+         {
+            if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(query, navigableRegion, 0.1))
+               return false;
+
+            if (PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(query, navigableRegion) > 3.0)
+               return false;
+
+            return true;
+         }
+      };
+   }
 }
