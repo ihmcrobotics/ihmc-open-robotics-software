@@ -23,6 +23,23 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class VisibilityGraphsFactory
 {
 
+   public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   {
+      NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
+
+      return allRegions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable).map(region -> createNavigableRegion(region, allRegions, parameters))
+                       .collect(Collectors.toList());
+   }
+
+   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   {
+      PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
+      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
+      double clusterResolution = parameters.getClusterResolution();
+      ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
+      return createNavigableRegion(region, allRegions, orthogonalAngle, clusterResolution, planarRegionFilter, extrusionDistanceCalculator);
+   }
+
    public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, double orthogonalAngle, double clusterResolution,
                                                        PlanarRegionFilter filter, ExtrusionDistanceCalculator extrusionDistanceCalculator)
    {
@@ -61,23 +78,6 @@ public class VisibilityGraphsFactory
       navigableRegion.setVisibilityMapInLocal(visibilityMap);
 
       return navigableRegion;
-   }
-
-   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
-   {
-      PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
-      double orthogonalAngle = parameters.getRegionOrthogonalAngle();
-      double clusterResolution = parameters.getClusterResolution();
-      ExtrusionDistanceCalculator extrusionDistanceCalculator = parameters.getExtrusionDistanceCalculator();
-      return createNavigableRegion(region, allRegions, orthogonalAngle, clusterResolution, planarRegionFilter, extrusionDistanceCalculator);
-   }
-
-   public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
-   {
-      NavigableRegionFilter navigableRegionFilter = parameters.getNavigableRegionFilter();
-
-      return allRegions.stream().filter(navigableRegionFilter::isPlanarRegionNavigable).map(region -> createNavigableRegion(region, allRegions, parameters))
-                       .collect(Collectors.toList());
    }
 
    public static SingleSourceVisibilityMap createSingleSourceVisibilityMap(Point3DReadOnly source, List<NavigableRegion> navigableRegions)
