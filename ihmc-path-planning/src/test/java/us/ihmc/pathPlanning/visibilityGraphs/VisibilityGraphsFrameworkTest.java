@@ -87,7 +87,13 @@ public class VisibilityGraphsFrameworkTest extends Application
          @Override
          public double getTooHighToStepDistance()
          {
-            return 0.6;
+            return 0.4;
+         }
+
+         @Override
+         public double getExtrusionDistance()
+         {
+            return 0.4;
          }
 
          @Override
