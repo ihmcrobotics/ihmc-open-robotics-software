@@ -390,19 +390,12 @@ public class PlanarRegionTools
 
    public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, PlanarRegion homeRegion)
    {
-      boolean startIsInside = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point1);
-      boolean goalIsInside = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point2);
+      if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point1))
+         return false;
+      if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point2))
+         return false;
 
-      return startIsInside && goalIsInside;
-   }
-
-   public static boolean areBothPointsInsidePolygon(Point2DReadOnly point1, Point2DReadOnly point2, List<? extends Point2DReadOnly> pointsInPolygon)
-   {
-      Point2D[] pointsArr = pointsInPolygon.toArray(new Point2D[pointsInPolygon.size()]);
-      boolean startIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point1);
-      boolean goalIsInside = PlanarRegionTools.isPointInsidePolygon(pointsArr, point2);
-
-      return startIsInside && goalIsInside;
+      return true;
    }
 
    /**
@@ -539,43 +532,6 @@ public class PlanarRegionTools
       Point3D point3D = new Point3D(point2D);
       transform.transform(point3D);
       return point3D;
-   }
-
-   public static List<PlanarRegion> keepOnlyRegionsThatAreEntirelyAboveHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion)
-   {
-      List<PlanarRegion> filteredList = new ArrayList<>();
-      for (PlanarRegion region : regionsToCheck)
-      {
-         if (isRegionAboveHomeRegion(region, homeRegion))
-         {
-            filteredList.add(region);
-         }
-      }
-
-      return filteredList;
-   }
-
-   public static boolean isRegionAboveHomeRegion(PlanarRegion regionToCheck, PlanarRegion homeRegion)
-   {
-      RigidBodyTransform transformFromHomeToWorld = new RigidBodyTransform();
-      homeRegion.getTransformToWorld(transformFromHomeToWorld);
-
-      for (int i = 0; i < homeRegion.getConcaveHull().length; i++)
-      {
-         RigidBodyTransform transformFromOtherToHome = new RigidBodyTransform();
-         regionToCheck.getTransformToWorld(transformFromOtherToHome);
-         transformFromOtherToHome.preMultiplyInvertOther(transformFromHomeToWorld);
-
-         for (int j = 0; j < regionToCheck.getConcaveHull().length; j++)
-         {
-            Point3D otherRegionPoint = new Point3D(regionToCheck.getConcaveHull()[j]);
-            otherRegionPoint.applyTransform(transformFromOtherToHome);
-
-            if (otherRegionPoint.getZ() < 0.0)
-               return false;
-         }
-      }
-      return true;
    }
 
    public static List<PlanarRegion> filterRegionsByTruncatingVerticesBeneathHomeRegion(List<PlanarRegion> regionsToCheck, PlanarRegion homeRegion,

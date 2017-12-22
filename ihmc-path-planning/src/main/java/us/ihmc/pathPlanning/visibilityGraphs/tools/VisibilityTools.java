@@ -52,22 +52,6 @@ public class VisibilityTools
       return filteredConnections;
    }
 
-   public static List<Connection> getConnectionsThatAreInsideRegion(Collection<Connection> connections, List<? extends Point2DReadOnly> polygon)
-   {
-      List<Connection> filteredConnections = new ArrayList<>();
-
-      for (Connection connection : connections)
-      {
-
-         if (PlanarRegionTools.areBothPointsInsidePolygon(connection.getSourcePoint2D(), connection.getTargetPoint2D(), polygon))
-         {
-            filteredConnections.add(connection);
-         }
-      }
-
-      return filteredConnections;
-   }
-
    public static Set<Connection> createStaticVisibilityMap(List<Cluster> clusters, NavigableRegion navigableRegion)
    {
       int regionId = navigableRegion.getMapId();
