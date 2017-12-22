@@ -4,6 +4,7 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalEditModeEnabled;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalPosition;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.InterRegionVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NextDatasetRequest;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PlanarRegionData;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PreviousDatasetRequest;
@@ -51,7 +52,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopic
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.InterRegionConnectionsViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
@@ -69,7 +69,7 @@ public class VisibilityGraphsTestVisualizer
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
    private final NavigableRegionViewer navigableRegionMeshViewer;
-   private final InterRegionConnectionsViewer interRegionConnectionsViewer;
+   private final VisibilityMapHolderViewer interRegionConnectionsViewer;
    private final VisibilityMapHolderViewer startMapViewer;
    private final VisibilityMapHolderViewer goalMapViewer;
    private final WalkerCollisionsViewer walkerCollisionsViewer;
@@ -118,8 +118,11 @@ public class VisibilityGraphsTestVisualizer
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
       navigableRegionMeshViewer = new NavigableRegionViewer(messager, executorService);
-      interRegionConnectionsViewer = new InterRegionConnectionsViewer(messager, executorService);
       walkerCollisionsViewer = new WalkerCollisionsViewer(messager);
+
+      interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
+      interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);
+      interRegionConnectionsViewer.setTopics(ShowInterRegionVisibilityMap, InterRegionVisibilityMap);
 
       startMapViewer = new VisibilityMapHolderViewer(messager);
       startMapViewer.setCustomColor(Color.YELLOW);
