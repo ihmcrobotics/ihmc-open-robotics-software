@@ -1,5 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
+
 import java.io.File;
 
 import com.sun.javafx.scene.control.skin.LabeledText;
@@ -80,6 +82,12 @@ public class DatasetNavigationAccordionController
 
       customDataFolder = result;
       load();
+   }
+
+   @FXML
+   private void requestRandomizeRegionIDs()
+   {
+      messager.submitMessage(RandomizePlanarRegionIDRequest, true);
    }
 
    @FXML

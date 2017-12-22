@@ -46,6 +46,7 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme Collision = apiFactory.createCategoryTheme("Collision");
    private static final CategoryTheme Animation = apiFactory.createCategoryTheme("Animation");
    private static final CategoryTheme Shadow = apiFactory.createCategoryTheme("Shadow");
+   private static final CategoryTheme RandomizeID = apiFactory.createCategoryTheme("RandomizeID");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -67,6 +68,7 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> GlobalReset = Root.topic(Reset);
 
    public static final Topic<PlanarRegionsList> PlanarRegionData = Root.child(PlanarRegion).topic(Data);
+   public static final Topic<Boolean> RandomizePlanarRegionIDRequest = Root.child(PlanarRegion).child(RandomizeID).topic(Request);
 
    public static final Topic<Boolean> StartEditModeEnabled = Root.child(Start).child(EditMode).topic(Enable);
    public static final Topic<Boolean> GoalEditModeEnabled = Root.child(Goal).child(EditMode).topic(Enable);
