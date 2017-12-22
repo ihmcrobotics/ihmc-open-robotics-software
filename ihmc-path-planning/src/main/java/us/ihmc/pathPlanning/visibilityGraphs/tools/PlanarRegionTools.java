@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -230,26 +232,18 @@ public class PlanarRegionTools
       return closestPoint.epsilonEquals(point, epsilon);
    }
 
-   public static PlanarRegion getRegionContainingThisPoint(Point3D point, List<PlanarRegion> regions)
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions)
    {
-      for (PlanarRegion region : regions)
-      {
-         if (isPointInWorldInsidePlanarRegion(region, point))
-         {
-            return region;
-         }
-      }
-
-      return null;
+      return getNavigableRegionContainingThisPoint(point, navigableRegions, 0.0);
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions)
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, List<NavigableRegion> navigableRegions, double epsilon)
    {
       List<NavigableRegion> containers = new ArrayList<>();
 
       for (NavigableRegion navigableRegion : navigableRegions)
       {
-         if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomeRegion(), point))
+         if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomeRegion(), point, epsilon))
          {
             containers.add(navigableRegion);
          }
@@ -284,27 +278,55 @@ public class PlanarRegionTools
       return closestContainer;
    }
 
-   public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion region, Point3DReadOnly pointInWorldToCheck)
+   public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(transformToWorld);
-      Point3D pointInLocalToCheck = new Point3D();
-      transformToWorld.inverseTransform(pointInWorldToCheck, pointInLocalToCheck);
-      return isPointInLocalInsidePlanarRegion(region, pointInLocalToCheck);
+      return isPointInLocalInsidePlanarRegion(planarRegion, pointInWorldToCheck, 0.0);
    }
 
-   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion region, Point3DReadOnly pointInLocalToCheck)
+   public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
-      return isPointInLocalInsidePlanarRegion(region, new Point2D(pointInLocalToCheck));
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+      Point3D pointInLocalToCheck = new Point3D();
+      transformToWorld.inverseTransform(pointInWorldToCheck, pointInLocalToCheck);
+      return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, epsilon);
+   }
+
+   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInLocalToCheck)
+   {
+      return isPointInLocalInsidePlanarRegion(planarRegion, new Point2D(pointInLocalToCheck));
+   }
+
+   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInLocalToCheck, double epsilon)
+   {
+      return isPointInLocalInsidePlanarRegion(planarRegion, new Point2D(pointInLocalToCheck), epsilon);
    }
 
    public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point2DReadOnly pointInLocalToCheck)
    {
-      if (!planarRegion.getConvexHull().getBoundingBox().isInsideInclusive(pointInLocalToCheck))
+      return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, 0.0);
+   }
+
+   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point2DReadOnly pointInLocalToCheck, double epsilon)
+   {
+      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
+      BoundingBox2D boundingBox = convexHull.getBoundingBox();
+
+      if (!boundingBox.isInsideEpsilon(pointInLocalToCheck, epsilon))
          return false;
-      if (!planarRegion.getConvexHull().isPointInside(pointInLocalToCheck))
+      if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
          return false;
-      return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
+      if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
+      {
+         return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
+      }
+      else
+      {
+         double[] epsilons = new double[planarRegion.getConcaveHullSize()];
+         Arrays.fill(epsilons, epsilon);
+         List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
+         return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
+      }
    }
 
    public static boolean isPointInsidePolygon(Point2DReadOnly[] polygon, Point2DReadOnly pointToCheck)
