@@ -6,6 +6,7 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionData;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartVisibilityMap;
 
@@ -48,7 +49,7 @@ public class VisibilityGraphsRenderer
    private final VisibilityMapHolderViewer startMapViewer;
    private final VisibilityMapHolderViewer goalMapViewer;
    private final NavigableRegionViewer navigableRegionViewer;
-   private final InterRegionConnectionsViewer interRegionConnectionsViewer;
+   private final VisibilityMapHolderViewer interRegionConnectionsViewer;
 
    private final REAMessager messager;
 
@@ -71,7 +72,9 @@ public class VisibilityGraphsRenderer
       goalMapViewer.setCustomColor(Color.CORNFLOWERBLUE);
       goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      interRegionConnectionsViewer = new InterRegionConnectionsViewer(messager, executorService);
+      interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
+      interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);
+      interRegionConnectionsViewer.setTopics(ShowInterRegionVisibilityMap, InterRegionVisibilityMap);
 
       root.getChildren().addAll(bodyPathMeshViewer.getRoot(), clusterMeshViewer.getRoot(), startMapViewer.getRoot(), goalMapViewer.getRoot(),
                                 navigableRegionViewer.getRoot(), interRegionConnectionsViewer.getRoot());
