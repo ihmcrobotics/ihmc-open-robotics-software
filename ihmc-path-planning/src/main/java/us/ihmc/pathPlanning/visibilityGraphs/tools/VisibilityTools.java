@@ -94,8 +94,23 @@ public class VisibilityTools
       return connections;
    }
 
-   public static boolean[] addClusterSelfVisibility(Cluster clusterToBuildMapOf, PlanarRegion homeRegion, List<Cluster> allClusters, int mapId,
-                                                    Set<Connection> connectionsToPack)
+   /**
+    * Finds all the possible and valid connections using only the vertices from a single cluster,
+    * i.e. {@code clusterToBuildMapOf} while considering all the clusters, including
+    * {@code clusterToBuildMapOf}, for the visibility check when creating connections.
+    * 
+    * @param clusterToBuildMapOf the only cluster used to create new connection using its navigable
+    *           extrusions. Not modified.
+    * @param homeRegion the region to which the clusters belong to. Not modified.
+    * @param allClusters list containing all the clusters to consider for the visibility check
+    *           including {@code clusterToBuildMapOf}. Not modified.
+    * @param mapId the ID used to create the connections.
+    * @param connectionsToPack the collection in which the connections are stored. Modified.
+    * @return an array of booleans informing on whether each individual navigable extrusion of
+    *         {@code clusterToBuildMapOf} is actually navigable or not.
+    */
+   private static boolean[] addClusterSelfVisibility(Cluster clusterToBuildMapOf, PlanarRegion homeRegion, List<Cluster> allClusters, int mapId,
+                                                     Collection<Connection> connectionsToPack)
    {
       List<Point2D> navigableExtrusions = clusterToBuildMapOf.getNavigableExtrusionsInLocal2D();
 
@@ -170,8 +185,29 @@ public class VisibilityTools
       return areActuallyNavigable;
    }
 
+   /**
+    * Finds all the possible and valid connections going from the navigable extrusions of
+    * {@code sourceCluster} to the ones of {@code targetCluster} while considering all the clusters,
+    * including {@code sourceCluster} and {@code targetCluster} when performing the visibility check
+    * when creating connections.
+    * 
+    * @param sourceCluster the cluster which the navigable extrusions are used as source points for
+    *           the connections. Not modified.
+    * @param sourceNavigability the array containing the information of whether or not each
+    *           individual navigable extrusion of {@code sourceCluster} is actually navigable. Not
+    *           modified.
+    * @param targetCluster the cluster which the navigable extrusions are used as target points for
+    *           the connections. Not modified.
+    * @param targetNavigability the array containing the information of whether or not each
+    *           individual navigable extrusion of {@code targetCluster} is actually navigable. Not
+    *           modified.
+    * @param allClusters list containing all the clusters to consider for the visibility check
+    *           including {@code sourceCluster} and {@code targetCluster}. Not modified.
+    * @param mapId the ID used to create the connections.
+    * @param connectionsToPack the collection in which the connections are stored. Modified.
+    */
    private static void addCrossClusterVisibility(Cluster sourceCluster, boolean[] sourceNavigability, Cluster targetCluster, boolean[] targetNavigability,
-                                                 List<Cluster> allClusters, int mapId, Set<Connection> connectionsToPack)
+                                                 List<Cluster> allClusters, int mapId, Collection<Connection> connectionsToPack)
    {
       Vector2D directionToCheck = new Vector2D();
       Vector2D nextEdge = new Vector2D();
@@ -194,10 +230,11 @@ public class VisibilityTools
 
             Point2D target = targets.get(targetIndex);
 
-            directionToCheck.sub(target, source);
-
             if (ENABLE_EXPERIMENTAL_QUICK_CHECK)
             {
+
+               directionToCheck.sub(target, source);
+
                { // Perform quick check on source
                   prevEdge.sub(source, ListWrappingIndexTools.getPrevious(sourceIndex, sources));
                   nextEdge.sub(ListWrappingIndexTools.getNext(sourceIndex, sources), source);
