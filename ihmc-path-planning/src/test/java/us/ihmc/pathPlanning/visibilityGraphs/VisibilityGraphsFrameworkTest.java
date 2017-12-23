@@ -58,7 +58,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    private static boolean DEBUG = true;
 
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
-   private static final SimpleUIMessager messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
+   private static SimpleUIMessager messager = null;
    // Because JavaFX will create a fresh new instance of VisibilityGraphsFrameworkTest, the ui has to be static so there is only one instance and we can refer to it in the test part.
    private static VisibilityGraphsTestVisualizer ui;
 
@@ -118,6 +118,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
       if (VISUALIZE)
       {
+         messager = new SimpleUIMessager(UIVisibilityGraphsTopics.API);
          messager.startMessager();
 
          // Did not find a better solution for starting JavaFX and still be able to move on.
@@ -139,7 +140,11 @@ public class VisibilityGraphsFrameworkTest extends Application
    public void tearDown() throws Exception
    {
       if (VISUALIZE)
+      {
          stop();
+         ui = null;
+         messager = null;
+      }
    }
 
    @Test(timeout = TIMEOUT)
