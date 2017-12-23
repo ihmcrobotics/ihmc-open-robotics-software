@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs;
+package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 

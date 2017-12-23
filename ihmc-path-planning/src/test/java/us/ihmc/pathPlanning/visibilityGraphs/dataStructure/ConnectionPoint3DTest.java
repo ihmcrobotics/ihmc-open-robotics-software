@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs;
+package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,6 +8,7 @@ import org.apache.commons.math3.util.Precision;
 import org.junit.Test;
 
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 
 public class ConnectionPoint3DTest
 {

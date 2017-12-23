@@ -14,8 +14,8 @@ import org.junit.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 
 public class JGraphToolsTest
 {
