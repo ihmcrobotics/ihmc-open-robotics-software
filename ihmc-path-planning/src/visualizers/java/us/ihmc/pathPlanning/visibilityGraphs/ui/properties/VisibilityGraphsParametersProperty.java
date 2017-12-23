@@ -8,10 +8,9 @@ import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class VisibilityGraphsParametersProperty extends ParametersProperty<SettableVisibilityGraphsParameters>
 {
-   private IntegerField numberOfForcedConnections = new IntegerField(SettableVisibilityGraphsParameters::getNumberOfForcedConnections, (p, v) -> p.setNumberOfForcedConnections(v));
-   private DoubleField minimumConnectionDistanceForRegions = new DoubleField(SettableVisibilityGraphsParameters::getMinimumConnectionDistanceForRegions, (p, v) -> p.setMinimumConnectionDistanceForRegions(v));
+   private DoubleField maxInterRegionConnectionLength = new DoubleField(SettableVisibilityGraphsParameters::getMaxInterRegionConnectionLength, (p, v) -> p.setMaxInterRegionConnectionLength(v));
    private DoubleField normalZThresholdForAccessibleRegions = new DoubleField(SettableVisibilityGraphsParameters::getNormalZThresholdForAccessibleRegions, (p, v) -> p.setNormalZThresholdForAccessibleRegions(v));
-   private DoubleField normalZThresholdForPolygonObstacles = new DoubleField(SettableVisibilityGraphsParameters::getNormalZThresholdForPolygonObstacles, (p, v) -> p.setNormalZThresholdForPolygonObstacles(v));
+   private DoubleField regionOrthogonalAngle = new DoubleField(SettableVisibilityGraphsParameters::getRegionOrthogonalAngle, (p, v) -> p.setRegionOrthogonalAngle(v));
    private DoubleField extrusionDistance = new DoubleField(SettableVisibilityGraphsParameters::getExtrusionDistance, (p, v) -> p.setExtrusionDistance(v));
    private DoubleField extrusionDistanceIfNotTooHighToStep = new DoubleField(SettableVisibilityGraphsParameters::getExtrusionDistanceIfNotTooHighToStep, (p, v) -> p.setExtrusionDistanceIfNotTooHighToStep(v));
    private DoubleField tooHighToStepDistance = new DoubleField(SettableVisibilityGraphsParameters::getTooHighToStepDistance, (p, v) -> p.setTooHighToStepDistance(v));
@@ -25,14 +24,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       super(bean, name, new SettableVisibilityGraphsParameters());
    }
 
-   public void binBidirectionalNumberOfForcedConnections(Property<? extends Number> property)
+   public void binBidirectionalMaxInterRegionConnectionLength(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, numberOfForcedConnections);
-   }
-
-   public void binBidirectionalMinimumConnectionDistanceForRegions(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, minimumConnectionDistanceForRegions);
+      bindFieldBidirectionalToNumberProperty(property, maxInterRegionConnectionLength);
    }
 
    public void binBidirectionalNormalZThresholdForAccessibleRegions(Property<? extends Number> property)
@@ -40,9 +34,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       bindFieldBidirectionalToNumberProperty(property, normalZThresholdForAccessibleRegions);
    }
 
-   public void binBidirectionalNormalZThresholdForPolygonObstacles(Property<? extends Number> property)
+   public void binBidirectionalRegionOrthogonalAngle(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, normalZThresholdForPolygonObstacles);
+      bindFieldBidirectionalToNumberProperty(property, regionOrthogonalAngle);
    }
 
    public void binBidirectionalExtrusionDistance(Property<? extends Number> property)
@@ -88,10 +82,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
 
    public static class SettableVisibilityGraphsParameters implements VisibilityGraphsParameters
    {
-      private int numberOfForcedConnections;
-      private double minimumConnectionDistanceForRegions;
+      private double maxInterRegionConnectionLength;
       private double normalZThresholdForAccessibleRegions;
-      private double normalZThresholdForPolygonObstacles;
+      private double regionOrthogonalAngle;
       private double extrusionDistance;
       private double extrusionDistanceIfNotTooHighToStep;
       private double tooHighToStepDistance;
@@ -107,10 +100,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
 
       public SettableVisibilityGraphsParameters(VisibilityGraphsParameters parameters)
       {
-         setNumberOfForcedConnections(parameters.getNumberOfForcedConnections());
-         setMinimumConnectionDistanceForRegions(parameters.getMinimumConnectionDistanceForRegions());
+         setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
          setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
-         setNormalZThresholdForPolygonObstacles(parameters.getNormalZThresholdForPolygonObstacles());
+         setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
          setExtrusionDistance(parameters.getExtrusionDistance());
          setExtrusionDistanceIfNotTooHighToStep(parameters.getExtrusionDistanceIfNotTooHighToStep());
          setTooHighToStepDistance(parameters.getTooHighToStepDistance());
@@ -121,15 +113,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       }
 
       @Override
-      public int getNumberOfForcedConnections()
+      public double getMaxInterRegionConnectionLength()
       {
-         return numberOfForcedConnections;
-      }
-
-      @Override
-      public double getMinimumConnectionDistanceForRegions()
-      {
-         return minimumConnectionDistanceForRegions;
+         return maxInterRegionConnectionLength;
       }
 
       @Override
@@ -139,9 +125,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
       }
 
       @Override
-      public double getNormalZThresholdForPolygonObstacles()
+      public double getRegionOrthogonalAngle()
       {
-         return normalZThresholdForPolygonObstacles;
+         return regionOrthogonalAngle;
       }
 
       @Override
@@ -186,14 +172,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
          return planarRegionMinSize;
       }
 
-      public void setNumberOfForcedConnections(int numberOfForcedConnections)
+      public void setMaxInterRegionConnectionLength(double maxInterRegionConnectionLength)
       {
-         this.numberOfForcedConnections = numberOfForcedConnections;
-      }
-
-      public void setMinimumConnectionDistanceForRegions(double minimumConnectionDistanceForRegions)
-      {
-         this.minimumConnectionDistanceForRegions = minimumConnectionDistanceForRegions;
+         this.maxInterRegionConnectionLength = maxInterRegionConnectionLength;
       }
 
       public void setNormalZThresholdForAccessibleRegions(double normalZThresholdForAccessibleRegions)
@@ -201,9 +182,9 @@ public class VisibilityGraphsParametersProperty extends ParametersProperty<Setta
          this.normalZThresholdForAccessibleRegions = normalZThresholdForAccessibleRegions;
       }
 
-      public void setNormalZThresholdForPolygonObstacles(double normalZThresholdForPolygonObstacles)
+      public void setRegionOrthogonalAngle(double normalZThresholdForPolygonObstacles)
       {
-         this.normalZThresholdForPolygonObstacles = normalZThresholdForPolygonObstacles;
+         this.regionOrthogonalAngle = normalZThresholdForPolygonObstacles;
       }
 
       public void setExtrusionDistance(double extrusionDistance)

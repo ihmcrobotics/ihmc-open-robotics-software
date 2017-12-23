@@ -43,10 +43,11 @@
                 </TitledPane>
               </panes>
             </Accordion>
-            <HBox>
+            <HBox maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="400.0" spacing="5.0">
                <children>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#load" text="Refresh" />
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#loadCustomDataFolder" text="Load custom data folder..." />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#load" text="Refresh" HBox.hgrow="ALWAYS" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#loadCustomDataFolder" text="Load custom data folder..." HBox.hgrow="ALWAYS" />
+                  <Button mnemonicParsing="false" onAction="#requestRandomizeRegionIDs" text="Randomize region IDs" />
                </children>
             </HBox>
          </children>
