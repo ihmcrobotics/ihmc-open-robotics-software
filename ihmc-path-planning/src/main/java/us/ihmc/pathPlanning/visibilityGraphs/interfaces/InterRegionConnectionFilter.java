@@ -1,7 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 
-import us.ihmc.pathPlanning.visibilityGraphs.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 
 public interface InterRegionConnectionFilter
 {

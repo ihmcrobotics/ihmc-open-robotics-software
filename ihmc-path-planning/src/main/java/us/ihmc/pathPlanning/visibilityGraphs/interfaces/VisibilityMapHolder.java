@@ -1,6 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 
 public interface VisibilityMapHolder
 {
