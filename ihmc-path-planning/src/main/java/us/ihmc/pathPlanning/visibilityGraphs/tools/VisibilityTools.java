@@ -98,6 +98,8 @@ public class VisibilityTools
                                                     Set<Connection> connectionsToPack)
    {
       List<Point2D> navigableExtrusions = clusterToBuildMapOf.getNavigableExtrusionsInLocal2D();
+
+      // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
       boolean[] areActuallyNavigable = new boolean[navigableExtrusions.size()];
       Arrays.fill(areActuallyNavigable, true);
 
@@ -114,7 +116,7 @@ public class VisibilityTools
       }
 
       for (int i = 0; i < navigableExtrusions.size() - 1; i++)
-      { // Adding the edges
+      { // Adding the edges of the navigable extrusion. As long as both the current and next vertices are navigable, the connection is valid.
          if (areActuallyNavigable[i] && areActuallyNavigable[i + 1])
             connectionsToPack.add(new Connection(navigableExtrusions.get(i), mapId, navigableExtrusions.get(i + 1), mapId));
       }
@@ -123,17 +125,19 @@ public class VisibilityTools
       Vector2D nextEdge = new Vector2D();
       Vector2D prevEdge = new Vector2D();
 
+      // Going through all the other possible combinations for finding connections
       for (int sourceIndex = 0; sourceIndex < navigableExtrusions.size() - 1; sourceIndex++)
       {
          if (!areActuallyNavigable[sourceIndex])
-            continue;
+            continue; // Both source and target have to be navigable for the connection to be valid
 
          Point2D source = navigableExtrusions.get(sourceIndex);
 
-         for (int targetIndex = 0; targetIndex < navigableExtrusions.size() - 1; targetIndex++)
+         // Starting from after the next vertex of the source as we already added all the edges as connections
+         for (int targetIndex = sourceIndex + 2; targetIndex < navigableExtrusions.size() - 1; targetIndex++)
          {
             if (!areActuallyNavigable[targetIndex])
-               continue;
+               continue; // Both source and target have to be navigable for the connection to be valid
 
             Point2D target = navigableExtrusions.get(targetIndex);
 
@@ -157,6 +161,7 @@ public class VisibilityTools
                }
             }
 
+            // Finally run the expensive test to verify if the target can be seen from the source.
             if (isPointVisibleForStaticMaps(allClusters, source, target))
                connectionsToPack.add(new Connection(source, mapId, target, mapId));
          }
