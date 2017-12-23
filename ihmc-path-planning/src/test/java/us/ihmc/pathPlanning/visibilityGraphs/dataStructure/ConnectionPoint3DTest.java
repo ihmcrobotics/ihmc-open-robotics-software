@@ -23,7 +23,7 @@ public class ConnectionPoint3DTest
       for (int i = 0; i < ITERATIONS; i++)
       {
          double raw = EuclidCoreRandomTools.nextDouble(random, 1000.0);
-         double expected = Precision.round(raw, 3);
+         double expected = Precision.round(raw, 4);
          double actual = ConnectionPoint3D.round(raw);
          assertEquals(expected, actual, EPSILON);
       }
