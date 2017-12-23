@@ -291,7 +291,7 @@ public class VisibilityGraphsGeometryToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 10000)
    public void testIntersectionBetweenRay2DAndCircle2D() throws Exception
    {
       Random random = new Random(456467);
