@@ -9,11 +9,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public class ConnectionPoint3D implements Point3DReadOnly
 {
-   public static final double PRECISION = 0.001;
-   public static final double INV_PRECISION = 1.0 / PRECISION;
+   public static final double PRECISION     = 1.0e-4;
+   public static final double INV_PRECISION = 1.0e+4;
 
    private final int regionId;
    private final double x, y, z;
+   private final int hashCode;
 
    public ConnectionPoint3D(int regionId)
    {
@@ -21,6 +22,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
       y = 0.0;
       z = 0.0;
       this.regionId = regionId;
+      hashCode = computeHashCode();
    }
 
    public ConnectionPoint3D(ConnectionPoint3D other)
@@ -34,6 +36,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
       this.y = y;
       this.z = z;
       this.regionId = regionId;
+      hashCode = computeHashCode();
    }
 
    public ConnectionPoint3D(Tuple2DReadOnly tuple2DReadOnly, int regionId)
@@ -42,6 +45,7 @@ public class ConnectionPoint3D implements Point3DReadOnly
       y = tuple2DReadOnly.getY();
       z = 0.0;
       this.regionId = regionId;
+      hashCode = computeHashCode();
    }
 
    public ConnectionPoint3D(Tuple3DReadOnly other, int regionId)
@@ -50,6 +54,16 @@ public class ConnectionPoint3D implements Point3DReadOnly
       y = other.getY();
       z = other.getZ();
       this.regionId = regionId;
+      hashCode = computeHashCode();
+   }
+
+   private int computeHashCode()
+   {
+      long bits = 1L;
+      bits = 31L * bits + Double.doubleToLongBits(getRoundedX());
+      bits = 31L * bits + Double.doubleToLongBits(getRoundedY());
+      bits = 31L * bits + Double.doubleToLongBits(getRoundedZ());
+      return (int) (bits ^ bits >> 32);
    }
 
    @Override
@@ -93,24 +107,29 @@ public class ConnectionPoint3D implements Point3DReadOnly
    @Override
    public int hashCode()
    {
-      long bits = 1L;
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedX());
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedY());
-      bits = 31L * bits + Double.doubleToLongBits(getRoundedZ());
-      return (int) (bits ^ bits >> 32);
+      return hashCode;
    }
 
    @Override
    public boolean equals(Object obj)
    {
+      if (obj == null)
+         return false;
+
       try
       {
          return epsilonEquals((Tuple3DReadOnly) obj, PRECISION);
       }
-      catch (ClassCastException | NullPointerException e)
+      catch (ClassCastException e)
       {
          return false;
       }
+   }
+
+   @Override
+   public boolean equals(Tuple3DReadOnly other)
+   {
+      return epsilonEquals(other, PRECISION);
    }
 
    @Override
@@ -119,9 +138,9 @@ public class ConnectionPoint3D implements Point3DReadOnly
       return "ConnectionPoint3D: " + EuclidCoreIOTools.getTuple3DString(this);
    }
 
-   private static double round(double value)
+   static double round(double value)
    {
-      return (int) value * INV_PRECISION * PRECISION;
+      return Math.round(value * INV_PRECISION) * PRECISION;
    }
 
    public ConnectionPoint3D applyTransform(Transform transform)

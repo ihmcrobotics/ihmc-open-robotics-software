@@ -187,6 +187,8 @@ public class BodyPathMeshViewer extends AnimationTimer
       {
          bodyPathMeshToRender.set(new Pair<>(null, null));
          activeBodyPathReference.set(null);
+         PrintTools.warn("Received body path that is null.");
+         return;
       }
 
       // First let's make a deep copy for later usage.
