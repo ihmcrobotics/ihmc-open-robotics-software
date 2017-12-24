@@ -1,6 +1,6 @@
-package us.ihmc.exampleSimulations.planarWalker;
+package us.ihmc.exampleSimulations;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
