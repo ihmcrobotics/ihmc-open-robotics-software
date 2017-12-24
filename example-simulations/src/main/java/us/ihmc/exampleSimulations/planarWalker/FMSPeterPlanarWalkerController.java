@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations;
+package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
