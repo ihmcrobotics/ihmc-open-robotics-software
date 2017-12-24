@@ -1,20 +1,20 @@
-package us.ihmc.exampleSimulations.planarWalker;
+package us.ihmc.exampleSimulations;
 
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.YoTimeInterval;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class YoPlanarWalkerTimedStep extends PlanarWalkerTimedStep
 {
-   private final YoEnum<RobotSide> robotSide;
+   private final EnumYoVariable<RobotSide> robotSide;
    private final YoTimeInterval timeInterval;
    
    YoPlanarWalkerTimedStep(String prefix, YoVariableRegistry registry)
    {
       super();
-      this.robotSide = new YoEnum<>(prefix + "RobotSide", registry, RobotSide.class);
+      this.robotSide = new EnumYoVariable<>(prefix + "RobotSide", registry, RobotSide.class);
       this.timeInterval = new YoTimeInterval(prefix + "TimeInterval", registry);
    }
 
