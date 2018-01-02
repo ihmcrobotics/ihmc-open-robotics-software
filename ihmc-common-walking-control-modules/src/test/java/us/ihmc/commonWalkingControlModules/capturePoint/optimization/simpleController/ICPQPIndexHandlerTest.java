@@ -2,18 +2,19 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleCont
 
 import org.junit.Assert;
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPQPIndexHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
-public class SimpleICPQPIndexHandlerTest
+public class ICPQPIndexHandlerTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testRegisterFootstep()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       indexHandler.registerFootstep();
 
       Assert.assertTrue(indexHandler.useStepAdjustment());
@@ -24,7 +25,7 @@ public class SimpleICPQPIndexHandlerTest
    @Test(timeout = 21000)
    public void testSizing()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
       Assert.assertFalse(indexHandler.useAngularMomentum());

@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -99,7 +99,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
    }
 
    @Override
-   public ICPOptimizationController getICPOptimizationController()
+   public ICPOptimizationControllerInterface getICPOptimizationController()
    {
       return null;
    }
