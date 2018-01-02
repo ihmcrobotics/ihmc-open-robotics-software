@@ -1,27 +1,17 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+
 public class DefaultVisibilityGraphParameters implements VisibilityGraphsParameters
 {
    @Override
-   public int getNumberOfForcedConnections()
-   {
-      return 5;
-   }
-
-   @Override
-   public double getMinimumConnectionDistanceForRegions()
+   public double getMaxInterRegionConnectionLength()
    {
       return 0.55;
    }
 
    @Override
    public double getNormalZThresholdForAccessibleRegions()
-   {
-      return 0.8;
-   }
-
-   @Override
-   public double getNormalZThresholdForPolygonObstacles()
    {
       return 0.8;
    }
@@ -41,7 +31,7 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getTooHighToStepDistance()
    {
-      return 0.6;
+      return 0.2;
    }
 
    @Override
@@ -59,6 +49,6 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public int getPlanarRegionMinSize()
    {
-      return 5;
+      return 2;
    }
 }

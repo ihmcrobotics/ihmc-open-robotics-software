@@ -8,7 +8,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.robotics.linearAlgebra.ConfigurableSolvePseudoInverseSVD;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -35,7 +35,7 @@ public class SmoothCapturePointAdjustmentToolbox
    private final DenseMatrix64F boundaryConditionMatrixInverse = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F boundaryConditionVector = new DenseMatrix64F(defaultSize, 1);
 
-   private final LinearSolver<DenseMatrix64F> pseudoInverseSolver = new DampedLeastSquaresSolver(defaultSize, 0.0);
+   private final LinearSolver<DenseMatrix64F> pseudoInverseSolver = new ConfigurableSolvePseudoInverseSVD(defaultSize, defaultSize, 1.0e-10);
 
    private final SmoothCapturePointToolbox icpToolbox;
 
