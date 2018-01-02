@@ -110,8 +110,8 @@ public class HumanoidKinematicsSolver
       boolean isSolutionGood = false;
       boolean isSolverStuck = false;
       solutionQuality.set(Double.NaN);
-      double solutionQualityPrevious = Double.NaN;
-      double solutionQualityDoublePrevious = Double.NaN;
+      double solutionQualityLast = Double.NaN;
+      double solutionQualityBeforeLast = Double.NaN;
       int iteration = 0;
 
       while (!isSolutionGood && iteration < maximumNumberOfIterations.getIntegerValue())
@@ -121,28 +121,33 @@ public class HumanoidKinematicsSolver
          KinematicsToolboxOutputStatus solution = controller.getSolution();
          solutionQuality.set(solution.getSolutionQuality());
 
-         if (!Double.isNaN(solutionQualityPrevious))
+         if (!Double.isNaN(solutionQualityLast))
          {
-            double deltaSolutionQuality = Math.abs(solutionQuality.getDoubleValue() - solutionQualityPrevious);
+            double deltaSolutionQualityLast = Math.abs(solutionQuality.getDoubleValue() - solutionQualityLast);
 
-            double deltaDoubleSolutionQuality = Math.abs(solutionQuality.getDoubleValue() - solutionQualityDoublePrevious);
+            double deltaSolutionQualityBeforeLast = Math.abs(solutionQuality.getDoubleValue() - solutionQualityBeforeLast);
 
-            boolean isSolutionStable = deltaSolutionQuality < solutionStabilityThreshold.getDoubleValue();
+            boolean isSolutionStable = deltaSolutionQualityLast < solutionStabilityThreshold.getDoubleValue();
             boolean isSolutionQualityHigh = solutionQuality.getDoubleValue() < solutionQualityThreshold.getDoubleValue();
+
             isSolutionGood = isSolutionStable && isSolutionQualityHigh;
 
             if (!isSolutionQualityHigh)
             {
-               boolean stuckPrevious = (deltaSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
-               boolean stuckDoublePrevious = (deltaDoubleSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
-               isSolverStuck = stuckPrevious || stuckDoublePrevious;
+               /**
+                * current solution quality should be compared with not only the last value and also before last value..
+                */
+               boolean stuckLast = (deltaSolutionQualityLast / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+               boolean stuckBeforeLast = (deltaSolutionQualityBeforeLast / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+
+               isSolverStuck = stuckLast || stuckBeforeLast;
             }
             else
                isSolverStuck = false;
          }
 
-         solutionQualityDoublePrevious = solutionQualityPrevious;
-         solutionQualityPrevious = solutionQuality.getDoubleValue();
+         solutionQualityBeforeLast = solutionQualityLast;
+         solutionQualityLast = solutionQuality.getDoubleValue();
 
          iteration++;
 
