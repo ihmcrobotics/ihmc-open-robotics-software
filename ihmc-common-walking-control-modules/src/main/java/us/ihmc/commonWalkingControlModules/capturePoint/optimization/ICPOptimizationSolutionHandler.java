@@ -1,8 +1,7 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -18,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SimpleICPOptimizationSolutionHandler
+public class ICPOptimizationSolutionHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -53,7 +52,7 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final String yoNamePrefix;
 
-   public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
+   public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
       this.yoNamePrefix = yoNamePrefix;
       this.debug = debug;
@@ -98,7 +97,7 @@ public class SimpleICPOptimizationSolutionHandler
       artifactList.add(adjustedICP.createArtifact());
    }
 
-   public void updateCostsToGo(SimpleICPOptimizationQPSolver solver)
+   public void updateCostsToGo(ICPOptimizationQPSolver solver)
    {
       if (debug)
       {
@@ -112,7 +111,7 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final FramePoint2D referenceFootstepLocation = new FramePoint2D();
    public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2D> unclippedFootstepSolutionsToPack,
-         ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
+         ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, ICPOptimizationQPSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)

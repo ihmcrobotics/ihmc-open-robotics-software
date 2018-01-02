@@ -7,8 +7,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
  */
 public abstract class ICPOptimizationParameters
 {
-   public abstract boolean useSimpleOptimization();
-
    /**
     * The maximum number of footsteps that can be considered by the controller. The variable {@link #numberOfFootstepsToConsider()} is clipped to this value.
     * It is also used to instantiate all the yo variable lists.

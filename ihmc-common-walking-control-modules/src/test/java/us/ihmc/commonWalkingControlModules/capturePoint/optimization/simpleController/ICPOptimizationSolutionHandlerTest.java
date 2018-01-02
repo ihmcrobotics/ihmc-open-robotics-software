@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleCont
 
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationSolutionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -25,13 +27,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
-public class SimpleICPOptimizationSolutionHandlerTest
+public class ICPOptimizationSolutionHandlerTest
 {
    private YoVariableRegistry registry = new YoVariableRegistry("robert");
 
    private ICPOptimizationParameters parameters;
-   private SimpleICPOptimizationSolutionHandler solutionHandler;
-   private SimpleICPOptimizationQPSolver solver;
+   private ICPOptimizationSolutionHandler solutionHandler;
+   private ICPOptimizationQPSolver solver;
 
    private void setupTest(double deadbandSize)
    {
@@ -41,8 +43,8 @@ public class SimpleICPOptimizationSolutionHandlerTest
    private void setupTest(double deadbandSize, double resolution)
    {
       parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
-      solutionHandler = new SimpleICPOptimizationSolutionHandler(parameters, false, "test", registry);
-      solver = new SimpleICPOptimizationQPSolver(parameters, 4, false);
+      solutionHandler = new ICPOptimizationSolutionHandler(parameters, false, "test", registry);
+      solver = new ICPOptimizationQPSolver(parameters, 4, false);
    }
 
    private ArrayList<Footstep> createFootsteps(double length, double width, int numberOfSteps)
@@ -414,11 +416,6 @@ public class SimpleICPOptimizationSolutionHandlerTest
       {
          this.deadbandSize = deadbandSize;
          this.resolution = resolution;
-      }
-
-      @Override public boolean useSimpleOptimization()
-      {
-         return false;
       }
 
       @Override public int getMaximumNumberOfFootstepsToConsider()

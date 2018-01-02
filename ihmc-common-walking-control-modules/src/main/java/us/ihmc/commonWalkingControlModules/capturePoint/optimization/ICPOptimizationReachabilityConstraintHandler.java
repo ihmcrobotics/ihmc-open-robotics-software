@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController.SimpleICPOptimizationQPSolver;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -92,7 +91,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       }
    }
 
-   public void initializeReachabilityConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
+   public void initializeReachabilityConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
    {
       contractedReachabilityPolygon.clearAndHide();
       motionLimitLine.setToNaN();
@@ -100,7 +99,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       solver.resetReachabilityConstraint();
    }
 
-   public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, SimpleICPOptimizationQPSolver solver)
+   public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
    {
       solver.resetReachabilityConstraint();
 
@@ -175,7 +174,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.setConvexPolygon2d(polygon2d.getConvexPolygon2d());
    }
 
-   public void updateReachabilityConstraint(SimpleICPOptimizationQPSolver solver)
+   public void updateReachabilityConstraint(ICPOptimizationQPSolver solver)
    {
       solver.resetReachabilityConstraint();
       FrameConvexPolygon2d polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
