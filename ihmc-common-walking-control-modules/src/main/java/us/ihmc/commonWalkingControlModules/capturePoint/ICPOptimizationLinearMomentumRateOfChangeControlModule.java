@@ -1,12 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPAdjustmentOptimizationController;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPTimingOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController.SimpleICPOptimizationController;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -74,26 +71,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
 
       ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
       useSimpleAdjustment = icpOptimizationParameters.useSimpleOptimization();
-      if (useSimpleAdjustment)
-      {
-         icpOptimizationController = new SimpleICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
-                                                                         contactableFeet, controlDT, registry, yoGraphicsListRegistry);
-      }
-      else
-      {
-         if (icpOptimizationParameters.useTimingOptimization())
-         {
-            icpOptimizationController = new ICPTimingOptimizationController((ContinuousCMPICPPlannerParameters) icpPlannerParameters, icpOptimizationParameters,
-                                                                            walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
-                                                                            contactableFeet, controlDT, registry, yoGraphicsListRegistry);
-         }
-         else
-         {
-            icpOptimizationController = new ICPAdjustmentOptimizationController((ContinuousCMPICPPlannerParameters) icpPlannerParameters,
-                                                                                icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
-                                                                                icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
-         }
-      }
+      icpOptimizationController = new SimpleICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
+                                                                      contactableFeet, controlDT, registry, yoGraphicsListRegistry);
    }
 
    @Override
