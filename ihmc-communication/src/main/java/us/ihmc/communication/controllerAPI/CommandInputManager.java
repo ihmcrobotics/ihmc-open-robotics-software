@@ -207,10 +207,7 @@ public class CommandInputManager
    public <M extends Packet<M>> void submitMessages(List<Packet<?>> messages)
    {
       for (int i = 0; i < messages.size(); i++)
-      {
          submitMessage((M) messages.get(i));
-      }
-         
    }
 
    /**
