@@ -1,11 +1,13 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -134,6 +136,372 @@ public class ContinuousSimpleReactionDynamicsTest
       dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, gradient);
 
       gradientExpected.zero();
+      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testDynamicsStateGradientNumericalDifferentiationStance()
+   {
+      double mass = 11.0;
+      double gravity = 9.81;
+      double epsilon = 1e-7;
+
+      Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
+
+      Vector3D inertia = new Vector3D();
+      inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
+      inertia.setY(boxSize.getX() * boxSize.getX() + boxSize.getZ() * boxSize.getZ());
+      inertia.setZ(boxSize.getY() * boxSize.getY() + boxSize.getX() * boxSize.getX());
+      inertia.scale(mass / 12.0);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+      DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+
+      dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, gradient);
+
+      DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
+      dynamics.getDynamics(STANCE, currentState, currentControl, dynamicState);
+
+      DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+      currentStateModified.add(x, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, x, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(y, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, y, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(z, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, z, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(3, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, 3, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(4, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, 4, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(5, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testDynamicsStateGradientNumericalDifferentiationFlight()
+   {
+      double mass = 11.0;
+      double gravity = 9.81;
+      double epsilon = 1e-7;
+
+      Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
+
+      Vector3D inertia = new Vector3D();
+      inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
+      inertia.setY(boxSize.getX() * boxSize.getX() + boxSize.getZ() * boxSize.getZ());
+      inertia.setZ(boxSize.getY() * boxSize.getY() + boxSize.getX() * boxSize.getX());
+      inertia.scale(mass / 12.0);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+      DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+
+      dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, gradient);
+
+      DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
+      dynamics.getDynamics(FLIGHT, currentState, currentControl, dynamicState);
+
+      DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+      currentStateModified.add(x, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, x, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(y, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, y, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(z, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, z, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(3, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, 3, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(4, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, 4, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+      currentStateModified.set(currentState);
+      currentStateModified.add(5, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testDynamicsControlGradientNumericalDifferentiationStance()
+   {
+      double mass = 11.0;
+      double gravity = 9.81;
+      double epsilon = 1e-7;
+
+      Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
+
+      Vector3D inertia = new Vector3D();
+      inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
+      inertia.setY(boxSize.getX() * boxSize.getX() + boxSize.getZ() * boxSize.getZ());
+      inertia.setZ(boxSize.getY() * boxSize.getY() + boxSize.getX() * boxSize.getX());
+      inertia.scale(mass / 12.0);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+      DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+
+      dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, gradient);
+
+      DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
+      dynamics.getDynamics(STANCE, currentState, currentControl, dynamicState);
+
+      DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+      currentControlModified.add(fx, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, fx, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(fy, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, fy, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(fz, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, fz, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(tauX, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, tauX, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(tauY, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, tauY, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(tauZ, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, tauZ, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(xF, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, xF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(yF, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, yF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(k, 0, epsilon);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testDynamicsControlGradientNumericalDifferentiationFlight()
+   {
+      double mass = 11.0;
+      double gravity = 9.81;
+      double epsilon = 1e-7;
+
+      Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
+
+      Vector3D inertia = new Vector3D();
+      inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
+      inertia.setY(boxSize.getX() * boxSize.getX() + boxSize.getZ() * boxSize.getZ());
+      inertia.setZ(boxSize.getY() * boxSize.getY() + boxSize.getX() * boxSize.getX());
+      inertia.scale(mass / 12.0);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+      DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+
+      dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, gradient);
+
+      DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
+      dynamics.getDynamics(FLIGHT, currentState, currentControl, dynamicState);
+
+      DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+      currentControlModified.add(fx, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, fx, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(fy, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, fy, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(fz, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, fz, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(tauX, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, tauX, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(tauY, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, tauY, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(tauZ, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, tauZ, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(xF, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, xF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(yF, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, yF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
+      currentControlModified.set(currentControl);
+      currentControlModified.add(k, 0, epsilon);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+
+      CommonOps.subtractEquals(dynamicStateModified, dynamicState);
+      MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
+
+
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 }

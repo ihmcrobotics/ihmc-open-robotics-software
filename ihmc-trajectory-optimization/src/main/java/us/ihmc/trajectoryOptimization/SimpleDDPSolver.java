@@ -1,25 +1,15 @@
 package us.ihmc.trajectoryOptimization;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements DDPSolverInterface<E>
 {
-   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction)
+   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction)
    {
       this(dynamics, costFunction, terminalCostFunction, false);
    }
 
-   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction, boolean debug)
+   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
    {
       super(dynamics, costFunction, terminalCostFunction, debug);
       lineSearchGain = 1.0;

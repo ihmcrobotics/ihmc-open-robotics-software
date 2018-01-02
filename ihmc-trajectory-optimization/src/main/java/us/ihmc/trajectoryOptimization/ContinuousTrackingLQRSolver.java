@@ -30,19 +30,19 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    private final DenseMatrix64F R_invBT;
 
    private final DiscreteHybridDynamics<E> dynamics;
-   private final LQCostFunction costFunction;
-   private final LQCostFunction terminalCostFunction;
+   private final LQTrackingCostFunction costFunction;
+   private final LQTrackingCostFunction terminalCostFunction;
 
    private final double deltaT;
 
    private final boolean debug;
 
-   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
+   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction,
                                       double deltaT)
    {
       this(dynamics, costFunction, terminalCostFunction, deltaT, false);
    }
-   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
+   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction,
                                       double deltaT, boolean debug)
    {
       this.dynamics = dynamics;

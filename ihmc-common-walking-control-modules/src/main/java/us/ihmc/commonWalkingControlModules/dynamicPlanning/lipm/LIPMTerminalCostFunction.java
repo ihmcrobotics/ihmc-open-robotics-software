@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.trajectoryOptimization.LQCostFunction;
+import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDynamics.controlVectorSize;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDynamics.stateVectorSize;
 
-public class LIPMTerminalCostFunction implements LQCostFunction
+public class LIPMTerminalCostFunction implements LQTrackingCostFunction
 {
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);
