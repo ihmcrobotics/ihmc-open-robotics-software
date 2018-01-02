@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPQPOptimizationSolver;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController.SimpleICPOptimizationQPSolver;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -20,7 +18,7 @@ public class ICPOptimizationCoPConstraintHandler
       this.icpControlPolygons = icpControlPolygons;
    }
 
-   public void updateCoPConstraintForDoubleSupport(ICPQPOptimizationSolver solver)
+   public void updateCoPConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
    {
       solver.resetCoPLocationConstraint();
 
@@ -35,34 +33,7 @@ public class ICPOptimizationCoPConstraintHandler
       }
    }
 
-   public void updateCoPConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
-   {
-      solver.resetCoPLocationConstraint();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FrameConvexPolygon2d supportPolygon;
-         if (useControlPolygons && icpControlPolygons != null)
-            supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
-         else
-            supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
-         solver.addSupportPolygon(supportPolygon);
-      }
-   }
-
-   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPQPOptimizationSolver solver)
-   {
-      solver.resetCoPLocationConstraint();
-
-      FrameConvexPolygon2d supportPolygon;
-      if (useControlPolygons && icpControlPolygons != null)
-         supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
-      else
-         supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
-      solver.addSupportPolygon(supportPolygon);
-   }
-
-   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, SimpleICPOptimizationQPSolver solver)
+   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
    {
       solver.resetCoPLocationConstraint();
 
