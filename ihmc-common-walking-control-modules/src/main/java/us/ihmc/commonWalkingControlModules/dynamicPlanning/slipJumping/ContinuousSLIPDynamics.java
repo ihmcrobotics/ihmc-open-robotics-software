@@ -154,6 +154,10 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
          double xF_k = currentControl.get(xF, 0);
          double yF_k = currentControl.get(yF, 0);
 
+         double fx_k = currentControl.get(fx, 0);
+         double fy_k = currentControl.get(fy, 0);
+         double fz_k = currentControl.get(fz, 0);
+
          double K = currentControl.get(k, 0);
          double pendulumLength = Math.sqrt((x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + z_k * z_k);
 
@@ -173,12 +177,16 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
 
          matrixToPack.set(thetaX, fy, 1.0 / inertia.getX() * -z_k);
          matrixToPack.set(thetaX, fz, 1.0 / inertia.getX() * (y_k - yF_k));
+         matrixToPack.set(thetaX, yF, 1.0 / inertia.getX() * -fz_k);
 
          matrixToPack.set(thetaY, fx, 1.0 / inertia.getY() * z_k);
-         matrixToPack.set(thetaY, fz, 1.0 / inertia.getY() * - (x_k - xF_k));
+         matrixToPack.set(thetaY, fz, 1.0 / inertia.getY() * -(x_k - xF_k));
+         matrixToPack.set(thetaY, xF, 1.0 / inertia.getY() * fz_k);
 
          matrixToPack.set(thetaZ, fx, 1.0 / inertia.getZ() * -(y_k - yF_k));
          matrixToPack.set(thetaZ, fy, 1.0 / inertia.getZ() * (x_k - xF_k));
+         matrixToPack.set(thetaZ, xF, 1.0 / inertia.getZ() * -fy_k);
+         matrixToPack.set(thetaZ, yF, 1.0 / inertia.getZ() * fx_k);
       }
    }
 }

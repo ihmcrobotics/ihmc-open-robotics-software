@@ -18,8 +18,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    private static final boolean useDynamicsHessian = false;
 
    protected final DiscreteHybridDynamics<E> dynamics;
-   protected final LQCostFunction costFunction;
-   protected final LQCostFunction terminalCostFunction;
+   protected final LQTrackingCostFunction costFunction;
+   protected final LQTrackingCostFunction terminalCostFunction;
 
    protected final DiscreteOptimizationTrajectory optimalTrajectory;
    protected final DiscreteOptimizationTrajectory desiredTrajectory;
@@ -69,7 +69,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
    protected double lineSearchGain = 1.0;
 
-   public AbstractDDPSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction, boolean debug)
+   public AbstractDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
    {
       this.dynamics = dynamics;
       this.costFunction = costFunction;

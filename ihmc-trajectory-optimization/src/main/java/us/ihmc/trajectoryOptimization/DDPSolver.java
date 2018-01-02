@@ -13,12 +13,12 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
 
    private final DiscreteOptimizationTrajectory previousTrajectory;
 
-   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction)
+   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction)
    {
       this(dynamics, costFunction, terminalCostFunction, false);
    }
 
-   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction, boolean debug)
+   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
    {
       super(dynamics, costFunction, terminalCostFunction, debug);
 

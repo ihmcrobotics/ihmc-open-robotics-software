@@ -31,8 +31,8 @@ public class LIPMDDPCalculator
       this.mass = mass;
       this.gravityZ = gravityZ;
 
-      LQCostFunction costFunction = new LIPMSimpleCostFunction();
-      LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
+      LQTrackingCostFunction costFunction = new LIPMSimpleCostFunction();
+      LQTrackingCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
       ddpSolver = new SimpleDDPSolver<>(dynamics, costFunction, terminalCostFunction, true);
       lqrSolver = new DiscreteTimeVaryingTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
 

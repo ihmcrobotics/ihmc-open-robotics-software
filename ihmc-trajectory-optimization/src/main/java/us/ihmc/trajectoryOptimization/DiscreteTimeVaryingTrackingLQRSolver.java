@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
@@ -33,20 +32,20 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
    private final DenseMatrix64F H;
 
    private final DiscreteHybridDynamics<E> dynamics;
-   private final LQCostFunction costFunction;
-   private final LQCostFunction terminalCostFunction;
+   private final LQTrackingCostFunction costFunction;
+   private final LQTrackingCostFunction terminalCostFunction;
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F tempMatrix2 = new DenseMatrix64F(0, 0);
 
    private final boolean debug;
 
-   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction)
+   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction)
    {
       this(dynamics, costFunction, terminalCostFunction, false);
    }
 
-   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction, boolean debug)
+   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
    {
       this.dynamics = dynamics;
       this.costFunction = costFunction;

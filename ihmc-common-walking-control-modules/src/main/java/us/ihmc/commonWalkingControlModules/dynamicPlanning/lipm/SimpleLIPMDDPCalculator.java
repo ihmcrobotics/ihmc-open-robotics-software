@@ -22,8 +22,8 @@ public class SimpleLIPMDDPCalculator
    public SimpleLIPMDDPCalculator(double deltaT, double mass, double gravityZ)
    {
       this.dynamics = new SimpleLIPMDynamics(deltaT, 1.0, gravityZ);
-      LQCostFunction costFunction = new SimpleLIPMSimpleCostFunction(); // discrete, so we need to take that into account
-      LQCostFunction terminalCostFunction = new SimpleLIPMTerminalCostFunction();
+      LQTrackingCostFunction costFunction = new SimpleLIPMSimpleCostFunction(); // discrete, so we need to take that into account
+      LQTrackingCostFunction terminalCostFunction = new SimpleLIPMTerminalCostFunction();
       this.deltaT = deltaT;
 
       ddpSolver = new DDPSolver<>(dynamics, costFunction, terminalCostFunction, true);
