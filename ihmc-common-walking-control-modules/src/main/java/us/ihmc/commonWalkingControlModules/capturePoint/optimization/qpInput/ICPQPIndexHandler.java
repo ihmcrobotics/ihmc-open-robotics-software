@@ -18,8 +18,6 @@ public class ICPQPIndexHandler
    private int footstepStartingIndex;
    /** Index for the CMP Feedback action term. */
    private int feedbackCMPIndex;
-   /** Index for the dynamic relaxation term. */
-   private int dynamicRelaxationIndex;
    /** Index for the angular momentum term. */
    private int angularMomentumIndex;
 
