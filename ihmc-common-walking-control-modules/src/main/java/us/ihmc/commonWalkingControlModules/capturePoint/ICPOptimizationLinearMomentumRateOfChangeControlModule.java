@@ -89,7 +89,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
-      icpOptimizationController.setFinalTransferSplitFractionToDefault();
    }
 
    @Override
@@ -142,7 +141,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
       {
          footstepToPack.getPose(footstepPose);
-         icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
+         icpOptimizationController.getFootstepSolution(footstepPositionSolution);
          footstepPose.setXYFromPosition2d(footstepPositionSolution);
          footstepToPack.setPose(footstepPose);
       }
@@ -160,17 +159,5 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    public ICPOptimizationControllerInterface getICPOptimizationController()
    {
       return icpOptimizationController;
-   }
-
-   @Override
-   public double getOptimizedTimeRemaining()
-   {
-      return icpOptimizationController.getOptimizedTimeRemaining();
-   }
-
-   @Override
-   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity)
-   {
-      icpOptimizationController.setReferenceICPVelocity(referenceICPVelocity);
    }
 }

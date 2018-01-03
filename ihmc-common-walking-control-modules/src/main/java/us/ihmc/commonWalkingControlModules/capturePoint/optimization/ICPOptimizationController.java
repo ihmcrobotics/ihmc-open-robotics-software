@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -56,10 +57,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean isStanding = new YoBoolean(yoNamePrefix + "IsStanding", registry);
    private final YoBoolean isInDoubleSupport = new YoBoolean(yoNamePrefix + "IsInDoubleSupport", registry);
 
-   private final ArrayList<YoDouble> swingDurations = new ArrayList<>();
-   private final ArrayList<YoDouble> transferDurations = new ArrayList<>();
-   private final YoDouble transferDurationSplitFraction = new YoDouble(yoNamePrefix + "TransferDurationSplitFraction", registry);
+   private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
+   private final YoDouble transferDuration = new YoDouble(yoNamePrefix + "TransferDuration", registry);
+   private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
    private final YoDouble finalTransferDuration = new YoDouble(yoNamePrefix + "FinalTransferDuration", registry);
+
+   private final YoDouble transferDurationSplitFraction = new YoDouble(yoNamePrefix + "TransferDurationSplitFraction", registry);
 
    private final YoEnum<RobotSide> transferToSide = new YoEnum<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
    private final YoEnum<RobotSide> supportSide = new YoEnum<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
@@ -78,10 +81,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFrameVector2d cmpCoPDifferenceSolution = new YoFrameVector2d(yoNamePrefix + "CMPCoPDifferenceSolution", "", worldFrame, registry);
    private final YoFramePoint2d feedbackCMPDelta = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
-   private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
-   private final ArrayList<YoFramePoint2d> upcomingFootstepLocations = new ArrayList<>();
-   private final ArrayList<YoFramePoint2d> footstepSolutions = new ArrayList<>();
-   private final ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
+   private final List<Footstep> upcomingFootsteps = new ArrayList<>();
+
+   private final YoFramePoint2d footstepSolution = new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePoint2d upcomingFootstepLocation = new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+   private final FramePoint2D unclippedFootstepSolution = new FramePoint2D();
 
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
@@ -121,6 +125,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final ICPOptimizationSolutionHandler solutionHandler;
+   private final ICPOptimizationQPSolver solver;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
@@ -129,8 +134,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final boolean useFootstepRegularization;
    private final boolean useFeedbackRegularization;
-
-   private final int maximumNumberOfFootstepsToConsider;
 
    private boolean localUseStepAdjustment;
    private boolean localScaleUpcomingStepWeights;
@@ -142,8 +145,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FramePoint2D desiredICP = new FramePoint2D();
    private final FramePoint2D perfectCMP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
-
-   private final ICPOptimizationQPSolver solver;
 
    private final double controlDT;
    private final double dynamicRelaxationDoubleSupportWeightModifier;
@@ -166,7 +167,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.controlDT = controlDT;
       this.contactableFeet = contactableFeet;
 
-      maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
       dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
 
       useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
@@ -200,21 +200,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
-      for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-      {
-         upcomingFootstepLocations.add(new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation" + i, worldFrame, registry));
-         footstepSolutions.add(new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation" + i, worldFrame, registry));
-         unclippedFootstepSolutions.add(new FramePoint2D(worldFrame));
-
-         YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration" + i, registry);
-         swingDuration.setToNaN();
-         swingDurations.add(swingDuration);
-         YoDouble transferDuration = new YoDouble(yoNamePrefix + "TransferDuration" + i, registry);
-         transferDuration.setToNaN();
-         transferDurations.add(transferDuration);
-      }
-      transferDurationSplitFraction.set(transferSplitFraction);
-
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
@@ -227,6 +212,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
+
+      transferDurationSplitFraction.set(transferSplitFraction);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -252,42 +239,29 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    public void clearPlan()
    {
       upcomingFootsteps.clear();
+      upcomingFootstepLocation.setToZero();
 
-      for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-      {
-         upcomingFootstepLocations.get(i).setToZero();
-
-         swingDurations.get(i).setToNaN();
-         transferDurations.get(i).setToNaN();
-      }
+      transferDuration.setToNaN();
+      swingDuration.setToNaN();
+      nextTransferDuration.setToNaN();
    }
 
    @Override
-   public void setTransferDuration(int stepNumber, double duration)
+   public void setTransferDuration(double duration)
    {
-      int numberOfFootstepsRegistered = upcomingFootsteps.size();
-      if (stepNumber < numberOfFootstepsRegistered + 1)
-         transferDurations.get(stepNumber).set(duration);
+      transferDuration.set(duration);
    }
 
    @Override
-   public void setTransferSplitFraction(int stepNumber, double splitFraction)
+   public void setSwingDuration(double duration)
    {
-
+      swingDuration.set(duration);
    }
 
    @Override
-   public void setSwingDuration(int stepNumber, double duration)
+   public void setNextTransferDuration(double duration)
    {
-      int numberOfFootstepsRegistered = upcomingFootsteps.size();
-      if (stepNumber < numberOfFootstepsRegistered)
-         swingDurations.get(stepNumber).set(duration);
-   }
-
-   @Override
-   public void setSwingSplitFraction(int stepNumber, double splitFraction)
-   {
-
+      nextTransferDuration.set(duration);
    }
 
    @Override
@@ -297,28 +271,29 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    }
 
    @Override
-   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
-   {
-
-   }
-
-   @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       if (footstep != null)
       {
          if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
          {
-            int footstepIndex = upcomingFootsteps.size();
+            if (upcomingFootsteps.size() == 0)
+            {
+               footstep.getPosition2d(tempPoint2d);
+               upcomingFootstepLocation.set(tempPoint2d);
+
+               footstepSolution.set(tempPoint2d);
+               unclippedFootstepSolution.set(tempPoint2d);
+
+               swingDuration.set(timing.getSwingTime());
+               transferDuration.set(timing.getTransferTime());
+            }
+            else if (upcomingFootsteps.size() == 1)
+            {
+               nextTransferDuration.set(timing.getTransferTime());
+            }
+
             upcomingFootsteps.add(footstep);
-            footstep.getPosition2d(tempPoint2d);
-            upcomingFootstepLocations.get(footstepIndex).set(tempPoint2d);
-
-            footstepSolutions.get(footstepIndex).set(tempPoint2d);
-            unclippedFootstepSolutions.get(footstepIndex).set(tempPoint2d);
-
-            swingDurations.get(footstepIndex).set(timing.getSwingTime());
-            transferDurations.get(footstepIndex).set(timing.getTransferTime());
          }
          else
          {
@@ -329,12 +304,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void updateYoFootsteps()
    {
-      for (int footstepIndex = 0; footstepIndex < upcomingFootsteps.size(); footstepIndex++)
+      if (upcomingFootsteps.size() > 0)
       {
-         upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
-         upcomingFootstepLocations.get(footstepIndex).set(tempPoint2d);
+         upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
+         upcomingFootstepLocation.set(tempPoint2d);
       }
-
    }
 
    @Override
@@ -350,7 +324,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
 
-      transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
+      transferDuration.set(finalTransferDuration.getDoubleValue());
 
       speedUpTime.set(0.0);
    }
@@ -361,8 +335,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.transferToSide.set(transferToSide);
       isInDoubleSupport.set(true);
 
-      int numberOfFootstepRegistered = upcomingFootsteps.size();
-      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      if (upcomingFootsteps.size() < 2)
+         nextTransferDuration.set(finalTransferDuration.getDoubleValue());
 
       initializeOnContactChange(initialTime);
 
@@ -377,8 +351,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       isStanding.set(false);
       isInDoubleSupport.set(false);
 
-      int numberOfFootstepRegistered = upcomingFootsteps.size();
-      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      if (upcomingFootsteps.size() < 2)
+         nextTransferDuration.set(finalTransferDuration.getDoubleValue());
 
       initializeOnContactChange(initialTime);
 
@@ -397,8 +371,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (useFootstepRegularization)
       {
-         int stepIndex = 0;
-         upcomingFootsteps.get(stepIndex).getPosition2d(tempPoint2d);
+         upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
          solver.resetFootstepRegularization(tempPoint2d);
       }
 
@@ -431,9 +404,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    }
 
    @Override
-   public void getFootstepSolution(int footstepIndex, FramePoint2D footstepSolutionToPack)
+   public void getFootstepSolution(FramePoint2D footstepSolutionToPack)
    {
-      footstepSolutions.get(footstepIndex).getFrameTuple2d(footstepSolutionToPack);
+      footstepSolution.getFrameTuple2d(footstepSolutionToPack);
    }
 
    @Override
@@ -488,23 +461,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       controllerTimer.stopMeasurement();
    }
-
-   @Override
-   public void setFinalTransferSplitFractionToDefault()
-   {
-   }
-
-   @Override
-   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity)
-   {
-   }
-
-   @Override
-   public double getOptimizedTimeRemaining()
-   {
-      throw new RuntimeException("This is not implemented in this solver.");
-   }
-
 
    @Override
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
@@ -581,7 +537,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          if (localScaleUpcomingStepWeights)
             scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
-         double recursionTime = timeRemainingInState.getDoubleValue() + transferDurationSplitFraction.getDoubleValue() * transferDurations.get(1).getDoubleValue();
+         double recursionTime = timeRemainingInState.getDoubleValue() + transferDurationSplitFraction.getDoubleValue() * nextTransferDuration.getDoubleValue();
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
@@ -633,7 +589,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          numberOfIterations.set(solver.getNumberOfIterations());
 
          if (localUseStepAdjustment && numberOfFootstepsToConsider > 0)
-            solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootsteps, numberOfFootstepsToConsider, solver);
+            solutionHandler.extractFootstepSolutions(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), solver);
 
          if (isInDoubleSupport.getBooleanValue())
             solutionHandler.zeroAdjustment();
@@ -657,13 +613,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       feedbackCMP.set(perfectCMP);
       feedbackCMP.add(feedbackCMPDelta);
 
-      if (limitReachabilityFromAdjustment.getBooleanValue())
+      if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && numberOfFootstepsToConsider > 0)
          updateReachabilityRegionFromAdjustment();
    }
 
    private void updateReachabilityRegionFromAdjustment()
    {
-      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootsteps, unclippedFootstepSolutions, wasFootstepAdjusted());
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootsteps.get(0), unclippedFootstepSolution, wasFootstepAdjusted());
    }
 
    private void computeTimeInCurrentState(double currentTime)
@@ -680,9 +636,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       else
       {
          if (isInDoubleSupport.getBooleanValue())
-            timeRemainingInState.set(transferDurations.get(0).getDoubleValue() - timeInCurrentState.getDoubleValue());
+            timeRemainingInState.set(transferDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
          else
-            timeRemainingInState.set(swingDurations.get(0).getDoubleValue() - timeInCurrentState.getDoubleValue());
+            timeRemainingInState.set(swingDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
       }
    }
 
@@ -690,7 +646,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       if (scaleStepRegularizationWeightWithTime.getBooleanValue())
       {
-         double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getDoubleValue()) / swingDurations.get(0).getDoubleValue();
+         double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getDoubleValue()) / swingDuration.getDoubleValue();
          scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue() / alpha);
       }
       else

@@ -254,7 +254,7 @@ public class ICPOptimizationControllerTest
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-         controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -521,12 +521,6 @@ public class ICPOptimizationControllerTest
 
       @Override
       public boolean useAngularMomentum()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useTimingOptimization()
       {
          return false;
       }
