@@ -69,7 +69,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -141,7 +141,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -213,7 +213,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -295,7 +295,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -472,13 +472,13 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getDynamicRelaxationWeight()
+      public double getDynamicsObjectiveWeight()
       {
          return 500.0;
       }
 
       @Override
-      public double getDynamicRelaxationDoubleSupportWeightModifier()
+      public double getDynamicsObjectiveDoubleSupportWeightModifier()
       {
          return 1.0;
       }

@@ -76,14 +76,14 @@ public abstract class ICPOptimizationParameters
     * This slack variable is required for the CoP to be constrained inside the support polygon when not using step adjustment,
     * and the step lengths to be constrained when allowing step adjustment.
     */
-   public abstract double getDynamicRelaxationWeight();
+   public abstract double getDynamicsObjectiveWeight();
 
 
    /**
     * Modifier to reduce the dynamic relaxation penalization when in double support.
     * This is introduced to improve the problem feasibility when switching between contact states.
     */
-   public abstract double getDynamicRelaxationDoubleSupportWeightModifier();
+   public abstract double getDynamicsObjectiveDoubleSupportWeightModifier();
 
    /**
     * Weight on the use of angular momentum minimization.
