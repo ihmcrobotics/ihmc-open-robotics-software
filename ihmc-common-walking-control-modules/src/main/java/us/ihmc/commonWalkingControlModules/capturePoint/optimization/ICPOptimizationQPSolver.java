@@ -4,7 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ConstraintToConvexRegion;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInputCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -132,7 +134,6 @@ public class ICPOptimizationQPSolver
    /** Number of iterations required for the active set solver to find a solution. */
    private int numberOfIterations;
 
-   private int currentEqualityConstraintIndex;
    private int currentInequalityConstraintIndex;
 
    /** boolean to determine whether or not to compute the cost to go. specified at compile time. */
@@ -234,6 +235,27 @@ public class ICPOptimizationQPSolver
       solver.setUseWarmStart(useWarmStart);
    }
 
+   /**
+    * Sets whether or not the footstep adjustment should have knowledge of trying to use angular momentum for balance.
+    * By default, this is true.
+    */
+   public void setConsiderAngularMomentumInAdjustment(boolean considerAngularMomentumInAdjustment)
+   {
+      inputCalculator.setConsiderAngularMomentumInAdjustment(considerAngularMomentumInAdjustment);
+   }
+
+   /**
+    * Sets whether or not the footstep adjustment should have knowledge of trying to use cop feedback for balance.
+    * By default, this is true.
+    */
+   public void setConsiderFeedbackInAdjustment(boolean considerFeedbackInAdjustment)
+   {
+      inputCalculator.setConsiderFeedbackInAdjustment(considerFeedbackInAdjustment);
+   }
+
+   /**
+    * Sets the maximum number of iterations to be used by the active set solver.
+    */
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
    {
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
@@ -308,7 +330,6 @@ public class ICPOptimizationQPSolver
       feedbackDeltaSolution.zero();
       angularMomentumSolution.zero();
 
-      currentEqualityConstraintIndex = 0;
       currentInequalityConstraintIndex = 0;
    }
 
@@ -482,6 +503,11 @@ public class ICPOptimizationQPSolver
       this.previousFootstepLocation.set(1, 0, previousFootstepLocation.getY());
    }
 
+   /**
+    * Resets the feedback regularization objective.
+    *
+    * @param previousFeedbackDeltaSolution new location of the previous feedback location to try and minimize against.
+    */
    public void resetFeedbackRegularization(FramePoint2D previousFeedbackDeltaSolution)
    {
       previousFeedbackDeltaSolution.changeFrame(worldFrame);
@@ -546,26 +572,6 @@ public class ICPOptimizationQPSolver
       CommonOps.scale(regularizationWeight, feedbackRegularizationWeight);
 
       hasFeedbackRegularizationTerm = true;
-   }
-
-   /**
-    * Resets the previous feedback solution to zero.
-    */
-   public void resetFeedbackRegularization()
-   {
-      previousFeedbackDeltaSolution.zero();
-   }
-
-   /**
-    * If using the active set solver, resets the active constraints. This only has an impact if using a warm start. Should be called everytime
-    * there is a contact change, as this is when the number of constraints changes.
-    */
-   public void resetOnContactChange()
-   {
-      /*
-      if (!useQuadProg)
-         activeSetSolver.resetActiveConstraints();
-         */
    }
 
    /**
@@ -955,21 +961,12 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Gets residual cost to go of the optimization problem. This value is included in the return of {@link #getCostToGo()}
-    * return cost to go
-    */
-   public double getResidualCostToGo()
-   {
-      return solverInputResidualCost.get(0, 0);
-   }
-
-   /**
     * Gets the total cost to go of the optimization problem.
     * @return cost to go
     */
    public double getCostToGo()
    {
-      return costToGo.get(0, 0);
+      return costToGo.get(0);
    }
 
    /**
@@ -978,7 +975,7 @@ public class ICPOptimizationQPSolver
     */
    public double getFootstepCostToGo()
    {
-      return footstepCostToGo.get(0, 0);
+      return footstepCostToGo.get(0);
    }
 
    /**
@@ -987,7 +984,7 @@ public class ICPOptimizationQPSolver
     */
    public double getFeedbackCostToGo()
    {
-      return feedbackCostToGo.get(0, 0);
+      return feedbackCostToGo.get(0);
    }
 
    /**
@@ -996,7 +993,7 @@ public class ICPOptimizationQPSolver
     */
    public double getAngularMomentumMinimizationCostToGo()
    {
-      return angularMomentumMinimizationCostToGo.get(0, 0);
+      return angularMomentumMinimizationCostToGo.get(0);
    }
 
    /**

@@ -69,7 +69,4 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
    public abstract ICPOptimizationControllerInterface getICPOptimizationController();
-
-   public abstract double getOptimizedTimeRemaining();
-
 }
