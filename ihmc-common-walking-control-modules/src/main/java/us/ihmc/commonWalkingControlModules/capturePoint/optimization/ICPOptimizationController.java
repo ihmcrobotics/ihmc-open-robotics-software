@@ -35,9 +35,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private static final boolean DEBUG = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
-   private static final double footstepAdjustmentSafetyFactor = 1.0;
-   private static final double transferSplitFraction = 0.3;
-
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -82,6 +79,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2d upcomingFootstepLocation = new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
    private final FramePoint2D unclippedFootstepSolution = new FramePoint2D();
 
+   private final YoDouble footstepAdjustmentSafetyFactor = new YoDouble(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry);
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
    private final YoFramePoint2d footstepWeights = new YoFramePoint2d(yoNamePrefix + "FootstepWeights", worldFrame, registry);
@@ -121,7 +119,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean useAngularMomentumIntegrator = new YoBoolean(yoNamePrefix + "UseAngularMomentumIntegrator", registry);
    private final YoDouble angularMomentumIntegratorGain = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorGain", registry);
    private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
-
 
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
@@ -178,18 +175,25 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaleStepRegularizationWeightWithTime.set(icpOptimizationParameters.scaleStepRegularizationWeightWithTime());
       scaleFeedbackWeightWithGain.set(icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
+      footstepAdjustmentSafetyFactor.set(icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
       forwardFootstepWeight.set(icpOptimizationParameters.getForwardFootstepWeight());
       lateralFootstepWeight.set(icpOptimizationParameters.getLateralFootstepWeight());
       footstepRegularizationWeight.set(icpOptimizationParameters.getFootstepRegularizationWeight());
+
       feedbackForwardWeight.set(icpOptimizationParameters.getFeedbackForwardWeight());
       feedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
       feedbackRegularizationWeight.set(icpOptimizationParameters.getFeedbackRegularizationWeight());
       feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
+
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
+
       angularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
       scaledAngularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+
       limitReachabilityFromAdjustment.set(icpOptimizationParameters.getLimitReachabilityFromAdjustment());
+
+      transferDurationSplitFraction.set(icpOptimizationParameters.getTransferSplitFraction());
 
       useAngularMomentumIntegrator.set(icpOptimizationParameters.getUseAngularMomentumIntegrator());
       angularMomentumIntegratorGain.set(icpOptimizationParameters.getAngularMomentumIntegratorGain());
@@ -218,7 +222,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
 
-      transferDurationSplitFraction.set(transferSplitFraction);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -539,7 +542,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          predictedEndOfStateICP.add(perfectCMP);
 
          upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
-         solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor, tempPoint2d);
+         solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), tempPoint2d);
       }
 
       if (useFootstepRegularization)

@@ -15,6 +15,14 @@ public abstract class ICPOptimizationParameters
    public abstract int numberOfFootstepsToConsider();
 
    /**
+    * Specifies a scaling factor on the amount of footstep adjustment. By increasing this past 1.0, the footstep will be adjusted more than explicitly necessary.
+    */
+   public double getFootstepAdjustmentSafetyFactor()
+   {
+      return 1.0;
+   }
+
+   /**
     * The weight for tracking the desired footsteps.
     * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CoP control authority has been saturated.
     */
@@ -200,6 +208,9 @@ public abstract class ICPOptimizationParameters
       return false;
    }
 
+   /**
+    * Specifies whether or not to use the ICP control polygon for the CMP, rather than the actual support polygon.
+    */
    public boolean getUseICPControlPolygons()
    {
       return true;
@@ -235,5 +246,13 @@ public abstract class ICPOptimizationParameters
    public double getAngularMomentumIntegratorLeakRatio()
    {
       return 0.92;
+   }
+
+   /**
+    * Specifies the transfer split fraction to use for the ICP value recursion multiplier.
+    */
+   public double getTransferSplitFraction()
+   {
+      return 0.3;
    }
 }
