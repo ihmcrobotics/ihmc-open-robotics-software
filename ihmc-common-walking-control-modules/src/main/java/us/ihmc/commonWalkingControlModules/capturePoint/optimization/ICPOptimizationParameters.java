@@ -255,4 +255,20 @@ public abstract class ICPOptimizationParameters
    {
       return 0.3;
    }
+
+   /**
+    * Sets whether or not to account for the used angular momentum when computing the amount of step adjustment.
+    */
+   public boolean considerAngularMomentumInAdjustment()
+   {
+      return false;
+   }
+
+   /**
+    * Sets whether or not to account for the used CoP feedback when computing the amount of step adjustment.
+    */
+   public boolean considerFeedbackInAdjustment()
+   {
+      return true;
+   }
 }

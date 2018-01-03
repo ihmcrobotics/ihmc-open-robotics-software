@@ -235,6 +235,27 @@ public class ICPOptimizationQPSolver
       solver.setUseWarmStart(useWarmStart);
    }
 
+   /**
+    * Sets whether or not the footstep adjustment should have knowledge of trying to use angular momentum for balance.
+    * By default, this is true.
+    */
+   public void setConsiderAngularMomentumInAdjustment(boolean considerAngularMomentumInAdjustment)
+   {
+      inputCalculator.setConsiderAngularMomentumInAdjustment(considerAngularMomentumInAdjustment);
+   }
+
+   /**
+    * Sets whether or not the footstep adjustment should have knowledge of trying to use cop feedback for balance.
+    * By default, this is true.
+    */
+   public void setConsiderFeedbackInAdjustment(boolean considerFeedbackInAdjustment)
+   {
+      inputCalculator.setConsiderFeedbackInAdjustment(considerFeedbackInAdjustment);
+   }
+
+   /**
+    * Sets the maximum number of iterations to be used by the active set solver.
+    */
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
    {
       solver.setMaxNumberOfIterations(maxNumberOfIterations);

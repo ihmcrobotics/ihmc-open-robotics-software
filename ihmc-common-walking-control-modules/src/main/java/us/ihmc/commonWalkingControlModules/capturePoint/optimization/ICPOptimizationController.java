@@ -215,6 +215,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       boolean updateRegularizationAutomatically = true;
       solver = new ICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
+      solver.setConsiderAngularMomentumInAdjustment(icpOptimizationParameters.considerAngularMomentumInAdjustment());
+      solver.setConsiderFeedbackInAdjustment(icpOptimizationParameters.considerFeedbackInAdjustment());
 
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, DEBUG, yoNamePrefix, registry);
 
