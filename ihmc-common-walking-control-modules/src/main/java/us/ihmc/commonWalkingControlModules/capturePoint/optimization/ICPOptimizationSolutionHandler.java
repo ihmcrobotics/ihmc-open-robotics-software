@@ -110,37 +110,28 @@ public class ICPOptimizationSolutionHandler
    }
 
    private final FramePoint2D referenceFootstepLocation = new FramePoint2D();
-   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2D> unclippedFootstepSolutionsToPack,
-         ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, ICPOptimizationQPSolver solver)
+   public void extractFootstepSolutions(YoFramePoint2d footstepSolutionToPack, FramePoint2D unclippedFootstepSolutionToPack,
+         Footstep upcomingFootstep, ICPOptimizationQPSolver solver)
    {
-      boolean firstStepAdjusted = false;
-      for (int i = 0; i < numberOfFootstepsToConsider; i++)
-      {
-         solver.getFootstepSolutionLocation(i, locationSolution);
+      solver.getFootstepSolutionLocation(0, locationSolution);
 
-         ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
+      ReferenceFrame deadbandFrame = upcomingFootstep.getSoleReferenceFrame();
 
-         //referenceFootstepLocations.get(i).getFrameTuple2d(referenceFootstepLocation);
-         upcomingFootsteps.get(i).getPosition2d(referenceFootstepLocation);
-         footstepSolutionsToPack.get(i).getFrameTuple2d(previousLocationSolution);
-         clippedLocationSolution.set(locationSolution);
-         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation,
-               deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
+      upcomingFootstep.getPosition2d(referenceFootstepLocation);
+      footstepSolutionToPack.getFrameTuple2d(previousLocationSolution);
+      clippedLocationSolution.set(locationSolution);
+      boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation,
+            deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
-         if (i == 0)
-         {
-            firstStepAdjusted = footstepWasAdjusted;
-            footstepAdjustment.set(locationSolution);
-            footstepAdjustment.sub(referenceFootstepLocation);
-            clippedFootstepAdjustment.set(clippedLocationSolution);
-            clippedFootstepAdjustment.sub(referenceFootstepLocation);
-         }
+      footstepAdjustment.set(locationSolution);
+      footstepAdjustment.sub(referenceFootstepLocation);
+      clippedFootstepAdjustment.set(clippedLocationSolution);
+      clippedFootstepAdjustment.sub(referenceFootstepLocation);
 
-         footstepSolutionsToPack.get(i).set(clippedLocationSolution);
-         unclippedFootstepSolutionsToPack.get(i).set(locationSolution);
-      }
+      footstepSolutionToPack.set(clippedLocationSolution);
+      unclippedFootstepSolutionToPack.set(locationSolution);
 
-      this.footstepWasAdjusted.set(firstStepAdjusted);
+      this.footstepWasAdjusted.set(footstepWasAdjusted);
    }
 
    public void zeroAdjustment()

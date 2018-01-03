@@ -103,13 +103,4 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
    {
       return null;
    }
-
-   @Override
-   public double getOptimizedTimeRemaining()
-   {
-      throw new RuntimeException("This method is not implemented in planner based momentum control module.");
-   }
-
-   @Override
-   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity) {}
 }

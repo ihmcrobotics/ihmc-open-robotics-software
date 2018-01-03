@@ -347,17 +347,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
 
-      double remainingTime;
-      if (balanceManager.useICPTimingOptimization())
-      {
-         remainingTime = balanceManager.getOptimizedTimeRemaining();
-         optimizedRemainingSwingTime.set(remainingTime);
-      }
-      else
-      {
-         remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
-         estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
-      }
+      double remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
+      estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
 
       if (remainingTime > 1.0e-3)
       {

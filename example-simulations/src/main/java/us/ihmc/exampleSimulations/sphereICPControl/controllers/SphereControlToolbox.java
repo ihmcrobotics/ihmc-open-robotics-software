@@ -786,12 +786,6 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean scaleUpcomingStepWeights()
-         {
-            return true;
-         }
-
-         @Override
          public boolean useFeedbackRegularization()
          {
             return true;
@@ -809,13 +803,7 @@ public class SphereControlToolbox
             return true;
          }
 
-         @Override
-         public boolean useTimingOptimization()
-         {
-            return false;
-         }
-
-         @Override
+        @Override
          public boolean useFootstepRegularization()
          {
             return true;
