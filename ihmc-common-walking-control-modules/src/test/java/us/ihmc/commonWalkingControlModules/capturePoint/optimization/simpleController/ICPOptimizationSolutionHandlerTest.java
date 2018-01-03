@@ -463,12 +463,12 @@ public class ICPOptimizationSolutionHandlerTest
          return 3.0;
       }
 
-      @Override public double getDynamicRelaxationWeight()
+      @Override public double getDynamicsObjectiveWeight()
       {
          return 1000.0;
       }
 
-      @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
+      @Override public double getDynamicsObjectiveDoubleSupportWeightModifier()
       {
          return 1.0;
       }

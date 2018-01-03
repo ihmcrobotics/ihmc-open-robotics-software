@@ -79,7 +79,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getDynamicRelaxationWeight()
+   public double getDynamicsObjectiveWeight()
    {
       if (runningOnRealRobot)
          return 10000.0;
@@ -94,7 +94,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getDynamicRelaxationDoubleSupportWeightModifier()
+   public double getDynamicsObjectiveDoubleSupportWeightModifier()
    {
       if (useAngularMomentum)
          return runningOnRealRobot ? 50.0 : 100.0;
