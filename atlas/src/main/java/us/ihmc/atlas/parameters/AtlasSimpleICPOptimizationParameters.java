@@ -14,11 +14,6 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
-   public boolean useSimpleOptimization()
-   {
-      return true;
-   }
-
    /** {@inheritDoc} */
    @Override
    public int numberOfFootstepsToConsider()
@@ -132,13 +127,6 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
 
    /** {@inheritDoc} */
    @Override
-   public boolean scaleUpcomingStepWeights()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean useFeedbackRegularization()
    {
       return true;
@@ -163,13 +151,6 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    public double getSafeCoPDistanceToEdge()
    {
       return 0.001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useTimingOptimization()
-   {
-      return false;
    }
 
    /** {@inheritDoc} */
@@ -205,20 +186,6 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    public double getAdjustmentDeadband()
    {
       return 0.02;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDoubleSupportSplitFractionForBigAdjustment()
-   {
-      return runningOnRealRobot ? 0.25 : 0.2;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumTimeOnInitialCMPForBigAdjustment()
-   {
-      return runningOnRealRobot ? 0.15 : 0.1;
    }
 
    /** {@inheritDoc} */
