@@ -173,9 +173,16 @@ public class ConvexPolygonScaler
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
     * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
     */
-   public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2D exteriorPolygon, ConvexPolygon2D interiorPolygon, double distance, ConvexPolygon2D scaledPolygonToPack)
+
+   /**
+    * This function computes the inscribed polygon that represents the constraint on the centroid location of an interior polygon that must
+    * remain inside an exterior polygon. The distance inside that the interior polygon can achieve is set by {@param distanceInside}, where positive
+    * represents an interior offset, and negative represents an exterior offset.
+    */
+   public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2D exteriorPolygon, ConvexPolygon2D interiorPolygon, double distanceInside,
+                                                             ConvexPolygon2D scaledPolygonToPack)
    {
-      if (Math.abs(distance) < 1.0e-10 && interiorPolygon.getArea() <= 1.0 -10)
+      if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0 -10)
       {
          scaledPolygonToPack.setAndUpdate(exteriorPolygon);
          return true;
@@ -188,16 +195,16 @@ public class ConvexPolygonScaler
          Point2DReadOnly vertex1 = exteriorPolygon.getVertex(1);
          polygonAsLineSegment.set(vertex0, vertex1);
 
-         if(distance < 0.0)
+         if(distanceInside < 0.0)
          {
             scaledPolygonToPack.clear();
             polygonAsLineSegment.direction(true, normalizedVector);
-            normalizedVector.scale(-distance);
+            normalizedVector.scale(-distanceInside);
             scaledPolygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
             scaledPolygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
 
             polygonAsLineSegment.perpendicular(true, normalizedVector);
-            normalizedVector.scale(distance);
+            normalizedVector.scale(distanceInside);
 
             scaledPolygonToPack.addVertex(vertex0.getX() + normalizedVector.getX(), vertex0.getY() + normalizedVector.getY());
             scaledPolygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
@@ -207,7 +214,7 @@ public class ConvexPolygonScaler
             return true;
          }
 
-         if (vertex0.distance(vertex1) < 2.0 * distance)
+         if (vertex0.distance(vertex1) < 2.0 * distanceInside)
          {
             Point2D midPoint = new Point2D(vertex0);
             midPoint.add(vertex1);
@@ -219,7 +226,7 @@ public class ConvexPolygonScaler
             return false;
          }
 
-         double percentageAlongSegment = distance / polygonAsLineSegment.length();
+         double percentageAlongSegment = distanceInside / polygonAsLineSegment.length();
          polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(percentageAlongSegment, newVertex0);
          polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(1 - percentageAlongSegment, newVertex1);
 
@@ -235,13 +242,13 @@ public class ConvexPolygonScaler
       // TODO
       if (exteriorPolygon.getNumberOfVertices() == 1)
       {
-         if(distance < 0.0)
+         if(distanceInside < 0.0)
          {
             Point2DReadOnly vertex0 = exteriorPolygon.getVertex(0);
-            scaledPolygonToPack.addVertex(vertex0.getX() + distance, vertex0.getY() + distance);
-            scaledPolygonToPack.addVertex(vertex0.getX() + distance, vertex0.getY() - distance);
-            scaledPolygonToPack.addVertex(vertex0.getX() - distance, vertex0.getY() + distance);
-            scaledPolygonToPack.addVertex(vertex0.getX() - distance, vertex0.getY() - distance);
+            scaledPolygonToPack.addVertex(vertex0.getX() + distanceInside, vertex0.getY() + distanceInside);
+            scaledPolygonToPack.addVertex(vertex0.getX() + distanceInside, vertex0.getY() - distanceInside);
+            scaledPolygonToPack.addVertex(vertex0.getX() - distanceInside, vertex0.getY() + distanceInside);
+            scaledPolygonToPack.addVertex(vertex0.getX() - distanceInside, vertex0.getY() - distanceInside);
             scaledPolygonToPack.update();
             return true;
          }
@@ -287,7 +294,7 @@ public class ConvexPolygonScaler
          }
 
 
-         linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance + extraDistance, referencePoint);
+         linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distanceInside + extraDistance, referencePoint);
          edgeOnQ.getDirection(normalizedVector);
 
          Line2D newEdge = getARay(rays.size());
