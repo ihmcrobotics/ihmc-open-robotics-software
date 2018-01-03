@@ -303,6 +303,19 @@ public class VisibilityGraphsIOTools
          List<File> children = Arrays.asList(file.listFiles());
          File parametersFile = children.stream().filter(child -> child.getName().endsWith(INPUTS_PARAMETERS_FILENAME)).findFirst().orElse(null);
 
+         // adding debug statements to test on bamboo TODO remove
+
+         PrintTools.info("Parent file absolute path:");
+         PrintTools.info(file.getAbsolutePath() + "\n");
+
+         PrintTools.info("File found by searching:");
+         PrintTools.info(parametersFile.getAbsolutePath() + "\n");
+
+         PrintTools.info("Expected file:");
+         PrintTools.info(expectedParametersFileName);
+
+         // adding debug statements to test on bamboo TODO remove
+
          if (parametersFile == null || !parametersFile.getAbsolutePath().equals(expectedParametersFileName))
             throw new RuntimeException("Could not find the parmeter file: " + expectedParametersFileName);
 
