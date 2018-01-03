@@ -529,12 +529,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       }
 
       @Override
-      public boolean useTimingOptimization()
-      {
-         return false;
-      }
-
-      @Override
       public boolean useFootstepRegularization()
       {
          return false;

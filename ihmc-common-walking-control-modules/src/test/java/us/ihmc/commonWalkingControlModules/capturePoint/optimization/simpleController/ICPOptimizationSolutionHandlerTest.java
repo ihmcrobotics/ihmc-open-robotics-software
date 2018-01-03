@@ -179,7 +179,7 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -207,7 +207,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
@@ -263,7 +263,7 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -291,7 +291,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
@@ -351,7 +351,7 @@ public class ICPOptimizationSolutionHandlerTest
       {
       }
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -416,11 +416,6 @@ public class ICPOptimizationSolutionHandlerTest
       {
          this.deadbandSize = deadbandSize;
          this.resolution = resolution;
-      }
-
-      @Override public int getMaximumNumberOfFootstepsToConsider()
-      {
-         return 5;
       }
 
       @Override public int numberOfFootstepsToConsider()
@@ -506,11 +501,6 @@ public class ICPOptimizationSolutionHandlerTest
       @Override public boolean useStepAdjustment()
       {
          return true;
-      }
-
-      @Override public boolean useTimingOptimization()
-      {
-         return false;
       }
 
       @Override public boolean useAngularMomentum()

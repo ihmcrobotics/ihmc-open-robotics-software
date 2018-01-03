@@ -14,11 +14,8 @@ public class ICPQPIndexHandler
    /** Number of footstep variables registered with the solver. Should be two times {@link #numberOfFootstepsToConsider} */
    private int numberOfFootstepVariables = 0;
 
-   /** Number of equality constraints in the optimization. Only the dynamics in this formulation. */
-   private final static int numberOfEqualityConstraints = 2; // these are the dynamics
-
    /** Index for the start of the footstep variables. */
-   private final int footstepStartingIndex = 0;
+   private int footstepStartingIndex;
    /** Index for the CMP Feedback action term. */
    private int feedbackCMPIndex;
    /** Index for the dynamic relaxation term. */
@@ -93,27 +90,19 @@ public class ICPQPIndexHandler
     */
    public void computeProblemSize()
    {
+      feedbackCMPIndex = 0;
+      angularMomentumIndex = feedbackCMPIndex + 2;
+      if (useAngularMomentum)
+         footstepStartingIndex = angularMomentumIndex + 2;
+      else
+         footstepStartingIndex = feedbackCMPIndex + 2;
+
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
-      numberOfFreeVariables = 4; // all the footstep locations, the CMP delta, and the dynamic relaxation
+      numberOfFreeVariables = 2; // the CMP delta
       if (useStepAdjustment)
-         numberOfFreeVariables += numberOfFootstepVariables;
+         numberOfFreeVariables += numberOfFootstepVariables; // all the footstep locations
       if (useAngularMomentum)
          numberOfFreeVariables += 2;
-
-      feedbackCMPIndex = footstepStartingIndex + numberOfFootstepVariables; // this variable is stored after the footsteps
-
-      dynamicRelaxationIndex = feedbackCMPIndex + 2; // this variable is stored after the feedback value
-      angularMomentumIndex = dynamicRelaxationIndex + 2; // this variable is stored after the dynamic relaxation index
-   }
-
-   /**
-    * Gets the total number of equality constraints for the optimization to use.
-    *
-    * @return number of equality constraints.
-    */
-   public int getNumberOfEqualityConstraints()
-   {
-      return numberOfEqualityConstraints;
    }
 
    /**
@@ -123,7 +112,7 @@ public class ICPQPIndexHandler
     */
    public int getFootstepStartIndex()
    {
-      return 0;
+      return footstepStartingIndex;
    }
 
    /**
@@ -145,16 +134,6 @@ public class ICPQPIndexHandler
    public int getFeedbackCMPIndex()
    {
       return feedbackCMPIndex;
-   }
-
-   /**
-    * Gets the index of the dynamic relaxation term.
-    *
-    * @return dynamic relaxation index.
-    */
-   public int getDynamicRelaxationIndex()
-   {
-      return dynamicRelaxationIndex;
    }
 
    /**

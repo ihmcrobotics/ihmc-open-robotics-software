@@ -8,15 +8,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 public abstract class ICPOptimizationParameters
 {
    /**
-    * The maximum number of footsteps that can be considered by the controller. The variable {@link #numberOfFootstepsToConsider()} is clipped to this value.
-    * It is also used to instantiate all the yo variable lists.
-    */
-   public int getMaximumNumberOfFootstepsToConsider()
-   {
-      return 5;
-   }
-
-   /**
     * How many footsteps the optimization considers for adjustment.
     * 1 footstep seems to be good.
     * With a penalization on the dynamics themselves, future steps show little effect on the current dynamics.
@@ -127,8 +118,6 @@ public abstract class ICPOptimizationParameters
     */
    public abstract boolean useAngularMomentum();
 
-   public abstract boolean useTimingOptimization();
-
    /**
     * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
     */
@@ -158,42 +147,6 @@ public abstract class ICPOptimizationParameters
     * When it is outside the deadband, the deadband is subtracted from it.
     */
    public abstract double getAdjustmentDeadband();
-
-   /**
-    * Represents the amount of adjustment to define as big
-    */
-   public boolean useDifferentSplitRatioForBigAdjustment()
-   {
-      return false;
-   }
-
-   /**
-    * Represents the amount of adjustment to define as big
-    */
-   public double getMagnitudeForBigAdjustment()
-   {
-      return 0.2;
-   }
-
-   /**
-    * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
-    * The returned value should be between 0.0 and 1.0:
-    * <li> 0.0 is equivalent to spend the entire double support on the initial CMP (last entry CMP if using one CMP per support, last exit CMP otherwise), </li>
-    * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
-    * <p> A value close to 0.5 is preferable. </p>
-    */
-   public double getDoubleSupportSplitFractionForBigAdjustment()
-   {
-      return 0.5;
-   }
-
-   /**
-    * Represents the minimum time in transfer before reaching the next entry CMP.
-    */
-   public double getMinimumTimeOnInitialCMPForBigAdjustment()
-   {
-      return 0.15;
-   }
 
    /**
     * This method sets what the minimum change in the current footstep is allowed to be.
@@ -257,110 +210,5 @@ public abstract class ICPOptimizationParameters
    public boolean getLimitReachabilityFromAdjustment()
    {
       return true;
-   }
-
-
-   /**
-    * This is the size used to vary the QP duration by, and allow us to compute the gradient of the cost with respect to the
-    * swing time duration. This is only used if {@link #useTimingOptimization()} returns true.
-    *
-    * @return variation size
-    */
-   public double getVariationSizeToComputeTimingGradient()
-   {
-      return 0.001;
-   }
-
-   /**
-    * This is the weight assigned to adjusting the swing time duration when {@link #useTimingOptimization()} returns true.
-    * It is used to compute the cost of adjusting the swing time duration, and is added to the cost to go of the
-    * quadratic program to compute the total cost to go.
-    *
-    * @return weight
-    */
-   public double getTimingAdjustmentGradientDescentWeight()
-   {
-      return 0.1;
-   }
-
-   /**
-    * This is the weight assigned to adjusting the swing time duration when {@link #useTimingOptimization()} returns true.
-    * It is used to compute the cost of adjusting the swing time duration, and is added to the cost to go of the
-    * quadratic program to compute the total cost to go.
-    *
-    * @return weight
-    */
-   public double getTimingAdjustmentGradientDescentRegularizationWeight()
-   {
-      return 0.001;
-   }
-
-   /**
-    * This is the gradient threshold at which the gradient descent algorithm is terminated. Once the gradient falls below
-    * a certain value, we know that the cost is near a minimum. This value defines how close we have to be to the minimum
-    * to terminate the algorithm.
-    *
-    * @return gradient threshold
-    */
-   public double getGradientThresholdForTimingAdjustment()
-   {
-      return 0.1;
-   }
-
-   /**
-    * This is the gain used in the gradient descent algorithm. It multiplies the current gradient estimate, and adds this
-    * value to the current duration.
-    *
-    * @return gradient gain
-    */
-   public double getGradientDescentGain()
-   {
-      return 0.035;
-   }
-
-   /**
-    * If, after the gradient descent update, the cost increased instead of decreased, we know we overshot the actual minimum location.
-    * This variable is then used to scale the duration adjustment that was just used in an attempt to not overshoot the minimum.
-    *
-    * @return scaling factor
-    */
-   public double getTimingAdjustmentAttenuation()
-   {
-      return 0.5;
-   }
-
-   /**
-    * <p>
-    * This is the maximum allowable solve duration for the entire gradient descent algorithm. Once it has surpassed this duration, the
-    * algorithm is terminated. On the next control tick, the algorithm resumes attempting to solve at this point.
-    * </p>
-    * <p>
-    * This should be used to set the control deadlines to ensure the algorithm does not take too long on every tick.
-    * </p>
-    * @return duration
-    */
-   public double getMaximumDurationForOptimization()
-   {
-      return 0.0008;
-   }
-
-   /**
-    * This is the maximum number of total iterations allowed by the gradient descent algorithm before terminating the current control tick.
-    * This includes the number of attenuation iterations, as well as total loops.
-    * @return number of iterations
-    */
-   public int getMaximumNumberOfGradientIterations()
-   {
-      return 15;
-   }
-
-   /**
-    * This is the maximum number of times the gradient will attempt to reduce its adjustment due to overshoot before continuing to the next gradient
-    * descent iteration.
-    * @return number of iterations
-    */
-   public int getMaximumNumberOfGradientReductions()
-   {
-      return 5;
    }
 }
