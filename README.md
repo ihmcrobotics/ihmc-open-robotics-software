@@ -1,5 +1,9 @@
 # IHMC Open Robotics Software
 
+### 0.11 Build Info
+Build 4570
+https://bamboo.ihmc.us/browse/LIBS-IHMCOPENROBOTICSSOFTWARE-1067
+
 ### Tested Platforms
 We test all of our software on OS X 10.12 Sierra, Windows 7/8/10, and Ubuntu 14.04 and 16.04 LTS, Desktop and Server. It is likely to work on other platforms but
 not necessarily tested.
