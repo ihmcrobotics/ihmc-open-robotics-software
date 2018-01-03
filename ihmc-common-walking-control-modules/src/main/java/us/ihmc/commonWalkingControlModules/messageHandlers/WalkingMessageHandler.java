@@ -20,13 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
@@ -94,6 +88,7 @@ public class WalkingMessageHandler
 
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
+   private final PlanarRegionsListHandler planarRegionsListHandler;
 
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
    private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -140,6 +135,7 @@ public class WalkingMessageHandler
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime);
+      planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -223,6 +219,16 @@ public class WalkingMessageHandler
       updateTransferTimes(upcomingFootstepTimings);
 
       updateVisualization();
+   }
+
+   public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
+   {
+      planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
+   }
+
+   public PlanarRegionsListHandler getPlanarRegionsListHandler()
+   {
+      return planarRegionsListHandler;
    }
 
    public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
@@ -567,6 +573,11 @@ public class WalkingMessageHandler
       fallingDirection.changeFrame(worldFrame);
       failureStatusMessage.setFallingDirection(fallingDirection);
       statusOutputManager.reportStatusMessage(failureStatusMessage);
+   }
+
+   public void requestPlanarRegions()
+   {
+      planarRegionsListHandler.requestPlanarRegions();
    }
 
    public void registerCompletedDesiredFootstep(Footstep completedFesiredFootstep)

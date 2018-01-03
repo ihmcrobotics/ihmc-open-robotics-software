@@ -539,6 +539,7 @@ public class WalkingHighLevelHumanoidController
       commandConsumer.consumeManipulationCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
+      commandConsumer.consumePlanarRegionsListCommand();
 
       updateFailureDetection();
 
