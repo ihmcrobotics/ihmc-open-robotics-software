@@ -505,12 +505,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
       }
 
       @Override
-      public boolean scaleUpcomingStepWeights()
-      {
-         return false;
-      }
-
-      @Override
       public boolean useFeedbackRegularization()
       {
          return false;

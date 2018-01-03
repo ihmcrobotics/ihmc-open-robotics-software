@@ -97,12 +97,6 @@ public abstract class ICPOptimizationParameters
    public abstract boolean scaleFeedbackWeightWithGain();
 
    /**
-    * Enabling this boolean causes {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be decreased
-    * sequentially for upcoming steps. Using this increases the likelihood of adjusting future steps, as well.
-    */
-   public abstract boolean scaleUpcomingStepWeights();
-
-   /**
     * Enabling this boolean enables the use of feedback regularization, found in {@link #getFeedbackRegularizationWeight()}.
     */
    public abstract boolean useFeedbackRegularization();
@@ -206,6 +200,10 @@ public abstract class ICPOptimizationParameters
       return false;
    }
 
+   public boolean getUseICPControlPolygons()
+   {
+      return true;
+   }
 
    public boolean getLimitReachabilityFromAdjustment()
    {

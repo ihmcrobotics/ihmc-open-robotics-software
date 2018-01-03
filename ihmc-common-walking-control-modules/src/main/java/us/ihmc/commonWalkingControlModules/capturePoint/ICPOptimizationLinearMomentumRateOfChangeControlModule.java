@@ -138,7 +138,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
-      if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
+      if (icpOptimizationController.useStepAdjustment())
       {
          footstepToPack.getPose(footstepPose);
          icpOptimizationController.getFootstepSolution(footstepPositionSolution);

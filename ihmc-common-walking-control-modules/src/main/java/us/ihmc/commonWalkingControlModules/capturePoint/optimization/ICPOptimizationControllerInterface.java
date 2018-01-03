@@ -22,11 +22,11 @@ public interface ICPOptimizationControllerInterface
    void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0);
    void initializeForSingleSupport(double initialTime, RobotSide transferToSide, double omega0);
 
-   int getNumberOfFootstepsToConsider();
    void getDesiredCMP(FramePoint2D desiredCMP);
    void getFootstepSolution(FramePoint2D footstepSolutionToPack);
    boolean wasFootstepAdjusted();
    boolean useAngularMomentum();
+   boolean useStepAdjustment();
 
    void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
 
