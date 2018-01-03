@@ -205,8 +205,35 @@ public abstract class ICPOptimizationParameters
       return true;
    }
 
+   /**
+    * Limits the reachability polygon constraint so that the foot cannot be retracted once it has started adjusting.
+    */
    public boolean getLimitReachabilityFromAdjustment()
    {
       return true;
+   }
+
+   /**
+    * Specifies whether or not to increase the cost of using angular momentum based on the amount of angular momentum used.
+    */
+   public boolean getUseAngularMomentumIntegrator()
+   {
+      return true;
+   }
+
+   /**
+    * Defines the integral gain for the angular momentum integrator, as used in {@link #getUseAngularMomentumIntegrator()}.
+    */
+   public double getAngularMomentumIntegratorGain()
+   {
+      return 50.0;
+   }
+
+   /**
+    * Defines the integral leak ratio for the angular momentum integrator, as used in {@link #getUseAngularMomentumIntegrator()}.
+    */
+   public double getAngularMomentumIntegratorLeakRatio()
+   {
+      return 0.92;
    }
 }

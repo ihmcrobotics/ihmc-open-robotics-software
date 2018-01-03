@@ -100,7 +100,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       steppingParameters = new AtlasSteppingParameters(jointMap);
       leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
-      icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
+      icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {

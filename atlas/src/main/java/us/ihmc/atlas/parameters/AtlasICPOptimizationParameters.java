@@ -3,13 +3,13 @@ package us.ihmc.atlas.parameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
-public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParameters
+public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
    private final boolean useAngularMomentum = false;
    private final boolean useStepAdjustment = false;
 
-   public AtlasSimpleICPOptimizationParameters(boolean runningOnRealRobot)
+   public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
