@@ -2,15 +2,26 @@
 
 ## Develop branch
 
-Version number, release notes, documentation, and README should always target the next release.
+1. Update version numbers.
+1. Create Release Notes.
+1. Update README.
+1. Update documentation. (When we have versioned documentation)
 
-## Preparing for release (Atlas certified)
+## Preparing for release
 
 1. `develop` branch is green on Bamboo for all supported software.
 1. Record the CI URLs for ihmc-open-robotics-software and record them the README.
    * There is a new  Status Icons plugin that gives an icon.
 1. Pin the Atlas OCU to the global build number. Some tags (i.e. `build-3344`)will help here.
+
+## Atlas Testing
+
 1. Atlas does obstacle course, all major features tested on real hardware.
+   * https://confluence.ihmc.us/display/HOWTO/Checklist+for+Stable+atlas-develop+Tags
+1. Update Release Notes on what was tested and performance results.
+   * List things that were tested
+   * Include log summary CSV
+   * Upload log video to YouTube and link
 
 ## Releasing
 1. Start release with git flow.
