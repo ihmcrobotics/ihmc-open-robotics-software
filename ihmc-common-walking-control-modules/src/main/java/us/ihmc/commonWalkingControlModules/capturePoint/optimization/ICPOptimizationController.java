@@ -31,16 +31,12 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final boolean DEBUG = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
    private static final double footstepAdjustmentSafetyFactor = 1.0;
    private static final double transferSplitFraction = 0.3;
-
-   private static final boolean useAngularMomentumIntegrator = true;
-   private static final double angularMomentumIntegratorGain = 50.0;
-   private static final double angularMomentumIntegratorLeakRatio = 0.92;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -122,6 +118,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
+   private final YoBoolean useAngularMomentumIntegrator = new YoBoolean(yoNamePrefix + "UseAngularMomentumIntegrator", registry);
+   private final YoDouble angularMomentumIntegratorGain = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorGain", registry);
+   private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
+
+
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final ICPOptimizationSolutionHandler solutionHandler;
@@ -189,6 +190,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       angularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
       scaledAngularMomentumMinimizationWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
       limitReachabilityFromAdjustment.set(icpOptimizationParameters.getLimitReachabilityFromAdjustment());
+
+      useAngularMomentumIntegrator.set(icpOptimizationParameters.getUseAngularMomentumIntegrator());
+      angularMomentumIntegratorGain.set(icpOptimizationParameters.getAngularMomentumIntegratorGain());
+      angularMomentumIntegratorLeakRatio.set(icpOptimizationParameters.getAngularMomentumIntegratorLeakRatio());
 
       useICPControlPolygons.set(icpOptimizationParameters.getUseICPControlPolygons());
 
@@ -659,7 +664,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       double angularMomentumMinimizationWeight = this.angularMomentumMinimizationWeight.getDoubleValue();
 
-      if (!useAngularMomentumIntegrator)
+      if (!useAngularMomentumIntegrator.getBooleanValue())
       {
          scaledAngularMomentumMinimizationWeight.set(angularMomentumMinimizationWeight);
          return;
@@ -667,10 +672,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       double angularMomentumMagnitude = cmpCoPDifferenceSolution.length();
 
-      double cumulativeAngularMomentumAfterLeak = angularMomentumMagnitude * controlDT + angularMomentumIntegratorLeakRatio * cumulativeAngularMomentum.getDoubleValue();
+      double cumulativeAngularMomentumAfterLeak = angularMomentumMagnitude * controlDT +
+            angularMomentumIntegratorLeakRatio.getDoubleValue() * cumulativeAngularMomentum.getDoubleValue();
       cumulativeAngularMomentum.set(cumulativeAngularMomentumAfterLeak);
 
-      double multiplier = 1.0 + angularMomentumIntegratorGain * cumulativeAngularMomentumAfterLeak;
+      double multiplier = 1.0 + angularMomentumIntegratorGain.getDoubleValue() * cumulativeAngularMomentumAfterLeak;
 
       scaledAngularMomentumMinimizationWeight.set(multiplier * angularMomentumMinimizationWeight);
    }
