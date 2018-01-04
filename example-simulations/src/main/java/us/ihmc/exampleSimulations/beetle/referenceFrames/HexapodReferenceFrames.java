@@ -2,10 +2,10 @@ package us.ihmc.exampleSimulations.beetle.referenceFrames;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -26,7 +26,7 @@ public class HexapodReferenceFrames implements ReferenceFrames
    private final ZUpFrame bodyZUpFrame;
    private final PoseReferenceFrame centerOfMassFrameWithBodyZUpOrientation;
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
-   private final FrameOrientation bodyOrientation = new FrameOrientation();
+   private final FrameQuaternion bodyOrientation = new FrameQuaternion();
 
    private final FramePoint3D centroid = new FramePoint3D();
    private final FramePoint3D currentFoot = new FramePoint3D();
@@ -111,7 +111,6 @@ public class HexapodReferenceFrames implements ReferenceFrames
    @Override
    public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 }

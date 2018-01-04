@@ -8,13 +8,13 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
@@ -29,7 +29,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort;
-   private final ControlFlowOutputPort<FrameOrientation> orientationPort;
+   private final ControlFlowOutputPort<FrameQuaternion> orientationPort;
    private final ControlFlowOutputPort<FrameVector3D> angularVelocityPort;
    private final ControlFlowOutputPort<FrameVector3D> angularAccelerationPort;
    private final ControlFlowOutputPort<FrameVector3D> biasPort;
@@ -82,7 +82,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
    public LinearAccelerationMeasurementModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort,
            ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort, ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationPort,
-           ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort,
+           ControlFlowOutputPort<FrameQuaternion> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort,
            ControlFlowOutputPort<FrameVector3D> angularAccelerationPort, ControlFlowOutputPort<FrameVector3D> biasPort, ControlFlowInputPort<Vector3D> linearAccelerationMeasurementInputPort,
            ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, 
            RigidBody measurementLink,

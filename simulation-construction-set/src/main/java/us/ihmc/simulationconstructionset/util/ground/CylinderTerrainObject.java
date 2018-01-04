@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Cylinder3D;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
@@ -32,8 +32,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       this.height = height;
       this.radius = radius;
       this.location = location;
-      RigidBodyTransform bottomTransform = transformToBottomOfCylinder();
-      cylinder = new Cylinder3D(bottomTransform, height, radius);
+      cylinder = new Cylinder3D(location, height, radius);
 
       Box3D box = new Box3D(location, radius * 2, radius * 2, height);
       Point3D[] vertices = box.getVertices();
@@ -141,7 +140,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    public Vector3D getAxisDirectionCopy()
    {
       Vector3D axisDirection = new Vector3D();
-      location.getRotationMatrix().getColumn(Direction.Z.getIndex(), axisDirection);
+      location.getRotationMatrix().getColumn(Axis.Z.ordinal(), axisDirection);
       return axisDirection;
    }
 

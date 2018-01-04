@@ -1,11 +1,11 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
 public class ProviderBasedConstantOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
@@ -46,7 +46,7 @@ public class ProviderBasedConstantOrientationTrajectoryGenerator implements Orie
       return time.getDoubleValue() > finalTime.getDoubleValue();
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationProvider.getOrientation(orientationToPack);
       orientationToPack.changeFrame(referenceFrame);
@@ -62,7 +62,7 @@ public class ProviderBasedConstantOrientationTrajectoryGenerator implements Orie
       angularAccelerationToPack.setToZero(referenceFrame);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

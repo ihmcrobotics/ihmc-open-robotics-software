@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
                                   + "and orientation of the footstep in world cooredinates. ",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/output/footstep_status")
-public class FootstepStatus extends StatusPacket<FootstepStatus>
+public class FootstepStatus extends SettablePacket<FootstepStatus>
 {
    public enum Status
    {
@@ -149,6 +149,7 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       return footstepIndex;
    }
 
+   @Override
    public String toString()
    {
       return "FootstepStatus{" + status + ", index: " + footstepIndex + "}";
@@ -185,6 +186,57 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    public RobotSide getRobotSide()
    {
          return robotSide;
+   }
+
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
+   }
+
+   public void setStatus(Status status)
+   {
+      this.status = status;
+   }
+
+   public void setFootstepIndex(int footstepIndex)
+   {
+      this.footstepIndex = footstepIndex;
+   }
+
+   public void setActualFootOrientationInWorld(Quaternion actualFootOrientationInWorld)
+   {
+      if (this.actualFootOrientationInWorld == null)
+      {
+         this.actualFootOrientationInWorld = new Quaternion();
+      }
+      this.actualFootOrientationInWorld.set(actualFootOrientationInWorld);
+   }
+
+   public void setActualFootPositionInWorld(Point3D actualFootPositionInWorld)
+   {
+      if (this.actualFootPositionInWorld == null)
+      {
+         this.actualFootPositionInWorld = new Point3D();
+      }
+      this.actualFootPositionInWorld.set(actualFootPositionInWorld);
+   }
+
+   public void setDesiredFootOrientationInWorld(Quaternion desiredFootOrientationInWorld)
+   {
+      if (this.desiredFootOrientationInWorld == null)
+      {
+         this.desiredFootOrientationInWorld = new Quaternion();
+      }
+      this.desiredFootOrientationInWorld.set(desiredFootOrientationInWorld);
+   }
+
+   public void setDesiredFootPositionInWorld(Point3D desiredFootPositionInWorld)
+   {
+      if (this.desiredFootPositionInWorld == null)
+      {
+         this.desiredFootPositionInWorld = new Point3D();
+      }
+      this.desiredFootPositionInWorld.set(desiredFootPositionInWorld);
    }
 
    @Override

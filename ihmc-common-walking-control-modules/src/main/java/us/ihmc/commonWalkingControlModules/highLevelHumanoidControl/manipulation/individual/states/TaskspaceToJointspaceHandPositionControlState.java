@@ -9,16 +9,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
@@ -30,8 +31,10 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TaskspaceToJointspaceHandPositionControlState extends FinishableState<HandControlMode>
 {
@@ -49,7 +52,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
    private final FrameVector3D desiredVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D desiredAcceleration = new FrameVector3D(worldFrame);
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame);
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D desiredAngularAcceleration = new FrameVector3D(worldFrame);
 
@@ -488,7 +491,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
       return jointspaceFeedbackControlCommand;
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
+   public JointDesiredOutputListReadOnly getLowLevelJointDesiredData()
    {
       return lowLevelJointDesiredData;
    }

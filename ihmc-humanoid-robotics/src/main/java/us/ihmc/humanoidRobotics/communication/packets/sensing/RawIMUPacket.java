@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 // see multisense_ros.RawImuData
 

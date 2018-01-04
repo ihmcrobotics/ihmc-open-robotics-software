@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
+import org.jcodec.common.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,22 +23,27 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -49,8 +55,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -64,8 +68,8 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -74,8 +78,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -99,9 +103,22 @@ public class WalkingControllerTest
             {
                return true;
             };
+
+            @Override
+            public double getMaxICPErrorBeforeSingleSupportX()
+            {
+               return 1.0;
+            };
+
+            @Override
+            public double getMaxICPErrorBeforeSingleSupportY()
+            {
+               return 1.0;
+            };
          };
       };
    };
+
    private static final double gravityZ = 9.81;
    private static final double controlDT = robotModel.getControllerDT();
    private static final double velocityDecay = 0.98;
@@ -126,12 +143,14 @@ public class WalkingControllerTest
 
    private WalkingHighLevelHumanoidController walkingController;
    private WholeBodyControllerCore controllerCore;
-   private LowLevelOneDoFJointDesiredDataHolderList controllerOutput;
+   private JointDesiredOutputList controllerOutput;
 
-   @Test
+   private static final double maxDriftRate = 0.2;
+
+   @Test(timeout = 30000)
    public void testForGarbage()
    {
-      walkingController.doTransitionIntoAction();
+      walkingController.initialize();
 
       // measure multiple ticks
       PrintTools.info("Starting to loop.");
@@ -168,6 +187,19 @@ public class WalkingControllerTest
             scs.setTime(yoTime.getDoubleValue());
             scs.tickAndUpdate();
          }
+         else
+         {
+            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getTranslationForReading();
+            Point3D min = new Point3D(-0.1, -0.1, 0.5);
+            Point3D max = new Point3D(0.1, 0.1, 1.0);
+            Vector3D drift = new Vector3D(maxDriftRate, maxDriftRate, maxDriftRate);
+            drift.scale(yoTime.getDoubleValue());
+            min.sub(drift);
+            max.add(drift);
+            BoundingBox3D boundingBox = new BoundingBox3D(min, max);
+            boolean insideInclusive = boundingBox.isInsideInclusive(rootPosition.getX(), rootPosition.getY(), rootPosition.getZ());
+            Assert.assertTrue("Robot drifted away.", insideInclusive);
+         }
       }
    }
 
@@ -179,11 +211,12 @@ public class WalkingControllerTest
       for (RobotSide robotSide : RobotSide.values)
       {
          MovingReferenceFrame soleFrame = referenceFrames.getSoleZUpFrame(robotSide);
-         FramePoint3D location = new FramePoint3D(soleFrame, 0.6, 0.0, 0.0);
-         FrameOrientation orientation = new FrameOrientation(soleFrame);
+         FramePoint3D location = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
+         FrameQuaternion orientation = new FrameQuaternion(soleFrame);
 
          location.changeFrame(stanceFrame);
          location.setZ(0.0);
+         location.setX(0.2);
 
          location.changeFrame(ReferenceFrame.getWorldFrame());
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -279,7 +312,7 @@ public class WalkingControllerTest
          OneDoFJoint joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
-         if (jointDesireds.hasControlMode())
+         if (jointDesireds.hasDesiredAcceleration())
          {
             double q = joint.getQ();
             double qd = joint.getQd();
@@ -377,7 +410,7 @@ public class WalkingControllerTest
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
 
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      controllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getControllableOneDoFJoints());
+      controllerOutput = new JointDesiredOutputList(fullRobotModel.getControllableOneDoFJoints());
       controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, registry);
    }
 
@@ -410,13 +443,16 @@ public class WalkingControllerTest
       HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
                                                                                                     yoTime, gravityZ, omega0, feet, controlDT, null,
                                                                                                     contactableBodies, yoGraphicsListRegistry);
+      registry.addChild(controllerToolbox.getYoVariableRegistry());
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime, feet,
-                                                                              statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, feet, statusOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
@@ -424,7 +460,7 @@ public class WalkingControllerTest
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                 capturePointPlannerParameters, controllerToolbox);
+                                                                 controllerToolbox);
    }
 
    @SuppressWarnings("unchecked")
@@ -459,6 +495,8 @@ public class WalkingControllerTest
          YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.getVariable(name);
          footStates.put(robotSide, footState);
       }
+
+      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), registry);
 
       if (showSCS)
       {

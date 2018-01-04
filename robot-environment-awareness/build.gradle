@@ -1,0 +1,56 @@
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "us.ihmc:ihmc-build:0.12.1"
+   }
+}
+apply plugin: "us.ihmc.ihmc-build"
+
+
+ihmc {
+   loadProductProperties("../product.properties")
+   description "Robot Environment Awareness is a library meant to provide interpretation to point cloud data such as identifying planar regions that can be used to planify footsteps for a bipedal robot."
+   openSource = true
+   
+   configureDependencyResolution()
+   configurePublications()
+}
+
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+}
+
+mainDependencies {
+   compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
+   compile group: 'us.ihmc', name: 'joctomap', version: '1.6.7'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   
+   compile group: 'us.ihmc', name: 'ihmc-communication', version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'ihmc-robotics-toolkit', version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'ihmc-javafx-toolkit', version: groupDependencyVersion
+}
+
+applicationDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile group: 'us.ihmc', name: 'ihmc-ros-tools', version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'ihmc-jmonkey-engine-toolkit', version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'simulation-construction-set', version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'simulation-construction-set-tools', version: groupDependencyVersion
+}
+
+
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.12'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
+}
+
+visualizersDependencies {
+   compile ihmc.sourceSetProject("main")
+}

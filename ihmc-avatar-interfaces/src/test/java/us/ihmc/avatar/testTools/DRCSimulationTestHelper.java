@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.avatar.DRCStartingLocation;
@@ -14,16 +13,19 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
@@ -33,14 +35,13 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -56,7 +57,6 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -89,16 +89,26 @@ public class DRCSimulationTestHelper
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
-   private HighLevelBehaviorFactory highLevelBehaviorFactory = null;
+   private HighLevelControllerStateFactory controllerStateFactory = null;
+   private ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private final DRCGuiInitialSetup guiInitialSetup;
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
+      this(simulationTestParameters, robotModel, null);
+   }
+
+   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel, CommonAvatarEnvironmentInterface testEnvironment)
+   {
       this.robotModel = robotModel;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.simulationTestingParameters = simulationTestParameters;
+
+      if (testEnvironment != null)
+         this.testEnvironment = testEnvironment;
+      simulationStarter = new DRCSimulationStarter(robotModel, this.testEnvironment);
 
       fullRobotModel = robotModel.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -110,6 +120,16 @@ public class DRCSimulationTestHelper
       networkProcessorParameters.enableNetworkProcessor(false);
    }
 
+   /**
+    * Use {@link #DRCSimulationTestHelper(SimulationTestingParameters, DRCRobotModel, CommonAvatarEnvironmentInterface)} instead.
+    */
+   @Deprecated
+   public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
+   {
+      this.testEnvironment = testEnvironment;
+      simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
+   }
+
    public void createSimulation(String name)
    {
       createSimulation(name, true, true);
@@ -117,11 +137,12 @@ public class DRCSimulationTestHelper
 
    public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
    {
-      simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
-      if (highLevelBehaviorFactory != null)
-         simulationStarter.registerHighLevelController(highLevelBehaviorFactory);
+      if (controllerStateFactory != null)
+         simulationStarter.registerHighLevelControllerState(controllerStateFactory);
+      if (controllerStateTransitionFactory != null)
+         simulationStarter.registerControllerStateTransition(controllerStateTransitionFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
       simulationStarter.setStartingLocationOffset(startingLocation);
@@ -178,6 +199,11 @@ public class DRCSimulationTestHelper
       scriptBasedControllerCommandGenerator.loadScriptFile(scriptInputStream, referenceFrame);
    }
 
+   public DRCSCSInitialSetup getSCSInitialSetup()
+   {
+      return simulationStarter.getSCSInitialSetup();
+   }
+
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
    {
       return simulationStarter.getQueuedControllerCommands();
@@ -200,7 +226,7 @@ public class DRCSimulationTestHelper
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
-      MomentumBasedControllerFactory controllerFactory = avatarSimulation.getMomentumBasedControllerFactory();
+      HighLevelHumanoidControllerFactory controllerFactory = avatarSimulation.getHighLevelHumanoidControllerFactory();
       controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
@@ -216,7 +242,7 @@ public class DRCSimulationTestHelper
 
    public CommonHumanoidReferenceFrames getReferenceFrames()
    {
-      MomentumBasedControllerFactory momentumBasedControllerFactory = avatarSimulation.getMomentumBasedControllerFactory();
+      HighLevelHumanoidControllerFactory momentumBasedControllerFactory = avatarSimulation.getHighLevelHumanoidControllerFactory();
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = momentumBasedControllerFactory.getHighLevelHumanoidControllerToolbox();
       return highLevelHumanoidControllerToolbox.getReferenceFrames();
    }
@@ -346,6 +372,14 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
+   
+   public void createVideo(String videoName)
+   {
+      if (simulationTestingParameters.getCreateSCSVideos())
+      {
+         BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
+      }
+   }
 
    public RobotSide[] createRobotSidesStartingFrom(RobotSide robotSide, int length)
    {
@@ -364,13 +398,21 @@ public class DRCSimulationTestHelper
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
 
-      Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
-      Vector3D randomCameraOffset = RandomGeometry.nextVector3D(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
-      cameraFix.add(randomCameraOffset);
-
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(false, true, true, false);
+      cameraConfiguration.setCameraDolly(false, true, true, false);
+      scs.setupCamera(cameraConfiguration);
+      scs.selectCamera("testCamera");
+   }
+
+   public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
+   {
+      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
+      
+      cameraConfiguration.setCameraFix(cameraFix);
+      cameraConfiguration.setCameraPosition(cameraPosition);
+      cameraConfiguration.setCameraTracking(enableTracking, true, true, false);
       cameraConfiguration.setCameraDolly(false, true, true, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
@@ -506,9 +548,9 @@ public class DRCSimulationTestHelper
       this.cheatWithGroundHeightAtFootstep = cheatWithGroundHeightAtFootstep;
    }
 
-   public void setHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
+   public void setHighLevelControllerStateFactory(HighLevelControllerStateFactory controllerStateFactory)
    {
-      this.highLevelBehaviorFactory = highLevelBehaviorFactory;
+      this.controllerStateFactory = controllerStateFactory;
    }
 
    public void setInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup)
@@ -519,11 +561,6 @@ public class DRCSimulationTestHelper
    public void setWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       this.walkingScriptParameters = walkingScriptParameters;
-   }
-
-   public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
-   {
-      this.testEnvironment = testEnvironment;
    }
 
    public void setNetworkProcessorParameters(DRCNetworkModuleParameters networkProcessorParameters)

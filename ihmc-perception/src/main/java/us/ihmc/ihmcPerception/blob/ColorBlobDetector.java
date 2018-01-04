@@ -31,7 +31,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 /**

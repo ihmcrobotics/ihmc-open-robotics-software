@@ -3,11 +3,11 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.PDGainsInterface;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -145,7 +145,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDDFeedforward.set(qdd_feedforward);
    }
 
-   public void setGains(PDGainsInterface gains)
+   public void setGains(PDGainsReadOnly gains)
    {
       kp.set(gains.getKp());
       kd.set(gains.getKd());

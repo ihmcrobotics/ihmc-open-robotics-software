@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public interface ControllerCoreCommandInterface
 {
@@ -12,6 +12,6 @@ public interface ControllerCoreCommandInterface
    public abstract InverseDynamicsCommandList getVirtualModelControlCommandList();
    public abstract FeedbackControlCommandList getFeedbackControlCommandList();
    public abstract InverseKinematicsCommandList getInverseKinematicsCommandList();
-   public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelOneDoFJointDesiredDataHolder();
+   public abstract JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder();
    public abstract WholeBodyControllerCoreMode getControllerCoreMode();
 }

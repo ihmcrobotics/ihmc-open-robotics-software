@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="148.0" prefWidth="701.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.StartGoalAnchorPaneController">
+   <children>
+      <GridPane hgap="10.0" layoutX="14.0" layoutY="24.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="6.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="6.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="6.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Label text="x" GridPane.columnIndex="2" />
+            <Label text="x" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Label text="y" GridPane.columnIndex="4" />
+            <Label text="y" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+            <Label text="z" GridPane.columnIndex="6" />
+            <Label text="z" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+            <ToggleButton fx:id="placeStartToggleButton" mnemonicParsing="false" text="Place Start" GridPane.columnIndex="1" />
+            <ToggleButton fx:id="placeGoalToggleButton" mnemonicParsing="false" text="Place Goal" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Spinner fx:id="startXSpinner" editable="true" GridPane.columnIndex="3" />
+            <Spinner fx:id="goalXSpinner" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Spinner fx:id="startYSpinner" editable="true" GridPane.columnIndex="5" />
+            <Spinner fx:id="goalYSpinner" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+            <Spinner fx:id="startZSpinner" editable="true" GridPane.columnIndex="7" />
+            <Spinner fx:id="goalZSpinner" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="1" />
+            <ToggleButton fx:id="showStartToggleButton" mnemonicParsing="false" selected="true" text="Show Start" />
+            <ToggleButton fx:id="showGoalToggleButton" mnemonicParsing="false" selected="true" text="Show Goal" GridPane.rowIndex="1" />
+         </children>
+      </GridPane>
+   </children>
+</AnchorPane>

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,16 +8,17 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -25,7 +26,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnv
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
@@ -34,7 +34,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    @Before
@@ -83,6 +83,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -157,6 +159,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -225,6 +229,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -294,6 +300,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
@@ -393,6 +401,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
       double distanceTraveled = 0.5 * starterLength;

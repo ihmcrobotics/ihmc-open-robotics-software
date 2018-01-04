@@ -1,43 +1,31 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.yaml.snakeyaml.Yaml;
+import java.util.stream.Collectors;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.taskExecutor.Task;
-import us.ihmc.tools.taskExecutor.TaskExecutor;
+import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
+import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieRosControlLowLevelController
 {
@@ -45,229 +33,50 @@ public class ValkyrieRosControlLowLevelController
 
    private final TimestampProvider timestampProvider;
 
-   private final AtomicBoolean resetIHMCControlRatioAndStandPrepRequested = new AtomicBoolean(false);
-
    private final ArrayList<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlEffortJointControlCommandCalculator> effortJointToControlCommandCalculatorMap = new LinkedHashMap<>();
-   private final ArrayList<ValkyrieRosControlPositionJointControlCommandCalculator> positionControlCommandCalculators = new ArrayList<>();
-   private final LinkedHashMap<String, ValkyrieRosControlPositionJointControlCommandCalculator> positionJointToControlCommandCalculatorMap = new LinkedHashMap<>();
 
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
 
-   private final YoDouble timeInStandprep = new YoDouble("timeInStandprep", registry);
-   private final YoDouble standPrepStartTime = new YoDouble("standPrepStartTime", registry);
+   private final ValkyrieFingerController fingerController;
 
-   private final YoDouble doIHMCControlRatio = new YoDouble("doIHMCControlRatio", registry);
-   private final YoDouble standPrepRampDuration = new YoDouble("standPrepRampDuration", registry);
-   private final YoDouble masterGain = new YoDouble("standPrepMasterGain", registry);
+   private final AtomicReference<HighLevelControllerName> currentHighLevelControllerState = new AtomicReference<HighLevelControllerName>(null);
 
-   private final YoDouble controlRatioRampDuration = new YoDouble("controlRatioRampDuration", registry);
-   private final YoDouble calibrationDuration = new YoDouble("calibrationDuration", registry);
-   private final YoDouble calibrationStartTime = new YoDouble("calibrationStartTime", registry);
-   private final YoDouble timeInCalibration = new YoDouble("timeInCalibration", registry);
-
-   private final YoEnum<ValkyrieLowLevelControlModeMessage.ControlMode> currentControlMode = new YoEnum<>("lowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class);
-
-   private final YoEnum<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlMode = new YoEnum<>("requestedLowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class, true);
-   private final AtomicReference<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlModeAtomic = new AtomicReference<>(null);
-
-   private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
-   private final ValkyrieAccelerationIntegration accelerationIntegration;
-
-   private CommandInputManager commandInputManager;
-   private final AtomicReference<HighLevelState> currentHighLevelState = new AtomicReference<HighLevelState>(null);
-
-   private final HighLevelStateCommand highLevelStateCommand = new HighLevelStateCommand();
-
-   private final TaskExecutor taskExecutor = new TaskExecutor();
-   private final Task rampUpIHMCControlRatioTask;
-   private final Task rampDownIHMCControlRatioTask;
-   private final Task calibrationTask;
-
-   private ForceSensorCalibrationModule forceSensorCalibrationModule;
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
-   @SuppressWarnings("unchecked")
-   public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT, List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-         List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, YoVariableRegistry parentRegistry)
+   public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
+                                               List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
+                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap, YoVariableRegistry parentRegistry)
    {
       this.timestampProvider = timestampProvider;
 
-      standPrepRampDuration.set(3.0);
-      controlRatioRampDuration.set(3.0);
-      masterGain.set(0.3);
-      calibrationDuration.set(10.0);
-
-      currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
-
       wakeUpTime.set(Double.NaN);
-      standPrepStartTime.set(Double.NaN);
-      calibrationStartTime.set(Double.NaN);
-      
-      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
-      accelerationIntegration = new ValkyrieAccelerationIntegration(yoEffortJointHandleHolders, updateDT, registry);
 
-      requestedLowLevelControlMode.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (requestedLowLevelControlMode.getEnumValue() != null)
-               requestedLowLevelControlModeAtomic.set(requestedLowLevelControlMode.getEnumValue());
-         }
-      });
+      fingerController = new ValkyrieFingerController(yoTime, updateDT, yoEffortJointHandleHolders, registry);
 
-      rampDownIHMCControlRatioTask = new AbstractLowLevelTask()
-      {
-         @Override
-         public void doAction()
-         {
-            double newRatio = doIHMCControlRatio.getDoubleValue() - updateDT / controlRatioRampDuration.getDoubleValue();
-            doIHMCControlRatio.set(MathTools.clamp(newRatio, 0.0, 1.0));
-         }
+      // Remove the finger joints to let the finger controller be the only controlling them
+      yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
 
-         @Override
-         public boolean isDone()
-         {
-            return doIHMCControlRatio.getDoubleValue() == 0.0;
-         }
-      };
-
-      rampUpIHMCControlRatioTask = new AbstractLowLevelTask()
-      {
-         @Override
-         public void doAction()
-         {
-            double newRatio = doIHMCControlRatio.getDoubleValue() + updateDT / controlRatioRampDuration.getDoubleValue();
-            doIHMCControlRatio.set(MathTools.clamp(newRatio, 0.0, 1.0));
-         }
-
-         @Override
-         public boolean isDone()
-         {
-            return doIHMCControlRatio.getDoubleValue() == 1.0;
-         }
-      };
-
-      calibrationTask = new AbstractLowLevelTask()
-      {
-         private final ValkyrieTorqueOffsetPrinter torqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
-
-         @Override
-         public void doAction()
-         {
-            timeInCalibration.set(yoTime.getDoubleValue() - calibrationStartTime.getDoubleValue());
-            if (timeInCalibration.getDoubleValue() >= calibrationDuration.getDoubleValue() - 0.1)
-            {
-               if (jointTorqueOffsetEstimator != null)
-                  jointTorqueOffsetEstimator.enableJointTorqueOffsetEstimationAtomic(false);
-            }
-         }
-
-         @Override
-         public void doTransitionIntoAction()
-         {
-            calibrationStartTime.set(yoTime.getDoubleValue());
-            if (jointTorqueOffsetEstimator != null)
-               jointTorqueOffsetEstimator.enableJointTorqueOffsetEstimationAtomic(true);
-         }
-
-         @Override
-         public void doTransitionOutOfAction()
-         {
-            calibrationStartTime.set(Double.NaN);
-
-            List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
-
-            torqueOffsetPrinter.printTorqueOffsets(jointTorqueOffsetEstimator);
-
-            for (int i = 0; i < oneDoFJoints.size(); i++)
-            {
-               OneDoFJoint joint = oneDoFJoints.get(i);
-               if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(joint))
-               {
-                  subtractTorqueOffset(joint, jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint));
-                  jointTorqueOffsetEstimator.resetEstimatedJointTorqueOffset(joint);
-               }
-            }
-
-            if (forceSensorCalibrationModule != null)
-               forceSensorCalibrationModule.requestFootForceSensorCalibrationAtomic();
-         }
-
-         @Override
-         public boolean isDone()
-         {
-            return timeInCalibration.getDoubleValue() >= calibrationDuration.getDoubleValue();
-         }
-      };
-
-      Yaml yaml = new Yaml();
-      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("standPrep/gains.yaml");
-      InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
-
-      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) yaml.load(gainStream);
-      Map<String, Double> setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
       Map<String, Double> offsetMap = ValkyrieTorqueOffsetPrinter.loadTorqueOffsetsFromFile();
-
-      try
-      {
-         gainStream.close();
-         setpointsStream.close();
-      }
-      catch (IOException e)
-      {
-      }
 
       for (YoEffortJointHandleHolder effortJointHandleHolder : yoEffortJointHandleHolders)
       {
          String jointName = effortJointHandleHolder.getName();
-         Map<String, Double> standPrepGains = gainMap.get(jointName);
          double torqueOffset = 0.0;
          if (offsetMap != null && offsetMap.containsKey(jointName))
             torqueOffset = -offsetMap.get(jointName);
 
-         double standPrepAngle = 0.0;
-         if (setPointMap.containsKey(jointName))
-         {
-            standPrepAngle = setPointMap.get(jointName);
-         }
-         ValkyrieRosControlEffortJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlEffortJointControlCommandCalculator(
-               effortJointHandleHolder, standPrepGains, torqueOffset, standPrepAngle, updateDT, registry);
+         ValkyrieRosControlEffortJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlEffortJointControlCommandCalculator(effortJointHandleHolder,
+                                                                                                                                                    torqueOffset,
+                                                                                                                                                    updateDT,
+                                                                                                                                                    registry);
          effortControlCommandCalculators.add(controlCommandCalculator);
 
          effortJointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
       }
 
-      for (YoPositionJointHandleHolder positionJointHandleHolder : yoPositionJointHandleHolders)
-      {
-         String jointName = positionJointHandleHolder.getName();
-         Map<String, Double> standPrepGains = gainMap.get(jointName);
-
-         double standPrepAngle = 0.0;
-         if (setPointMap.containsKey(jointName))
-         {
-            standPrepAngle = setPointMap.get(jointName);
-         }
-         ValkyrieRosControlPositionJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlPositionJointControlCommandCalculator(
-               positionJointHandleHolder, standPrepGains, standPrepAngle, updateDT, registry);
-         positionControlCommandCalculators.add(controlCommandCalculator);
-
-         positionJointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
-      }
-
       parentRegistry.addChild(registry);
-   }
-
-   public void setDoIHMCControlRatio(double controlRatio)
-   {
-      doIHMCControlRatio.set(MathTools.clamp(controlRatio, 0.0, 1.0));
-   }
-
-   public void requestCalibration()
-   {
-      requestedLowLevelControlModeAtomic.set(ValkyrieLowLevelControlModeMessage.ControlMode.CALIBRATION);
    }
 
    public void doControl()
@@ -279,122 +88,29 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
-      taskExecutor.doControl();
-      ValkyrieLowLevelControlModeMessage.ControlMode newRequest = requestedLowLevelControlModeAtomic.getAndSet(null);
-      requestedLowLevelControlMode.set(null);
-
-      switch (currentControlMode.getEnumValue())
-      {
-      case STAND_PREP:
-         if (doIHMCControlRatio.getDoubleValue() > 1.0 - 1.0e-3 && currentHighLevelState.get() == HighLevelState.WALKING)
-         {
-            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);
-            break;
-         }
-
-         if (taskExecutor.isDone() && currentHighLevelState.get() != HighLevelState.DO_NOTHING_BEHAVIOR)
-         {
-            highLevelStateCommand.setHighLevelState(HighLevelState.DO_NOTHING_BEHAVIOR);
-            commandInputManager.submitCommand(highLevelStateCommand);
-         }
-
-         if (newRequest == null)
-            break;
-
-         switch (newRequest)
-         {
-         case CALIBRATION:
-            highLevelStateCommand.setHighLevelState(HighLevelState.CALIBRATION);
-            commandInputManager.submitCommand(highLevelStateCommand);
-            taskExecutor.submit(rampUpIHMCControlRatioTask);
-            taskExecutor.submit(calibrationTask);
-            taskExecutor.submit(rampDownIHMCControlRatioTask);
-            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.CALIBRATION);
-            break;
-         case HIGH_LEVEL_CONTROL:
-            highLevelStateCommand.setHighLevelState(HighLevelState.WALKING);
-            commandInputManager.submitCommand(highLevelStateCommand);
-            taskExecutor.submit(rampUpIHMCControlRatioTask);
-            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);
-            break;
-         default:
-            break;
-         }
-
-      case CALIBRATION:
-         if (taskExecutor.isDone())
-         {
-            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
-         }
-         break;
-      case HIGH_LEVEL_CONTROL:
-         if (newRequest != null && newRequest == ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP)
-         {
-            taskExecutor.clear();
-            taskExecutor.submit(rampDownIHMCControlRatioTask);
-            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
-            break;
-         }
-
-         if (resetIHMCControlRatioAndStandPrepRequested.getAndSet(false))
-         {
-            standPrepStartTime.set(Double.NaN);
-            doIHMCControlRatio.set(0.0);
-            taskExecutor.clear();
-            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
-            break;
-         }
-
-         if (doIHMCControlRatio.getDoubleValue() < 1.0e-3 && taskExecutor.isDone())
-         {
-            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
-            break;
-         }
-
-         torqueHysteresisCompensator.compute();
-         if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
-            accelerationIntegration.compute();
-         break;
-      }
-
+      fingerController.doControl();
       updateCommandCalculators();
    }
 
    public void updateCommandCalculators()
    {
-      if (!standPrepStartTime.isNaN())
+      for (int i = 0; i < effortControlCommandCalculators.size(); i++)
       {
-         timeInStandprep.set(yoTime.getDoubleValue() - standPrepStartTime.getDoubleValue());
-
-         double ramp = timeInStandprep.getDoubleValue() / standPrepRampDuration.getDoubleValue();
-         ramp = MathTools.clamp(ramp, 0.0, 1.0);
-
-         for (int i = 0; i < effortControlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-            commandCalculator.computeAndUpdateJointTorque(ramp, doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
-         }
-
-         for (int i = 0; i < positionControlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlPositionJointControlCommandCalculator commandCalculator = positionControlCommandCalculators.get(i);
-            commandCalculator.computeAndUpdateJointPosition(ramp, doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
-         }
+         ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
+         commandCalculator.computeAndUpdateJointTorque();
       }
-      else
+   }
+
+   private void writeTorqueOffsets()
+   {
+      List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         standPrepStartTime.set(yoTime.getDoubleValue());
-
-         for (int i = 0; i < effortControlCommandCalculators.size(); i++)
+         OneDoFJoint joint = oneDoFJoints.get(i);
+         if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(joint))
          {
-            ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-            commandCalculator.initialize();
-         }
-
-         for (int i = 0; i < positionControlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlPositionJointControlCommandCalculator commandCalculator = positionControlCommandCalculators.get(i);
-            commandCalculator.initialize();
+            subtractTorqueOffset(joint, jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint));
+            jointTorqueOffsetEstimator.resetEstimatedJointTorqueOffset(joint);
          }
       }
    }
@@ -410,34 +126,21 @@ public class ValkyrieRosControlLowLevelController
 
    public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
    {
-      this.commandInputManager = commandInputManager;
-
       StatusMessageListener<HighLevelStateChangeStatusMessage> highLevelStateChangeListener = new StatusMessageListener<HighLevelStateChangeStatusMessage>()
       {
          @Override
          public void receivedNewMessageStatus(HighLevelStateChangeStatusMessage statusMessage)
          {
             if (statusMessage != null)
-               currentHighLevelState.set(statusMessage.endState);
+            {
+               currentHighLevelControllerState.set(statusMessage.endState);
+
+               if (statusMessage.initialState == HighLevelControllerName.CALIBRATION)
+                  writeTorqueOffsets();
+            }
          }
       };
       statusOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, highLevelStateChangeListener);
-
-      StatusMessageListener<WalkingControllerFailureStatusMessage> controllerFailureListener = new StatusMessageListener<WalkingControllerFailureStatusMessage>()
-      {
-         @Override
-         public void receivedNewMessageStatus(WalkingControllerFailureStatusMessage statusMessage)
-         {
-            if (statusMessage != null)
-               resetIHMCControlRatioAndStandPrepRequested.set(true);
-         }
-      };
-      statusOutputManager.attachStatusMessageListener(WalkingControllerFailureStatusMessage.class, controllerFailureListener);
-   }
-   
-   public void attachForceSensorCalibrationModule(DRCRobotSensorInformation sensorInformation, ForceSensorCalibrationModule forceSensorCalibrationModule)
-   {
-      this.forceSensorCalibrationModule = forceSensorCalibrationModule;
    }
 
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
@@ -445,34 +148,24 @@ public class ValkyrieRosControlLowLevelController
       this.jointTorqueOffsetEstimator = jointTorqueOffsetEstimator;
    }
 
-   private abstract class AbstractLowLevelTask implements Task
-   {
-      @Override
-      public void doAction()
-      {
-      }
-
-      @Override
-      public void doTransitionIntoAction()
-      {
-      }
-
-      @Override
-      public void doTransitionOutOfAction()
-      {
-      }
-   }
-
    public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
    {
-      packetCommunicator.attachListener(ValkyrieLowLevelControlModeMessage.class, new PacketConsumer<ValkyrieLowLevelControlModeMessage>()
+      fingerController.setupCommunication(packetCommunicator);
+   }
+
+   /**
+    * Very inefficient way of checking if a joint is a finger joint that should be used only at construction time.
+    */
+   private static boolean isFingerJoint(YoEffortJointHandleHolder handle)
+   {
+      for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values)
       {
-         @Override
-         public void receivedPacket(ValkyrieLowLevelControlModeMessage packet)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            if (packet != null && packet.getRequestedControlMode() != null)
-               requestedLowLevelControlModeAtomic.set(packet.getRequestedControlMode());
+            if (handle.getName().equals(valkyrieHandJointName.getJointName(robotSide)))
+               return true;
          }
-      });
+      }
+      return false;
    }
 }

@@ -178,6 +178,54 @@ public class MatrixToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRemoveColumn()
+   {
+      Random random = new Random(3216516L);
+      for (int i = 0; i < 20; i++)
+      {
+         int numRows = RandomNumbers.nextInt(random, 1, 100);
+         int numCols = RandomNumbers.nextInt(random, 1, 100);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(numRows, numCols, 1.0, 100.0, random);
+         int indexOfColumnToRemove = RandomNumbers.nextInt(random, 0, randomMatrix.getNumCols() - 1);
+         DenseMatrix64F expectedMatrix = new DenseMatrix64F(numRows, numCols - 1);
+
+         for (int colIndex = 0; colIndex < numCols - 1; colIndex++)
+         {
+            for (int rowIndex = 0; rowIndex < numRows; rowIndex++)
+            {
+               if (colIndex >= indexOfColumnToRemove)
+                  expectedMatrix.set(rowIndex, colIndex, randomMatrix.get(rowIndex, colIndex + 1));
+               else
+                  expectedMatrix.set(rowIndex, colIndex, randomMatrix.get(rowIndex, colIndex));
+            }
+         }
+
+         DenseMatrix64F matrixToTest = new DenseMatrix64F(randomMatrix);
+         MatrixTools.removeColumn(matrixToTest, indexOfColumnToRemove);
+
+         for (int colIndex = 0; colIndex < numCols - 1; colIndex++)
+         {
+            DenseMatrix64F expectedMatrixColumn = new DenseMatrix64F(numRows, 1);
+            DenseMatrix64F randomMatrixColumn = new DenseMatrix64F(numRows, 1);
+
+            int originalColumnIndex = colIndex;
+            if (colIndex >= indexOfColumnToRemove)
+               originalColumnIndex++;
+
+            CommonOps.extractColumn(expectedMatrix, colIndex, expectedMatrixColumn);
+            CommonOps.extractColumn(randomMatrix, originalColumnIndex, randomMatrixColumn);
+            boolean areMatricesEqual = MatrixFeatures.isEquals(randomMatrixColumn, expectedMatrixColumn, 1.0e-10);
+            assertTrue(areMatricesEqual);
+         }
+
+
+         boolean areMatricesEqual = MatrixFeatures.isEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         assertTrue(areMatricesEqual);
+      }
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRemoveZeroRows()
@@ -255,7 +303,7 @@ public class MatrixToolsTest
       {
          int numRows = RandomNumbers.nextInt(random, 3, 100);
          DenseMatrix64F matrixToTest = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
-         FramePoint3D framePointToInsert = EuclidFrameRandomTools.generateRandomFramePoint3D(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
+         FramePoint3D framePointToInsert = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
          int startRowToInsertFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
          MatrixTools.insertFrameTupleIntoEJMLVector(framePointToInsert, matrixToTest, startRowToInsertFrameTuple);
 

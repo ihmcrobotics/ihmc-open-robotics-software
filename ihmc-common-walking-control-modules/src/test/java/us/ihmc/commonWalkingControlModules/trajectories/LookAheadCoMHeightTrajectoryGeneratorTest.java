@@ -17,6 +17,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -29,7 +30,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class LookAheadCoMHeightTrajectoryGeneratorTest
 {
@@ -78,7 +78,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
-      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");
@@ -166,14 +166,14 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
          FramePoint3D transferFromFootFramePoint = new FramePoint3D();
          transferFromFootstep.getPosition(transferFromFootFramePoint);
-         FrameOrientation transferFromFootOrientation = new FrameOrientation();
+         FrameQuaternion transferFromFootOrientation = new FrameQuaternion();
          transferFromFootstep.getOrientation(transferFromFootOrientation);
          transferFromFootSpoof.setPose(transferFromFootFramePoint, transferFromFootOrientation);
 
          FootSpoof transferToFootSpoof = contactableFeet.get(transferToFootstep.getRobotSide());
          FramePoint3D transferToFootFramePoint = new FramePoint3D();
          transferToFootstep.getPosition(transferToFootFramePoint);
-         FrameOrientation transferToFootOrientation = new FrameOrientation();
+         FrameQuaternion transferToFootOrientation = new FrameQuaternion();
          transferToFootstep.getOrientation(transferToFootOrientation);
          transferToFootSpoof.setPose(transferToFootFramePoint, transferToFootOrientation);
 

@@ -1,11 +1,14 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -13,6 +16,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,6 +32,80 @@ import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegionTest
 {
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIntersections()
+   {
+      List<ConvexPolygon2D> polygonsRegion1 = new ArrayList<>();
+
+      ConvexPolygon2D polygon11 = new ConvexPolygon2D();
+      polygon11.addVertex(0.0, 0.0);
+      polygon11.addVertex(2.0, 0.0);
+      polygon11.addVertex(2.0, 0.5);
+      polygon11.addVertex(0.0, 0.5);
+      polygon11.update();
+      polygonsRegion1.add(polygon11);
+
+      ConvexPolygon2D polygon12 = new ConvexPolygon2D();
+      polygon12.addVertex(1.0, 0.0);
+      polygon12.addVertex(2.0, 0.0);
+      polygon12.addVertex(2.0, -1.5);
+      polygon12.addVertex(1.0, -1.5);
+      polygon12.update();
+      polygonsRegion1.add(polygon12);
+
+      RigidBodyTransform transform1 = new RigidBodyTransform();
+      PlanarRegion region1 = new PlanarRegion(transform1, polygonsRegion1);
+
+      List<ConvexPolygon2D> polygonsRegion2 = new ArrayList<>();
+      ConvexPolygon2D polygon21 = new ConvexPolygon2D();
+      polygon21.addVertex(-1.0, 0.1);
+      polygon21.addVertex(1.0, 0.1);
+      polygon21.addVertex(1.0, -0.1);
+      polygon21.addVertex(-1.0, -0.1);
+      polygon21.update();
+      polygonsRegion2.add(polygon21);
+
+      ConvexPolygon2D polygon22 = new ConvexPolygon2D();
+      polygon22.addVertex(1.5, 0.1);
+      polygon22.addVertex(2.0, 0.1);
+      polygon22.addVertex(2.0, -0.1);
+      polygon22.addVertex(1.5, -0.1);
+      polygon22.update();
+      polygonsRegion2.add(polygon22);
+
+      RigidBodyTransform transform2 = new RigidBodyTransform();
+      transform2.setTranslation(0.5, 0.0, 0.0);
+      transform2.appendYawRotation(-Math.PI / 4.0);
+      transform2.appendRollRotation(Math.PI / 2.0);
+      PlanarRegion region2 = new PlanarRegion(transform2, polygonsRegion2);
+
+      List<LineSegment3D> intersections = region1.intersect(region2);
+
+      List<LineSegment3D> expectedIntersections = new ArrayList<>();
+      expectedIntersections.add(new LineSegment3D(new Point3D(0.0, 0.5, 0.0), new Point3D(0.5, 0.0, 0.0)));
+      expectedIntersections.add(new LineSegment3D(new Point3D(1.0, -0.5, 0.0), new Point3D(0.5 + 1.0 / Math.sqrt(2.0), -1.0 / Math.sqrt(2.0), 0.0)));
+      expectedIntersections.add(new LineSegment3D(new Point3D(0.5 + 1.5 / Math.sqrt(2.0), -1.5 / Math.sqrt(2.0), 0.0),
+                                                  new Point3D(0.5 + 2.0 / Math.sqrt(2.0), -2.0 / Math.sqrt(2.0), 0.0)));
+
+      Assert.assertEquals(expectedIntersections.size(), intersections.size());
+      for (LineSegment3D intersection : intersections)
+      {
+         boolean foundMatch = false;
+         for (LineSegment3D expectedIntersection : expectedIntersections)
+         {
+            if (intersection.getDirection(false).dot(expectedIntersection.getDirection(false)) < 0.0)
+            {
+               expectedIntersection.flipDirection();
+            }
+            if (intersection.epsilonEquals(expectedIntersection, 1.0e-10))
+            {
+               foundMatch = true;
+            }
+         }
+         Assert.assertTrue(foundMatch);
+      }
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -399,14 +477,14 @@ public class PlanarRegionTest
       points = intersectionsInPlaneFrame.get(1);
       assertEquals(1, points.length);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
-      
+
       lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
       lineSegment = new LineSegment2D(2.5, 4.5, 3.0, 9.0);
       assertFalse("Not intersecting if fully outside", planarRegion.isLineSegmentIntersecting(lineSegment));
 
       lineSegment = new LineSegment2D(2.0, -2.0, 2.0, 2.0);
-      assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));  
+      assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(1, intersectionsInPlaneFrame.size());
@@ -690,7 +768,7 @@ public class PlanarRegionTest
 
                assertTrue(
                      "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                           + boundingBox3dInWorld, boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, PlanarRegion.DEFAULT_BOUNDING_BOX_EPSILON));
+                           + boundingBox3dInWorld, boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, 1e-15));
             }
          }
       }

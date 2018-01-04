@@ -1,13 +1,5 @@
 package us.ihmc.robotDataLogger;
 
-import java.io.IOException;
-
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.common.SerializedPayload;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.IDLSequence;
-
 /**
 * 
 * Topic data type of the struct "Handshake" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
@@ -16,9 +8,9 @@ import us.ihmc.idl.IDLSequence;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogger.Handshake>
+public class HandshakePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.Handshake>
 {
-	public static final String name = "us::ihmc::robotDataLogger::Handshake";
+	public static final java.lang.String name = "us::ihmc::robotDataLogger::Handshake";
 	
 	
 	
@@ -27,19 +19,19 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
         
     }
 
-	private final CDR serializeCDR = new CDR();
-	private final CDR deserializeCDR = new CDR();
+	private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
+	private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
     
     @Override
-   public void serialize(us.ihmc.robotDataLogger.Handshake data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(us.ihmc.robotDataLogger.Handshake data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
       serializeCDR.finishSerialize();
    }
    @Override
-   public void deserialize(SerializedPayload serializedPayload, us.ihmc.robotDataLogger.Handshake data) throws IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.Handshake data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -55,34 +47,34 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 1024; ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 32767; ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 128; ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.JointDefinitionPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 2048; ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 2048; ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 1024; ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.EnumTypePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -102,34 +94,34 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getRegistries().size(); ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType.getCdrSerializedSize(data.getRegistries().get(a), current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getVariables().size(); ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType.getCdrSerializedSize(data.getVariables().get(a), current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getJoints().size(); ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.JointDefinitionPubSubType.getCdrSerializedSize(data.getJoints().get(a), current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getGraphicObjects().size(); ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType.getCdrSerializedSize(data.getGraphicObjects().get(a), current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getArtifacts().size(); ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType.getCdrSerializedSize(data.getArtifacts().get(a), current_alignment);}
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getEnumTypes().size(); ++a)
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.EnumTypePubSubType.getCdrSerializedSize(data.getEnumTypes().get(a), current_alignment);}
@@ -139,7 +131,7 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
 	    return current_alignment - initial_alignment;
 	}
 	
-   public static void write(us.ihmc.robotDataLogger.Handshake data, CDR cdr)
+   public static void write(us.ihmc.robotDataLogger.Handshake data, us.ihmc.idl.CDR cdr)
    {
 
 	    cdr.write_type_6(data.getDt());
@@ -171,7 +163,7 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
 	    us.ihmc.robotDataLogger.SummaryPubSubType.write(data.getSummary(), cdr);
    }
 
-   public static void read(us.ihmc.robotDataLogger.Handshake data, CDR cdr)
+   public static void read(us.ihmc.robotDataLogger.Handshake data, us.ihmc.idl.CDR cdr)
    {
 
 	    	data.setDt(cdr.read_type_6());
@@ -193,7 +185,7 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
    }
    
 	@Override
-	public final void serialize(us.ihmc.robotDataLogger.Handshake data, InterchangeSerializer ser)
+	public final void serialize(us.ihmc.robotDataLogger.Handshake data, us.ihmc.idl.InterchangeSerializer ser)
 	{
 			    ser.write_type_6("dt", data.getDt());
 			    
@@ -215,7 +207,7 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
 	}
 	
 	@Override
-	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.Handshake data)
+	public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.Handshake data)
 	{
 	    			data.setDt(ser.read_type_6("dt"));	
 	    	    
@@ -252,21 +244,21 @@ public class HandshakePubSubType implements TopicDataType<us.ihmc.robotDataLogge
    @Override
    public int getTypeSize()
    {
-      return CDR.getTypeSize(getMaxCdrSerializedSize());
+      return us.ihmc.idl.CDR.getTypeSize(getMaxCdrSerializedSize());
    }
 
    @Override
-   public String getName()
+   public java.lang.String getName()
    {
       return name;
    }
    
-   public void serialize(us.ihmc.robotDataLogger.Handshake data, CDR cdr)
+   public void serialize(us.ihmc.robotDataLogger.Handshake data, us.ihmc.idl.CDR cdr)
 	{
 		write(data, cdr);
 	}
 
-   public void deserialize(us.ihmc.robotDataLogger.Handshake data, CDR cdr)
+   public void deserialize(us.ihmc.robotDataLogger.Handshake data, us.ihmc.idl.CDR cdr)
    {
         read(data, cdr);
    }

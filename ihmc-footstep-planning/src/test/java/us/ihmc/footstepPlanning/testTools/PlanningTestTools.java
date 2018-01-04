@@ -3,7 +3,9 @@ package us.ihmc.footstepPlanning.testTools;
 import static org.junit.Assert.assertTrue;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,9 +24,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -38,18 +39,18 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class PlanningTestTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final AppearanceDefinition[] appearances = { YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray() };
+   private static final AppearanceDefinition[] appearances = {YoAppearance.LightGray(), YoAppearance.Grey(), YoAppearance.DarkGray()};
 
-   public static ConvexPolygon2D createDefaultFootPolygon()
+   private static final double footLength = 0.2;
+   private static final double footWidth = 0.1;
+
+   public static ConvexPolygon2D createFootPolygon(double footLength, double footWidth)
    {
-      double footLength = 0.2;
-      double footWidth = 0.1;
-
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();
       footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
       footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
@@ -60,25 +61,41 @@ public class PlanningTestTools
       return footPolygon;
    }
 
+   public static ConvexPolygon2D createDefaultFootPolygon()
+   {
+      return createFootPolygon(footLength, footWidth);
+   }
+
    public static SideDependentList<ConvexPolygon2D> createDefaultFootPolygons()
+   {
+      return createFootPolygons(footLength, footWidth);
+   }
+
+   public static SideDependentList<ConvexPolygon2D> createFootPolygons(double footLength, double footWidth)
    {
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
-         footPolygons.put(side, PlanningTestTools.createDefaultFootPolygon());
+         footPolygons.put(side, PlanningTestTools.createFootPolygon(footLength, footWidth));
       return footPolygons;
+   }
+
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose goalPose, BodyPathPlanner bodyPath)
+   {
+      visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, null, null);
    }
 
    public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose goalPose)
    {
-      visualizeAndSleep(planarRegionsList, footseps, goalPose, null, null);
+      visualizeAndSleep(planarRegionsList, footseps, goalPose, null, null, null);
    }
 
    public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps)
    {
-      visualizeAndSleep(planarRegionsList, footseps, null, null, null);
+      visualizeAndSleep(planarRegionsList, footseps, null, null, null, null);
    }
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose goalPose, BodyPathPlanner bodyPath,
+                                        YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       if (registry != null)
@@ -87,16 +104,36 @@ public class PlanningTestTools
          scs.addYoGraphicsListRegistry(graphicsListRegistry, true);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addCoordinateSystem(0.3);
+//      graphics3DObject.addCoordinateSystem(0.3);
       if (planarRegionsList != null)
+      {
          graphics3DObject.addPlanarRegionsList(planarRegionsList, appearances);
+         scs.setGroundVisible(false);
+      }
       scs.addStaticLinkGraphics(graphics3DObject);
+      scs.setCameraPosition(-4.0, -4.0, 6.0);
+      scs.setCameraFix(0.5, 0.0, 0.1);
 
       YoVariableRegistry vizRegistry = new YoVariableRegistry("FootstepPlanningResult");
       YoGraphicsListRegistry vizGraphicsListRegistry = new YoGraphicsListRegistry();
 
       if (goalPose != null)
          addGoalViz(goalPose, vizRegistry, vizGraphicsListRegistry);
+
+      if (bodyPath != null)
+      {
+         int markers = 100;
+         for (int i = 0; i < markers; i++)
+         {
+            double alpha = (double) i / (double) (markers - 1);
+            Pose2D pose = new Pose2D();
+            bodyPath.getPointAlongPath(alpha, pose);
+            YoFramePoint yoPoint = new YoFramePoint("BodyPathPoint" + i, worldFrame, vizRegistry);
+            yoPoint.set(pose.getPosition());
+            YoGraphicPosition pointVis = new YoGraphicPosition("BodyPathPoint" + i, yoPoint, 0.025, YoAppearance.Blue());
+            vizGraphicsListRegistry.registerYoGraphic("viz", pointVis);
+         }
+      }
 
       if (footseps != null)
       {
@@ -114,6 +151,7 @@ public class PlanningTestTools
             AppearanceDefinition appearance = footstep.getRobotSide() == RobotSide.RIGHT ? YoAppearance.Green() : YoAppearance.Red();
             YoFramePose yoFootstepPose = new YoFramePose("footPose" + i, worldFrame, vizRegistry);
             yoFootstepPose.set(footstepPose);
+            yoFootstepPose.setZ(yoFootstepPose.getZ() + (footstep.getRobotSide() == RobotSide.RIGHT ? 0.001 : 0.0));
 
             if (!footstep.hasFoothold())
             {
@@ -146,21 +184,25 @@ public class PlanningTestTools
    {
       YoFramePoint yoGoal = new YoFramePoint("GoalPosition", worldFrame, registry);
       yoGoal.set(goalPose.getFramePointCopy());
-      graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("GoalViz", yoGoal, 0.05, YoAppearance.White()));
+      graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("GoalViz", yoGoal, 0.05, YoAppearance.Yellow()));
+      YoFramePoint yoStart = new YoFramePoint("StartPosition", worldFrame, registry);
+      graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("StartViz", yoStart, 0.05, YoAppearance.Blue()));
       PoseReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
       FrameVector3D goalOrientation = new FrameVector3D(goalFrame, 0.5, 0.0, 0.0);
       goalOrientation.changeFrame(worldFrame);
       YoFrameVector yoGoalOrientation = new YoFrameVector("GoalVector", worldFrame, registry);
       yoGoalOrientation.set(goalOrientation);
-      graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
+//      graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
    }
 
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose,
+                                         PlanarRegionsList planarRegionsList)
    {
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, true);
    }
 
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose,
+                                         PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -170,11 +212,12 @@ public class PlanningTestTools
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
 
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal, PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal,
+                                         PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
+      planner.setPlanarRegions(planarRegionsList);
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoal(goal);
-      planner.setPlanarRegions(planarRegionsList);
 
       ExecutionTimer timer = new ExecutionTimer("Timer", 0.0, new YoVariableRegistry("Timer"));
       timer.startMeasurement();
@@ -183,11 +226,13 @@ public class PlanningTestTools
       PrintTools.info("Planning took " + timer.getCurrentTime().getDoubleValue() + "s");
 
       FootstepPlan footstepPlan = planner.getPlan();
-      if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result. Result: " + result, result.validForExecution());
+      if (assertPlannerReturnedResult)
+         assertTrue("Planner was not able to provide valid result. Result: " + result, result.validForExecution());
       return footstepPlan;
    }
 
-   public static void configureAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
+   public static void configureAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide,
+                                                      FramePose goalPose, PlanarRegionsList planarRegionsList)
    {
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -215,7 +260,7 @@ public class PlanningTestTools
       RobotSide stepSide = footstep.getRobotSide();
 
       double midFeetOffset = stepSide.negateIfLeftSide(0.125);
-      Vector3D goalOffset = new Vector3D(0.0, midFeetOffset , 0.0);
+      Vector3D goalOffset = new Vector3D(0.0, midFeetOffset, 0.0);
       RigidBodyTransform soleToWorld = new RigidBodyTransform();
       stepPose.getRigidBodyTransform(soleToWorld);
       soleToWorld.transform(goalOffset);

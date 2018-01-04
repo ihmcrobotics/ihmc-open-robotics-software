@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class MeshDataGenerator
 {
@@ -277,44 +277,30 @@ public class MeshDataGenerator
     * @param ccwOrderedConvexPolygonPoints the counter-clockwise-ordered vertices of the polygon.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(Point3D... ccwOrderedConvexPolygonPoints)
+   public static MeshDataHolder Polygon(Point3DReadOnly... ccwOrderedConvexPolygonPoints)
    {
-      Point3D32[] points = makePoint3fArrayFromPoint3dArray(ccwOrderedConvexPolygonPoints);
+      Point3D32[] vertices = makePoint3fArrayFromPoint3dArray(ccwOrderedConvexPolygonPoints);
 
-      return Polygon(points);
-   }
-
-   /**
-    * Create a triangle mesh for the given polygon.
-    * <p>
-    * <b> It is assumed that the polygon is convex and counter-clockwise ordered. </b>
-    * </p>
-    * 
-    * @param ccwOrderedConvexPolygonPoints the counter-clockwise-ordered vertices of the polygon.
-    * @return the created triangle mesh.
-    */
-   public static MeshDataHolder Polygon(Point3D32... ccwOrderedConvexPolygonPoints)
-   {
       // Assume convexity and ccw.
-      int numberOfTriangles = ccwOrderedConvexPolygonPoints.length - 2;
+      int numberOfTriangles = vertices.length - 2;
 
       if (numberOfTriangles <= 0)
          return null;
 
-      TexCoord2f[] textPoints = generateInterpolatedTexturePoints(ccwOrderedConvexPolygonPoints.length);
+      TexCoord2f[] textPoints = generateInterpolatedTexturePoints(vertices.length);
       // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
       int[] triangleIndices = new int[3 * numberOfTriangles];
       int index = 0;
-      for (int j = 2; j < ccwOrderedConvexPolygonPoints.length; j++)
+      for (int j = 2; j < vertices.length; j++)
       {
          triangleIndices[index++] = 0;
          triangleIndices[index++] = j - 1;
          triangleIndices[index++] = j;
       }
 
-      Vector3D32[] normals = findNormalsPerVertex(triangleIndices, ccwOrderedConvexPolygonPoints);
+      Vector3D32[] normals = findNormalsPerVertex(triangleIndices, vertices);
 
-      return new MeshDataHolder(ccwOrderedConvexPolygonPoints, textPoints, triangleIndices, normals);
+      return new MeshDataHolder(vertices, textPoints, triangleIndices, normals);
    }
 
    /**
@@ -1662,12 +1648,7 @@ public class MeshDataGenerator
       return Line(lineSegment3d.getFirstEndpoint(), lineSegment3d.getSecondEndpoint(), width);
    }
 
-   public static MeshDataHolder Line(Point3D point0, Point3D point1, double width)
-   {
-      return Line(point0.getX(), point0.getY(), point0.getZ(), point1.getX(), point1.getY(), point1.getZ(), width);
-   }
-
-   public static MeshDataHolder Line(Point3D32 point0, Point3D32 point1, float width)
+   public static MeshDataHolder Line(Point3DReadOnly point0, Point3DReadOnly point1, double width)
    {
       return Line(point0.getX(), point0.getY(), point0.getZ(), point1.getX(), point1.getY(), point1.getZ(), width);
    }
@@ -1925,7 +1906,14 @@ public class MeshDataGenerator
    public static MeshDataHolder Tetrahedron(float edgeLength)
    {
       /*
-       * Base vertices ordering 0 /\ / \ / \ 2 ------ 1
+       * @formatter:off
+       * Base vertices ordering
+       *     0
+       *    / \
+       *   /   \
+       *  /     \
+       * 2 ----- 1
+       * @formatter:on
        */
       float height = THIRD_SQRT6 * edgeLength;
       float topHeight = FOURTH_SQRT6 * edgeLength;
@@ -2053,11 +2041,11 @@ public class MeshDataGenerator
       return textPoints;
    }
 
-   private static Point3D32[] makePoint3fArrayFromPoint3dArray(Point3D[] pPoints)
+   private static Point3D32[] makePoint3fArrayFromPoint3dArray(Point3DReadOnly[] pPoints)
    {
       Point3D32[] points3f = new Point3D32[pPoints.length];
       int i = 0;
-      for (Point3D point3d : pPoints)
+      for (Point3DReadOnly point3d : pPoints)
       {
          points3f[i++] = new Point3D32(point3d);
       }

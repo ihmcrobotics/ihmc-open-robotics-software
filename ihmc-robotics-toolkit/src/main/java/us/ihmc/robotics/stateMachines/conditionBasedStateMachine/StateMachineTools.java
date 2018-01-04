@@ -61,12 +61,62 @@ public class StateMachineTools
       }
    }
 
+   public static <T extends Enum<T>> StateTransition<T> buildRequestableStateTransition(final YoEnum<T> requestedState, final T finalStateEnum)
+   {
+      return buildRequestableStateTransition(requestedState, new ArrayList<>(), finalStateEnum);
+   }
+
+   public static <T extends Enum<T>> StateTransition<T> buildRequestableStateTransition(final YoEnum<T> requestedState,
+                                                                                      List<? extends StateTransitionAction> stateTransitionActions,
+                                                                                      final T finalStateEnum)
+   {
+      List<StateTransitionAction> stateTransitionActionsCopy = new ArrayList<>(stateTransitionActions);
+      StateTransitionCondition stateTransitionCondition = new RequestedStateTransitionCondition<T>(finalStateEnum, requestedState);
+      StateTransitionAction stateTransitionAction = new StateTransitionAction()
+      {
+         public void doTransitionAction()
+         {
+            requestedState.set(null);
+         }
+      };
+      stateTransitionActionsCopy.add(stateTransitionAction);
+
+      return new StateTransition<T>(finalStateEnum, stateTransitionCondition, stateTransitionActionsCopy);
+   }
+
+   public static <T extends Enum<T>> StateTransition<T> buildFinishedStateTransition(final FinishableState<T> initialState, final T finalStateEnum)
+   {
+      return buildFinishedStateTransition(initialState, new ArrayList<>(), finalStateEnum);
+   }
+
+   public static <T extends Enum<T>> StateTransition<T> buildFinishedStateTransition(final FinishableState<T> initialState,
+                                                                                     List<? extends StateTransitionAction> stateTransitionActions,
+                                                                                     final T finalStateEnum)
+   {
+      List<StateTransitionAction> stateTransitionActionsCopy = new ArrayList<>(stateTransitionActions);
+      StateTransitionCondition stateTransitionCondition = new FinishedStateTransitionCondition<>(initialState, finalStateEnum);
+      StateTransitionAction stateTransitionAction = new StateTransitionAction()
+      {
+         public void doTransitionAction()
+         {
+         }
+      };
+      stateTransitionActionsCopy.add(stateTransitionAction);
+
+      return new StateTransition<T>(finalStateEnum, stateTransitionCondition, stateTransitionActionsCopy);
+   }
+
    private static class RequestedStateTransitionCondition<T extends Enum<T>> implements StateTransitionCondition
    {
       private final FinishableState<T> fromState;
       private final T requestedStateTrigger;
       private final boolean waitUntilDone;
       private final YoEnum<T> requestedState;
+
+      public RequestedStateTransitionCondition(T requestedStateTrigger, YoEnum<T> requestedState)
+      {
+         this(null, requestedStateTrigger, requestedState, false);
+      }
 
       public RequestedStateTransitionCondition(FinishableState<T> fromState, T requestedStateTrigger, YoEnum<T> requestedState, boolean waitUntilDone)
       {
@@ -82,6 +132,23 @@ public class StateMachineTools
          boolean transitionRequested = requestedStateTrigger.equals(requestedState.getEnumValue());
 
          return done && transitionRequested;
+      }
+   }
+
+   private static class FinishedStateTransitionCondition<T extends Enum<T>> implements StateTransitionCondition
+   {
+      private final FinishableState<T> fromState;
+      private final T nextState;
+
+      public FinishedStateTransitionCondition(FinishableState<T> fromState, T nextState)
+      {
+         this.fromState = fromState;
+         this.nextState = nextState;
+      }
+
+      public boolean checkCondition()
+      {
+         return fromState.isDone();
       }
    }
 

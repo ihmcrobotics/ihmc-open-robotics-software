@@ -1,13 +1,16 @@
 package us.ihmc.graphicsDescription;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 
@@ -37,7 +40,7 @@ public class MeshDataBuilder
     * @param lz box length along the z-axis.
     * @param offset coordinate of the box center. Not modified.
     */
-   public void addBox(double lx, double ly, double lz, Tuple3DBasics offset)
+   public void addBox(double lx, double ly, double lz, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset);
    }
@@ -60,7 +63,7 @@ public class MeshDataBuilder
     * @param lz box length along the z-axis.
     * @param offset coordinate of the box center. Not modified.
     */
-   public void addBox(float lx, float ly, float lz, Tuple3DBasics offset)
+   public void addBox(float lx, float ly, float lz, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset);
    }
@@ -71,7 +74,7 @@ public class MeshDataBuilder
     * @param radius radius of the cone's base.
     * @param offset coordinate of the cone's base center. Not modified.
     */
-   public void addCone(double height, double radius, Tuple3DBasics offset)
+   public void addCone(double height, double radius, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset);
    }
@@ -83,7 +86,7 @@ public class MeshDataBuilder
     * @param offset coordinate of the cone's base center. Not modified.
     * @param orientation axis-angle describing the cone orientation with respect to world. Not modified.
     */
-   public void addCone(double height, double radius, Tuple3DBasics offset, AxisAngle orientation)
+   public void addCone(double height, double radius, Tuple3DReadOnly offset, AxisAngle orientation)
    {
       addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset, orientation);
    }
@@ -94,7 +97,7 @@ public class MeshDataBuilder
     * @param radius radius of the cone's base.
     * @param offset coordinate of the cone's base center. Not modified.
     */
-   public void addCone(float height, float radius, Tuple3DBasics offset)
+   public void addCone(float height, float radius, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Cone(radius, height, DEFAULT_RES), offset);
    }
@@ -116,7 +119,7 @@ public class MeshDataBuilder
     * @param size edge length of the cube.
     * @param cubeOffset coordinates of the cube's center. Not modified.
     */
-   public void addCube(double size, Tuple3DBasics cubeOffset)
+   public void addCube(double size, Tuple3DReadOnly cubeOffset)
    {
       addBox(size, size, size, cubeOffset);
    }
@@ -126,7 +129,7 @@ public class MeshDataBuilder
     * @param size edge length of the cube.
     * @param cubeOffset coordinates of the cube's center. Not modified.
     */
-   public void addCube(float size, Tuple3DBasics cubeOffset)
+   public void addCube(float size, Tuple3DReadOnly cubeOffset)
    {
       addBox(size, size, size, cubeOffset);
    }
@@ -137,7 +140,7 @@ public class MeshDataBuilder
     * @param radius the cylinder's radius.
     * @param offset coordinates of the cylinder's center. Not modified.
     */
-   public void addCylinder(double height, double radius, Tuple3DBasics offset)
+   public void addCylinder(double height, double radius, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset);
    }
@@ -149,7 +152,7 @@ public class MeshDataBuilder
     * @param offset coordinates of the cylinder's center. Not modified.
     * @param orientation axis-angle describing the cylinder orientation with respect to world. Not modified.
     */
-   public void addCylinder(double height, double radius, Tuple3DBasics offset, AxisAngle orientation)
+   public void addCylinder(double height, double radius, Tuple3DReadOnly offset, AxisAngle orientation)
    {
       addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset, orientation);
    }
@@ -160,7 +163,7 @@ public class MeshDataBuilder
     * @param radius the cylinder's radius.
     * @param offset coordinates of the cylinder's center. Not modified.
     */
-   public void addCylinder(float height, float radius, Tuple3DBasics offset)
+   public void addCylinder(float height, float radius, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset);
    }
@@ -201,7 +204,7 @@ public class MeshDataBuilder
     * @param end end coordinate of the line. Not modified.
     * @param lineWidth width of the line.
     */
-   public void addLine(Tuple3DBasics start, Tuple3DBasics end, double lineWidth)
+   public void addLine(Tuple3DReadOnly start, Tuple3DReadOnly end, double lineWidth)
    {
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth);
    }
@@ -212,7 +215,7 @@ public class MeshDataBuilder
     * @param end end coordinate of the line. Not modified.
     * @param lineWidth width of the line.
     */
-   public void addLine(Tuple3DBasics start, Tuple3DBasics end, float lineWidth)
+   public void addLine(Tuple3DReadOnly start, Tuple3DReadOnly end, float lineWidth)
    {
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth);
    }
@@ -258,26 +261,40 @@ public class MeshDataBuilder
 
    /**
     * Add a series of connected 3D lines to this builder.
+    * @param transform the transform to apply to the points. Not modified. 
     * @param points coordinates of the line end points. Not modified. 
     * @param lineWidth width of the lines.
     * @param close whether the end of the given array of points should be connected to the beginning or not.
     */
-   public void addMultiLine(List<Point3D> points, double lineWidth, boolean close)
+   public void addMultiLine(RigidBodyTransform transform, List<? extends Point2DReadOnly> points, double lineWidth, boolean close)
+   {
+      List<Point3D> point3Ds = points.stream().map(Point3D::new).collect(Collectors.toList());
+      point3Ds.forEach(transform::transform);
+      addMultiLine(point3Ds, lineWidth, close);
+   }
+
+   /**
+    * Add a series of connected 3D lines to this builder.
+    * @param points coordinates of the line end points. Not modified. 
+    * @param lineWidth width of the lines.
+    * @param close whether the end of the given array of points should be connected to the beginning or not.
+    */
+   public void addMultiLine(List<? extends Point3DReadOnly> points, double lineWidth, boolean close)
    {
       if (points.size() < 2)
          return;
 
       for (int i = 1; i < points.size(); i++)
       {
-         Point3D start = points.get(i - 1);
-         Point3D end = points.get(i);
+         Point3DReadOnly start = points.get(i - 1);
+         Point3DReadOnly end = points.get(i);
          addLine(start, end, lineWidth);
       }
 
       if (close)
       {
-         Point3D start = points.get(points.size() - 1);
-         Point3D end = points.get(0);
+         Point3DReadOnly start = points.get(points.size() - 1);
+         Point3DReadOnly end = points.get(0);
          addLine(start, end, lineWidth);
       }
    }
@@ -288,22 +305,22 @@ public class MeshDataBuilder
     * @param lineWidth width of the lines.
     * @param close whether the end of the given array of points should be connected to the beginning or not.
     */
-   public void addMultiLine(Point3D[] points, double lineWidth, boolean close)
+   public void addMultiLine(Point3DReadOnly[] points, double lineWidth, boolean close)
    {
       if (points.length < 2)
          return;
 
       for (int i = 1; i < points.length; i++)
       {
-         Point3D start = points[i - 1];
-         Point3D end = points[i];
+         Point3DReadOnly start = points[i - 1];
+         Point3DReadOnly end = points[i];
          addLine(start, end, lineWidth);
       }
 
       if (close)
       {
-         Point3D start = points[points.length - 1];
-         Point3D end = points[0];
+         Point3DReadOnly start = points[points.length - 1];
+         Point3DReadOnly end = points[0];
          addLine(start, end, lineWidth);
       }
    }
@@ -320,11 +337,21 @@ public class MeshDataBuilder
    }
 
    /**
+    * Add a 2D polygon to this builder. 
+    * @param transformToWorld the transform from the polygon's local coordinates to world. Not modified.
+    * @param polygon the polygon to render.
+    */
+   public void addPolygon(RigidBodyTransform transformToWorld, ConvexPolygon2D polygon)
+   {
+      addMesh(MeshDataGenerator.Polygon(transformToWorld, polygon));
+   }
+
+   /**
     * Add a sphere centered to this builder.
     * @param radius the sphere radius.
     * @param offset the coordinate of the sphere. Not modified.
     */
-   public void addSphere(double radius, Tuple3DBasics offset)
+   public void addSphere(double radius, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset);
    }
@@ -343,7 +370,7 @@ public class MeshDataBuilder
     * @param radius the sphere radius.
     * @param offset the coordinate of the sphere. Not modified.
     */
-   public void addSphere(float radius, Tuple3DBasics offset)
+   public void addSphere(float radius, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset);
    }
@@ -364,7 +391,7 @@ public class MeshDataBuilder
     * @param edgeLength edge length of the tetrahedron.
     * @param offset coordinates of the center of the tetrahedron's circumscribed sphere. Not modified.
     */
-   public void addTetrahedron(double edgeLength, Tuple3DBasics offset)
+   public void addTetrahedron(double edgeLength, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset);
    }
@@ -374,7 +401,7 @@ public class MeshDataBuilder
     * @param edgeLength edge length of the tetrahedron.
     * @param offset coordinates of the center of the tetrahedron's circumscribed sphere. Not modified.
     */
-   public void addTetrahedron(float edgeLength, Tuple3DBasics offset)
+   public void addTetrahedron(float edgeLength, Tuple3DReadOnly offset)
    {
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset);
    }

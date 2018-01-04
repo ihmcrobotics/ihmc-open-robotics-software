@@ -172,7 +172,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
          for (int j = 0; j < numberOfPointsToTests; j++)
          {
-            Point3D pointToProject = EuclidCoreRandomTools.generateRandomPoint3D(random, xyzBoundary, xyzBoundary, xyzBoundary);
+            Point3D pointToProject = EuclidCoreRandomTools.nextPoint3D(random, xyzBoundary, xyzBoundary, xyzBoundary);
             ConvexPolytope randomPointPolytope = ConvexPolytopeConstructor.constructSinglePointPolytope(pointToProject);
 
             Point3D closestPointOnPolytope = new Point3D();

@@ -10,19 +10,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -45,11 +45,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
    private AssertionError assertionError;
 
@@ -449,7 +449,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
          // Now, check the position and velocity kinematics of the last joint:
          ReferenceFrame spinningFrame = lastInverseDynamicsJoint.getFrameAfterJoint();
-         FrameOrientation orientation = new FrameOrientation(spinningFrame);
+         FrameQuaternion orientation = new FrameQuaternion(spinningFrame);
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
          lastFrameOrientationID.set(orientation);
 
@@ -461,10 +461,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          
          transformToWorld.invert();
          orientation.applyTransform(transformToWorld);
-         double[] yawPitchRoll = orientation.getYawPitchRoll();
-         assertEquals(0.0, yawPitchRoll[0], 1e-7);
-         assertEquals(0.0, yawPitchRoll[1], 1e-7);
-         assertEquals(0.0, yawPitchRoll[2], 1e-7);
+         assertEquals(0.0, orientation.getYaw(), 1e-7);
+         assertEquals(0.0, orientation.getPitch(), 1e-7);
+         assertEquals(0.0, orientation.getRoll(), 1e-7);
       }
    }
 

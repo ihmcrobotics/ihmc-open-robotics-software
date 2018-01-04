@@ -17,7 +17,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testGoHome() throws SimulationExceededMaximumTimeException
    {
       super.testGoHome();
@@ -25,7 +25,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleTrajectoryPoint();
@@ -33,7 +33,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
       super.testWalking();
@@ -41,7 +41,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testWalkingAfterTrajectory() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingAfterTrajectory();
@@ -49,7 +49,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 50000)
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();
@@ -57,7 +57,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingWithUserControl();
@@ -65,7 +65,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlFrame();

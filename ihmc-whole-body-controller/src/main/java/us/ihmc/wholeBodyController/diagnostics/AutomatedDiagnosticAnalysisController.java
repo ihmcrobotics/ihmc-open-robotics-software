@@ -3,7 +3,6 @@ package us.ihmc.wholeBodyController.diagnostics;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -11,7 +10,7 @@ import java.util.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotics.robotController.RobotController;
@@ -20,7 +19,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTaskExecutor;
@@ -71,7 +70,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       diagnosticTaskExecutor = new DiagnosticTaskExecutor("highLevelTaskExecutor", yoTime, registry);
 
       FullHumanoidRobotModel fullRobotModel = toolbox.getFullRobotModel();
-      LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput = toolbox.getLowLevelOutput();
+      JointDesiredOutputList lowLevelOutput = toolbox.getLowLevelOutput();
       DiagnosticParameters diagnosticParameters = toolbox.getDiagnosticParameters();
 
       doIdleControl.set(diagnosticParameters.doIdleControlUntilRobotIsAlive());

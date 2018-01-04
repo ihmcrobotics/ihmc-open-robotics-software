@@ -12,6 +12,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -62,9 +63,8 @@ import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBu
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
@@ -898,7 +898,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       {
          sequenceArmPose(activeSideForHandControl.getEnumValue());
 
-         FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+         FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
 
          submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGE_CHICKEN_WINGS);
          sequenceChestRotations(0.55);
@@ -1276,7 +1276,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitFootPosition(false, robotSide, new FramePoint3D(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), 0.1));
 
       // Go to running man pose:
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
       desiredUpperArmOrientation.setYawPitchRoll(-1.2, -Math.PI / 2.0, 0.0);
       submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
 
@@ -1331,8 +1331,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       RobotSide robotSide = RobotSide.RIGHT;
       boolean mirrorOrientationForRightSide = true;
 
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
-      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide));
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion desiredHandOrientation = new FrameQuaternion(lowerArmsFrames.get(robotSide));
 
       desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, -1.2708);
       desiredHandOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
@@ -1346,8 +1346,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       RobotSide robotSide = RobotSide.RIGHT;
       boolean mirrorOrientationForRightSide = true;
 
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
-      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide));
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion desiredHandOrientation = new FrameQuaternion(lowerArmsFrames.get(robotSide));
 
       desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, -1.2708);
 
@@ -1458,9 +1458,9 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void cuteWave(RobotSide robotSide)
    {
 
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
-      FrameOrientation desiredHandOnHipOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide.getOppositeSide()));
-      FrameOrientation desiredHandWavingOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide));
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion desiredHandOnHipOrientation = new FrameQuaternion(lowerArmsFrames.get(robotSide.getOppositeSide()));
+      FrameQuaternion desiredHandWavingOrientation = new FrameQuaternion(lowerArmsFrames.get(robotSide));
       boolean mirrorOrientationForRightSide = true;
 
       submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians((robotSide == RobotSide.RIGHT ? 20.0 : -20.0)));
@@ -1497,7 +1497,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void bow(RobotSide robotSide)
    {
       ReferenceFrame soleZUpFrame = soleZUpFrames.get(robotSide.getOppositeSide());
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
       boolean mirrorOrientationForRightSide = true;
 
       //put the foot forward and prepare the arms
@@ -1767,12 +1767,12 @@ public class DiagnosticBehavior extends AbstractBehavior
       double halfPi = Math.PI / 2.0;
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
-      FrameOrientation upperArmDown2 = new FrameOrientation(chestFrame, -0.7443, 0.2789, -1.2803);
-      FrameOrientation upperArmIntermediateOnWayUp = new FrameOrientation(chestFrame, -0.0000, 0.7853, -0.0000);
-      FrameOrientation upperArmUp1 = new FrameOrientation(chestFrame, 0.6154, 0.5235, 0.9553);
-      FrameOrientation upperArmUp2 = new FrameOrientation(chestFrame, -0.6154, -0.5235, 0.9553);
-      FrameOrientation upperArmIntermediateOnWayDown = new FrameOrientation(chestFrame, 0.0000, -0.7853, -0.0000);
-      FrameOrientation upperArmDown1 = new FrameOrientation(chestFrame, 0.7443, -0.2789, -1.2803);
+      FrameQuaternion upperArmDown2 = new FrameQuaternion(chestFrame, -0.7443, 0.2789, -1.2803);
+      FrameQuaternion upperArmIntermediateOnWayUp = new FrameQuaternion(chestFrame, -0.0000, 0.7853, -0.0000);
+      FrameQuaternion upperArmUp1 = new FrameQuaternion(chestFrame, 0.6154, 0.5235, 0.9553);
+      FrameQuaternion upperArmUp2 = new FrameQuaternion(chestFrame, -0.6154, -0.5235, 0.9553);
+      FrameQuaternion upperArmIntermediateOnWayDown = new FrameQuaternion(chestFrame, 0.0000, -0.7853, -0.0000);
+      FrameQuaternion upperArmDown1 = new FrameQuaternion(chestFrame, 0.7443, -0.2789, -1.2803);
 
       SideDependentList<double[]> armsDown2 = computeSymmetricArmJointAngles(upperArmDown2, 0.0, null, true);
       SideDependentList<double[]> armsIntermediateOnWayUp = computeSymmetricArmJointAngles(upperArmIntermediateOnWayUp, -halfPi / 2.0, null, true);
@@ -1838,7 +1838,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
 
       // Put the arms in front
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(chestFrame);
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(chestFrame);
       desiredUpperArmOrientation.setYawPitchRoll(0.0000, -0.0000, -0.9708);
       submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, null);
       pipeLine.requestNewStage();
@@ -1965,7 +1965,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitDesiredChestOrientation(boolean parallelize, double yaw, double pitch, double roll)
    {
-      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, yaw, pitch, roll);
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(pelvisZUpFrame, yaw, pitch, roll);
       desiredChestOrientation.changeFrame(worldFrame);
       ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior,
             trajectoryTime.getDoubleValue(), pelvisZUpFrame);
@@ -2030,7 +2030,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitDesiredPelvisOrientation(boolean parallelize, double yaw, double pitch, double roll, double trajectoryTime, double sleepTime)
    {
-      FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
+      FrameQuaternion desiredPelvisOrientation = new FrameQuaternion(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
       Quaternion desiredQuaternion = new Quaternion(desiredPelvisOrientation.getQuaternion());
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
@@ -2102,7 +2102,8 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    public void submitHumanoidArmPose(RobotSide robotSide, HumanoidArmPose armPose)
    {
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame(),
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion();
+      desiredUpperArmOrientation.setYawPitchRollIncludingFrame(fullRobotModel.getChest().getBodyFixedFrame(),
             armPose.getDesiredUpperArmYawPitchRoll());
       double elbowAngle = robotSide.negateIfRightSide(armPose.getDesiredElbowAngle(robotSide));
       double[] handOrientation = new double[3];
@@ -2110,17 +2111,18 @@ public class DiagnosticBehavior extends AbstractBehavior
       {
          handOrientation = armPose.getDesiredHandYawPitchRoll();
       }
-      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide), handOrientation);
+      FrameQuaternion desiredHandOrientation = new FrameQuaternion();
+      desiredHandOrientation.setYawPitchRollIncludingFrame(lowerArmsFrames.get(robotSide), handOrientation);
       submitHandPose(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation, true);
    }
 
-   public void submitSymmetricHandPose(FrameOrientation desiredUpperArmOrientation, double elbowAngle, FrameOrientation desiredHandOrientation)
+   public void submitSymmetricHandPose(FrameQuaternion desiredUpperArmOrientation, double elbowAngle, FrameQuaternion desiredHandOrientation)
    {
       for (RobotSide robotSide : RobotSide.values)
          submitHandPose(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation, true);
    }
 
-   public void submitHandPose(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, double elbowAngle, FrameOrientation desiredHandOrientation,
+   public void submitHandPose(RobotSide robotSide, FrameQuaternion desiredUpperArmOrientation, double elbowAngle, FrameQuaternion desiredHandOrientation,
          boolean mirrorOrientationForRightSide)
    {
       double[] desiredJointAngles = computeArmJointAngles(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation,
@@ -2143,8 +2145,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
-   public SideDependentList<double[]> computeSymmetricArmJointAngles(FrameOrientation desiredUpperArmOrientation, double elbowAngle,
-         FrameOrientation desiredHandOrientation, boolean mirrorOrientationForRightSide)
+   public SideDependentList<double[]> computeSymmetricArmJointAngles(FrameQuaternion desiredUpperArmOrientation, double elbowAngle,
+         FrameQuaternion desiredHandOrientation, boolean mirrorOrientationForRightSide)
    {
       SideDependentList<double[]> desiredSymmetricJointAngles = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -2155,8 +2157,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       return desiredSymmetricJointAngles;
    }
 
-   private double[] computeArmJointAngles(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, double elbowAngle,
-         FrameOrientation desiredHandOrientation, boolean mirrorOrientationForRightSide)
+   private double[] computeArmJointAngles(RobotSide robotSide, FrameQuaternion desiredUpperArmOrientation, double elbowAngle,
+         FrameQuaternion desiredHandOrientation, boolean mirrorOrientationForRightSide)
    {
       double[] desiredUpperArmJointAngles = computeUpperArmJointAngles(robotSide, desiredUpperArmOrientation, mirrorOrientationForRightSide, 0);
       if (desiredUpperArmJointAngles == null)
@@ -2190,12 +2192,12 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final Random random = new Random(541654L);
 
-   private double[] computeUpperArmJointAngles(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, boolean mirrorOrientationForRightSide, int iteration)
+   private double[] computeUpperArmJointAngles(RobotSide robotSide, FrameQuaternion desiredUpperArmOrientation, boolean mirrorOrientationForRightSide, int iteration)
    {
       if (desiredUpperArmOrientation == null)
          return new double[upperArmJointsClone.get(robotSide).length];
 
-      FrameOrientation temporaryDesiredUpperArmOrientation = new FrameOrientation();
+      FrameQuaternion temporaryDesiredUpperArmOrientation = new FrameQuaternion();
       temporaryDesiredUpperArmOrientation.setIncludingFrame(desiredUpperArmOrientation);
 
       if (iteration == 0)
@@ -2220,14 +2222,15 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       if (mirrorOrientationForRightSide)
       {
-         double[] yawPitchRoll = temporaryDesiredUpperArmOrientation.getYawPitchRoll();
+         double[] yawPitchRoll = new double[3];
+         temporaryDesiredUpperArmOrientation.getYawPitchRoll(yawPitchRoll);
          yawPitchRoll[0] = robotSide.negateIfRightSide(yawPitchRoll[0]);
          yawPitchRoll[2] = robotSide.negateIfRightSide(yawPitchRoll[2]);
          temporaryDesiredUpperArmOrientation.setYawPitchRoll(yawPitchRoll);
       }
 
       RigidBodyTransform desiredTransformForUpperArm = new RigidBodyTransform();
-      temporaryDesiredUpperArmOrientation.getTransform3D(desiredTransformForUpperArm);
+      desiredTransformForUpperArm.setRotation(temporaryDesiredUpperArmOrientation);
       desiredTransformForUpperArm.set(desiredTransformForUpperArm);
       desiredTransformForUpperArm.multiply(armZeroJointAngleConfigurationOffsets.get(robotSide));
       boolean success = inverseKinematicsForUpperArms.get(robotSide).solve(desiredTransformForUpperArm);
@@ -2253,12 +2256,12 @@ public class DiagnosticBehavior extends AbstractBehavior
       return desiredUpperArmJointAngles;
    }
 
-   private double[] computeLowerArmJointAngles(RobotSide robotSide, FrameOrientation desiredHandOrientation, boolean mirrorOrientationForRightSide)
+   private double[] computeLowerArmJointAngles(RobotSide robotSide, FrameQuaternion desiredHandOrientation, boolean mirrorOrientationForRightSide)
    {
       if (desiredHandOrientation == null)
          return new double[lowerArmJointsClone.get(robotSide).length];
 
-      FrameOrientation temporaryDesiredHandOrientation = new FrameOrientation();
+      FrameQuaternion temporaryDesiredHandOrientation = new FrameQuaternion();
       temporaryDesiredHandOrientation.setIncludingFrame(desiredHandOrientation);
 
       temporaryDesiredHandOrientation.checkReferenceFrameMatch(lowerArmsFrames.get(robotSide));
@@ -2269,15 +2272,15 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       if (mirrorOrientationForRightSide)
       {
-         double qx = -temporaryDesiredHandOrientation.getQx();
-         double qy = temporaryDesiredHandOrientation.getQy();
-         double qz = -temporaryDesiredHandOrientation.getQz();
-         double qs = temporaryDesiredHandOrientation.getQs();
+         double qx = -temporaryDesiredHandOrientation.getX();
+         double qy = temporaryDesiredHandOrientation.getY();
+         double qz = -temporaryDesiredHandOrientation.getZ();
+         double qs = temporaryDesiredHandOrientation.getS();
          temporaryDesiredHandOrientation.set(qx, qy, qz, qs);
       }
 
       RigidBodyTransform desiredTransformForLowerArm = new RigidBodyTransform();
-      temporaryDesiredHandOrientation.getTransform3D(desiredTransformForLowerArm);
+      desiredTransformForLowerArm.setRotation(temporaryDesiredHandOrientation);
       boolean success = inverseKinematicsForLowerArms.get(robotSide).solve(desiredTransformForLowerArm);
 
       if (!success)
@@ -2316,7 +2319,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitFootPosition(boolean parallelize, RobotSide robotSide, FramePoint3D desiredFootPosition)
    {
-      FrameOrientation desiredFootOrientation = new FrameOrientation(desiredFootPosition.getReferenceFrame());
+      FrameQuaternion desiredFootOrientation = new FrameQuaternion(desiredFootPosition.getReferenceFrame());
       FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);
       submitFootPose(parallelize, robotSide, desiredFootPose);
    }
@@ -2347,7 +2350,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          double roll)
    {
       FramePoint3D framePosition = new FramePoint3D(referenceFrame, x, y, z);
-      FrameOrientation frameOrientation = new FrameOrientation(referenceFrame, yaw, pitch, roll);
+      FrameQuaternion frameOrientation = new FrameQuaternion(referenceFrame, yaw, pitch, roll);
       FramePose desiredFootPose = new FramePose(framePosition, frameOrientation);
       submitFootPose(parallelize, robotSide, desiredFootPose);
    }
@@ -2357,7 +2360,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
    }
 
-   private final FrameOrientation tempFrameOrientation = new FrameOrientation();
+   private final FrameQuaternion tempFrameOrientation = new FrameQuaternion();
 
    @Override
    public void doControl()
@@ -2642,7 +2645,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void sequenceArmShake(RobotSide armSide)
    {
       double halfPi = Math.PI / 2.0;
-      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
       boolean mirrorOrientationForRightSide = true;
 
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)

@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPProportionalController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.YoICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPProportionalController;
+import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -102,7 +102,7 @@ public class SphereNewICPController implements GenericSphereController
       omega0 = controlToolbox.getOmega0();
       heightController = new BasicHeightController(controlToolbox, registry);
       icpPlanner = new SmoothCMPBasedICPPlanner(controlToolbox.getFullRobotModel(), controlToolbox.getBipedSupportPolygons(), controlToolbox.getContactableFeet(),
-            controlToolbox.getNewCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), 4, registry, yoGraphicsListRegistry, 9.81);
+            controlToolbox.getNewCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), registry, yoGraphicsListRegistry, 9.81);
       icpPlanner.initializeParameters(controlToolbox.getNewCapturePointPlannerParameters());
       icpPlanner.setOmega0(omega0);
 

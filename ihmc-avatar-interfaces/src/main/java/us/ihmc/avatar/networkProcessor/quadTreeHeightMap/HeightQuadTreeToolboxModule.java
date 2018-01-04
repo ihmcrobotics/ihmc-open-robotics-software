@@ -12,7 +12,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -55,7 +55,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
+   public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
    {
       return Collections.singletonList(HeightQuadTreeMessage.class);
    }

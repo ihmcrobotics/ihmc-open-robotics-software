@@ -4,14 +4,15 @@ import java.util.ArrayList;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -25,7 +26,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    private double swingHeight = 0.0;
    private final FramePoint3D position = new FramePoint3D();
-   private final FrameOrientation orientation = new FrameOrientation();
+   private final FrameQuaternion orientation = new FrameQuaternion();
 
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
@@ -35,6 +36,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingTrajectoryBlendDuration = 0.0;
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
+   private double touchdownDuration = Double.NaN;
 
    private ReferenceFrame trajectoryFrame;
    
@@ -60,6 +62,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       customPositionWaypoints.clear();
       swingTrajectory.clear();
 
+      touchdownDuration = Double.NaN;
       swingDuration = Double.NaN;
       transferDuration = Double.NaN;
    }
@@ -103,6 +106,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       }
 
       swingDuration = message.swingDuration;
+      touchdownDuration = message.touchdownDuration;
       transferDuration = message.transferDuration;
       
       this.executionDelayTime = message.executionDelayTime;
@@ -134,6 +138,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
 
       swingDuration = other.swingDuration;
+      touchdownDuration = other.touchdownDuration;
       transferDuration = other.transferDuration;
       this.executionDelayTime = other.executionDelayTime;
    }
@@ -149,7 +154,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       this.robotSide = robotSide;
    }
 
-   public void setPose(Point3D position, Quaternion orientation)
+   public void setPose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       this.position.set(position);
       this.orientation.set(orientation);
@@ -217,7 +222,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return position;
    }
 
-   public FrameOrientation getOrientation()
+   public FrameQuaternion getOrientation()
    {
       return orientation;
    }
@@ -235,6 +240,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public double getTransferDuration()
    {
       return transferDuration;
+   }
+   
+   public double getTouchdownDuration()
+   {
+      return touchdownDuration;
    }
 
    @Override
@@ -299,6 +309,4 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    {
       return true;
    }
-
-
 }

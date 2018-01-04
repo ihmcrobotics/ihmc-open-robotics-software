@@ -2,21 +2,23 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.FOOT_SWING_WEIGHT;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -112,7 +114,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.scale(weight);
    }
 
-   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
       this.angularWeight.set(angularWeight);
       this.linearWeight.set(linearWeight);
@@ -139,6 +141,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
       }
+
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      contactState.notifyContactStateHasChanged();
 
       spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
 

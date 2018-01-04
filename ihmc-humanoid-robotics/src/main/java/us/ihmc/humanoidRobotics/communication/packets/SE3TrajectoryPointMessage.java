@@ -12,10 +12,14 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -67,7 +71,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
          angularVelocity = new Vector3D(se3TrajectoryPointMessage.angularVelocity);
    }
 
-   public SE3TrajectoryPointMessage(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3D linearVelocity, Vector3D angularVelocity)
+   public SE3TrajectoryPointMessage(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       this.time = time;
       this.position = new Point3D(position);
@@ -113,7 +117,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       return time;
    }
 
-   public void getPosition(Point3D positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       positionToPack.set(position);
    }
@@ -123,7 +127,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       this.position.set(position);
    }
 
-   public void getOrientation(Quaternion orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientationToPack.set(orientation);
    }
@@ -133,22 +137,22 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       this.orientation.set(orientation);
    }
 
-   public void getLinearVelocity(Vector3D linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocityToPack.set(linearVelocity);
    }
 
-   public void setLinearVelocity(Vector3D linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void getAngularVelocity(Vector3D angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
 
-   public void setAngularVelocity(Vector3D angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }

@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.combined;
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
 
 public class WeightedSubtractionVelocitySensor extends LinearCombinationVelocitySensor

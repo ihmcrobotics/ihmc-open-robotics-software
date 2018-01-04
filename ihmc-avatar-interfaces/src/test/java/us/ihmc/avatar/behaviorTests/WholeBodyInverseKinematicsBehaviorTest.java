@@ -20,14 +20,15 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -38,11 +39,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private boolean isKinematicsToolboxVisualizerEnabled = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
@@ -121,11 +122,11 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       RigidBody chest = fullRobotModel.getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
-      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
+      FrameQuaternion initialChestOrientation = new FrameQuaternion(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       ReferenceFrame pelvisControlFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      FrameQuaternion initialPelvisOrientation = new FrameQuaternion(pelvisControlFrame);
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
@@ -161,8 +162,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       double angleEpsilon = Math.toRadians(1.0);
 
-      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, angleEpsilon);
-      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, angleEpsilon);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, angleEpsilon);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, angleEpsilon);
 
       String handName = fullRobotModel.getHand(robotSide).getName();
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
@@ -285,7 +286,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       RigidBody chest = drcBehaviorTestHelper.getControllerFullRobotModel().getChest();
       ReferenceFrame chestControlFrame = chest.getBodyFixedFrame();
-      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
+      FrameQuaternion initialChestOrientation = new FrameQuaternion(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion offsetOrientation = new Quaternion();
@@ -330,7 +331,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       double chestAngleEpsilon = Math.toRadians(10);
 
-      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, chestAngleEpsilon));
+      assertTrue(isOrientationEqual(initialChestOrientation, controllerDesiredChestOrientation, chestAngleEpsilon));
 
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
 
@@ -542,7 +543,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Quaternion offsetOrientationChest = new Quaternion();
       offsetOrientationChest.setYawPitchRoll(0.3, 0.0, 0.1);
       ReferenceFrame chestControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
-      FrameOrientation desiredChestOrientation = new FrameOrientation(chestControlFrame);
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(chestControlFrame);
       double initialChestPitch = desiredChestOrientation.getPitch();
       double initialChestYaw = desiredChestOrientation.getYaw();
       desiredChestOrientation.set(offsetOrientationChest);
@@ -564,7 +565,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      FrameOrientation currentChestOrientation = new FrameOrientation(chestControlFrame);
+      FrameQuaternion currentChestOrientation = new FrameQuaternion(chestControlFrame);
       currentChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       double currentChestRoll = currentChestOrientation.getRoll();
       double currentChestYaw = currentChestOrientation.getYaw();
@@ -595,7 +596,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Quaternion offsetOrientationPelvis = new Quaternion();
       offsetOrientationPelvis.setYawPitchRoll(0.3, 0.0, 0.1);
       ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
-      FrameOrientation desiredPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      FrameQuaternion desiredPelvisOrientation = new FrameQuaternion(pelvisControlFrame);
       double initialPelvisPitch = desiredPelvisOrientation.getPitch();
       double initialPelvisYaw = desiredPelvisOrientation.getYaw();
       desiredPelvisOrientation.set(offsetOrientationPelvis);
@@ -617,7 +618,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      FrameOrientation currentPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      FrameQuaternion currentPelvisOrientation = new FrameQuaternion(pelvisControlFrame);
       currentPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       double currentPelvisRoll = currentPelvisOrientation.getRoll();
       double currentPelvisYaw = currentPelvisOrientation.getYaw();
@@ -632,7 +633,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private boolean isOrientationEqual(Quaternion initialQuat, Quaternion finalQuat, double angleEpsilon)
+   private boolean isOrientationEqual(QuaternionReadOnly initialQuat, QuaternionReadOnly finalQuat, double angleEpsilon)
    {
       Quaternion quatDifference = new Quaternion(initialQuat);
       quatDifference.multiplyConjugateOther(finalQuat);

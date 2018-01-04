@@ -13,7 +13,7 @@ import us.ihmc.communication.ros.generators.RosExportedField;
  *
  * @param <T> Type of the final implementation of this message.
  */
-public abstract class QueueableMessage<T extends QueueableMessage<T>> extends TrackablePacket<T>
+public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Packet<T>
 {
    @RosExportedField(documentation = "When OVERRIDE is chosen:"
          + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."

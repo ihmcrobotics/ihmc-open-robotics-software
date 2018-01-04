@@ -15,9 +15,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisu
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -33,7 +33,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -158,6 +158,8 @@ public class HighLevelHumanoidControllerToolbox
 
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
    private WalkingMessageHandler walkingMessageHandler;
+   
+   private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
@@ -371,8 +373,27 @@ public class HighLevelHumanoidControllerToolbox
       filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha,
                                                                                               yoAngularMomentum);
       momentumGain.set(0.0);
+      
+      attachControllerFailureListener(new ControllerFailureListener()
+      {
+         @Override
+         public void controllerFailed(FrameVector2D fallingDirection)
+         {
+            reportControllerFailed();
+         }
+      });
    }
 
+   public void reportControllerFailed()
+   {
+      controllerFailed.set(true);
+   }
+   
+   public YoBoolean getControllerFailedBoolean()
+   {
+      return controllerFailed;
+   }
+   
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
    {
       List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
@@ -818,6 +839,11 @@ public class HighLevelHumanoidControllerToolbox
    public SideDependentList<ContactableFoot> getContactableFeet()
    {
       return feet;
+   }
+
+   public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
+   {
+      return contactableBodies;
    }
 
    public ContactablePlaneBody getContactableBody(RigidBody body)

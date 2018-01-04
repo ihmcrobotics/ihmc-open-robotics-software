@@ -77,7 +77,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 47.7)
-   @Test(timeout = 240000)
+   @Test(timeout = 150000)
    public void testWalkAtAngleUsingStartTargetMeanOrientation() throws SimulationExceededMaximumTimeException
    {
       super.testWalkAtAngleUsingStartTargetMeanOrientation();

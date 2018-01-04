@@ -50,7 +50,7 @@ public class TimeStampedTransformBufferTest
 
       for (int i = 0; i < bufferSize; i++)
       {
-         RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          timeStamp += (long) RandomNumbers.nextInt(random, 1, 1516);
          TimeStampedTransform3D newTimeStampedTransform = new TimeStampedTransform3D(newestPelvisPose, timeStamp);
          pelvisPosesRegistered.add(newTimeStampedTransform);
@@ -95,7 +95,7 @@ public class TimeStampedTransformBufferTest
 
          for (int poseIndex = 0; poseIndex < numberOfPoses; poseIndex++)
          {
-            RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+            RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
             timeStamp += (long) RandomNumbers.nextInt(random, 1, 1516);
             TimeStampedTransform3D newTimeStampedTransform = new TimeStampedTransform3D(newestPelvisPose, timeStamp);
             pelvisPosesRegistered.add(newTimeStampedTransform);
@@ -138,7 +138,7 @@ public class TimeStampedTransformBufferTest
 
       for (int poseIndex = 0; poseIndex < numberOfPoses; poseIndex++)
       {
-         RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          timeStamp += (long) RandomNumbers.nextInt(random, 1, 1516);
          TimeStampedTransform3D newTimeStampedTransform = new TimeStampedTransform3D(newestPelvisPose, timeStamp);
          pelvisPosesRegistered.add(newTimeStampedTransform);
@@ -189,12 +189,12 @@ public class TimeStampedTransformBufferTest
          pelvisPosesRegistered.clear();
          for (int j = 0; j < RandomNumbers.nextInt(random, 1, bufferSize); j++)
          {
-            timeStampedPelvisPoseBuffer.put(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random), timeStamp);
+            timeStampedPelvisPoseBuffer.put(EuclidCoreRandomTools.nextRigidBodyTransform(random), timeStamp);
          }
 
          for (int poseIndex = 0; poseIndex < numberOfPoses; poseIndex++)
          {
-            RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+            RigidBodyTransform newestPelvisPose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
             timeStamp += (long) RandomNumbers.nextInt(random, 1, 1516);
             TimeStampedTransform3D newTimeStampedTransform = new TimeStampedTransform3D(newestPelvisPose, timeStamp);
             pelvisPosesRegistered.add(newTimeStampedTransform);

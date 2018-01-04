@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import java.io.InputStream;
 import java.util.List;
 
 import com.jme3.math.Transform;
@@ -9,7 +10,9 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
+import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasPlanarRegionFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
@@ -27,12 +30,14 @@ import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOf
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -60,7 +65,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
-import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
@@ -104,6 +109,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
+   private final AtlasHighLevelControllerParameters highLevelControllerParameters;
 
    private final RobotDescription robotDescription;
 
@@ -159,8 +165,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       else
          capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
 
-      planarRegionFootstepPlannerParameters = new AtlasFootstepPlannerParameters();
+      planarRegionFootstepPlannerParameters = new AtlasPlanarRegionFootstepPlannerParameters();
 
+      highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
 
@@ -182,6 +189,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public RobotDescription getRobotDescription()
    {
       return robotDescription;
+   }
+
+   @Override
+   public HighLevelControllerParameters getHighLevelControllerParameters()
+   {
+      return highLevelControllerParameters;
    }
 
    @Override
@@ -788,7 +801,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       linkHolder.setInertia(inertia);
    }
-   
+
    /**
     * Adds robot specific footstep parameters
     */
@@ -797,17 +810,29 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return planarRegionFootstepPlannerParameters;
    }
-   
+
+   @Override
+   public FootstepPlannerParameters getFootstepPlannerParameters()
+   {
+      return new AtlasFootstepPlannerParameters();
+   }
+
    @Override
    public DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return new DRCSimulationOutputWriterForControllerThread(humanoidFloatingRootJointRobot);
    }
-   
+
    @Override
-   public LowLevelOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   public JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return null;
+   }
+
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      return getClass().getResourceAsStream("/us/ihmc/atlas/parameters/controller.xml");
    }
    
 }

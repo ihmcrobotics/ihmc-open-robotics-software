@@ -17,7 +17,7 @@ public class JMEDataTypeUtilsTest
    {
       for (int i = 0; i < 1000; i++)
       {
-         RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(new Random(-2346283641976L));
+         RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(new Random(-2346283641976L));
          //TODO @Davide test removed
          //Transform jmeVersion = JMEDataTypeUtils.j3dTransform3DToJMETransform(randomTransform);
          //RigidBodyTransform resultTransform = JMEDataTypeUtils.jmeTransformToTransform3D(jmeVersion);

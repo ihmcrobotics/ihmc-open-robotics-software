@@ -193,7 +193,6 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
    {
       String fileEnding = ".guiConf";
 
-      // TODO Auto-generated method stub
       try
       {
          String filename = file.getName();

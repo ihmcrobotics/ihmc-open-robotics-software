@@ -3,7 +3,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 import java.util.EnumMap;
 import java.util.Map;
 
-import us.ihmc.robotics.Axis;
+import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.controllers.pidGains.DampingUpdater;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -88,7 +88,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
 
-   private static void populateMap(Map<Axis, YoDouble> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
+   static void populateMap(Map<Axis, YoDouble> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
    {
       switch (gainCoupling)
       {
@@ -189,7 +189,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       return tempIntegralGains;
    }
 
-   private static void fillFromMap(Map<Axis, YoDouble> map, double[] arrayToFill)
+   static void fillFromMap(Map<Axis, YoDouble> map, double[] arrayToFill)
    {
       arrayToFill[0] = map.get(Axis.X).getDoubleValue();
       arrayToFill[1] = map.get(Axis.Y).getDoubleValue();

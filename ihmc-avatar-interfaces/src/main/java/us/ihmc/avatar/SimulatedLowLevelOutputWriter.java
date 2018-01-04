@@ -5,14 +5,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SimulatedLowLevelOutputWriter implements LowLevelOutputWriter
+public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
 {
 
    protected final FloatingRootJointRobot robot;
@@ -27,7 +27,7 @@ public class SimulatedLowLevelOutputWriter implements LowLevelOutputWriter
    }
 
    @Override
-   public void setLowLevelOneDoFJointDesiredDataHolderList(LowLevelOneDoFJointDesiredDataHolderList lowLevelDataHolder)
+   public void setJointDesiredOutputList(JointDesiredOutputList lowLevelDataHolder)
    {
       revoluteJoints.clear();
 

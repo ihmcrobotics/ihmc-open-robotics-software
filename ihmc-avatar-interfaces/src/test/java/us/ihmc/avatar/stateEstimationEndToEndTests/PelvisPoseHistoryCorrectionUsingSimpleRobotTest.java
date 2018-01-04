@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -44,7 +44,7 @@ import us.ihmc.tools.MemoryTools;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
 //   private static final boolean showGUI = false;
    //TODO get that from the StateEstimatorParameters
@@ -263,8 +263,6 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       floatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
       refFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame(), true, false)
       {
-         private static final long serialVersionUID = -6427490298776551499L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -328,7 +326,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = new RigidBodyTransform[numOfTargets];
       for (int i = 0; i < 10; i++)
       {
-         targets[i] = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         targets[i] = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       }
       return targets;
    }
@@ -806,7 +804,6 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       @Override
       public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
       {
-         // TODO Auto-generated method stub
          
       }
    }

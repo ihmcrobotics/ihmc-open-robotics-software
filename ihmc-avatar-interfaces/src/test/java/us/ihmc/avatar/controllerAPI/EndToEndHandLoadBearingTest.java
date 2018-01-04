@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -35,11 +34,11 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInterface
 {
-   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -122,6 +121,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       assertTrue(success);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface

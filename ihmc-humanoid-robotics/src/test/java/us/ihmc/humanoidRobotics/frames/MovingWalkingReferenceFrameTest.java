@@ -25,7 +25,7 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 public class MovingWalkingReferenceFrameTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstFiniteDifference()
    {
       Random random = new Random(23423L);
@@ -103,7 +103,6 @@ public class MovingWalkingReferenceFrameTest
    {
       return new MovingReferenceFrame(name, parentFrame)
       {
-         private static final long serialVersionUID = 2679570743450192657L;
          private final Vector3D linearAmplitude = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          private final Vector3D linearFrequency = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          private final Vector3D linearPhase = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());

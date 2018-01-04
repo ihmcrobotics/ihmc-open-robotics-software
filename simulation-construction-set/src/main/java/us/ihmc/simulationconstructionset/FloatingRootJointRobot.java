@@ -1,14 +1,18 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.tools.FormattingTools;
 
 public class FloatingRootJointRobot extends RobotFromDescription
 {
@@ -42,7 +46,7 @@ public class FloatingRootJointRobot extends RobotFromDescription
       rootJoint.getTransformToWorld(transform);
    }
 
-   public void setPositionInWorld(Tuple3DBasics offset)
+   public void setPositionInWorld(Tuple3DReadOnly offset)
    {
       rootJoint.setPosition(offset);
    }
@@ -52,17 +56,17 @@ public class FloatingRootJointRobot extends RobotFromDescription
       rootJoint.setYawPitchRoll(yaw, pitch, roll);
    }
 
-   public void setOrientation(Quaternion quaternion)
+   public void setOrientation(QuaternionReadOnly quaternion)
    {
       rootJoint.setQuaternion(quaternion);
    }
 
-   public void setAngularVelocity(Vector3D velocity)
+   public void setAngularVelocity(Vector3DReadOnly velocity)
    {
       rootJoint.setAngularVelocityInBody(velocity);
    }
 
-   public void setLinearVelocity(Vector3D velocity)
+   public void setLinearVelocity(Vector3DReadOnly velocity)
    {
       rootJoint.setVelocity(velocity);
    }
@@ -94,22 +98,22 @@ public class FloatingRootJointRobot extends RobotFromDescription
       return position;
    }
 
-   public void getPositionInWorld(Vector3D vectorToPack)
+   public void getPositionInWorld(Vector3DBasics vectorToPack)
    {
       rootJoint.getPosition(vectorToPack);
    }
 
-   public void getVelocityInWorld(Vector3D vectorToPack)
+   public void getVelocityInWorld(Vector3DBasics vectorToPack)
    {
       rootJoint.getVelocity(vectorToPack);
    }
 
-   public void getOrientationInWorld(Quaternion quaternionToPack)
+   public void getOrientationInWorld(QuaternionBasics quaternionToPack)
    {
       rootJoint.getQuaternion(quaternionToPack);
    }
 
-   public void getAngularVelocityInBody(Vector3D vectorToPack)
+   public void getAngularVelocityInBody(Vector3DBasics vectorToPack)
    {
       rootJoint.getAngularVelocityInBody(vectorToPack);
    }

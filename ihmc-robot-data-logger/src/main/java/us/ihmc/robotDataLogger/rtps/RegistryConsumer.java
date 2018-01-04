@@ -6,19 +6,17 @@ import java.util.concurrent.PriorityBlockingQueue;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.common.Guid;
 import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.robotDataLogger.LogDataType;
-import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.YoVariableClientImplementation;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryDecompressor;
 import us.ihmc.robotDataLogger.dataBuffers.RegistryReceiveBuffer;
 import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
-import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class RegistryConsumer extends Thread implements SubscriberListener
 {
@@ -32,10 +30,11 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final SampleInfo sampleInfo = new SampleInfo();
    private volatile boolean running = true;
    
+   private boolean firstSample = true;
 
    private final IDLYoVariableHandshakeParser parser;
    private final RegistryDecompressor registryDecompressor;
-   private final YoVariableClient listener;
+   private final YoVariableClientImplementation listener;
    
    private final TIntLongHashMap lastRegistryUid = new TIntLongHashMap();
    private final TObjectLongHashMap<Guid> sampleIdentities = new TObjectLongHashMap<>();
@@ -51,33 +50,19 @@ public class RegistryConsumer extends Thread implements SubscriberListener
    private final int segmentsForAllVariables;
    
    private long previousTimestamp = -1;
-   private final YoInteger skippedPackets;
-   private final YoInteger skippedIncomingPackets;
-   private final YoInteger nonIncreasingTimestamps;
-   private final YoInteger packetsOutOfOrder;
-   private final YoInteger mergedPackets;
-   private final YoInteger totalPackets;
-   private final YoInteger skippedPacketDueToFullBuffer;
-   private final YoInteger firstSegmentsMissing;
 
    
    private long lastPacketReceived;
    
-   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClient yoVariableClient, YoVariableRegistry loggerDebugRegistry)
+   private final RTPSDebugRegistry debugRegistry;
+   
+   public RegistryConsumer(IDLYoVariableHandshakeParser parser, YoVariableClientImplementation yoVariableClient, RTPSDebugRegistry debugRegistry)
    {
       this.parser = parser;
       this.registryDecompressor = new RegistryDecompressor(parser.getYoVariablesList(), parser.getJointStates());
       this.listener = yoVariableClient;
-      
-      this.skippedPackets = new YoInteger("skippedPackets", loggerDebugRegistry);
-      this.skippedIncomingPackets = new YoInteger("skippedIncomingPackets", loggerDebugRegistry);
-      this.nonIncreasingTimestamps = new YoInteger("nonIncreasingTimestamps", loggerDebugRegistry);
-      this.packetsOutOfOrder = new YoInteger("packetsOutOfOrder", loggerDebugRegistry);
-      this.mergedPackets = new YoInteger("mergedPackets", loggerDebugRegistry);
-      this.totalPackets = new YoInteger("totalPackets", loggerDebugRegistry);
-      this.skippedPacketDueToFullBuffer = new YoInteger("skippedPacketDueToFullBuffer", loggerDebugRegistry);
-      this.firstSegmentsMissing = new YoInteger("firstSegmentsMissing", loggerDebugRegistry);
-      
+
+      this.debugRegistry = debugRegistry;
 
       this.segmentsForAllVariables = LogParticipantTools.calculateLogSegmentSizes(parser.getNumberOfVariables(), parser.getNumberOfJointStateVariables()).length;
       
@@ -151,16 +136,16 @@ public class RegistryConsumer extends Thread implements SubscriberListener
       {
          if(buffer.getUid() < previousUid)
          {
-            packetsOutOfOrder.increment();
+            debugRegistry.getPacketsOutOfOrder().increment();
          }
          else
          {
-            skippedPackets.add((int) (buffer.getUid() - previousUid - 1));
+            debugRegistry.getSkippedPackets().add((int) (buffer.getUid() - previousUid - 1));
          }
       }
       
      
-      totalPackets.increment();
+      debugRegistry.getTotalPackets().increment();
    }
    
 
@@ -176,24 +161,31 @@ public class RegistryConsumer extends Thread implements SubscriberListener
          
          if(buffer.getOffset() > 0)
          {
-            firstSegmentsMissing.increment();
+            debugRegistry.getFirstSegmentsMissing().increment();
          }
          
          while(!orderedBuffers.isEmpty() && orderedBuffers.peek().getTimestamp() == timestamp)
          {
             RegistryReceiveBuffer next = orderedBuffers.take();
             decompressBuffer(next);
-            mergedPackets.increment();
+            debugRegistry.getMergedPackets().increment();
          }
          
          if(previousTimestamp != -1 && previousTimestamp >= buffer.getTimestamp())
          {
-            nonIncreasingTimestamps.increment();         
+            debugRegistry.getNonIncreasingTimestamps().increment();         
          }
          previousTimestamp = buffer.getTimestamp();
          
-         listener.receivedTimestampAndData(timestamp);
-      
+         if(firstSample)
+         {
+            listener.connected();
+            firstSample = false;
+         }
+         else
+         {
+            listener.receivedTimestampAndData(timestamp);
+         }
       }
       else
       {
@@ -237,7 +229,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
             
             if(sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) != sampleIdentities.getNoEntryValue() && sampleIdentities.get(sampleInfo.getSampleIdentity().getGuid()) + 1 != sampleInfo.getSampleIdentity().getSequenceNumber().get())
             {
-               skippedIncomingPackets.increment();
+               debugRegistry.getSkippedIncomingPackets().increment();
             }
             sampleIdentities.put(sampleInfo.getSampleIdentity().getGuid(), sampleInfo.getSampleIdentity().getSequenceNumber().get());
             
@@ -248,7 +240,7 @@ public class RegistryConsumer extends Thread implements SubscriberListener
             }
             else
             {
-               skippedPacketDueToFullBuffer.increment();
+               debugRegistry.getSkippedPacketDueToFullBuffer().increment();
             }
          }
       }

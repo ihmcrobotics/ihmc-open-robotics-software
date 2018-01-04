@@ -45,7 +45,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
 {
@@ -104,8 +104,6 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 
       cameraReferenceFrame = new ReferenceFrame(prefix + "CameraReferenceFrame", ReferenceFrame.getWorldFrame())
       {
-         private static final long serialVersionUID = 4455939689271999057L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -115,8 +113,6 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 
       detectorReferenceFrame = new ReferenceFrame(prefix + "DetectorReferenceFrame", cameraReferenceFrame)
       {
-         private static final long serialVersionUID = -6695542420802533867L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -126,8 +122,6 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 
       locatedFiducialReferenceFrame = new ReferenceFrame(prefix + "LocatedReferenceFrame", ReferenceFrame.getWorldFrame())
       {
-         private static final long serialVersionUID = 9164127391552081524L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

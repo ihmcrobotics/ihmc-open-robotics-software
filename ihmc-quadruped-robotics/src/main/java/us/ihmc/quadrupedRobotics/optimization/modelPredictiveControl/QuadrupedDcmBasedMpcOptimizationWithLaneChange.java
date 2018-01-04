@@ -13,16 +13,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
-import us.ihmc.quadrupedRobotics.planning.*;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements QuadrupedMpcOptimizationWithLaneChange
 {
@@ -169,10 +170,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
             addPointWithScaleFactor(cmpPositionSetpoint, currentSolePosition.get(robotQuadrant), normalizedContactPressure);
          }
       }
-      for (Direction direction : Direction.values2D())
-      {
-         stepAdjustmentVector.setElement(direction.ordinal(), u.get(rowOffset++, 0));
-      }
+      stepAdjustmentVector.setElement(0, u.get(rowOffset++, 0));
+      stepAdjustmentVector.setElement(1, u.get(rowOffset++, 0));
 
       // Update logging variables
       yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
@@ -224,7 +223,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
       int rowOffset = 0;
       int columnOffset = 0;
-      for (Direction direction : Direction.values2D())
+      for (int axis = 0; axis < 2; axis++)
       {
          columnOffset = 0;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -232,7 +231,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
             if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
             {
                currentSolePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-               B.set(rowOffset, columnOffset, currentSolePosition.get(robotQuadrant).getElement(direction.getIndex()));
+               B.set(rowOffset, columnOffset, currentSolePosition.get(robotQuadrant).getElement(axis));
                columnOffset++;
             }
          }
@@ -240,7 +239,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
          for (int i = 0; i < numberOfIntervals; i++)
          {
             piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
-            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).getElement(direction.getIndex()));
+            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).getElement(axis));
             B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, piecewiseConstantCopTrajectory.getNormalizedPressureContributedByQueuedSteps(i));
          }
          x0.set(rowOffset, 0, 0);
@@ -260,7 +259,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
          double previewTime =
                piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1) - piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(0);
-         y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.getElement(direction.getIndex()));
+         y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.getElement(axis));
          rowOffset++;
       }
 

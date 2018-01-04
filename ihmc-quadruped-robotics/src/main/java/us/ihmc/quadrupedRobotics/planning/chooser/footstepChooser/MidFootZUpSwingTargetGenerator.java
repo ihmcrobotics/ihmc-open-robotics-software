@@ -1,16 +1,16 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLinkLengths;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
@@ -55,7 +55,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final ExecutionTimer getSwingTargetTimer = new ExecutionTimer("getSwingTargetTimer", registry);
 
    private final FramePoint3D swingLegHipPitchPoint = new FramePoint3D();
-   private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
+   private final FrameQuaternion swingLegHipRollOrientation = new FrameQuaternion();
 
    private final FramePoint3D desiredSwingFootPositionFromHalfStride = new FramePoint3D();
    private final FramePoint3D desiredSwingFootPositionFromOppositeSideFoot = new FramePoint3D();

@@ -432,7 +432,7 @@ public class TwistTest extends SpatialMotionVectorTest
    /**
     * This test is used to prove that the reference frame in which the linear velocity of a body fixed point in computed in does not matter.
     */
-	@Test
+	@Test(timeout = 30000)
    public void testGetLinearVelocityOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
    {
       Random random = new Random(4354L);
@@ -441,15 +441,15 @@ public class TwistTest extends SpatialMotionVectorTest
       {
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          ReferenceFrame baseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("baseFrame", worldFrame,
-                                                                                                 EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                                 EuclidCoreRandomTools.nextRigidBodyTransform(random));
          ReferenceFrame bodyFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bodyFrame", worldFrame,
-                                                                                                 EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-         Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
-         Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+                                                                                                 EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
+         Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
 
          Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
 
-         FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.nextPoint3D(random, 1.0));
          FrameVector3D bodyFixedPointLinearVelocityInBody = new FrameVector3D();
          FrameVector3D bodyFixedPointLinearVelocityInBase = new FrameVector3D();
 

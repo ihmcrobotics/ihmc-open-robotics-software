@@ -35,7 +35,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test
+   @Test(timeout = 30000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       super.testStandingWithLowPelvisOrientationGains();
@@ -56,7 +56,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
    @Override
    protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (YoDouble) scs.getVariable("MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
+      return (YoDouble) scs.getVariable("HighLevelHumanoidControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
                                                 "v1PelvisOrientationErrorMagnitude");
    }
 

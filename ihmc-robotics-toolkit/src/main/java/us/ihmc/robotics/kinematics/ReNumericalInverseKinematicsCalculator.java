@@ -13,7 +13,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -261,7 +261,6 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    @Override
    public void setLimitJointAngles(boolean limitJointAngles)
    {
-      // TODO Auto-generated method stub
       
    }
 }

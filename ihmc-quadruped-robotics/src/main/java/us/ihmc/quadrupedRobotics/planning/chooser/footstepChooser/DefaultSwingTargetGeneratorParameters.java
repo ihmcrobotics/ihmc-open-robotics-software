@@ -64,28 +64,24 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionB
    @Override
    public double getInitalCoMHeight()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public double getDefaultSwingHeight()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public double getDefaultSwingDuration()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public double getDefaultSubCircleRadius()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
    

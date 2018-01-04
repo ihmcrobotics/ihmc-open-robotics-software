@@ -4,7 +4,7 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameWaypoint;
@@ -108,5 +108,13 @@ public abstract class YoFrameTrajectoryPoint<Y extends YoFrameTrajectoryPoint<Y,
       if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
          return false;
       return super.epsilonEquals(other, epsilon);
+   }
+
+   @Override
+   public boolean geometricallyEquals(Y other, double epsilon)
+   {
+      if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
+         return false;
+      return super.geometricallyEquals(other, epsilon);
    }
 }

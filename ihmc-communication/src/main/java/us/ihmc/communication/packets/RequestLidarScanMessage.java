@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class RequestLidarScanMessage extends TrackablePacket<RequestLidarScanMessage>
+public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage>
 {
    public boolean removeShadows = true;
    public boolean removeSelfCollisions = true;

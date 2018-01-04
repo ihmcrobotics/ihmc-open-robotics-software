@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomGeometry;
 
@@ -218,21 +218,36 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
    @Override
    public boolean epsilonEquals(EuclideanTrajectoryPointMessage other, double epsilon)
    {
-      if (position == null && other.position != null)
-         return false;
-      if (position != null && other.position == null)
+      if (position == null ^ other.position == null)
          return false;
 
-      if (linearVelocity == null && other.linearVelocity != null)
-         return false;
-      if (linearVelocity != null && other.linearVelocity == null)
+      if (linearVelocity == null ^ other.linearVelocity == null)
          return false;
 
       if (!MathTools.epsilonCompare(time, other.time, epsilon))
          return false;
-      if (!position.epsilonEquals(other.position, epsilon))
+      if (position != null && !position.epsilonEquals(other.position, epsilon))
          return false;
-      if (!linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
+      if (linearVelocity != null && !linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean geometricallyEquals(EuclideanTrajectoryPointMessage other, double epsilon)
+   {
+      if (position == null ^ other.position == null)
+         return false;
+
+      if (linearVelocity == null ^ other.linearVelocity == null)
+         return false;
+
+      if (!MathTools.epsilonCompare(time, other.time, epsilon))
+         return false;
+      if (position != null && !position.geometricallyEquals(other.position, epsilon))
+         return false;
+      if (linearVelocity != null && !linearVelocity.geometricallyEquals(other.linearVelocity, epsilon))
          return false;
 
       return true;

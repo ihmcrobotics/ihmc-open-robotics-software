@@ -1,11 +1,11 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -76,12 +76,12 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
       parentRegistry.addChild(registry);
    }
 
-   public void setInitialOrientation(FrameOrientation initialOrientation)
+   public void setInitialOrientation(FrameQuaternion initialOrientation)
    {
       this.initialOrientation.setAndMatchFrame(initialOrientation);
    }
 
-   public void setFinalOrientation(FrameOrientation finalOrientation)
+   public void setFinalOrientation(FrameQuaternion finalOrientation)
    {
       this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
@@ -134,7 +134,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    }
 
    @Override
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -152,7 +152,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    }
 
    @Override
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

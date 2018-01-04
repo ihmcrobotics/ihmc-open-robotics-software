@@ -5,13 +5,12 @@ import java.util.List;
 
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 
 /**
  *  MessageOfMessages provides a generic way to send a collection of messages to the controller.
  */
-public class MessageOfMessages extends TrackablePacket<MessageOfMessages> implements VisualizablePacket, MultiplePacketHolder
+public class MessageOfMessages extends Packet<MessageOfMessages> implements VisualizablePacket, MultiplePacketHolder
 {
    
    private ArrayList<Packet<?>> packets = new ArrayList<>();

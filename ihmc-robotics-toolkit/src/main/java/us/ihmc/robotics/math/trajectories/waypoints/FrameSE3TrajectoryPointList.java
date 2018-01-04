@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameSE3TrajectoryPointList, FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
 {
@@ -18,7 +18,7 @@ public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameS
          addTrajectoryPoint(trajectoryPointList.getTrajectoryPoint(i));
    }
 
-   public void addTrajectoryPoint(double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
+   public void addTrajectoryPoint(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       FrameSE3TrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();
       newTrajectoryPoint.set(time, position, orientation, linearVelocity, angularVelocity);

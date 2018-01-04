@@ -20,7 +20,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class FrameBox3dTest
@@ -121,16 +121,16 @@ public class FrameBox3dTest
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("A", worldFrame,
-                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                             EuclidCoreRandomTools.nextRigidBodyTransform(random));
       ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("B", worldFrame,
-                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                             EuclidCoreRandomTools.nextRigidBodyTransform(random));
       ReferenceFrame frameC = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("C", frameB,
-                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                             EuclidCoreRandomTools.nextRigidBodyTransform(random));
       ReferenceFrame frameD = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("D", frameA,
-                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                             EuclidCoreRandomTools.nextRigidBodyTransform(random));
       ReferenceFrame[] frames = {worldFrame, frameA, frameB, frameC, frameD};
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Box3D expectedBox = new Box3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       FramePose expectedBoxPose = new FramePose(worldFrame, randomTransform);
       FramePose actualBoxPose = new FramePose();
@@ -140,7 +140,7 @@ public class FrameBox3dTest
 
       expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
       EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPosition(), actualBoxPose.getPosition(), epsilon);
-      EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
 
       for (int i = 0; i < 100; i++)
       {
@@ -154,7 +154,7 @@ public class FrameBox3dTest
          assertTrue(expectedBox.epsilonEquals(frameBox.getBox3d(), epsilon));
          expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
          EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPosition(), actualBoxPose.getPosition(), epsilon);
-         EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
       }
    }
 
@@ -222,7 +222,7 @@ public class FrameBox3dTest
       for (int boxNumber = 0; boxNumber < nBoxes; boxNumber++)
       {
          FrameBox3d box = createRandomBox(worldFrame, random);
-         RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          FrameBox3d boxTransformed = new FrameBox3d(box);
          boxTransformed.applyTransform(transform);
          FrameBox3d biggerBox = new FrameBox3d(box);
@@ -256,7 +256,7 @@ public class FrameBox3dTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(351235L);
       FrameBox3d box = new FrameBox3d(worldFrame);
-      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       box.setTransform(transform);
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
@@ -285,7 +285,7 @@ public class FrameBox3dTest
 
    private static FrameBox3d createRandomBox(ReferenceFrame referenceFrame, Random random)
    {
-      RigidBodyTransform configuration = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform configuration = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       double lengthX = random.nextDouble();
       double widthY = random.nextDouble();
       double heightZ = random.nextDouble();

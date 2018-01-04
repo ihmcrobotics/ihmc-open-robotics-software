@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -23,8 +24,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -71,6 +71,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
+   
+//   this needs to be tested on the real robot before it's exposed in ROS. -shrews
+//   @RosExportedField(documentation = "The touchdown duration is the time spent trying to do a soft touchdown."
+//         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
+   public double touchdownDuration = -1.0;
 
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
@@ -148,6 +153,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.swingDuration = footstepData.swingDuration;
       this.transferDuration = footstepData.transferDuration;
+      this.touchdownDuration = footstepData.touchdownDuration;
       this.executionDelayTime = footstepData.executionDelayTime;
    }
 
@@ -162,11 +168,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       robotSide = footstep.getRobotSide();
 
       FramePoint3D location = new FramePoint3D();
-      FrameOrientation orientation = new FrameOrientation();
+      FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.location = location.getPoint();
-      this.orientation = orientation.getQuaternion();
+      this.orientation = new Quaternion(orientation);
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
@@ -315,11 +321,23 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       setTransferDuration(transferDuration);
    }
 
+   public void setTimings(double swingDuration, double touchdownDuration, double transferDuration)
+   {
+      setSwingDuration(swingDuration);
+      setTouchdownDuration(touchdownDuration);
+      setTransferDuration(transferDuration);
+   }
+
    public void setSwingDuration(double swingDuration)
    {
       this.swingDuration = swingDuration;
    }
 
+   public void setTouchdownDuration(double touchdownDuration)
+   {
+      this.touchdownDuration = touchdownDuration;
+   }
+   
    public void setTransferDuration(double transferDuration)
    {
       this.transferDuration = transferDuration;
@@ -328,6 +346,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public double getSwingDuration()
    {
       return swingDuration;
+   }
+   
+   public double getTouchdownDuration()
+   {
+      return touchdownDuration;
    }
 
    public double getTransferDuration()
@@ -358,8 +381,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       String ret = "";
 
-      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), this.orientation);
-      double[] ypr = frameOrientation.getYawPitchRoll();
+      FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), this.orientation);
+      double[] ypr = new double[3];
+      frameOrientation.getYawPitchRoll(ypr);
       ret = location.toString();
       ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
       ret += "Predicted Contact Points: ";
@@ -450,6 +474,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       boolean sameTimings = MathTools.epsilonEquals(swingDuration, footstepData.swingDuration, epsilon);
       sameTimings = sameTimings && MathTools.epsilonEquals(transferDuration, footstepData.transferDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonEquals(touchdownDuration, footstepData.touchdownDuration, epsilon);
 
       boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonEquals(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
 
@@ -496,6 +521,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.swingDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
       this.transferDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
+      //TODO: when the footstep data list ros message gets regenerated uncomment this! -shrews
+//      this.touchdownDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {

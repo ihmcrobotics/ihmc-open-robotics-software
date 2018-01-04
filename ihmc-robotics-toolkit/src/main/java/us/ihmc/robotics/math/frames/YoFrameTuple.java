@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.frames;
 import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -19,13 +20,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements ReferenceFrameHolder, Clearable
+public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements ReferenceFrameHolder, Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -180,9 +180,9 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements R
       return z.getDoubleValue();
    }
 
-   public final double get(Direction direction)
+   public final double get(Axis axis)
    {
-      switch (direction)
+      switch (axis)
       {
       case X:
          return getX();

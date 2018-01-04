@@ -67,7 +67,7 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class SimulationConstructionSetUsingDirectCallsTest
@@ -1331,7 +1331,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
          @Override
          public void initializeProcessing()
          {
-            // TODO Auto-generated method stub
 
          }
       };

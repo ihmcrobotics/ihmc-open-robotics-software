@@ -11,7 +11,7 @@ import javax.swing.JScrollPane;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -374,7 +374,6 @@ public class OneStepCaptureRegionCalculatorTest
 
    private class SimpleAnkleZUpReferenceFrame extends ReferenceFrame
    {
-      private static final long serialVersionUID = -2855876641425187923L;
       private final Vector3D offset = new Vector3D();
 
       public SimpleAnkleZUpReferenceFrame(String name)
@@ -427,8 +426,6 @@ public class OneStepCaptureRegionCalculatorTest
       {
          ReferenceFrame ankleZUpFrame = new ReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUpFrame", worldFrame)
          {
-            private static final long serialVersionUID = -261348843115593336L;
-
             @Override
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {

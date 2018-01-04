@@ -23,7 +23,7 @@ public class AtlasRobotConfigurationDataBufferTest extends RobotConfigurationDat
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test
+   @Test(timeout = 30000)
    public void testAddingStuff()
    {
       super.testAddingStuff();
@@ -31,7 +31,7 @@ public class AtlasRobotConfigurationDataBufferTest extends RobotConfigurationDat
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test
+   @Test(timeout = 30000)
    public void testWaitForTimestamp()
    {
       super.testWaitForTimestamp();

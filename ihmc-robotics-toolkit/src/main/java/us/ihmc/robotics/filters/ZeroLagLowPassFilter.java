@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class ZeroLagLowPassFilter
 {
