@@ -32,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -81,6 +82,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
@@ -102,53 +104,13 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private static final double[] rightHandStraightSideJointAngles = new double[] {-0.5067668142160446, -0.3659876546358431, 1.7973796317575155, -1.2398714600960365, -0.005510224629709242, 0.6123343067479899, 0.12524505635696856};
-   private static final double[] leftHandStraightSideJointAngles = new double[] {0.61130147334225, 0.22680071472282162, 1.6270339908033258, 1.2703560974484844, 0.10340544060719102, -0.6738299572358809, 0.13264785356924128};
-   private static final SideDependentList<double[]> straightArmConfigs = new SideDependentList<>();
-   static
-   {
-      straightArmConfigs.put(RobotSide.LEFT, leftHandStraightSideJointAngles);
-      straightArmConfigs.put(RobotSide.RIGHT, rightHandStraightSideJointAngles);
-   }
-
-   private void setUpMomentum() throws SimulationExceededMaximumTimeException
-   {
-      // enable the use of body momentum in the controller
-      YoBoolean allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
-      allowUpperBodyMomentumInSingleSupport.set(true);
-      YoBoolean allowUsingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
-      allowUsingHighMomentumWeight.set(true);
-
-      // bring the arms in a stretched position
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-         armTrajectoryMessage.robotSide = robotSide;
-         double[] armConfig = straightArmConfigs.get(robotSide);
-         armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
-         for (int i = 0; i < armConfig.length; i++)
-         {
-            TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
-            trajectoryPoint.position = armConfig[i];
-            trajectoryPoint.time = 1.0;
-            OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
-            jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
-            armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
-         }
-         drcSimulationTestHelper.send(armTrajectoryMessage);
-      }
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
-   }
-
-
    /**
     * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
     */
-   public void testStandingWithGCPointsChangingOnTheFly() throws SimulationExceededMaximumTimeException, RuntimeException
+   public void testChangeOfSupport() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      Random random = new Random(1984L);
+      Random random = new Random(1738L);
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
@@ -156,7 +118,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatEnvironment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
+      drcSimulationTestHelper.createSimulation("ICPFlatGroundTest");
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
 
       // Since the foot support points change while standing, the parts of the support polygon that need to be cut off might have had the CoP in them.
@@ -192,7 +154,6 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       });
 
       setupCameraForWalkingUpToRamp();
-//      setupSupportViz();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -231,7 +192,6 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          if (!success) break;
       }
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -242,6 +202,186 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   /**
+    * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
+    */
+   public void testPauseWalkingInSwing() throws SimulationExceededMaximumTimeException, RuntimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatEnvironment);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("ICPFlatGroundTest");
+
+      YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
+      YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
+
+      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (Double.isNaN(v.getValueAsDouble()))
+            {
+               fail("Desired ICP X value is NaN.");
+            }
+         }
+      });
+      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (Double.isNaN(v.getValueAsDouble()))
+            {
+               fail("Desired ICP Y value is NaN.");
+            }
+         }
+      });
+
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      int numberOfSteps = 5;
+      double swingDuration = 1.0;
+      double transferDuration = 0.3;
+      FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
+      drcSimulationTestHelper.send(message);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2 * (swingDuration + transferDuration));
+      drcSimulationTestHelper.send(new PauseWalkingMessage(true));
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      drcSimulationTestHelper.send(new PauseWalkingMessage(false));
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps) * (swingDuration + transferDuration));
+
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D(-0.06095496955280358, -0.001119333179390724, 0.7875020745919501);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   /**
+    * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
+    */
+   public void testPauseWalkingInTransfer() throws SimulationExceededMaximumTimeException, RuntimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatEnvironment);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("ICPFlatGroundTest");
+
+      YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
+      YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
+
+      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (Double.isNaN(v.getValueAsDouble()))
+            {
+               fail("Desired ICP X value is NaN.");
+            }
+         }
+      });
+      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (Double.isNaN(v.getValueAsDouble()))
+            {
+               fail("Desired ICP Y value is NaN.");
+            }
+         }
+      });
+
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      int numberOfSteps = 5;
+      double swingDuration = 1.0;
+      double transferDuration = 0.3;
+      FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
+      drcSimulationTestHelper.send(message);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2 * (swingDuration + transferDuration) + 0.8 * transferDuration);
+      drcSimulationTestHelper.send(new PauseWalkingMessage(true));
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      drcSimulationTestHelper.send(new PauseWalkingMessage(false));
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps) * (swingDuration + transferDuration));
+
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D(-0.06095496955280358, -0.001119333179390724, 0.7875020745919501);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private FootstepDataListMessage createForwardWalkingFootsteps(int numberOfSteps, double length, double stanceWidth, double swingDuration, double transferDuration)
+   {
+      FootstepDataListMessage footstepListMessage = new FootstepDataListMessage();
+
+      double xLocation = 0.0;
+      RobotSide robotSide = RobotSide.LEFT;
+      for (int i = 0; i < numberOfSteps - 1; i++)
+      {
+         xLocation += length;
+         FootstepDataMessage footstepMessage = new FootstepDataMessage();
+         footstepMessage.setSwingDuration(swingDuration);
+         footstepMessage.setTransferDuration(transferDuration);
+         footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
+         footstepMessage.setOrientation(new Quaternion());
+         footstepMessage.setRobotSide(robotSide);
+
+         footstepListMessage.add(footstepMessage);
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      FootstepDataMessage footstepMessage = new FootstepDataMessage();
+      footstepMessage.setSwingDuration(swingDuration);
+      footstepMessage.setTransferDuration(transferDuration);
+      footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
+      footstepMessage.setOrientation(new Quaternion());
+      footstepMessage.setRobotSide(robotSide);
+
+      footstepListMessage.add(footstepMessage);
+      footstepListMessage.setDefaultSwingDuration(swingDuration);
+      footstepListMessage.setDefaultTransferDuration(transferDuration);
+
+      return footstepListMessage;
    }
 
    private SideDependentList<String> getFootJointNames(FullHumanoidRobotModel fullRobotModel)
