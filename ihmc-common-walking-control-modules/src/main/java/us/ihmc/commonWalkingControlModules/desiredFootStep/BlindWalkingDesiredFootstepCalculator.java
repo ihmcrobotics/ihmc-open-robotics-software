@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,13 +11,12 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -88,7 +88,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
          numberBlindStepsInPlace.increment();
       }
 
-      FrameOrientation footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), swingLegSide, supportFrame);
+      FrameQuaternion footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), swingLegSide, supportFrame);
       FramePoint3D footstepPosition = getDesiredFootstepPositionCopy(supportZUpFrame, supportFrame, swingLegSide);
 
       setYoVariables(swingLegSide, footOrientation, footstepPosition);
@@ -105,7 +105,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       futureSupportZUpFrame.update();
 
       computeDistanceAndAngleToDestination(futureSupportZUpFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy());
-      FrameOrientation footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), futureSwingLegSide, futureSupportZUpFrame);
+      FrameQuaternion footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), futureSwingLegSide, futureSupportZUpFrame);
       FramePoint3D footstepPosition = getDesiredFootstepPositionCopy(futureSupportZUpFrame, futureSupportFrame, futureSwingLegSide);
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
@@ -251,7 +251,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       return desiredOffsetFromAnkle;
    }
 
-   private FrameOrientation computeDesiredFootRotation(double angleToDestination, RobotSide swingLegSide, ReferenceFrame supportFootFrame)
+   private FrameQuaternion computeDesiredFootRotation(double angleToDestination, RobotSide swingLegSide, ReferenceFrame supportFootFrame)
    {
       RigidBodyTransform supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(worldFrame);
       RotationMatrix supportFootToWorldRotation = new RotationMatrix();
@@ -306,7 +306,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       ret.set(yawRotation);
       ret.multiply(supportFootToWorldRotation);
 
-      return new FrameOrientation(worldFrame, ret);
+      return new FrameQuaternion(worldFrame, ret);
    }
 
    private FramePoint3D computeDesiredFootPosition(ReferenceFrame upcomingSupportFrame, FrameVector2D desiredOffsetFromSupport)
@@ -318,7 +318,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       return footstepPosition;
    }
 
-   private void setYoVariables(RobotSide swingLegSide, FrameOrientation footstepOrientation, FramePoint3D footstepPosition)
+   private void setYoVariables(RobotSide swingLegSide, FrameQuaternion footstepOrientation, FramePoint3D footstepPosition)
    {
       footstepOrientations.get(swingLegSide).set(footstepOrientation);
       footstepPositions.get(swingLegSide).set(footstepPosition);

@@ -5,6 +5,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -38,10 +39,10 @@ public class SmallAngleRotationDerivativeTest
 
       double perturbationMagnitude = 1e-6;
       double delta = 1e-12;
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
          Vector3D perturbationRotationVector = new Vector3D();
-         Direction.set(perturbationRotationVector, direction, perturbationMagnitude);
+         Axis.set(perturbationRotationVector, axis, perturbationMagnitude);
 
          // expected
          Vector3D expected = new Vector3D(perturbationRotationVector);

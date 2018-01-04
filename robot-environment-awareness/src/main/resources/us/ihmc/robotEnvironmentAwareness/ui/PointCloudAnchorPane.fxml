@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="pointCloudAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="615.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController">
+   <children>
+      <HBox layoutX="14.0" layoutY="14.0" spacing="15.0">
+         <children>
+            <VBox spacing="10.0">
+               <children>
+                  <ToggleButton fx:id="enableButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
+                  <Button fx:id="clearButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
+               </children>
+            </VBox>
+            <VBox>
+               <children>
+                  <Label text="Number of scans:" />
+                  <Slider fx:id="scanHistorySizeSlider" blockIncrement="1.0" majorTickUnit="50.0" max="1000.0" minorTickCount="1" prefHeight="38.0" prefWidth="492.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

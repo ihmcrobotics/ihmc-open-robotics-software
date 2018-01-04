@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class StepprFlatGroundCircularWalkingTrack
 {
@@ -39,8 +39,8 @@ public class StepprFlatGroundCircularWalkingTrack
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
       
       scs.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot").setValueFromDouble(0.1); 
-      scs.getVariable("MomentumBasedControllerFactory","swingTime").setValueFromDouble(0.75); 
-      scs.getVariable("MomentumBasedControllerFactory","transferTime").setValueFromDouble(0.25); 
+      scs.getVariable("HighLevelHumanoidControllerFactory","swingTime").setValueFromDouble(0.75);
+      scs.getVariable("HighLevelHumanoidControllerFactory","transferTime").setValueFromDouble(0.25);
       YoVariable<?> desiredVelocityX =  scs.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       
 

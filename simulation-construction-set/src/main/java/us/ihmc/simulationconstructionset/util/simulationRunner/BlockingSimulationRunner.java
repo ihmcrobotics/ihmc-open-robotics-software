@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class BlockingSimulationRunner
 {
@@ -47,6 +47,20 @@ public class BlockingSimulationRunner
 //    waitForSimulationToStart();
       waitForSimulationToFinish(scs, maximumClockRunTimeInSeconds, destroySimulationIfOverrunMaxTime);
       checkIfControllerHasFailed();
+   }
+
+   public boolean simulateNTicksAndBlockAndCatchExceptions(int numberOfTicks) throws SimulationExceededMaximumTimeException
+   {
+      try
+      {
+         simulateNTicksAndBlock(numberOfTicks);
+         return true;
+      }
+      catch (Exception e)
+      {
+         PrintTools.error(this, e.getMessage());
+         return false;
+      }
    }
 
    public void simulateAndBlock(double simulateTime) throws SimulationExceededMaximumTimeException, ControllerFailureException

@@ -7,13 +7,13 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -101,7 +101,7 @@ public class FootSpoof implements ContactablePlaneBody
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
-   public void setPose(FramePoint3D position, FrameOrientation orientation)
+   public void setPose(FramePoint3D position, FrameQuaternion orientation)
    {
       shinFrame.setPoseAndUpdate(position, orientation);
    }
@@ -111,11 +111,11 @@ public class FootSpoof implements ContactablePlaneBody
       shinFrame.translateAndUpdate(x, y, z);
    }
 
-   public void setSoleFrame(FramePoint3D position, FrameOrientation orientation)
+   public void setSoleFrame(FramePoint3D position, FrameQuaternion orientation)
    {
       position.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       orientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setSoleFrame(new FramePose(ReferenceFrame.getWorldFrame(), position.getPoint(), orientation.getQuaternionCopy()));
+      setSoleFrame(new FramePose(position, orientation));
    }
 
    public void setSoleFrame(FramePose newSolePoseInWorldFrame)

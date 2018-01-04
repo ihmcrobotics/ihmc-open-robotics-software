@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -18,8 +19,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
@@ -49,7 +49,7 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nEach step in a list of footsteps might have a different transfer duration. The value specified here is a default"
          + "\nvalue, used if a footstep in this list was created without a transferDuration.")
-   public double defaultTransferDuration = 0.0;
+   public double defaultTransferDuration = -1.0;
 
    @RosExportedField(documentation = "Specifies the time used to return to a stable standing stance after the execution of the"
          + "\nfootstep list is finished. If the value is negative the defaultTransferDuration will be used.")
@@ -216,8 +216,8 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
          startingFootstep = this.get(0).getLocation().toString();
          Quaternion quat4d = this.get(0).getOrientation();
 
-         FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), quat4d);
-         startingFootstep = startingFootstep + ", ypr= " + Arrays.toString(frameOrientation.getYawPitchRoll());
+         FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), quat4d);
+         startingFootstep = startingFootstep + ", yaw= " + frameOrientation.getYaw() + ", pitch= " + frameOrientation.getPitch() + ", roll= " + frameOrientation.getRoll();
       }
 
       if (this.size() == 1)

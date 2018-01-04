@@ -44,6 +44,9 @@ public class ConfigurableSolvePseudoInverseSVD implements LinearSolver<DenseMatr
       this.singularValueLimit = singularValueLimit;
    }
 
+   private final DenseMatrix64F V = new DenseMatrix64F(1, 1);
+
+   @Override
    public boolean setA(DenseMatrix64F A)
    {
       pinv.reshape(A.numCols, A.numRows, false);
@@ -52,7 +55,9 @@ public class ConfigurableSolvePseudoInverseSVD implements LinearSolver<DenseMatr
          return false;
 
       DenseMatrix64F U_t = svd.getU(null, true);
-      DenseMatrix64F V = svd.getV(null, false);
+      DenseMatrix64F V_t = svd.getV(null, true);
+      V.reshape(V_t.getNumCols(), V_t.getNumRows());
+      CommonOps.transpose(V_t, V);
       double[] S = svd.getSingularValues();
       int N = Math.min(A.numRows, A.numCols);
 
@@ -82,26 +87,31 @@ public class ConfigurableSolvePseudoInverseSVD implements LinearSolver<DenseMatr
       return true;
    }
 
+   @Override
    public double quality()
    {
       throw new IllegalArgumentException("Not supported by this solver.");
    }
 
+   @Override
    public void solve(DenseMatrix64F b, DenseMatrix64F x)
    {
       CommonOps.mult(pinv, b, x);
    }
 
+   @Override
    public void invert(DenseMatrix64F A_inv)
    {
       A_inv.set(pinv);
    }
 
+   @Override
    public boolean modifiesA()
    {
       return svd.inputModified();
    }
 
+   @Override
    public boolean modifiesB()
    {
       return false;

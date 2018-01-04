@@ -15,11 +15,11 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.LimbName;
@@ -72,8 +72,8 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
       ypLeftEE.set(leftEE);
       ypRightEE.set(rightEE);
 
-      yposeLeftEE.set(leftEE, new FrameOrientation(CalibUtil.world));
-      yposeRightEE.set(rightEE, new FrameOrientation(CalibUtil.world));
+      yposeLeftEE.set(leftEE, new FrameQuaternion(CalibUtil.world));
+      yposeRightEE.set(rightEE, new FrameQuaternion(CalibUtil.world));
    }
 
    public void createQoutYoVariables()

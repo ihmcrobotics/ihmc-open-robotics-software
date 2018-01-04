@@ -218,7 +218,6 @@ public class CleaningMotionStateMachineBehavior extends StateMachineBehavior<Cle
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
    }
 
    private void setUpSolarPanel()

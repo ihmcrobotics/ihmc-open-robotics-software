@@ -6,7 +6,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -18,8 +18,8 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DRCOutputProcessor drcOutputWriter;
 
-   private final YoDouble alphaTorqueOffset = new YoDouble("alphaTorqueOffset",
-         "Filter for integrating acceleration to get a torque offset at each joint", registry);
+   private final YoDouble alphaTorqueOffset = new YoDouble("alphaTorqueOffset", "Filter for integrating acceleration to get a torque offset at each joint",
+                                                           registry);
 
    private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
@@ -32,7 +32,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    {
       this.updateDT = updateDT;
       this.drcOutputWriter = drcOutputWriter;
-      if(drcOutputWriter != null)
+      if (drcOutputWriter != null)
       {
          registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
       }
@@ -41,7 +41,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    @Override
    public void initialize()
    {
-      if(drcOutputWriter != null)
+      if (drcOutputWriter != null)
       {
          drcOutputWriter.initialize();
       }
@@ -55,8 +55,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
          JointDesiredOutput jointData = torqueOffsetList.first(i);
          YoDouble torqueOffsetVariable = torqueOffsetList.second(i);
 
-
-         double desiredAcceleration = jointData.getDesiredAcceleration();
+         double desiredAcceleration = jointData.hasDesiredAcceleration() ? jointData.getDesiredAcceleration() : 0.0;
 
          if (resetTorqueOffsets.getBooleanValue())
             torqueOffsetVariable.set(0.0);
@@ -67,19 +66,22 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
          double alpha = alphaTorqueOffset.getDoubleValue();
          offsetTorque = alpha * (offsetTorque + desiredAcceleration * updateDT) + (1.0 - alpha) * offsetTorque;
          torqueOffsetVariable.set(offsetTorque);
-         jointData.setDesiredTorque(jointData.getDesiredTorque() + offsetTorque + ditherTorque);
+         double desiredTorque = jointData.hasDesiredTorque() ? jointData.getDesiredTorque() : 0.0;
+         jointData.setDesiredTorque(desiredTorque + offsetTorque + ditherTorque);
       }
 
-      if(drcOutputWriter != null)
+      if (drcOutputWriter != null)
       {
          drcOutputWriter.processAfterController(timestamp);
       }
    }
 
    @Override
-   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel,
+                                               JointDesiredOutputList lowLevelControllerCoreOutput,
+                                               RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      if(drcOutputWriter != null)
+      if (drcOutputWriter != null)
       {
          drcOutputWriter.setLowLevelControllerCoreOutput(controllerRobotModel, lowLevelControllerCoreOutput, rawJointSensorDataHolderMap);
       }
@@ -101,7 +103,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    @Override
    public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController)
    {
-      if(drcOutputWriter != null)
+      if (drcOutputWriter != null)
       {
          drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
       }

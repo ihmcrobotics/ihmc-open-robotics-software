@@ -12,9 +12,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -84,12 +85,12 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       frameInformation.set(so3TrajectoryMessage);
    }
 
-   public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame trajectoryFrame)
+   public AbstractSO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       this(trajectoryTime, desiredOrientation, trajectoryFrame.getNameBasedHashCode());
    }
 
-   public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long trajectoryReferenceFrameId)
+   public AbstractSO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       Vector3D zeroAngularVelocity = new Vector3D();
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {new SO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
@@ -140,7 +141,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is should be expressed in the frame defined by referenceFrameId
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity,
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity,
          ReferenceFrame expressedInReferenceFrame)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
@@ -159,7 +160,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is should be expressed in the frame defined by referenceFrameId
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity,
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity,
          long expressedInReferenceFrameId)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
@@ -371,14 +372,14 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       this.useCustomControlFrame = useCustomControlFrame;
    }
 
-   public void setControlFramePosition(Point3D controlFramePosition)
+   public void setControlFramePosition(Point3DReadOnly controlFramePosition)
    {
       if (controlFramePose == null)
          controlFramePose = new QuaternionBasedTransform();
       controlFramePose.setTranslation(controlFramePosition);
    }
 
-   public void setControlFrameOrientation(Quaternion controlFrameOrientation)
+   public void setControlFrameOrientation(QuaternionReadOnly controlFrameOrientation)
    {
       if (controlFramePose == null)
          controlFramePose = new QuaternionBasedTransform();

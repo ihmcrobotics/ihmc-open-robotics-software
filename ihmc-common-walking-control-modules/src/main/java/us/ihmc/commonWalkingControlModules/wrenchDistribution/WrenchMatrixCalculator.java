@@ -17,13 +17,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WrenchMatrixCalculator
 {
@@ -51,7 +51,8 @@ public class WrenchMatrixCalculator
 
    private final DenseMatrix64F desiredCoPMatrix;
    private final DenseMatrix64F previousCoPMatrix;
-   
+   private final DenseMatrix64F activeRhoMatrix;
+
    private final DenseMatrix64F rhoMaxMatrix;
    private final DenseMatrix64F rhoWeightMatrix;
    private final DenseMatrix64F rhoRateWeightMatrix;
@@ -90,6 +91,7 @@ public class WrenchMatrixCalculator
                                                                                
       desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                   
       previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
+      activeRhoMatrix = new DenseMatrix64F(rhoSize, 1);
 
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
@@ -108,8 +110,10 @@ public class WrenchMatrixCalculator
 
          rigidBodies.add(rigidBody);
 
+         FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
          PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody, centerOfMassFrame,
-               maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, registry);
+               maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, frictionConeRotation, registry);
+         helper.setDeactivateRhoWhenNotInContact(toolbox.getDeactiveRhoWhenNotInContact());
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
 
          basisVectorsOrigin.addAll(helper.getBasisVectorsOrigin());
@@ -145,6 +149,21 @@ public class WrenchMatrixCalculator
       helper.setCenterOfPressureCommand(command);
    }
 
+   public boolean hasContactStateChanged()
+   {
+      boolean hasContactStateChanged = false;
+      for (int i = 0; i < rigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = rigidBodies.get(i);
+         PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
+
+         if (helper.hasReset())
+            hasContactStateChanged = true;
+      }
+
+      return hasContactStateChanged;
+   }
+
    private final Vector2D tempDeisredCoPWeight = new Vector2D();
    private final Vector2D tempCoPRateWeight = new Vector2D();
 
@@ -178,6 +197,8 @@ public class WrenchMatrixCalculator
          CommonOps.insert(helper.getLastRho(), rhoPreviousMatrix, rhoStartIndex, 0);
          CommonOps.insert(helper.getDesiredCoPMatrix(), desiredCoPMatrix, copStartIndex, 0);
          CommonOps.insert(helper.getPreviousCoPMatrix(), previousCoPMatrix, copStartIndex, 0);
+
+         CommonOps.insert(helper.getActiveRhoMatrix(), activeRhoMatrix, rhoStartIndex, 0);
 
          CommonOps.insert(helper.getRhoJacobian(), rhoJacobianMatrix, 0, rhoStartIndex);
          CommonOps.insert(helper.getCopJacobianMatrix(), copJacobianMatrix, copStartIndex, rhoStartIndex);
@@ -250,6 +271,11 @@ public class WrenchMatrixCalculator
    public DenseMatrix64F getPreviousCoPMatrix()
    {
       return previousCoPMatrix;
+   }
+
+   public DenseMatrix64F getActiveRhoMatrix()
+   {
+      return activeRhoMatrix;
    }
 
    public DenseMatrix64F getRhoMaxMatrix()

@@ -29,8 +29,8 @@ public class QuaternionRotationRelationshipTest
 
       for (int i=0; i<numberOfTests; i++)
       {
-         RigidBodyTransform transform1 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         RigidBodyTransform transform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform transform1 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+         RigidBodyTransform transform2 = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          transform1.setTranslation(new Vector3D());
          transform2.setTranslation(new Vector3D());
 

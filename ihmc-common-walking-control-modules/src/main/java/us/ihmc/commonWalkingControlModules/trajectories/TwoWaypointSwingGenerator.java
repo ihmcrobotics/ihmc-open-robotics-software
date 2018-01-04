@@ -3,21 +3,27 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 {
@@ -55,14 +61,21 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private final BagOfBalls waypointViz;
 
+   private RobotSide swingSide = null;
+   private ReferenceFrame stanceZUpFrame = null;
+   private final Vector2D swingOffset = new Vector2D();
+   private final YoDouble minDistanceToStance;
+   private final YoBoolean needToAdjustedSwingForSelfCollision;
+   private final YoBoolean crossOverStep;
+
    public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, null, null, minSwingHeight, maxSwingHeight, parentRegistry, yoGraphicsListRegistry);
    }
 
    public TwoWaypointSwingGenerator(String namePrefix, double[] waypointProportions, double[] obstacleClearanceProportions, double minSwingHeight,
-         double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -78,6 +91,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       this.minSwingHeight = new YoDouble(namePrefix + "MinSwingHeight", registry);
       this.minSwingHeight.set(minSwingHeight);
+
+      this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
+      this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
 
       if (waypointProportions == null)
          waypointProportions = defaultWaypointProportions;
@@ -103,6 +119,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          waypointViz = new BagOfBalls(numberWaypoints, 0.02, namePrefix + "Waypoints", YoAppearance.White(), registry, yoGraphicsListRegistry);
       else
          waypointViz = null;
+
+      needToAdjustedSwingForSelfCollision = new YoBoolean(namePrefix + "AdjustedSwing", registry);
+      crossOverStep = new YoBoolean(namePrefix + "CrossOverStep", registry);
    }
 
    public void setStepTime(double stepTime)
@@ -184,8 +203,11 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       initialPosition.changeFrame(worldFrame);
       finalPosition.changeFrame(worldFrame);
-      double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
+      stanceFootPosition.changeFrame(worldFrame);
 
+      needToAdjustedSwingForSelfCollision.set(computeSwingAdjustment(initialPosition, finalPosition, stanceFootPosition, swingOffset));
+
+      double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
       switch (trajectoryType)
       {
       case OBSTACLE_CLEARANCE:
@@ -193,6 +215,10 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          {
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, obstacleClearanceWaypointProportions.get(i).getDoubleValue());
             waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
+            if (needToAdjustedSwingForSelfCollision.getBooleanValue())
+            {
+               waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
+            }
          }
          break;
       case DEFAULT:
@@ -200,6 +226,10 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          {
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions.get(i).getDoubleValue());
             waypointPositions.get(i).add(0.0, 0.0, swingHeight.getDoubleValue());
+            if (needToAdjustedSwingForSelfCollision.getBooleanValue())
+            {
+               waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
+            }
          }
          break;
       case CUSTOM:
@@ -208,7 +238,6 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          throw new RuntimeException("Trajectory type not implemented");
       }
 
-      stanceFootPosition.changeFrame(worldFrame);
       double maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
       for (int i = 0; i < numberWaypoints; i++)
       {
@@ -226,6 +255,97 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       trajectory.initialize();
 
       visualize();
+   }
+
+   private final FrameVector2D xyDistanceToStance = new FrameVector2D();
+   private final Point2D stance2D = new Point2D();
+   private final Point2D pointA2D = new Point2D();
+   private final Point2D pointB2D = new Point2D();
+   private final FramePoint2D pointAInStance = new FramePoint2D();
+   private final FramePoint2D pointBInStance = new FramePoint2D();
+   private final Point2D tempPoint = new Point2D();
+
+   /**
+    * Given the start and end point of the swing as well as the position of the stance foot this method will compute
+    * whether the nominal swing trajectory will be close to the stance foot. This is an indication that self collision
+    * between swing and stance leg will occur. In that case a offset vector is computed and packed that will contain
+    * a swing trajectory adjustment that will avoid this.
+    */
+   private boolean computeSwingAdjustment(FramePoint3D pointA, FramePoint3D pointB, FramePoint3D stance, Vector2D offsetToPack)
+   {
+      if (swingSide == null || stanceZUpFrame == null)
+      {
+         offsetToPack.setToZero();
+         return false;
+      }
+
+      pointA2D.set(pointA);
+      pointB2D.set(pointB);
+      stance2D.set(stance);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(stance2D, pointA2D, pointB2D, tempPoint);
+      boolean smallAngleChange = !EuclidGeometryTools.isPoint2DOnLineSegment2D(tempPoint, pointA2D, pointB2D);
+
+      xyDistanceToStance.setToZero(worldFrame);
+      xyDistanceToStance.sub(tempPoint, stance2D);
+      xyDistanceToStance.changeFrame(stanceZUpFrame);
+
+      // If the nominal trajectory intersects the negative Y axis of the sole frame for a swing with the left side the step is a cross over step.
+      pointAInStance.setIncludingFrame(worldFrame, pointA2D);
+      pointBInStance.setIncludingFrame(worldFrame, pointB2D);
+      pointAInStance.changeFrame(stanceZUpFrame);
+      pointBInStance.changeFrame(stanceZUpFrame);
+      boolean trajectoryIntersectsY = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(0.0, 0.0, 0.0, 1.0, pointAInStance.getX(),
+                                                                                                    pointAInStance.getY(), pointBInStance.getX(),
+                                                                                                    pointBInStance.getY(), tempPoint);
+
+      boolean crossOver = trajectoryIntersectsY && swingSide.negateIfRightSide(tempPoint.getY()) < 0.0;
+      crossOverStep.set(crossOver);
+
+      // Prevent adjusting on side steps or steps that do not change the angle between the feet much.
+      if (!crossOver && smallAngleChange)
+      {
+         offsetToPack.setToZero();
+         return false;
+      }
+
+      double distance;
+      if (crossOver)
+      {
+         distance = minDistanceToStance.getDoubleValue() + xyDistanceToStance.length();
+         xyDistanceToStance.negate();
+      }
+      else
+      {
+         distance = minDistanceToStance.getDoubleValue() - xyDistanceToStance.length();
+      }
+
+      if (distance < 0.0)
+      {
+         offsetToPack.setToZero();
+         return false;
+      }
+
+      xyDistanceToStance.changeFrame(worldFrame);
+      xyDistanceToStance.normalize();
+      xyDistanceToStance.scale(distance);
+      xyDistanceToStance.get(offsetToPack);
+      return true;
+   }
+
+   /**
+    * Calling this method will enable a simple collision avoidance heuristic in the swing generator: if a straight line in the xy plane
+    * from the start to the end of the swing is too close to the stance position the trajectory waypoints will be adjusted. To activate
+    * this, additional information has to be provided as arguments to this method.
+    *
+    * @param swingSide the side of the robot that this swing trajectory will be executed on
+    * @param stanceZUpFrame the zup frame located at the stance foot sole
+    * @param minDistanceToStance the minimum clearance that the swing should have from the stance foot sole point in the xy plane
+    */
+   public void enableStanceCollisionAvoidance(RobotSide swingSide, ReferenceFrame stanceZUpFrame, double minDistanceToStance)
+   {
+      this.swingSide = swingSide;
+      this.stanceZUpFrame = stanceZUpFrame;
+      this.minDistanceToStance.set(minDistanceToStance);
    }
 
    private void visualize()

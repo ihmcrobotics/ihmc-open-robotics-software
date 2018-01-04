@@ -3,12 +3,11 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.Direction;
 
 /**
  * {@code YoPolynomial3D} is the simplest 3D wrapper around the 1D {@link YoPolynomial}.
@@ -239,9 +238,9 @@ public class YoPolynomial3D
       return integralResult;
    }
 
-   public YoPolynomial getYoPolynomial(Direction direction)
+   public YoPolynomial getYoPolynomial(Axis axis)
    {
-      return getYoPolynomial(direction.ordinal());
+      return getYoPolynomial(axis.ordinal());
    }
 
    public YoPolynomial getYoPolynomial(int index)

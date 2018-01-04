@@ -17,9 +17,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
@@ -31,12 +28,13 @@ import us.ihmc.simulationConstructionSetTools.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ContactableValveRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
 {
    private static final double DEFAULT_DAMPING = 3;
-
-   private String name;
 
    protected double valveRadius;
    private double valveOffsetFromWall;
@@ -70,7 +68,6 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
          FramePose valvePoseInWorld, double valveNumberOfPossibleTurns, double valveMass)
    {
       super(name);
-      this.name = name;
       setValveProperties(valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, valveNumberOfPossibleTurns, valveMass);
       setPoseInWorld(valvePoseInWorld);
       setMass(valveMass);
@@ -147,10 +144,8 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       //torus and offsetCylinder
       RigidBodyTransform transform = new RigidBodyTransform();
       RigidBodyTransform invertTransform = new RigidBodyTransform();
-      Quaternion quat = new Quaternion();
 
-      quat.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
-      transform.setRotation(quat);
+      transform.setRotationYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
       invertTransform.set(transform);
       invertTransform.invert();
 
@@ -163,19 +158,20 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       //spokes
       for (int i = 0; i < numberOfSpokes; i++)
       {
-         quat.setYawPitchRoll(0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes);
-         transform.setRotation(quat);
+         double spokeLength = valveRadius - spokesThickness / 2.0;
+         transform.setRotationYawPitchRollAndZeroTranslation(0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes);
+         transform.appendTranslation(0.0, 0.0, -spokeLength);
          invertTransform.set(transform);
          invertTransform.invert();
 
          RigidBodyTransform yoGraphicTransform = new RigidBodyTransform(rotationTransform);
          yoGraphicTransform.multiply(transform);
 
-         FrameCylinder3d spokeCylinder = new FrameCylinder3d(valveFrame, transform, valveRadius - spokesThickness / 2.0, spokesThickness / 2.0);
+         FrameCylinder3d spokeCylinder = new FrameCylinder3d(valveFrame, transform, spokeLength, spokesThickness / 2.0);
          spokesCylinders.add(spokeCylinder);
 
          valveLinkGraphics.transform(transform);
-         valveLinkGraphics.addCylinder(valveRadius - spokesThickness / 2.0, spokesThickness / 2.0, YoAppearance.DarkRed());
+         valveLinkGraphics.addCylinder(spokeLength, spokesThickness / 2.0, YoAppearance.DarkRed());
          valveLinkGraphics.transform(invertTransform);
       }
 
@@ -250,28 +246,24 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation,
          QuaternionReadOnly cameraRotation)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void select()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void unSelect(boolean reset)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void addSelectedListeners(SelectableObjectListener selectedListener)
    {
-      // TODO Auto-generated method stub
 
    }
    

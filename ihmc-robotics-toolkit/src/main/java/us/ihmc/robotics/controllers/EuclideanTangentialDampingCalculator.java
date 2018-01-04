@@ -6,7 +6,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
@@ -36,7 +36,6 @@ public class EuclideanTangentialDampingCalculator
 
       bodyFrameTangentToControl = new ReferenceFrame(prefix + "BodyFrameTangentToControl", bodyFrame)
       {
-         private static final long serialVersionUID = 8992154939350877111L;
          private final AxisAngle rotationToControlFrame = new AxisAngle();
 
          @Override

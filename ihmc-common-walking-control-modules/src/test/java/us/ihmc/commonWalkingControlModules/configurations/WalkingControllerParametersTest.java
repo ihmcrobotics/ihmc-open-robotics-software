@@ -15,7 +15,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 public class WalkingControllerParametersTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testNoParameters() throws ClassNotFoundException, InstantiationException, IllegalAccessException
    {
       Class<?> c = Class.forName("us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters");

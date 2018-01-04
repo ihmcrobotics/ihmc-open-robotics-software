@@ -1,9 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.MathTools.square;
+import static us.ihmc.commons.MathTools.square;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.QuaternionTools;
@@ -14,8 +15,7 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
@@ -166,9 +166,9 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       trajectoryTime.set(duration);
    }
 
-   private final FrameOrientation tempOrientation = new FrameOrientation();
+   private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
-   public void setInitialOrientation(FrameOrientation initialOrientation)
+   public void setInitialOrientation(FrameQuaternion initialOrientation)
    {
       tempOrientation.setIncludingFrame(initialOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
@@ -182,7 +182,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       this.initialOrientation.set(tempOrientation);
    }
 
-   public void setFinalOrientation(FrameOrientation finalOrientation)
+   public void setFinalOrientation(FrameQuaternion finalOrientation)
    {
       tempOrientation.setIncludingFrame(finalOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
@@ -242,7 +242,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       this.numberOfRevolutions.set(numberOfRevolutions);
    }
 
-   public void setInitialConditions(FrameOrientation initialOrientation, FrameVector3D initialAngularVelocity)
+   public void setInitialConditions(FrameQuaternion initialOrientation, FrameVector3D initialAngularVelocity)
    {
       setInitialOrientation(initialOrientation);
       setInitialAngularVelocity(initialAngularVelocity);
@@ -254,7 +254,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       setInitialAngularVelocity(initialAngularVelocity);
    }
 
-   public void setFinalConditions(FrameOrientation finalOrientation, FrameVector3D finalAngularVelocity)
+   public void setFinalConditions(FrameQuaternion finalOrientation, FrameVector3D finalAngularVelocity)
    {
       setFinalOrientation(finalOrientation);
       setFinalAngularVelocity(finalAngularVelocity);
@@ -266,7 +266,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       setFinalAngularVelocity(finalAngularVelocity);
    }
 
-   private final FrameOrientation tempFrameOrientation = new FrameOrientation();
+   private final FrameQuaternion tempFrameOrientation = new FrameQuaternion();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
 
    public void setTrajectoryParameters(FrameSO3TrajectoryPoint initialFrameSO3Waypoint, FrameSO3TrajectoryPoint finalFrameSO3Waypoint)
@@ -321,8 +321,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    {
       double TOverThree = trajectoryTime.getDoubleValue() / 3.0;
 
-      Quaternion qa = initialOrientation.getFrameOrientation().getQuaternion();
-      Quaternion qb = finalOrientation.getFrameOrientation().getQuaternion();
+      FrameQuaternion qa = initialOrientation.getFrameOrientation();
+      FrameQuaternion qb = finalOrientation.getFrameOrientation();
       initialAngularVelocity.get(wa);
       finalAngularVelocity.get(wb);
       qa.inverseTransform(wa);
@@ -595,7 +595,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    }
 
    @Override
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -613,7 +613,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    }
 
    @Override
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

@@ -14,8 +14,11 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -24,12 +27,11 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -43,7 +45,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -52,6 +54,21 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       RigidBody head = fullRobotModel.getHead();
       String headName = head.getName();
       OneDoFJoint[] neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+
+      // move joints to mid range
+      double[] desiredJointPositions = new double[neckJoints.length];
+      double[] desiredJointVelcoties = new double[neckJoints.length];
+      for (int i = 0; i < neckJoints.length; i++)
+      {
+         OneDoFJoint joint = neckJoints[i];
+         desiredJointPositions[i] = (joint.getJointLimitLower() + joint.getJointLimitUpper()) / 2.0;
+         desiredJointVelcoties[i] = 0.0;
+      }
+      NeckTrajectoryMessage neckTrajectoryMessage = new NeckTrajectoryMessage(0.5, desiredJointPositions);
+      drcSimulationTestHelper.send(neckTrajectoryMessage);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.55);
+      assertTrue(success);
+
       double[] neckDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, neckJoints.length, 0.1);
       NeckDesiredAccelerationsMessage neckDesiredAccelerationsMessage = new NeckDesiredAccelerationsMessage(neckDesiredJointAccelerations);
 

@@ -6,7 +6,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
@@ -55,6 +55,7 @@ public class TestYoVariableConnection
    public TestYoVariableConnection() throws IOException
    {
       new YoInteger("var5", registry);
+      new YoEnum<TestEnum>("var6", "", registry, TestEnum.class, true);
       parameterReader = new XmlParameterReader(getClass().getResourceAsStream("TestParameters.xml"));
       
       server.setSendKeepAlive(true);

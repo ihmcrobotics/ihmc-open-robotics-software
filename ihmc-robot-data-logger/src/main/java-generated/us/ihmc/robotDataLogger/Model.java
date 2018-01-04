@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "Model" defined in LogProperties.idl. 
@@ -14,11 +11,11 @@ public class Model
 {
     public Model()
     {
-        	loader_ = new StringBuilder(255); 
-        	path_ = new StringBuilder(255); 
-        	name_ = new StringBuilder(255); 
-        	resourceBundle_ = new StringBuilder(255); 
-        	resourceDirectoriesList_ = new IDLSequence.StringBuilderHolder (255, "type_d");           
+        	loader_ = new java.lang.StringBuilder(255); 
+        	path_ = new java.lang.StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
+        	resourceBundle_ = new java.lang.StringBuilder(255); 
+        	resourceDirectoriesList_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (255, "type_d");           
         
     }
 
@@ -41,12 +38,12 @@ public class Model
         	loader_.append(loader);
         }
         
-        public String getLoaderAsString()
+        public java.lang.String getLoaderAsString()
         {
         	return getLoader().toString();
         }
 
-    public StringBuilder getLoader()
+    public java.lang.StringBuilder getLoader()
     {
         return loader_;
     }
@@ -58,12 +55,12 @@ public class Model
         	path_.append(path);
         }
         
-        public String getPathAsString()
+        public java.lang.String getPathAsString()
         {
         	return getPath().toString();
         }
 
-    public StringBuilder getPath()
+    public java.lang.StringBuilder getPath()
     {
         return path_;
     }
@@ -75,12 +72,12 @@ public class Model
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -92,19 +89,19 @@ public class Model
         	resourceBundle_.append(resourceBundle);
         }
         
-        public String getResourceBundleAsString()
+        public java.lang.String getResourceBundleAsString()
         {
         	return getResourceBundle().toString();
         }
 
-    public StringBuilder getResourceBundle()
+    public java.lang.StringBuilder getResourceBundle()
     {
         return resourceBundle_;
     }
 
         
 
-    public IDLSequence.StringBuilderHolder  getResourceDirectoriesList()
+    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getResourceDirectoriesList()
     {
         return resourceDirectoriesList_;
     }
@@ -115,7 +112,7 @@ public class Model
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -138,7 +135,7 @@ public class Model
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -167,10 +164,10 @@ public class Model
 		return builder.toString();
     }
 
-    private StringBuilder loader_; 
-    private StringBuilder path_; 
-    private StringBuilder name_; 
-    private StringBuilder resourceBundle_; 
-    private IDLSequence.StringBuilderHolder  resourceDirectoriesList_; 
+    private java.lang.StringBuilder loader_; 
+    private java.lang.StringBuilder path_; 
+    private java.lang.StringBuilder name_; 
+    private java.lang.StringBuilder resourceBundle_; 
+    private us.ihmc.idl.IDLSequence.StringBuilderHolder  resourceDirectoriesList_; 
 
 }

@@ -12,15 +12,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyControllerCore
 {
@@ -42,7 +41,8 @@ public class WholeBodyControllerCore
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
+                                  JointDesiredOutputList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
    {
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
 
@@ -134,6 +134,7 @@ public class WholeBodyControllerCore
       controllerCoreSubmitTimer.startMeasurement();
       reset();
 
+      boolean reinitializationRequested = controllerCoreCommand.isReinitializationRequested();
       currentMode.set(controllerCoreCommand.getControllerCoreMode());
 
       switch (currentMode.getEnumValue())
@@ -141,6 +142,8 @@ public class WholeBodyControllerCore
       case INVERSE_DYNAMICS:
          if (inverseDynamicsSolver != null)
          {
+            if (reinitializationRequested)
+               inverseDynamicsSolver.reinitialize();
             feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
             inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
          }
@@ -319,7 +322,7 @@ public class WholeBodyControllerCore
       return controllerCoreOutput;
    }
 
-   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
+   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return yoLowLevelOneDoFJointDesiredDataHolder;
    }

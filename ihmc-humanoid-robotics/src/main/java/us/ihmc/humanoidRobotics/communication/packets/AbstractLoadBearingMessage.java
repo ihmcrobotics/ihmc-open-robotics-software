@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
 
-public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>> extends TrackablePacket<T>
+public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>> extends Packet<T>
 {
    /** If set to true this will load the contact point. Otherwise the rigid body will stop bearing load. */
    public boolean load = false;
@@ -32,8 +32,8 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       load = random.nextBoolean();
       coefficientOfFriction = random.nextDouble();
-      bodyFrameToContactFrame = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      contactNormalInWorldFrame = EuclidCoreRandomTools.generateRandomVector3D(random);
+      bodyFrameToContactFrame = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      contactNormalInWorldFrame = EuclidCoreRandomTools.nextVector3D(random);
    }
 
    public void setLoad(boolean load)

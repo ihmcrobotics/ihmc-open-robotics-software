@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.sphereICPControl;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
@@ -10,11 +11,12 @@ import com.thoughtworks.xstream.io.StreamException;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -59,7 +61,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -456,8 +458,8 @@ public class SphereICPPlannerVisualizer
       double minY = 0.5 * randomSupportPolygon.getMinY();
       double maxX = 0.5 * randomSupportPolygon.getMaxX();
       double maxY = 0.5 * randomSupportPolygon.getMaxY();
-      FramePoint2D randomLineOrigin = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, maxX, minY, maxY);
-      FrameVector2D randomLineVector = EuclidFrameRandomTools.generateRandomFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
+      FramePoint2D randomLineOrigin = EuclidFrameRandomTools.nextFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, maxX, minY, maxY);
+      FrameVector2D randomLineVector = EuclidFrameRandomTools.nextFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2d randomLine = new FrameLine2d(randomLineOrigin, randomLineVector);
 
       ConvexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
@@ -465,7 +467,7 @@ public class SphereICPPlannerVisualizer
 
       while (randomSupportPolygon.getNumberOfVertices() < 4)
       {
-         FramePoint2D duplicate = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
+         FramePoint2D duplicate = EuclidFrameRandomTools.nextFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
          duplicate.add(randomSupportPolygon.getFrameVertexCopy(0));
          randomSupportPolygon.addVertex(duplicate);
          randomSupportPolygon.update();
@@ -691,31 +693,45 @@ public class SphereICPPlannerVisualizer
          }
 
          @Override
-         public List<Vector2D> getCoPForwardOffsetBounds()
+         public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
          {
-            ArrayList<Vector2D> copForwardOffsetBounds = new ArrayList<>();
+            EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
 
             Vector2D entryBounds = new Vector2D(0.0, 0.03);
             Vector2D exitBounds = new Vector2D(-0.04, 0.08);
 
-            copForwardOffsetBounds = new ArrayList<>();
-            copForwardOffsetBounds.add(entryBounds);
-            copForwardOffsetBounds.add(exitBounds);
+            copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
+            copForwardOffsetBounds.put(entryCoPName, entryBounds);
+            copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
             return copForwardOffsetBounds;
          }
 
+         /**{@inheritDoc} */
          @Override
-         public List<Vector2D> getCoPOffsets()
+         public CoPPointName getExitCoPName()
          {
-            ArrayList<Vector2D> copOffsets = new ArrayList<>();
+            return exitCoPName;
+         }
+
+         /**{@inheritDoc} */
+         @Override
+         public CoPPointName getEntryCoPName()
+         {
+            return entryCoPName;
+         }
+
+         @Override
+         public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
+         {
+            EnumMap<CoPPointName, Vector2D> copOffsets;
 
             Vector2D entryOffset = new Vector2D(0.0, -0.005);
             Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
 
-            copOffsets = new ArrayList<>();
-            copOffsets.add(entryOffset);
-            copOffsets.add(exitOffset);
+            copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
+            copOffsets.put(entryCoPName, entryOffset);
+            copOffsets.put(entryCoPName, exitOffset);
 
             return copOffsets;
          }

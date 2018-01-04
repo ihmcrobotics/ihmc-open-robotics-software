@@ -30,6 +30,12 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
    }
 
    @Override
+   public double getStepHeightOffset()
+   {
+      return 0.0;
+   }
+
+   @Override
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
@@ -37,7 +43,7 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 167.7)
-   @Test
+   @Test(timeout = 1200000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
       super.testWalkingOverCinderBlockField();

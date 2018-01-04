@@ -1,15 +1,17 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RigidBodyUserControlState extends RigidBodyControlState
 {
@@ -21,7 +23,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    private final int numberOfJoints;
 
    private final YoDouble[] userDesiredJointAccelerations;
-   private final YoDouble[] weights;
+   private final DoubleProvider[] weights;
 
    private final YoBoolean abortUserControlMode;
    private final YoBoolean hasWeights;
@@ -37,13 +39,12 @@ public class RigidBodyUserControlState extends RigidBodyControlState
 
       jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
       userDesiredJointAccelerations = new YoDouble[jointsToControl.length];
-      weights = new YoDouble[jointsToControl.length];
+      weights = new DoubleProvider[jointsToControl.length];
 
       for (int i = 0; i < numberOfJoints; i++)
       {
          String jointName = jointsToControl[i].getName();
          userDesiredJointAccelerations[i] = new YoDouble(prefix + "_" + jointName + "_qdd_d", registry);
-         weights[i] = new YoDouble(prefix + "_" + jointName + "_weight", registry);
          jointspaceAccelerationCommand.addJoint(jointsToControl[i], Double.NaN);
       }
 
@@ -87,28 +88,28 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       {
          double desiredAcceleration = userDesiredJointAccelerations[jointIdx].getDoubleValue();
          jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(jointIdx, desiredAcceleration);
-         jointspaceAccelerationCommand.setWeight(jointIdx, weights[jointIdx].getDoubleValue());
+         jointspaceAccelerationCommand.setWeight(jointIdx, weights[jointIdx].getValue());
       }
    }
 
-   public void setWeights(TObjectDoubleHashMap<String> weights)
+   public void setWeights(Map<String, DoubleProvider> weights)
    {
       hasWeights.set(true);
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJoint joint = jointsToControl[jointIdx];
          if (weights.containsKey(joint.getName()))
-            this.weights[jointIdx].set(weights.get(joint.getName()));
+            this.weights[jointIdx] = weights.get(joint.getName());
          else
             hasWeights.set(false);
       }
    }
 
-   public void setWeight(double weight)
+   public void setWeight(DoubleProvider weight)
    {
       hasWeights.set(true);
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-         this.weights[jointIdx].set(weight);
+         this.weights[jointIdx] = weight;
    }
 
    @Override

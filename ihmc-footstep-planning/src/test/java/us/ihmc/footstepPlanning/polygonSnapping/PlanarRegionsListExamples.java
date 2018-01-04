@@ -1,20 +1,25 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
 public class PlanarRegionsListExamples
@@ -106,6 +111,30 @@ public class PlanarRegionsListExamples
       generator.translate(0.6 + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
       generator.addRectangle(0.6, courseWidth);
       
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList generateSteppingStoneField(double steppingStoneWidth, double steppingStoneLength, double stepWidth, double stepLength, int numberOfSteps)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double platformLength = 0.6;
+      double platformWidth = 1.0;
+
+      generator.addRectangle(platformLength, platformWidth);
+      generator.translate(0.5 * platformLength, 0.0, 0.0);
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         RobotSide side = (i % 2 == 0) ? RobotSide.LEFT : RobotSide.RIGHT;
+         double xOffset = stepLength;
+         double yOffset = side.negateIfRightSide(0.5 * stepWidth);
+         generator.translate(xOffset, yOffset, 0.0);
+         generator.addRectangle(steppingStoneLength, steppingStoneWidth);
+      }
+
+      generator.translate(stepLength + 0.5 * platformLength, 0.0, 0.0);
+      generator.addRectangle(platformLength, platformWidth);
       return generator.getPlanarRegionsList();
    }
 
@@ -208,32 +237,30 @@ public class PlanarRegionsListExamples
       return convexPolygon;
    }
 
-   public static PlanarRegionsList createSteppingStonesEnvironment()
+   public static PlanarRegionsList generateSteppingStonesEnvironment(double pathRadius)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      double cinderBlockWidth = 0.2;
-      double cinderBlockLength = 0.3;
-      double cinderBlockSeparationWidth = 0.5;
-      double cinderBlockSeparationLength = 0.3;
-
-      double pathRadius = 2.5;
+      double cinderBlockWidth = 0.25;
+      double cinderBlockLength = 0.35;
+      double cinderBlockSeparationWidth = 0.25;
+      double cinderBlockSeparationLength = 0.35;
 
       double quarterCircleLength = 0.5 * Math.PI * pathRadius;
       int numberOfSteps = (int) Math.round(quarterCircleLength / cinderBlockSeparationLength);
       if(numberOfSteps % 2 != 1) numberOfSteps++;
 
       // starting block
-      generator.translate(0.0, -0.5, 0.0);
+      generator.translate(0.0, -0.5, 0.001);
       generator.addRectangle(2.0, 1.0);
       generator.identity();
 
       // ending block
-      generator.translate(pathRadius + 0.5, pathRadius, 0.0);
+      generator.translate(pathRadius + 0.5, pathRadius, 0.001);
       generator.addRectangle(1.0, 2.0);
       generator.identity();
 
       // cinder blocks
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 1; i < numberOfSteps; i++)
       {
          double percentageAlongCurve = ((double) i / (double) numberOfSteps);
 
@@ -241,7 +268,7 @@ public class PlanarRegionsListExamples
          double xPositionAlongCurve = pathRadius * (1.0 - Math.cos(angle));
          double yPositionAlongCurve = pathRadius * Math.sin(angle);
 
-         generator.translate(xPositionAlongCurve, yPositionAlongCurve, 0.0);
+         generator.translate(xPositionAlongCurve, yPositionAlongCurve, -0.001);
          generator.rotate(- angle, Axis.Z);
 
          double xTranslation = cinderBlockSeparationWidth * 0.5;
@@ -431,7 +458,8 @@ public class PlanarRegionsListExamples
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
-      PlanarRegionsList planarRegionsList = createMazeEnvironment();
+//      PlanarRegionsList planarRegionsList = createMazeEnvironment();
+      PlanarRegionsList planarRegionsList = generateSteppingStoneField(0.1, 0.1, 0.25, 0.3, 6);
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
                                                                                                 false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();

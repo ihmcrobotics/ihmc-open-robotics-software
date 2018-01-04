@@ -9,9 +9,9 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackController;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.PDGainsInterface;
-import us.ihmc.robotics.controllers.SimplePDGainsHolder;
+import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -58,7 +58,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
    private final RecyclingArrayList<MutableDouble> feedForwardAccelerations = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
 
    /** Gains to used by the PD controllers for the next control tick. */
-   private final RecyclingArrayList<SimplePDGainsHolder> gains = new RecyclingArrayList<>(initialCapacity, SimplePDGainsHolder.class);
+   private final RecyclingArrayList<PDGains> gains = new RecyclingArrayList<>(initialCapacity, PDGains.class);
    /** Weight used in the QP optimization describing how 'important' achieving this command is. */
    private final RecyclingArrayList<MutableDouble> weightsForSolver = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
 
@@ -92,7 +92,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param gains the new set of gains to be used. The data is copied into a local object. Not
     *           modified.
     */
-   public void setGains(int jointIndex, PDGainsInterface gains)
+   public void setGains(int jointIndex, PDGainsReadOnly gains)
    {
       this.gains.get(jointIndex).set(gains);
    }
@@ -104,7 +104,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param gains the new set of gains to be used. The data is copied into a local object. Not
     *           modified.
     */
-   public void setGains(PDGainsInterface gains)
+   public void setGains(PDGainsReadOnly gains)
    {
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
          this.gains.get(jointIndex).set(gains);
@@ -159,7 +159,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
       weightsForSolver.add().setValue(Double.POSITIVE_INFINITY);
       gains.add().set(0.0, 0.0, 0.0, 0.0);
    }
-   
+
    /**
     * Adds a joint to be controlled in the next control tick.
     *
@@ -169,7 +169,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param feedForwardAcceleration the feed-forward acceleration for the joint, used to improve
     *           tracking performance.
     */
-   public void addJoint(OneDoFJoint joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration, PDGainsInterface gains, double weight)
+   public void addJoint(OneDoFJoint joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration, PDGainsReadOnly gains, double weight)
    {
       joints.add(joint);
       jointNames.add(joint.getName());
@@ -252,7 +252,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param jointIndex the index of the joint gains.
     * @return the PD gains to be used.
     */
-   public PDGainsInterface getGains(int jointIndex)
+   public PDGainsReadOnly getGains(int jointIndex)
    {
       return gains.get(jointIndex);
    }

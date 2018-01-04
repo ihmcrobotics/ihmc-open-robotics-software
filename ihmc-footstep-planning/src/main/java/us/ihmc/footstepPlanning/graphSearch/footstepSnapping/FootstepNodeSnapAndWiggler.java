@@ -1,173 +1,127 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
+public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
-   private PlanarRegionsList planarRegionsList;
-   private BipedalFootstepPlannerListener listener;
-   private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private BipedalFootstepPlannerParameters parameters;
+   private final BipedalFootstepPlannerListener listener;
+   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private final FootstepPlannerParameters parameters;
 
-   public FootstepNodeSnapAndWiggler(BipedalFootstepPlannerParameters parameters)
-   {
-      this.parameters = parameters;
-   }
+   private final WiggleParameters wiggleParameters = new WiggleParameters();
+   private final PlanarRegion planarRegionToPack = new PlanarRegion();
+   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
 
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-   }
-
-   public void setFootPolygonsInSoleFrame(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
+   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters,
+                                     BipedalFootstepPlannerListener listener)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-   }
-
-   public void setListener(BipedalFootstepPlannerListener listener)
-   {
+      this.parameters = parameters;
       this.listener = listener;
    }
 
-   public RigidBodyTransform snapFootstepNode(FootstepNode bipedalFootstepPlannerNode, ConvexPolygon2D footholdIntersectionToPack)
+   @Override
+   public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
-      if (planarRegionsList == null)
-      {
-         throw new RuntimeException("Only call this if planarRegionsList exists. Check for null before calling.");
-      }
+      FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
-      RobotSide nodeSide = bipedalFootstepPlannerNode.getRobotSide();
-      RigidBodyTransform soleTransformBeforeSnap = new RigidBodyTransform();
-
-      BipedalFootstepPlannerNodeUtils.getSoleTransform(bipedalFootstepPlannerNode, soleTransformBeforeSnap);
-      if (!isTransformZUp(soleTransformBeforeSnap))
-      {
-         throw new RuntimeException("Node needs to be flat (no pitch or roll) before calling this! bipedalFootstepPlannerNode = \n"
-                                          + bipedalFootstepPlannerNode);
-      }
-
-      ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D(footPolygonsInSoleFrame.get(nodeSide));
-      currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
-
-      PlanarRegion planarRegionToPack = new PlanarRegion();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList,
-                                                                                                        planarRegionToPack);
       if (snapTransform == null)
-      {
-         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-         return null;
-      }
+         return FootstepNodeSnapData.emptyData();
 
-      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
-      {
-         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
-                                                         BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-         return null;
-      }
+      ConvexPolygon2D footholdPolygonInLocalFrame = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapTransform);
+      if (footholdPolygonInLocalFrame.isEmpty())
+         return FootstepNodeSnapData.emptyData();
 
-      BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(bipedalFootstepPlannerNode, snapTransform);
-
-      WiggleParameters wiggleParameters = new WiggleParameters();
-      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
-      //      parameters.minX = -0.1;
-      //      parameters.maxX = 0.1;
-      //      parameters.minY = -0.1;
-      //      parameters.maxY = 0.1;
-      //      parameters.minYaw = -0.1;
-      //      parameters.maxYaw = 0.1;
-      //      parameters.rotationWeight = 1.0;
-
-      ConvexPolygon2D polygonToWiggleInRegionFrame = planarRegionToPack.snapPolygonIntoRegionAndChangeFrameToRegionFrame(currentFootPolygon, snapTransform);
-      //      System.out.println("polygonToWiggleInRegionFrame = \n" + polygonToWiggleInRegionFrame);
-      //      System.out.println("planarRegionToPack = \n" + planarRegionToPack);
-
-      RigidBodyTransform wiggleTransformLocalToLocal = null;
-      if (parameters.getWiggleIntoConvexHullOfPlanarRegions())
-         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(polygonToWiggleInRegionFrame, planarRegionToPack, wiggleParameters);
-      else
-         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(polygonToWiggleInRegionFrame, planarRegionToPack, wiggleParameters);
-
+      RigidBodyTransform wiggleTransformLocalToLocal = getWiggleTransformInPlanarRegionFrame(footholdPolygonInLocalFrame);
+      
       if (wiggleTransformLocalToLocal == null)
       {
-         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
-
-         //TODO: Possibly have different node costs depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
          {
-            return null;
+            notifyListenerNodeUnderConsiderationWasRejected(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
+            return FootstepNodeSnapData.emptyData();
          }
-
          else
          {
-            return snapTransform;
+            FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygonInLocalFrame);
+            return new FootstepNodeSnapData(snapTransform, footholdPolygonInLocalFrame);
          }
       }
 
-      //      System.out.println("wiggleTransformLocalToLocal = \n" + wiggleTransformLocalToLocal);
-
-      //      wiggleTransform = new RigidBodyTransform();
-      //      wiggleTransform.setTranslation(0.2, 0.0, 0.0);
-
-      Point3D wiggleTranslation = new Point3D();
-      wiggleTransformLocalToLocal.transform(wiggleTranslation);
-      Vector3D wiggleVector = new Vector3D(wiggleTranslation);
-      if (wiggleVector.length() > parameters.getMaximumXYWiggleDistance())
-      {
-         wiggleVector.scale(parameters.getMaximumXYWiggleDistance() / wiggleVector.length());
-      }
-
-      Vector3D rotationEuler = new Vector3D();
-      wiggleTransformLocalToLocal.getRotationEuler(rotationEuler);
-      double yaw = rotationEuler.getZ();
-      yaw = MathTools.clamp(yaw, parameters.getMaximumYawWiggle());
-
-      rotationEuler.setZ(yaw);
-      wiggleTransformLocalToLocal.setRotationEulerAndZeroTranslation(rotationEuler);
-      wiggleTransformLocalToLocal.setTranslation(wiggleVector);
-
-      //      System.out.println("Limited wiggleTransformLocalToLocal = \n" + wiggleTransformLocalToLocal);
-
-      RigidBodyTransform wiggleTransformWorldToWorld = new RigidBodyTransform();
-      RigidBodyTransform transformOne = new RigidBodyTransform();
-      planarRegionToPack.getTransformToWorld(transformOne);
-      RigidBodyTransform transformTwo = new RigidBodyTransform(transformOne);
-      transformTwo.invert();
-
-      wiggleTransformWorldToWorld.set(transformOne);
-      wiggleTransformWorldToWorld.multiply(wiggleTransformLocalToLocal);
-      wiggleTransformWorldToWorld.set(wiggleTransformWorldToWorld);
-      wiggleTransformWorldToWorld.multiply(transformTwo);
-
-      //      System.out.println("wiggleTransformWorldToWorld = \n" + wiggleTransformWorldToWorld);
-
+      RigidBodyTransform wiggleTransformWorldToWorld = getWiggleTransformInWorldFrame(wiggleTransformLocalToLocal);
       RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform(wiggleTransformWorldToWorld);
       snapAndWiggleTransform.multiply(snapTransform);
 
       // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
-      ConvexPolygon2D checkFootPolygonInWorld = new ConvexPolygon2D(currentFootPolygon);
-      checkFootPolygonInWorld.applyTransformAndProjectToXYPlane(snapAndWiggleTransform);
+      ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footholdPolygonInLocalFrame);
+      footPolygonInWorld.applyTransformAndProjectToXYPlane(snapAndWiggleTransform);
 
-      List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(checkFootPolygonInWorld);
+      List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(footPolygonInWorld);
 
+      if (checkForTooMuchPenetrationAfterWiggle(footstepNode, planarRegionToPack, footPolygonInWorld,
+                                                planarRegionsIntersectingSnappedAndWiggledPolygon))
+         return FootstepNodeSnapData.emptyData();
+
+      ConvexPolygon2D wiggledFootholdPolygonInLocalFrame = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapAndWiggleTransform);
+      FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
+
+      return new FootstepNodeSnapData(snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
+   }
+
+   private RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
+   {
+      updateWiggleParameters();
+
+      if (parameters.getWiggleIntoConvexHullOfPlanarRegions())
+         return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
+      else
+         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
+   }
+
+   private void updateWiggleParameters()
+   {
+      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
+      wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
+   }
+
+   private RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal)
+   {
+      RigidBodyTransform wiggleTransformWorldToWorld = new RigidBodyTransform();
+      RigidBodyTransform localToWorld = new RigidBodyTransform();
+      planarRegionToPack.getTransformToWorld(localToWorld);
+      RigidBodyTransform worldToLocal = new RigidBodyTransform(localToWorld);
+      worldToLocal.invert();
+
+      wiggleTransformWorldToWorld.set(localToWorld);
+      wiggleTransformWorldToWorld.multiply(wiggleTransformLocalToLocal);
+      wiggleTransformWorldToWorld.multiply(worldToLocal);
+      return wiggleTransformWorldToWorld;
+   }
+
+   private boolean checkForTooMuchPenetrationAfterWiggle(FootstepNode node, PlanarRegion highestElevationPlanarRegion,
+                                                         ConvexPolygon2D footPolygonInWorld,
+                                                         List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon)
+   {
       ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack = new ArrayList<>();
       RigidBodyTransform transformToWorldFromIntersectingPlanarRegion = new RigidBodyTransform();
 
@@ -177,7 +131,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
          {
             planarRegionIntersectingSnappedAndWiggledPolygon.getTransformToWorld(transformToWorldFromIntersectingPlanarRegion);
             intersectionsInPlaneFrameToPack.clear();
-            planarRegionIntersectingSnappedAndWiggledPolygon.getPolygonIntersectionsWhenProjectedVertically(checkFootPolygonInWorld,
+            planarRegionIntersectingSnappedAndWiggledPolygon.getPolygonIntersectionsWhenProjectedVertically(footPolygonInWorld,
                                                                                                             intersectionsInPlaneFrameToPack);
 
             // If any points are above the plane of the planarRegionToPack, then this is stepping into a v type problem.
@@ -190,28 +144,20 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
                   Point3D vertex3dInWorld = new Point3D(vertex2d.getX(), vertex2d.getY(), 0.0);
                   transformToWorldFromIntersectingPlanarRegion.transform(vertex3dInWorld);
 
-                  double planeZGivenXY = planarRegionToPack.getPlaneZGivenXY(vertex3dInWorld.getX(), vertex3dInWorld.getY());
+                  double planeZGivenXY = highestElevationPlanarRegion.getPlaneZGivenXY(vertex3dInWorld.getX(), vertex3dInWorld.getY());
 
                   double zPenetration = vertex3dInWorld.getZ() - planeZGivenXY;
-                  //               System.out.println("zPenetration = " + zPenetration);
 
                   if (zPenetration > parameters.getMaximumZPenetrationOnValleyRegions())
                   {
-                     notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
-                                                                     BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
-                     return null;
+                     notifyListenerNodeUnderConsiderationWasRejected(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
+                     return true;
                   }
                }
             }
          }
       }
-
-      return snapAndWiggleTransform;
-   }
-
-   private boolean isTransformZUp(RigidBodyTransform soleTransformBeforeSnap)
-   {
-      return Math.abs(soleTransformBeforeSnap.getM22() - 1.0) < 1e-4;
+      return false;
    }
 
    private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)

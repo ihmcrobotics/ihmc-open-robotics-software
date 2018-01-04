@@ -1,31 +1,23 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
    private SideDependentList<FootstepNode> goalNodes;
-   private final BipedalFootstepPlannerParameters parameters;
+   private final FootstepPlannerParameters parameters;
 
-   private final ArrayList<Double> xOffsetFromIdealFootstep;
-   private final ArrayList<Double> yOffsetFromIdealFootstep;
-   private final ArrayList<Double> yawOffsetFromIdealFootstep;
-
-   public ParameterBasedNodeExpansion(BipedalFootstepPlannerParameters parameters)
+   public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
-
-      xOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepLength(), parameters.getMaximumStepReach(), FootstepNode.gridSizeX);
-      yOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepWidth(), parameters.getMaximumStepWidth(), FootstepNode.gridSizeY);
-      yawOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(- parameters.getMaximumStepYaw(), parameters.getMaximumStepYaw(), FootstepNode.gridSizeYaw);
    }
 
    public void setGoalNodes(SideDependentList<FootstepNode> goalNodes)
@@ -37,8 +29,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
       HashSet<FootstepNode> expansion = new HashSet<>();
-
-      addGoalNodeIfReachable(node, expansion);
       addDefaultFootsteps(node, expansion);
 
       return expansion;
@@ -58,11 +48,16 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> expansion)
    {
       RobotSide nextSide = node.getRobotSide().getOppositeSide();
-      for(double x : xOffsetFromIdealFootstep)
+      for (double x = parameters.getMinimumStepLength(); x < parameters.getMaximumStepReach(); x += FootstepNode.gridSizeXY)
       {
-         for(double y : yOffsetFromIdealFootstep)
+         for (double y = parameters.getMinimumStepWidth(); y < parameters.getMaximumStepWidth(); y += FootstepNode.gridSizeXY)
          {
-            for (double yaw : yawOffsetFromIdealFootstep)
+            if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
+            {
+               continue;
+            }
+
+            for (double yaw = parameters.getMinimumStepYaw(); yaw < parameters.getMaximumStepYaw(); yaw += FootstepNode.gridSizeYaw)
             {
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);

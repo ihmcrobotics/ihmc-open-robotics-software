@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -12,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlanne
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -593,31 +594,45 @@ public class SphereControlToolbox
          }
 
          @Override
-         public List<Vector2D> getCoPForwardOffsetBounds()
+         public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
          {
-            ArrayList<Vector2D> copForwardOffsetBounds = new ArrayList<>();
+            EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
 
             Vector2D entryBounds = new Vector2D(0.0, 0.03);
             Vector2D exitBounds = new Vector2D(-0.04, 0.08);
 
-            copForwardOffsetBounds = new ArrayList<>();
-            copForwardOffsetBounds.add(entryBounds);
-            copForwardOffsetBounds.add(exitBounds);
+            copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
+            copForwardOffsetBounds.put(entryCoPName, entryBounds);
+            copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
             return copForwardOffsetBounds;
          }
 
+         /**{@inheritDoc} */
          @Override
-         public List<Vector2D> getCoPOffsets()
+         public CoPPointName getExitCoPName()
          {
-            ArrayList<Vector2D> copOffsets = new ArrayList<>();
+            return exitCoPName;
+         }
+
+         /**{@inheritDoc} */
+         @Override
+         public CoPPointName getEntryCoPName()
+         {
+            return entryCoPName;
+         }
+
+         @Override
+         public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
+         {
+            EnumMap<CoPPointName, Vector2D> copOffsets;
 
             Vector2D entryOffset = new Vector2D(0.0, -0.005);
             Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
 
-            copOffsets = new ArrayList<>();
-            copOffsets.add(entryOffset);
-            copOffsets.add(exitOffset);
+            copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
+            copOffsets.put(entryCoPName, entryOffset);
+            copOffsets.put(entryCoPName, exitOffset);
 
             return copOffsets;
          }
@@ -687,12 +702,6 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
-         public boolean useSimpleOptimization()
-         {
-            return false;
-         }
-
-         @Override
          public int numberOfFootstepsToConsider()
          {
             return 4;
@@ -747,13 +756,13 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 500.0;
          }
 
          @Override
-         public double getDynamicRelaxationDoubleSupportWeightModifier()
+         public double getDynamicsObjectiveDoubleSupportWeightModifier()
          {
             return 1.0;
          }
@@ -777,12 +786,6 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean scaleUpcomingStepWeights()
-         {
-            return true;
-         }
-
-         @Override
          public boolean useFeedbackRegularization()
          {
             return true;
@@ -800,13 +803,7 @@ public class SphereControlToolbox
             return true;
          }
 
-         @Override
-         public boolean useTimingOptimization()
-         {
-            return false;
-         }
-
-         @Override
+        @Override
          public boolean useFootstepRegularization()
          {
             return true;

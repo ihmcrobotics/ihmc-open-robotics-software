@@ -273,7 +273,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       {
          GroundContactPoint groundContactPoint = new GroundContactPoint(groundContactPointDescription.getName(),
                                                                         groundContactPointDescription.getOffsetFromJoint(), this);
-         joint.addGroundContactPoint(groundContactPoint);
+         joint.addGroundContactPoint(groundContactPointDescription.getGroupIdentifier(), groundContactPoint);
 
          if (!jointToGroundContactPointsMap.containsKey(joint))
          {

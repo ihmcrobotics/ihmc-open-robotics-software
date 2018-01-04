@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.pushRecovery;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.avatar.DRCPushRecoveryStandingTest;
@@ -28,6 +29,7 @@ public class ValkyriePushRecoveryStandingTest extends DRCPushRecoveryStandingTes
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Ignore("Needs to be improved")
    @ContinuousIntegrationTest(estimatedDuration = 53.2)
    @Test(timeout = 270000)
    @Override

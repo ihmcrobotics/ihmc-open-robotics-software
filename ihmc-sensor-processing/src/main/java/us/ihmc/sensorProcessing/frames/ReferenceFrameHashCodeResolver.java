@@ -16,12 +16,14 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  *
- * This class is Immutable, you shouldn't add reference frames to it except through the constructor or you will be fired... from a cannon.. into the sun
+ * This class is Immutable, you shouldn't add reference frames to it except through the constructor
+ * or you will be fired... from a cannon.. into the sun
  *
- * This class keeps track of all the reference frames from the full robot model and reference frames.
- * It uses reflection to pull all the frames from the full robot model and the reference frames, it looks at all models
- * that return a reference frame or a RobotSide,  robotQuadrant, or RobotSextant. If we get more robot segments we should
- * switch to using reflection and generics to pull them automatically.
+ * This class keeps track of all the reference frames from the full robot model and reference
+ * frames. It uses reflection to pull all the frames from the full robot model and the reference
+ * frames, it looks at all models that return a reference frame or a RobotSide, robotQuadrant, or
+ * RobotSextant. If we get more robot segments we should switch to using reflection and generics to
+ * pull them automatically.
  *
  * @author bs
  *
@@ -30,7 +32,7 @@ public class ReferenceFrameHashCodeResolver
 {
 
    private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
-   
+
    public ReferenceFrameHashCodeResolver(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
       nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
@@ -61,12 +63,12 @@ public class ReferenceFrameHashCodeResolver
       }
 
       TLongObjectHashMap<ReferenceFrame> referenceFrameDefaultHashIds = referenceFrames.getReferenceFrameDefaultHashIds();
-      if(referenceFrameDefaultHashIds != null)
+      if (referenceFrameDefaultHashIds != null)
       {
-         for(long key : referenceFrameDefaultHashIds.keys())
+         for (long key : referenceFrameDefaultHashIds.keys())
          {
             ReferenceFrame referenceFrame = referenceFrameDefaultHashIds.get(key);
-            if(referenceFrame != null)
+            if (referenceFrame != null)
             {
                checkAndAddReferenceFrame(referenceFrame);
             }
@@ -74,17 +76,18 @@ public class ReferenceFrameHashCodeResolver
          }
       }
    }
-   
+
    /**
     * For Testing
+    * 
     * @param referenceFrames
     */
    public ReferenceFrameHashCodeResolver(List<ReferenceFrame> referenceFrames)
    {
       nameBasedHashCodeToReferenceFrameMap.put(NameBasedHashCodeTools.NULL_HASHCODE, null);
-      for(ReferenceFrame referenceFrame : referenceFrames)
+      for (ReferenceFrame referenceFrame : referenceFrames)
       {
-         if(referenceFrame != null)
+         if (referenceFrame != null)
          {
             nameBasedHashCodeToReferenceFrameMap.put(referenceFrame.getNameBasedHashCode(), referenceFrame);
          }
@@ -93,6 +96,7 @@ public class ReferenceFrameHashCodeResolver
 
    /**
     * uses reflection to get the reference frames
+    * 
     * @param obj the object to pull from
     * @param clazz the class tyo
     * @throws IllegalAccessException
@@ -109,7 +113,7 @@ public class ReferenceFrameHashCodeResolver
             if (method.getParameterCount() == 0)
             {
                ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj);
-               if(referenceFrame != null)
+               if (referenceFrame != null)
                {
                   checkAndAddReferenceFrame(referenceFrame);
                }
@@ -119,7 +123,7 @@ public class ReferenceFrameHashCodeResolver
                for (RobotSide robotSide : RobotSide.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj, robotSide);
-                  if(referenceFrame != null)
+                  if (referenceFrame != null)
                   {
                      checkAndAddReferenceFrame(referenceFrame);
                   }
@@ -130,7 +134,7 @@ public class ReferenceFrameHashCodeResolver
                for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj, robotQuadrant);
-                  if(referenceFrame != null)
+                  if (referenceFrame != null)
                   {
                      checkAndAddReferenceFrame(referenceFrame);
                   }
@@ -141,7 +145,7 @@ public class ReferenceFrameHashCodeResolver
                for (RobotSextant robotSextant : RobotSextant.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj, robotSextant);
-                  if(referenceFrame != null)
+                  if (referenceFrame != null)
                   {
                      checkAndAddReferenceFrame(referenceFrame);
                   }
@@ -152,7 +156,9 @@ public class ReferenceFrameHashCodeResolver
    }
 
    /**
-    * Check to see if the map already has a frame under the hashcode. If so check if the two frames are the same, if not throw an exception.
+    * Check to see if the map already has a frame under the hashcode. If so check if the two frames
+    * are the same, if not throw an exception.
+    * 
     * @param referenceFrame
     */
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame)
@@ -162,10 +168,10 @@ public class ReferenceFrameHashCodeResolver
 
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame, long nameBasedHashCode)
    {
-      if(nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
+      if (nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
       {
          ReferenceFrame existingFrame = nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
-         if(!referenceFrame.equals(existingFrame))
+         if (!referenceFrame.equals(existingFrame))
          {
             throw new IllegalArgumentException("ReferenceFrameHashCodeResolver: Tried to put in a reference frame with the same name");
          }

@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.skippy;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -519,24 +519,20 @@ public class SkippyRobot extends Robot
 
    public YoDouble getQdd_z()
    {
-      // TODO Auto-generated method stub
       return rootJointIfSkippy.qdd_z;
    }
 
    public YoDouble getQ_hip()
    {
-      // TODO Auto-generated method stub
       return hipJoint.getQYoVariable();
    }
 
    public YoDouble getQd_hip()
    {
-      // TODO Auto-generated method stub
       return hipJoint.getQDYoVariable();
    }
    public YoDouble getQdd_hip()
    {
-      // TODO Auto-generated method stub
       return hipJoint.getQDDYoVariable();
    }
 

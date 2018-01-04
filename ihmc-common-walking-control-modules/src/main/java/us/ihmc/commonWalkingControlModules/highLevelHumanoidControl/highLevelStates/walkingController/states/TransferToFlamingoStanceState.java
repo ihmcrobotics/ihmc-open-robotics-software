@@ -1,24 +1,25 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class TransferToFlamingoStanceState extends TransferState
 {
    private final FootstepTiming footstepTiming = new FootstepTiming();
 
-   public TransferToFlamingoStanceState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+   public TransferToFlamingoStanceState(RobotSide transferToSide, WalkingControllerParameters walkingControllerParameters,
+         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
-      super(transferToSide, WalkingStateEnum.getFlamingoTransferState(transferToSide), walkingMessageHandler, controllerToolbox, managerFactory,
-            failureDetectionControlModule, parentRegistry);
+      super(transferToSide, WalkingStateEnum.getFlamingoTransferState(transferToSide), walkingControllerParameters, walkingMessageHandler, controllerToolbox,
+            managerFactory, failureDetectionControlModule, parentRegistry);
    }
 
    @Override
@@ -41,7 +42,8 @@ public class TransferToFlamingoStanceState extends TransferState
       double swingTime = Double.POSITIVE_INFINITY;
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      footstepTiming.setTimings(Double.POSITIVE_INFINITY, initialTransferTime);
+      double defaultTouchdownDuration = walkingMessageHandler.getDefaultTouchdownTime();
+      footstepTiming.setTimings(Double.POSITIVE_INFINITY, defaultTouchdownDuration, initialTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
       balanceManager.setICPPlanTransferToSide(transferToSide);
       balanceManager.initializeICPPlanForTransfer(swingTime, initialTransferTime, finalTransferTime);

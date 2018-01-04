@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class AbstractDataExporter implements ActionListener
 {

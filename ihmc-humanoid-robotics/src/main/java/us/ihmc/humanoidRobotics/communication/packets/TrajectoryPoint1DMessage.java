@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 @RosMessagePacket(documentation = "This class is used to build 1D trajectory messages including jointspace trajectory messages."
@@ -150,6 +150,12 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       if (!MathTools.epsilonCompare(getVelocity(), other.getVelocity(), epsilon))
          return false;
       return true;
+   }
+
+   @Override
+   public boolean geometricallyEquals(TrajectoryPoint1DMessage other, double epsilon)
+   {
+      return epsilonEquals(other, epsilon);
    }
 
    @Override

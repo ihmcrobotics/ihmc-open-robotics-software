@@ -197,4 +197,10 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    {
       return lineSegment3d;
    }
+
+   public void getIncludingFrame(FrameLineSegment2d lineSegment2DToPack)
+   {
+      lineSegment2DToPack.setToZero(getReferenceFrame());
+      lineSegment2DToPack.set(getReferenceFrame(), lineSegment3d.getFirstEndpointX(), lineSegment3d.getFirstEndpointY(), lineSegment3d.getSecondEndpointX(), lineSegment3d.getSecondEndpointY());
+   }
 }

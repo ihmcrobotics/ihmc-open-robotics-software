@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 
 public class SimpleTrajectoryPoint<W extends GeometryObject<W>, T extends SimpleTrajectoryPoint<W, T>> implements TrajectoryPointInterface<T>
@@ -90,6 +90,14 @@ public class SimpleTrajectoryPoint<W extends GeometryObject<W>, T extends Simple
       if (!MathTools.epsilonEquals(time, other.getTime(), epsilon))
          return false;
       return waypointData.epsilonEquals(other.waypointData, epsilon);
+   }
+
+   @Override
+   public boolean geometricallyEquals(T other, double epsilon)
+   {
+      if (!MathTools.epsilonEquals(time, other.getTime(), epsilon))
+         return false;
+      return waypointData.geometricallyEquals(other.waypointData, epsilon);
    }
 
    @Override

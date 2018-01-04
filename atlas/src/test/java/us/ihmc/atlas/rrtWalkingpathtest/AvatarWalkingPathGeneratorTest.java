@@ -44,12 +44,12 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
@@ -126,35 +126,30 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       @Override
       public TerrainObject3D getTerrainObject3D()
       {
-         // TODO Auto-generated method stub
          return EnvSet;
       }
 
       @Override
       public List<? extends Robot> getEnvironmentRobots()
       {
-         // TODO Auto-generated method stub
          return null;
       }
 
       @Override
       public void createAndSetContactControllerToARobot()
       {
-         // TODO Auto-generated method stub
 
       }
 
       @Override
       public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
       {
-         // TODO Auto-generated method stub
 
       }
 
       @Override
       public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
       {
-         // TODO Auto-generated method stub
       }
    }
 

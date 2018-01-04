@@ -17,7 +17,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,7 +27,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wanderer.hardware.visualization.WandererExpoFrame;
 
 public class WandererDashboard extends JPanel implements PlaybackListener
@@ -116,7 +116,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       initializationPanel.setLayout(new BoxLayout(initializationPanel, BoxLayout.X_AXIS));
       final YoBoolean enabledOutput = (YoBoolean)yoVariableHolder.getVariable("WandererOutputWriter","enableOutput");
       final YoBoolean startStandPrep = (YoBoolean)yoVariableHolder.getVariable("WandererStandPrep","startStandPrep");
-      final YoEnum requestedHighLevelState = (YoEnum)yoVariableHolder.getVariable("HighLevelHumanoidControllerManager","requestedHighLevelState");
+      final YoEnum requestedHighLevelState = (YoEnum)yoVariableHolder.getVariable("HumanoidHighLevelControllerManager","requestedHighLevelState");
       final YoDouble controlRatio = (YoDouble) yoVariableHolder.getVariable("WandererOutputWriter","controlRatio");
       
       final YoDouble leftFootForce = (YoDouble)yoVariableHolder.getVariable("l_footStateEstimatorWrenchBasedFootSwitch","l_footStateEstimatorFootForceMag");
@@ -160,9 +160,9 @@ public class WandererDashboard extends JPanel implements PlaybackListener
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            requestedHighLevelState.set(HighLevelState.WALKING.ordinal());
+            requestedHighLevelState.set(HighLevelControllerName.WALKING.ordinal());
             ThreadTools.sleep(500);
-            requestedHighLevelState.set(HighLevelState.WALKING.ordinal());
+            requestedHighLevelState.set(HighLevelControllerName.WALKING.ordinal());
             ThreadTools.sleep(500);
             controlRatio.set(1.0);
          }
@@ -308,14 +308,12 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    @Override
    public void play(double realTimeRate)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void stop()
    {
-      // TODO Auto-generated method stub
 
    }
 

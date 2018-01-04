@@ -3,7 +3,7 @@ package us.ihmc.avatar.factory;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -20,7 +20,7 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 public class AvatarSimulation
 {
    private SimulationConstructionSet simulationConstructionSet;
-   private MomentumBasedControllerFactory momentumBasedControllerFactory;
+   private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
    private AbstractThreadedRobotController threadedRobotController;
    private HumanoidGlobalDataProducer humanoidGlobalDataProducer;
@@ -33,7 +33,6 @@ public class AvatarSimulation
 
    public void start()
    {
-      System.out.println(humanoidFloatingRootJointRobot.getRobotsYoVariableRegistry().getAllVariables().size());
       if (yoVariableServer != null)
       {
          yoVariableServer.start();
@@ -110,9 +109,9 @@ public class AvatarSimulation
       return simulationConstructionSet;
    }
 
-   public MomentumBasedControllerFactory getMomentumBasedControllerFactory()
+   public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
    {
-      return momentumBasedControllerFactory;
+      return highLevelHumanoidControllerFactory;
    }
 
    public HumanoidFloatingRootJointRobot getHumanoidFloatingRootJointRobot()
@@ -135,9 +134,9 @@ public class AvatarSimulation
       this.simulationConstructionSet = simulationConstructionSet;
    }
 
-   public void setMomentumBasedControllerFactory(MomentumBasedControllerFactory momentumBasedControllerFactory)
+   public void setHighLevelHumanoidControllerFactory(HighLevelHumanoidControllerFactory momentumBasedControllerFactory)
    {
-      this.momentumBasedControllerFactory = momentumBasedControllerFactory;
+      this.highLevelHumanoidControllerFactory = momentumBasedControllerFactory;
    }
 
    public void setYoVariableServer(YoVariableServer yoVariableServer)

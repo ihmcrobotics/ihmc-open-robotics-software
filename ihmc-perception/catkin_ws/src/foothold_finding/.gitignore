@@ -28,7 +28,7 @@
 *.app
 
 # Eclipse
-.cproject
+!.cproject
 .project
 .settings
-*.pydevproject
+!*.pydevproject

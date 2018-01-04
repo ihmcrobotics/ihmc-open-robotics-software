@@ -17,6 +17,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -33,7 +34,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
@@ -45,11 +45,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiRobotTestInterface
 {
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private final boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -119,17 +119,18 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
 
       // Corrupt the footsteps by adding a big z offset and coorupting the pitch and roll
-      FrameOrientation tempFrameOrientation = new FrameOrientation();
+      FrameQuaternion tempFrameOrientation = new FrameQuaternion();
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
       {
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          footstepData.location.setZ(footstepData.location.getZ() + 1.0);
          tempFrameOrientation.set(footstepData.getOrientation());
-         double[] yawPitchRoll = tempFrameOrientation.getYawPitchRoll();
+         double[] yawPitchRoll = new double[3];
+         tempFrameOrientation.getYawPitchRoll(yawPitchRoll);
          yawPitchRoll[1] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
          yawPitchRoll[2] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
          tempFrameOrientation.setYawPitchRoll(yawPitchRoll);
-         tempFrameOrientation.getQuaternion(footstepData.getOrientation());
+         footstepData.setOrientation(tempFrameOrientation);
       }
 
       vidualizeCorruptedFootsteps(corruptedFootstepDataList, scs);
@@ -188,7 +189,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
          RobotSide robotSide = footstep.getRobotSide();
          FramePoint3D position = new FramePoint3D();
-         FrameOrientation orientation = new FrameOrientation();
+         FrameQuaternion orientation = new FrameQuaternion();
          footstep.getPose(position, orientation);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation.getQuaternion());
          snappedFootstepDataList.add(footstepData);

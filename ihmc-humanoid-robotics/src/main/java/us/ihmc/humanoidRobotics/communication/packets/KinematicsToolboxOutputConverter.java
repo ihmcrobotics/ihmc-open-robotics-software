@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -17,8 +18,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -128,9 +128,9 @@ public class KinematicsToolboxOutputConverter
 
       ReferenceFrame chestFrame = fullRobotModelToUseForConversion.getChest().getBodyFixedFrame();
       Quaternion desiredQuaternion = new Quaternion();
-      FrameOrientation desiredOrientation = new FrameOrientation(chestFrame);
+      FrameQuaternion desiredOrientation = new FrameQuaternion(chestFrame);
       desiredOrientation.changeFrame(worldFrame);
-      desiredOrientation.getQuaternion(desiredQuaternion);
+      desiredQuaternion.set(desiredOrientation);
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredQuaternion, worldFrame, pelvisZUpFrame);
       output.setChestTrajectoryMessage(chestTrajectoryMessage);

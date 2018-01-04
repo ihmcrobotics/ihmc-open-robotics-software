@@ -4,12 +4,12 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -127,7 +127,7 @@ public class PositionStateRobotModelUpdater implements Runnable
 
    private final FramePoint3D tempCenterOfMassPositionState = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final RotationMatrix tempOrientationStateReconstructMatrix = new RotationMatrix();
-   private final FrameOrientation tempOrientationStateReconstruct = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion tempOrientationStateReconstruct = new FrameQuaternion(ReferenceFrame.getWorldFrame());
    private final RigidBodyTransform tempEstimationLinkToWorld = new RigidBodyTransform();
    private final RigidBodyTransform tempRootJointToWorld = new RigidBodyTransform();
 
@@ -148,7 +148,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final Vector3D tempEstimationLinkPositionVector3d = new Vector3D();
 
    private void computeEstimationLinkToWorldTransform(ReferenceFrame estimationFrame, RigidBodyTransform estimationLinkToWorldToPack, FramePoint3D centerOfMassWorld,
-           FrameOrientation estimationLinkOrientation)
+           FrameQuaternion estimationLinkOrientation)
    {
       // r^{estimation}
       tempCenterOfMassBody.setToZero(estimationFrame);
@@ -157,7 +157,7 @@ public class PositionStateRobotModelUpdater implements Runnable
 
       // R_{estimation}^{w}
       estimationLinkOrientation.changeFrame(worldFrame);
-      estimationLinkOrientation.getTransform3D(estimationLinkToWorldToPack);
+      estimationLinkToWorldToPack.setRotation(estimationLinkOrientation);
 
       // R_{estimation}^{w} * r^{estimation}
       tempCenterOfMassBody.get(tempCenterOfMassBodyVector3d);

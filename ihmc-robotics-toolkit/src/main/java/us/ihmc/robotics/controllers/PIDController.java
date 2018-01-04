@@ -1,24 +1,24 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class PIDController
+public class PIDController extends AbstractPIDController
 {
    private final PDController pdController;
    private final YoDouble integralGain;
    private final YoDouble maxIntegralError;
-   private final YoDouble maxOutput;
-   private final YoDouble cumulativeError;
+   private final YoDouble maxFeedback;
    private final YoDouble integralLeakRatio;
-   
-   private final YoDouble actionI;
 
    public PIDController(String suffix, YoVariableRegistry registry)
    {
+      super(suffix, registry);
+
       pdController = new PDController(suffix, registry);
 
       integralGain = new YoDouble("ki_" + suffix, registry);
@@ -26,22 +26,22 @@ public class PIDController
 
       maxIntegralError = new YoDouble("maxIntegralError_" + suffix, registry);
       maxIntegralError.set(Double.POSITIVE_INFINITY);
-      
-      maxOutput = new YoDouble("maxOutput_" + suffix, registry);
-      maxOutput.set(Double.POSITIVE_INFINITY);
 
-      cumulativeError = new YoDouble("cumulativeError_" + suffix, registry);
-      cumulativeError.set(0.0);
-      
-      actionI = new YoDouble("action_I_" + suffix, registry);
-      actionI.set(0.0);
-      
+      maxFeedback = new YoDouble("maxOutput_" + suffix, registry);
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+
       integralLeakRatio = new YoDouble("leak_" + suffix, registry);
       integralLeakRatio.set(1.0);
 
+      addLeakRatioClipper();
+   }
+
+   private void addLeakRatioClipper()
+   {
       VariableChangedListener leakRatioClipper = new VariableChangedListener()
       {
-         @Override public void notifyOfVariableChange(YoVariable<?> v)
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             integralLeakRatio.set(MathTools.clamp(integralLeakRatio.getDoubleValue(), 0.0, 1.0), false);
          }
@@ -50,63 +50,42 @@ public class PIDController
       integralLeakRatio.addVariableChangedListener(leakRatioClipper);
    }
 
-   public PIDController(YoDouble proportionalGain, YoDouble integralGain, YoDouble derivativeGain, YoDouble maxIntegralError,
-         String suffix, YoVariableRegistry registry)
+   public PIDController(YoDouble proportionalGain, YoDouble integralGain, YoDouble derivativeGain, YoDouble maxIntegralError, String suffix,
+                        YoVariableRegistry registry)
    {
+      super(suffix, registry);
+
       pdController = new PDController(proportionalGain, derivativeGain, suffix, registry);
       this.integralGain = integralGain;
       this.maxIntegralError = maxIntegralError;
-      
-      maxOutput = new YoDouble("maxOutput_" + suffix, registry);
-      maxOutput.set(Double.POSITIVE_INFINITY);
 
-      cumulativeError = new YoDouble("cumulativeError_" + suffix, registry);
-      cumulativeError.set(0.0);
-      
-      actionI = new YoDouble("integralAction_" + suffix, registry);
-      actionI.set(0.0);
-      
+      maxFeedback = new YoDouble("maxOutput_" + suffix, registry);
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+
       integralLeakRatio = new YoDouble("leak_" + suffix, registry);
       integralLeakRatio.set(1.0);
+
+      addLeakRatioClipper();
    }
 
    public PIDController(YoPIDGains yoPIDGains, String suffix, YoVariableRegistry registry)
    {
+      super(suffix, registry);
+
       pdController = new PDController(yoPIDGains, suffix, registry);
       this.integralGain = yoPIDGains.getYoKi();
       this.maxIntegralError = yoPIDGains.getYoMaxIntegralError();
-      this.maxOutput = yoPIDGains.getYoMaximumOutput();
-
-      cumulativeError = new YoDouble("cumulativeError_" + suffix, registry);
-      cumulativeError.set(0.0);
-
-      actionI = new YoDouble("integralAction_" + suffix, registry);
-      actionI.set(0.0);
+      this.maxFeedback = yoPIDGains.getYoMaximumFeedback();
 
       integralLeakRatio = yoPIDGains.getYoIntegralLeakRatio();
-   }
-   
-   public double getMaximumOutputLimit()
-   {
-      return maxOutput.getDoubleValue();
    }
 
    public void setMaximumOutputLimit(double max)
    {
-      if( max <=0 )
-         maxOutput.set(Double.POSITIVE_INFINITY);
+      if (max <= 0.0)
+         maxFeedback.set(Double.POSITIVE_INFINITY);
       else
-         maxOutput.set( max );
-   }
-
-   public double getProportionalGain()
-   {
-      return pdController.getProportionalGain();
-   }
-
-   public double getDerivativeGain()
-   {
-      return pdController.getDerivativeGain();
+         maxFeedback.set(max);
    }
 
    public void setProportionalGain(double proportionalGain)
@@ -124,54 +103,14 @@ public class PIDController
       pdController.setPositionDeadband(deadband);
    }
 
-   public double getPositionError()
-   {
-      return pdController.getPositionError();
-   }
-
-   public double getRateError()
-   {
-      return pdController.getRateError();
-   }
-
-   public double getCumulativeError()
-   {
-      return cumulativeError.getDoubleValue();
-   }
-
-   public void setCumulativeError(double error)
-   {
-      cumulativeError.set(error);
-   }
-
-   public double getIntegralGain()
-   {
-      return integralGain.getDoubleValue();
-   }
-
-   public double getPositionDeadband()
-   {
-      return pdController.getPositionDeadband();
-   }
-
-   public double getMaxIntegralError()
-   {
-      return maxIntegralError.getDoubleValue();
-   }
-
    public void setIntegralGain(double integralGain)
    {
       this.integralGain.set(integralGain);
    }
-   
+
    public void setIntegralLeakRatio(double integralLeakRatio)
    {
       this.integralLeakRatio.set(MathTools.clamp(integralLeakRatio, 0.0, 1.0));
-   }
-   
-   public double getIntegralLeakRatio()
-   {
-      return integralLeakRatio.getDoubleValue();
    }
 
    public void setMaxIntegralError(double maxIntegralError)
@@ -179,46 +118,33 @@ public class PIDController
       this.maxIntegralError.set(maxIntegralError);
    }
 
-   public void resetIntegrator()
+   @Override
+   protected AbstractPDController getPDController()
    {
-      cumulativeError.set(0.0);
+      return pdController;
    }
 
-   public double compute(double currentPosition, double desiredPosition, double currentRate, double desiredRate, double deltaTime)
+   @Override
+   public double getMaximumFeedback()
    {
-      pdController.compute(currentPosition, desiredPosition, currentRate, desiredRate);
-
-      return computeIntegralEffortAndAddPDEffort(deltaTime);
+      return maxFeedback.getDoubleValue();
    }
 
-   public double computeForAngles(double currentPosition, double desiredPosition, double currentRate, double desiredRate, double deltaTime)
+   @Override
+   public double getIntegralGain()
    {
-      pdController.computeForAngles(currentPosition, desiredPosition, currentRate, desiredRate);
-
-      return computeIntegralEffortAndAddPDEffort(deltaTime);
+      return integralGain.getDoubleValue();
    }
 
-   private double computeIntegralEffortAndAddPDEffort(double deltaTime)
+   @Override
+   public double getMaxIntegralError()
    {
-      double outputSignal = (pdController.getProportionalGain() * pdController.getPositionError()) + (pdController.getDerivativeGain() * pdController.getRateError());
+      return maxIntegralError.getDoubleValue();
+   }
 
-      if (integralGain.getDoubleValue() < 1.0e-5)
-      {
-         cumulativeError.set(0.0);
-      }
-      else
-      {
-         // LIMIT THE MAX INTEGRAL ERROR SO WON'T WIND UP
-         double maxError = maxIntegralError.getDoubleValue();
-         double errorAfterLeak = pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue() * cumulativeError.getDoubleValue();
-         cumulativeError.set(MathTools.clamp(errorAfterLeak, maxError));
-
-         actionI.set(integralGain.getDoubleValue() * cumulativeError.getDoubleValue());
-         outputSignal += actionI.getDoubleValue();
-      }
-
-      double maximumOutput = Math.abs( maxOutput.getDoubleValue() );
-      outputSignal = MathTools.clamp(outputSignal, maximumOutput);
-      return outputSignal;
+   @Override
+   public double getIntegralLeakRatio()
+   {
+      return integralLeakRatio.getDoubleValue();
    }
 }

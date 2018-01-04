@@ -9,16 +9,17 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuaternionCalculusTest
 {
@@ -126,8 +127,8 @@ public class QuaternionCalculusTest
       double trajectoryTime = 1.0;
       traj.setTrajectoryTime(trajectoryTime);
       Random random = new Random(65265L);
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, ReferenceFrame.getWorldFrame());
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, ReferenceFrame.getWorldFrame());
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
       traj.setInitialOrientation(initialOrientation);
       traj.setFinalOrientation(finalOrientation);
       traj.initialize();
@@ -135,7 +136,7 @@ public class QuaternionCalculusTest
       double dt = 1.0e-4;
       double dtForFD = 1.0e-6;
 
-      FrameOrientation orientation = new FrameOrientation();
+      FrameQuaternion orientation = new FrameQuaternion();
       FrameVector3D expectedAngularVelocity = new FrameVector3D();
       Quaternion q = new Quaternion();
       Vector4D qDot = new Vector4D();
@@ -148,13 +149,13 @@ public class QuaternionCalculusTest
          traj.compute(time);
          traj.getOrientation(orientation);
          traj.getAngularVelocity(expectedAngularVelocity);
-         orientation.getQuaternion(q);
+         q.set(orientation);
          traj.compute(time - dtForFD);
          traj.getOrientation(orientation);
-         orientation.getQuaternion(qPrevious);
+         qPrevious.set(orientation);
          traj.compute(time + dtForFD);
          traj.getOrientation(orientation);
-         orientation.getQuaternion(qNext);
+         qNext.set(orientation);
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dtForFD, qDot);
          quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
@@ -221,8 +222,8 @@ public class QuaternionCalculusTest
       double trajectoryTime = 1.0;
       traj.setTrajectoryTime(trajectoryTime);
       Random random = new Random(65265L);
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, ReferenceFrame.getWorldFrame());
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, ReferenceFrame.getWorldFrame());
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
       traj.setInitialOrientation(initialOrientation);
       traj.setFinalOrientation(finalOrientation);
       traj.initialize();
@@ -230,7 +231,7 @@ public class QuaternionCalculusTest
       double dt = 1.0e-4;
       double dtForFD = 1.0e-4;
 
-      FrameOrientation orientation = new FrameOrientation();
+      FrameQuaternion orientation = new FrameQuaternion();
       FrameVector3D expectedAngularAcceleration = new FrameVector3D();
       Quaternion q = new Quaternion();
       Vector4D qDot = new Vector4D();
@@ -244,13 +245,13 @@ public class QuaternionCalculusTest
          traj.compute(time);
          traj.getOrientation(orientation);
          traj.getAngularAcceleration(expectedAngularAcceleration);
-         orientation.getQuaternion(q);
+         q.set(orientation);
          traj.compute(time - dtForFD);
          traj.getOrientation(orientation);
-         orientation.getQuaternion(qPrevious);
+         qPrevious.set(orientation);
          traj.compute(time + dtForFD);
          traj.getOrientation(orientation);
-         orientation.getQuaternion(qNext);
+         qNext.set(orientation);
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dtForFD, qDot);
          quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, q, qNext, dtForFD, qDDot);

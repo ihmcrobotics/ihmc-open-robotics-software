@@ -52,7 +52,7 @@ import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistency
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -68,6 +68,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private static final String BACKLASH = "bl";
    private static final String POLYNOMIAL = "poly";
    private static final String CONSTANT = "cst";
+   private static final String AFFINE = "aff";
+   private static final String COUPLING = "cpl";
    private static final String ALPHA_FILTER = "filt";
    private static final String FINITE_DIFFERENCE = "fd";
    private static final String ELASTICITY_COMPENSATOR = "stiff";
@@ -641,6 +643,96 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
+    * Apply an affine transform to the joint position:
+    * <p>
+    * <code> q_filt = scale * q_in + bias </code>
+    * </p>
+    * <p>
+    * Useful when the sensor measurement does not directly reflect the joint position, i.e. separated with a constant gear ratio plus an offset.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * </p>
+    * @param scale the scale factor to apply to the joint position measurement. Can be {@code null}.
+    * @param bias the offset to add to the joint position measurement. Can be {@code null}.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @throws RuntimeException if both {@code scale} and {@code bias} are {@code null}.
+    */
+   public void addJointPositionAffineTransform(YoDouble scale, YoDouble bias, boolean forVizOnly)
+   {
+      addJointPositionAffineTransformWithJointsToIgnore(scale, bias, forVizOnly);
+   }
+
+   /**
+    * Apply an affine transform to the joint position:
+    * <p>
+    * <code> q_filt = scale * q_in + bias </code>
+    * </p>
+    * <p>
+    * Useful when the sensor measurement does not directly reflect the joint position, i.e. separated with a constant gear ratio plus an offset.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * </p>
+    * @param scale the scale factor to apply to the joint position measurement. Can be {@code null}.
+    * @param bias the offset to add to the joint position measurement. Can be {@code null}.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    * @throws RuntimeException if both {@code scale} and {@code bias} are {@code null}.
+    */
+   public void addJointPositionAffineTransformOnlyForSpecifiedJoints(YoDouble scale, YoDouble bias, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      addJointPositionAffineTransformWithJointsToIgnore(scale, bias, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+   }
+
+   /**
+    * Apply an affine transform to the joint position:
+    * <p>
+    * <code> q_filt = scale * q_in + bias </code>
+    * </p>
+    * <p>
+    * Useful when the sensor measurement does not directly reflect the joint position, i.e. separated with a constant gear ratio plus an offset.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * </p>
+    * @param scale the scale factor to apply to the joint position measurement. Can be {@code null}.
+    * @param bias the offset to add to the joint position measurement. Can be {@code null}.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    * @throws RuntimeException if both {@code scale} and {@code bias} are {@code null}.
+    */
+   public void addJointPositionAffineTransformWithJointsToIgnore(YoDouble scale, YoDouble bias, boolean forVizOnly, String... jointsToIgnore)
+   {
+      if (scale == null && bias == null)
+         throw new RuntimeException("Cannot create processor, scale and bias are both null.");
+
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
+         YoDouble intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
+         List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
+         String prefix = JOINT_POSITION.getProcessorNamePrefix(AFFINE);
+         String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
+         YoDouble filteredJointPosition = new YoDouble(prefix + suffix, registry);
+         ProcessingYoVariable processor;
+         if (scale == null)
+            processor = () -> filteredJointPosition.set(intermediateJointPosition.getDoubleValue() + bias.getDoubleValue());
+         else if (bias == null)
+            processor = () -> filteredJointPosition.set(scale.getDoubleValue() * intermediateJointPosition.getDoubleValue());
+         else
+            processor = () -> filteredJointPosition.set(scale.getDoubleValue() * intermediateJointPosition.getDoubleValue() + bias.getDoubleValue());
+         processors.add(processor);
+
+         if (!forVizOnly)
+            outputJointPositions.put(oneDoFJoint, filteredJointPosition);
+      }
+   }
+
+   /**
     * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
     * Useful when the joint encoders are off and the error can be approximated by a polynomial.
     * Implemented as a cumulative processor but should probably be called only once.
@@ -756,6 +848,47 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (!forVizOnly)
             outputJointPositions.put(oneDoFJoint, filteredJointPosition);
       }
+   }
+
+   /**
+    * Computes the position of a slave joint from a master joint as follows:
+    * <p>
+    * <code> q_slave = couplingRatio * q_master + couplingBias </code>
+    * </p> 
+    * 
+    * @param nameOfJointMaster the name of the joint from which the position of the slave is to be computed.
+    * @param nameOfJointSlave the name of the joint to compute the position of.
+    * @param couplingRatio the ratio between the master position and the slave position. Can be {@code null}.
+    * @param couplingBias the position offset between the master and the slave. Can be {@code null}.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are {@code null}.
+    */
+   public void computeJointPositionUsingCoupling(String nameOfJointMaster, String nameOfJointSlave, YoDouble couplingRatio, YoDouble couplingBias, boolean forVizOnly)
+   {
+      if (couplingRatio == null && couplingBias == null)
+         throw new RuntimeException("Cannot create joint position coupling without giving either a couplingRatio or couplingBias.");
+
+      OneDoFJoint jointMaster = jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(nameOfJointMaster)).findFirst().get();
+      OneDoFJoint jointSlave = jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(nameOfJointSlave)).findFirst().get();
+
+
+      YoDouble intermediateMasterPosition = outputJointPositions.get(jointMaster);
+
+      List<ProcessingYoVariable> slaveProcessors = processedJointPositions.get(jointSlave);
+      String prefix = JOINT_POSITION.getProcessorNamePrefix(COUPLING);
+      String suffix = JOINT_POSITION.getProcessorNameSuffix(nameOfJointSlave, slaveProcessors.size());
+      YoDouble filteredJointSlavePosition = new YoDouble(prefix + suffix, registry);
+      ProcessingYoVariable slaveProcessor;
+      if (couplingRatio == null)
+         slaveProcessor = () -> filteredJointSlavePosition.set(intermediateMasterPosition.getDoubleValue() + couplingBias.getDoubleValue());
+      else if (couplingBias == null)
+         slaveProcessor = () -> filteredJointSlavePosition.set(couplingRatio.getDoubleValue() * intermediateMasterPosition.getDoubleValue());
+      else
+         slaveProcessor = () -> filteredJointSlavePosition.set(couplingRatio.getDoubleValue() * intermediateMasterPosition.getDoubleValue() + couplingBias.getDoubleValue());
+      slaveProcessors.add(slaveProcessor);
+
+      if (!forVizOnly)
+         outputJointPositions.put(jointSlave, filteredJointSlavePosition);
    }
 
    public void addJointVelocityElasticyCompensator(Map<OneDoFJoint, YoDouble> stiffnesses, YoDouble maximumDeflection, boolean forVizOnly)
@@ -1140,7 +1273,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * Use only for diagnostics.
     * @return The map with all the validity checkers.
     */
-   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder, List<String> jointsToIgnore)
+   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, JointDesiredOutputListReadOnly outputDataHolder, List<String> jointsToIgnore)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
 
@@ -1245,7 +1378,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return consistencyCheckerMap;
    }
 
-   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder)
+   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore, JointDesiredOutputListReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> delayEstimatorMap = new LinkedHashMap<>();
 
@@ -1264,7 +1397,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return delayEstimatorMap;
    }
 
-   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder)
+   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore, JointDesiredOutputListReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap = new LinkedHashMap<>();
 

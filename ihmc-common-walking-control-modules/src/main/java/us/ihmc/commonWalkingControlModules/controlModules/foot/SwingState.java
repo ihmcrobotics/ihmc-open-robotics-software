@@ -11,19 +11,19 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -41,6 +41,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -79,15 +80,15 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePose initialPose = new FramePose();
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
-   private final FrameOrientation initialOrientation = new FrameOrientation();
+   private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
    private final FramePoint3D finalPosition = new FramePoint3D();
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
-   private final FrameOrientation finalOrientation = new FrameOrientation();
+   private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
-   private final FrameOrientation tmpOrientation = new FrameOrientation();
+   private final FrameQuaternion tmpOrientation = new FrameQuaternion();
    private final FrameVector3D tmpVector = new FrameVector3D();
 
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
@@ -120,7 +121,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoDouble maxInitialLinearVelocityMagnitude;
    private final YoDouble maxInitialAngularVelocityMagnitude;
 
-   private final YoDouble finalSwingHeightOffset;
+   private final DoubleParameter finalSwingHeightOffset;
    private final double controlDT;
 
    private final YoDouble minHeightDifferenceForObstacleClearance;
@@ -152,7 +153,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector yoDesiredSoleLinearVelocity;
    private final YoFrameVector yoDesiredSoleAngularVelocity;
-
+   
    private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
@@ -172,8 +173,8 @@ public class SwingState extends AbstractUnconstrainedState
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
-      finalSwingHeightOffset = new YoDouble(namePrefix + "SwingFinalHeightOffset", registry);
-      finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
+      finalSwingHeightOffset = new DoubleParameter(namePrefix + "SwingFinalHeightOffset", registry, swingTrajectoryParameters.getDesiredTouchdownHeightOffset(), -0.01, 0.005);
+      //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
 
       minHeightDifferenceForObstacleClearance = new YoDouble(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
@@ -235,6 +236,10 @@ public class SwingState extends AbstractUnconstrainedState
 
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix + "Swing", waypointProportions, obstacleClearanceProportions,
                                                                minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
+
+      double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
+      swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
+
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
       blendedSwingTrajectory = new BlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
@@ -299,7 +304,7 @@ public class SwingState extends AbstractUnconstrainedState
    }
 
    @Override
-   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
       super.setWeights(angularWeight, linearWeight);
       unscaledLinearWeight.set(linearWeight);
@@ -411,7 +416,7 @@ public class SwingState extends AbstractUnconstrainedState
       blendedSwingTrajectory.initialize();
    }
 
-   private void modifyFinalOrientationForTouchdown(FrameOrientation finalOrientationToPack)
+   private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
    {
       finalPosition.changeFrame(oppositeSoleZUpFrame);
       stanceFootPosition.changeFrame(oppositeSoleZUpFrame);
@@ -573,7 +578,7 @@ public class SwingState extends AbstractUnconstrainedState
       desiredPose.setToZero(desiredControlFrame);
       desiredPose.changeFrame(worldFrame);
       desiredPose.getPosition(desiredPosition.getPoint());
-      desiredPose.getOrientation(desiredOrientation.getQuaternion());
+      desiredPose.getOrientation(desiredOrientation);
 
       // change twist
       desiredLinearVelocity.changeFrame(desiredSoleFrame);
@@ -620,7 +625,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       footstep.getPose(footstepPose);
       footstepPose.changeFrame(worldFrame);
-      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
+      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getValue()); //getDoubleValue());
 
       // if replanning do not change the original trajectory type or waypoints
       if (replanTrajectory.getBooleanValue())
@@ -675,6 +680,13 @@ public class SwingState extends AbstractUnconstrainedState
       setFootstep(newFootstep, swingTime);
       doContinuousReplanning.set(continuousReplan);
    }
+   
+   public void getDesireds(FramePose desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
+   {
+      desiredPoseToPack.setIncludingFrame(this.desiredPose);
+      desiredAngularVelocityToPack.setIncludingFrame(this.desiredAngularVelocity);
+      desiredLinearVelocityToPack.setIncludingFrame(this.desiredLinearVelocity);
+   };
 
    private double computeSwingTimeRemaining()
    {

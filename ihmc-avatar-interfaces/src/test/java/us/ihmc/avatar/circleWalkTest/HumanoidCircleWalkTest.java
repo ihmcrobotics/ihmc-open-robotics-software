@@ -14,8 +14,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -24,9 +24,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -37,18 +34,21 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 {
-
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(getRadiusForCircle(), 0.0, 0.0), Math.PI / 2);
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private DRCRobotModel robotModel;
-   private FullHumanoidRobotModel fullRobotModel;
-   Random random = new Random();
+   Random random = new Random(42);
+
+   @After
+   public void tearDown()
+   {
+      drcSimulationTestHelper = null;
+   }
 
    protected double getRadiusForCircle()
    {
@@ -80,7 +80,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       return 10;
    }
 
-   protected double getRandomValidJointAngle(RobotSide side, ArmJointName armJointName)
+   protected double getRandomValidJointAngle(RobotSide side, ArmJointName armJointName, FullHumanoidRobotModel fullRobotModel)
    {
       OneDoFJoint armJoint = fullRobotModel.getArmJoint(side, armJointName);
       if (armJoint != null)
@@ -99,10 +99,31 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       return null;
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testCircleWalk() throws SimulationExceededMaximumTimeException
    {
-      setupTest();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      // create simulation test helper
+      FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
+      String className = getClass().getSimpleName();
+
+      DRCStartingLocation startingLocation = new DRCStartingLocation()
+      {
+         @Override
+         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
+         {
+            return new OffsetAndYawRobotInitialSetup(new Vector3D(getRadiusForCircle(), 0.0, 0.0), Math.PI / 2);
+         }
+      };
+      DRCRobotModel robotModel = getRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
+      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
+      drcSimulationTestHelper.createSimulation(className);
+      ThreadTools.sleep(1000);
+
       setupCameraSideView();
       double radius = getRadiusForCircle();
       double stepLength = getStepLength();
@@ -123,7 +144,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       ArrayList<Point3D> rootLocations = new ArrayList<>();
       ArrayList<OneDoFJointTrajectoryMessage> leftArmTrajectory = new ArrayList<>();
       ArrayList<OneDoFJointTrajectoryMessage> rightArmTrajectory = new ArrayList<>();
-      ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
+      ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper, fullRobotModel);
 
       for (int armJointIndex = 0; armJointIndex < getArmDoF(); armJointIndex++)
       {
@@ -133,9 +154,9 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          {
 
             leftJointTrajectory.setTrajectoryPoint(trajectoryPointIndex, 2 * trajectoryPointIndex + 1,
-                                                   getRandomValidJointAngle(RobotSide.LEFT, armJoint[armJointIndex]), 0);
+                                                   getRandomValidJointAngle(RobotSide.LEFT, armJoint[armJointIndex], fullRobotModel), 0);
             rightJointTrajectory.setTrajectoryPoint(trajectoryPointIndex, 2 * trajectoryPointIndex + 1,
-                                                    getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex]), 0);
+                                                    getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex], fullRobotModel), 0);
          }
          leftHandMessage.setTrajectory1DMessage(armJointIndex, leftJointTrajectory);
          rightHandMessage.setTrajectory1DMessage(armJointIndex, rightJointTrajectory);
@@ -173,7 +194,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       int numberOfFootsteps = footMessage.footstepDataList.size();
       double defaultSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double defaultTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      
+
       double simulationTime = numberOfFootsteps * defaultSwingTime + numberOfFootsteps * defaultTransferTime + 2.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
@@ -187,6 +208,8 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       {
          assertTrue(armCheckPointFlags.get(i).getBooleanValue());
       }
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
@@ -196,36 +219,6 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       footstepData.setOrientation(orient);
       footstepData.setRobotSide(robotSide);
       message.add(footstepData);
-   }
-
-   private void setupTest()
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      // create simulation test helper
-      FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
-      String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
-      robotModel = getRobotModel();
-      fullRobotModel = robotModel.createFullRobotModel();
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setStartingLocation(startingLocation);
-      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
-      drcSimulationTestHelper.createSimulation(className);
-      ThreadTools.sleep(1000);
-   }
-
-   protected boolean keepSCSUp()
-   {
-      return false;
    }
 
    private void setupCameraBackView()
@@ -263,7 +256,6 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          drcSimulationTestHelper = null;
       }
 
-      simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -284,9 +276,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       private ArmJointName[] armJoint = getArmJointNames();
       private YoVariableRegistry circleWalkRegistry;
       private final double EPSILON = 1e-2;
+      private FullHumanoidRobotModel fullRobotModel;
 
-      public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper)
+      public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper, FullHumanoidRobotModel fullRobotModel)
       {
+         this.fullRobotModel = fullRobotModel;
          humanoidRobotModel = drcSimulationTestHelper.getRobot();
          drcSimTestHelper = drcSimulationTestHelper;
          drcSimulationTestHelper.addRobotControllerOnControllerThread(this);

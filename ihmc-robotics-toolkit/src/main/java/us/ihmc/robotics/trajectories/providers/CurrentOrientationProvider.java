@@ -1,7 +1,7 @@
 package us.ihmc.robotics.trajectories.providers;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class CurrentOrientationProvider implements OrientationProvider
 {
@@ -12,7 +12,7 @@ public class CurrentOrientationProvider implements OrientationProvider
       this.endEffectorFrame = endEffectorFrame;
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setToZero(endEffectorFrame);
    }
