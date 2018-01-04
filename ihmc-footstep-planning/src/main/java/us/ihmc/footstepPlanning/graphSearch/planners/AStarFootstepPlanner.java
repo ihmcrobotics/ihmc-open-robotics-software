@@ -146,9 +146,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
-      if(debug)
-         PrintTools.info("A* planner is starting");
-      
       initialize();
       
       if(debug)
@@ -207,10 +204,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
-
-      boolean validStartNode = nodeChecker.isNodeValid(startNode, null);
-      if (!validStartNode)
-         throw new RuntimeException("Start node isn't valid");
 
       validGoalNode.set(true);
       for (RobotSide robotSide : RobotSide.values)
