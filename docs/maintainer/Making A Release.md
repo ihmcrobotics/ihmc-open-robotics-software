@@ -33,7 +33,7 @@
 
 ## Polishing Release
 
-1. Update GitHub release notes. With RELEASE_NOTES.md (or something)
+1. Update GitHub release notes with RELEASE_NOTES.md (or something)
 
 
 
