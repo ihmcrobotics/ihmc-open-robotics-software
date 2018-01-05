@@ -46,7 +46,7 @@ import java.util.List;
 public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGeneratorInterface
 {
    private static final int maxNumberOfCoPWaypoints = 20;
-   private static final boolean debug = false;
+   private final boolean debug;
 
    public enum UseSplitFractionFor
    {
@@ -155,8 +155,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                           List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations, List<YoDouble> swingSplitFractions,
                                           List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations,
+           touchdownDurations, swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, false, parentRegistry);
+
+   }
+
+   public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
+                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
+                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations, List<YoDouble> swingSplitFractions,
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, boolean debug, YoVariableRegistry parentRegistry)
+   {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
       this.fullPrefix = namePrefix + "CoPTrajectoryGenerator";
+      this.debug = debug;
       additionalTimeForFinalTransfer = new YoDouble(fullPrefix + "AdditionalTimeForFinalTransfer", registry);
       safeDistanceFromCoPToSupportEdges = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdges", registry);
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
@@ -367,8 +378,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    public void updateListeners()
    {
       if (debug)
+      {
          for (int i = 0; i < copLocationWaypoints.size(); i++)
             copLocationWaypoints.get(i).notifyVariableChangedListeners();
+      }
+
       updateAdjustedCoPViz();
    }
 
@@ -918,22 +932,34 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       
       if (transferTime <= 0.0 || !Double.isFinite(transferTime))
+      {
          transferTime = defaultTransferTime;
-      
+         if (debug) PrintTools.warn("Using a default transfer time because it is currently invalid.");
+      }
+
+      double splitFraction = transferSplitFractions.get(footstepIndex).getDoubleValue();
+      if (Double.isNaN(splitFraction))
+      {
+         splitFraction = 0.5;
+         if (debug) PrintTools.warn("Using a transfer split fraction of 0.5 because it is currently unset.");
+      }
+
       if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.TIME)
       {
          switch (segmentIndex)
          {
          case 0:
-            return transferTime * transferSplitFractions.get(footstepIndex).getDoubleValue();
+            return transferTime * splitFraction;
          case 1:
-            return transferTime * (1.0 - transferSplitFractions.get(footstepIndex).getDoubleValue());
+            return transferTime * (1.0 - splitFraction);
          default:
             throw new RuntimeException("For some reason we didn't just use a array that summed to one");
          }
       }
       else
+      {
          return transferTime * 0.5;
+      }
    }
 
    private void computeCoPPointsForFootstepSwing(int copLocationsIndex, int footstepIndex)
