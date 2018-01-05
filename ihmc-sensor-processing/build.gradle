@@ -46,6 +46,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-ros2-library", version: groupDependencyVersion
 }
 
 testDependencies {
