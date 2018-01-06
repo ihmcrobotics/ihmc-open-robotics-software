@@ -547,6 +547,203 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
    @Override
    public void getCostControlGradientOfStateGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
+      if (matrixToPack.getNumRows() != stateVectorSize)
+         throw new RuntimeException("The hessian has the wrong number of rows.");
+      if (matrixToPack.getNumCols() != controlVectorSize)
+         throw new RuntimeException("The hessian has the wrong number of cols.");
+
+      switch (hybridState)
+      {
+      case STANCE:
+         double x_k = stateVector.get(x);
+         double y_k = stateVector.get(y);
+         double z_k = stateVector.get(z);
+
+         double xF_k = controlVector.get(xF);
+         double yF_k = controlVector.get(yF);
+         double zF_k = 0.0;
+
+         double relativeX = x_k - xF_k;
+         double relativeY = y_k - yF_k;
+         double relativeZ = z_k - zF_k;
+
+         double fX_k = controlVector.get(fx);
+         double fY_k = controlVector.get(fy);
+         double fZ_k = controlVector.get(fz);
+
+         double tauX_k = controlVector.get(tauX);
+         double tauY_k = controlVector.get(tauY);
+         double tauZ_k = controlVector.get(tauZ);
+
+         double K_k = controlVector.get(k);
+
+         double currentLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
+
+         double normalizedSpringCompression = nominalPendulumLength / currentLength - 1;
+         double normalizedSpringForce = K_k * normalizedSpringCompression;
+
+         double l3 = Math.pow(currentLength, -3.0);
+         double l5 = Math.pow(currentLength, -5.0);
+
+         double qFx = Q.get(x, x);
+         double qFy = Q.get(y, y);
+         double qFz = Q.get(z, z);
+         double qTx = Q.get(tauX, tauX);
+         double qTy = Q.get(tauY, tauY);
+         double qTz = Q.get(tauZ, tauZ);
+
+         double xForceDifference = fX_k - normalizedSpringForce * relativeX;
+         double yForceDifference = fY_k - normalizedSpringForce * relativeY;
+         double zForceDifference = fZ_k - normalizedSpringForce * relativeZ;
+
+         double dfXdx = K_k * (nominalPendulumLength * l3 * relativeX * relativeX - normalizedSpringCompression);
+         double dfYdx = K_k * nominalPendulumLength * l3 * relativeX * relativeY;
+         double dfZdx = K_k * nominalPendulumLength * l3 * relativeX * relativeZ;
+
+         double dfXdy = K_k * nominalPendulumLength * l3 * relativeX * relativeY;
+         double dfYdy = K_k * (nominalPendulumLength * l3 * relativeY * relativeY - normalizedSpringCompression);
+         double dfZdy = K_k * nominalPendulumLength * l3 * relativeY * relativeZ;
+
+         double dfXdz = K_k * nominalPendulumLength * l3 * relativeX * relativeZ;
+         double dfYdz = K_k * nominalPendulumLength * l3 * relativeY * relativeZ;
+         double dfZdz = K_k * (nominalPendulumLength * l3 * relativeZ * relativeZ - normalizedSpringCompression);
+
+         double dfXdxdxf = 3.0 * K_k * nominalPendulumLength * Math.pow(relativeX, 3.0) * l5 - 3.0 * K_k * nominalPendulumLength * relativeX * l3;
+         double dfYdxdxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeY * l5 - K_k * nominalPendulumLength * relativeY * l3;
+         double dfZdxdxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeZ * l5 - K_k * nominalPendulumLength * relativeZ * l3;
+
+         double dfXdxdyf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeY * l5 - K_k * nominalPendulumLength * relativeY * l3;
+         double dfYdxdyf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeY * l5 - K_k * nominalPendulumLength * relativeX * l3;
+         double dfZdxdyf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeZ * l5;
+
+         double Jxfx = 2.0 * qFx * (K_k * (nominalPendulumLength * l3 * relativeX * relativeX - normalizedSpringCompression))
+               - 2.0 * qTy * fZ_k * relativeZ - 2.0 * qTz * fY_k * relativeY;
+         double Jxfy = 2.0 * qFy * K_k * nominalPendulumLength * l3 * relativeX * relativeY
+               + 2.0 * qTz * (fY_k * relativeX - (tauZ_k + relativeY * fX_k - relativeX * fY_k));
+         double Jxfz = 2.0 * qFz * K_k * nominalPendulumLength * l3 * relativeX * relativeZ
+               + 2.0 * qTy * (fZ_k * relativeX + (tauY_k - relativeZ * fX_k + relativeX * fZ_k));
+
+         double Jxtaux = 0.0;
+         double Jxtauy = 2.0 * qTy * fZ_k;
+         double Jxtauz = -2.0 * qTz * fY_k;
+
+         double Jxxf = 2.0 * qFx * (dfXdxdxf * xForceDifference - dfXdx * dfXdx);
+         Jxxf += 2.0 * qFy * (dfYdxdxf * yForceDifference - dfYdx * dfYdx);
+         Jxxf += 2.0 * qFz * (dfZdxdxf * zForceDifference - dfZdx * dfZdx);
+         Jxxf -= (2.0 * qTy * fZ_k * fZ_k + 2.0 * qTz * fY_k * fY_k);
+
+         double Jxyf = 2.0 * qFx * (dfXdxdyf * xForceDifference - dfXdx * dfXdy);
+         Jxyf += 2.0 * qFy * (dfYdxdyf * yForceDifference - dfYdx * dfYdy);
+         Jxyf += 2.0 * qFz * (dfZdxdyf * zForceDifference - dfZdx * dfZdy);
+         Jxyf += 2.0 * qTz  * fX_k * fY_k;
+
+         double Jxk = 2.0 * qFx * ((nominalPendulumLength * l3 * relativeX * relativeX - normalizedSpringCompression) * xForceDifference - dfXdx * normalizedSpringCompression * relativeX);
+         Jxk += 2.0 * qFy * ((nominalPendulumLength * l3 * relativeX * relativeY) * yForceDifference - dfYdx * normalizedSpringCompression * relativeY);
+         Jxk += 2.0 * qFz * ((nominalPendulumLength * l3 * relativeX * relativeZ) * zForceDifference - dfZdx * normalizedSpringCompression * relativeZ);
+
+
+
+         double Jyfx = 2.0 * qFx * (K_k * nominalPendulumLength * l3 * relativeX * relativeY)
+               + 2.0 * qTz * (fX_k * relativeY + (tauZ_k + relativeY * fX_k - relativeX * fY_k));
+         double Jyfy = 2.0 * qFy * (K_k * (nominalPendulumLength * l3 * relativeY * relativeY - normalizedSpringCompression))
+               - 2.0 * qTx * fZ_k * relativeZ - 2.0 * qTz * fX_k * relativeX;
+         double Jyfz = 2.0 * qFz * K_k * nominalPendulumLength * l3 * relativeY * relativeZ
+               + 2.0 * qTx * (fZ_k * relativeY - (tauX_k + relativeZ * fY_k - relativeY * fZ_k));
+
+         double Jytaux = -2.0 * qTx * fZ_k;
+         double Jytauy = 0.0;
+         double Jytauz = 2.0 * qTz * fX_k;
+
+
+         double dfXdydxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeY * l5 - K_k * nominalPendulumLength * relativeY * l3;
+         double dfYdydxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeY * l5 - K_k * nominalPendulumLength * relativeX * l3;
+         double dfZdydxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeZ * l5;
+
+         double dfXdydyf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeY * l5 - K_k * nominalPendulumLength * relativeX * l3;
+         double dfYdydyf = 3.0 * K_k * nominalPendulumLength * Math.pow(relativeY, 3.0) * l5 - 3.0 * K_k * nominalPendulumLength * relativeY * l3;
+         double dfZdydyf = 3.0 * K_k * nominalPendulumLength * relativeY * relativeY * relativeZ * l5 - K_k * nominalPendulumLength * relativeZ * l3;
+
+         double Jyxf = 2.0 * qFx * (dfXdydxf * xForceDifference - dfXdx * dfXdy);
+         Jyxf += 2.0 * qFy * (dfYdydxf * yForceDifference - dfYdx * dfYdy);
+         Jyxf += 2.0 * qFz * (dfZdydxf * zForceDifference - dfZdx * dfZdy);
+         Jyxf += 2.0 * qTz * fX_k * fY_k;
+
+         double Jyyf = 2.0 * qFx * (dfXdydyf * xForceDifference - dfXdy * dfXdy);
+         Jyyf += 2.0 * qFy * (dfYdydyf * yForceDifference - dfYdy * dfYdy);
+         Jyyf += 2.0 * qFz * (dfZdydyf * zForceDifference - dfZdy * dfZdy);
+         Jyyf -= 2.0 * (qTx * fZ_k * fZ_k + qTz * fX_k * fX_k);
+
+         double Jyk = 2.0 * qFx * ((nominalPendulumLength * l3 * relativeX * relativeY) * xForceDifference - normalizedSpringCompression * relativeX * dfXdy);
+         Jyk += 2.0 * qFy * ((nominalPendulumLength * l3 * relativeY * relativeY - normalizedSpringCompression) * yForceDifference - normalizedSpringCompression * relativeY * dfYdy);
+         Jyk += 2.0 * qFz * ((nominalPendulumLength * l3 * relativeY * relativeZ) * zForceDifference - normalizedSpringCompression * relativeZ * dfZdy);
+
+         double Jzfx = 2.0 * qFx * (K_k * nominalPendulumLength * l3 * relativeX * relativeZ)
+               + 2.0 * qTy * (fX_k * relativeZ - (tauY_k - relativeZ * fX_k + relativeX * fZ_k));
+         double Jzfy = 2.0 * qFy * (K_k * nominalPendulumLength * l3 * relativeY * relativeZ)
+               + 2.0 * qTx * (fY_k * relativeZ + (tauX_k + relativeZ * fY_k - relativeY * fZ_k));
+         double Jzfz = 2.0 * qFz * (K_k * (nominalPendulumLength * l3 * relativeZ * relativeZ - normalizedSpringCompression))
+               - 2.0 * qTx * fY_k * relativeY - 2.0 * qTy * fX_k * relativeX;
+
+         double Jztaux = 2.0 * qTx * fY_k;
+         double Jztauy = -2.0 * qTy * fX_k;
+         double Jztauz = 0.0;
+
+         double dfXdzdxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeZ * l5 - K_k * nominalPendulumLength * relativeZ * l3;
+         double dfYdzdxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeZ * l5;
+         double dfZdzdxf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeZ * relativeZ * l5 - K_k * nominalPendulumLength * relativeX * l3;
+
+         double dfXdzdyf = 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeZ * l5;
+         double dfYdzdyf = 3.0 * K_k * nominalPendulumLength * relativeY * relativeY * relativeZ * l5 - K_k * nominalPendulumLength * relativeZ * l3;
+         double dfZdzdyf = 3.0 * K_k * nominalPendulumLength * relativeZ * relativeZ * relativeY * l5 - K_k * nominalPendulumLength * relativeY * l3;
+
+         double Jzxf = 2.0 * qFx * (dfXdzdxf * xForceDifference - dfXdx * dfXdz);
+         Jzxf += 2.0 * qFy * (dfYdzdxf * yForceDifference - dfYdx * dfYdz);
+         Jzxf += 2.0 * qFz * (dfZdzdxf * zForceDifference - dfZdx * dfZdz);
+         Jzxf += 2.0 * qTz * fX_k * fZ_k;
+
+         double Jzyf = 2.0 * qFx * (dfXdzdyf * xForceDifference - dfXdz * dfXdy);
+         Jzyf += 2.0 * qFy * (dfYdzdyf * yForceDifference - dfYdz * dfYdy);
+         Jzyf += 2.0 * qFz * (dfZdzdyf * zForceDifference - dfZdz * dfZdy);
+         Jzyf += 2.0 * qTx * fY_k * fZ_k;
+
+         double Jzk = 2.0 * qFx * (nominalPendulumLength * l3 * relativeX * relativeZ * xForceDifference - normalizedSpringCompression * relativeX * dfXdz);
+         Jzk += 2.0 * qFy * (nominalPendulumLength * l3 * relativeY * relativeZ * yForceDifference - normalizedSpringCompression * relativeY * dfYdz);
+         Jzk += 2.0 * qFz * ((nominalPendulumLength * l3 * relativeZ * relativeZ - normalizedSpringCompression) * zForceDifference - normalizedSpringCompression * relativeZ * dfZdz);
+
+         matrixToPack.set(x, fx, Jxfx);
+         matrixToPack.set(x, fy, Jxfy);
+         matrixToPack.set(x, fz, Jxfz);
+         matrixToPack.set(x, tauX, Jxtaux);
+         matrixToPack.set(x, tauY, Jxtauy);
+         matrixToPack.set(x, tauZ, Jxtauz);
+         matrixToPack.set(x, xF, Jxxf);
+         matrixToPack.set(x, yF, Jxyf);
+         matrixToPack.set(x, k, Jxk);
+
+         matrixToPack.set(y, fx, Jyfx);
+         matrixToPack.set(y, fy, Jyfy);
+         matrixToPack.set(y, fz, Jyfz);
+         matrixToPack.set(y, tauX, Jytaux);
+         matrixToPack.set(y, tauY, Jytauy);
+         matrixToPack.set(y, tauZ, Jytauz);
+         matrixToPack.set(y, xF, Jyxf);
+         matrixToPack.set(y, yF, Jyyf);
+         matrixToPack.set(y, k, Jyk);
+
+         matrixToPack.set(z, fx, Jzfx);
+         matrixToPack.set(z, fy, Jzfy);
+         matrixToPack.set(z, fz, Jzfz);
+         matrixToPack.set(z, tauX, Jztaux);
+         matrixToPack.set(z, tauY, Jztauy);
+         matrixToPack.set(z, tauZ, Jztauz);
+         matrixToPack.set(z, xF, Jzxf);
+         matrixToPack.set(z, yF, Jzyf);
+         matrixToPack.set(z, k, Jzk);
+
+         break;
+      case FLIGHT:
+         break;
+      }
 
    }
 
