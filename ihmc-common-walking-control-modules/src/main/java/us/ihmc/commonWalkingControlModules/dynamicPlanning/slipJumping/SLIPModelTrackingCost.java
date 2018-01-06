@@ -320,6 +320,9 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
 
          double currentLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
 
+         double normalizedSpringCompression = nominalPendulumLength / currentLength - 1;
+         double normalizedSpringForce = K_k * normalizedSpringCompression;
+
          double l3 = Math.pow(currentLength, -3.0);
          double l5 = Math.pow(currentLength, -5.0);
 
@@ -330,9 +333,9 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double qTy = Q.get(tauY, tauY);
          double qTz = Q.get(tauZ, tauZ);
 
-         double Jfxfx = 2.0 * qFx - 2.0 * qTy * relativeZ * relativeZ + 2.0 * qTz * relativeY * relativeY;
+         double Jfxfx = 2.0 * qFx + 2.0 * qTy * relativeZ * relativeZ + 2.0 * qTz * relativeY * relativeY;
          double Jfxfy = -2.0 * qTz * relativeX * relativeY;
-         double Jfxfz = -2.0 * qTy * relativeX * relativeX;
+         double Jfxfz = -2.0 * qTy * relativeX * relativeZ;
          double Jfxtx = 0.0;
          double Jfxty = -2.0 * qTy * relativeZ;
          double Jfxtz = 2.0 * qTz * relativeY;
@@ -340,7 +343,7 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
                + 2.0 * qTy * relativeZ * fZ_k  + 2.0 * qTz * relativeY * fY_k;
          double Jfxyf = -2.0 * qFx * (K_k * nominalPendulumLength * relativeX * relativeY * l3)
                + 2.0 * qTz * (-fX_k * relativeY - (tauZ_k + relativeY * fX_k - relativeX * fY_k));
-         double Jfxk = -2.0 * qFy * (nominalPendulumLength / currentLength - 1.0) * relativeY;
+         double Jfxk = -2.0 * qFx * normalizedSpringCompression * relativeX;
 
          double Jfyfy = 2.0 * qFy + 2.0 * qTx * relativeZ * relativeZ + 2.0 * qTz * relativeX * relativeX;
          double Jfyfz = -2.0 * qTx * relativeZ * relativeY ;
@@ -349,9 +352,9 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double Jfytz = -2.0 * qTz * relativeX;
          double Jfyxf = -2.0 * qFy * (K_k * nominalPendulumLength * relativeX * relativeY * l3)
                + 2.0 * qTz * ((-fY_k * relativeX) + (tauZ_k + relativeY * fX_k - relativeX * fY_k));
-         double Jfyyf = 2.0 * qFy * (K_k * (nominalPendulumLength / currentLength - nominalPendulumLength * relativeY * relativeX * l3 - 1.0))
+         double Jfyyf = 2.0 * qFy * (K_k * (nominalPendulumLength / currentLength - nominalPendulumLength * relativeY * relativeY * l3 - 1.0))
                + 2.0 * qTx * relativeZ * fZ_k + 2.0 * qTz * relativeX * fX_k;
-         double Jfyk = -2.0 * qFy * ((nominalPendulumLength / currentLength - 1.0) * relativeY);
+         double Jfyk = -2.0 * qFy * (normalizedSpringCompression * relativeY);
 
          double Jfzfz = 2.0 * qFz + 2.0 * qTx * relativeY * relativeY + 2.0 * qTy * relativeX * relativeX;
          double Jfztx = -2.0 * qTx * relativeY;
@@ -361,7 +364,7 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
                + 2.0 * qTy * (-fZ_k * relativeX - (tauY_k - relativeZ * fX_k + relativeX * fZ_k));
          double Jfzyf = -2.0 * qFx * (K_k * nominalPendulumLength * relativeY * relativeZ * l3)
                + 2.0 * qTx * (-fZ_k * relativeY + (tauX_k + relativeZ * fY_k - relativeY * fZ_k));
-         double Jfzk = -2.0 * qFz * ((nominalPendulumLength / currentLength - 1.0) * relativeZ);
+         double Jfzk = -2.0 * qFz * (normalizedSpringCompression * relativeZ);
 
          double Jtxtx = 2.0 * qTx;
          double Jtxty = 0.0;
@@ -381,19 +384,16 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double Jtzyf = -2.0 * qTz * fX_k;
          double Jtzk = 0.0;
 
-         double normalizedCompression = nominalPendulumLength / currentLength - 1.0;
-         double normalizedSpringForce = K_k * normalizedCompression;
-
          double xForceDifference = fX_k - normalizedSpringForce * relativeX;
          double yForceDifference = fY_k - normalizedSpringForce * relativeY;
          double zForceDifference = fZ_k - normalizedSpringForce * relativeZ;
 
-         double dfXxf = K_k * (-nominalPendulumLength * l3 * relativeX * relativeX + normalizedCompression);
+         double dfXxf = K_k * (-nominalPendulumLength * l3 * relativeX * relativeX + normalizedSpringCompression);
          double dfYxf = -K_k * nominalPendulumLength * l3 * relativeX * relativeY;
          double dfZxf = -K_k * nominalPendulumLength * l3 * relativeX * relativeZ;
 
          double dfXyf = -K_k * nominalPendulumLength * l3 * relativeX * relativeY;
-         double dfYyf = K_k * (-nominalPendulumLength * l3 * relativeY * relativeY + normalizedCompression);
+         double dfYyf = K_k * (-nominalPendulumLength * l3 * relativeY * relativeY + normalizedSpringCompression);
          double dfZyf = -K_k * nominalPendulumLength * l3 * relativeY * relativeZ;
 
          double dfXxfxf = 3.0 * K_k * nominalPendulumLength * relativeX * l3 - 3.0 * K_k * nominalPendulumLength * Math.pow(relativeX, 3.0) * l5;
@@ -421,26 +421,26 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double Jyfyf = 2.0 * qFx * (dfXyfyf * xForceDifference + dfXyf * dfXyf);
          Jyfyf += 2.0 * qFy * (dfYyfyf * yForceDifference + dfYyf * dfYyf);
          Jyfyf += 2.0 * qFz * (dfZyfyf * zForceDifference + dfZyf * dfZyf);
-         Jyfyf += 2.0 * qTx * fZ_k * fZ_k + 2.0 * qTz * qFx * qFx;
+         Jyfyf += 2.0 * qTx * fZ_k * fZ_k + 2.0 * qTz * fX_k * fX_k;
 
 
-         double Jxfk = 2.0 * qFx * ((-nominalPendulumLength * l3 * relativeX * relativeX + normalizedCompression) * xForceDifference
-               - (normalizedCompression) * relativeX * (K_k * (-nominalPendulumLength * l3 * relativeX * relativeX + normalizedCompression)));
+         double Jxfk = 2.0 * qFx * ((-nominalPendulumLength * l3 * relativeX * relativeX + normalizedSpringCompression) * xForceDifference
+               - (normalizedSpringCompression) * relativeX * (K_k * (-nominalPendulumLength * l3 * relativeX * relativeX + normalizedSpringCompression)));
          Jxfk += 2.0 * qFy * ((-nominalPendulumLength * l3 * relativeX * relativeY) * yForceDifference
-               - (normalizedCompression) * relativeY * (-K_k * nominalPendulumLength * l3 * relativeX * relativeY));
+               - (normalizedSpringCompression) * relativeY * (-K_k * nominalPendulumLength * l3 * relativeX * relativeY));
          Jxfk += 2.0 * qFy * ((-nominalPendulumLength * l3 * relativeX * relativeZ) * zForceDifference
-               - (normalizedCompression) * relativeZ * (-K_k * nominalPendulumLength * l3 * relativeX * relativeZ));
+               - (normalizedSpringCompression) * relativeZ * (-K_k * nominalPendulumLength * l3 * relativeX * relativeZ));
 
          double Jyfk = 2.0 * qFx * ((-nominalPendulumLength * l3 * relativeX * relativeY) * xForceDifference
-               - (normalizedCompression) * relativeX * (-K_k * nominalPendulumLength * l3 * relativeX * relativeY));
-         Jyfk += 2.0 * qFy * ((-nominalPendulumLength * l3 * relativeY * relativeY + normalizedCompression) * yForceDifference
-               - (normalizedCompression) * relativeY * (K_k * (-nominalPendulumLength * l3 * relativeY * relativeY + normalizedCompression)));
+               - (normalizedSpringCompression) * relativeX * (-K_k * nominalPendulumLength * l3 * relativeX * relativeY));
+         Jyfk += 2.0 * qFy * ((-nominalPendulumLength * l3 * relativeY * relativeY + normalizedSpringCompression) * yForceDifference
+               - (normalizedSpringCompression) * relativeY * (K_k * (-nominalPendulumLength * l3 * relativeY * relativeY + normalizedSpringCompression)));
          Jyfk += 2.0 * qFz * ((-nominalPendulumLength * l3 * relativeY * relativeZ) * zForceDifference
-               - (normalizedCompression) * relativeZ * (-K_k * nominalPendulumLength * l3 * relativeY * relativeZ));
+               - (normalizedSpringCompression) * relativeZ * (-K_k * nominalPendulumLength * l3 * relativeY * relativeZ));
 
 
          double Jkk = qFx * relativeX * relativeX + qFy * relativeY * relativeY + qFy * relativeZ * relativeZ;
-         Jkk *= 2.0 * normalizedCompression * normalizedCompression;
+         Jkk *= 2.0 * normalizedSpringCompression * normalizedSpringCompression;
 
          matrixToPack.set(fx, fx, Jfxfx);
          matrixToPack.set(fx, fy, Jfxfy);
