@@ -9,6 +9,8 @@ import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.Random;
 
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
 public class SLIPModelTrackingCostTest
