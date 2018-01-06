@@ -49,8 +49,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private static final boolean adjustICPForSingleSupport = true;
    private static final boolean adjustICPForDoubleSupport = true;
-   
-   
+
    private final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
    private final ReferenceICPTrajectoryGenerator referenceICPGenerator;

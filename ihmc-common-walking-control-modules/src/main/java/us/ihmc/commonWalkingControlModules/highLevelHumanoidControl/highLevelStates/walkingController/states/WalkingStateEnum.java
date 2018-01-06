@@ -62,10 +62,12 @@ public enum WalkingStateEnum
       {
       case WALKING_LEFT_SUPPORT:
       case FLAMINGO_LEFT_SUPPORT:
+      case TO_WALKING_LEFT_SUPPORT:
          return RobotSide.LEFT;
 
       case WALKING_RIGHT_SUPPORT:
       case FLAMINGO_RIGHT_SUPPORT:
+      case TO_WALKING_RIGHT_SUPPORT:
          return RobotSide.RIGHT;
 
       default:

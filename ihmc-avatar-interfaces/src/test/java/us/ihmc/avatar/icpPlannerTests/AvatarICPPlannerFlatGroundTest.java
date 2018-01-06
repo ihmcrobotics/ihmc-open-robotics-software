@@ -205,7 +205,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    }
 
    /**
-    * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
+    * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
     */
    public void testPauseWalkingInSwing() throws SimulationExceededMaximumTimeException, RuntimeException
    {
@@ -278,7 +278,80 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    }
 
    /**
-    * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
+    * This test pauses walking on the first step to check that functionality, and then finishes the plan.
+    */
+   public void testPauseWalkingInTransferFirstStep() throws SimulationExceededMaximumTimeException, RuntimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatEnvironment);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("ICPFlatGroundTest");
+
+      YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
+      YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
+
+      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (Double.isNaN(v.getValueAsDouble()))
+            {
+               fail("Desired ICP X value is NaN.");
+            }
+         }
+      });
+      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            if (Double.isNaN(v.getValueAsDouble()))
+            {
+               fail("Desired ICP Y value is NaN.");
+            }
+         }
+      });
+
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      int numberOfSteps = 5;
+      double swingDuration = 1.0;
+      double transferDuration = 0.3;
+      FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
+      drcSimulationTestHelper.send(message);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.8 * transferDuration);
+      drcSimulationTestHelper.send(new PauseWalkingMessage(true));
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      drcSimulationTestHelper.send(new PauseWalkingMessage(false));
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps + 1) * (swingDuration + transferDuration));
+
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D(-0.06095496955280358, -0.001119333179390724, 0.7875020745919501);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   /**
+    * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
     */
    public void testPauseWalkingInTransfer() throws SimulationExceededMaximumTimeException, RuntimeException
    {
@@ -350,79 +423,6 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   /**
-    * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
-    */
-   public void testPauseWalkingInTransferOfLongPlan() throws SimulationExceededMaximumTimeException, RuntimeException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatEnvironment);
-      drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.createSimulation("ICPFlatGroundTest");
-
-      YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
-      YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
-
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (Double.isNaN(v.getValueAsDouble()))
-            {
-               fail("Desired ICP X value is NaN.");
-            }
-         }
-      });
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (Double.isNaN(v.getValueAsDouble()))
-            {
-               fail("Desired ICP Y value is NaN.");
-            }
-         }
-      });
-
-
-      setupCameraForWalkingUpToRamp();
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      int numberOfSteps = 12;
-      int stepToPauseOn = numberOfSteps - 2;
-      double swingDuration = 1.0;
-      double transferDuration = 0.3;
-      FootstepDataListMessage message = createForwardWalkingFootsteps(numberOfSteps, 0.3, 0.3, swingDuration, transferDuration);
-      drcSimulationTestHelper.send(message);
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((stepToPauseOn - 1) * (swingDuration + transferDuration) + 0.8 * transferDuration);
-      drcSimulationTestHelper.send(new PauseWalkingMessage(true));
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-      drcSimulationTestHelper.send(new PauseWalkingMessage(false));
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((numberOfSteps + 2 - stepToPauseOn) * (swingDuration + transferDuration));
-
-      drcSimulationTestHelper.checkNothingChanged();
-
-      assertTrue(success);
-
-      Point3D center = new Point3D(-0.06095496955280358, -0.001119333179390724, 0.7875020745919501);
-      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-   }
 
    private FootstepDataListMessage createForwardWalkingFootsteps(int numberOfSteps, double length, double stanceWidth, double swingDuration, double transferDuration)
    {
