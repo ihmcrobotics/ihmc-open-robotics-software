@@ -92,77 +92,13 @@ public class SLIPModelTrackingCostTest
 
       costFunction.getCostStateGradient(SLIPState.STANCE, currentControl, currentState, costGradient);
 
-      DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
-      currentStateModified.add(x, 0, epsilon);
-      double modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(x, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(y, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(y, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(z, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(z, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(thetaX, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(thetaX, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(thetaY, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(thetaY, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(thetaZ, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(thetaZ, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(xDot, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(xDot, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(yDot, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(yDot, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(zDot, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(zDot, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(thetaXDot, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(thetaXDot, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(thetaYDot, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(thetaYDot, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentStateModified.set(currentState);
-      currentStateModified.add(thetaZDot, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
-      expectedCostGradient.set(thetaZDot, 0, (modifiedCost - cost) / epsilon);
-
+      for (int modifiedStateIndex = 0; modifiedStateIndex < stateVectorSize; modifiedStateIndex++)
+      {
+         DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+         currentStateModified.add(modifiedStateIndex, 0, epsilon);
+         double modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControl, currentStateModified);
+         expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / epsilon);
+      }
 
       JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
    }
@@ -287,58 +223,13 @@ public class SLIPModelTrackingCostTest
 
       costFunction.getCostControlGradient(SLIPState.STANCE, currentControl, currentState, costGradient);
 
-      DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
-      currentControlModified.add(fx, 0, epsilon);
-      double modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(fx, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(fy, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(fy, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(fz, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(fz, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(tauX, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(tauX, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(tauY, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(tauY, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(tauZ, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(tauZ, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(xF, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(xF, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(yF, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(yF, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(k, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
-      expectedCostGradient.set(k, 0, (modifiedCost - cost) / epsilon);
+      for (int controlModifiedIndex = 0; controlModifiedIndex < controlVectorSize; controlModifiedIndex++)
+      {
+         DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+         currentControlModified.add(controlModifiedIndex, 0, epsilon);
+         double modifiedCost = costFunction.getCost(SLIPState.STANCE, currentControlModified, currentState);
+         expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / epsilon);
+      }
 
 
       JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
@@ -366,58 +257,13 @@ public class SLIPModelTrackingCostTest
 
       costFunction.getCostControlGradient(SLIPState.FLIGHT, currentControl, currentState, costGradient);
 
-      DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
-      currentControlModified.add(fx, 0, epsilon);
-      double modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(fx, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(fy, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(fy, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(fz, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(fz, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(tauX, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(tauX, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(tauY, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(tauY, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(tauZ, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(tauZ, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(xF, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(xF, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(yF, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(yF, 0, (modifiedCost - cost) / epsilon);
-
-
-      currentControlModified.set(currentControl);
-      currentControlModified.add(k, 0, epsilon);
-      modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
-      expectedCostGradient.set(k, 0, (modifiedCost - cost) / epsilon);
+      for (int controlModifiedIndex = 0; controlModifiedIndex < controlVectorSize; controlModifiedIndex++)
+      {
+         DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+         currentControlModified.add(controlModifiedIndex, 0, epsilon);
+         double modifiedCost = costFunction.getCost(SLIPState.FLIGHT, currentControlModified, currentState);
+         expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / epsilon);
+      }
 
 
       JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-7);
@@ -548,6 +394,7 @@ public class SLIPModelTrackingCostTest
 
       double xf_k = currentControl.get(xF);
       double yf_k = currentControl.get(yF);
+      double zf_k = 0.0;
 
       double fx_k = currentControl.get(fx);
       double fy_k = currentControl.get(fy);
@@ -559,24 +406,25 @@ public class SLIPModelTrackingCostTest
 
       double relativeX = x_k - xf_k;
       double relativeY = y_k - yf_k;
+      double relativeZ = z_k - zf_k;
 
 
       double k_k = currentControl.get(k);
 
-      double length = Math.sqrt(relativeX * relativeX + relativeY * relativeY + z_k * z_k);
+      double length = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
 
       double dynamicsXError = fx_k - k_k * (nominalLength / length - 1.0) * relativeX;
       double dynamicsYError = fy_k - k_k * (nominalLength / length - 1.0) * relativeY;
-      double dynamicsZError = fz_k - k_k * (nominalLength / length - 1.0) * z_k;
-      double dynamicsTauXError = tauX_k + z_k * fy_k - (y_k - yf_k) * fz_k;
-      double dynamicsTauYError = tauY_k - z_k * fx_k - (xf_k - x_k) * fz_k;
+      double dynamicsZError = fz_k - k_k * (nominalLength / length - 1.0) * relativeZ;
+      double dynamicsTauXError = tauX_k - (zf_k - z_k) * fy_k - (y_k - yf_k) * fz_k;
+      double dynamicsTauYError = tauY_k - (z_k - zf_k) * fx_k - (xf_k - x_k) * fz_k;
       double dynamicsTauZError = tauZ_k - (yf_k - y_k) * fx_k - (x_k - xf_k) * fy_k;
 
       double gradientFxXError = 1.0;
       double gradientFxYError = 0.0;
       double gradientFxZError = 0.0;
       double gradientFxTauXError = 0.0;
-      double gradientFxTauYError = -z_k;
+      double gradientFxTauYError = (zf_k - z_k);
       double gradientFxTauZError = (y_k - yf_k);
 
       double expectedFxX = 2.0 * SLIPModelTrackingCost.qFX * gradientFxXError * dynamicsXError;
@@ -590,7 +438,7 @@ public class SLIPModelTrackingCostTest
       double gradientFyXError = 0.0;
       double gradientFyYError = 1.0;
       double gradientFyZError = 0.0;
-      double gradientFyTauXError = z_k;
+      double gradientFyTauXError = z_k - zf_k;
       double gradientFyTauYError = 0.0;
       double gradientFyTauZError = -(x_k - xf_k);
 

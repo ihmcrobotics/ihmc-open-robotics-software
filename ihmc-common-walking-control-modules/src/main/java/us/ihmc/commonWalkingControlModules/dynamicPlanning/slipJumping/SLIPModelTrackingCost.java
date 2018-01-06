@@ -288,7 +288,254 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
    @Override
    public void getCostControlHessian(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
+      if (matrixToPack.getNumRows() != controlVectorSize)
+         throw new RuntimeException("Matrix state hessian has improper number of rows.");
+      if (matrixToPack.getNumCols() != controlVectorSize)
+         throw new RuntimeException("Matrix state hessian has improper number of columns.");
 
+      switch (hybridState)
+      {
+      case STANCE:
+         double x_k = stateVector.get(x);
+         double y_k = stateVector.get(y);
+         double z_k = stateVector.get(z);
+
+         double xF_k = controlVector.get(xF);
+         double yF_k = controlVector.get(yF);
+         double zF_k = 0.0;
+
+         double relativeX = x_k - xF_k;
+         double relativeY = y_k - yF_k;
+         double relativeZ = z_k - zF_k;
+
+         double fX_k = controlVector.get(fx);
+         double fY_k = controlVector.get(fy);
+         double fZ_k = controlVector.get(fz);
+
+         double tauX_k = controlVector.get(tauX);
+         double tauY_k = controlVector.get(tauY);
+         double tauZ_k = controlVector.get(tauZ);
+
+         double K_k = controlVector.get(k);
+
+         double currentLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
+
+         double l3 = Math.pow(currentLength, -3.0);
+         double l5 = Math.pow(currentLength, -5.0);
+
+         double qFx = Q.get(x, x);
+         double qFy = Q.get(y, y);
+         double qFz = Q.get(z, z);
+         double qTx = Q.get(tauX, tauX);
+         double qTy = Q.get(tauY, tauY);
+         double qTz = Q.get(tauZ, tauZ);
+
+         double Jfxfx = 2.0 * qFx - 2.0 * qTy * relativeZ * relativeZ + 2.0 * qTz * relativeY * relativeY;
+         double Jfxfy = -2.0 * qTz * relativeX * relativeY;
+         double Jfxfz = -2.0 * qTy * relativeX * relativeX;
+         double Jfxtx = 0.0;
+         double Jfxty = -2.0 * qTy * relativeZ;
+         double Jfxtz = 2.0 * qTz * relativeY;
+         double Jfxxf = 2.0 * qFz * (K_k * (nominalPendulumLength / currentLength - nominalPendulumLength * relativeX * relativeX * l3 - 1.0))
+               + 2.0 * qTy * relativeZ * fZ_k  + 2.0 * qTz * relativeY * fY_k;
+         double Jfxyf = -2.0 * qFx * (K_k * nominalPendulumLength * relativeX * relativeY * l3)
+               + 2.0 * qTz * (-fX_k * relativeY - (tauZ_k + relativeY * fX_k - relativeX * fY_k));
+         double Jfxk = -2.0 * qFy * (nominalPendulumLength / currentLength - 1.0) * relativeY;
+
+         double Jfyfy = 2.0 * qFy + 2.0 * qTx * relativeZ * relativeZ + 2.0 * qTz * relativeX * relativeX;
+         double Jfyfz = -2.0 * qTx * relativeZ * relativeY ;
+         double Jfytx = 2.0 * qTx * relativeZ;
+         double Jfyty = 0.0;
+         double Jfytz = -2.0 * qTz * relativeX;
+         double Jfyxf = -2.0 * qFy * (K_k * nominalPendulumLength * relativeX * relativeY * l3)
+               + 2.0 * qTz * ((-fY_k * relativeX) + (tauZ_k + relativeY * fX_k - relativeX * fY_k));
+         double Jfyyf = 2.0 * qFy * (K_k * (nominalPendulumLength / currentLength - nominalPendulumLength * relativeY * relativeX * l3 - 1.0))
+               + 2.0 * qTx * relativeZ * fZ_k + 2.0 * qTz * relativeX * fX_k;
+         double Jfyk = -2.0 * qFy * ((nominalPendulumLength / currentLength - 1.0) * relativeY);
+
+         double Jfzfz = 2.0 * qFz + 2.0 * qTx * relativeY * relativeY + 2.0 * qTy * relativeX * relativeX;
+         double Jfztx = -2.0 * qTx * relativeY;
+         double Jfzty = 2.0 * qTy * relativeX;
+         double Jfztz = 0.0;
+         double Jfzxf = -2.0 * qFx * (K_k * nominalPendulumLength * relativeX * relativeZ * l3)
+               + 2.0 * qTy * (-fZ_k * relativeX - (tauY_k - relativeZ * fX_k + relativeX * fZ_k));
+         double Jfzyf = -2.0 * qFx * (K_k * nominalPendulumLength * relativeY * relativeZ * l3)
+               + 2.0 * qTx * (-fZ_k * relativeY + (tauX_k + relativeZ * fY_k - relativeY * fZ_k));
+         double Jfzk = -2.0 * qFz * ((nominalPendulumLength / currentLength - 1.0) * relativeZ);
+
+         double Jtxtx = 2.0 * qTx;
+         double Jtxty = 0.0;
+         double Jtxtz = 0.0;
+         double Jtxxf = 0.0;
+         double Jtxyf = 2.0 * qTx * fZ_k;
+         double Jtxk = 0.0;
+
+         double Jtyty = 2.0 * qTy;
+         double Jtytz = 0.0;
+         double Jtyxf = -2.0 * qTy * fZ_k;
+         double Jtyyf = 0.0;
+         double Jtyk = 0.0;
+
+         double Jtztz = 2.0 * qTz;
+         double Jtzxf = 2.0 * qTz * fY_k;
+         double Jtzyf = -2.0 * qTz * fX_k;
+         double Jtzk = 0.0;
+
+         double normalizedCompression = nominalPendulumLength / currentLength - 1.0;
+         double normalizedSpringForce = K_k * normalizedCompression;
+
+         double xForceDifference = fX_k - normalizedSpringForce * relativeX;
+         double yForceDifference = fY_k - normalizedSpringForce * relativeY;
+         double zForceDifference = fZ_k - normalizedSpringForce * relativeZ;
+
+         double dfXxf = K_k * (-nominalPendulumLength * l3 * relativeX * relativeX + normalizedCompression);
+         double dfYxf = -K_k * nominalPendulumLength * l3 * relativeX * relativeY;
+         double dfZxf = -K_k * nominalPendulumLength * l3 * relativeX * relativeZ;
+
+         double dfXyf = -K_k * nominalPendulumLength * l3 * relativeX * relativeY;
+         double dfYyf = K_k * (-nominalPendulumLength * l3 * relativeY * relativeY + normalizedCompression);
+         double dfZyf = -K_k * nominalPendulumLength * l3 * relativeY * relativeZ;
+
+         double dfXxfxf = 3.0 * K_k * nominalPendulumLength * relativeX * l3 - 3.0 * K_k * nominalPendulumLength * Math.pow(relativeX, 3.0) * l5;
+         double dfYxfxf = K_k * nominalPendulumLength * relativeY * l3 - 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeY * l5;
+         double dfZxfxf = K_k * nominalPendulumLength * relativeZ * l3 - 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeZ * l5;
+
+         double dfXxfyf = K_k * nominalPendulumLength * relativeY * l3 - 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeY * l5;
+         double dfYxfyf = K_k * nominalPendulumLength * relativeX * l3 - 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeY * l5;
+         double dfZxfyf = -3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeZ * l5;
+
+         double dfXyfyf = K_k * nominalPendulumLength * relativeX * l3 - 3.0 * K_k * nominalPendulumLength * relativeX * relativeY * relativeY * l5;
+         double dfYyfyf = 3.0 * K_k * nominalPendulumLength * relativeY * l3 - 3.0 * K_k * nominalPendulumLength * Math.pow(relativeY, 3.0) * l5;
+         double dfZyfyf = K_k * nominalPendulumLength * relativeZ * l3 - 3.0 * K_k * nominalPendulumLength * relativeY * relativeY * relativeZ * l5;
+
+         double Jxfxf = 2.0 * qFx * (dfXxfxf * xForceDifference + dfXxf * dfXxf);
+         Jxfxf += 2.0 * qFy * (dfYxfxf * yForceDifference + dfYxf * dfYxf);
+         Jxfxf += 2.0 * qFz * (dfZxfxf * zForceDifference + dfZxf * dfZxf);
+         Jxfxf += 2.0 * qTy * fZ_k * fZ_k + 2.0 * qTz * fY_k * fY_k;
+
+         double Jxfyf = 2.0 * qFx * (dfXxfyf * xForceDifference + dfXxf * dfXyf);
+         Jxfyf += 2.0 * qFy * (dfYxfyf * yForceDifference + dfYxf * dfYyf);
+         Jxfyf += 2.0 * qFz * (dfZxfyf * zForceDifference + dfZxf * dfZyf);
+         Jxfyf -= 2.0 * qTz * fY_k * fX_k;
+
+         double Jyfyf = 2.0 * qFx * (dfXyfyf * xForceDifference + dfXyf * dfXyf);
+         Jyfyf += 2.0 * qFy * (dfYyfyf * yForceDifference + dfYyf * dfYyf);
+         Jyfyf += 2.0 * qFz * (dfZyfyf * zForceDifference + dfZyf * dfZyf);
+         Jyfyf += 2.0 * qTx * fZ_k * fZ_k + 2.0 * qTz * qFx * qFx;
+
+
+         double Jxfk = 2.0 * qFx * ((-nominalPendulumLength * l3 * relativeX * relativeX + normalizedCompression) * xForceDifference
+               - (normalizedCompression) * relativeX * (K_k * (-nominalPendulumLength * l3 * relativeX * relativeX + normalizedCompression)));
+         Jxfk += 2.0 * qFy * ((-nominalPendulumLength * l3 * relativeX * relativeY) * yForceDifference
+               - (normalizedCompression) * relativeY * (-K_k * nominalPendulumLength * l3 * relativeX * relativeY));
+         Jxfk += 2.0 * qFy * ((-nominalPendulumLength * l3 * relativeX * relativeZ) * zForceDifference
+               - (normalizedCompression) * relativeZ * (-K_k * nominalPendulumLength * l3 * relativeX * relativeZ));
+
+         double Jyfk = 2.0 * qFx * ((-nominalPendulumLength * l3 * relativeX * relativeY) * xForceDifference
+               - (normalizedCompression) * relativeX * (-K_k * nominalPendulumLength * l3 * relativeX * relativeY));
+         Jyfk += 2.0 * qFy * ((-nominalPendulumLength * l3 * relativeY * relativeY + normalizedCompression) * yForceDifference
+               - (normalizedCompression) * relativeY * (K_k * (-nominalPendulumLength * l3 * relativeY * relativeY + normalizedCompression)));
+         Jyfk += 2.0 * qFz * ((-nominalPendulumLength * l3 * relativeY * relativeZ) * zForceDifference
+               - (normalizedCompression) * relativeZ * (-K_k * nominalPendulumLength * l3 * relativeY * relativeZ));
+
+
+         double Jkk = qFx * relativeX * relativeX + qFy * relativeY * relativeY + qFy * relativeZ * relativeZ;
+         Jkk *= 2.0 * normalizedCompression * normalizedCompression;
+
+         matrixToPack.set(fx, fx, Jfxfx);
+         matrixToPack.set(fx, fy, Jfxfy);
+         matrixToPack.set(fx, fz, Jfxfz);
+         matrixToPack.set(fx, tauX, Jfxtx);
+         matrixToPack.set(fx, tauY, Jfxty);
+         matrixToPack.set(fx, tauZ, Jfxtz);
+         matrixToPack.set(fx, xF, Jfxxf);
+         matrixToPack.set(fx, yF, Jfxyf);
+         matrixToPack.set(fx, k, Jfxk);
+
+         matrixToPack.set(fy, fx, Jfxfy);
+         matrixToPack.set(fy, fy, Jfyfy);
+         matrixToPack.set(fy, fz, Jfyfz);
+         matrixToPack.set(fy, tauX, Jfytx);
+         matrixToPack.set(fy, tauY, Jfyty);
+         matrixToPack.set(fy, tauZ, Jfytz);
+         matrixToPack.set(fy, xF, Jfyxf);
+         matrixToPack.set(fy, yF, Jfyyf);
+         matrixToPack.set(fy, k, Jfyk);
+
+         matrixToPack.set(fz, fx, Jfxfz);
+         matrixToPack.set(fz, fy, Jfyfz);
+         matrixToPack.set(fz, fz, Jfzfz);
+         matrixToPack.set(fz, tauX, Jfztx);
+         matrixToPack.set(fz, tauY, Jfzty);
+         matrixToPack.set(fz, tauZ, Jfztz);
+         matrixToPack.set(fz, xF, Jfzxf);
+         matrixToPack.set(fz, yF, Jfzyf);
+         matrixToPack.set(fz, k, Jfzk);
+
+         matrixToPack.set(tauX, fx, Jfxtx);
+         matrixToPack.set(tauX, fy, Jfytx);
+         matrixToPack.set(tauX, fz, Jfztx);
+         matrixToPack.set(tauX, tauX, Jtxtx);
+         matrixToPack.set(tauX, tauY, Jtxty);
+         matrixToPack.set(tauX, tauZ, Jtxtz);
+         matrixToPack.set(tauX, xF, Jtxxf);
+         matrixToPack.set(tauX, yF, Jtxyf);
+         matrixToPack.set(tauX, k, Jtxk);
+
+         matrixToPack.set(tauY, fx, Jfxty);
+         matrixToPack.set(tauY, fy, Jfyty);
+         matrixToPack.set(tauY, fz, Jfzty);
+         matrixToPack.set(tauY, tauX, Jtxty);
+         matrixToPack.set(tauY, tauY, Jtyty);
+         matrixToPack.set(tauY, tauZ, Jtytz);
+         matrixToPack.set(tauY, xF, Jtyxf);
+         matrixToPack.set(tauY, yF, Jtyyf);
+         matrixToPack.set(tauY, k, Jtyk);
+
+         matrixToPack.set(tauZ, fx, Jfxtz);
+         matrixToPack.set(tauZ, fy, Jfytz);
+         matrixToPack.set(tauZ, fz, Jfztz);
+         matrixToPack.set(tauZ, tauX, Jtxtz);
+         matrixToPack.set(tauZ, tauY, Jtytz);
+         matrixToPack.set(tauZ, tauZ, Jtztz);
+         matrixToPack.set(tauZ, xF, Jtzxf);
+         matrixToPack.set(tauZ, yF, Jtzyf);
+         matrixToPack.set(tauZ, k, Jtzk);
+
+         matrixToPack.set(xF, fx, Jfxxf);
+         matrixToPack.set(xF, fy, Jfyxf);
+         matrixToPack.set(xF, fz, Jfzxf);
+         matrixToPack.set(xF, tauX, Jtxxf);
+         matrixToPack.set(xF, tauY, Jtyxf);
+         matrixToPack.set(xF, tauZ, Jtzxf);
+         matrixToPack.set(xF, xF, Jxfxf);
+         matrixToPack.set(xF, yF, Jxfyf);
+         matrixToPack.set(xF, k, Jxfk);
+
+         matrixToPack.set(yF, fx, Jfxyf);
+         matrixToPack.set(yF, fy, Jfyyf);
+         matrixToPack.set(yF, fz, Jfzyf);
+         matrixToPack.set(yF, tauX, Jtxyf);
+         matrixToPack.set(yF, tauY, Jtyyf);
+         matrixToPack.set(yF, tauZ, Jtzyf);
+         matrixToPack.set(yF, xF, Jxfyf);
+         matrixToPack.set(yF, yF, Jyfyf);
+         matrixToPack.set(yF, k, Jyfk);
+
+         matrixToPack.set(k, fx, Jfxk);
+         matrixToPack.set(k, fy, Jfyk);
+         matrixToPack.set(k, fz, Jfzk);
+         matrixToPack.set(k, tauX, Jtxk);
+         matrixToPack.set(k, tauY, Jtyk);
+         matrixToPack.set(k, tauZ, Jtzk);
+         matrixToPack.set(k, xF, Jxfk);
+         matrixToPack.set(k, yF, Jyfk);
+         matrixToPack.set(k, k, Jkk);
+         break;
+      case FLIGHT:
+
+         break;
+      }
    }
 
    @Override
