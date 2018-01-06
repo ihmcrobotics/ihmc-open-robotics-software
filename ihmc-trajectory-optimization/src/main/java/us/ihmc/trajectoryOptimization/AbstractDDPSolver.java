@@ -18,8 +18,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    private static final boolean useDynamicsHessian = false;
 
    protected final DiscreteHybridDynamics<E> dynamics;
-   protected final LQTrackingCostFunction costFunction;
-   protected final LQTrackingCostFunction terminalCostFunction;
+   protected final LQTrackingCostFunction<E> costFunction;
+   protected final LQTrackingCostFunction<E> terminalCostFunction;
 
    protected final DiscreteOptimizationTrajectory optimalTrajectory;
    protected final DiscreteOptimizationTrajectory desiredTrajectory;
@@ -69,7 +69,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
    protected double lineSearchGain = 1.0;
 
-   public AbstractDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
+   public AbstractDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction<E> costFunction, LQTrackingCostFunction<E> terminalCostFunction, boolean debug)
    {
       this.dynamics = dynamics;
       this.costFunction = costFunction;
@@ -223,11 +223,11 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
          dynamics.getDynamicsStateGradient(dynamicsState, currentState, currentControl, dynamicsStateGradientTrajectory.get(t));
          dynamics.getDynamicsControlGradient(dynamicsState, currentState, currentControl, dynamicsControlGradientTrajectory.get(t));
 
-         costFunction.getCostStateGradient(currentControl, currentState, desiredControl, desiredState, costStateGradientTrajectory.get(t));
-         costFunction.getCostControlGradient(currentControl, currentState, desiredControl, desiredState, costControlGradientTrajectory.get(t));
-         costFunction.getCostStateHessian(currentControl, currentState, costStateHessianTrajectory.get(t));
-         costFunction.getCostControlHessian(currentControl, currentState, costControlHessianTrajectory.get(t));
-         costFunction.getCostControlGradientOfStateGradient(currentControl, currentState, costStateControlHessianTrajectory.get(t));
+         costFunction.getCostStateGradient(dynamicsState, currentControl, currentState, desiredControl, desiredState, costStateGradientTrajectory.get(t));
+         costFunction.getCostControlGradient(dynamicsState, currentControl, currentState, desiredControl, desiredState, costControlGradientTrajectory.get(t));
+         costFunction.getCostStateHessian(dynamicsState, currentControl, currentState, costStateHessianTrajectory.get(t));
+         costFunction.getCostControlHessian(dynamicsState, currentControl, currentState, costControlHessianTrajectory.get(t));
+         costFunction.getCostControlGradientOfStateGradient(dynamicsState, currentControl, currentState, costStateControlHessianTrajectory.get(t));
       }
    }
 

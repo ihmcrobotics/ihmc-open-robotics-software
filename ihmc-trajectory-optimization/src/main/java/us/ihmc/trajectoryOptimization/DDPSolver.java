@@ -57,8 +57,8 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       DiscreteTrajectory desiredStateTrajectory = desiredTrajectory.getStateTrajectory();
       DiscreteTrajectory desiredControlTrajectory = desiredTrajectory.getControlTrajectory();
 
-      terminalCostFunction.getCostStateHessian(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), valueStateHessianTrajectory.get(endIndex));
-      terminalCostFunction.getCostStateGradient(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), desiredControlTrajectory.get(endIndex),
+      terminalCostFunction.getCostStateHessian(dynamicsState, controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), valueStateHessianTrajectory.get(endIndex));
+      terminalCostFunction.getCostStateGradient(dynamicsState, controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), desiredControlTrajectory.get(endIndex),
                                                 desiredStateTrajectory.get(endIndex), valueStateGradientTrajectory.get(endIndex));
 
       for (int t = endIndex; t >= startIndex; t--)
@@ -150,7 +150,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
             dynamics.getNextState(dynamicsState, updatedState, updatedControl, updatedTrajectory.getState(t + 1));
 
          // compute cost
-         cost += costFunction.getCost(updatedControl, updatedState, desiredTrajectory.getControl(t), desiredTrajectory.getState(t));
+         cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredTrajectory.getControl(t), desiredTrajectory.getState(t));
       }
 
       return cost;

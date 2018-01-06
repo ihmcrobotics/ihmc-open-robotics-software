@@ -30,8 +30,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    private final DenseMatrix64F R_invBT;
 
    private final DiscreteHybridDynamics<E> dynamics;
-   private final LQTrackingCostFunction costFunction;
-   private final LQTrackingCostFunction terminalCostFunction;
+   private final LQTrackingCostFunction<E> costFunction;
+   private final LQTrackingCostFunction<E> terminalCostFunction;
 
    private final double deltaT;
 
@@ -42,7 +42,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    {
       this(dynamics, costFunction, terminalCostFunction, deltaT, false);
    }
-   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction,
+   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction<E> costFunction, LQTrackingCostFunction<E> terminalCostFunction,
                                       double deltaT, boolean debug)
    {
       this.dynamics = dynamics;
@@ -118,9 +118,9 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       DenseMatrix64F desiredState = desiredTrajectory.getState(i);
       DenseMatrix64F desiredControl;
 
-      costFunction.getCostStateHessian(state, control, Q);
-      costFunction.getCostControlHessian(state, control, R);
-      terminalCostFunction.getCostStateHessian(state, control, Qf);
+      costFunction.getCostStateHessian(dynamicState, state, control, Q);
+      costFunction.getCostControlHessian(dynamicState, state, control, R);
+      terminalCostFunction.getCostStateHessian(dynamicState, state, control, Qf);
 
       dynamics.getContinuousAMatrix(A);
       dynamics.getContinuousBMatrix(B);
