@@ -176,8 +176,11 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double K_k = controlVector.get(k);
 
          double currentLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
+         double l3 = Math.pow(currentLength, -3.0);
+         double l5 = Math.pow(currentLength, -5.0);
 
-         double normalizedSpringForce = K_k * (nominalPendulumLength / currentLength - 1.0);
+         double normalizedSpringCompression = nominalPendulumLength / currentLength - 1.0;
+         double normalizedSpringForce = K_k * normalizedSpringCompression;
 
          double xForceDifference = fX_k - normalizedSpringForce * relativeX;
          double yForceDifference = fY_k - normalizedSpringForce * relativeY;
@@ -190,20 +193,17 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double qTy = Q.get(tauY, tauY);
          double qTz = Q.get(tauZ, tauZ);
 
-         double dfXdx = K_k * (nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeX * relativeX - nominalPendulumLength / currentLength + 1.0);
-         double dfYdx = K_k * nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeX * relativeY;
-         double dfZdx = K_k * nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeX * relativeZ;
+         double dfXdx = K_k * (nominalPendulumLength * l3 * relativeX * relativeX - normalizedSpringCompression);
+         double dfYdx = K_k * nominalPendulumLength * l3 * relativeX * relativeY;
+         double dfZdx = K_k * nominalPendulumLength * l3 * relativeX * relativeZ;
 
-         double dfXdy = K_k * nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeX * relativeY;
-         double dfYdy = K_k * (nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeY * relativeY - nominalPendulumLength / currentLength + 1.0);
-         double dfZdy = K_k * nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeY * relativeZ;
+         double dfXdy = K_k * nominalPendulumLength * l3 * relativeX * relativeY;
+         double dfYdy = K_k * (nominalPendulumLength * l3 * relativeY * relativeY - normalizedSpringCompression);
+         double dfZdy = K_k * nominalPendulumLength * l3 * relativeY * relativeZ;
 
-         double dfXdz = K_k * nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeX * relativeZ;
-         double dfYdz = K_k * nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeY * relativeZ;
-         double dfZdz = K_k * (nominalPendulumLength * Math.pow(currentLength, -3.0) * relativeZ * relativeZ - nominalPendulumLength / currentLength + 1.0);
-
-         double l3 = Math.pow(currentLength, -3.0);
-         double l5 = Math.pow(currentLength, -5.0);
+         double dfXdz = K_k * nominalPendulumLength * l3 * relativeX * relativeZ;
+         double dfYdz = K_k * nominalPendulumLength * l3 * relativeY * relativeZ;
+         double dfZdz = K_k * (nominalPendulumLength * l3 * relativeZ * relativeZ - normalizedSpringCompression);
 
          double dfXdxdx = 3.0 * K_k * nominalPendulumLength * relativeX * l3 - 3.0 * K_k * nominalPendulumLength * Math.pow(relativeX, 3.0) * l5;
          double dfYdxdx = K_k * nominalPendulumLength * relativeY * l3 - 3.0 * K_k * nominalPendulumLength * relativeX * relativeX * relativeY * l5;
@@ -226,13 +226,13 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double dfZdydz = K_k * nominalPendulumLength * relativeY * l3 - 3.0 * K_k * nominalPendulumLength * relativeY * relativeZ * relativeZ * l5;
 
          double dfXdzdz = K_k * nominalPendulumLength * relativeX * l3 - 3.0 * K_k * nominalPendulumLength * relativeX * relativeZ * relativeZ * l5;
-         double dfYdzdz = K_k * nominalPendulumLength * relativeY * l3 - 3.0 * K_k * nominalPendulumLength * relativeY * relativeZ * relativeX * l5;
+         double dfYdzdz = K_k * nominalPendulumLength * relativeY * l3 - 3.0 * K_k * nominalPendulumLength * relativeY * relativeZ * relativeZ * l5;
          double dfZdzdz = 3.0 * K_k * nominalPendulumLength * relativeZ * l3 - 3.0 * K_k * nominalPendulumLength * Math.pow(relativeZ, 3.0) * l5;
 
          double Jxx = 2.0 * qFx * (dfXdxdx * xForceDifference + dfXdx * dfXdx);
          Jxx += 2.0 * qFy * (dfYdxdx * yForceDifference + dfYdx * dfYdx);
          Jxx += 2.0 * qFz * (dfZdxdx * zForceDifference + dfZdx * dfZdx);
-         Jxx += 2.0 * qTy * fZ_k * fZ_k + qTz * qTz * fY_k * fY_k;
+         Jxx += 2.0 * qTy * fZ_k * fZ_k + 2.0 * qTz * fY_k * fY_k;
 
          double Jxy = 2.0 * qFx * (dfXdxdy * xForceDifference + dfXdx * dfXdy);
          Jxy += 2.0 * qFy * (dfYdxdy * yForceDifference + dfYdx * dfYdy);
@@ -247,17 +247,17 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          double Jyy = 2.0 * qFx * (dfXdydy * xForceDifference + dfXdy * dfXdy);
          Jyy += 2.0 * qFy * (dfYdydy * yForceDifference + dfYdy * dfYdy);
          Jyy += 2.0 * qFz * (dfZdydy * zForceDifference + dfZdy * dfZdy);
-         Jyy += 2.0 * qTz * fX_k * fX_k - qTx * qTx * fZ_k * fZ_k;
+         Jyy += 2.0 * qTz * fX_k * fX_k + 2.0 * qTx * fZ_k * fZ_k;
 
          double Jyz = 2.0 * qFx * (dfXdydz * xForceDifference + dfXdy * dfXdz);
          Jyz += 2.0 * qFy * (dfYdydz * yForceDifference + dfYdy * dfYdz);
          Jyz += 2.0 * qFz * (dfZdydz * zForceDifference + dfZdy * dfZdz);
-         Jyz -= 2.0 * qTx * fX_k * fY_k;
+         Jyz -= 2.0 * qTx * fZ_k * fY_k;
 
          double Jzz = 2.0 * qFx * (dfXdzdz * xForceDifference + dfXdz * dfXdz);
          Jzz += 2.0 * qFy * (dfYdzdz * yForceDifference + dfYdz * dfYdz);
          Jzz += 2.0 * qFz * (dfZdzdz * zForceDifference + dfZdz * dfZdz);
-         Jzz += 2.0 * qTx * fY_k * fY_k - 2.0 * qTy * fX_k * fX_k;
+         Jzz += 2.0 * qTx * fY_k * fY_k + 2.0 * qTy * fX_k * fX_k;
 
          matrixToPack.set(x, x, Jxx);
          matrixToPack.set(x, y, Jxy);
