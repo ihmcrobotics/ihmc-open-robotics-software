@@ -154,6 +154,8 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
       if (matrixToPack.getNumCols() != stateVectorSize)
          throw new RuntimeException("Matrix state hessian has improper number of columns.");
 
+      matrixToPack.zero();
+
       switch (hybridState)
       {
       case STANCE:
@@ -292,6 +294,8 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          throw new RuntimeException("Matrix state hessian has improper number of rows.");
       if (matrixToPack.getNumCols() != controlVectorSize)
          throw new RuntimeException("Matrix state hessian has improper number of columns.");
+
+      matrixToPack.zero();
 
       switch (hybridState)
       {
@@ -551,6 +555,8 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
          throw new RuntimeException("The hessian has the wrong number of rows.");
       if (matrixToPack.getNumCols() != controlVectorSize)
          throw new RuntimeException("The hessian has the wrong number of cols.");
+
+      matrixToPack.zero();
 
       switch (hybridState)
       {

@@ -31,8 +31,8 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
    private final DenseMatrix64F H;
 
    private final DiscreteHybridDynamics<E> dynamics;
-   private final LQTrackingCostFunction costFunction;
-   private final LQTrackingCostFunction terminalCostFunction;
+   private final LQTrackingCostFunction<E> costFunction;
+   private final LQTrackingCostFunction<E> terminalCostFunction;
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F tempMatrix2 = new DenseMatrix64F(0, 0);
@@ -117,9 +117,9 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       DenseMatrix64F initialDesiredState = desiredTrajectory.getState(startIndex);
       DenseMatrix64F initialDesiredControl = desiredTrajectory.getControl(startIndex);
 
-      costFunction.getCostStateHessian(initialDesiredState, initialDesiredControl, Q);
-      costFunction.getCostControlHessian(initialDesiredState, initialDesiredControl, R);
-      terminalCostFunction.getCostStateHessian(initialDesiredState, initialDesiredControl, Qf);
+      costFunction.getCostStateHessian(dynamicState, initialDesiredState, initialDesiredControl, Q);
+      costFunction.getCostControlHessian(dynamicState, initialDesiredState, initialDesiredControl, R);
+      terminalCostFunction.getCostStateHessian(dynamicState, initialDesiredState, initialDesiredControl, Qf);
 
       dynamics.getDynamicsStateGradient(dynamicState, initialDesiredState, initialDesiredControl, A);
       dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, B);

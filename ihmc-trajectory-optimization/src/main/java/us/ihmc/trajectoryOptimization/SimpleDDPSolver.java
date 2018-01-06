@@ -36,7 +36,7 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
                                currentControl, updatedControl);
 
          // compute cost
-         cost += costFunction.getCost(updatedControl, updatedState, desiredControl, desiredState);
+         cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredControl, desiredState);
 
          // integrate
          if (t < desiredTrajectory.size() - 1)
@@ -56,8 +56,8 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
       DiscreteTrajectory desiredStateTrajectory = desiredTrajectory.getStateTrajectory();
       DiscreteTrajectory desiredControlTrajectory = desiredTrajectory.getControlTrajectory();
 
-      terminalCostFunction.getCostStateHessian(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), valueStateHessianTrajectory.get(endIndex));
-      terminalCostFunction.getCostStateGradient(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), desiredControlTrajectory.get(endIndex),
+      terminalCostFunction.getCostStateHessian(dynamicsState, controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), valueStateHessianTrajectory.get(endIndex));
+      terminalCostFunction.getCostStateGradient(dynamicsState, controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), desiredControlTrajectory.get(endIndex),
                                                 desiredStateTrajectory.get(endIndex), valueStateGradientTrajectory.get(endIndex));
 
       for (int t = endIndex; t >= startIndex; t--)

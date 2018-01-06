@@ -32,20 +32,22 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
    private final DenseMatrix64F H;
 
    private final DiscreteHybridDynamics<E> dynamics;
-   private final LQTrackingCostFunction costFunction;
-   private final LQTrackingCostFunction terminalCostFunction;
+   private final LQTrackingCostFunction<E> costFunction;
+   private final LQTrackingCostFunction<E> terminalCostFunction;
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F tempMatrix2 = new DenseMatrix64F(0, 0);
 
    private final boolean debug;
 
-   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction)
+   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction<E> costFunction,
+                                               LQTrackingCostFunction<E> terminalCostFunction)
    {
       this(dynamics, costFunction, terminalCostFunction, false);
    }
 
-   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
+   public DiscreteTimeVaryingTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction<E> costFunction,
+                                               LQTrackingCostFunction<E> terminalCostFunction, boolean debug)
    {
       this.dynamics = dynamics;
       this.costFunction = costFunction;
@@ -117,7 +119,7 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
       DenseMatrix64F currentDesiredControl = desiredTrajectory.getControl(i);
       DenseMatrix64F currentDesiredState = desiredTrajectory.getState(i);
 
-      terminalCostFunction.getCostStateHessian(currentDesiredState, currentDesiredControl, Qf);
+      terminalCostFunction.getCostStateHessian(dynamicState, currentDesiredState, currentDesiredControl, Qf);
 
       DenseMatrix64F initialS1 = s1Trajectory.get(i);
       DenseMatrix64F initialS2 = s2Trajectory.get(i);
@@ -132,8 +134,8 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
          currentDesiredState = desiredTrajectory.getState(i);
          dynamics.getDynamicsStateGradient(dynamicState, currentDesiredState, currentDesiredControl, A);
          dynamics.getDynamicsControlGradient(dynamicState, currentDesiredState, currentDesiredControl, B);
-         costFunction.getCostStateHessian(currentDesiredState, currentDesiredControl, Q);
-         costFunction.getCostControlHessian(currentDesiredState, currentDesiredControl, R);
+         costFunction.getCostStateHessian(dynamicState, currentDesiredState, currentDesiredControl, Q);
+         costFunction.getCostControlHessian(dynamicState, currentDesiredState, currentDesiredControl, R);
 
          if (debug)
          {

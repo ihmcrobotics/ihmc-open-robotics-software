@@ -5,6 +5,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMSimpleCostFunction;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 
 import static org.junit.Assert.assertEquals;
 
@@ -58,7 +59,7 @@ public class LIPMSimpleCostFunctionTest
       double stateCost = 0.25e-4 + 0.625e-6 + 0.4 + 1e-2 + 1e-2 + 0.25e-2;
       double controlCost = 0.09 + 0.0625 + 0.0025;
 
-      double cost = costFunction.getCost(currentControl, currentState, desiredControl, desiredState);
+      double cost = costFunction.getCost(DefaultDiscreteState.DEFAULT, currentControl, currentState, desiredControl, desiredState);
 
       assertEquals(stateCost + controlCost, cost, 1e-5);
    }
@@ -118,7 +119,7 @@ public class LIPMSimpleCostFunctionTest
       gradientExpected.set(4, 0, 1e-2);
       gradientExpected.set(5, 0, 0.5e-2);
 
-      costFunction.getCostStateGradient(currentControl, currentState, desiredControl, desiredState, gradient);
+      costFunction.getCostStateGradient(DefaultDiscreteState.DEFAULT, currentControl, currentState, desiredControl, desiredState, gradient);
 
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
    }
@@ -175,7 +176,7 @@ public class LIPMSimpleCostFunctionTest
       gradientExpected.set(1, 0, -0.25);
       gradientExpected.set(2, 0, 50e-6);
 
-      costFunction.getCostControlGradient(currentControl, currentState, desiredControl, desiredState, gradient);
+      costFunction.getCostControlGradient(DefaultDiscreteState.DEFAULT, currentControl, currentState, desiredControl, desiredState, gradient);
 
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
    }
@@ -206,7 +207,7 @@ public class LIPMSimpleCostFunctionTest
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      costFunction.getCostControlHessian(currentControl, currentState, hessian);
+      costFunction.getCostControlHessian(DefaultDiscreteState.DEFAULT, currentControl, currentState, hessian);
 
       JUnitTools.assertMatrixEquals(R, hessian, 1e-10);
    }
@@ -240,7 +241,7 @@ public class LIPMSimpleCostFunctionTest
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      costFunction.getCostStateHessian(currentControl, currentState, hessian);
+      costFunction.getCostStateHessian(DefaultDiscreteState.DEFAULT, currentControl, currentState, hessian);
 
       JUnitTools.assertMatrixEquals(Q, hessian, 1e-10);
    }
@@ -267,7 +268,7 @@ public class LIPMSimpleCostFunctionTest
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      costFunction.getCostStateGradientOfControlGradient(currentControl, currentState, hessian);
+      costFunction.getCostStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, currentControl, currentState, hessian);
 
       JUnitTools.assertMatrixEquals(hessianExpected, hessian, 1e-10);
    }

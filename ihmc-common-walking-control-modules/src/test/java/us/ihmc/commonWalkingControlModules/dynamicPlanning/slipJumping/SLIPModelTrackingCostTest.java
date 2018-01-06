@@ -9,8 +9,6 @@ import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.Random;
 
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
 public class SLIPModelTrackingCostTest
@@ -635,6 +633,120 @@ public class SLIPModelTrackingCostTest
          DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
          currentControlModified.add(partialControl, 0, epsilon);
          costFunction.getCostStateGradient(SLIPState.STANCE, currentControlModified, currentState, modifiedGradient);
+
+         for (int state = 0; state < stateVectorSize; state++)
+            expectedCostHessian.set(state, partialControl, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
+      }
+
+
+      JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testCostStateHessianNumericalDifferentiationFlight()
+   {
+      double epsilon = 1e-9;
+      double mass = 15.0;
+      double nominalLength = 1.5;
+      double gravityZ = 9.81;
+      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F costHessian = new DenseMatrix64F(stateVectorSize, stateVectorSize);
+      DenseMatrix64F expectedCostHessian = new DenseMatrix64F(stateVectorSize, stateVectorSize);
+
+      DenseMatrix64F currentGradient = new DenseMatrix64F(stateVectorSize, 1);
+      DenseMatrix64F modifiedGradient = new DenseMatrix64F(stateVectorSize, 1);
+
+      costFunction.getCostStateHessian(SLIPState.FLIGHT, currentControl, currentState, costHessian);
+      costFunction.getCostStateGradient(SLIPState.FLIGHT, currentControl, currentState, currentGradient);
+
+
+      for (int partialState = 0; partialState < stateVectorSize; partialState++)
+      {
+         DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+         currentStateModified.add(partialState, 0, epsilon);
+         costFunction.getCostStateGradient(SLIPState.FLIGHT, currentControl, currentStateModified, modifiedGradient);
+
+         for (int state = 0; state < stateVectorSize; state++)
+            expectedCostHessian.set(state, partialState, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
+      }
+
+
+      JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testCostControlHessianNumericalDifferentiationFlight()
+   {
+      double epsilon = 1e-9;
+      double mass = 15.0;
+      double nominalLength = 1.5;
+      double gravityZ = 9.81;
+      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F costHessian = new DenseMatrix64F(controlVectorSize, controlVectorSize);
+      DenseMatrix64F expectedCostHessian = new DenseMatrix64F(controlVectorSize, controlVectorSize);
+
+      DenseMatrix64F currentGradient = new DenseMatrix64F(controlVectorSize, 1);
+      DenseMatrix64F modifiedGradient = new DenseMatrix64F(controlVectorSize, 1);
+
+      costFunction.getCostControlHessian(SLIPState.FLIGHT, currentControl, currentState, costHessian);
+      costFunction.getCostControlGradient(SLIPState.FLIGHT, currentControl, currentState, currentGradient);
+
+
+      for (int partialControl = 0; partialControl < controlVectorSize; partialControl++)
+      {
+         DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+         currentControlModified.add(partialControl, 0, epsilon);
+         costFunction.getCostControlGradient(SLIPState.FLIGHT, currentControlModified, currentState, modifiedGradient);
+
+         for (int control = 0; control < controlVectorSize; control++)
+            expectedCostHessian.set(control, partialControl, (modifiedGradient.get(control) - currentGradient.get(control)) / epsilon);
+      }
+
+
+      JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testCostStateControlHessianNumericalDifferentiationFlight()
+   {
+      double epsilon = 1e-9;
+      double mass = 15.0;
+      double nominalLength = 1.5;
+      double gravityZ = 9.81;
+      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F costHessian = new DenseMatrix64F(stateVectorSize, controlVectorSize);
+      DenseMatrix64F expectedCostHessian = new DenseMatrix64F(stateVectorSize, controlVectorSize);
+
+      DenseMatrix64F currentGradient = new DenseMatrix64F(stateVectorSize, 1);
+      DenseMatrix64F modifiedGradient = new DenseMatrix64F(stateVectorSize, 1);
+
+      costFunction.getCostControlGradientOfStateGradient(SLIPState.FLIGHT, currentControl, currentState, costHessian);
+      costFunction.getCostStateGradient(SLIPState.FLIGHT, currentControl, currentState, currentGradient);
+
+
+      for (int partialControl = 0; partialControl < controlVectorSize; partialControl++)
+      {
+         DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+         currentControlModified.add(partialControl, 0, epsilon);
+         costFunction.getCostStateGradient(SLIPState.FLIGHT, currentControlModified, currentState, modifiedGradient);
 
          for (int state = 0; state < stateVectorSize; state++)
             expectedCostHessian.set(state, partialControl, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
