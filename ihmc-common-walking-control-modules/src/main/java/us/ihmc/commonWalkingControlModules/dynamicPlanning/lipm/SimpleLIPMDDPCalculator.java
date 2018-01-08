@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.trajectoryOptimization.*;
+import us.ihmc.trajectoryOptimization.DDPSolver;
 
 public class SimpleLIPMDDPCalculator
 {
@@ -83,7 +84,7 @@ public class SimpleLIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      ddpSolver.initializeTrajectoriesFromDesireds(currentState, desiredTrajectory);
+      ddpSolver.initializeSequencesFromDesireds(currentState, desiredTrajectory);
       //ddpSolver.solveBackwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
       //ddpSolver.solveForwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
       //ddpSolver.initializeDDPWithLQRSolution();

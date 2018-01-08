@@ -5,6 +5,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.trajectoryOptimization.*;
+import us.ihmc.trajectoryOptimization.SimpleDDPSolver;
+import us.ihmc.trajectoryOptimization.DiscreteTimeVaryingTrackingLQRSolver;
+import us.ihmc.trajectoryOptimization.LQRSolverInterface;
 
 public class LIPMDDPCalculator
 {
@@ -101,19 +104,19 @@ public class LIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      lqrSolver.setDesiredTrajectory(desiredTrajectory, currentState);
+      lqrSolver.setDesiredSequence(desiredTrajectory, currentState);
       lqrSolver.solveRiccatiEquation(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
-      lqrSolver.computeOptimalTrajectories(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
-      lqrSolver.getOptimalTrajectory(optimalTrajectory);
+      lqrSolver.computeOptimalSequences(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
+      lqrSolver.getOptimalSequence(optimalTrajectory);
 
-      ddpSolver.initializeFromLQRSolution(DefaultDiscreteState.DEFAULT, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainTrajectory(),
-                                          lqrSolver.getOptimalFeedForwardControlTrajectory());
+      ddpSolver.initializeFromLQRSolution(DefaultDiscreteState.DEFAULT, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainSequence(),
+                                          lqrSolver.getOptimalFeedForwardControlSequence());
    }
 
    public int solve()
    {
-      int iterations = ddpSolver.computeTrajectory(DefaultDiscreteState.DEFAULT);
-      optimalTrajectory.set(ddpSolver.getOptimalTrajectory());
+      int iterations = ddpSolver.computeSequence(DefaultDiscreteState.DEFAULT);
+      optimalTrajectory.set(ddpSolver.getOptimalSequence());
       return iterations;
    }
 
