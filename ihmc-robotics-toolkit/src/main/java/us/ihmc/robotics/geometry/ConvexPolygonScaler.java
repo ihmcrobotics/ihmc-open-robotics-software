@@ -285,36 +285,15 @@ public class ConvexPolygonScaler
 
       if (exteriorPolygon.getNumberOfVertices() == 1)
       {
-         boolean updatedPolygon = false;
-         Point2DReadOnly exteriorVertex = exteriorPolygon.getVertex(0);
-
-         for (int j = 0; j < interiorPolygon.getNumberOfVertices(); j++)
+         if (distanceInside < 0.0)
          {
-            Point2DReadOnly interiorVertex = interiorPolygon.getVertex(j);
-            vectorToInteriorPolygonVertex.set(interiorVertex);
-            double distanceToVertex = vectorToInteriorPolygonVertex.length();
-
-            double distancePast = -distanceInside - distanceToVertex;
-
-            if (distanceToVertex + distanceInside < 0.0)
-            {
-               scaledPolygonToPack.addVertex(exteriorVertex.getX() + distancePast * interiorVertex.getX() / distanceToVertex,
-                                             exteriorVertex.getY() + distancePast * interiorVertex.getY() / distanceToVertex);
-               updatedPolygon = true;
-            }
-
-         }
-
-         if (updatedPolygon)
-         {
-            scaledPolygonToPack.update();
-            return true;
+            scaleConvexPolygon(exteriorPolygon, distanceInside, scaledPolygonToPack);
+            return scaleConvexPolygonToContainInteriorPolygon(scaledPolygonToPack, interiorPolygon, 0.0, scaledPolygonToPack);
          }
          else
          {
             scaledPolygonToPack.setAndUpdate(exteriorPolygon);
             return false;
-
          }
       }
 
