@@ -3,6 +3,7 @@ package us.ihmc.trajectoryOptimization;
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.trajectoryOptimization.DiscreteOptimizationData;
 
 import java.util.List;
 
