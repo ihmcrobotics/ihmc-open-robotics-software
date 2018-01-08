@@ -168,11 +168,6 @@ public class ConvexPolygonScaler
 
 
    private final Vector2D vectorToInteriorPolygonVertex = new Vector2D();
-   /**
-    * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
-    * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
-    * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
-    */
 
    /**
     * This function computes the inscribed polygon that represents the constraint on the centroid location of an interior polygon that must
