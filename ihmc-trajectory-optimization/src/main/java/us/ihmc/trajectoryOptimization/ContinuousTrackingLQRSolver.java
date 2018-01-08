@@ -89,7 +89,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    public void setDesiredTrajectory(DiscreteOptimizationTrajectory desiredTrajectory, DenseMatrix64F initialState)
    {
       this.desiredTrajectory.set(desiredTrajectory);
-      this.optimalTrajectory.setZeroTrajectory(desiredTrajectory);
+      this.optimalTrajectory.setZero(desiredTrajectory);
 
       this.S2Trajectory.clear();
       this.S1Trajectory.clear();

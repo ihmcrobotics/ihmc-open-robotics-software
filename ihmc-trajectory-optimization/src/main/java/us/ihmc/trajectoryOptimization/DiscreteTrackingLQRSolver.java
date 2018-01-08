@@ -86,7 +86,7 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
    public void setDesiredTrajectory(DiscreteOptimizationTrajectory desiredTrajectory, DenseMatrix64F initialState)
    {
       this.desiredTrajectory.set(desiredTrajectory);
-      this.optimalTrajectory.setZeroTrajectory(desiredTrajectory);
+      this.optimalTrajectory.setZero(desiredTrajectory);
 
       this.feedbackGainTrajectory.clear();
       this.feedforwardTrajectory.clear();

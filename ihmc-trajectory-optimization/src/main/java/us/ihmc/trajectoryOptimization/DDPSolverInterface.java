@@ -8,14 +8,14 @@ import java.util.List;
 
 public interface DDPSolverInterface<E extends Enum>
 {
-   void initializeFromLQRSolution(E dynamicsState, DiscreteOptimizationTrajectory optimalTrajectory, DiscreteOptimizationTrajectory desiredTrajectory,
-                                  RecyclingArrayList<DenseMatrix64F> feedbackGainTrajectory, RecyclingArrayList<DenseMatrix64F> feedForwardTrajectory);
-   void initializeTrajectoriesFromDesireds(DenseMatrix64F initialCoM, DiscreteOptimizationTrajectory desiredTrajectory);
+   void initializeFromLQRSolution(E dynamicsState, DiscreteOptimizationData optimalSequence, DiscreteOptimizationData desiredSequence,
+                                  RecyclingArrayList<DenseMatrix64F> feedbackGainSequence, RecyclingArrayList<DenseMatrix64F> feedForwardSequence);
+   void initializeSequencesFromDesireds(DenseMatrix64F initialCoM, DiscreteOptimizationData desiredSequence);
 
-   DiscreteOptimizationTrajectory getOptimalTrajectory();
+   DiscreteOptimizationData getOptimalSequence();
 
-   int computeTrajectory(E dynamicsState);
-   int computeTrajectory(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices);
-   double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationTrajectory updatedTrajectory);
-   boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationTrajectory trajectory);
+   int computeSequence(E dynamicsState);
+   int computeSequence(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices);
+   double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence);
+   boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationData trajectory);
 }

@@ -4,9 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class DiscreteTrajectory extends RecyclingArrayList<DenseMatrix64F>
+public class DiscreteTrajectory extends DiscreteSequence
 {
    private double startTime = Double.NaN;
    private double endTime = Double.NaN;
@@ -16,13 +15,12 @@ public class DiscreteTrajectory extends RecyclingArrayList<DenseMatrix64F>
 
    public DiscreteTrajectory(int dimensionality)
    {
-      this(dimensionality, 1);
+      super(dimensionality);
    }
 
    public DiscreteTrajectory(int xDimension, int yDimension)
    {
-      super(1000, new VariableVectorBuilder(xDimension, yDimension));
-      this.clear();
+      super(xDimension, yDimension);
    }
 
    public void set(DiscreteTrajectory other)
@@ -45,9 +43,7 @@ public class DiscreteTrajectory extends RecyclingArrayList<DenseMatrix64F>
       this.deltaT = deltaT;
       computeRequiredDeltaT((endTime - startTime), deltaT);
 
-      this.clear();
-      for (int i = 0; i < numberOfTimeSteps; i++)
-         this.add().zero();
+      this.setLength(numberOfTimeSteps);
    }
 
    public void compute(double time, DenseMatrix64F valueToPack)
@@ -64,13 +60,6 @@ public class DiscreteTrajectory extends RecyclingArrayList<DenseMatrix64F>
 
       CommonOps.scale((1.0 - alpha), get(startIndex), valueToPack);
       CommonOps.addEquals(valueToPack, alpha, get(startIndex + 1));
-   }
-
-   public void zero(int size)
-   {
-      this.clear();
-      for (int i = 0; i < size; i++)
-         this.add().zero();
    }
 
    public double getStartTime()
