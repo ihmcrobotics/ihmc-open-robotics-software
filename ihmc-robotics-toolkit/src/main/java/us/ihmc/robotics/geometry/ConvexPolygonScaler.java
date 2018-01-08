@@ -188,47 +188,96 @@ public class ConvexPolygonScaler
          return true;
       }
 
-      // TODO
       if (exteriorPolygon.getNumberOfVertices() == 2)
       {
-         Point2DReadOnly vertex0 = exteriorPolygon.getVertex(0);
-         Point2DReadOnly vertex1 = exteriorPolygon.getVertex(1);
-         polygonAsLineSegment.set(vertex0, vertex1);
+         Point2DReadOnly exteriorVertex1 = exteriorPolygon.getVertex(0);
+         Point2DReadOnly exteriorVertex2 = exteriorPolygon.getVertex(1);
+         edgeOnQ.set(exteriorVertex1, exteriorVertex2);
 
+         // first, expanding the polygon line into a six pointed polygon, then shrinking this polygon to contain the interior polygon
          if(distanceInside < 0.0)
          {
             scaledPolygonToPack.clear();
-            polygonAsLineSegment.direction(true, normalizedVector);
+            edgeOnQ.getDirection( normalizedVector);
             normalizedVector.scale(-distanceInside);
-            scaledPolygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
-            scaledPolygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
+            scaledPolygonToPack.addVertex(exteriorVertex1.getX() - normalizedVector.getX(), exteriorVertex1.getY() - normalizedVector.getY());
+            scaledPolygonToPack.addVertex(exteriorVertex2.getX() + normalizedVector.getX(), exteriorVertex2.getY() + normalizedVector.getY());
 
-            polygonAsLineSegment.perpendicular(true, normalizedVector);
+            edgeOnQ.perpendicularVector(normalizedVector);
             normalizedVector.scale(distanceInside);
 
-            scaledPolygonToPack.addVertex(vertex0.getX() + normalizedVector.getX(), vertex0.getY() + normalizedVector.getY());
-            scaledPolygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
-            scaledPolygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
-            scaledPolygonToPack.addVertex(vertex1.getX() - normalizedVector.getX(), vertex1.getY() - normalizedVector.getY());
+            scaledPolygonToPack.addVertex(exteriorVertex1.getX() + normalizedVector.getX(), exteriorVertex1.getY() + normalizedVector.getY());
+            scaledPolygonToPack.addVertex(exteriorVertex1.getX() - normalizedVector.getX(), exteriorVertex1.getY() - normalizedVector.getY());
+            scaledPolygonToPack.addVertex(exteriorVertex2.getX() + normalizedVector.getX(), exteriorVertex2.getY() + normalizedVector.getY());
+            scaledPolygonToPack.addVertex(exteriorVertex2.getX() - normalizedVector.getX(), exteriorVertex2.getY() - normalizedVector.getY());
             scaledPolygonToPack.update();
-            return true;
+
+            return scaleConvexPolygonToContainInteriorPolygon(scaledPolygonToPack, interiorPolygon, 0.0, scaledPolygonToPack);
          }
 
-         if (vertex0.distance(vertex1) < 2.0 * distanceInside)
+         double extraDistanceToPoint1 = 0.0;
+
+         int leftMostIndexOnInteriorPolygon = interiorPolygon.getMinXIndex();
+         Point2DReadOnly interiorVertex = interiorPolygon.getVertex(leftMostIndexOnInteriorPolygon);
+         int nextInteriorVertexIndex = interiorPolygon.getNextVertexIndex(leftMostIndexOnInteriorPolygon);
+         Point2DReadOnly nextInteriorVertex = interiorPolygon.getVertex(nextInteriorVertexIndex);
+
+         for (int j = 0; j < interiorPolygon.getNumberOfVertices(); j++)
          {
-            Point2D midPoint = new Point2D(vertex0);
-            midPoint.add(vertex1);
-            midPoint.scale(0.5);
+            vectorToInteriorPolygonVertex.set(interiorVertex);
+            double projectedDistanceToPoint = edgeOnQ.getDirectionX() * vectorToInteriorPolygonVertex.getX() +
+                  edgeOnQ.getDirectionY() * vectorToInteriorPolygonVertex.getY();
+
+            extraDistanceToPoint1 = Math.max(extraDistanceToPoint1, -projectedDistanceToPoint);
+
+            // // FIXME: 1/8/18 clean this up?
+            interiorVertex = nextInteriorVertex;
+            nextInteriorVertexIndex = interiorPolygon.getNextVertexIndex(nextInteriorVertexIndex);
+            nextInteriorVertex = interiorPolygon.getVertex(nextInteriorVertexIndex);
+         }
+
+
+         edgeOnQ.negateDirection();
+         double extraDistanceToPoint2 = 0.0;
+
+         leftMostIndexOnInteriorPolygon = interiorPolygon.getMinXIndex();
+         interiorVertex = interiorPolygon.getVertex(leftMostIndexOnInteriorPolygon);
+         nextInteriorVertexIndex = interiorPolygon.getNextVertexIndex(leftMostIndexOnInteriorPolygon);
+         nextInteriorVertex = interiorPolygon.getVertex(nextInteriorVertexIndex);
+
+
+         for (int j = 0; j < interiorPolygon.getNumberOfVertices(); j++)
+         {
+            vectorToInteriorPolygonVertex.set(interiorVertex);
+            double projectedDistanceToPoint = edgeOnQ.getDirectionX() * vectorToInteriorPolygonVertex.getX() +
+                  edgeOnQ.getDirectionY() * vectorToInteriorPolygonVertex.getY();
+
+            extraDistanceToPoint2 = Math.max(extraDistanceToPoint2, -projectedDistanceToPoint);
+
+            // // FIXME: 1/8/18 clean this up?
+            interiorVertex = nextInteriorVertex;
+            nextInteriorVertexIndex = interiorPolygon.getNextVertexIndex(nextInteriorVertexIndex);
+            nextInteriorVertex = interiorPolygon.getVertex(nextInteriorVertexIndex);
+         }
+
+
+         double percentAlongSegmentVertex1 = (distanceInside + extraDistanceToPoint1) / polygonAsLineSegment.length();
+         double percentAlongSegmentVertex2 = (distanceInside + extraDistanceToPoint2) / polygonAsLineSegment.length();
+
+         // the line segment collapses to a point
+         if (percentAlongSegmentVertex1 >= 0.5 && percentAlongSegmentVertex2 >= 0.5)
+         {
+            polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(0.5, newVertex0);
 
             scaledPolygonToPack.clear();
-            scaledPolygonToPack.addVertex(midPoint);
+            scaledPolygonToPack.addVertex(newVertex0);
             scaledPolygonToPack.update();
             return false;
          }
 
-         double percentageAlongSegment = distanceInside / polygonAsLineSegment.length();
-         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(percentageAlongSegment, newVertex0);
-         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(1 - percentageAlongSegment, newVertex1);
+         // the line segment is shrunk
+         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(Math.min(percentAlongSegmentVertex1, 0.5), newVertex0);
+         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(1.0 - Math.min(percentAlongSegmentVertex2, 0.5), newVertex1);
 
          newVertices.clear();
          newVertices.add(newVertex0);
@@ -239,22 +288,41 @@ public class ConvexPolygonScaler
          return true;
       }
 
-      // TODO
       if (exteriorPolygon.getNumberOfVertices() == 1)
       {
-         if(distanceInside < 0.0)
+         boolean updatedPolygon = false;
+         Point2DReadOnly exteriorVertex = exteriorPolygon.getVertex(0);
+
+         for (int j = 0; j < interiorPolygon.getNumberOfVertices(); j++)
          {
-            Point2DReadOnly vertex0 = exteriorPolygon.getVertex(0);
-            scaledPolygonToPack.addVertex(vertex0.getX() + distanceInside, vertex0.getY() + distanceInside);
-            scaledPolygonToPack.addVertex(vertex0.getX() + distanceInside, vertex0.getY() - distanceInside);
-            scaledPolygonToPack.addVertex(vertex0.getX() - distanceInside, vertex0.getY() + distanceInside);
-            scaledPolygonToPack.addVertex(vertex0.getX() - distanceInside, vertex0.getY() - distanceInside);
+            Point2DReadOnly interiorVertex = interiorPolygon.getVertex(j);
+            vectorToInteriorPolygonVertex.set(interiorVertex);
+            double distanceToVertex = vectorToInteriorPolygonVertex.length();
+
+            double distancePast = -distanceInside - distanceToVertex;
+
+            if (distanceToVertex + distanceInside < 0.0)
+            {
+               scaledPolygonToPack.addVertex(exteriorVertex.getX() + distancePast * interiorVertex.getX() / distanceToVertex,
+                                             exteriorVertex.getY() + distancePast * interiorVertex.getY() / distanceToVertex);
+               updatedPolygon = true;
+            }
+
+         }
+
+         if (updatedPolygon)
+         {
             scaledPolygonToPack.update();
             return true;
          }
-         scaledPolygonToPack.setAndUpdate(exteriorPolygon);
-         return false;
+         else
+         {
+            scaledPolygonToPack.setAndUpdate(exteriorPolygon);
+            return false;
+
+         }
       }
+
 
       rays.clear();
 
@@ -281,13 +349,13 @@ public class ConvexPolygonScaler
          for (int j = 0; j < interiorPolygon.getNumberOfVertices(); j++)
          {
             vectorToInteriorPolygonVertex.set(interiorVertex);
-            //vectorToInteriorPolygonVertex.sub(interiorCentroid);
 
             double distancePerpendicularToEdge = linePerpendicularToEdgeOnQ.getDirectionX() * vectorToInteriorPolygonVertex.getX() +
                   linePerpendicularToEdgeOnQ.getDirectionY() * vectorToInteriorPolygonVertex.getY();
 
             extraDistance = Math.max(extraDistance, -distancePerpendicularToEdge);
 
+            // // FIXME: 1/8/18 clean this up?
             interiorVertex = nextInteriorVertex;
             nextInteriorVertexIndex = interiorPolygon.getNextVertexIndex(nextInteriorVertexIndex);
             nextInteriorVertex = interiorPolygon.getVertex(nextInteriorVertexIndex);
