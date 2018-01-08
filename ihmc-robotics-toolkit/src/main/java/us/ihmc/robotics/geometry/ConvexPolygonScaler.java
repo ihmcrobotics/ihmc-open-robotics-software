@@ -22,6 +22,7 @@ public class ConvexPolygonScaler
    private final Line2D linePerpendicularToEdgeOnQ = new Line2D();
    private final Point2D referencePoint = new Point2D();
    private final Vector2D normalizedVector = new Vector2D();
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    
    private final ArrayList<Line2D> edgePool = new ArrayList<Line2D>();
    
@@ -185,6 +186,7 @@ public class ConvexPolygonScaler
 
       if (exteriorPolygon.getNumberOfVertices() == 2)
       {
+
          Point2DReadOnly exteriorVertex1 = exteriorPolygon.getVertex(0);
          Point2DReadOnly exteriorVertex2 = exteriorPolygon.getVertex(1);
          edgeOnQ.set(exteriorVertex1, exteriorVertex2);
@@ -192,22 +194,8 @@ public class ConvexPolygonScaler
          // first, expanding the polygon line into a six pointed polygon, then shrinking this polygon to contain the interior polygon
          if(distanceInside < 0.0)
          {
-            scaledPolygonToPack.clear();
-            edgeOnQ.getDirection( normalizedVector);
-            normalizedVector.scale(-distanceInside);
-            scaledPolygonToPack.addVertex(exteriorVertex1.getX() - normalizedVector.getX(), exteriorVertex1.getY() - normalizedVector.getY());
-            scaledPolygonToPack.addVertex(exteriorVertex2.getX() + normalizedVector.getX(), exteriorVertex2.getY() + normalizedVector.getY());
-
-            edgeOnQ.perpendicularVector(normalizedVector);
-            normalizedVector.scale(distanceInside);
-
-            scaledPolygonToPack.addVertex(exteriorVertex1.getX() + normalizedVector.getX(), exteriorVertex1.getY() + normalizedVector.getY());
-            scaledPolygonToPack.addVertex(exteriorVertex1.getX() - normalizedVector.getX(), exteriorVertex1.getY() - normalizedVector.getY());
-            scaledPolygonToPack.addVertex(exteriorVertex2.getX() + normalizedVector.getX(), exteriorVertex2.getY() + normalizedVector.getY());
-            scaledPolygonToPack.addVertex(exteriorVertex2.getX() - normalizedVector.getX(), exteriorVertex2.getY() - normalizedVector.getY());
-            scaledPolygonToPack.update();
-
-            return scaleConvexPolygonToContainInteriorPolygon(scaledPolygonToPack, interiorPolygon, 0.0, scaledPolygonToPack);
+            scaleConvexPolygon(exteriorPolygon, distanceInside, tempPolygon);
+            return scaleConvexPolygonToContainInteriorPolygon(tempPolygon, interiorPolygon, 0.0, scaledPolygonToPack);
          }
 
          double extraDistanceToPoint1 = 0.0;
@@ -287,8 +275,8 @@ public class ConvexPolygonScaler
       {
          if (distanceInside < 0.0)
          {
-            scaleConvexPolygon(exteriorPolygon, distanceInside, scaledPolygonToPack);
-            return scaleConvexPolygonToContainInteriorPolygon(scaledPolygonToPack, interiorPolygon, 0.0, scaledPolygonToPack);
+            scaleConvexPolygon(exteriorPolygon, distanceInside, tempPolygon);
+            return scaleConvexPolygonToContainInteriorPolygon(tempPolygon, interiorPolygon, 0.0, scaledPolygonToPack);
          }
          else
          {
