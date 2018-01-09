@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController;
 
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationQPSolver;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationSolutionHandler;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationSolutionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;

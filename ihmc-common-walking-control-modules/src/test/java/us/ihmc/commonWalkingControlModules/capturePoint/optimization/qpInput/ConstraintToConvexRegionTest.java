@@ -6,7 +6,6 @@ import org.ejml.ops.MatrixFeatures;
 import org.jcodec.common.Assert;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.qpInput.ConstraintToConvexRegion;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
