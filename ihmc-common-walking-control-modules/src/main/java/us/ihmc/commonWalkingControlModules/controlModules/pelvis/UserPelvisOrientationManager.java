@@ -10,10 +10,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -34,7 +34,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
 
    private final FramePose homePose;
 
-   public UserPelvisOrientationManager(YoPID3DGains gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public UserPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       super(PelvisOrientationControlMode.USER);
 
@@ -57,7 +57,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       parentRegistry.addChild(registry);
    }
 
-   public void setWeights(Vector3D angularWeight)
+   public void setWeights(Vector3DReadOnly angularWeight)
    {
       taskspaceControlState.setWeights(angularWeight, null);
    }

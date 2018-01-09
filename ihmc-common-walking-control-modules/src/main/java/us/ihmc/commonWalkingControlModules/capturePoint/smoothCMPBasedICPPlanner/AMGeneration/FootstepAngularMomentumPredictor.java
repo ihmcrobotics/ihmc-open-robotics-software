@@ -271,13 +271,11 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public void updateListeners()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override
    public void createVisualizerForConstantAngularMomentum(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
    {
-      // TODO Auto-generated method stub
    }
 
    @Override

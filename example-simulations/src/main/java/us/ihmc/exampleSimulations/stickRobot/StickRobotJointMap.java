@@ -9,7 +9,7 @@ import static us.ihmc.exampleSimulations.stickRobot.StickRobotOrderedJointMap.jo
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -263,7 +263,6 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public boolean isTorqueVelocityLimitsEnabled()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
@@ -348,14 +347,12 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public String getLegJointName(RobotSide robotSide, LegJointName legJointName)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public String getArmJointName(RobotSide robotSide, ArmJointName armJointName)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -374,14 +371,12 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public String[] getPositionControlledJointsForSimulation()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

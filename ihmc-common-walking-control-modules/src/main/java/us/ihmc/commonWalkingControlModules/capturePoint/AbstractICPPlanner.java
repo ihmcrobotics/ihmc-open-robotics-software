@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -217,7 +218,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       transferDurationAlphas.add(transferDurationAlpha);
    }
 
-   public void initializeParameters(ICPTrajectoryPlannerParameters parameters)
+   public void initializeParameters(ICPPlannerParameters parameters)
    {
       defaultTransferDurationAlpha.set(parameters.getTransferSplitFraction());
       defaultSwingDurationAlpha.set(parameters.getSwingSplitFraction());

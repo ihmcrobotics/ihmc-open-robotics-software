@@ -164,7 +164,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, false);
       drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 1.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 1.5);
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
 
       humanoidReferenceFrames.updateFrames();

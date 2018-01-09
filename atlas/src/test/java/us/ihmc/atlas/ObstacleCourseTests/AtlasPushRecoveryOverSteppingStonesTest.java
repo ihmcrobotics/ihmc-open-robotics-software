@@ -4,8 +4,8 @@ import org.junit.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSimpleICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -41,7 +41,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends DRCPushRecoveryOver
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return new AtlasSimpleICPOptimizationParameters(false)
+                  return new AtlasICPOptimizationParameters(false)
                   {
                      @Override
                      public boolean useAngularMomentum()

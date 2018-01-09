@@ -18,7 +18,7 @@ import us.ihmc.robotDataLogger.CameraAnnouncement;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakeFileType;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
-import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
@@ -323,9 +323,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
-   public void setYoVariableClient(YoVariableClient client)
-   {
-   }
 
 
    public boolean updateYoVariables()
@@ -346,7 +343,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    @SuppressWarnings("resource")
    @Override
-   public void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
+   public void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       logHandshake(handshake, handshakeParser);
       
@@ -465,8 +462,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public boolean executeVariableChangedListeners()
+   public void connected()
    {
-      return false;
+      
    }
 }

@@ -1659,7 +1659,11 @@ public abstract class JointPhysics< J extends Joint>
    {
       if (groundContactPointGroups != null)
       {
-         list.addAll(groundContactPointGroups.get(groundContactGroupIdentifier).getGroundContactPoints());
+         GroundContactPointGroup groundContactPointGroup = groundContactPointGroups.get(groundContactGroupIdentifier);
+         if(groundContactPointGroup != null)
+         {
+            list.addAll(groundContactPointGroup.getGroundContactPoints());
+         }
       }
 
       // Recurse over the children:

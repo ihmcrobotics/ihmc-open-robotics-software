@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -184,17 +185,26 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
+   @Override
    public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
-      super.initializeParameters((ICPTrajectoryPlannerParameters) icpPlannerParameters);
+      super.initializeParameters(icpPlannerParameters);
 
-      icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
-      icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnFinalCMP(icpPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());
+      if (icpPlannerParameters instanceof ContinuousCMPICPPlannerParameters)
+      {
+         ContinuousCMPICPPlannerParameters continuousCMPICPPlannerParameters = (ContinuousCMPICPPlannerParameters) icpPlannerParameters;
+         icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(continuousCMPICPPlannerParameters.getMaxDurationForSmoothingEntryToExitCoPSwitch());
+         icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnFinalCMP(continuousCMPICPPlannerParameters.getMinTimeToSpendOnExitCoPInSingleSupport());
 
-      numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
-      useTwoConstantCMPsPerSupport.set(icpPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1);
+         numberFootstepsToConsider.set(continuousCMPICPPlannerParameters.getNumberOfFootstepsToConsider());
+         useTwoConstantCMPsPerSupport.set(continuousCMPICPPlannerParameters.getNumberOfCoPWayPointsPerFoot() > 1);
 
-      referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
+         referenceCMPsCalculator.initializeParameters(continuousCMPICPPlannerParameters);
+      }
+      else
+      {
+         throw new RuntimeException("Tried to submit the wrong type of parameters.");
+      }
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)

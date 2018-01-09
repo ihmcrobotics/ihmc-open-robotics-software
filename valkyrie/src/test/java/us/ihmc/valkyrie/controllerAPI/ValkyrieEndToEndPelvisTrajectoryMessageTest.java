@@ -83,7 +83,7 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 300000)
    public void testSingleWaypointThenManualChange() throws Exception
    {
       super.testSingleWaypointThenManualChange();

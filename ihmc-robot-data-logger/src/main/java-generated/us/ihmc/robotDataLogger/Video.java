@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "Video" defined in LogProperties.idl. 
@@ -40,7 +37,7 @@ public class Video
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -56,7 +53,7 @@ public class Video
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		

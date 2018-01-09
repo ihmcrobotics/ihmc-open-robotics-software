@@ -1,13 +1,5 @@
 package us.ihmc.robotDataLogger;
 
-import java.io.IOException;
-
-import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.common.SerializedPayload;
-import us.ihmc.idl.InterchangeSerializer;
-import us.ihmc.idl.CDR;
-import us.ihmc.idl.IDLSequence;
-
 /**
 * 
 * Topic data type of the struct "AppearanceDefinitionMessage" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
@@ -16,9 +8,9 @@ import us.ihmc.idl.IDLSequence;
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.ihmc.robotDataLogger.AppearanceDefinitionMessage>
+public class AppearanceDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.AppearanceDefinitionMessage>
 {
-	public static final String name = "us::ihmc::robotDataLogger::AppearanceDefinitionMessage";
+	public static final java.lang.String name = "us::ihmc::robotDataLogger::AppearanceDefinitionMessage";
 	
 	
 	
@@ -27,19 +19,19 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.i
         
     }
 
-	private final CDR serializeCDR = new CDR();
-	private final CDR deserializeCDR = new CDR();
+	private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
+	private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
     
     @Override
-   public void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
       serializeCDR.finishSerialize();
    }
    @Override
-   public void deserialize(SerializedPayload serializedPayload, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data) throws IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -55,13 +47,13 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.i
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 	
 	    return current_alignment - initial_alignment;
@@ -77,19 +69,19 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.i
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 	
 	    return current_alignment - initial_alignment;
 	}
 	
-   public static void write(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, CDR cdr)
+   public static void write(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
 
 	    cdr.write_type_6(data.getR());
@@ -101,7 +93,7 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.i
 	    cdr.write_type_6(data.getTransparency());
    }
 
-   public static void read(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, CDR cdr)
+   public static void read(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
 
 	    	data.setR(cdr.read_type_6());
@@ -118,7 +110,7 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.i
    }
    
 	@Override
-	public final void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, InterchangeSerializer ser)
+	public final void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
 	{
 			    ser.write_type_6("r", data.getR());
 			    
@@ -131,7 +123,7 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.i
 	}
 	
 	@Override
-	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data)
+	public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.AppearanceDefinitionMessage data)
 	{
 	    			data.setR(ser.read_type_6("r"));	
 	    	    
@@ -159,21 +151,21 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<us.i
    @Override
    public int getTypeSize()
    {
-      return CDR.getTypeSize(getMaxCdrSerializedSize());
+      return us.ihmc.idl.CDR.getTypeSize(getMaxCdrSerializedSize());
    }
 
    @Override
-   public String getName()
+   public java.lang.String getName()
    {
       return name;
    }
    
-   public void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, CDR cdr)
+   public void serialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.CDR cdr)
 	{
 		write(data, cdr);
 	}
 
-   public void deserialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, CDR cdr)
+   public void deserialize(us.ihmc.robotDataLogger.AppearanceDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
         read(data, cdr);
    }

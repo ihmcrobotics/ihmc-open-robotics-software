@@ -19,6 +19,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 
@@ -43,7 +44,7 @@ public class ICPOptimizationSolutionHandlerTest
    private void setupTest(double deadbandSize, double resolution)
    {
       parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
-      solutionHandler = new ICPOptimizationSolutionHandler(parameters, false, "test", registry);
+      solutionHandler = new ICPOptimizationSolutionHandler(parameters, new YoBoolean("useICPControlPolygons", registry), "test", registry);
       solver = new ICPOptimizationQPSolver(parameters, 4, false);
    }
 
@@ -167,7 +168,7 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, 1, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep,  solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -195,7 +196,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, 1, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
@@ -244,7 +245,7 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, 1, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -272,7 +273,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, 1, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
@@ -325,7 +326,7 @@ public class ICPOptimizationSolutionHandlerTest
       {
       }
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, 1, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -392,16 +393,6 @@ public class ICPOptimizationSolutionHandlerTest
          this.resolution = resolution;
       }
 
-      @Override public boolean useSimpleOptimization()
-      {
-         return false;
-      }
-
-      @Override public int getMaximumNumberOfFootstepsToConsider()
-      {
-         return 5;
-      }
-
       @Override public int numberOfFootstepsToConsider()
       {
          return 0;
@@ -447,12 +438,12 @@ public class ICPOptimizationSolutionHandlerTest
          return 3.0;
       }
 
-      @Override public double getDynamicRelaxationWeight()
+      @Override public double getDynamicsObjectiveWeight()
       {
          return 1000.0;
       }
 
-      @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
+      @Override public double getDynamicsObjectiveDoubleSupportWeightModifier()
       {
          return 1.0;
       }
@@ -472,11 +463,6 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean scaleUpcomingStepWeights()
-      {
-         return false;
-      }
-
       @Override public boolean useFeedbackRegularization()
       {
          return false;
@@ -485,11 +471,6 @@ public class ICPOptimizationSolutionHandlerTest
       @Override public boolean useStepAdjustment()
       {
          return true;
-      }
-
-      @Override public boolean useTimingOptimization()
-      {
-         return false;
       }
 
       @Override public boolean useAngularMomentum()
