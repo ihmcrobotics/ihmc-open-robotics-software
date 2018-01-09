@@ -41,14 +41,11 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 {
    public enum WalkOverTerrainState
    {
-      LOOK_FOR_GOAL, SLEEP, LOOK_DOWN_AT_TERRAIN, PLAN_TO_GOAL, CLEAR_PLANAR_REGIONS_LIST, TAKE_SOME_STEPS, REACHED_GOAL
+      SLEEP, PLAN_TO_GOAL, CLEAR_PLANAR_REGIONS_LIST, TAKE_SOME_STEPS, REACHED_GOAL
    }
-
-   private final CommunicationBridge coactiveBehaviorsNetworkManager;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   private final FindGoalBehavior lookForGoalBehavior;
    private final SleepBehavior sleepBehavior;
    private final LookDownBehavior lookDownAtTerrainBehavior;
    private final PlanHumanoidFootstepsBehavior planHumanoidFootstepsBehavior;
@@ -81,21 +78,14 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
-      coactiveBehaviorsNetworkManager = communicationBridge;
-      //      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-
-      //create your behaviors
-      this.lookForGoalBehavior = new FindGoalBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames,
-                                                      goalDetectorBehaviorService);
 
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
       sleepBehavior.setSleepTime(2.0);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
 
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, referenceFrames);
-//      planHumanoidFootstepsBehavior.createAndAttachSCSListenerToPlanner();
       planHumanoidFootstepsBehavior.createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
 
       clearPlanarRegionsListBehavior = new ClearPlanarRegionsListBehavior(communicationBridge);
@@ -104,12 +94,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
 
-      this.registry.addChild(lookForGoalBehavior.getYoVariableRegistry());
       this.registry.addChild(sleepBehavior.getYoVariableRegistry());
       this.registry.addChild(lookDownAtTerrainBehavior.getYoVariableRegistry());
       this.registry.addChild(planHumanoidFootstepsBehavior.getYoVariableRegistry());
       this.registry.addChild(takeSomeStepsBehavior.getYoVariableRegistry());
-      //      this.registry.addChild(reachedGoalBehavior.getYoVariableRegistry());
       this.registry.addChild(userValidationExampleBehavior.getYoVariableRegistry());
 
       setupStateMachine();
@@ -134,17 +122,6 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
    private void setupStateMachine()
    {
-
-      BehaviorAction<WalkOverTerrainState> lookForGoalAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.LOOK_FOR_GOAL, lookForGoalBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Looking for Goal");
-            sendPacket(p1);
-         }
-      };
-
       BehaviorAction<WalkOverTerrainState> sleepAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.SLEEP, sleepBehavior)
       {
          @Override
@@ -155,25 +132,12 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          }
       };
 
-      BehaviorAction<WalkOverTerrainState> lookDownAtTerrainAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN, lookDownAtTerrainBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Looking Down at Terrain");
-            sendPacket(p1);
-
-            lookDownAtTerrainBehavior.setupPipeLine();
-         }
-      };
-
       BehaviorAction<WalkOverTerrainState> planHumanoidFootstepsAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.PLAN_TO_GOAL, planHumanoidFootstepsBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             FramePose3D goalPose = new FramePose3D();
-            lookForGoalBehavior.getGoalPose(goalPose);
             Tuple3DBasics goalPosition = new Point3D(goalPose.getPosition());
 
             String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
@@ -182,7 +146,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             TextToSpeechPacket p1 = new TextToSpeechPacket("Plannning Footsteps to (" + xString + ", " + yString + ")");
             sendPacket(p1);
 
-            planHumanoidFootstepsBehavior.setGoalPoseAndFirstSwingSide(goalPose, nextSideToSwing.getEnumValue());
+//            planHumanoidFootstepsBehavior.setGoalPoseAndFirstSwingSide(goalPose, nextSideToSwing.getEnumValue());
          }
       };
 
@@ -223,19 +187,9 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       //setup the state machine
 
-      statemachine.addStateWithDoneTransition(lookForGoalAction, WalkOverTerrainState.SLEEP);
-      statemachine.addStateWithDoneTransition(sleepAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
-      statemachine.addStateWithDoneTransition(lookDownAtTerrainAction, WalkOverTerrainState.PLAN_TO_GOAL);
       statemachine.addStateWithDoneTransition(planHumanoidFootstepsAction, WalkOverTerrainState.CLEAR_PLANAR_REGIONS_LIST);
       statemachine.addStateWithDoneTransition(clearPlanarRegionsListAction, WalkOverTerrainState.TAKE_SOME_STEPS);
       statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.PLAN_TO_GOAL); //REACHED_GOAL);
-//      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN); //REACHED_GOAL);
-      //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_FOR_GOAL);
-      statemachine.addStateWithDoneTransition(reachedGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
-
-      //the state machine will transition into this state every time the behavior starts.
-      statemachine.setStartState(WalkOverTerrainState.LOOK_FOR_GOAL);
-
    }
 
    private class ClearPlanarRegionsListBehavior extends AbstractBehavior
