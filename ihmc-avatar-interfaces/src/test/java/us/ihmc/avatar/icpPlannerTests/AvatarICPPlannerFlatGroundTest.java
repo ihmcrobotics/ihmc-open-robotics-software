@@ -82,7 +82,6 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
