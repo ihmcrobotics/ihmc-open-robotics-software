@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -68,7 +68,7 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
 
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
-   public abstract ICPOptimizationController getICPOptimizationController();
+   public abstract ICPOptimizationControllerInterface getICPOptimizationController();
 
    public abstract double getOptimizedTimeRemaining();
 

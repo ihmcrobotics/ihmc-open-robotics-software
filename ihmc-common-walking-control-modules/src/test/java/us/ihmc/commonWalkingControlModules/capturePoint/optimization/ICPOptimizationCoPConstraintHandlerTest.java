@@ -6,9 +6,9 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationCoPConstraintHandler;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationCoPConstraintHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -55,7 +55,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 
       constraintHandler.updateCoPConstraintForDoubleSupport(solver);
       solver.setMaxCMPDistanceFromEdge(0.05);
@@ -117,7 +117,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 
       // test left support
       constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);
@@ -222,7 +222,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 
       constraintHandler.updateCoPConstraintForDoubleSupport(solver);
       solver.setMaxCMPDistanceFromEdge(0.05);
@@ -278,7 +278,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(parameters, 5, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 
       // test left support
       constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT, solver);

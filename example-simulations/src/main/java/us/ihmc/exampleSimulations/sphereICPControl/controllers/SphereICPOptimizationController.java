@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.YoICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.ICPAdjustmentOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.recursiveController.ICPAdjustmentOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -73,7 +73,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final YoFramePoint yoDesiredCMP;
 
-   private final ICPOptimizationController icpOptimizationController;
+   private final ICPOptimizationControllerInterface icpOptimizationController;
    private final YoICPControlGains icpGains;
    private final YoDouble omega0 = new YoDouble("omega0", registry);
    private final double totalMass;
