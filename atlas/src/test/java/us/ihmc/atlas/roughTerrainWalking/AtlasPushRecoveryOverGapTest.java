@@ -81,6 +81,18 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                      {
                         return true;
                      }
+
+                     @Override
+                     public boolean usePlanarRegionConstraints()
+                     {
+                        return true;
+                     }
+
+                     @Override
+                     public boolean switchPlanarRegionConstraintsAutomatically()
+                     {
+                        return false;
+                     }
                   };
                }
             };

@@ -11,8 +11,8 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  */
 public class ICPQPInputCalculator
 {
-   private boolean considerAngularMomentumInAdjustment;
-   private boolean considerFeedbackInAdjustment;
+   private boolean considerAngularMomentumInAdjustment = true;
+   private boolean considerFeedbackInAdjustment = true;
 
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
    public ICPQPIndexHandler indexHandler;
