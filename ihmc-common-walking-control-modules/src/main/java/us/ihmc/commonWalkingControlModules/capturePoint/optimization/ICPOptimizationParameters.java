@@ -271,4 +271,20 @@ public abstract class ICPOptimizationParameters
    {
       return true;
    }
+
+   /**
+    * Sets whether or not the ICP optimization algorithm will consider planar regions.
+    */
+   public boolean usePlanarRegionConstraints()
+   {
+      return false;
+   }
+
+   /**
+    * Sets whether or not the ICP optimization algorithm will switch the planar region if it starts to lose balance.
+    */
+   public boolean switchPlanarRegionConstraintsAutomatically()
+   {
+      return true;
+   }
 }
