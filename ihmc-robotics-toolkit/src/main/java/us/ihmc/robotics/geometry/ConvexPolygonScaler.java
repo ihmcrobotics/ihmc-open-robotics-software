@@ -190,6 +190,7 @@ public class ConvexPolygonScaler
          Point2DReadOnly exteriorVertex1 = exteriorPolygon.getVertex(0);
          Point2DReadOnly exteriorVertex2 = exteriorPolygon.getVertex(1);
          edgeOnQ.set(exteriorVertex1, exteriorVertex2);
+         polygonAsLineSegment.set(exteriorVertex1, exteriorVertex2);
 
          // first, expanding the polygon line into a six pointed polygon, then shrinking this polygon to contain the interior polygon
          if(distanceInside < 0.0)
