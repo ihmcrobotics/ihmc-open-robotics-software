@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationControllerInterface;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
