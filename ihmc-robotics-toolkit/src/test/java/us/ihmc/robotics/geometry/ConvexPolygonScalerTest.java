@@ -579,4 +579,46 @@ public class ConvexPolygonScalerTest
       assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
       assertFalse(success);
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testTroublingCollapseExteriorRectangleToLine()
+   {
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+
+      ConvexPolygon2D exteriorPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D interiorPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D scaledPolygonExpected = new ConvexPolygon2D();
+
+      Point2D exteriorVertex0 = new Point2D(0.7, -0.5);
+      Point2D exteriorVertex1 = new Point2D(0.7, -0.4);
+      Point2D exteriorVertex2 = new Point2D(-0.3, -0.5);
+      Point2D exteriorVertex3 = new Point2D(-0.3, -0.5);
+      exteriorPolygon.addVertex(exteriorVertex0);
+      exteriorPolygon.addVertex(exteriorVertex1);
+      exteriorPolygon.addVertex(exteriorVertex2);
+      exteriorPolygon.addVertex(exteriorVertex3);
+      exteriorPolygon.update();
+
+      Point2D interiorVertex0 = new Point2D(0.11, -0.085 / 2.0);
+      Point2D interiorVertex1 = new Point2D(0.11, 0.085 / 2.0);
+      Point2D interiorVertex2 = new Point2D(-0.11, 0.055);
+      Point2D interiorVertex3 = new Point2D(-0.11, 0.055);
+      interiorPolygon.addVertex(interiorVertex0);
+      interiorPolygon.addVertex(interiorVertex1);
+      interiorPolygon.addVertex(interiorVertex2);
+      interiorPolygon.addVertex(interiorVertex3);
+      interiorPolygon.update();
+
+      Point2D expectedVertex0 = new Point2D(-0.3 + 0.11, -0.45);
+      Point2D expectedVertex1 = new Point2D(0.7 - 0.11, -0.45);
+      scaledPolygonExpected.addVertex(expectedVertex0);
+      scaledPolygonExpected.addVertex(expectedVertex1);
+      scaledPolygonExpected.update();
+
+      boolean success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, 0.0, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertTrue(success);
+   }
 }
