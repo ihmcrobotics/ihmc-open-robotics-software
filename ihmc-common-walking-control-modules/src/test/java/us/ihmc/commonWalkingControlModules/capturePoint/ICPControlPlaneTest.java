@@ -236,7 +236,10 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      assertEquals(expectedProjectedPoint.getX(), projectedPoint.getX(), 1e-10);
+      assertEquals(expectedProjectedPoint.getY(), projectedPoint.getY(), 1e-10);
+      assertEquals(expectedProjectedPoint.getZ(), projectedPoint.getZ(), 1e-10);
+      expectedProjectedPoint.checkReferenceFrameMatch(projectedPoint);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -524,24 +527,6 @@ public class ICPControlPlaneTest
 
          EuclidCoreTestTools.assertTuple3DEquals("iteration " + iter, expectedProjectedPoint, projectedPoint, 1e-10);
       }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testProjectPointOntoPlanarRegion()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
-      YoDouble omega = new YoDouble("omega", registry);
-      double gravity = 9.81;
-
-      ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
-      double planeHeightInCoMFrame = -1.0; //
-
-      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
-
-
-      assertTrue(false);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
