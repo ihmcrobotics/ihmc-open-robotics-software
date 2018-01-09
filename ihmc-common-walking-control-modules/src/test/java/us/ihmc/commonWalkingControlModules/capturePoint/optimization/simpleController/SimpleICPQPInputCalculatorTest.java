@@ -6,8 +6,8 @@ import org.ejml.ops.MatrixFeatures;
 import org.jcodec.common.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.SimpleICPQPIndexHandler;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.SimpleICPQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInputCalculator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -31,7 +31,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(icpQPInputExpected.quadraticTerm);
       CommonOps.scale(2.0, icpQPInputExpected.quadraticTerm);
 
-      SimpleICPQPInputCalculator.computeFeedbackTask(icpQPInputToTest, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(icpQPInputToTest, feedbackWeight);
 
       Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
    }
@@ -40,8 +40,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testFeedbackRegularizationTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
       ICPQPInput icpQPInputExpected = new ICPQPInput(2);
@@ -83,7 +83,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(icpQPInputExpected.quadraticTerm);
       CommonOps.scale(2.0, icpQPInputExpected.quadraticTerm);
 
-      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(icpQPInputToTest, minimizationWeight);
+      ICPQPInputCalculator.computeAngularMomentumMinimizationTask(icpQPInputToTest, minimizationWeight);
 
       Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
    }
@@ -92,8 +92,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testFootstepTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
       ICPQPInput icpQPInputExpected = new ICPQPInput(2);
@@ -176,8 +176,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testFootstepRegularizationTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
       ICPQPInput icpQPInputExpected = new ICPQPInput(2);
@@ -260,8 +260,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testComputeDynamicsTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       // problem requirements
       ICPQPInput icpQPInputToTest = new ICPQPInput(2);
@@ -670,8 +670,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFeedbackTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       ICPQPInput feedbackTask = new ICPQPInput(2);
       ICPQPInput feedbackRegularizationTask = new ICPQPInput(2);
@@ -680,7 +680,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(feedbackWeight);
       CommonOps.scale(3.6, feedbackWeight);
 
-      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
 
       DenseMatrix64F feedbackRegularizationWeight = new DenseMatrix64F(2, 2);
       CommonOps.setIdentity(feedbackRegularizationWeight);
@@ -720,8 +720,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitDynamicsTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setUseAngularMomentum(true);
       indexHandler.registerFootstep();
@@ -777,8 +777,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitAngularMomentumMinimizationTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setUseAngularMomentum(true);
       indexHandler.computeProblemSize();
@@ -789,7 +789,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(angularMomentumWeight);
       CommonOps.scale(2.0, angularMomentumWeight);
 
-      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumTask, angularMomentumWeight);
+      ICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumTask, angularMomentumWeight);
 
       DenseMatrix64F quadratic = new DenseMatrix64F(4, 4);
       DenseMatrix64F linear = new DenseMatrix64F(4, 1);
@@ -814,8 +814,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFootstepTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.registerFootstep();
       indexHandler.registerFootstep();
@@ -899,8 +899,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndAngularMomentumTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setUseAngularMomentum(true);
       indexHandler.computeProblemSize();
@@ -911,7 +911,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(feedbackWeight);
       CommonOps.scale(3.6, feedbackWeight);
 
-      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
 
       ICPQPInput angularMomentumTask = new ICPQPInput(2);
 
@@ -919,7 +919,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(angularMomentumWeight);
       CommonOps.scale(2.0, angularMomentumWeight);
 
-      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumTask, angularMomentumWeight);
+      ICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumTask, angularMomentumWeight);
 
 
       DenseMatrix64F quadratic = new DenseMatrix64F(4, 4);
@@ -950,8 +950,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndDynamicsTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setUseAngularMomentum(true);
       indexHandler.registerFootstep();
@@ -965,7 +965,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(feedbackWeight);
       CommonOps.scale(3.6, feedbackWeight);
 
-      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
 
 
       ICPQPInput dynamicsTask = new ICPQPInput(6);
@@ -1021,8 +1021,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndFootstepTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.registerFootstep();
       indexHandler.setUseAngularMomentum(true);
@@ -1034,7 +1034,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(feedbackWeight);
       CommonOps.scale(3.6, feedbackWeight);
 
-      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
 
       ICPQPInput footstepTask = new ICPQPInput(2);
       ICPQPInput footstepRegularizationTask = new ICPQPInput(2);
@@ -1093,8 +1093,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndFootstepAndDynamicsTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setUseAngularMomentum(true);
       indexHandler.registerFootstep();
@@ -1108,7 +1108,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(feedbackWeight);
       CommonOps.scale(3.6, feedbackWeight);
 
-      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
 
 
       ICPQPInput dynamicsTask = new ICPQPInput(6);
@@ -1196,8 +1196,8 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndFootstepAndDynamicsAndAngularMomentumTask()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
-      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.setUseAngularMomentum(true);
       indexHandler.registerFootstep();
@@ -1211,7 +1211,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(feedbackWeight);
       CommonOps.scale(3.6, feedbackWeight);
 
-      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
 
 
       ICPQPInput dynamicsTask = new ICPQPInput(6);
@@ -1268,7 +1268,7 @@ public class SimpleICPQPInputCalculatorTest
       CommonOps.setIdentity(angularMomentumWeight);
       CommonOps.scale(2.0, angularMomentumWeight);
 
-      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumTask, angularMomentumWeight);
+      ICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumTask, angularMomentumWeight);
 
 
 

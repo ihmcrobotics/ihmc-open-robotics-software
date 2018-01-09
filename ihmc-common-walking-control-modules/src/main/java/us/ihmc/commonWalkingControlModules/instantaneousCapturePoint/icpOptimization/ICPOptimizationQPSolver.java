@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.SimpleICPQPIndexHandler;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.SimpleICPQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -20,9 +20,9 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 /**
  * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
  * designed to stabilize ICP based walking trajectories using both CMP feedback and step adjustment. Designed to
- * work inside the {@link SimpleICPOptimizationController}.
+ * work inside the {@link ICPOptimizationController}.
  */
-public class SimpleICPOptimizationQPSolver
+public class ICPOptimizationQPSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -32,9 +32,9 @@ public class SimpleICPOptimizationQPSolver
    private static final double convergenceThreshold = 1.0e-20;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
-   private final SimpleICPQPIndexHandler indexHandler;
+   private final ICPQPIndexHandler indexHandler;
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   private final SimpleICPQPInputCalculator inputCalculator;
+   private final ICPQPInputCalculator inputCalculator;
 
    /**
     * Has the form 0.5 x<sup>T</sup> H x + h x
@@ -167,38 +167,38 @@ public class SimpleICPOptimizationQPSolver
    private double planarRegionDistanceFromEdge = 0.0;
 
    /**
-    * Creates the ICP Optimization Solver. Refer to the class documentation: {@link SimpleICPOptimizationQPSolver}.
+    * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPOptimizationQPSolver}.
     *
     * @param icpOptimizationParameters parameters to be used by in the optimization.
     * @param maximumNumberOfCMPVertices maximum number of vertices to be considered by the CoP location constraint.
     * @param computeCostToGo whether or not to compute the cost to go.
     */
-   public SimpleICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   public ICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
       this(icpOptimizationParameters, maximumNumberOfCMPVertices, computeCostToGo, true);
    }
 
 
-   public SimpleICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo,
-                                        boolean autoSetPreviousSolution)
+   public ICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo,
+                                  boolean autoSetPreviousSolution)
    {
       this(icpOptimizationParameters.getMinimumFootstepWeight(), icpOptimizationParameters.getMinimumFeedbackWeight(), maximumNumberOfCMPVertices,
            computeCostToGo, autoSetPreviousSolution);
    }
 
-   public SimpleICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   public ICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
       this(minimumFootstepWeight, minimumFeedbackWeight, maximumNumberOfCMPVertices, computeCostToGo, true);
    }
 
-   public SimpleICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo,
-                                        boolean autoSetPreviousSolution)
+   public ICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo,
+                                  boolean autoSetPreviousSolution)
    {
       this.computeCostToGo = computeCostToGo;
       this.autoSetPreviousSolution = autoSetPreviousSolution;
 
-      indexHandler = new SimpleICPQPIndexHandler();
-      inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+      indexHandler = new ICPQPIndexHandler();
+      inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       this.minimumFootstepWeight = minimumFootstepWeight;
       this.minimumFeedbackWeight = minimumFeedbackWeight;
@@ -707,7 +707,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addFeedbackTask()
    {
-      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
+      ICPQPInputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
 
       if (hasFeedbackRegularizationTerm)
          inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
@@ -720,7 +720,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addAngularMomentumMinimizationTask()
    {
-      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
+      ICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
       inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 

@@ -24,7 +24,7 @@ public class ICPOptimizationCoPConstraintHandler
       this.useICPControlPolygons = useICPControlPolygons && icpControlPolygons != null;
    }
 
-   public void updateCoPConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
+   public void updateCoPConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
    {
       solver.resetCoPLocationConstraint();
 
@@ -39,7 +39,7 @@ public class ICPOptimizationCoPConstraintHandler
       }
    }
 
-   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, SimpleICPOptimizationQPSolver solver)
+   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
    {
       solver.resetCoPLocationConstraint();
 

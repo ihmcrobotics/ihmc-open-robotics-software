@@ -2,20 +2,20 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.SimpleICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationQPSolver;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
- * This class is used by the {@link SimpleICPOptimizationQPSolver} to  convert weights and gains into the actual objects for the quadratic program.
+ * This class is used by the {@link ICPOptimizationQPSolver} to  convert weights and gains into the actual objects for the quadratic program.
  */
-public class SimpleICPQPInputCalculator
+public class ICPQPInputCalculator
 {
    private boolean considerAngularMomentumInAdjustment = false;
    private boolean considerFeedbackInAdjustment = true;
 
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   public SimpleICPQPIndexHandler indexHandler;
+   public ICPQPIndexHandler indexHandler;
 
    private final DenseMatrix64F identity = CommonOps.identity(2, 2);
    private final DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 1);
@@ -35,11 +35,11 @@ public class SimpleICPQPInputCalculator
 
 
    /**
-    * Creates the ICP Quadratic Problem Input Calculator. Refer to the class documentation: {@link SimpleICPQPInputCalculator}.
+    * Creates the ICP Quadratic Problem Input Calculator. Refer to the class documentation: {@link ICPQPInputCalculator}.
     *
     * @param indexHandler holder of the indices for the different optimization terms.
     */
-   public SimpleICPQPInputCalculator(SimpleICPQPIndexHandler indexHandler)
+   public ICPQPInputCalculator(ICPQPIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
    }

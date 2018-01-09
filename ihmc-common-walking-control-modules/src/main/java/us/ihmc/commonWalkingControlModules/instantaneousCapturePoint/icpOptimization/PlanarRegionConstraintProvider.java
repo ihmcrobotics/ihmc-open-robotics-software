@@ -170,7 +170,7 @@ public class PlanarRegionConstraintProvider
    }
 
 
-   public void updatePlanarRegionConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
+   public void updatePlanarRegionConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
    {
       reset();
 
@@ -183,7 +183,7 @@ public class PlanarRegionConstraintProvider
    }
 
 
-   public void updatePlanarRegionConstraintForSingleSupport(Footstep footstep, double swingTimeRemaining, FramePoint2D currentICP, double omega0, SimpleICPOptimizationQPSolver solver)
+   public void updatePlanarRegionConstraintForSingleSupport(Footstep footstep, double swingTimeRemaining, FramePoint2D currentICP, double omega0, ICPOptimizationQPSolver solver)
    {
       captureRegionCalculator.calculateCaptureRegion(footstep.getRobotSide(), swingTimeRemaining, currentICP, omega0,
                                                      bipedSupportPolygons.getFootPolygonInWorldFrame(footstep.getRobotSide().getOppositeSide()));
