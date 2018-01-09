@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -19,6 +21,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SphereWithConvexPolygonIntersectorTest
 {
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
