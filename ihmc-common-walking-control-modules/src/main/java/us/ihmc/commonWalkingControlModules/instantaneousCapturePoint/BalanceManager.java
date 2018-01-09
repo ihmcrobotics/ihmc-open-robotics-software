@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -178,7 +178,7 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
                totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
-      ICPOptimizationController icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
+      ICPOptimizationControllerInterface icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       ICPPlannerInterface icpPlanner;
       //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, yoGraphicsListRegistry);

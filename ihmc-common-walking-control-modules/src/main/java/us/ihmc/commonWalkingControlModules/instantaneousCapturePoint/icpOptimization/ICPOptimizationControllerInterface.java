@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public interface ICPOptimizationController
+public interface ICPOptimizationControllerInterface
 {
    public void setFootstepWeights(double forwardWeight, double lateralWeight);
    public void setFeedbackWeights(double forwardWeight, double lateralWeight);

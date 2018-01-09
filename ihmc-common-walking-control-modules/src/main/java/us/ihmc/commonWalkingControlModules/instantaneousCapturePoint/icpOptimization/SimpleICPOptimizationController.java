@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import java.util.ArrayList;
 
@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -29,7 +28,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -37,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class SimpleICPOptimizationController implements ICPOptimizationController
+public class SimpleICPOptimizationController implements ICPOptimizationControllerInterface
 {
    private static final boolean VISUALIZE = true;
    private static final boolean DEBUG = false;

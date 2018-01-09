@@ -1,41 +1,40 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController;
-
-import java.util.ArrayList;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.SimpleICPQPIndexHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.SimpleICPQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPEqualityConstraintInput;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInputCalculator;
-import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
  * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
  * designed to stabilize ICP based walking trajectories using both CMP feedback and step adjustment. Designed to
- * work inside the {@link ICPAdjustmentOptimizationController}.
+ * work inside the {@link SimpleICPOptimizationController}.
  */
-public class ICPQPOptimizationSolver
+public class SimpleICPOptimizationQPSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int maxNumberOfIterations = 100;
-   private static final double convergenceThreshold = 1.0e-100;
+   // FIXME this cannot be true until we setup resetting the active set based on state changes
+   private static final boolean useWarmStart = false;
+   private static final int maxNumberOfIterations = 10;
+   private static final double convergenceThreshold = 1.0e-20;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
-   private final ICPQPIndexHandler indexHandler;
+   private final SimpleICPQPIndexHandler indexHandler;
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   private final ICPQPInputCalculator inputCalculator;
+   private final SimpleICPQPInputCalculator inputCalculator;
 
    /**
     * Has the form 0.5 x<sup>T</sup> H x + h x
@@ -51,9 +50,9 @@ public class ICPQPOptimizationSolver
     * Has the form A<sub>eq</sub> x = b<sub>eq</sub>
     */
    /** Total linear equality constraint matrix for the quadratic program. */
-   private final DenseMatrix64F solverInput_Aeq;
+   //private final DenseMatrix64F solverInput_Aeq;
    /** Total linear equality constraint objective vector for the quadratic program. */
-   private final DenseMatrix64F solverInput_beq;
+   //private final DenseMatrix64F solverInput_beq;
 
    /**
     * Has the form A<sub>ineq</sub> x >= b<sub>ineq</sub>
@@ -63,46 +62,37 @@ public class ICPQPOptimizationSolver
    /** Total linear inequality constraint objective vector for the quadratic program. */
    private final DenseMatrix64F solverInput_bineq;
 
-   /** Lower bound on the free variables for the quadratic program. */
-   private final DenseMatrix64F solverInput_Lb;
-   /** Upper bound on the free variables for the quadratic program. */
-   private final DenseMatrix64F solverInput_Ub;
-
 
    /** QP Objective to minimize the amount of feedback action. Also contains feedback regularization. */
    private final ICPQPInput feedbackTaskInput;
-   /** QP Objective to minimize the dynamic relaxation magnitude. */
-   private final ICPQPInput dynamicRelaxationTask;
    /** QP Objective to minimize the amount of step adjustment. Also contains step adjustment. */
    private final ICPQPInput footstepTaskInput;
    /** QP Objective to minimize the angular momentum magnitude. */
    private final ICPQPInput angularMomentumMinimizationTask;
+   /** QP Objective to minimize the difference between the dynamics */
+   private final ICPQPInput dynamicsTaskInput;
 
-   /** Constraint that encodes the recursive ICP dynamics. */
-   private final ICPEqualityConstraintInput dynamicsConstraintInput;
    /** Constraint on the CoP location to the support polygon. */
    private final ConstraintToConvexRegion copLocationConstraint;
-   /** Constraint on the CMP location within some value */
+   /** Constraint on the CMP location to the bounds. */
    private final ConstraintToConvexRegion cmpLocationConstraint;
    /** Constraint on the footstep location to the reachable region. */
    private final ConstraintToConvexRegion reachabilityConstraint;
+   /** Constraint on the footstep location to the planar region. */
+   private final ConstraintToConvexRegion planarRegionConstraint;
 
-   /** List of recursion multipliers for the steps that encode the recursive ICP dynamics. */
-   private final ArrayList<DenseMatrix64F> footstepRecursionMultipliers = new ArrayList<>();
+   /** Recursion multipliers for the steps that encode the recursive ICP dynamics. */
+   private double footstepRecursionMultiplier;
+   private double footstepAdjustmentSafetyFactor;
    /** Location of the desired footsteps from a high level footstep planner. */
-   private final ArrayList<DenseMatrix64F> referenceFootstepLocations = new ArrayList<>();
+   private final DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
 
-   /** Recursion of the final ICP location for the recursive ICP dynamics. */
-   private final DenseMatrix64F finalICPRecursion = new DenseMatrix64F(2, 1);
-   /** Effects of the CMP offsets in the upcoming feet and the stance CMP locations in the recursive ICP dynamics. */
-   private final DenseMatrix64F cmpConstantEffect = new DenseMatrix64F(2, 1);
-   /** Current ICP location. */
-   private final DenseMatrix64F currentICP = new DenseMatrix64F(2, 1);
-   /** Reference CMP from the ICP plan. */
+   /** Current ICP Error location. */
    private final DenseMatrix64F perfectCMP = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
 
    /** List of weights for tracking the different footsteps. */
-   private final ArrayList<DenseMatrix64F> footstepWeights = new ArrayList<>();
+   private final DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 2);
    /** Weight for the footstep regularization task. */
    private final DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the CMP feedback action. */
@@ -110,14 +100,14 @@ public class ICPQPOptimizationSolver
    /** Weight regularizing the CMP feedback action. */
    private final DenseMatrix64F feedbackRegularizationWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the dynamic relaxation magnitude. */
-   private final DenseMatrix64F dynamicRelaxationWeight = new DenseMatrix64F(2, 2);
+   private final DenseMatrix64F dynamicsWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the angular momentum magnitude. */
    private final DenseMatrix64F angularMomentumMinimizationWeight = new DenseMatrix64F(2, 2);
    /** Proportional gain on the ICP feedback controller. */
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private final JavaQuadProgSolver solver = new JavaQuadProgSolver();
+   private final SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
 
    /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;
@@ -125,14 +115,12 @@ public class ICPQPOptimizationSolver
    private final DenseMatrix64F footstepLocationSolution;
    /** Feedback action solution to the quadratic program. */
    private final DenseMatrix64F feedbackDeltaSolution;
-   /** Dynamic relaxation solution to the quadratic program. */
-   private final DenseMatrix64F dynamicRelaxationSolution;
    /** Angular momentum solution to the quadratic program. */
    private final DenseMatrix64F angularMomentumSolution;
 
    /** Previous solution for the feedback action, used in the feedback regularization objective. */
    private final DenseMatrix64F previousFeedbackDeltaSolution;
-   private final ArrayList<DenseMatrix64F> previousFootstepLocations = new ArrayList<>();
+   private final DenseMatrix64F previousFootstepLocation = new DenseMatrix64F(2, 1);
 
    /** Cost to go for the entire quadratic program. */
    private final DenseMatrix64F costToGo;
@@ -140,13 +128,9 @@ public class ICPQPOptimizationSolver
    private final DenseMatrix64F footstepCostToGo;
    /** Cost to go for the feedback action minimization objective. */
    private final DenseMatrix64F feedbackCostToGo;
-   /** Cost to go for the dynamic reachability minimization objective. */
-   private final DenseMatrix64F dynamicRelaxationCostToGo;
    /** Cost to go for the angular momentum minimization objective. */
    private final DenseMatrix64F angularMomentumMinimizationCostToGo;
 
-   /** Maximum number of footsteps that the quadratic program will ever consider. Used for clearing and storing data. */
-   private final int maximumNumberOfFootstepsToConsider;
    /** Maximum number of vertices in the reachability polygon that the quadratic program will ever consider. Used for clearing and storing data. */
    private static final int maximumNumberOfReachabilityVertices = 4;
 
@@ -170,7 +154,6 @@ public class ICPQPOptimizationSolver
    /** Minimum allowable weight on the feedback task. */
    private final double minimumFeedbackWeight;
 
-   private final FramePoint3D tmpPoint = new FramePoint3D();
    private final DenseMatrix64F tmpCost;
    private final DenseMatrix64F tmpFootstepCost;
    private final DenseMatrix64F tmpFeedbackCost;
@@ -180,33 +163,47 @@ public class ICPQPOptimizationSolver
    private double copSafeDistanceToEdge = 0.0001;
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
+   private boolean hasPlanarRegionConstraint = false;
+   private double planarRegionDistanceFromEdge = 0.0;
+
    /**
-    * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPQPOptimizationSolver}.
+    * Creates the ICP Optimization Solver. Refer to the class documentation: {@link SimpleICPOptimizationQPSolver}.
     *
     * @param icpOptimizationParameters parameters to be used by in the optimization.
     * @param maximumNumberOfCMPVertices maximum number of vertices to be considered by the CoP location constraint.
     * @param computeCostToGo whether or not to compute the cost to go.
     */
-   public ICPQPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   public SimpleICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
       this(icpOptimizationParameters, maximumNumberOfCMPVertices, computeCostToGo, true);
    }
 
-   public ICPQPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo,
-         boolean autoSetPreviousSolution)
+
+   public SimpleICPOptimizationQPSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo,
+                                        boolean autoSetPreviousSolution)
+   {
+      this(icpOptimizationParameters.getMinimumFootstepWeight(), icpOptimizationParameters.getMinimumFeedbackWeight(), maximumNumberOfCMPVertices,
+           computeCostToGo, autoSetPreviousSolution);
+   }
+
+   public SimpleICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   {
+      this(minimumFootstepWeight, minimumFeedbackWeight, maximumNumberOfCMPVertices, computeCostToGo, true);
+   }
+
+   public SimpleICPOptimizationQPSolver(double minimumFootstepWeight, double minimumFeedbackWeight, int maximumNumberOfCMPVertices, boolean computeCostToGo,
+                                        boolean autoSetPreviousSolution)
    {
       this.computeCostToGo = computeCostToGo;
       this.autoSetPreviousSolution = autoSetPreviousSolution;
 
-      indexHandler = new ICPQPIndexHandler();
-      inputCalculator = new ICPQPInputCalculator(indexHandler);
+      indexHandler = new SimpleICPQPIndexHandler();
+      inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
 
-      maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
+      this.minimumFootstepWeight = minimumFootstepWeight;
+      this.minimumFeedbackWeight = minimumFeedbackWeight;
 
-      minimumFootstepWeight = icpOptimizationParameters.getMinimumFootstepWeight();
-      minimumFeedbackWeight = icpOptimizationParameters.getMinimumFeedbackWeight();
-
-      int maximumNumberOfFreeVariables = 2 * maximumNumberOfFootstepsToConsider + maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices + 4;
+      int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
 
       solverInput_H = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfFreeVariables);
@@ -214,59 +211,41 @@ public class ICPQPOptimizationSolver
       solverInputResidualCost = new DenseMatrix64F(1, 1);
 
       feedbackTaskInput = new ICPQPInput(2);
-      footstepTaskInput = new ICPQPInput(2 * maximumNumberOfFootstepsToConsider);
-      dynamicRelaxationTask = new ICPQPInput(2);
+      footstepTaskInput = new ICPQPInput(2);
       angularMomentumMinimizationTask = new ICPQPInput(2);
+      dynamicsTaskInput = new ICPQPInput(6);
 
-      dynamicsConstraintInput = new ICPEqualityConstraintInput(maximumNumberOfFreeVariables);
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
-
-      solverInput_Aeq = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
-      solverInput_beq = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, 1);
+      planarRegionConstraint = new ConstraintToConvexRegion(20);
 
       solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
       solverInput_bineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, 1);
 
-      solverInput_Lb = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
-      solverInput_Ub = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
-      CommonOps.fill(solverInput_Lb, Double.NEGATIVE_INFINITY);
-      CommonOps.fill(solverInput_Ub, Double.POSITIVE_INFINITY);
-
-      for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-      {
-         referenceFootstepLocations.add(new DenseMatrix64F(2, 1));
-         previousFootstepLocations.add(new DenseMatrix64F(2, 1));
-
-         footstepRecursionMultipliers.add(new DenseMatrix64F(2, 2));
-         footstepWeights.add(new DenseMatrix64F(2, 2));
-      }
-
       solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      footstepLocationSolution = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
+      footstepLocationSolution = new DenseMatrix64F(2, 1);
       feedbackDeltaSolution = new DenseMatrix64F(2, 1);
-      dynamicRelaxationSolution = new DenseMatrix64F(2, 1);
       angularMomentumSolution = new DenseMatrix64F(2, 1);
 
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
 
       tmpCost = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      tmpFootstepCost = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
+      tmpFootstepCost = new DenseMatrix64F(2, 1);
       tmpFeedbackCost = new DenseMatrix64F(2, 1);
       costToGo = new DenseMatrix64F(1, 1);
       footstepCostToGo = new DenseMatrix64F(1, 1);
       feedbackCostToGo = new DenseMatrix64F(1, 1);
-      dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
       angularMomentumMinimizationCostToGo = new DenseMatrix64F(1, 1);
 
       solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
-      solver.setRequireInequalityConstraintsSatisfied(true);
-      /*
-      if (!useQuadProg)
-         activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
-      */
+      solver.setUseWarmStart(useWarmStart);
+   }
+
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      solver.setMaxNumberOfIterations(maxNumberOfIterations);
    }
 
    /**
@@ -286,37 +265,6 @@ public class ICPQPOptimizationSolver
    public void setMaxCMPDistanceFromEdge(double maxCMPDistance)
    {
       this.cmpSafeDistanceFromEdge = maxCMPDistance;
-   }
-
-   /**
-    * Adds a vertex of the support polygon to the CoP location constraint. The CoP is constrained to the inside of the convex hull described
-    * by these vertices. The vertex location is offset in the x and y directions in the {@param frame} reference frame by the parameters {@param xBuffer} and
-    * {@param yBuffer}, respectively.
-    *
-    * @param vertexLocation location of the vertex.
-    * @param frame reference frame of the support polygon.
-    * @param xBuffer offset of the vertex in the x direction in the {@param frame} reference frame.
-    * @param yBuffer offset of the vetex in the y direction in the {@param frame} reference frame.
-    */
-   public void addSupportPolygonVertex(FramePoint2D vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
-   {
-      tmpPoint.setToZero(frame);
-      tmpPoint.set(vertexLocation);
-
-      if (tmpPoint.getX() > 0.0)
-         tmpPoint.setX(tmpPoint.getX() + xBuffer);
-      else
-         tmpPoint.setX(tmpPoint.getX() - xBuffer);
-
-      if (tmpPoint.getY() > 0.0)
-         tmpPoint.setY(tmpPoint.getY() + yBuffer);
-      else
-         tmpPoint.setY(tmpPoint.getY() - yBuffer);
-
-      tmpPoint.changeFrame(worldFrame);
-
-      copLocationConstraint.addVertex(tmpPoint);
-      cmpLocationConstraint.addVertex(tmpPoint);
    }
 
    /**
@@ -340,26 +288,27 @@ public class ICPQPOptimizationSolver
       reachabilityConstraint.reset();
    }
 
-   /**
-    * Adds a vertex of the reachability region to the reachability constraint. The footstep is constrained to the inside of the convex hull
-    * described by these vertices.
-    *
-    * @param vertexLocation location of the vertex.
-    * @param frame reference frame of the support polygon.
-    */
-   public void addReachabilityVertex(FramePoint2D vertexLocation, ReferenceFrame frame)
+   public void resetPlanarRegionConstraint()
    {
-      tmpPoint.setToZero(frame);
-      tmpPoint.set(vertexLocation);
-      tmpPoint.changeFrame(worldFrame);
-
-      reachabilityConstraint.addVertex(tmpPoint);
+      planarRegionConstraint.reset();
+      hasPlanarRegionConstraint = false;
    }
 
    public void addReachabilityPolygon(FrameConvexPolygon2d polygon)
    {
       polygon.changeFrame(worldFrame);
+      polygon.update();
       reachabilityConstraint.addPolygon(polygon);
+   }
+
+   public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon, double planarRegionDistanceFromEdge)
+   {
+      hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon, planarRegionDistanceFromEdge);
+   }
+
+   public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon)
+   {
+      hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon);
    }
 
    /**
@@ -371,28 +320,17 @@ public class ICPQPOptimizationSolver
       solverInput_h.zero();
       solverInputResidualCost.zero();
 
-      solverInput_Aeq.zero();
-      solverInput_beq.zero();
-
       solverInput_Aineq.zero();
       solverInput_bineq.zero();
 
-      dynamicsConstraintInput.reset();
-
-      dynamicRelaxationTask.reset();
       angularMomentumMinimizationTask.reset();
       footstepTaskInput.reset();
       feedbackTaskInput.reset();
-
-      finalICPRecursion.zero();
-      cmpConstantEffect.zero();
-      currentICP.zero();
-      perfectCMP.zero();
+      dynamicsTaskInput.reset();
 
       solution.zero();
       footstepLocationSolution.zero();
       feedbackDeltaSolution.zero();
-      dynamicRelaxationSolution.zero();
       angularMomentumSolution.zero();
 
       currentEqualityConstraintIndex = 0;
@@ -406,17 +344,22 @@ public class ICPQPOptimizationSolver
    private void reshape()
    {
       int problemSize = indexHandler.getNumberOfFreeVariables();
-      int numberOfEqualityConstraints = indexHandler.getNumberOfEqualityConstraints();
       int numberOfFootstepsToConsider = indexHandler.getNumberOfFootstepsToConsider();
       int numberOfInequalityConstraints;
 
       copLocationConstraint.setPolygon();
       cmpLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
+      if (hasPlanarRegionConstraint)
+         planarRegionConstraint.setPolygon();
 
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize();
       if (indexHandler.useStepAdjustment())
+      {
          numberOfInequalityConstraints += reachabilityConstraint.getInequalityConstraintSize();
+         if (hasPlanarRegionConstraint)
+            numberOfInequalityConstraints += planarRegionConstraint.getInequalityConstraintSize();
+      }
       if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
          numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
@@ -424,17 +367,12 @@ public class ICPQPOptimizationSolver
       solverInput_h.reshape(problemSize, 1);
 
       feedbackTaskInput.reshape(2);
-      dynamicRelaxationTask.reshape(2);
+      dynamicsTaskInput.reshape(problemSize);
       angularMomentumMinimizationTask.reshape(2);
       footstepTaskInput.reshape(2 * numberOfFootstepsToConsider);
 
-      solverInput_Aeq.reshape(numberOfEqualityConstraints, problemSize);
-      solverInput_beq.reshape(numberOfEqualityConstraints, 1);
-
       solverInput_Aineq.reshape(numberOfInequalityConstraints, problemSize);
       solverInput_bineq.reshape(numberOfInequalityConstraints, 1);
-
-      dynamicsConstraintInput.reshape(problemSize);
 
       solution.reshape(problemSize, 1);
       footstepLocationSolution.reshape(2 * numberOfFootstepsToConsider, 1);
@@ -444,14 +382,12 @@ public class ICPQPOptimizationSolver
     * Resets the controller conditions on the feedback minimization task, the feedback gains, and the dynamic relaxation minimization task.
     * Also sets that the controller is not to attempt to regularize the feedback minimization task.
     *
-    * Should be called before calling {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} and before calling
-    * {@link #setFeedbackConditions(double, double, double, double, double)} every control tick.
     */
    public void resetFeedbackConditions()
    {
       feedbackWeight.zero();
       feedbackGain.zero();
-      dynamicRelaxationWeight.zero();
+      dynamicsWeight.zero();
 
       hasFeedbackRegularizationTerm = false;
    }
@@ -460,8 +396,6 @@ public class ICPQPOptimizationSolver
     * Resets the controller conditions for the minimization of angular momentum task, and also sets it so that the controller will not attempt to utilize
     * angular momentum to stabilize the ICP dynamics.
     *
-    * Should be called before calling {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} and before calling
-    * {@link #setAngularMomentumConditions(double, boolean)} every control tick.
     */
    public void resetAngularMomentumConditions()
    {
@@ -472,9 +406,6 @@ public class ICPQPOptimizationSolver
    /**
     * Resets the footstep plan tracking conditions for the controller. This includes resetting all the reference footstep locations and the
     * footstep recursion multipliers. Also sets that the controller is not to attempt to regularize the footstep locations.
-    *
-    * Should be called before calling {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} and before calling
-    * {@link #setFootstepAdjustmentConditions(int, double, double, double, FramePoint2D)} every control tick.
     */
    public void resetFootstepConditions()
    {
@@ -482,12 +413,9 @@ public class ICPQPOptimizationSolver
 
       footstepRegularizationWeight.zero();
 
-      for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-      {
-         referenceFootstepLocations.get(i).zero();
-         footstepRecursionMultipliers.get(i).zero();
-         footstepWeights.get(i).zero();
-      }
+      referenceFootstepLocation.zero();
+      footstepRecursionMultiplier = 0.0;
+      footstepWeight.zero();
 
       hasFootstepRegularizationTerm = false;
    }
@@ -496,48 +424,50 @@ public class ICPQPOptimizationSolver
     * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
     * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
     *
-    * Should be called after calling {@link #resetFootstepConditions()} and before calling
-    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
-    *
-    * @param footstepIndex index of the current footstep.
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
     * @param weight weight on tracking the reference footstep location in the solver.
-    * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(int footstepIndex, double recursionMultiplier, double weight, FramePoint2D referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, FramePoint2D referenceFootstepLocation)
    {
-      this.setFootstepAdjustmentConditions(footstepIndex, recursionMultiplier, weight, weight, referenceFootstepLocation);
+      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, 1.0, referenceFootstepLocation);
    }
 
    /**
     * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
     * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
     *
-    * Should be called after calling {@link #resetFootstepConditions()} and before calling
-    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
+    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
+    * @param weight weight on tracking the reference footstep location in the solver.
+    */
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, double safetyFactor, FramePoint2D referenceFootstepLocation)
+   {
+      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, weight, safetyFactor, referenceFootstepLocation);
+   }
+
+   /**
+    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
+    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
     *
-    * @param footstepIndex index of the current footstep.
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
     * @param xWeight weight on tracking the reference footstep location in the solver in the Cartesian x coordinate.
     * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(int footstepIndex, double recursionMultiplier, double xWeight, double yWeight, FramePoint2D referenceFootstepLocation)
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint2D referenceFootstepLocation)
    {
-      CommonOps.setIdentity(identity);
-      MatrixTools.setMatrixBlock(footstepRecursionMultipliers.get(footstepIndex), 0, 0, identity, 0, 0, 2, 2, recursionMultiplier);
+      footstepRecursionMultiplier = recursionMultiplier;
+      footstepAdjustmentSafetyFactor = safetyFactor;
 
       xWeight = Math.max(minimumFootstepWeight, xWeight);
       yWeight = Math.max(minimumFootstepWeight, yWeight);
 
-      identity.zero();
-      identity.set(0, 0, xWeight);
-      identity.set(1, 1, yWeight);
-      MatrixTools.setMatrixBlock(footstepWeights.get(footstepIndex), 0, 0, identity, 0, 0, 2, 2, 1.0);
+      footstepWeight.zero();
+      footstepWeight.set(0, 0, xWeight);
+      footstepWeight.set(1, 1, yWeight);
 
       referenceFootstepLocation.changeFrame(worldFrame);
-      referenceFootstepLocations.get(footstepIndex).set(0, 0, referenceFootstepLocation.getX());
-      referenceFootstepLocations.get(footstepIndex).set(1, 0, referenceFootstepLocation.getY());
+      this.referenceFootstepLocation.set(0, 0, referenceFootstepLocation.getX());
+      this.referenceFootstepLocation.set(1, 0, referenceFootstepLocation.getY());
 
       indexHandler.registerFootstep();
    }
@@ -545,9 +475,6 @@ public class ICPQPOptimizationSolver
    /**
     * Sets the conditions for the minimization of the angular momentum task. This includes whether or not to utilize angular momentum to help stabilize
     * the ICP dynamics, as well as the weight on its minimization.
-    *
-    * Should be called after calling {@link #resetAngularMomentumConditions()} and before calling
-    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param angularMomentumMinimizationWeight weight on minimizing angular momentum.
     * @param useAngularMomentum whether or not to use angular momentum in the problem.
@@ -577,14 +504,20 @@ public class ICPQPOptimizationSolver
    /**
     * Resets the footstep regularization objectives. This is important to call at the start of every new step, if using footstep regularization.
     *
-    * @param footstepIndex index of footstep to reset
     * @param previousFootstepLocation new location of the previous footstep location to try and minimize against.
     */
-   public void resetFootstepRegularization(int footstepIndex, FramePoint2D previousFootstepLocation)
+   public void resetFootstepRegularization(FramePoint2D previousFootstepLocation)
    {
       previousFootstepLocation.changeFrame(worldFrame);
-      previousFootstepLocations.get(footstepIndex).set(0, 0, previousFootstepLocation.getX());
-      previousFootstepLocations.get(footstepIndex).set(1, 0, previousFootstepLocation.getY());
+      this.previousFootstepLocation.set(0, 0, previousFootstepLocation.getX());
+      this.previousFootstepLocation.set(1, 0, previousFootstepLocation.getY());
+   }
+
+   public void resetFeedbackRegularization(FramePoint2D previousFeedbackDeltaSolution)
+   {
+      previousFeedbackDeltaSolution.changeFrame(worldFrame);
+      this.previousFeedbackDeltaSolution.set(0, 0, previousFeedbackDeltaSolution.getX());
+      this.previousFeedbackDeltaSolution.set(1, 0, previousFeedbackDeltaSolution.getY());
    }
 
 
@@ -594,34 +527,28 @@ public class ICPQPOptimizationSolver
     * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
     * the nominal CMP location and the one used to control the ICP dynamics. The dynamic relaxation allows the ICP recursive dynamics to be violated by a
     * small magnitude, which is critical to not overconstraining the problem.
-    *
-    * Should be called before calling after {@link #resetFeedbackConditions()} and before calling
-    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param feedbackWeight weight on the minimization of the feedback action for the solver.
     * @param feedbackGain ICP controller proportional gain.
-    * @param dynamicRelaxationWeight weight on the minimization of the dynamic relaxation for the solver.
+    * @param dynamicsWeight weight on the minimization of the dynamic relaxation for the solver.
     */
-   public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double dynamicRelaxationWeight)
+   public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double dynamicsWeight)
    {
-      this.setFeedbackConditions(feedbackWeight, feedbackWeight, feedbackGain, feedbackGain, dynamicRelaxationWeight);
+      this.setFeedbackConditions(feedbackWeight, feedbackWeight, feedbackGain, feedbackGain, dynamicsWeight);
    }
 
    /**
     * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
     * the nominal CMP location and the one used to control the ICP dynamics. The dynamic relaxation allows the ICP recursive dynamics to be violated by a
     * small magnitude, which is critical to not overconstraining the problem.
-    *
-    * Should be called before calling after {@link #resetFeedbackConditions()} and before calling
-    * {@link #compute(FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}.
     *
     * @param feedbackXWeight weight on the minimization of the feedback action for the solver in the Cartesian x coordinate direction.
     * @param feedbackYWeight weight on the minimization of the feedback action for the solver in the Cartesian y coordinate direction.
     * @param feedbackXGain ICP controller proportional gain in the Cartesian x coordinate direction.
     * @param feedbackYGain ICP controller proportional gain in the Cartesian y coordinate direction.
-    * @param dynamicRelaxationWeight weight on the minimization of the dynamic relaxation for the solver.
+    * @param dynamicsWeight weight on the minimization of the dynamic relaxation for the solver.
     */
-   public void setFeedbackConditions(double feedbackXWeight, double feedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicRelaxationWeight)
+   public void setFeedbackConditions(double feedbackXWeight, double feedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicsWeight)
    {
       feedbackXWeight = Math.max(feedbackXWeight, minimumFeedbackWeight);
       feedbackYWeight = Math.max(feedbackYWeight, minimumFeedbackWeight);
@@ -634,8 +561,8 @@ public class ICPQPOptimizationSolver
       this.feedbackGain.set(0, 0, feedbackXGain);
       this.feedbackGain.set(1, 1, feedbackYGain);
 
-      CommonOps.setIdentity(this.dynamicRelaxationWeight);
-      CommonOps.scale(dynamicRelaxationWeight, this.dynamicRelaxationWeight);
+      CommonOps.setIdentity(this.dynamicsWeight);
+      CommonOps.scale(dynamicsWeight, this.dynamicsWeight);
    }
 
    /**
@@ -679,39 +606,38 @@ public class ICPQPOptimizationSolver
     *
     * All the tasks must be set every tick before calling this method.
     *
-    * @param finalICPRecursion recursion of the final desired ICP location.
-    * @param cmpConstantEffect combined projection of the CMP offsets in the upcoming footsteps and teh stance CMP locations.
-    * @param currentICP current location of the ICP
     * @param perfectCMP current desired value of the CMP based on the nominal ICP location.
     * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
     */
-   public void compute(FramePoint2D finalICPRecursion, FramePoint2D cmpConstantEffect, FramePoint2D currentICP, FramePoint2D perfectCMP) throws NoConvergenceException
+   public void compute(YoFrameVector2d currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
+   {
+      compute(currentICPError.getFrameTuple2d(), perfectCMP);
+   }
+
+   public void compute(FrameVector2D currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
    {
       indexHandler.computeProblemSize();
 
       reset();
       reshape();
 
-      finalICPRecursion.changeFrame(worldFrame);
-      cmpConstantEffect.changeFrame(worldFrame);
-      currentICP.changeFrame(worldFrame);
+      currentICPError.checkReferenceFrameMatch(worldFrame);
       perfectCMP.changeFrame(worldFrame);
 
-      this.finalICPRecursion.set(0, 0, finalICPRecursion.getX());
-      this.finalICPRecursion.set(1, 0, finalICPRecursion.getY());
-
-      this.currentICP.set(0, 0, currentICP.getX());
-      this.currentICP.set(1, 0, currentICP.getY());
-
+      this.currentICPError.set(0, 0, currentICPError.getX());
+      this.currentICPError.set(1, 0, currentICPError.getY());
       this.perfectCMP.set(0, 0, perfectCMP.getX());
       this.perfectCMP.set(1, 0, perfectCMP.getY());
 
-      this.cmpConstantEffect.set(0, 0, cmpConstantEffect.getX());
-      this.cmpConstantEffect.set(1, 0, cmpConstantEffect.getY());
-
       addFeedbackTask();
-      addDynamicConstraint();
-      addDynamicRelaxationTask();
+
+      if (indexHandler.useStepAdjustment())
+         addStepAdjustmentTask();
+
+      if (indexHandler.useAngularMomentum())
+         addAngularMomentumMinimizationTask();
+
+      addDynamicConstraintTask();
 
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
@@ -722,11 +648,8 @@ public class ICPQPOptimizationSolver
       if (indexHandler.useStepAdjustment() && reachabilityConstraint.getInequalityConstraintSize() > 0)
          addReachabilityConstraint();
 
-      if (indexHandler.useStepAdjustment())
-         addStepAdjustmentTask();
-
-      if (indexHandler.useAngularMomentum())
-         addAngularMomentumMinimizationTask();
+      if (indexHandler.useStepAdjustment() && planarRegionConstraint.getInequalityConstraintSize() > 0)
+         addPlanarRegionConstraint();
 
       NoConvergenceException noConvergenceException = null;
       try
@@ -751,7 +674,6 @@ public class ICPQPOptimizationSolver
          if (autoSetPreviousSolution)
             setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
 
-         extractDynamicRelaxationSolution(dynamicRelaxationSolution);
          extractAngularMomentumSolution(angularMomentumSolution);
 
          computeWholeCostToGo();
@@ -770,13 +692,11 @@ public class ICPQPOptimizationSolver
     */
    private void addStepAdjustmentTask()
    {
-      for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
-      {
-         inputCalculator.computeFootstepTask(i, footstepTaskInput, footstepWeights.get(i), referenceFootstepLocations.get(i));
+      int stepIndex = 0;
+      inputCalculator.computeFootstepTask(stepIndex, footstepTaskInput, footstepWeight, referenceFootstepLocation);
 
-         if (hasFootstepRegularizationTerm)
-            inputCalculator.computeFootstepRegularizationTask(i, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocations.get(i));
-      }
+      if (hasFootstepRegularizationTerm)
+         inputCalculator.computeFootstepRegularizationTask(stepIndex, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocation);
 
       inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
@@ -787,7 +707,7 @@ public class ICPQPOptimizationSolver
     */
    private void addFeedbackTask()
    {
-      inputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
+      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
 
       if (hasFeedbackRegularizationTerm)
          inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
@@ -796,20 +716,11 @@ public class ICPQPOptimizationSolver
    }
 
    /**
-    * Adds the minimization of the dynamic relaxation to the quadratic program's cost objectives.
-    */
-   private void addDynamicRelaxationTask()
-   {
-      inputCalculator.computeDynamicRelaxationTask(dynamicRelaxationTask, dynamicRelaxationWeight);
-      inputCalculator.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h, solverInputResidualCost);
-   }
-
-   /**
     * Adds the minimization of angular momentum to the quadratic program's cost objectives.
     */
    private void addAngularMomentumMinimizationTask()
    {
-      inputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
+      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
       inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
@@ -829,9 +740,6 @@ public class ICPQPOptimizationSolver
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
       MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
-
-      if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, -1.0);
 
       currentInequalityConstraintIndex += constraintSize;
    }
@@ -866,12 +774,31 @@ public class ICPQPOptimizationSolver
     */
    private void addReachabilityConstraint()
    {
-      reachabilityConstraint.setDeltaInside(copSafeDistanceToEdge);
+      reachabilityConstraint.setDeltaInside(0.0);
       reachabilityConstraint.formulateConstraint();
 
       int constraintSize = reachabilityConstraint.getInequalityConstraintSize();
       MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), reachabilityConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
+
+      currentInequalityConstraintIndex += constraintSize;
+   }
+
+   /**
+    * Adds a convex location constraint on the footstep location that requires the footstep to be in a planar region.
+    *
+    * <p>
+    * Takes the form Ax <= b.
+    * </p>
+    */
+   private void addPlanarRegionConstraint()
+   {
+      // todo formulate the distance inside
+      planarRegionConstraint.formulateConstraint();
+
+      int constraintSize = planarRegionConstraint.getInequalityConstraintSize();
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), planarRegionConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, planarRegionConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
    }
@@ -895,15 +822,11 @@ public class ICPQPOptimizationSolver
     *    <li>r<sub>f,i</sub> is the location of the i<sup>th</sup> footstep</li>
     * </p>
     */
-   private void addDynamicConstraint()
+   private void addDynamicConstraintTask()
    {
-      inputCalculator.computeDynamicsConstraint(dynamicsConstraintInput, currentICP, finalICPRecursion, cmpConstantEffect, feedbackGain,
-            footstepRecursionMultipliers);
-
-      MatrixTools.setMatrixBlock(solverInput_Aeq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.Aeq, 0, 0, 2, indexHandler.getNumberOfFreeVariables(), 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.beq, 0, 0, 2, 1, 1.0);
-
-      currentEqualityConstraintIndex += 2;
+      inputCalculator.computeDynamicsTask(dynamicsTaskInput, currentICPError, referenceFootstepLocation, feedbackGain,
+            dynamicsWeight, footstepRecursionMultiplier, footstepAdjustmentSafetyFactor);
+      inputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -924,11 +847,9 @@ public class ICPQPOptimizationSolver
 
       solver.clear();
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
-      solver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
       solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
 
       numberOfIterations = solver.solve(solutionToPack);
-
 
       if (MatrixTools.containsNaN(solutionToPack))
          throw new NoConvergenceException(numberOfIterations);
@@ -941,7 +862,7 @@ public class ICPQPOptimizationSolver
     */
    private void extractFootstepSolutions(DenseMatrix64F footstepLocationSolutionToPack)
    {
-      MatrixTools.setMatrixBlock(footstepLocationSolutionToPack, 0, 0, solution, 0, 0, indexHandler.getNumberOfFootstepVariables(), 1, 1.0);
+      MatrixTools.setMatrixBlock(footstepLocationSolutionToPack, 0, 0, solution, indexHandler.getFootstepStartIndex(), 0, indexHandler.getNumberOfFootstepVariables(), 1, 1.0);
    }
 
    /**
@@ -952,16 +873,6 @@ public class ICPQPOptimizationSolver
    private void extractFeedbackDeltaSolution(DenseMatrix64F feedbackSolutionToPack)
    {
       MatrixTools.setMatrixBlock(feedbackSolutionToPack, 0, 0, solution, indexHandler.getFeedbackCMPIndex(), 0, 2, 1, 1.0);
-   }
-
-   /**
-    * Extracts the dynamic relaxation magnitude from the solution vector.
-    *
-    * @param dynamicRelaxationSolutionToPack dynamic relaxation solution. Modified.
-    */
-   private void extractDynamicRelaxationSolution(DenseMatrix64F dynamicRelaxationSolutionToPack)
-   {
-      MatrixTools.setMatrixBlock(dynamicRelaxationSolutionToPack, 0, 0, solution, indexHandler.getDynamicRelaxationIndex(), 0, 2, 1, 1.0);
    }
 
    /**
@@ -982,17 +893,8 @@ public class ICPQPOptimizationSolver
     */
    private void setPreviousFootstepSolution(DenseMatrix64F footstepLocationSolution)
    {
-      for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
-         MatrixTools.setMatrixBlock(previousFootstepLocations.get(i), 0, 0, footstepLocationSolution, 2 * i, 0, 2, 1, 1.0);
-   }
-
-   public void setPreviousFootstepSolutionFromCurrent()
-   {
-      if (indexHandler.useStepAdjustment())
-      {
-         for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
-            MatrixTools.setMatrixBlock(previousFootstepLocations.get(i), 0, 0, footstepLocationSolution, 2 * i, 0, 2, 1, 1.0);
-      }
+      int stepIndex = 0;
+      MatrixTools.setMatrixBlock(previousFootstepLocation, 0, 0, footstepLocationSolution, 2 * stepIndex, 0, 2, 1, 1.0);
    }
 
    /**
@@ -1001,11 +903,6 @@ public class ICPQPOptimizationSolver
     * @param feedbackDeltaSolution amount of CMP feedback.
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F feedbackDeltaSolution)
-   {
-      previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
-   }
-
-   public void setPreviousFeedbackDeltaSolutionFromCurrent()
    {
       previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
    }
@@ -1041,7 +938,6 @@ public class ICPQPOptimizationSolver
 
       footstepCostToGo.zero();
       feedbackCostToGo.zero();
-      dynamicRelaxationCostToGo.zero();
       angularMomentumMinimizationCostToGo.zero();
 
       // feedback cost:
@@ -1051,14 +947,6 @@ public class ICPQPOptimizationSolver
 
       CommonOps.multAddTransA(-1.0, feedbackTaskInput.linearTerm, feedbackDeltaSolution, feedbackCostToGo);
       CommonOps.addEquals(feedbackCostToGo, feedbackTaskInput.residualCost);
-
-      // dynamic relaxation cost:
-      CommonOps.mult(dynamicRelaxationTask.quadraticTerm, dynamicRelaxationSolution, tmpFeedbackCost);
-      CommonOps.multTransA(dynamicRelaxationSolution, tmpFeedbackCost, dynamicRelaxationCostToGo);
-      CommonOps.scale(0.5, dynamicRelaxationCostToGo);
-
-      CommonOps.multAddTransA(-1.0, dynamicRelaxationTask.linearTerm, dynamicRelaxationSolution, dynamicRelaxationCostToGo);
-      CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
 
       if (indexHandler.useStepAdjustment())
       { // footstep cost:
@@ -1099,23 +987,11 @@ public class ICPQPOptimizationSolver
     *
     * @param cmpFeedbackDifferenceToPack difference between the nominal CMP and the desired CMP.
     */
-   public void getCMPFeedbackDifference(FrameVector2D cmpFeedbackDifferenceToPack)
+   public void getCoPFeedbackDifference(FrameVector2D cmpFeedbackDifferenceToPack)
    {
       cmpFeedbackDifferenceToPack.setToZero(worldFrame);
       cmpFeedbackDifferenceToPack.setX(feedbackDeltaSolution.get(0, 0));
       cmpFeedbackDifferenceToPack.setY(feedbackDeltaSolution.get(1, 0));
-   }
-
-   /**
-    * Gets the magnitude of the dynamic relaxation that is a slack variable in the recursive ICP dynamics.
-    *
-    * @param dynamicRelaxationToPack magnitude of the slack variable. Modified.
-    */
-   public void getDynamicRelaxation(FramePoint2D dynamicRelaxationToPack)
-   {
-      dynamicRelaxationToPack.setToZero(worldFrame);
-      dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
-      dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
    }
 
    /**
@@ -1124,7 +1000,7 @@ public class ICPQPOptimizationSolver
     *
     * @param differenceToPack difference between the two points. Modified.
     */
-   public void getCMPDifferenceFromCoP(FramePoint2D differenceToPack)
+   public void getCMPDifferenceFromCoP(FrameVector2D differenceToPack)
    {
       differenceToPack.setToZero(worldFrame);
       differenceToPack.setX(angularMomentumSolution.get(0, 0));
@@ -1168,15 +1044,6 @@ public class ICPQPOptimizationSolver
    }
 
    /**
-    * Gets the cost to go of the dynamic relaxation minimization task.
-    * @return cost to go
-    */
-   public double getDynamicRelaxationCostToGo()
-   {
-      return dynamicRelaxationCostToGo.get(0, 0);
-   }
-
-   /**
     * Gets the cost to go of the angular momentum minimization task.
     * @return cost to go
     */
@@ -1192,5 +1059,15 @@ public class ICPQPOptimizationSolver
    public int getNumberOfIterations()
    {
       return numberOfIterations;
+   }
+
+   public ConstraintToConvexRegion getCoPLocationConstraint()
+   {
+      return copLocationConstraint;
+   }
+
+   public ConstraintToConvexRegion getCMPLocationConstraint()
+   {
+      return cmpLocationConstraint;
    }
 }
