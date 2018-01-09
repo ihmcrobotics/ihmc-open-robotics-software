@@ -42,7 +42,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
+public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    

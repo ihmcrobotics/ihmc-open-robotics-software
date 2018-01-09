@@ -329,15 +329,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
    }
 
-   private void updateYoFootsteps()
-   {
-      if (upcomingFootsteps.size() > 0)
-      {
-         upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
-         upcomingFootstepLocation.set(tempPoint2d);
-      }
-   }
-
    @Override
    public void initializeForStanding(double initialTime)
    {
@@ -582,10 +573,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
          predictedEndOfStateICP.add(perfectCMP);
 
-         /*
-         Footstep upcomingFootstep = upcomingFootsteps.get(footstepIndex);
-         upcomingFootstep.getPosition(tempPoint3d);
-         */
          upcomingFootstepLocation.get(tempPoint3d);
          if (useICPControlPolygons.getBooleanValue())
             icpControlPlane.projectPointOntoControlPlane(worldFrame, tempPoint3d, projectedTempPoint3d);
