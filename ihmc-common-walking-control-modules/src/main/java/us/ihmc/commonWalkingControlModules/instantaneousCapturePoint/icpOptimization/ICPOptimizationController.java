@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class SimpleICPOptimizationController implements ICPOptimizationControllerInterface
+public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
    private static final boolean VISUALIZE = true;
    private static final boolean DEBUG = false;
@@ -131,7 +131,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final PlanarRegionConstraintProvider planarRegionConstraintProvider;
-   private final SimpleICPOptimizationSolutionHandler solutionHandler;
+   private final ICPOptimizationSolutionHandler solutionHandler;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final ICPControlPlane icpControlPlane;
@@ -158,25 +158,25 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final FramePoint2D perfectCMP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
 
-   private final SimpleICPOptimizationQPSolver solver;
+   private final ICPOptimizationQPSolver solver;
 
    private final double controlDT;
    private final double dynamicRelaxationDoubleSupportWeightModifier;
 
    private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
 
-   public SimpleICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                          ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                          double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
+                                    ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                    double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet,
            controlDT, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public SimpleICPOptimizationController(WalkingControllerParameters walkingControllerParameters, ICPOptimizationParameters icpOptimizationParameters,
-                                          BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
-                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, ICPOptimizationParameters icpOptimizationParameters,
+                                    BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
+                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.contactableFeet = contactableFeet;
@@ -237,9 +237,9 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
 
       boolean updateRegularizationAutomatically = true;
-      solver = new SimpleICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
+      solver = new ICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
 
-      solutionHandler = new SimpleICPOptimizationSolutionHandler(icpControlPlane, icpOptimizationParameters, useICPControlPlane, DEBUG, yoNamePrefix, registry);
+      solutionHandler = new ICPOptimizationSolutionHandler(icpControlPlane, icpOptimizationParameters, useICPControlPlane, DEBUG, yoNamePrefix, registry);
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPlane);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,

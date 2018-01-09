@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleCont
 
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.SimpleICPOptimizationQPSolver;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.SimpleICPOptimizationSolutionHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationSolutionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -33,8 +33,8 @@ public class SimpleICPOptimizationSolutionHandlerTest
    private YoVariableRegistry registry = new YoVariableRegistry("robert");
 
    private ICPOptimizationParameters parameters;
-   private SimpleICPOptimizationSolutionHandler solutionHandler;
-   private SimpleICPOptimizationQPSolver solver;
+   private ICPOptimizationSolutionHandler solutionHandler;
+   private ICPOptimizationQPSolver solver;
 
    private void setupTest(double deadbandSize)
    {
@@ -44,8 +44,8 @@ public class SimpleICPOptimizationSolutionHandlerTest
    private void setupTest(double deadbandSize, double resolution)
    {
       parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
-      solutionHandler = new SimpleICPOptimizationSolutionHandler(parameters, false, "test", registry);
-      solver = new SimpleICPOptimizationQPSolver(parameters, 4, false);
+      solutionHandler = new ICPOptimizationSolutionHandler(parameters, false, "test", registry);
+      solver = new ICPOptimizationQPSolver(parameters, 4, false);
    }
 
    private Footstep createFootsteps(double length, double width, int numberOfSteps)

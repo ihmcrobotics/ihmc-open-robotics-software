@@ -91,7 +91,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       }
    }
 
-   public void initializeReachabilityConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
+   public void initializeReachabilityConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
    {
       contractedReachabilityPolygon.clearAndHide();
       motionLimitLine.setToNaN();
@@ -100,7 +100,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       solver.resetPlanarRegionConstraint();
    }
 
-   public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, SimpleICPOptimizationQPSolver solver)
+   public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
    {
       solver.resetReachabilityConstraint();
 
@@ -148,7 +148,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.setConvexPolygon2d(polygon2d.getConvexPolygon2d());
    }
 
-   public void updateReachabilityConstraint(SimpleICPOptimizationQPSolver solver)
+   public void updateReachabilityConstraint(ICPOptimizationQPSolver solver)
    {
       solver.resetReachabilityConstraint();
       FrameConvexPolygon2d polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();

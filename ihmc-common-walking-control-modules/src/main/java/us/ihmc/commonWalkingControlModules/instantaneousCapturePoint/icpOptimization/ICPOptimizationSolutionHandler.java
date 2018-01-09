@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SimpleICPOptimizationSolutionHandler
+public class ICPOptimizationSolutionHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -59,13 +59,13 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final String yoNamePrefix;
 
-   public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
+   public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
       this(null, icpOptimizationParameters, false, debug, yoNamePrefix, registry);
    }
 
-   public SimpleICPOptimizationSolutionHandler(ICPControlPlane icpControlPlane, ICPOptimizationParameters icpOptimizationParameters, boolean useICPControlPlane,
-                                               boolean debug, String yoNamePrefix, YoVariableRegistry registry)
+   public ICPOptimizationSolutionHandler(ICPControlPlane icpControlPlane, ICPOptimizationParameters icpOptimizationParameters, boolean useICPControlPlane,
+                                         boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
       this.useICPControlPlane = useICPControlPlane && icpControlPlane != null;
       this.yoNamePrefix = yoNamePrefix;
@@ -116,7 +116,7 @@ public class SimpleICPOptimizationSolutionHandler
       artifactList.add(footstepPositionInControlPlane.createArtifact());
    }
 
-   public void updateCostsToGo(SimpleICPOptimizationQPSolver solver)
+   public void updateCostsToGo(ICPOptimizationQPSolver solver)
    {
       if (debug)
       {
@@ -132,7 +132,7 @@ public class SimpleICPOptimizationSolutionHandler
    private final FramePoint2D referenceFootstepLocation2D = new FramePoint2D();
 
    public void extractFootstepSolution(YoFramePose footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
-                                       int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
+                                       int numberOfFootstepsToConsider, ICPOptimizationQPSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
@@ -175,7 +175,7 @@ public class SimpleICPOptimizationSolutionHandler
    // fixme this is wrong
    private final FramePose tmpPose = new FramePose();
    public void extractFootstepSolution(YoFramePose footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
-                                       int numberOfFootstepsToConsider, PlanarRegion activePlanarRegion, SimpleICPOptimizationQPSolver solver)
+                                       int numberOfFootstepsToConsider, PlanarRegion activePlanarRegion, ICPOptimizationQPSolver solver)
    {
       if (activePlanarRegion == null)
       {

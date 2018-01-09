@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.SimpleICPQPIndexHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -14,7 +14,7 @@ public class SimpleICPQPIndexHandlerTest
    @Test(timeout = 21000)
    public void testRegisterFootstep()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       indexHandler.registerFootstep();
 
       Assert.assertTrue(indexHandler.useStepAdjustment());
@@ -25,7 +25,7 @@ public class SimpleICPQPIndexHandlerTest
    @Test(timeout = 21000)
    public void testSizing()
    {
-      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
       Assert.assertFalse(indexHandler.useAngularMomentum());

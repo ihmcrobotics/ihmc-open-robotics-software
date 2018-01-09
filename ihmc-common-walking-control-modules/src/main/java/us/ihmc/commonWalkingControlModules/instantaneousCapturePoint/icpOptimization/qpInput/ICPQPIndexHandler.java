@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.SimpleICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationQPSolver;
 
 /**
- * Class intended to manage the indices of all components used in the {@link SimpleICPOptimizationQPSolver}.
+ * Class intended to manage the indices of all components used in the {@link ICPOptimizationQPSolver}.
  */
-public class SimpleICPQPIndexHandler
+public class ICPQPIndexHandler
 {
    /** Number of footsteps registered with the solver. */
    private int numberOfFootstepsToConsider = 0;

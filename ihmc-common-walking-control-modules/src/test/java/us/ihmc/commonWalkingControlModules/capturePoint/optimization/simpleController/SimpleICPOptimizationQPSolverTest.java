@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.SimpleICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationQPSolver;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -26,7 +26,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testStandingWithPerfectTrackingAndAngularMomentum() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
       solver.setAngularMomentumConditions(10.0, true);
       solver.setFeedbackConditions(0.1, 3.0, 500.0);
@@ -53,7 +53,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testStandingUnconstrainedWithAndAngularMomentum() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
       solver.setAngularMomentumConditions(1000.0, true);
       solver.setFeedbackConditions(0.1, 0.1, 3.0, 3.0, 100000.0);
@@ -83,7 +83,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testStandingUnconstrained() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
       solver.setFeedbackConditions(0.1, 3.0, 100000.0);
 
@@ -112,7 +112,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testStandingConstrained() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       // create support polygon constraint
@@ -154,7 +154,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       // create support polygon constraint
@@ -203,7 +203,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testSteppingUnconstrainedFeedbackPreferred() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 0.1;
@@ -249,7 +249,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testSteppingUnconstrainedFootstepAdjustmentPreferred() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1000.0;
@@ -294,7 +294,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testSteppingUnconstrainedFootstepAdjustmentPreferredWithAngularMomentum() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1000.0;
@@ -340,7 +340,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testSteppingUnconstrainedWithAdjustment() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1.0;
@@ -410,7 +410,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testSteppingUnconstrainedWithAdjustmentAndAngularMomentum() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 1.0;
@@ -481,7 +481,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testSteppingCoPConstrainedWithAdjustment() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 0.1;
@@ -535,7 +535,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testCoPAndFootstepConstrainedWithAdjustment() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
 
       double feedbackWeight = 0.1;
@@ -631,7 +631,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testNoExceptions() throws Exception
    {
-         SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+         ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
          // feedback
          FramePoint2D scaledFeedbackWeight = new FramePoint2D(worldFrame, 0.2826586940121205, 0.2826586940121205);
@@ -697,7 +697,7 @@ public class SimpleICPOptimizationQPSolverTest
    @Test(timeout = 21000)
    public void testSimpleNoExceptions() throws Exception
    {
-      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
 
       // feedback
