@@ -1,11 +1,13 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
@@ -17,11 +19,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    private final Vector3D defaultLinearFootWeight = new Vector3D(30.0, 30.0, 30.0);
    private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
-
-   private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
-   private final double chestUserModeWeight = 50.0;
-   private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 1;
@@ -36,14 +33,15 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    private final Vector2D copWeight = new Vector2D(100.0, 200.0); //750.0, 1500.0);
    private final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0); //100000.0, 200000.0);
    private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
-   private final double headJointspaceWeight = 1.0;
-   private final double headUserModeWeight = 1.0;
-   private final double handUserModeWeight = 50.0;
-   private final double handJointspaceWeight = 1.0;
-   private final Vector3D handAngularTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final Vector3D handLinearTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
 
-   private final Vector3D headAngularWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final List<GroupParameter<Double>> jointspaceWeights = new ArrayList<>();
+   private final List<GroupParameter<Double>> userModeWeights = new ArrayList<>();
+   private final List<GroupParameter<Vector3DReadOnly>> taskspaceAngularWeights = new ArrayList<>();
+   private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeights = new ArrayList<>();
+
+   public HexapodMomentumOptimizationSettings()
+   {
+   }
 
    /** @inheritDoc */
    @Override
@@ -131,41 +129,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
 
    /** @inheritDoc */
    @Override
-   public double getHeadUserModeWeight()
-   {
-      return headUserModeWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getHeadJointspaceWeight()
-   {
-      return headJointspaceWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHeadAngularWeight()
-   {
-      return headAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getChestAngularWeight()
-   {
-      return chestAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getPelvisAngularWeight()
-   {
-      return pelvisAngularWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
    public Vector3D getDefaultLinearFootWeight()
    {
       return defaultLinearFootWeight;
@@ -190,34 +153,6 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    public Vector3D getHighAngularFootWeight()
    {
       return highAngularFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getHandUserModeWeight()
-   {
-      return handUserModeWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public double getHandJointspaceWeight()
-   {
-      return handJointspaceWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHandAngularTaskspaceWeight()
-   {
-      return handAngularTaskspaceWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHandLinearTaskspaceWeight()
-   {
-      return handLinearTaskspaceWeight;
    }
 
    /** @inheritDoc */
@@ -250,46 +185,29 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
 
    /** @inheritDoc */
    @Override
-   public TObjectDoubleHashMap<String> getJointspaceWeights()
+   public List<GroupParameter<Double>> getJointspaceWeights()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return jointspaceWeights;
    }
 
    /** @inheritDoc */
    @Override
-   public double getChestUserModeWeight()
+   public List<GroupParameter<Double>> getUserModeWeights()
    {
-      return chestUserModeWeight;
+      return userModeWeights;
    }
 
    /** @inheritDoc */
    @Override
-   public TObjectDoubleHashMap<String> getUserModeWeights()
+   public List<GroupParameter<Vector3DReadOnly>> getTaskspaceAngularWeights()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return taskspaceAngularWeights;
    }
 
    /** @inheritDoc */
    @Override
-   public Map<String, Vector3D> getTaskspaceAngularWeights()
+   public List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights()
    {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Map<String, Vector3D> getTaskspaceLinearWeights()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public Vector3D getPelvisLinearWeight()
-   {
-      return pelvisLinearWeight;
+      return taskspaceLinearWeights;
    }
 }

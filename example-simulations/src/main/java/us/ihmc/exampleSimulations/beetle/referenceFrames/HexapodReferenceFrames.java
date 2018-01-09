@@ -111,7 +111,6 @@ public class HexapodReferenceFrames implements ReferenceFrames
    @Override
    public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 }

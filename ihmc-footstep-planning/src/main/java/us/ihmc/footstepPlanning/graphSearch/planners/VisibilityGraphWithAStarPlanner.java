@@ -5,16 +5,20 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.layout.VBox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -195,18 +199,28 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
          try
          {
-            List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+            List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
 
-            if (path == null || path.size() < 2)
+            if (path.size() < 2)
             {
-               double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
-               timeSpentBeforeFootstepPlanner.set(seconds);
-               timeSpentInFootstepPlanner.set(0.0);
-               yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
-               return yoResult.getEnumValue();
+               if(parameters.getReturnBestEffortPlan())
+               {
+                  Vector2D goalDirection = new Vector2D(bodyGoalPose.getX(), bodyGoalPose.getY());
+                  goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
+                  goalDirection.scale(planningHorizon / goalDirection.length());
+                  waypoints.add(new Point2D(goalDirection.getX() + bodyStartPose.getX(), goalDirection.getY() + bodyStartPose.getY()));
+               }
+               else
+               {
+                  double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+                  timeSpentBeforeFootstepPlanner.set(seconds);
+                  timeSpentInFootstepPlanner.set(0.0);
+                  yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
+                  return yoResult.getEnumValue();
+               }
             }
 
-            for (Point3D waypoint3d : path)
+            for (Point3DReadOnly waypoint3d : path)
             {
                waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
             }

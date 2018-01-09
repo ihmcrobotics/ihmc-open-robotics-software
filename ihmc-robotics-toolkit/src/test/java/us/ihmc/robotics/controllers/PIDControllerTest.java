@@ -10,10 +10,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.tools.MemoryTools;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PIDControllerTest
 {
    private final Random random = new Random();
@@ -23,7 +27,7 @@ public class PIDControllerTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void showMemoryUsageAfterTest()
    {
@@ -75,7 +79,7 @@ public class PIDControllerTest
       pidGains.setMaximumIntegralError(maxError);
       pidGains.setPositionDeadband(deadband);
       pidGains.setIntegralLeakRatio(leakRate);
-      pidGains.setMaximumOutput(maxOutput);
+      pidGains.setMaximumFeedback(maxOutput);
 
       PIDController pid = new PIDController(pidGains, "", registry);
       assertEquals(proportional, pid.getProportionalGain(), 0.001);
@@ -84,7 +88,7 @@ public class PIDControllerTest
       assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
       assertEquals(deadband, pid.getPositionDeadband(), 0.001);
       assertEquals(leakRate, pid.getIntegralLeakRatio(), 0.001);
-      assertEquals(maxOutput, pid.getMaximumOutputLimit(), 1e-5);
+      assertEquals(maxOutput, pid.getMaximumFeedback(), 1e-5);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.4)
@@ -106,7 +110,7 @@ public class PIDControllerTest
       pidGains.setKd(derivative);
       pidGains.setMaximumIntegralError(maxError);
       pidGains.setPositionDeadband(deadband);
-      pidGains.setMaximumOutput(maxOutput);
+      pidGains.setMaximumFeedback(maxOutput);
 
       PIDController pid = new PIDController(pidGains, "", registry);
       assertEquals(proportional, pid.getProportionalGain(), 0.001);
@@ -114,7 +118,7 @@ public class PIDControllerTest
       assertEquals(derivative, pid.getDerivativeGain(), 0.001);
       assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
       assertEquals(deadband, pid.getPositionDeadband(), 0.001);
-      assertEquals(maxOutput, pid.getMaximumOutputLimit(), 0.001);
+      assertEquals(maxOutput, pid.getMaximumFeedback(), 0.001);
       assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }
 
@@ -135,14 +139,14 @@ public class PIDControllerTest
       pidGains.setKi(integral);
       pidGains.setKd(derivative);
       pidGains.setMaximumIntegralError(maxIntegralError);
-      pidGains.setMaximumOutput(maxOutput);
+      pidGains.setMaximumFeedback(maxOutput);
 
       PIDController pid = new PIDController(pidGains, "", registry);
       assertEquals(proportional, pid.getProportionalGain(), 0.001);
       assertEquals(integral, pid.getIntegralGain(), 0.001);
       assertEquals(derivative, pid.getDerivativeGain(), 0.001);
       assertEquals(maxIntegralError, pid.getMaxIntegralError(), 0.001);
-      assertEquals(maxOutput, pid.getMaximumOutputLimit(), 1e-5);
+      assertEquals(maxOutput, pid.getMaximumFeedback(), 1e-5);
       assertEquals(0.0, pid.getPositionDeadband(), 0.001);
       assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }
@@ -169,7 +173,7 @@ public class PIDControllerTest
       assertEquals(integral, pid.getIntegralGain(), 0.001);
       assertEquals(derivative, pid.getDerivativeGain(), 0.001);
       assertEquals(maxIntegralError, pid.getMaxIntegralError(), 0.001);
-      assertEquals(Double.POSITIVE_INFINITY, pid.getMaximumOutputLimit(), 0.001);
+      assertEquals(Double.POSITIVE_INFINITY, pid.getMaximumFeedback(), 0.001);
       assertEquals(0.0, pid.getPositionDeadband(), 0.001);
       assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }

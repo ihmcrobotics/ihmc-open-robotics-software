@@ -127,7 +127,6 @@ public class YoVariableToggler implements NewDataListener
    @Override
    public void newDataHasBeenSent()
    {
-      // TODO Auto-generated method stub
 
    }
 

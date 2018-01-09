@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPAdjustmentOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -115,9 +115,8 @@ public class SphereICPOptimizationController implements GenericSphereController
       icpGains.setKpOrthogonalToMotion(3.0);
       icpGains.setKpParallelToMotion(2.0);
 
-      icpOptimizationController = new ICPAdjustmentOptimizationController(controlToolbox.getCapturePointPlannerParameters(), controlToolbox.getICPOptimizationParameters(),
-                                                                          null, controlToolbox.getBipedSupportPolygons(),
-                                                                          controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
+      icpOptimizationController = new ICPOptimizationController(null, controlToolbox.getICPOptimizationParameters(), controlToolbox.getBipedSupportPolygons(),
+                                                                controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
 
       stateMachine = new StateMachine<>("supportStateMachine", "supportStateTime", SupportState.class, controlToolbox.getYoTime(), registry);
       StandingState standingState = new StandingState();
@@ -296,14 +295,14 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpOptimizationController.getDesiredCMP(desiredCMP);
          yoDesiredCMP.set(desiredCMP, 0.0);
 
-         for (int i = 0; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
+         if (icpOptimizationController.useStepAdjustment())
          {
-            Footstep footstep = nextFootsteps.get(i);
+            Footstep footstep = nextFootsteps.get(0);
 
             if (footstep != null)
             {
                footstep.getPose(footstepPose);
-               icpOptimizationController.getFootstepSolution(i, footstepPositionSolution);
+               icpOptimizationController.getFootstepSolution(footstepPositionSolution);
                footstepPose.setXYFromPosition2d(footstepPositionSolution);
                footstep.setPose(footstepPose);
             }
@@ -326,9 +325,6 @@ public class SphereICPOptimizationController implements GenericSphereController
          nextFootsteps.add(nextFootstep);
          nextFootsteps.add(nextNextFootstep);
          nextFootsteps.add(nextNextNextFootstep);
-
-         for (int i = 3; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
-            nextFootsteps.add(controlToolbox.peekAtFootstep(i - 1));
 
          timing.setTimings(controlToolbox.getDoubleSupportDuration(), controlToolbox.getSingleSupportDuration());
          icpPlanner.addFootstepToPlan(nextFootstep, timing);
@@ -388,14 +384,14 @@ public class SphereICPOptimizationController implements GenericSphereController
 
          if (getPreviousState().getStateEnum() != SupportState.STANDING)
          {
-            for (int i = 0; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
+            if (icpOptimizationController.useStepAdjustment())
             {
-               Footstep footstep = nextFootsteps.get(i);
+               Footstep footstep = nextFootsteps.get(0);
 
                if (footstep != null)
                {
                   footstep.getPose(footstepPose);
-                  icpOptimizationController.getFootstepSolution(i, footstepPositionSolution);
+                  icpOptimizationController.getFootstepSolution(footstepPositionSolution);
                   footstepPose.setXYFromPosition2d(footstepPositionSolution);
                   footstep.setPose(footstepPose);
                }
@@ -423,9 +419,6 @@ public class SphereICPOptimizationController implements GenericSphereController
          nextFootsteps.add(nextFootstep);
          nextFootsteps.add(nextNextFootstep);
          nextFootsteps.add(nextNextNextFootstep);
-
-         for (int i = 3; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
-            nextFootsteps.add(controlToolbox.peekAtFootstep(i - 1));
 
          controlToolbox.updateUpcomingFootstepsViz(nextFootstep, nextNextFootstep, nextNextNextFootstep);
 

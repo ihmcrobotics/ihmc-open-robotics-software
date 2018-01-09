@@ -25,6 +25,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -139,7 +140,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR, cinderBlockField, startingLocation, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, cinderBlockField, startingLocation, goalPose);
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -150,7 +151,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, startingLocation, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, startingLocation, goalPose);
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -160,7 +161,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR, steppingStoneField, startingLocation, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, startingLocation, goalPose);
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -170,11 +171,11 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, startingLocation, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, startingLocation, goalPose);
    }
 
-   private void runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlanningRequestPacket.FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
-                                                         DRCStartingLocation startingLocation, FramePose goalPose)
+   private void runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
+                                                       DRCStartingLocation startingLocation, FramePose goalPose)
    {
       try
       {
@@ -194,7 +195,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
    }
 
-   private void runEndToEndTest(FootstepPlanningRequestPacket.FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
+   private void runEndToEndTest(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
                                 DRCStartingLocation startingLocation, FramePose goalPose) throws Exception
    {
       outputStatus = new AtomicReference<>();
@@ -239,13 +240,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
 
       FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose, plannerType);
-      requestPacket.setAssumeFlatGround(false);
-      toolboxCommunicator.send(requestPacket);
-
-      blockingSimulationRunner.simulateAndBlock(1.0);
-
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-      toolboxCommunicator.send(planarRegionsListMessage);
+      requestPacket.setPlanarRegionsListMessage(planarRegionsListMessage);
+      toolboxCommunicator.send(requestPacket);
 
       while(outputStatus.get() == null)
       {

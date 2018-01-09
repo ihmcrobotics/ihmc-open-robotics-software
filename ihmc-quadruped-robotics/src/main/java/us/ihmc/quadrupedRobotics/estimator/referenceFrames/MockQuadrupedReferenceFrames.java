@@ -80,42 +80,36 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    @Override
    public ReferenceFrame getRootJointFrame()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getLegAttachmentFrame(RobotQuadrant robotQuadrant)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getKneeFrame(RobotQuadrant robotQuadrant)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getHipRollFrame(RobotQuadrant robotQuadrant)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getHipPitchFrame(RobotQuadrant robotQuadrant)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public QuadrantDependentList<ReferenceFrame> getFootReferenceFrames()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -128,42 +122,36 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    @Override
    public ReferenceFrame getCenterOfMassFrame()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getCenterOfMassZUpFrame()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getBodyZUpFrame()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getBodyFrame()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getCenterOfFourHipsFrame()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getFrameBeforeLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -176,7 +164,6 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    @Override
    public ReferenceFrame getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(RobotQuadrant footToExclude)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -184,21 +171,18 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    @Override
    public ReferenceFrame getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

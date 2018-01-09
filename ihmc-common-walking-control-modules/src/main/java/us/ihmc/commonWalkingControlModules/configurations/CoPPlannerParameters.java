@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
 
+import java.util.EnumMap;
 import java.util.List;
 
 /**
@@ -21,23 +22,51 @@ public interface CoPPlannerParameters
    int getNumberOfCoPWayPointsPerFoot();
 
    /**
+    * Name of the cop point that is designed as the entry, which is the first CoP for the swing phase. Typically Heel.
+    */
+   CoPPointName getEntryCoPName();
+
+   /**
+    * Name of the cop point that is designed as the exit, which is the last CoP for the swing phase. Typically Toe.
+    */
+   CoPPointName getExitCoPName();
+
+   /**
     * <p>
     * This parameter indicates how far backward and forward in the foot the CoPs can be.
     * </p>
     * <p>
-    * A large positive maximum value for the heel CoP can be helpful for backward steps.
-    * The minimum value for the heel CoP should probably be 0.0, as a negative value would delay the toe off
+    * A large positive maximum value for the entry CoP can be helpful for backward steps.
+    * The minimum value for the entry CoP should probably be 0.0, as a negative value would delay the toe off
     * when walking forward.
     * </p>
+    * <p>
+    * A large positive maximum value for the exit CoP here can improve significantly long
+    * forward steps and help trigger the exit off earlier.
+    * The minimum value for the exit CoP indicates how far back in the foot it can be. For instance,
+    * -0.02m will let the robot move slightly backward in single support when doing back steps.
+    * </p>
+    * <p>
+    * The data is organized such that the entry CoP bounds are the first entry in the list, and
+    * the exit CoP bounds are the second entry in the list. The minimum value is then the X field
+    * in the vector, while the maximum value is the Y field in the vector.
+    * </p>
     */
-   List<Vector2D> getCoPForwardOffsetBounds();
+   EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot();
 
    /**
     * <p>
     * These parameters force the CoP locations inside or outside in the foot, and forward or backward.
     * </p>
+    * <p>
+    * The values for the exit CoP are only used when using an ICP planner with two or more CoPs per support.
+    * </p>
+    * <p>
+    * The offsets themselves are in the foot frame. The X offset is the forward offset in the foot,
+    * while the Y offset is the inside offset.
+    * </p>
     */
-   List<Vector2D> getCoPOffsets();
+   EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame();
 
    /**
     * This parameter is used when computing the CoP locations to make sure they are
@@ -50,13 +79,13 @@ public interface CoPPlannerParameters
     * Only used when using an ICP planner with two or more CoPs per support.
     * </p>
     * <p>
-    * The forward offset of the ball CoP is computed according to the upcoming step length times the returned fraction.
+    * The forward offset of the exit CoP is computed according to the upcoming step length times the returned fraction.
     * </p>
     * <p>
     * One third seems to be a reasonable value.
     * </p>
     */
-   double getStepLengthToBallCoPOffsetFactor();
+   EnumMap<CoPPointName, Double> getStepLengthToCoPOffsetFactors();
 
    /**
     * <p>
@@ -73,7 +102,6 @@ public interface CoPPlannerParameters
     * </p>
     */
    boolean putExitCoPOnToes();
-
 
    /**
     * <p>

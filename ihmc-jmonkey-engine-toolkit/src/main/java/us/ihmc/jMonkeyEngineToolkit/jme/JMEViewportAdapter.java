@@ -12,6 +12,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.SceneProcessor;
+import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue;
@@ -288,7 +289,6 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public void setClipDistances(double near, double far)
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -331,7 +331,6 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public double getFieldOfView()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
@@ -411,31 +410,26 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public void initialize(RenderManager rm, ViewPort vp)
    {
-      // TODO Auto-generated method stub
 
    }
 
    public void reshape(ViewPort vp, int w, int h)
    {
-      // TODO Auto-generated method stub
 
    }
 
    public boolean isInitialized()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
    public void preFrame(float tpf)
    {
-      // TODO Auto-generated method stub
 
    }
 
    public void postQueue(RenderQueue rq)
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -453,7 +447,12 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public void cleanup()
    {
-      // TODO Auto-generated method stub
 
+   }
+
+   @Override
+   public void setProfiler(AppProfiler profiler)
+   {
+      
    }
 }

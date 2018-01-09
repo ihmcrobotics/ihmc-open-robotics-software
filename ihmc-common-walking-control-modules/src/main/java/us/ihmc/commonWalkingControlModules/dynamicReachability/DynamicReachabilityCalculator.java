@@ -958,32 +958,19 @@ public class DynamicReachabilityCalculator
 
       int numberOfFootstepsRegistered = icpPlanner.getNumberOfFootstepsRegistered();
 
-      icpOptimizationController.setTransferDuration(0, originalTransferDurations.get(0) + currentTransferAdjustment.getDoubleValue());
-      icpOptimizationController.setTransferSplitFraction(0, currentTransferAlpha.getDoubleValue());
-
-      icpOptimizationController.setSwingDuration(0, originalSwingDurations.get(0) + currentSwingAdjustment.getDoubleValue());
-      icpOptimizationController.setSwingSplitFraction(0, currentSwingAlpha.getDoubleValue());
+      icpOptimizationController.setTransferDuration(originalTransferDurations.get(0) + currentTransferAdjustment.getDoubleValue());
+      icpOptimizationController.setSwingDuration(originalSwingDurations.get(0) + currentSwingAdjustment.getDoubleValue());
 
       boolean isThisTheFinalTransfer = (numberOfFootstepsRegistered == 1);
 
       double adjustedTransferDuration = originalTransferDurations.get(1) + nextTransferAdjustment.getDoubleValue();
       if (isThisTheFinalTransfer)
-      {
          icpOptimizationController.setFinalTransferDuration(adjustedTransferDuration);
-         icpOptimizationController.setFinalTransferSplitFraction(nextTransferAlpha.getDoubleValue());
-      }
       else
-      {
-         icpOptimizationController.setTransferDuration(1, adjustedTransferDuration);
-         icpOptimizationController.setTransferSplitFraction(1, nextTransferAlpha.getDoubleValue());
-      }
+         icpOptimizationController.setNextTransferDuration(adjustedTransferDuration);
 
       for (int i = 0; i < numberOfHigherSteps; i++)
       {
-         double swingDuration = originalSwingDurations.get(i + 1);
-         double swingAdjustment = higherSwingAdjustments.get(i).getDoubleValue();
-         icpOptimizationController.setSwingDuration(i + 1, swingDuration + swingAdjustment);
-
          int transferIndex = i + 2;
          double transferDuration = originalTransferDurations.get(transferIndex);
          double transferAdjustment = higherTransferAdjustments.get(i).getDoubleValue();
@@ -991,8 +978,6 @@ public class DynamicReachabilityCalculator
          isThisTheFinalTransfer = (numberOfFootstepsRegistered == transferIndex);
          if (isThisTheFinalTransfer)
             icpOptimizationController.setFinalTransferDuration(transferDuration + transferAdjustment);
-         else
-            icpOptimizationController.setTransferDuration(transferIndex, transferDuration + transferAdjustment);
       }
    }
 

@@ -65,8 +65,6 @@ public class PlanarRegionFileTools
    {
       try
       {
-         if (folderPath.toFile().exists())
-            return false;
          Files.createDirectories(folderPath);
          writePlanarRegionsData(folderPath, planarRegionData);
          return true;
@@ -74,6 +72,21 @@ public class PlanarRegionFileTools
       catch (IOException e)
       {
          e.printStackTrace();
+         return false;
+      }
+   }
+
+   public static boolean isPlanarRegionFile(File file)
+   {
+      if (file == null || !file.exists() || !file.isDirectory())
+         return false;
+
+      try
+      {
+         return importPlanRegionDataInternal(file) != null;
+      }
+      catch (IOException e)
+      {
          return false;
       }
    }
@@ -87,73 +100,83 @@ public class PlanarRegionFileTools
     */
    public static PlanarRegionsList importPlanRegionData(File dataFolder)
    {
+
       try
       {
-         File headerFile = new File(dataFolder, "header.txt");
-         List<PlanarRegion> planarRegions = new ArrayList<>();
-
-         FileReader fileReader = new FileReader(headerFile);
-         BufferedReader bufferedReader = new BufferedReader(fileReader);
-         String line = "";
-         String cvsSplitBy = ",";
-
-         while ((line = bufferedReader.readLine()) != null)
-         {
-            line = line.replaceAll("regionId: ", "");
-            line = line.replaceAll("index: ", "");
-            line = line.replaceAll("origin: ", "");
-            line = line.replaceAll("normal: ", "");
-            line = line.replaceAll("\\[", "");
-            line = line.replaceAll("\\]", "");
-            line = line.replaceAll("concave hull size: ", "");
-            line = line.replaceAll("number of convex polygons: ", "");
-            line = line.replaceAll(" ", "");
-            String[] values = line.split(cvsSplitBy);
-
-            int i = 0;
-
-            int regionId = Integer.parseInt(values[i++]);
-            int regionIndex = Integer.parseInt(values[i++]);
-            String fileName = "region" + regionId + "_" + regionIndex;
-
-            float xOrigin = Float.parseFloat(values[i++]);
-            float yOrigin = Float.parseFloat(values[i++]);
-            float zOrigin = Float.parseFloat(values[i++]);
-            Point3D origin = new Point3D(xOrigin, yOrigin, zOrigin);
-
-            float xNormal = Float.parseFloat(values[i++]);
-            float yNormal = Float.parseFloat(values[i++]);
-            float zNormal = Float.parseFloat(values[i++]);
-            Vector3D normal = new Vector3D(xNormal, yNormal, zNormal);
-
-            int concaveHullSize = Integer.parseInt(values[i++]);
-            int numberOfConvexPolygons = Integer.parseInt(values[i++]);
-
-            int[] convexPolygonsSize = new int[numberOfConvexPolygons];
-
-            for (int hullIndex = 0; hullIndex < numberOfConvexPolygons; hullIndex++)
-               convexPolygonsSize[hullIndex] = Integer.parseInt(values[i++]);
-
-            PlanarRegion loadedRegion = loadPlanarRegionVertices(dataFolder, fileName, concaveHullSize, convexPolygonsSize, regionId, origin, normal);
-            if (loadedRegion != null)
-            {
-               planarRegions.add(loadedRegion);
-            }
-            else
-            {
-               PrintTools.error(PlanarRegionFileTools.class, "Could not load the file: " + fileName);
-            }
-         }
-
-         bufferedReader.close();
-         return new PlanarRegionsList(planarRegions);
+         PlanarRegionsList loadedRegions = importPlanRegionDataInternal(dataFolder);
+         if (loadedRegions == null)
+            PrintTools.error(PlanarRegionFileTools.class, "Could not load the file: " + dataFolder.getName());
+         return loadedRegions;
       }
       catch (IOException e)
       {
          e.printStackTrace();
          return null;
       }
+   }
 
+   private static PlanarRegionsList importPlanRegionDataInternal(File dataFolder) throws IOException
+   {
+      File headerFile = new File(dataFolder, "header.txt");
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      FileReader fileReader = new FileReader(headerFile);
+      BufferedReader bufferedReader = new BufferedReader(fileReader);
+      String line = "";
+      String cvsSplitBy = ",";
+
+      while ((line = bufferedReader.readLine()) != null)
+      {
+         line = line.replaceAll("regionId: ", "");
+         line = line.replaceAll("index: ", "");
+         line = line.replaceAll("origin: ", "");
+         line = line.replaceAll("normal: ", "");
+         line = line.replaceAll("\\[", "");
+         line = line.replaceAll("\\]", "");
+         line = line.replaceAll("concave hull size: ", "");
+         line = line.replaceAll("number of convex polygons: ", "");
+         line = line.replaceAll(" ", "");
+         String[] values = line.split(cvsSplitBy);
+
+         int i = 0;
+
+         int regionId = Integer.parseInt(values[i++]);
+         int regionIndex = Integer.parseInt(values[i++]);
+         String fileName = "region" + regionId + "_" + regionIndex;
+
+         float xOrigin = Float.parseFloat(values[i++]);
+         float yOrigin = Float.parseFloat(values[i++]);
+         float zOrigin = Float.parseFloat(values[i++]);
+         Point3D origin = new Point3D(xOrigin, yOrigin, zOrigin);
+
+         float xNormal = Float.parseFloat(values[i++]);
+         float yNormal = Float.parseFloat(values[i++]);
+         float zNormal = Float.parseFloat(values[i++]);
+         Vector3D normal = new Vector3D(xNormal, yNormal, zNormal);
+
+         int concaveHullSize = Integer.parseInt(values[i++]);
+         int numberOfConvexPolygons = Integer.parseInt(values[i++]);
+
+         int[] convexPolygonsSize = new int[numberOfConvexPolygons];
+
+         for (int hullIndex = 0; hullIndex < numberOfConvexPolygons; hullIndex++)
+            convexPolygonsSize[hullIndex] = Integer.parseInt(values[i++]);
+
+         PlanarRegion loadedRegion = loadPlanarRegionVertices(dataFolder, fileName, concaveHullSize, convexPolygonsSize, regionId, origin, normal);
+         if (loadedRegion != null)
+         {
+            planarRegions.add(loadedRegion);
+         }
+         else
+         {
+            bufferedReader.close();
+            return null;
+         }
+      }
+
+      bufferedReader.close();
+
+      return new PlanarRegionsList(planarRegions);
    }
 
    private static void writePlanarRegionsData(Path folderPath, PlanarRegionsList planarRegionData) throws IOException

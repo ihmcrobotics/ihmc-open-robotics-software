@@ -15,6 +15,7 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -667,6 +668,16 @@ public class PlanarRegion
    }
 
    /**
+    * Retrieves and returns a copy of the normal of this planar region.
+    */
+   public Vector3D getNormal()
+   {
+      Vector3D normal = new Vector3D();
+      getNormal(normal);
+      return normal;
+   }
+
+   /**
     * Retrieves the normal of this planar region and stores it in the given {@link Vector3D}.
     *
     * @param normalToPack used to store the normal of this planar region.
@@ -1005,5 +1016,31 @@ public class PlanarRegion
       ret.setPoint(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
       ret.setNormal(fromLocalToWorldTransform.getM02(), fromLocalToWorldTransform.getM12(), fromLocalToWorldTransform.getM22());
       return ret;
+   }
+
+   /**
+    * Transforms the given object in the local coordinates of this planar region.
+    * <p>
+    * Assumes the object is originally expressed in world coordinates.
+    * </p>
+    * 
+    * @param objectToTransform the object to be transformed. Modified.
+    */
+   public void transformFromWorldToLocal(Transformable objectToTransform)
+   {
+      objectToTransform.applyTransform(fromWorldToLocalTransform);
+   }
+
+   /**
+    * Transforms the given object in the world coordinates.
+    * <p>
+    * Assumes the object is originally expressed in local coordinates of this planar region.
+    * </p>
+    * 
+    * @param objectToTransform the object to be transformed. Modified.
+    */
+   public void transformFromLocalToWorld(Transformable objectToTransform)
+   {
+      objectToTransform.applyTransform(fromLocalToWorldTransform);
    }
 }

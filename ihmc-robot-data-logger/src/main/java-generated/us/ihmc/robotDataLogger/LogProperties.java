@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "LogProperties" defined in LogProperties.idl. 
@@ -14,10 +11,10 @@ public class LogProperties
 {
     public LogProperties()
     {
-        	version_ = new StringBuilder(255); 
-        	name_ = new StringBuilder(255); 
-        	variables_ = new us.ihmc.robotDataLogger.Variables();model_ = new us.ihmc.robotDataLogger.Model();timestamp_ = new StringBuilder(255); 
-        	cameras_ = new IDLSequence.Object<us.ihmc.robotDataLogger.Camera> (255, us.ihmc.robotDataLogger.Camera.class, new us.ihmc.robotDataLogger.CameraPubSubType());
+        	version_ = new java.lang.StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
+        	variables_ = new us.ihmc.robotDataLogger.Variables();model_ = new us.ihmc.robotDataLogger.Model();timestamp_ = new java.lang.StringBuilder(255); 
+        	cameras_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.Camera> (255, us.ihmc.robotDataLogger.Camera.class, new us.ihmc.robotDataLogger.CameraPubSubType());
 
         	video_ = new us.ihmc.robotDataLogger.Video();
         
@@ -41,12 +38,12 @@ public class LogProperties
         	version_.append(version);
         }
         
-        public String getVersionAsString()
+        public java.lang.String getVersionAsString()
         {
         	return getVersion().toString();
         }
 
-    public StringBuilder getVersion()
+    public java.lang.StringBuilder getVersion()
     {
         return version_;
     }
@@ -58,12 +55,12 @@ public class LogProperties
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -89,19 +86,19 @@ public class LogProperties
         	timestamp_.append(timestamp);
         }
         
-        public String getTimestampAsString()
+        public java.lang.String getTimestampAsString()
         {
         	return getTimestamp().toString();
         }
 
-    public StringBuilder getTimestamp()
+    public java.lang.StringBuilder getTimestamp()
     {
         return timestamp_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.robotDataLogger.Camera>  getCameras()
+    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.Camera>  getCameras()
     {
         return cameras_;
     }
@@ -119,7 +116,7 @@ public class LogProperties
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -146,7 +143,7 @@ public class LogProperties
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -183,12 +180,12 @@ public class LogProperties
 		return builder.toString();
     }
 
-    private StringBuilder version_; 
-    private StringBuilder name_; 
+    private java.lang.StringBuilder version_; 
+    private java.lang.StringBuilder name_; 
     private us.ihmc.robotDataLogger.Variables variables_; 
     private us.ihmc.robotDataLogger.Model model_; 
-    private StringBuilder timestamp_; 
-    private IDLSequence.Object<us.ihmc.robotDataLogger.Camera>  cameras_; 
+    private java.lang.StringBuilder timestamp_; 
+    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.Camera>  cameras_; 
     private us.ihmc.robotDataLogger.Video video_; 
 
 }

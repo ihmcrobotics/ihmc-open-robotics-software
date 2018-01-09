@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -15,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -25,8 +25,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -69,7 +69,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -141,7 +141,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -213,7 +213,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -254,7 +254,7 @@ public class ICPOptimizationControllerTest
       currentICP.add(icpError);
 
       controller.initializeForStanding(0.0);
-         controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
+      controller.compute(0.04, desiredICP, desiredICPVelocity, perfectCMP, currentICP, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
@@ -295,7 +295,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 10000.0;
          }
@@ -418,12 +418,6 @@ public class ICPOptimizationControllerTest
    private class TestICPOptimizationParameters extends ICPOptimizationParameters
    {
       @Override
-      public boolean useSimpleOptimization()
-      {
-         return true;
-      }
-
-      @Override
       public int numberOfFootstepsToConsider()
       {
          return 1;
@@ -478,13 +472,13 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getDynamicRelaxationWeight()
+      public double getDynamicsObjectiveWeight()
       {
          return 500.0;
       }
 
       @Override
-      public double getDynamicRelaxationDoubleSupportWeightModifier()
+      public double getDynamicsObjectiveDoubleSupportWeightModifier()
       {
          return 1.0;
       }
@@ -508,12 +502,6 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public boolean scaleUpcomingStepWeights()
-      {
-         return false;
-      }
-
-      @Override
       public boolean useFeedbackRegularization()
       {
          return false;
@@ -527,12 +515,6 @@ public class ICPOptimizationControllerTest
 
       @Override
       public boolean useAngularMomentum()
-      {
-         return false;
-      }
-
-      @Override
-      public boolean useTimingOptimization()
       {
          return false;
       }

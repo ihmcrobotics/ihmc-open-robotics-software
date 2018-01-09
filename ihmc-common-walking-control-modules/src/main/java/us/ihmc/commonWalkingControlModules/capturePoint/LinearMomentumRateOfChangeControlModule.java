@@ -339,9 +339,4 @@ public abstract class LinearMomentumRateOfChangeControlModule
    {
       this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
-
-
-   public abstract void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
-
-   public abstract void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
 }

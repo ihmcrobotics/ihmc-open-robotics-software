@@ -16,13 +16,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
@@ -73,7 +73,7 @@ public class CenterOfMassHeightManager
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
 
       PDGains gains = walkingControllerParameters.getCoMHeightControlGains();
-      comHeightGains = new YoPDGains(gains.getName(), registry);
+      comHeightGains = new YoPDGains("_CoMHeight", registry);
       comHeightGains.createDerivativeGainUpdater(true);
       comHeightGains.set(gains);
 
@@ -120,7 +120,7 @@ public class CenterOfMassHeightManager
     * set the weights for user mode, CenterOfMassHeightControlState does not use this weight
     * @param weight
     */
-   public void setPelvisTaskspaceWeights(Vector3D weight)
+   public void setPelvisTaskspaceWeights(Vector3DReadOnly weight)
    {
       pelvisHeightControlState.setWeights(weight);
    }
@@ -172,10 +172,10 @@ public class CenterOfMassHeightManager
       {
          enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
          stateMachine.getCurrentState().getCurrentDesiredHeightOfDefaultControlFrame(tempPosition);
-         
+
          tempPose.setToZero(tempPosition.getReferenceFrame());
          tempPose.setPosition(tempPosition);
-         
+
          if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
          {
             requestState(pelvisHeightControlState.getStateEnum());
