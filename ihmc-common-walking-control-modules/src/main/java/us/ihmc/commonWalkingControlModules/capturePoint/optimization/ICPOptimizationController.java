@@ -234,8 +234,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
-      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, bipedSupportPolygons, contactableFeet,
-                                                                          yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
+                                                                          bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
 
 
       if (yoGraphicsListRegistry != null)
