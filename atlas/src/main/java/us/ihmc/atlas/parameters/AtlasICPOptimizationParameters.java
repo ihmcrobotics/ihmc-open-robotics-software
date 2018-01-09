@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
 public class AtlasICPOptimizationParameters extends ICPOptimizationParameters

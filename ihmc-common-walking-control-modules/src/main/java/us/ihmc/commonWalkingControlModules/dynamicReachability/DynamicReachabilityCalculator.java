@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -149,7 +149,7 @@ public class DynamicReachabilityCalculator
    private final TimeAdjustmentSolver solver;
 
    private final ICPPlannerInterface icpPlanner;
-   private final ICPOptimizationController icpOptimizationController;
+   private final ICPOptimizationControllerInterface icpOptimizationController;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final TDoubleArrayList originalTransferDurations = new TDoubleArrayList();
@@ -157,7 +157,7 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalTransferAlphas = new TDoubleArrayList();
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
-   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, ICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
+   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, ICPOptimizationControllerInterface icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
                                         ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
