@@ -173,7 +173,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       this.controlDT = controlDT;
       this.contactableFeet = contactableFeet;
-      this.icpControlPlane = icpControlPolygons.getIcpControlPlane();
+
+      if (icpControlPolygons != null)
+         this.icpControlPlane = icpControlPolygons.getIcpControlPlane();
+      else
+         this.icpControlPlane = null;
 
       dynamicsObjectiveDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier();
 
@@ -210,7 +214,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       angularMomentumIntegratorGain.set(icpOptimizationParameters.getAngularMomentumIntegratorGain());
       angularMomentumIntegratorLeakRatio.set(icpOptimizationParameters.getAngularMomentumIntegratorLeakRatio());
 
-      useICPControlPolygons.set(icpOptimizationParameters.getUseICPControlPolygons());
+      useICPControlPolygons.set(icpOptimizationParameters.getUseICPControlPolygons() && icpControlPlane != null);
 
       safeCoPDistanceToEdge.set(icpOptimizationParameters.getSafeCoPDistanceToEdge());
       if (walkingControllerParameters != null)
@@ -234,8 +238,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
-      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
-                                                                          bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+      if (walkingControllerParameters != null)
+         planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
+                                                                             bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+      else
+         planarRegionConstraintProvider = null;
 
 
       if (yoGraphicsListRegistry != null)
@@ -340,7 +347,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
-      planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+      if (planarRegionConstraintProvider != null)
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
 
       transferDuration.set(finalTransferDuration.getDoubleValue());
 
@@ -366,7 +374,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
-      planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
+      if (planarRegionConstraintProvider != null)
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
    }
 
    @Override
@@ -386,8 +395,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
 
-      planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
-      planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+      if (planarRegionConstraintProvider != null)
+      {
+         planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+      }
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -510,8 +522,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       else
       {
          copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
-         planarRegionConstraintProvider
-               .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+         if (planarRegionConstraintProvider != null)
+            planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
       }
 
       solver.resetFootstepConditions();
@@ -622,8 +634,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
          if (localUseStepAdjustment && includeFootsteps)
          {
-            solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0),
-                                                    planarRegionConstraintProvider.getActivePlanarRegion(), solver);
+            PlanarRegion activePlanarRegion;
+            if (planarRegionConstraintProvider != null)
+               activePlanarRegion = planarRegionConstraintProvider.getActivePlanarRegion();
+            else
+               activePlanarRegion = null;
+
+            solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
          }
 
          if (isInDoubleSupport.getBooleanValue())
@@ -728,6 +745,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
-      planarRegionConstraintProvider.setPlanarRegions(planarRegions);
+      if (planarRegionConstraintProvider != null)
+         planarRegionConstraintProvider.setPlanarRegions(planarRegions);
    }
 }
