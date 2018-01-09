@@ -53,7 +53,6 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final ClearPlanarRegionsListBehavior clearPlanarRegionsListBehavior;
    private final SimpleDoNothingBehavior reachedGoalBehavior;
 
-   private final GetUserValidationBehavior userValidationExampleBehavior;
    private final ReferenceFrame midZupFrame;
 
    private final YoDouble yoTime;
@@ -92,13 +91,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);
 
-      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
-
       this.registry.addChild(sleepBehavior.getYoVariableRegistry());
       this.registry.addChild(lookDownAtTerrainBehavior.getYoVariableRegistry());
       this.registry.addChild(planHumanoidFootstepsBehavior.getYoVariableRegistry());
       this.registry.addChild(takeSomeStepsBehavior.getYoVariableRegistry());
-      this.registry.addChild(userValidationExampleBehavior.getYoVariableRegistry());
 
       setupStateMachine();
 
