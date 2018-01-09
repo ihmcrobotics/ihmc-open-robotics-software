@@ -333,7 +333,7 @@ public class ConvexPolygonScalerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testWithScalePointExteriorPolygon()
+   public void testWithPointScaleExteriorPolygon()
    {
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
@@ -415,5 +415,168 @@ public class ConvexPolygonScalerTest
       success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, -0.6, scaledPolygon);
       assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
       assertTrue(success);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testWithLineScaleExteriorPolygon()
+   {
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+
+      ConvexPolygon2D exteriorPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D interiorPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D scaledPolygonExpected = new ConvexPolygon2D();
+
+      Point2D exteriorVertex0 = new Point2D(0.5, 0.5);
+      Point2D exteriorVertex1 = new Point2D(0.5, 1.0);
+      exteriorPolygon.addVertex(exteriorVertex0);
+      exteriorPolygon.addVertex(exteriorVertex1);
+      exteriorPolygon.update();
+
+      Point2D interiorVertex0 = new Point2D(0.5, 0.5);
+      Point2D interiorVertex1 = new Point2D(-0.5, 0.5);
+      Point2D interiorVertex2 = new Point2D(0.5, -0.5);
+      Point2D interiorVertex3 = new Point2D(-0.5, -0.5);
+      interiorPolygon.addVertex(interiorVertex0);
+      interiorPolygon.addVertex(interiorVertex1);
+      interiorPolygon.addVertex(interiorVertex2);
+      interiorPolygon.addVertex(interiorVertex3);
+      interiorPolygon.update();
+
+      Point2D expectedVertex0 = new Point2D(0.5, 0.75);
+      scaledPolygonExpected.addVertex(expectedVertex0);
+      scaledPolygonExpected.update();
+
+      boolean success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, 0.0, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertFalse(success);
+
+      success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, 0.2, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertFalse(success);
+
+      success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, -0.2, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertFalse(success);
+
+      exteriorVertex0.set(0.5, 0.25);
+      exteriorVertex1.set(0.5, 1.35);
+      exteriorPolygon.clear();
+      exteriorPolygon.addVertex(exteriorVertex0);
+      exteriorPolygon.addVertex(exteriorVertex1);
+      exteriorPolygon.update();
+
+      expectedVertex0 = new Point2D(0.6, 0.75);
+      Point2D expectedVertex1 = new Point2D(0.6, 0.85);
+      Point2D expectedVertex2 = new Point2D(0.5, 0.95);
+      Point2D expectedVertex3 = new Point2D(0.5, 0.65);
+      Point2D expectedVertex4 = new Point2D(0.4, 0.75);
+      Point2D expectedVertex5 = new Point2D(0.4, 0.85);
+      scaledPolygonExpected.clear();
+      scaledPolygonExpected.addVertex(expectedVertex0);
+      scaledPolygonExpected.addVertex(expectedVertex1);
+      scaledPolygonExpected.addVertex(expectedVertex2);
+      scaledPolygonExpected.addVertex(expectedVertex3);
+      scaledPolygonExpected.addVertex(expectedVertex4);
+      scaledPolygonExpected.addVertex(expectedVertex5);
+      scaledPolygonExpected.update();
+
+      success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, -0.6, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertTrue(success);
+
+
+
+      exteriorVertex0.set(0.5, 0.25);
+      exteriorVertex1.set(0.5, 1.25);
+      exteriorPolygon.clear();
+      exteriorPolygon.addVertex(exteriorVertex0);
+      exteriorPolygon.addVertex(exteriorVertex1);
+      exteriorPolygon.update();
+
+      expectedVertex0 = new Point2D(0.6, 0.75);
+      expectedVertex1 = new Point2D(0.5, 0.85);
+      expectedVertex2 = new Point2D(0.5, 0.65);
+      expectedVertex3 = new Point2D(0.4, 0.75);
+      scaledPolygonExpected.clear();
+      scaledPolygonExpected.addVertex(expectedVertex0);
+      scaledPolygonExpected.addVertex(expectedVertex1);
+      scaledPolygonExpected.addVertex(expectedVertex2);
+      scaledPolygonExpected.addVertex(expectedVertex3);
+      scaledPolygonExpected.update();
+
+      success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, -0.6, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertTrue(success);
+
+
+      exteriorVertex0.set(0.5, 0.25);
+      exteriorVertex1.set(0.5, 1.35);
+      exteriorPolygon.clear();
+      exteriorPolygon.addVertex(exteriorVertex0);
+      exteriorPolygon.addVertex(exteriorVertex1);
+      exteriorPolygon.update();
+
+      interiorVertex0 = new Point2D(0.5, 0.5);
+      interiorVertex1 = new Point2D(-0.5, 0.5);
+      interiorVertex2 = new Point2D(0.5, -0.5);
+      interiorVertex3 = new Point2D(-0.5, -0.5);
+      interiorPolygon.clear();
+      interiorPolygon.addVertex(interiorVertex0);
+      interiorPolygon.addVertex(interiorVertex1);
+      interiorPolygon.addVertex(interiorVertex2);
+      interiorPolygon.addVertex(interiorVertex3);
+      interiorPolygon.update();
+
+      expectedVertex0 = new Point2D(0.4, 0.85);
+      expectedVertex1 = new Point2D(0.5, 0.95);
+      expectedVertex2 = new Point2D(0.6, 0.85);
+      expectedVertex3 = new Point2D(0.6, 0.75);
+      expectedVertex4 = new Point2D(0.5, 0.65);
+      expectedVertex5 = new Point2D(0.4, 0.75);
+      scaledPolygonExpected.clear();
+      scaledPolygonExpected.addVertex(expectedVertex0);
+      scaledPolygonExpected.addVertex(expectedVertex1);
+      scaledPolygonExpected.addVertex(expectedVertex2);
+      scaledPolygonExpected.addVertex(expectedVertex3);
+      scaledPolygonExpected.addVertex(expectedVertex4);
+      scaledPolygonExpected.addVertex(expectedVertex5);
+      scaledPolygonExpected.update();
+
+      success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, -0.6, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertTrue(success);
+
+
+
+
+      exteriorVertex0.set(0.5, 0.25);
+      exteriorVertex1.set(0.5, 1.25);
+      exteriorPolygon.clear();
+      exteriorPolygon.addVertex(exteriorVertex0);
+      exteriorPolygon.addVertex(exteriorVertex1);
+      exteriorPolygon.update();
+
+
+      interiorVertex0 = new Point2D(0.5, 0.5);
+      interiorVertex1 = new Point2D(-0.5, 0.5);
+      interiorVertex2 = new Point2D(0.5, -0.5);
+      interiorVertex3 = new Point2D(-0.5, -0.5);
+      interiorPolygon.clear();
+      interiorPolygon.addVertex(interiorVertex0);
+      interiorPolygon.addVertex(interiorVertex1);
+      interiorPolygon.addVertex(interiorVertex2);
+      interiorPolygon.addVertex(interiorVertex3);
+      interiorPolygon.update();
+
+      expectedVertex0 = new Point2D(0.5, 0.75);
+      scaledPolygonExpected.clear();
+      scaledPolygonExpected.addVertex(expectedVertex0);
+      scaledPolygonExpected.update();
+
+      success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, -0.2, scaledPolygon);
+      assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
+      assertFalse(success);
    }
 }
