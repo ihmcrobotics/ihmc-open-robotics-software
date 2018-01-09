@@ -649,11 +649,13 @@ public class ICPOptimizationQPSolver
       if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.useAngularMomentum() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
-      if (indexHandler.useStepAdjustment() && reachabilityConstraint.getInequalityConstraintSize() > 0)
-         addReachabilityConstraint();
-
-      if (indexHandler.useStepAdjustment() && planarRegionConstraint.getInequalityConstraintSize() > 0)
-         addPlanarRegionConstraint();
+      if (indexHandler.useStepAdjustment())
+      {
+         if (reachabilityConstraint.getInequalityConstraintSize() > 0)
+            addReachabilityConstraint();
+         if (planarRegionConstraint.getInequalityConstraintSize() > 0)
+            addPlanarRegionConstraint();
+      }
 
       NoConvergenceException noConvergenceException = null;
       try
