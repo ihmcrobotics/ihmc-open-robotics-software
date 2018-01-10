@@ -124,7 +124,6 @@ public class HumanoidKinematicsSolver
          if (!Double.isNaN(solutionQualityLast))
          {
             double deltaSolutionQualityLast = Math.abs(solutionQuality.getDoubleValue() - solutionQualityLast);
-
             double deltaSolutionQualityBeforeLast = Math.abs(solutionQuality.getDoubleValue() - solutionQualityBeforeLast);
 
             boolean isSolutionStable = deltaSolutionQualityLast < solutionStabilityThreshold.getDoubleValue();
@@ -134,9 +133,7 @@ public class HumanoidKinematicsSolver
 
             if (!isSolutionQualityHigh)
             {
-               /**
-                * current solution quality should be compared with not only the last value and also before last value..
-                */
+               // current solution quality should be compared with not only the last value but also the value before the last.
                boolean stuckLast = (deltaSolutionQualityLast / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
                boolean stuckBeforeLast = (deltaSolutionQualityBeforeLast / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
 
