@@ -240,8 +240,6 @@ public class VisibilityGraphsIOTools
 
    public static File fileFromClassPath(Path path)
    {
-      String pathString = path.toString();
-
       String builder = "";
       for (int i = 0; i < path.getNameCount(); i++)
       {
