@@ -1,18 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.apache.commons.io.IOUtils;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,6 +8,16 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class VisibilityGraphsIOTools
 {
@@ -82,7 +80,7 @@ public class VisibilityGraphsIOTools
    /**
     * Generates a default timestamped name that can be used to generate automated and unique
     * folders.
-    * 
+    *
     * @return a {@code String} of the form: "20171201_163422_VizGraphs".
     */
    public static String createDefaultTimeStampedDatasetFolderName()
@@ -196,26 +194,81 @@ public class VisibilityGraphsIOTools
       String getStringToWrite();
    }
 
-   public static File getDataResource(Class<?> loadingClass)
-   {
-      String pathString = loadingClass.getClassLoader().getResource(DATA_FOLDER_NAME).getPath();
-      if (isWindows())
-         pathString = pathString.substring(1, pathString.length());
-
-      return Paths.get(pathString).toFile();
-   }
+   //   public static File getDataResource(Class<?> loadingClass)
+   //   {
+   //      URL url = loadingClass.getClassLoader().getResource(DATA_FOLDER_NAME);
+   //      //      PrintTools.info(VisibilityGraphsIOTools.class, "url: " + url);
+   //      String pathString = url.getPath();
+   //      PrintTools.info(VisibilityGraphsIOTools.class, "pathString bfore: " + pathString);
+   //      if (isWindows())
+   //         pathString = pathString.substring(1, pathString.length());
+   //
+   //      //      PrintTools.info(VisibilityGraphsIOTools.class, "pathString: " + pathString);
+   //
+   //      Path path = Paths.get(pathString);
+   //
+   //      //      loadingClass.getClassLoader().
+   //      //      PrintTools.info(VisibilityGraphsIOTools.class, "path: " + path.toString());
+   //      return path.toFile();
+   //   }
 
    public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets(Class<?> loadingClass)
    {
-      File mainDataFolder = getDataResource(loadingClass);
+      //      File mainDataFolder = getDataResource(loadingClass);
 
-      return Arrays.stream(mainDataFolder.listFiles()).map(VisibilityGraphsIOTools::loadDataset).collect(Collectors.toList());
+      //      PrintTools.info(VisibilityGraphsIOTools.class, "mainDataFolder: " + mainDataFolder.getPath());
+
+      ArrayList<Path> relativePaths = new ArrayList<>();
+      listResourceDirectoryContents(loadingClass, DATA_FOLDER_NAME).forEach(entry -> relativePaths.add(Paths.get(DATA_FOLDER_NAME, entry)));
+
+      return relativePaths.stream().map(VisibilityGraphsIOTools::loadDataset).collect(Collectors.toList());
+   }
+
+   private static List<String> listResourceDirectoryContents(Class<?> loadingClass, String relativePath)
+   {
+      try
+      {
+         return IOUtils.readLines(loadingClass.getClassLoader().getResourceAsStream(relativePath), StandardCharsets.UTF_8);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e.getMessage());
+      }
+   }
+
+   public static File fileFromClassPath(Path path)
+   {
+      String pathString = path.toString();
+
+      String builder = "";
+      for (int i = 0; i < path.getNameCount(); i++)
+      {
+         builder += path.getName(i).toString();
+         if (i < path.getNameCount() - 1)
+         {
+            builder += "/";
+         }
+      }
+
+      PrintTools.info(VisibilityGraphsIOTools.class, "Going in: " + builder);
+
+      URL resourceUrl = VisibilityGraphsIOTools.class.getClassLoader().getResource(builder);
+      PrintTools.info(VisibilityGraphsIOTools.class, "resourceUrl: " + resourceUrl.toString());
+      String resourcePath = resourceUrl.getPath();
+      PrintTools.info(VisibilityGraphsIOTools.class, "resourcePath: " + resourcePath);
+      if (isWindows())
+         resourcePath = resourcePath.substring(1, resourcePath.length());
+
+      Path newPath = Paths.get(resourcePath);
+      PrintTools.info(VisibilityGraphsIOTools.class, "newPath: " + newPath);
+
+      return newPath.toFile();
    }
 
    /**
     * Loads either directly the planar regions from the given file, or from the first child
     * directory if the file is a visibility graphs dataset.
-    * 
+    *
     * @param inputFile the file to load the planar regions from. Can be an actual planar regions
     *           data file or a visibility graphs dataset file.
     * @return the loaded planar regions or {@code null} if not able to load them.
@@ -228,7 +281,7 @@ public class VisibilityGraphsIOTools
    /**
     * Adjust the file path such that the given file is returned if it is a planar regions file, or
     * the first child directory is returned if it is a visibility graphs dataset file.
-    * 
+    *
     * @param inputFile the planar regions file to be adjusted. Can be an actual planar regions data
     *           file or a visibility graphs dataset file.
     * @return
@@ -276,40 +329,51 @@ public class VisibilityGraphsIOTools
       return PlanarRegionFileTools.isPlanarRegionFile(planarRegionFolders[0]);
    }
 
-   public static VisibilityGraphsUnitTestDataset loadDataset(File datasetFolder)
+   public static VisibilityGraphsUnitTestDataset loadDataset(Path datasetFolder)
    {
-      if (!datasetFolder.isDirectory())
-      {
-         throw new RuntimeException("The data folder should only contain valid datasets for visibility graphs. Bad file: " + datasetFolder);
-      }
+      //      if (!datasetFolder.isDirectory())
+      //      {
+      //         throw new RuntimeException("The data folder should only contain valid datasets for visibility graphs. Bad file: " + datasetFolder);
+      //      }
 
       return new VisibilityGraphsUnitTestDataset(datasetFolder);
    }
 
    public static class VisibilityGraphsUnitTestDataset
    {
-      private final File file;
+      private final Path datasetPath;
 
       private final int expectedPathSize;
       private final Point3D start;
       private final Point3D goal;
       private final PlanarRegionsList planarRegionsList;
 
-      private VisibilityGraphsUnitTestDataset(File file)
+      private VisibilityGraphsUnitTestDataset(Path datasetPath)
       {
-         this.file = file;
-         String expectedParametersFileName = file.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME;
+         this.datasetPath = datasetPath;
+         PrintTools.info("Dataset path: " + datasetPath);
 
-         List<File> children = Arrays.asList(file.listFiles());
-         File parametersFile = children.stream().filter(child -> child.getName().endsWith(INPUTS_PARAMETERS_FILENAME)).findFirst().orElse(null);
+         Path parametersPath = datasetPath.resolve(INPUTS_PARAMETERS_FILENAME);
 
-         if (parametersFile == null || !parametersFile.getAbsolutePath().equals(expectedParametersFileName))
-            throw new RuntimeException("Could not find the parmeter file: " + expectedParametersFileName);
+         PrintTools.info("expectedParametersFileName: " + parametersPath);
 
-         File planarRegionFile = children.stream().filter(child -> child.isDirectory()).findFirst().orElse(null);
+         //         List<File> children = Arrays.asList(file.listFiles());
+         //         File parametersFile = children.stream().filter(child -> child.getName().endsWith(INPUTS_PARAMETERS_FILENAME)).findFirst().orElse(null);
 
-         if (planarRegionFile == null)
+         if (getClass().getClassLoader().getResource(parametersPath.toString()) == null)
+            throw new RuntimeException("Could not find the parmeter file: " + parametersPath);
+
+         String planarRegionDirectoryName = listResourceDirectoryContents(getClass(), datasetPath.toString()).stream().filter(
+               content -> content.contains("PlanarRegion")).findFirst().orElse(null);
+         PrintTools.info(this, "PlanarRegion folder: " + planarRegionDirectoryName);
+
+         //         File planarRegionFile = children.stream().filter(child -> child.isDirectory()).findFirst().orElse(null);
+
+         if (planarRegionDirectoryName == null)
             throw new RuntimeException("Could not find the planar region directory.");
+
+         File parametersFile = fileFromClassPath(parametersPath);
+         File planarRegionFile = fileFromClassPath(datasetPath.resolve(planarRegionDirectoryName));
 
          expectedPathSize = parsePathSize(parametersFile);
          start = parseField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
@@ -335,7 +399,7 @@ public class VisibilityGraphsIOTools
 
       public String getDatasetName()
       {
-         return file.getName();
+         return datasetPath.toString();
       }
 
       public Point3D getStart()

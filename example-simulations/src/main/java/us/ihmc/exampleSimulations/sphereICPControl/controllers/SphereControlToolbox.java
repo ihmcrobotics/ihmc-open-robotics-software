@@ -702,12 +702,6 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
-         public boolean useSimpleOptimization()
-         {
-            return false;
-         }
-
-         @Override
          public int numberOfFootstepsToConsider()
          {
             return 4;
@@ -762,13 +756,13 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 500.0;
          }
 
          @Override
-         public double getDynamicRelaxationDoubleSupportWeightModifier()
+         public double getDynamicsObjectiveDoubleSupportWeightModifier()
          {
             return 1.0;
          }
@@ -792,12 +786,6 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean scaleUpcomingStepWeights()
-         {
-            return true;
-         }
-
-         @Override
          public boolean useFeedbackRegularization()
          {
             return true;
@@ -815,13 +803,7 @@ public class SphereControlToolbox
             return true;
          }
 
-         @Override
-         public boolean useTimingOptimization()
-         {
-            return false;
-         }
-
-         @Override
+        @Override
          public boolean useFootstepRegularization()
          {
             return true;

@@ -2,32 +2,33 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPQPOptimizationSolver;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController.SimpleICPOptimizationQPSolver;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ICPOptimizationCoPConstraintHandler
 {
-   private static final boolean useControlPolygons = false;
-
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
 
-   public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons)
+   private final YoBoolean useICPControlPolygons;
+
+   public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
+                                              YoBoolean useICPControlPolygons)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.icpControlPolygons = icpControlPolygons;
+      this.useICPControlPolygons = useICPControlPolygons;
    }
 
-   public void updateCoPConstraintForDoubleSupport(ICPQPOptimizationSolver solver)
+   public void updateCoPConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
    {
       solver.resetCoPLocationConstraint();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2d supportPolygon;
-         if (useControlPolygons && icpControlPolygons != null)
+         if (useICPControlPolygons.getBooleanValue() && icpControlPolygons != null)
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
          else
             supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
@@ -35,39 +36,12 @@ public class ICPOptimizationCoPConstraintHandler
       }
    }
 
-   public void updateCoPConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
-   {
-      solver.resetCoPLocationConstraint();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FrameConvexPolygon2d supportPolygon;
-         if (useControlPolygons && icpControlPolygons != null)
-            supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
-         else
-            supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
-         solver.addSupportPolygon(supportPolygon);
-      }
-   }
-
-   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPQPOptimizationSolver solver)
+   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
    {
       solver.resetCoPLocationConstraint();
 
       FrameConvexPolygon2d supportPolygon;
-      if (useControlPolygons && icpControlPolygons != null)
-         supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
-      else
-         supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
-      solver.addSupportPolygon(supportPolygon);
-   }
-
-   public void updateCoPConstraintForSingleSupport(RobotSide supportSide, SimpleICPOptimizationQPSolver solver)
-   {
-      solver.resetCoPLocationConstraint();
-
-      FrameConvexPolygon2d supportPolygon;
-      if (useControlPolygons && icpControlPolygons != null)
+      if (useICPControlPolygons.getBooleanValue() && icpControlPolygons != null)
          supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
       else
          supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
