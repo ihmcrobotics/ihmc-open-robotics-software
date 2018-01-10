@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.AbstractICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -99,17 +99,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
    }
 
    @Override
-   public AbstractICPOptimizationController getICPOptimizationController()
+   public ICPOptimizationControllerInterface getICPOptimizationController()
    {
       return null;
    }
-
-   @Override
-   public double getOptimizedTimeRemaining()
-   {
-      throw new RuntimeException("This method is not implemented in planner based momentum control module.");
-   }
-
-   @Override
-   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity) {}
 }

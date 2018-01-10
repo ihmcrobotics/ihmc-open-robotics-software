@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPAdjustmentOptimizationController;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPTimingOptimizationController;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController.SimpleICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,7 +25,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LeggedLinearMomentumRateOfChangeControlModule
 {
-   private final ICPOptimizationController icpOptimizationController;
+   private final ICPOptimizationControllerInterface icpOptimizationController;
    private final YoDouble yoTime;
    private final BipedSupportPolygons bipedSupportPolygons;
    
@@ -37,7 +34,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
 
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
-   private final boolean useSimpleAdjustment;
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
@@ -73,27 +69,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
 
       ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
-      useSimpleAdjustment = icpOptimizationParameters.useSimpleOptimization();
-      if (useSimpleAdjustment)
-      {
-         icpOptimizationController = new SimpleICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
-                                                                         contactableFeet, controlDT, registry, yoGraphicsListRegistry);
-      }
-      else
-      {
-         if (icpOptimizationParameters.useTimingOptimization())
-         {
-            icpOptimizationController = new ICPTimingOptimizationController((ContinuousCMPICPPlannerParameters) icpPlannerParameters, icpOptimizationParameters,
-                                                                            walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
-                                                                            contactableFeet, controlDT, registry, yoGraphicsListRegistry);
-         }
-         else
-         {
-            icpOptimizationController = new ICPAdjustmentOptimizationController((ContinuousCMPICPPlannerParameters) icpPlannerParameters,
-                                                                                icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
-                                                                                icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
-         }
-      }
+      icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
+                                                                contactableFeet, controlDT, registry, yoGraphicsListRegistry);
    }
 
    @Override
@@ -112,7 +89,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
-      icpOptimizationController.setFinalTransferSplitFractionToDefault();
    }
 
    @Override
@@ -162,24 +138,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
-      if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
+      if (icpOptimizationController.useStepAdjustment())
       {
-         if (useSimpleAdjustment)
-         {
-            footstepToPack.getPose(footstepPose);
-            icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
-            footstepPose.setXYFromPosition2d(footstepPositionSolution);
-            footstepToPack.setPose(footstepPose);
-         }
-         else
-         {
-            RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstepToPack.getRobotSide());
-
-            footstepToPack.getAnklePose(footstepPose, ankleToSole);
-            icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
-            footstepPose.setXYFromPosition2d(footstepPositionSolution);
-            footstepToPack.setFromAnklePose(footstepPose, ankleToSole);
-         }
+         footstepToPack.getPose(footstepPose);
+         icpOptimizationController.getFootstepSolution(footstepPositionSolution);
+         footstepPose.setXYFromPosition2d(footstepPositionSolution);
+         footstepToPack.setPose(footstepPose);
       }
 
       return icpOptimizationController.wasFootstepAdjusted();
@@ -192,20 +156,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    }
 
    @Override
-   public ICPOptimizationController getICPOptimizationController()
+   public ICPOptimizationControllerInterface getICPOptimizationController()
    {
       return icpOptimizationController;
-   }
-
-   @Override
-   public double getOptimizedTimeRemaining()
-   {
-      return icpOptimizationController.getOptimizedTimeRemaining();
-   }
-
-   @Override
-   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity)
-   {
-      icpOptimizationController.setReferenceICPVelocity(referenceICPVelocity);
    }
 }

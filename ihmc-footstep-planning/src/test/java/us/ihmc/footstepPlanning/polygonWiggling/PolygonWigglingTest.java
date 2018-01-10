@@ -1591,6 +1591,303 @@ public class PolygonWigglingTest
       assertFalse(allInside);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testConstraintOfSquarePolygonInSquarePolygon()
+   {
+      DenseMatrix64F A = new DenseMatrix64F(4, 2);
+      DenseMatrix64F b = new DenseMatrix64F(4);
+
+      DenseMatrix64F x = new DenseMatrix64F(2, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(4, 1);
+
+      ConvexPolygon2D exteriorPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D interiorPolygon = new ConvexPolygon2D();
+
+      exteriorPolygon.addVertex(new Point2D(1.0, 1.0));
+      exteriorPolygon.addVertex(new Point2D(1.0, -1.0));
+      exteriorPolygon.addVertex(new Point2D(-1.0, -1.0));
+      exteriorPolygon.addVertex(new Point2D(-1.0, 1.0));
+      exteriorPolygon.update();
+
+      interiorPolygon.addVertex(new Point2D(0.5, 0.5));
+      interiorPolygon.addVertex(new Point2D(0.5, -0.5));
+      interiorPolygon.addVertex(new Point2D(-0.5, -0.5));
+      interiorPolygon.addVertex(new Point2D(-0.5, 0.5));
+      interiorPolygon.update();
+
+      PolygonWiggler.constrainPolygonInsideOtherPolygon(exteriorPolygon, interiorPolygon, A, b, 0.0);
+
+      // test centered
+      x.set(0, 0, 0.0);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      boolean allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on left edge
+      x.set(0, 0, -0.5);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on right edge
+      x.set(0, 0, 0.5);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on top edge
+      x.set(0, 0, 0.0);
+      x.set(1, 0, 0.5);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on bottom edge
+      x.set(0, 0, 0.0);
+      x.set(1, 0, -0.5);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on top left corner
+      x.set(0, 0, -0.5);
+      x.set(1, 0, 0.5);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on top right corner
+      x.set(0, 0, 0.5);
+      x.set(1, 0, 0.5);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on bottom right corner
+      x.set(0, 0, 0.5);
+      x.set(1, 0, -0.5);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test on bottom left corner
+      x.set(0, 0, -0.5);
+      x.set(1, 0, -0.5);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test outside left edge
+      x.set(0, 0, 0.0);
+      x.set(1, 0, -0.6);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test outside right edge
+      x.set(0, 0, 0.0);
+      x.set(1, 0, 0.6);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test outside top edge
+      x.set(0, 0, 0.6);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test outside bottom edge
+      x.set(0, 0, -0.6);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test outside top left corner
+      x.set(0, 0, 0.6);
+      x.set(1, 0, -0.6);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testConstraintOfSquarePolygonInPentagon()
+   {
+      DenseMatrix64F A = new DenseMatrix64F(5, 2);
+      DenseMatrix64F b = new DenseMatrix64F(5);
+
+      DenseMatrix64F x = new DenseMatrix64F(2, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(5, 1);
+
+      ConvexPolygon2D exteriorPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D interiorPolygon = new ConvexPolygon2D();
+
+      exteriorPolygon.addVertex(new Point2D(-1.0, -0.6));
+      exteriorPolygon.addVertex(new Point2D(-1.0, 0.6));
+      exteriorPolygon.addVertex(new Point2D(0.0, -1.0));
+      exteriorPolygon.addVertex(new Point2D(0.0, 1.0));
+      exteriorPolygon.addVertex(new Point2D(1.0, 0.0));
+      exteriorPolygon.update();
+
+      interiorPolygon.addVertex(new Point2D(0.5, 0.5));
+      interiorPolygon.addVertex(new Point2D(0.5, -0.5));
+      interiorPolygon.addVertex(new Point2D(-0.5, -0.5));
+      interiorPolygon.addVertex(new Point2D(-0.5, 0.5));
+      interiorPolygon.update();
+
+      PolygonWiggler.constrainPolygonInsideOtherPolygon(exteriorPolygon, interiorPolygon, A, b, 0.0);
+
+      // test centered
+      x.set(0, 0, 0.0);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      boolean allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test a little past as far up as possible
+      x.set(0, 0, 0.1);
+      x.set(1, 0, 0.0);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test a little left
+      x.set(0, 0, 0.0);
+      x.set(1, 0, -0.1);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test a little right
+      x.set(0, 0, 0.0);
+      x.set(1, 0, 0.1);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test at bottom left
+      x.set(0, 0, -0.5);
+      x.set(1, 0, -0.1);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test a little left of bottom left
+      x.set(0, 0, -0.5);
+      x.set(1, 0, -0.2);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test a little below bottom left
+      x.set(0, 0, -0.6);
+      x.set(1, 0, -0.1);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test at bottom right
+      x.set(0, 0, -0.5);
+      x.set(1, 0, 0.1);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertTrue(allInside);
+
+      // test a little right of bottom right
+      x.set(0, 0, -0.5);
+      x.set(1, 0, 0.2);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+
+      // test a little below bottom right
+      x.set(0, 0, -0.6);
+      x.set(1, 0, 0.1);
+
+      CommonOps.mult(A, x, solution);
+      allInside = true;
+      for (int i = 0; i < solution.getNumRows(); i++)
+         allInside &= solution.get(i, 0) <= b.get(i, 0) + epsilon;
+      assertFalse(allInside);
+   }
+
    private void addPolygonToArtifacts(String name, ConvexPolygon2D polygon, Color color)
    {
       YoFrameConvexPolygon2d yoPlanePolygon = new YoFrameConvexPolygon2d(name + "Polygon", worldFrame, 10, registry);

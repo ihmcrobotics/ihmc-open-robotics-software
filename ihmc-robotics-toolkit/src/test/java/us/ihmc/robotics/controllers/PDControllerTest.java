@@ -7,8 +7,11 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class PDControllerTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.1)

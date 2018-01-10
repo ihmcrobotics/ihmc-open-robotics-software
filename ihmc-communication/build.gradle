@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.0"
+      classpath "us.ihmc:ihmc-build:0.12.2"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -35,6 +35,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "IHMCPubSub", version: "0.3.4.1"
+   compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.2.0"
 }
 
 testDependencies {
