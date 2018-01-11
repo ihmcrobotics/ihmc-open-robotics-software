@@ -99,7 +99,7 @@ public class SimpleOcclusionTests
       BestEffortPlannerParameters parameters = new BestEffortPlannerParameters();
 
       Path path = Paths.get(getClass().getClassLoader().getResource("PlanarRegions_20171114_090937").getPath());
-      PlanarRegionsList regions = PlanarRegionFileTools.importPlanRegionData(path.toFile());
+      PlanarRegionsList regions = PlanarRegionFileTools.importPlanarRegionData(path.toFile());
 
       runTest(startPose, goalPose, regions, parameters, 2.0);
    }
