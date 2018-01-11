@@ -33,6 +33,11 @@ public abstract class WalkingState extends FinishableState<WalkingStateEnum>
       return getStateEnum().getSupportSide();
    }
 
+   public RobotSide getTransferToSide()
+   {
+      return getStateEnum().getTransferToSide();
+   }
+
    public void handleFootLoadBearingCommand(FootLoadBearingCommand command)
    {
       // Override in state that can handle EndEffectorLoadBearingCommand
