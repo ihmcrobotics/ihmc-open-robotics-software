@@ -54,6 +54,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       planPathState.setSwingTime(1.5);
 
       this.chestFrame = referenceFrames.getChestFrame();
+
+      setupStateMachine();
    }
 
    private void setupStateMachine()
@@ -62,7 +64,12 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       stateMachine.addState(planPathState);
       stateMachine.addState(walkingState);
 
-      waitState.addStateTransition(WalkOverTerrainState.WALKING, waitState::isDoneWaiting);
+      planPathState.addStateTransition(WalkOverTerrainState.WALKING, () -> planPathState.planHasBeenReceived() && planPathState.planIsValidForExecution());
+      planPathState.addStateTransition(WalkOverTerrainState.WAIT, () -> planPathState.planHasBeenReceived() && planPathState.planIsValidForExecution());
+      waitState.addStateTransition(WalkOverTerrainState.PLAN_FOOTSTEPS, waitState::isDoneWaiting);
+      walkingState.addStateTransition(WalkOverTerrainState.PLAN_FOOTSTEPS, walkingState::stepHasCompleted);
+
+      stateMachine.setCurrentState(WalkOverTerrainState.PLAN_FOOTSTEPS);
    }
 
    @Override
