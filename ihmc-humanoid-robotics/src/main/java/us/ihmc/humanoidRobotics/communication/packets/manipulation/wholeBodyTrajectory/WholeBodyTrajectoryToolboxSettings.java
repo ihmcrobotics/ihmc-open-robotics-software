@@ -77,14 +77,14 @@ public class WholeBodyTrajectoryToolboxSettings
       {
          if (robotSide == RobotSide.LEFT)
          {
-            position = new Point3D(0.0, 0.2, 0.0);
+            position = new Point3D(0.0, 0.19, 0.0);
             orientation = new Quaternion();
             orientation.appendYawRotation(0.5 * Math.PI);
             orientation.appendRollRotation(-0.5 * Math.PI);
          }
          else
          {
-            position = new Point3D(0.0, -0.2, 0.0);
+            position = new Point3D(0.0, -0.19, 0.0);
             orientation = new Quaternion();
             orientation.appendYawRotation(-0.5 * Math.PI);
             orientation.appendRollRotation(0.5 * Math.PI);
@@ -110,13 +110,13 @@ public class WholeBodyTrajectoryToolboxSettings
       {
          if (robotSide == RobotSide.LEFT)
          {
-            position = new Point3D(0.0, 0.12, 0.0);
+            position = new Point3D(0.02, 0.02, 0.0);
             orientation = new Quaternion();
             orientation.appendYawRotation(0.5 * Math.PI);
          }
          else
          {
-            position = new Point3D(0.0, -0.12, 0.0);
+            position = new Point3D(0.02, -0.02, 0.0);
             orientation = new Quaternion();
             orientation.appendYawRotation(-0.5 * Math.PI);
          }
