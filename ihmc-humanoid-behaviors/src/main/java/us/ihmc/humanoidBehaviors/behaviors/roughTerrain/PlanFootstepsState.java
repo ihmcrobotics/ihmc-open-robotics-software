@@ -32,28 +32,30 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
    private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessage = new AtomicReference<>();
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus = new AtomicReference<>();
 
-   private final YoEnum<RobotSide> nextSideToSwing = new YoEnum<RobotSide>("nextSideToSwing", registry, RobotSide.class, false);
+   private final YoEnum<RobotSide> nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class, false);
    private final YoDouble swingTime = new YoDouble("swingTime", registry);
+   private final YoDouble transferTime = new YoDouble("transferTime", registry);
    private final CommunicationBridge communicationBridge;
 
-   public PlanFootstepsState(CommunicationBridge communicationBridge, SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry)
+   PlanFootstepsState(CommunicationBridge communicationBridge, SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry)
    {
       super(WalkOverTerrainStateMachineBehavior.WalkOverTerrainState.PLAN_FOOTSTEPS);
       this.soleFrames = soleFrames;
       this.communicationBridge = communicationBridge;
 
-      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) -> goalPose.set(packet.goalPose));
       communicationBridge.attachListener(PlanarRegionsListMessage.class, planarRegionsListMessage::set);
       communicationBridge.attachListener(FootstepPlanningToolboxOutputStatus.class, plannerOutputStatus::set);
 
-      swingTime.set(Double.NaN);
+      swingTime.set(1.5);
+      transferTime.set(0.3);
+      nextSideToSwing.set(RobotSide.LEFT);
 
       parentRegistry.addChild(registry);
    }
 
-   public void setNextSideToSwing(RobotSide nextSideToSwing)
+   public void setGoalPose(FramePose3D goalPose)
    {
-      this.nextSideToSwing.set(nextSideToSwing);
+      this.goalPose.set(goalPose);
    }
 
    public void setSwingTime(double swingTime)
@@ -64,9 +66,9 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
    @Override
    public void doTransitionIntoAction()
    {
-      if(swingTime.getDoubleValue() == Double.NaN)
+      if(goalPose.get() == null)
       {
-         throw new RuntimeException("Swing time hasn't been set, call setSwingTime before executing state");
+         throw new RuntimeException("Goal pose must be set before executing this state");
       }
 
       ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
@@ -86,24 +88,22 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
    @Override
    public void doTransitionOutOfAction()
    {
-      FootstepDataListMessage footstepDataMessage = plannerOutputStatus.get().footstepDataList;
-      footstepDataMessage.setDestination(PacketDestination.CONTROLLER);
-      communicationBridge.sendPacket(footstepDataMessage);
+      FootstepDataListMessage footstepDataListMessage = plannerOutputStatus.get().footstepDataList;
+      footstepDataListMessage.setDefaultSwingDuration(swingTime.getDoubleValue());
+      footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
+
+      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
+      communicationBridge.sendPacket(footstepDataListMessage);
    }
 
-   public boolean planHasBeenReceived()
+   boolean planHasBeenReceived()
    {
       return plannerOutputStatus.get() != null;
    }
 
-   public boolean planIsValidForExecution()
+   boolean planIsValidForExecution()
    {
       return plannerOutputStatus.get().planningResult.validForExecution();
-   }
-
-   public FootstepPlanningToolboxOutputStatus getToolboxOutputStatus()
-   {
-      return plannerOutputStatus.get();
    }
 
    private FootstepPlanningRequestPacket createPlanningRequestPacket()

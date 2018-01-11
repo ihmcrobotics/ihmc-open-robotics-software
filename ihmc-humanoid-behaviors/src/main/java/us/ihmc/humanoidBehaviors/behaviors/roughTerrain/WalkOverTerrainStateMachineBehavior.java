@@ -6,21 +6,27 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
 import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,7 +43,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final PlanFootstepsState planPathState;
    private final WalkingState walkingState;
 
-   private final ReferenceFrame chestFrame;
+   private final ReferenceFrame chestFrame, midFeetZUpFrame;
+   private final AtomicReference<FramePose3D> goalPose = new AtomicReference<>();
 
    public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, HumanoidReferenceFrames referenceFrames)
    {
@@ -46,13 +53,18 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       stateMachine = new StateMachine<WalkOverTerrainState>(getName() + "StateMachine", getName() + "StateMachine",
                                                             WalkOverTerrainState.class, yoTime, registry);
 
-      waitState = new WaitState(yoTime, 5.0);
+      waitState = new WaitState(yoTime);
       planPathState = new PlanFootstepsState(communicationBridge, referenceFrames.getSoleFrames(), registry);
       walkingState = new WalkingState(communicationBridge);
 
-      planPathState.setSwingTime(1.5);
+      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) ->
+      {
+         goalPose.set(packet.goalPose);
+         planPathState.setGoalPose(packet.goalPose);
+      });
 
       this.chestFrame = referenceFrames.getChestFrame();
+      this.midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
       setupStateMachine();
    }
@@ -63,8 +75,14 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       stateMachine.addState(planPathState);
       stateMachine.addState(walkingState);
 
-      planPathState.addStateTransition(WalkOverTerrainState.WALKING, () -> planPathState.planHasBeenReceived() && planPathState.planIsValidForExecution());
-      planPathState.addStateTransition(WalkOverTerrainState.WAIT, () -> planPathState.planHasBeenReceived() && planPathState.planIsValidForExecution());
+      StateTransitionAction planningToWalkingAction = () ->
+      {
+         waitState.hasWalkedBetweenWaiting.set(true);
+      };
+
+      planPathState.addStateTransition(new StateTransition<>(WalkOverTerrainState.WALKING, () -> planPathState.planHasBeenReceived() && planPathState.planIsValidForExecution(),
+                                                           planningToWalkingAction));
+      planPathState.addStateTransition(WalkOverTerrainState.WAIT, () -> planPathState.planHasBeenReceived() && !planPathState.planIsValidForExecution());
       waitState.addStateTransition(WalkOverTerrainState.PLAN_FOOTSTEPS, waitState::isDoneWaiting);
       walkingState.addStateTransition(WalkOverTerrainState.PLAN_FOOTSTEPS, walkingState::stepHasCompleted);
 
@@ -109,18 +127,27 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      return false;
+      FramePose3D goalPoseInMidFeetZUpFrame = new FramePose3D(goalPose.get());
+      goalPoseInMidFeetZUpFrame.changeFrame(midFeetZUpFrame);
+      double goalXYDistance = EuclidGeometryTools.pythagorasGetHypotenuse(goalPoseInMidFeetZUpFrame.getX(), goalPoseInMidFeetZUpFrame.getY());
+      return goalXYDistance < 0.2;
    }
 
    class WaitState extends State<WalkOverTerrainState>
    {
+      private static final double initialWaitTime = 5.0;
+
       private final YoDouble waitTime = new YoDouble("waitTime", registry);
+      private final YoBoolean hasWalkedBetweenWaiting = new YoBoolean("hasWalkedBetweenWaiting", registry);
       private final YoStopwatch stopwatch;
 
-      WaitState(YoDouble yoTime, double waitTime)
+      WaitState(YoDouble yoTime)
       {
          super(WalkOverTerrainState.WAIT);
+
          stopwatch = new YoStopwatch("waitStopWatch", yoTime, registry);
+         stopwatch.start();
+         waitTime.set(initialWaitTime);
       }
 
       @Override
@@ -134,8 +161,18 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       {
          lookDown();
          clearPlanarRegionsList();
+
          stopwatch.reset();
-         stopwatch.start();
+
+         if(!hasWalkedBetweenWaiting.getBooleanValue())
+         {
+            waitTime.set(initialWaitTime);
+            hasWalkedBetweenWaiting.set(false);
+         }
+         else
+         {
+            waitTime.set(2.0 * waitTime.getDoubleValue());
+         }
       }
 
       private void lookDown()
@@ -161,7 +198,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       }
 
-      public boolean isDoneWaiting()
+      boolean isDoneWaiting()
       {
          return stopwatch.totalElapsed() >= waitTime.getDoubleValue();
       }
