@@ -197,7 +197,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    public void showMemoryUsageBeforeTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
