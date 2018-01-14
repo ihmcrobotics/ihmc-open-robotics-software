@@ -63,7 +63,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    protected static final double lambdaMin = 1e-10;
 
    private double modificationFactor = 1e-10;
-   protected double lambda;
+   protected double lambda = lambdaMin;
 
    protected double lineSearchGain = 1.0;
 
