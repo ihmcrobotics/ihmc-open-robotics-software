@@ -167,7 +167,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public void initializeSequencesFromDesireds(DenseMatrix64F initialCoM, DiscreteOptimizationData desiredSequence)
+   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence)
    {
       this.feedBackGainSequence.clear();
       this.feedForwardSequence.clear();
@@ -206,7 +206,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
          dynamicsStateGradientSequence.add().zero();
       }
 
-      optimalSequence.setState(0, initialCoM);
+      optimalSequence.setState(0, initialState);
    }
 
    public void computeFunctionApproximations(E dynamicsState, LQTrackingCostFunction<E> costFunction, int startIndex, int endIndex)
@@ -534,11 +534,15 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
          if (hessianWasPD)
          {
+            // set initial state
+            updatedSequence.setState(0, optimalSequence.getState(0));
+
             for (int segment = 0; segment < dynamicsStates.size(); segment++)
             {
                int startIndex = startIndices.get(segment);
-               forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), costFunctions.get(segment), optimalSequence.getState(startIndex),
-                           updatedSequence);
+               int endIndex = endIndices.get(segment);
+               DenseMatrix64F initialStateForSegment = updatedSequence.getState(startIndex);
+               forwardPass(dynamicsStates.get(segment), startIndex, endIndex, costFunctions.get(segment), initialStateForSegment, updatedSequence);
             }
             optimalSequence.set(updatedSequence);
 
@@ -561,7 +565,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialCoM,
+   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
                                       DiscreteOptimizationData updatedSequence);
 
    @Override

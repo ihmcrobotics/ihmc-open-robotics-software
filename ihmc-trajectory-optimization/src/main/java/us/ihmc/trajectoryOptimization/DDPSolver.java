@@ -38,9 +38,9 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public void initializeSequencesFromDesireds(DenseMatrix64F initialCoM, DiscreteOptimizationData desiredSequence)
+   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence)
    {
-      super.initializeSequencesFromDesireds(initialCoM, desiredSequence);
+      super.initializeSequencesFromDesireds(initialState, desiredSequence);
 
       previousSequence.setZero(desiredSequence);
    }
@@ -101,7 +101,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialCoM,
+   public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
                              DiscreteOptimizationData updatedSequence)
    {
       lineSearchGain = lineSearchStartGain;
@@ -110,7 +110,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       double updatedCost = 0.0;
       while(iterate)
       {
-         updatedCost = solveForwardDDPPassInternal(dynamicsState, startIndex, endIndex, costFunction, initialCoM, previousSequence);
+         updatedCost = solveForwardDDPPassInternal(dynamicsState, startIndex, endIndex, costFunction, initialState, previousSequence);
 
          if (Double.isInfinite(updatedCost))
          {
@@ -133,10 +133,10 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       return updatedCost;
    }
 
-   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialCoM,
+   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
                                               DiscreteOptimizationData updatedSequence)
    {
-      updatedSequence.setState(startIndex, initialCoM);
+      updatedSequence.setState(startIndex, initialState);
 
       double cost = 0.0;
 

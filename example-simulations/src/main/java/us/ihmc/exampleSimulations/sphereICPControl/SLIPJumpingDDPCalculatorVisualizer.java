@@ -61,6 +61,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private static final double firstTransferDuration = 0.5;
    private static final double flightDuration = 0.5;
    private static final double secondTransferDuration = 0.5;
+   private static final double landingAngle = 0.5;
 
    private static final double nominalComHeight = 1.0;
    private static final double length = 0.25;
@@ -166,7 +167,6 @@ public class SLIPJumpingDDPCalculatorVisualizer
 
       leftFoot = new Footstep(RobotSide.LEFT, new FramePose(new FramePoint3D(worldFrame, length, 0.1, 0.0), new FrameQuaternion()));
       rightFoot = new Footstep(RobotSide.RIGHT, new FramePose(new FramePoint3D(worldFrame, length, -0.1, 0.0), new FrameQuaternion()));
-      computeNextPass.set(true);
 
       simulate();
       ThreadTools.sleepForever();
