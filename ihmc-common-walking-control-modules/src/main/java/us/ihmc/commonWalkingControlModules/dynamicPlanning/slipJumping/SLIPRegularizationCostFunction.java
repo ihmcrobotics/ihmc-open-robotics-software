@@ -15,28 +15,28 @@ public class SLIPRegularizationCostFunction implements LQCostFunction<SLIPState>
 
    public SLIPRegularizationCostFunction()
    {
-      Q.set(x, x, 5e0);
-      Q.set(y, y, 5e0);
-      Q.set(z, z, 5e0);
-      Q.set(thetaX, thetaX, 5e0);
-      Q.set(thetaY, thetaY, 5e0);
-      Q.set(thetaZ, thetaZ, 5e0);
-      Q.set(xDot, xDot, 5e0);
-      Q.set(yDot, yDot, 5e0);
-      Q.set(zDot, zDot, 5e0);
-      Q.set(thetaXDot, thetaXDot, 5e0);
-      Q.set(thetaYDot, thetaYDot, 5e0);
-      Q.set(thetaZDot, thetaZDot, 5e0);
+      Q.set(x, x, 1e-5);
+      Q.set(y, y, 1e-5);
+      Q.set(z, z, 1e-5);
+      Q.set(thetaX, thetaX, 1e-5);
+      Q.set(thetaY, thetaY, 1e-5);
+      Q.set(thetaZ, thetaZ, 1e-5);
+      Q.set(xDot, xDot, 1e-5);
+      Q.set(yDot, yDot, 1e-5);
+      Q.set(zDot, zDot, 1e-5);
+      Q.set(thetaXDot, thetaXDot, 1e-5);
+      Q.set(thetaYDot, thetaYDot, 1e-5);
+      Q.set(thetaZDot, thetaZDot, 1e-5);
 
-      R.set(fx, fx, 0.0);
-      R.set(fy, fy, 0.0);
-      R.set(fz, fz, 0.0);
-      R.set(tauX, tauX, 0.0);
-      R.set(tauY, tauY, 0.0);
-      R.set(tauZ, tauZ, 0.0);
-      R.set(xF, xF, 0.0);
-      R.set(yF, yF, 0.0);
-      R.set(k, k, 0.0);
+      R.set(fx, fx, 1e-5);
+      R.set(fy, fy, 1e-5);
+      R.set(fz, fz, 1e-8);
+      R.set(tauX, tauX, 1e1);
+      R.set(tauY, tauY, 1e1);
+      R.set(tauZ, tauZ, 1e1);
+      R.set(xF, xF, 1e-5);
+      R.set(yF, yF, 1e-5);
+      R.set(k, k, 1e-8);
    }
 
    private DenseMatrix64F tempWX = new DenseMatrix64F(stateVectorSize, 1);

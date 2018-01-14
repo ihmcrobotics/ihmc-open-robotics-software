@@ -24,11 +24,9 @@ public class SimpleReactionDynamicsTest
       double mass = 10.0;
       double gravity = 9.81;
       double deltaT = 0.01;
-      double flightDuration = 1.7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       SimpleReactionDynamics dynamics = new SimpleReactionDynamics(deltaT, mass, gravity);
-      dynamics.setFlightDuration(flightDuration);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -74,15 +72,15 @@ public class SimpleReactionDynamicsTest
 
       nextStateExpected.zero();
 
-      nextStateExpected.set(x, currentState.get(x) + flightDuration * currentState.get(xDot));
-      nextStateExpected.set(y, currentState.get(y) + flightDuration * currentState.get(yDot));
-      nextStateExpected.set(z, currentState.get(z) + flightDuration * currentState.get(zDot) - 0.5 * flightDuration * flightDuration * gravity);
-      nextStateExpected.set(thetaX, currentState.get(thetaX) + flightDuration * currentState.get(thetaXDot));
-      nextStateExpected.set(thetaY, currentState.get(thetaY) + flightDuration * currentState.get(thetaYDot));
-      nextStateExpected.set(thetaZ, currentState.get(thetaZ) + flightDuration * currentState.get(thetaZDot));
+      nextStateExpected.set(x, currentState.get(x) + deltaT * currentState.get(xDot));
+      nextStateExpected.set(y, currentState.get(y) + deltaT * currentState.get(yDot));
+      nextStateExpected.set(z, currentState.get(z) + deltaT * currentState.get(zDot) - 0.5 * deltaT * deltaT * gravity);
+      nextStateExpected.set(thetaX, currentState.get(thetaX) + deltaT * currentState.get(thetaXDot));
+      nextStateExpected.set(thetaY, currentState.get(thetaY) + deltaT * currentState.get(thetaYDot));
+      nextStateExpected.set(thetaZ, currentState.get(thetaZ) + deltaT * currentState.get(thetaZDot));
       nextStateExpected.set(xDot, currentState.get(xDot));
       nextStateExpected.set(yDot, currentState.get(yDot));
-      nextStateExpected.set(zDot, currentState.get(zDot) - flightDuration * gravity);
+      nextStateExpected.set(zDot, currentState.get(zDot) - deltaT * gravity);
       nextStateExpected.set(thetaXDot, currentState.get(thetaXDot));
       nextStateExpected.set(thetaYDot, currentState.get(thetaYDot));
       nextStateExpected.set(thetaZDot, currentState.get(thetaZDot));
@@ -97,14 +95,12 @@ public class SimpleReactionDynamicsTest
       double mass = 10.0;
       double gravity = 9.81;
       double deltaT = 0.01;
-      double flightDuration = 1.7;
 
       ContinuousSimpleReactionDynamics continuousDynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
       DenseMatrix64F continuousDynamicsStateGradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       SimpleReactionDynamics dynamics = new SimpleReactionDynamics(deltaT, mass, gravity);
-      dynamics.setFlightDuration(flightDuration);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -142,15 +138,15 @@ public class SimpleReactionDynamicsTest
       gradientExpected.zero();
       CommonOps.setIdentity(gradientExpected);
 
-      gradientExpected.set(x, xDot, flightDuration);
-      gradientExpected.set(y, yDot, flightDuration);
-      gradientExpected.set(z, zDot, flightDuration);
-      gradientExpected.set(thetaX, thetaXDot, flightDuration);
-      gradientExpected.set(thetaY, thetaYDot, flightDuration);
-      gradientExpected.set(thetaZ, thetaZDot, flightDuration);
+      gradientExpected.set(x, xDot, deltaT);
+      gradientExpected.set(y, yDot, deltaT);
+      gradientExpected.set(z, zDot, deltaT);
+      gradientExpected.set(thetaX, thetaXDot, deltaT);
+      gradientExpected.set(thetaY, thetaYDot, deltaT);
+      gradientExpected.set(thetaZ, thetaZDot, deltaT);
 
-      MatrixTools.addMatrixBlock(gradientExpected, x, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, 0.5 * flightDuration * flightDuration);
-      MatrixTools.addMatrixBlock(gradientExpected, xDot, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, flightDuration);
+      MatrixTools.addMatrixBlock(gradientExpected, x, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, 0.5 * deltaT * deltaT);
+      MatrixTools.addMatrixBlock(gradientExpected, xDot, 0, continuousDynamicsStateGradient, x, 0, stateVectorSize / 2, stateVectorSize, deltaT);
 
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
@@ -162,14 +158,12 @@ public class SimpleReactionDynamicsTest
       double mass = 10.0;
       double gravity = 9.81;
       double deltaT = 0.01;
-      double flightDuration = 1.7;
 
       ContinuousSimpleReactionDynamics continuousDynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
       DenseMatrix64F continuousDynamicsControlGradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       SimpleReactionDynamics dynamics = new SimpleReactionDynamics(deltaT, mass, gravity);
-      dynamics.setFlightDuration(flightDuration);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -197,8 +191,8 @@ public class SimpleReactionDynamicsTest
       dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, gradient);
 
       gradientExpected.zero();
-      MatrixTools.addMatrixBlock(gradientExpected, x, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, 0.5 * flightDuration * flightDuration);
-      MatrixTools.addMatrixBlock(gradientExpected, xDot, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, flightDuration);
+      MatrixTools.addMatrixBlock(gradientExpected, x, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, 0.5 * deltaT * deltaT);
+      MatrixTools.addMatrixBlock(gradientExpected, xDot, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, deltaT);
 
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }

@@ -518,7 +518,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    {
 
       boolean lastIteration = false;
-      for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
+      for (int segment = 0; segment < dynamicsStates.size(); segment++)
          computeFunctionApproximations(dynamicsStates.get(segment), costFunctions.get(segment), startIndices.get(segment), endIndices.get(segment));
 
       for (int iterB = 0; iterB < 20; iterB++)

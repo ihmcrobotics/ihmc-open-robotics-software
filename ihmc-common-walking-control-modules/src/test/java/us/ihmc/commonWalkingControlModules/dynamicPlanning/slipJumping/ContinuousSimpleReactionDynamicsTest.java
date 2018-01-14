@@ -101,6 +101,150 @@ public class ContinuousSimpleReactionDynamicsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
+   public void testStateGradientNumericalDifferentiationStance()
+   {
+      double epsilon = 1e-9;
+      double mass = 15.0;
+      double gravityZ = 9.81;
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravityZ);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+      DenseMatrix64F expectedGradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+
+      DenseMatrix64F dynamicsUnmodified = new DenseMatrix64F(stateVectorSize / 2, 1);
+      DenseMatrix64F dynamicsModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      dynamics.getDynamics(SLIPState.STANCE, currentState, currentControl, dynamicsUnmodified);
+
+      dynamics.getDynamicsStateGradient(SLIPState.STANCE, currentState, currentControl, gradient);
+
+      for (int modifiedStateIndex = 0; modifiedStateIndex < stateVectorSize / 2; modifiedStateIndex++)
+      {
+         DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+         currentStateModified.add(modifiedStateIndex, 0, epsilon);
+         dynamics.getDynamics(SLIPState.STANCE, currentStateModified, currentControl, dynamicsModified);
+
+         for (int stateIndex = 0; stateIndex < stateVectorSize / 2; stateIndex++)
+            expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
+      }
+
+      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testStateGradientNumericalDifferentiationFlight()
+   {
+      double epsilon = 1e-9;
+      double mass = 15.0;
+      double gravityZ = 9.81;
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravityZ);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+      DenseMatrix64F expectedGradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+
+      DenseMatrix64F dynamicsUnmodified = new DenseMatrix64F(stateVectorSize / 2, 1);
+      DenseMatrix64F dynamicsModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      dynamics.getDynamics(SLIPState.FLIGHT, currentState, currentControl, dynamicsUnmodified);
+
+      dynamics.getDynamicsStateGradient(SLIPState.FLIGHT, currentState, currentControl, gradient);
+
+      for (int modifiedStateIndex = 0; modifiedStateIndex < stateVectorSize / 2; modifiedStateIndex++)
+      {
+         DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+         currentStateModified.add(modifiedStateIndex, 0, epsilon);
+         dynamics.getDynamics(SLIPState.FLIGHT, currentStateModified, currentControl, dynamicsModified);
+
+         for (int stateIndex = 0; stateIndex < stateVectorSize / 2; stateIndex++)
+            expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
+      }
+
+      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testControlGradientNumericalDifferentiationStance()
+   {
+      double epsilon = 1e-9;
+      double mass = 15.0;
+      double gravityZ = 9.81;
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravityZ);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+      DenseMatrix64F expectedGradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+
+      DenseMatrix64F dynamicsUnmodified = new DenseMatrix64F(stateVectorSize / 2, 1);
+      DenseMatrix64F dynamicsModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      dynamics.getDynamics(SLIPState.STANCE, currentState, currentControl, dynamicsUnmodified);
+
+      dynamics.getDynamicsControlGradient(SLIPState.STANCE, currentState, currentControl, gradient);
+
+      for (int modifiedStateIndex = 0; modifiedStateIndex < controlVectorSize; modifiedStateIndex++)
+      {
+         DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+         currentControlModified.add(modifiedStateIndex, 0, epsilon);
+         dynamics.getDynamics(SLIPState.STANCE, currentState, currentControlModified, dynamicsModified);
+
+         for (int stateIndex = 0; stateIndex < stateVectorSize / 2; stateIndex++)
+            expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
+      }
+
+      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testControlGradientNumericalDifferentiationFlight()
+   {
+      double epsilon = 1e-9;
+      double mass = 15.0;
+      double gravityZ = 9.81;
+      ContinuousSimpleReactionDynamics dynamics = new ContinuousSimpleReactionDynamics(mass, gravityZ);
+
+      Random random = new Random(1738L);
+      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
+      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
+      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+      DenseMatrix64F expectedGradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+
+      DenseMatrix64F dynamicsUnmodified = new DenseMatrix64F(stateVectorSize / 2, 1);
+      DenseMatrix64F dynamicsModified = new DenseMatrix64F(stateVectorSize / 2, 1);
+
+      dynamics.getDynamics(SLIPState.FLIGHT, currentState, currentControl, dynamicsUnmodified);
+
+      dynamics.getDynamicsControlGradient(SLIPState.FLIGHT, currentState, currentControl, gradient);
+
+      for (int modifiedStateIndex = 0; modifiedStateIndex < controlVectorSize; modifiedStateIndex++)
+      {
+         DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+         currentControlModified.add(modifiedStateIndex, 0, epsilon);
+         dynamics.getDynamics(SLIPState.FLIGHT, currentState, currentControlModified, dynamicsModified);
+
+         for (int stateIndex = 0; stateIndex < stateVectorSize / 2; stateIndex++)
+            expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
+      }
+
+      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
    public void testDynamicsControlGradient()
    {
       double mass = 10.0;

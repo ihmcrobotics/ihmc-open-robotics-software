@@ -51,12 +51,10 @@ public class SLIPJumpingDDPCalculator
       LQCostFunction<SLIPState> slipRegularizationCost = new SLIPRegularizationCostFunction();
 
       LQTrackingCostFunction<SLIPState> slipDesiredTrackingCost = new SLIPDesiredTrackingCostFunction();
-      LQTrackingCostFunction<SLIPState> slipStateChangeCost = new SLIPStateChangeCostFunction();
 
       regularCostFunction.addLQCostFunction(slipModelTrackingCost);
       regularCostFunction.addLQCostFunction(slipRegularizationCost);
       regularCostFunction.addLQTrackingCostFunction(slipDesiredTrackingCost);
-      regularCostFunction.addLQTrackingCostFunction(slipStateChangeCost);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -83,12 +81,13 @@ public class SLIPJumpingDDPCalculator
       double nominalInitialStiffness = 4.0 * Math.PI * Math.PI * mass / (firstStanceDuration  * firstStanceDuration);
       int numberOfInitialTimeSteps = (int) Math.floor(firstStanceDuration / deltaT);
 
+      int numberOfFlightTimeSteps = (int) Math.floor(flightDuration / deltaT);
+
       double nominalFinalStiffness = 4.0 * Math.PI * Math.PI * mass / (secondStanceDuration * secondStanceDuration);
       int numberOfFinalTimeSteps = (int) Math.floor(secondStanceDuration / deltaT);
 
       double modifiedDeltaT = firstStanceDuration / numberOfInitialTimeSteps;
       dynamics.setTimeStepSize(modifiedDeltaT);
-      dynamics.setFlightDuration(flightDuration);
 
       dynamicStates.add(SLIPState.STANCE);
       startIndices.add(0);
@@ -98,18 +97,19 @@ public class SLIPJumpingDDPCalculator
 
       dynamicStates.add(SLIPState.FLIGHT);
       startIndices.add(numberOfInitialTimeSteps);
-      endIndices.add(numberOfInitialTimeSteps);
+      endIndices.add(numberOfInitialTimeSteps + numberOfFlightTimeSteps - 1);
       costFunctions.add(regularCostFunction);
       terminalCostFunctions.add(null);
 
       dynamicStates.add(SLIPState.STANCE);
-      startIndices.add(numberOfInitialTimeSteps + 1);
-      endIndices.add(numberOfInitialTimeSteps + numberOfFinalTimeSteps - 1);
+      startIndices.add(numberOfInitialTimeSteps + numberOfFlightTimeSteps);
+      endIndices.add(numberOfInitialTimeSteps + numberOfFlightTimeSteps + numberOfFinalTimeSteps - 1);
       costFunctions.add(regularCostFunction);
       terminalCostFunctions.add(terminalCostFunction);
 
-      desiredSequence.setLength(numberOfInitialTimeSteps + numberOfFinalTimeSteps);
-      optimalSequence.setLength(numberOfInitialTimeSteps + numberOfFinalTimeSteps);
+      int totalSize = numberOfInitialTimeSteps + numberOfFlightTimeSteps + numberOfFinalTimeSteps;
+      desiredSequence.setLength(totalSize);
+      optimalSequence.setLength(totalSize);
 
       for (int i = 0; i < numberOfInitialTimeSteps; i++)
       {
@@ -125,7 +125,21 @@ public class SLIPJumpingDDPCalculator
          desiredControl.set(k, nominalInitialStiffness);
       }
 
-      for (int i = numberOfInitialTimeSteps; i < numberOfInitialTimeSteps + numberOfFinalTimeSteps; i++)
+      for (int i = numberOfInitialTimeSteps; i < numberOfInitialTimeSteps + numberOfFlightTimeSteps; i++)
+      {
+         DenseMatrix64F desiredState = desiredSequence.getState(i);
+         desiredState.set(x, 0.5 * (firstSupport.getX() + secondSupport.getX()));
+         desiredState.set(y, 0.5 * (firstSupport.getY() + secondSupport.getY()));
+         desiredState.set(z, 0.5 * (firstSupport.getZ() + secondSupport.getZ())+ nominalHeight);
+
+         DenseMatrix64F desiredControl = desiredSequence.getControl(i);
+         desiredControl.set(fz, 0.0);
+         desiredControl.set(xF, firstSupport.getX());
+         desiredControl.set(yF, firstSupport.getY());
+         desiredControl.set(k, 0.0);
+      }
+
+      for (int i = numberOfInitialTimeSteps + numberOfFlightTimeSteps; i < totalSize; i++)
       {
          DenseMatrix64F desiredState = desiredSequence.getState(i);
          desiredState.set(x, secondSupport.getX());

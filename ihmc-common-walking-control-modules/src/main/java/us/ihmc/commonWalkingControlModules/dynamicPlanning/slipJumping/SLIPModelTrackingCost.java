@@ -10,12 +10,12 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
 {
-   static double qFX = 1.0e2;
-   static double qFY = 1.0e2;
-   static double qFZ = 1.0e2;
-   static double qTauX = 1.0e2;
-   static double qTauY = 1.0e2;
-   static double qTauZ = 1.0e2;
+   static double qFX = 5.0;
+   static double qFY = 5.0;
+   static double qFZ = 5.0;
+   static double qTauX = 1.0;
+   static double qTauY = 1.0;
+   static double qTauZ = 1.0;
 
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize / 2);
    private final ContinuousSimpleReactionDynamics simpleReactionDynamics;
