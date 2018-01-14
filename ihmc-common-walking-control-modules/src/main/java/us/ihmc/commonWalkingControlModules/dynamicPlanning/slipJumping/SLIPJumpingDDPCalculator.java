@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDynamics;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMSimpleCostFunction;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMTerminalCostFunction;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.trajectoryOptimization.*;
 import us.ihmc.trajectoryOptimization.SimpleDDPSolver;
@@ -32,7 +29,12 @@ public class SLIPJumpingDDPCalculator
 
    private final DenseMatrix64F initialState;
 
+   private final CompositeLQCostFunction<SLIPState> regularCostFunction = new CompositeLQCostFunction<>();
+   private final LQTrackingCostFunction<SLIPState> terminalCostFunction = new SLIPTerminalCostFunction();
+
    private final List<SLIPState> dynamicStates = new ArrayList<>();
+   private final List<LQTrackingCostFunction<SLIPState>> costFunctions = new ArrayList<>();
+   private final List<LQTrackingCostFunction<SLIPState>> terminalCostFunctions = new ArrayList<>();
    private final TIntArrayList startIndices = new TIntArrayList();
    private final TIntArrayList endIndices = new TIntArrayList();
 
@@ -44,10 +46,18 @@ public class SLIPJumpingDDPCalculator
       this.nominalHeight = nominalHeight;
       this.gravityZ = gravityZ;
 
-      LQTrackingCostFunction costFunction = new LIPMSimpleCostFunction();
-      LQTrackingCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
-      ddpSolver = new SimpleDDPSolver<>(dynamics, costFunction, terminalCostFunction, true);
+      ddpSolver = new SimpleDDPSolver<>(dynamics, true);
 
+      LQCostFunction<SLIPState> slipModelTrackingCost = new SLIPModelTrackingCost(mass, nominalHeight, gravityZ);
+      LQCostFunction<SLIPState> slipRegularizationCost = new SLIPRegularizationCostFunction();
+
+      LQTrackingCostFunction<SLIPState> slipDesiredTrackingCost = new SLIPDesiredTrackingCostFunction();
+      LQTrackingCostFunction<SLIPState> slipStateChangeCost = new SLIPStateChangeCostFunction();
+
+      regularCostFunction.addLQCostFunction(slipModelTrackingCost);
+      regularCostFunction.addLQCostFunction(slipRegularizationCost);
+      regularCostFunction.addLQTrackingCostFunction(slipDesiredTrackingCost);
+      regularCostFunction.addLQTrackingCostFunction(slipStateChangeCost);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -85,14 +95,20 @@ public class SLIPJumpingDDPCalculator
       dynamicStates.add(SLIPState.STANCE);
       startIndices.add(0);
       endIndices.add(numberOfInitialTimeSteps - 1);
+      costFunctions.add(regularCostFunction);
+      terminalCostFunctions.add(null);
 
       dynamicStates.add(SLIPState.FLIGHT);
       startIndices.add(numberOfInitialTimeSteps - 1);
       endIndices.add(numberOfInitialTimeSteps);
+      costFunctions.add(regularCostFunction);
+      terminalCostFunctions.add(null);
 
       dynamicStates.add(SLIPState.STANCE);
       startIndices.add(numberOfInitialTimeSteps);
       endIndices.add(numberOfInitialTimeSteps + numberOfFinalTimeSteps - 1);
+      costFunctions.add(regularCostFunction);
+      terminalCostFunctions.add(terminalCostFunction);
 
       desiredSequence.setLength(numberOfInitialTimeSteps + numberOfFinalTimeSteps);
       optimalSequence.setLength(numberOfInitialTimeSteps + numberOfFinalTimeSteps);
@@ -125,16 +141,17 @@ public class SLIPJumpingDDPCalculator
          desiredControl.set(k, nominalFinalStiffness);
       }
 
+      ddpSolver.initializeSequencesFromDesireds(currentState, desiredSequence);
    }
 
    public int solve()
    {
-      return ddpSolver.computeSequence(dynamicStates, startIndices, endIndices);
+      return ddpSolver.computeSequence(dynamicStates, costFunctions, terminalCostFunctions, startIndices, endIndices);
    }
 
    public void singleSolve()
    {
-      ddpSolver.computeOnePass(dynamicStates, startIndices, endIndices);
+      ddpSolver.computeOnePass(dynamicStates, costFunctions, terminalCostFunctions, startIndices, endIndices);
    }
 
    private double computeDeltaT(double trajectoryLength)

@@ -18,8 +18,6 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    private static final boolean useDynamicsHessian = false;
 
    protected final DiscreteHybridDynamics<E> dynamics;
-   protected final LQTrackingCostFunction<E> costFunction;
-   protected final LQTrackingCostFunction<E> terminalCostFunction;
 
    protected final DiscreteOptimizationData optimalSequence;
    protected final DiscreteOptimizationData desiredSequence;
@@ -69,11 +67,9 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
    protected double lineSearchGain = 1.0;
 
-   public AbstractDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction<E> costFunction, LQTrackingCostFunction<E> terminalCostFunction, boolean debug)
+   public AbstractDDPSolver(DiscreteHybridDynamics<E> dynamics, boolean debug)
    {
       this.dynamics = dynamics;
-      this.costFunction = costFunction;
-      this.terminalCostFunction = terminalCostFunction;
       this.debug = debug;
 
       int stateSize = dynamics.getStateVectorSize();
@@ -124,7 +120,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public void initializeFromLQRSolution(E dynamicsState, DiscreteOptimizationData trajectory, DiscreteOptimizationData desiredSequence,
+   public void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData trajectory, DiscreteOptimizationData desiredSequence,
                                          RecyclingArrayList<DenseMatrix64F> feedBackGainSequence, RecyclingArrayList<DenseMatrix64F> feedForwardSequence)
    {
       this.feedBackGainSequence.clear();
@@ -165,7 +161,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       }
 
       // FIXME
-      forwardPass(dynamicsState, 0, optimalSequence.size() - 1, optimalSequence.getState(0), updatedSequence);
+      forwardPass(dynamicsState, 0, optimalSequence.size() - 1, costFunction, optimalSequence.getState(0), updatedSequence);
 
       optimalSequence.set(updatedSequence);
    }
@@ -213,7 +209,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       optimalSequence.setState(0, initialCoM);
    }
 
-   public void computeFunctionApproximations(E dynamicsState, int startIndex, int endIndex)
+   public void computeFunctionApproximations(E dynamicsState, LQTrackingCostFunction<E> costFunction, int startIndex, int endIndex)
    {
       for (int t = startIndex; t <= endIndex; t++)
       {
@@ -407,7 +403,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public int computeSequence(E dynamicsState)
+   public int computeSequence(E dynamicsState, LQTrackingCostFunction<E> costFunction, LQTrackingCostFunction<E> terminalCostFunction)
    {
       double cost, cost0;
       cost0 = Double.MAX_VALUE;
@@ -418,15 +414,15 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       for (int iterations = 0; iterations < 20; iterations++)
       {
          boolean lastIteration = false;
-         computeFunctionApproximations(dynamicsState, startIndex, endIndex);
+         computeFunctionApproximations(dynamicsState, costFunction, startIndex, endIndex);
 
          for (int iterB = 0; iterB < 20; iterB++)
          {
-            boolean hessianWasPD = backwardPass(dynamicsState, startIndex, endIndex, optimalSequence);
+            boolean hessianWasPD = backwardPass(dynamicsState, startIndex, endIndex, terminalCostFunction, optimalSequence);
 
             if (hessianWasPD)
             {
-               cost = forwardPass(dynamicsState, startIndex, endIndex, optimalSequence.getState(0), updatedSequence);
+               cost = forwardPass(dynamicsState, startIndex, endIndex, costFunction, optimalSequence.getState(0), updatedSequence);
                optimalSequence.set(updatedSequence);
 
                if (Math.abs(cost - cost0) / Math.abs(cost0) < 1e-1)
@@ -456,7 +452,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
 
    @Override
-   public int computeSequence(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices)
+   public int computeSequence(List<E> dynamicsStates, List<LQTrackingCostFunction<E>> costFunctions, List<LQTrackingCostFunction<E>> terminalCostFunctions,
+                              TIntArrayList startIndices, TIntArrayList endIndices)
    {
       double cost, cost0;
       cost0 = Double.MAX_VALUE;
@@ -465,14 +462,15 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       {
          boolean lastIteration = false;
          for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
-            computeFunctionApproximations(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment));
+            computeFunctionApproximations(dynamicsStates.get(segment), costFunctions.get(segment), startIndices.get(segment), endIndices.get(segment));
 
          for (int iterB = 0; iterB < 20; iterB++)
          {
             boolean hessianWasPD = true;
             for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
             {
-               hessianWasPD = backwardPass(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment), optimalSequence);
+               hessianWasPD = backwardPass(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment),
+                                           terminalCostFunctions.get(segment), optimalSequence);
                if (!hessianWasPD)
                   break;
             }
@@ -483,8 +481,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
                for (int segment = 0; segment < dynamicsStates.size(); segment++)
                {
                   int startIndex = startIndices.get(segment);
-                  cost += forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), optimalSequence.getState(startIndex),
-                                     updatedSequence);
+                  cost += forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), costFunctions.get(segment),
+                                      optimalSequence.getState(startIndex), updatedSequence);
                }
                optimalSequence.set(updatedSequence);
 
@@ -515,19 +513,21 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public void computeOnePass(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices)
+   public void computeOnePass(List<E> dynamicsStates, List<LQTrackingCostFunction<E>> costFunctions, List<LQTrackingCostFunction<E>> terminalCostFunctions,
+                              TIntArrayList startIndices, TIntArrayList endIndices)
    {
 
       boolean lastIteration = false;
       for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
-         computeFunctionApproximations(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment));
+         computeFunctionApproximations(dynamicsStates.get(segment), costFunctions.get(segment), startIndices.get(segment), endIndices.get(segment));
 
       for (int iterB = 0; iterB < 20; iterB++)
       {
          boolean hessianWasPD = true;
          for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
          {
-            hessianWasPD = backwardPass(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment), optimalSequence);
+            hessianWasPD = backwardPass(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment),
+                                        terminalCostFunctions.get(segment), optimalSequence);
             if (!hessianWasPD)
                break;
          }
@@ -537,7 +537,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
             for (int segment = 0; segment < dynamicsStates.size(); segment++)
             {
                int startIndex = startIndices.get(segment);
-               forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), optimalSequence.getState(startIndex),
+               forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), costFunctions.get(segment), optimalSequence.getState(startIndex),
                            updatedSequence);
             }
             optimalSequence.set(updatedSequence);
@@ -560,8 +560,11 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
    }
 
-   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence);
+   @Override
+   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialCoM,
+                                      DiscreteOptimizationData updatedSequence);
 
-
-   public abstract boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationData trajectory);
+   @Override
+   public abstract boolean backwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> terminalCostFunction,
+                                        DiscreteOptimizationData trajectory);
 }

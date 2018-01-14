@@ -4,19 +4,20 @@ import org.ejml.data.DenseMatrix64F;
 
 public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements DDPSolverInterface<E>
 {
-   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction)
+   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics)
    {
-      this(dynamics, costFunction, terminalCostFunction, false);
+      this(dynamics, false);
    }
 
-   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
+   public SimpleDDPSolver(DiscreteHybridDynamics<E> dynamics, boolean debug)
    {
-      super(dynamics, costFunction, terminalCostFunction, debug);
+      super(dynamics, debug);
       lineSearchGain = 1.0;
    }
 
    @Override
-   public double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence)
+   public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction,
+                             DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence)
    {
       updatedSequence.setState(startIndex, initialCoM);
 
@@ -47,7 +48,7 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
    }
 
    @Override
-   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationData sequence)
+   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> terminalCostFunction, DiscreteOptimizationData sequence)
    {
       boolean success = true;
 
@@ -56,10 +57,12 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
       DiscreteData desiredStateSequence = desiredSequence.getStateSequence();
       DiscreteData desiredControlSequence = desiredSequence.getControlSequence();
 
-      terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), valueStateHessianSequence
-            .get(endIndex));
-      terminalCostFunction.getCostStateGradient(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), desiredControlSequence.get(endIndex),
-                                                desiredStateSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
+      if (terminalCostFunction != null)
+      {
+         terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), valueStateHessianSequence.get(endIndex));
+         terminalCostFunction.getCostStateGradient(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), desiredControlSequence.get(endIndex),
+                                                   desiredStateSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
+      }
 
       for (int t = endIndex; t >= startIndex; t--)
       {
