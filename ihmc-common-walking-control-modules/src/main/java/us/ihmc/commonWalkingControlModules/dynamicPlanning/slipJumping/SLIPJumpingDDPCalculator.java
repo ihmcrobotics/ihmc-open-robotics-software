@@ -30,10 +30,6 @@ public class SLIPJumpingDDPCalculator
    private final double gravityZ;
    private final double nominalHeight;
 
-   private double firstStanceDuration;
-   private double flightDuration;
-   private double secondStanceDuration;
-
    private final DenseMatrix64F initialState;
 
    private final List<SLIPState> dynamicStates = new ArrayList<>();
@@ -74,10 +70,6 @@ public class SLIPJumpingDDPCalculator
                           double firstStanceDuration, double flightDuration, double secondStanceDuration)
    {
       // TODO do something with the current state
-      this.firstStanceDuration = firstStanceDuration;
-      this.flightDuration = flightDuration;
-      this.secondStanceDuration = secondStanceDuration;
-
       initialState.set(currentState);
 
       double nominalInitialStiffness = 4.0 * Math.PI * Math.PI * mass / (firstStanceDuration  * firstStanceDuration);
@@ -101,6 +93,9 @@ public class SLIPJumpingDDPCalculator
       dynamicStates.add(SLIPState.STANCE);
       startIndices.add(numberOfInitialTimeSteps);
       endIndices.add(numberOfInitialTimeSteps + numberOfFinalTimeSteps - 1);
+
+      desiredSequence.setLength(numberOfInitialTimeSteps + numberOfFinalTimeSteps);
+      optimalSequence.setLength(numberOfInitialTimeSteps + numberOfFinalTimeSteps);
 
       for (int i = 0; i < numberOfInitialTimeSteps; i++)
       {
@@ -137,10 +132,20 @@ public class SLIPJumpingDDPCalculator
       return ddpSolver.computeSequence(dynamicStates, startIndices, endIndices);
    }
 
+   public void singleSolve()
+   {
+      ddpSolver.computeOnePass(dynamicStates, startIndices, endIndices);
+   }
+
    private double computeDeltaT(double trajectoryLength)
    {
       int numberOfTimeSteps = (int) Math.floor(trajectoryLength / deltaT);
       return trajectoryLength / numberOfTimeSteps;
+   }
+
+   public DiscreteOptimizationSequence getOptimalSequence()
+   {
+      return optimalSequence;
    }
 
    public double getValue()

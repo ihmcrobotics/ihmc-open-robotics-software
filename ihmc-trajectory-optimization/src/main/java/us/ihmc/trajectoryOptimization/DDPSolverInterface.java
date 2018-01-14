@@ -17,6 +17,8 @@ public interface DDPSolverInterface<E extends Enum>
 
    int computeSequence(E dynamicsState);
    int computeSequence(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices);
+   void computeOnePass(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices);
+
    double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence);
    boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationData trajectory);
 }
