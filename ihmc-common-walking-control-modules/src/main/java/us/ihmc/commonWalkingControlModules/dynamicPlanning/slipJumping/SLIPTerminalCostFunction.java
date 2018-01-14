@@ -14,28 +14,28 @@ public class SLIPTerminalCostFunction implements LQTrackingCostFunction<SLIPStat
 
    public SLIPTerminalCostFunction()
    {
-      Q.set(x, x, 1e2);
-      Q.set(y, y, 1e2);
-      Q.set(z, z, 1e2);
-      Q.set(thetaX, thetaX, 1e2);
-      Q.set(thetaY, thetaY, 1e2);
-      Q.set(thetaZ, thetaZ, 1e2);
-      Q.set(xDot, xDot, 1e2);
-      Q.set(yDot, yDot, 1e2);
-      Q.set(zDot, zDot, 1e2);
-      Q.set(thetaXDot, thetaXDot, 1e2);
-      Q.set(thetaYDot, thetaYDot, 1e2);
-      Q.set(thetaZDot, thetaZDot, 1e2);
+      Q.set(x, x, 1e10);
+      Q.set(y, y, 1e10);
+      Q.set(z, z, 1e10);
+      Q.set(thetaX, thetaX, 1e10);
+      Q.set(thetaY, thetaY, 1e10);
+      Q.set(thetaZ, thetaZ, 1e10);
+      Q.set(xDot, xDot, 1e10);
+      Q.set(yDot, yDot, 1e10);
+      Q.set(zDot, zDot, 1e10);
+      Q.set(thetaXDot, thetaXDot, 1e10);
+      Q.set(thetaYDot, thetaYDot, 1e10);
+      Q.set(thetaZDot, thetaZDot, 1e10);
 
-      R.set(fx, fx, 0.0);
-      R.set(fy, fy, 0.0);
-      R.set(fz, fz, 0.0);
-      R.set(tauX, tauX, 0.0);
-      R.set(tauY, tauY, 0.0);
-      R.set(tauZ, tauZ, 0.0);
-      R.set(xF, xF, 0.0);
-      R.set(yF, yF, 0.0);
-      R.set(k, k, 0.0);
+      R.set(fx, fx, 1e10);
+      R.set(fy, fy, 1e10);
+      R.set(fz, fz, 1e10);
+      R.set(tauX, tauX, 1e10);
+      R.set(tauY, tauY, 1e10);
+      R.set(tauZ, tauZ, 1e10);
+      R.set(xF, xF, 0e0);
+      R.set(yF, yF, 0e0);
+      R.set(k, k, 0e0);
    }
 
    private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);

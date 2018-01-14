@@ -61,10 +61,11 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private static final double firstTransferDuration = 0.5;
    private static final double flightDuration = 0.5;
    private static final double secondTransferDuration = 0.5;
-   private static final double landingAngle = 0.5;
+   private static final double landingAngle = Math.toRadians(45);
 
    private static final double nominalComHeight = 1.0;
    private static final double length = 0.25;
+   private static final double gravityZ = 9.81;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
 
@@ -93,7 +94,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private final Footstep leftFoot;
    private final Footstep rightFoot;
 
-   private final SLIPJumpingDDPCalculator ddp = new SLIPJumpingDDPCalculator(0.01, 150.0, nominalComHeight, 9.81);
+   private final SLIPJumpingDDPCalculator ddp = new SLIPJumpingDDPCalculator(0.01, 150.0, nominalComHeight, gravityZ);
 
    private final YoInteger updatesPerRequest = new YoInteger("updatesPerRequest", registry);
    private final YoDouble trajectoryDT = new YoDouble("trajectoryDT", registry);
@@ -186,6 +187,10 @@ public class SLIPJumpingDDPCalculatorVisualizer
       currentCoMState = new DenseMatrix64F(SLIPState.stateVectorSize, 1);
       currentCoMState.set(2, 0, 1.0);
 
+      double jumpLength = startPoint.distance(endPoint);
+      double heightChange = endPoint.getZ() - startPoint.getZ();
+      double flightDuration = Math.sqrt(2.0 * (heightChange + jumpLength * Math.tan(landingAngle)) / gravityZ);
+      //double apexHeight
       ddp.initialize(currentCoMState, startPoint, endPoint, firstTransferDuration, flightDuration, secondTransferDuration);
       plotCoMPlan();
 
