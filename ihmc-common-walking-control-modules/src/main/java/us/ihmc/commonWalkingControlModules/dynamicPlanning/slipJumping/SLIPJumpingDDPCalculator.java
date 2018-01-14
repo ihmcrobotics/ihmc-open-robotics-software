@@ -16,7 +16,6 @@ public class SLIPJumpingDDPCalculator
    private final SimpleReactionDynamics dynamics;
 
    private double deltaT;
-   private double modifiedDeltaT;
 
    private final DiscreteOptimizationSequence optimalSequence;
    private final DiscreteOptimizationSequence desiredSequence;
@@ -72,7 +71,6 @@ public class SLIPJumpingDDPCalculator
    {
       dynamics.setTimeStepSize(deltaT);
       this.deltaT = deltaT;
-      this.modifiedDeltaT = deltaT;
    }
 
 
@@ -152,6 +150,7 @@ public class SLIPJumpingDDPCalculator
    public void singleSolve()
    {
       ddpSolver.computeOnePass(dynamicStates, costFunctions, terminalCostFunctions, startIndices, endIndices);
+      optimalSequence.set(ddpSolver.getOptimalSequence());
    }
 
    private double computeDeltaT(double trajectoryLength)
