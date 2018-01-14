@@ -18,16 +18,18 @@ public class SimpleLIPMDDPCalculator
 
    private int numberOfTimeSteps;
 
+   private final LQTrackingCostFunction<DefaultDiscreteState> costFunction;
+   private final LQTrackingCostFunction<DefaultDiscreteState> terminalCostFunction;
    private final DDPSolver<DefaultDiscreteState> ddpSolver;
 
    public SimpleLIPMDDPCalculator(double deltaT, double mass, double gravityZ)
    {
       this.dynamics = new SimpleLIPMDynamics(deltaT, 1.0, gravityZ);
-      LQTrackingCostFunction costFunction = new SimpleLIPMSimpleCostFunction(); // discrete, so we need to take that into account
-      LQTrackingCostFunction terminalCostFunction = new SimpleLIPMTerminalCostFunction();
+      costFunction = new SimpleLIPMSimpleCostFunction(); // discrete, so we need to take that into account
+      terminalCostFunction = new SimpleLIPMTerminalCostFunction();
       this.deltaT = deltaT;
 
-      ddpSolver = new DDPSolver<>(dynamics, costFunction, terminalCostFunction, true);
+      ddpSolver = new DDPSolver<>(dynamics, true);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();

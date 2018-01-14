@@ -19,9 +19,7 @@ public class DDPSolverTest
    public void testComputeUpdatedControl()
    {
       TestDynamics dynamics = new TestDynamics();
-      LQTrackingCostFunction costFunction = new BasicLQCostFunction();
-      LQTrackingCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       DenseMatrix64F feedforwardTerm = new DenseMatrix64F(3, 1);
 
@@ -145,9 +143,7 @@ public class DDPSolverTest
       DenseMatrix64F QxuExpected = new DenseMatrix64F(6, 3);
 
       TestDynamics dynamics = new TestDynamics();
-      LQTrackingCostFunction costFunction = new BasicLQCostFunction();
-      LQTrackingCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       calculator.updateHamiltonianApproximations(DefaultDiscreteState.DEFAULT, 0, L_X, L_U, L_XX, L_UU, L_XU, f_X, f_U, V_X, V_XX, Qx, Qu, Qxx, Quu, Qxu, Qux);
 
@@ -189,9 +185,7 @@ public class DDPSolverTest
    public void testComputePreviousValueApproximation()
    {
       TestDynamics dynamics = new TestDynamics();
-      LQTrackingCostFunction costFunction = new BasicLQCostFunction();
-      LQTrackingCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
       DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
@@ -321,9 +315,7 @@ public class DDPSolverTest
    public void testComputeFeedbackGainAndFeedForwardTerm()
    {
       TestDynamics dynamics = new TestDynamics();
-      LQTrackingCostFunction costFunction = new BasicLQCostFunction();
-      LQTrackingCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
       DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
@@ -454,9 +446,7 @@ public class DDPSolverTest
       DenseMatrix64F d_original = new DenseMatrix64F(d);
 
       TestDynamics dynamics = new TestDynamics();
-      LQTrackingCostFunction costFunction = new BasicLQCostFunction();
-      LQTrackingCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       calculator.addMultQuad(a, b, c, d);
 

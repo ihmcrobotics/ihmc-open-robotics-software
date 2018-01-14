@@ -13,14 +13,14 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
 
    private final DiscreteOptimizationData previousSequence;
 
-   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction)
+   public DDPSolver(DiscreteHybridDynamics<E> dynamics)
    {
-      this(dynamics, costFunction, terminalCostFunction, false);
+      this(dynamics, false);
    }
 
-   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction, boolean debug)
+   public DDPSolver(DiscreteHybridDynamics<E> dynamics, boolean debug)
    {
-      super(dynamics, costFunction, terminalCostFunction, debug);
+      super(dynamics, debug);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
@@ -29,10 +29,10 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public void initializeFromLQRSolution(E dynamicsState, DiscreteOptimizationData optimalSequence, DiscreteOptimizationData desiredSequence,
+   public void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData optimalSequence, DiscreteOptimizationData desiredSequence,
                                          RecyclingArrayList<DenseMatrix64F> feedbackGainSequence, RecyclingArrayList<DenseMatrix64F> feedForwardSequence)
    {
-      super.initializeFromLQRSolution(dynamicsState, optimalSequence, desiredSequence, feedBackGainSequence, feedForwardSequence);
+      super.initializeFromLQRSolution(dynamicsState, costFunction, optimalSequence, desiredSequence, feedBackGainSequence, feedForwardSequence);
 
       previousSequence.setZero(optimalSequence);
    }
@@ -48,7 +48,8 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
 
 
    @Override
-   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationData trajectory)
+   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex,
+                               LQTrackingCostFunction<E> terminalCostFunction, DiscreteOptimizationData trajectory)
    {
       boolean success = true;
 
@@ -57,9 +58,12 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       DiscreteData desiredStateSequence = desiredSequence.getStateSequence();
       DiscreteData desiredControlSequence = desiredSequence.getControlSequence();
 
-      terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), valueStateHessianSequence.get(endIndex));
-      terminalCostFunction.getCostStateGradient(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), desiredControlSequence.get(endIndex),
-                                                desiredStateSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
+      if (terminalCostFunction != null)
+      {
+         terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), valueStateHessianSequence.get(endIndex));
+         terminalCostFunction.getCostStateGradient(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), desiredControlSequence.get(endIndex),
+                                                   desiredStateSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
+      }
 
       for (int t = endIndex; t >= startIndex; t--)
       {
@@ -97,7 +101,8 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence)
+   public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialCoM,
+                             DiscreteOptimizationData updatedSequence)
    {
       lineSearchGain = lineSearchStartGain;
       boolean iterate = true;
@@ -105,7 +110,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       double updatedCost = 0.0;
       while(iterate)
       {
-         updatedCost = solveForwardDDPPassInternal(dynamicsState, startIndex, endIndex, initialCoM, previousSequence);
+         updatedCost = solveForwardDDPPassInternal(dynamicsState, startIndex, endIndex, costFunction, initialCoM, previousSequence);
 
          if (Double.isInfinite(updatedCost))
          {
@@ -128,7 +133,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       return updatedCost;
    }
 
-   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM,
+   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialCoM,
                                               DiscreteOptimizationData updatedSequence)
    {
       updatedSequence.setState(startIndex, initialCoM);
