@@ -514,6 +514,52 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       throw new RuntimeException("Didn't converge.");
    }
 
+   @Override
+   public void computeOnePass(List<E> dynamicsStates, TIntArrayList startIndices, TIntArrayList endIndices)
+   {
+
+      boolean lastIteration = false;
+      for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
+         computeFunctionApproximations(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment));
+
+      for (int iterB = 0; iterB < 20; iterB++)
+      {
+         boolean hessianWasPD = true;
+         for (int segment = dynamicsStates.size() - 1; segment >= 0; segment--)
+         {
+            hessianWasPD = backwardPass(dynamicsStates.get(segment), startIndices.get(segment), endIndices.get(segment), optimalSequence);
+            if (!hessianWasPD)
+               break;
+         }
+
+         if (hessianWasPD)
+         {
+            for (int segment = 0; segment < dynamicsStates.size(); segment++)
+            {
+               int startIndex = startIndices.get(segment);
+               forwardPass(dynamicsStates.get(segment), startIndex, endIndices.get(segment), optimalSequence.getState(startIndex),
+                           updatedSequence);
+            }
+            optimalSequence.set(updatedSequence);
+
+            applyLevenbergMarquardtHeuristicForHessianRegularization(true);
+            break;
+         }
+         else
+         {
+            if (lastIteration)
+               break;
+
+            if (debug) PrintTools.info("Dynamics are not positive definite");
+            applyLevenbergMarquardtHeuristicForHessianRegularization(false);
+         }
+
+         if (lambda == lambdaMin)
+            lastIteration = true;
+      }
+
+   }
+
    public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence);
 
 
