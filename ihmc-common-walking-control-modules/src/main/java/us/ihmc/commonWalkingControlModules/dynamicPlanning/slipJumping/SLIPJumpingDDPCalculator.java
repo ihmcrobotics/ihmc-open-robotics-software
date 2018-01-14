@@ -97,13 +97,13 @@ public class SLIPJumpingDDPCalculator
       terminalCostFunctions.add(null);
 
       dynamicStates.add(SLIPState.FLIGHT);
-      startIndices.add(numberOfInitialTimeSteps - 1);
+      startIndices.add(numberOfInitialTimeSteps);
       endIndices.add(numberOfInitialTimeSteps);
       costFunctions.add(regularCostFunction);
       terminalCostFunctions.add(null);
 
       dynamicStates.add(SLIPState.STANCE);
-      startIndices.add(numberOfInitialTimeSteps);
+      startIndices.add(numberOfInitialTimeSteps + 1);
       endIndices.add(numberOfInitialTimeSteps + numberOfFinalTimeSteps - 1);
       costFunctions.add(regularCostFunction);
       terminalCostFunctions.add(terminalCostFunction);
@@ -140,6 +140,7 @@ public class SLIPJumpingDDPCalculator
       }
 
       ddpSolver.initializeSequencesFromDesireds(currentState, desiredSequence);
+      optimalSequence.set(desiredSequence);
    }
 
    public int solve()

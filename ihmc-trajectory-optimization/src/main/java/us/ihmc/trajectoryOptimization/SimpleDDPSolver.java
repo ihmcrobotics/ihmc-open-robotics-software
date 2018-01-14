@@ -17,9 +17,9 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
 
    @Override
    public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction,
-                             DenseMatrix64F initialCoM, DiscreteOptimizationData updatedSequence)
+                             DenseMatrix64F initialState, DiscreteOptimizationData updatedSequence)
    {
-      updatedSequence.setState(startIndex, initialCoM);
+      updatedSequence.setState(startIndex, initialState);
 
       double cost = 0.0;
 
@@ -39,7 +39,7 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
          // compute cost
          cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredControl, desiredState);
 
-         // integrate
+         // integrate // FIXME this is wrong
          if (t < desiredSequence.size() - 1)
             dynamics.getNextState(dynamicsState, updatedState, updatedControl, updatedSequence.getState(t + 1));
       }
