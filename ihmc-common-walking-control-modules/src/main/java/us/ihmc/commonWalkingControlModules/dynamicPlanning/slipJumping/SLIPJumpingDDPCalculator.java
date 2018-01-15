@@ -29,7 +29,7 @@ public class SLIPJumpingDDPCalculator
    private final DenseMatrix64F initialState;
 
    private final CompositeLQCostFunction<SLIPState> regularCostFunction = new CompositeLQCostFunction<>();
-   private final LQTrackingCostFunction<SLIPState> terminalCostFunction = new SLIPTerminalCostFunction();
+   private final LQTrackingCostFunction<SLIPState> terminalCostFunction = new SLIPTerminalCost();
 
    private final List<SLIPState> dynamicStates = new ArrayList<>();
    private final List<LQTrackingCostFunction<SLIPState>> costFunctions = new ArrayList<>();
