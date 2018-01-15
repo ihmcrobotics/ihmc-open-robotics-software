@@ -159,6 +159,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
+      
+      listOfControllableRigidBodies.add(desiredFullRobotModel.getHead());
 
       return listOfControllableRigidBodies;
    }
@@ -326,7 +328,15 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       updateCoMPositionAndFootPoses();
    }
 
-   void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
+   public void updateFootSupportState(boolean isLeftFootInSupport, boolean isRightFootInSupport)
+   {
+      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
+      capturabilityBasedStatus.leftFootSupportPolygonLength = isLeftFootInSupport ? 1 : 0;
+      capturabilityBasedStatus.rightFootSupportPolygonLength = isRightFootInSupport ? 1 : 0;
+      updateCapturabilityBasedStatus(capturabilityBasedStatus);
+   }
+
+   public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       latestCapturabilityBasedStatusReference.set(newStatus);
    }

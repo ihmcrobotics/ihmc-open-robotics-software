@@ -29,6 +29,7 @@ public class SimulationOverheadPlotterFactory
    private boolean createInSeperateWindow = false;
    private boolean showOnStart = true;
    private String variableNameToTrack = null;
+   private String plotterName = "Plotter";
 
    public SimulationOverheadPlotter createOverheadPlotter()
    {
@@ -46,7 +47,6 @@ public class SimulationOverheadPlotterFactory
       JPanel plotterPanel = simulationOverheadPlotter.getJPanel();
       JPanel plotterKeyJPanel = simulationOverheadPlotter.getJPanelKey();
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
-      String plotterName = "Plotter";
       
       if (createInSeperateWindow)
       {
@@ -144,6 +144,11 @@ public class SimulationOverheadPlotterFactory
    public void setCreateInSeperateWindow(boolean createInSeperateWindow)
    {
       this.createInSeperateWindow = createInSeperateWindow;
+   }
+   
+   public void setPlotterName(String plotterName)
+   {
+      this.plotterName = plotterName;
    }
    
    public void setShowOnStart(boolean showOnStart)

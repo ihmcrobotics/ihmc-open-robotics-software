@@ -26,10 +26,10 @@ public enum HumanoidBehaviorType
    TEST_ICP_OPTIMIZATION,
    TEST_GC_GENERATION,
    TEST_SMOOTH_ICP_PLANNER,
-   SOLARPANEL_BEHAVIOR,
    PUSH_AND_WALK,
    COLLABORATIVE_TASK,
-   FIRE_FIGHTING,
+   FIRE_FIGHTING,   
+   CUTTING_WALL,
    REPEATEDLY_WALK_FOOTSTEP_LIST;
 
    public static final HumanoidBehaviorType[] values = values();
