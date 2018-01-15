@@ -87,7 +87,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      simulationTestingParameters.setKeepSCSUp(false);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -222,7 +222,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       // Trajectory parameters
       double trajectoryTime = 10.0;
       double circleRadius = 0.6; // Valkyrie, enable ypr, is available for 0.5 radius.
-      Point3D circleCenter = new Point3D(0.55, 0.3, 1.1);
+      Point3D circleCenter = new Point3D(0.55, 0.2, 1.0);
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.0);
       Quaternion handOrientation = new Quaternion(circleOrientation);

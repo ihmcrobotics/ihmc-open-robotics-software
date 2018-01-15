@@ -160,7 +160,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       boolean cuttingDirectionCW = true;
       double cuttingRadius = 0.3;
       Vector3D wallNormalVector = new Vector3D(-1.0, 0.0, 0.0);
-      Point3D cuttingCenterPosition = new Point3D(0.6, -0.3, 1.1);
+      Point3D cuttingCenterPosition = new Point3D(0.7, -0.3, 1.1);
 
       // wbt toolbox configuration message
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -177,7 +177,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       RobotSide robotSide = RobotSide.RIGHT;
       RigidBody hand = fullRobotModel.getHand(robotSide);
 
-      Vector3D translationToGraspingFrame = new Vector3D(-0.1, 0.05, -0.1);
+      Vector3D translationToGraspingFrame = new Vector3D(-0.0, 0.05, -0.1);
       handControlFrames.get(robotSide).appendTranslation(translationToGraspingFrame);
 
       FunctionTrajectory handFunction = time -> TrajectoryLibraryForDRC.computeCuttingWallTrajectory(time, trajectoryTime, cuttingRadius, cuttingDirectionCW,
@@ -303,8 +303,8 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
        */
       // test for position only.
       ConfigurationSpaceName[] explorationSpaces = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,};
-      double[] explorationUpperLimits = {1.3, 0.2, 0.2};
-      double[] explorationLowerLimits = {-0.0, -0.2, -0.2};
+      double[] explorationUpperLimits = {0.15, 0.05, 0.2};
+      double[] explorationLowerLimits = {-0.0, -0.5, -0.2};
 
       rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationUpperLimits, explorationLowerLimits));
 
