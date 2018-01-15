@@ -38,7 +38,7 @@ public class PlanarRegionDataImporterVisualizer extends Application
       PlanarRegionsList planarRegionData;
 
       if (defaultFile != null)
-         planarRegionData = PlanarRegionDataImporter.importPlanRegionData(defaultFile);
+         planarRegionData = PlanarRegionDataImporter.importPlanarRegionData(defaultFile);
       else
          planarRegionData = PlanarRegionDataImporter.importUsingFileChooser(primaryStage);
       if (planarRegionData == null)
