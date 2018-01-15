@@ -20,11 +20,12 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 {
-   private static final int defaultNumberOfStepsToTake = 10;
-   private static final int defaultNumberOfIterations = 5;
+   private static final int defaultNumberOfStepsToTake = 5;
+   private static final int defaultNumberOfIterations = 2;
 
    private final YoBoolean walkingForward = new YoBoolean("walkingFotward", registry);
    private final YoDouble footstepLength = new YoDouble("footstepLength", registry);
@@ -39,8 +40,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final FootstepDataListMessage forwardFootstepList = new FootstepDataListMessage();
    private final FootstepDataListMessage backwardFootstepList = new FootstepDataListMessage();
 
-   private final AtomicInteger stepsAlongCurrentList = new AtomicInteger();
-
+   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
    private final SideDependentList<MovingReferenceFrame> soleFrames;
    private final ReferenceFrame midFootZUpFrame;
 
@@ -51,14 +51,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       soleFrames = referenceFrames.getSoleFrames();
       midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();
-
-      communicationBridge.attachListener(WalkingStatusMessage.class, (packet) ->
-      {
-         if(packet.status.equals(WalkingStatusMessage.Status.COMPLETED))
-         {
-            stepsAlongCurrentList.incrementAndGet();
-         }
-      });
+      communicationBridge.attachListener(WalkingStatusMessage.class, walkingStatusMessage::set);
 
       walkingForward.set(true);
       initialSwingSide.set(RobotSide.RIGHT);
@@ -145,7 +138,8 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
          return;
       }
 
-      if(stepsAlongCurrentList.get() == forwardFootstepList.getDataList().size())
+      WalkingStatusMessage walkingStatusMessage = this.walkingStatusMessage.getAndSet(null);
+      if(walkingStatusMessage != null && walkingStatusMessage.status.equals(WalkingStatusMessage.Status.COMPLETED))
       {
          if(walkingForward.getBooleanValue())
          {
@@ -163,8 +157,6 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
             sendPacket(forwardFootstepList);
             walkingForward.set(true);
          }
-
-         stepsAlongCurrentList.set(0);
       }
    }
 
