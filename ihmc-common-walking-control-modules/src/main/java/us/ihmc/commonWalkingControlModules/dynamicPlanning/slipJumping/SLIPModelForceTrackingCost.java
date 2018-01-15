@@ -8,7 +8,7 @@ import us.ihmc.trajectoryOptimization.LQCostFunction;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
+public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 {
    static double qFX = 5.0;
    static double qFY = 5.0;
@@ -42,7 +42,7 @@ public class SLIPModelTrackingCost implements LQCostFunction<SLIPState>
 
    private final double nominalPendulumLength;
 
-   public SLIPModelTrackingCost(double pendulumMass, double nominalPendulumLength, double gravityZ)
+   public SLIPModelForceTrackingCost(double pendulumMass, double nominalPendulumLength, double gravityZ)
    {
       this.pendulumMass = pendulumMass;
       this.nominalPendulumLength = nominalPendulumLength;

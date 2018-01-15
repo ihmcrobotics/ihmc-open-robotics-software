@@ -47,10 +47,10 @@ public class SLIPJumpingDDPCalculator
 
       ddpSolver = new SimpleDDPSolver<>(dynamics, true);
 
-      LQCostFunction<SLIPState> slipModelTrackingCost = new SLIPModelTrackingCost(mass, nominalHeight, gravityZ);
-      LQCostFunction<SLIPState> slipRegularizationCost = new SLIPRegularizationCostFunction();
+      LQCostFunction<SLIPState> slipModelTrackingCost = new SLIPModelForceTrackingCost(mass, nominalHeight, gravityZ);
+      LQCostFunction<SLIPState> slipRegularizationCost = new SLIPRegularizationCost();
 
-      LQTrackingCostFunction<SLIPState> slipDesiredTrackingCost = new SLIPDesiredTrackingCostFunction();
+      LQTrackingCostFunction<SLIPState> slipDesiredTrackingCost = new SLIPDesiredTrackingCost();
 
       regularCostFunction.addLQCostFunction(slipModelTrackingCost);
       regularCostFunction.addLQCostFunction(slipRegularizationCost);

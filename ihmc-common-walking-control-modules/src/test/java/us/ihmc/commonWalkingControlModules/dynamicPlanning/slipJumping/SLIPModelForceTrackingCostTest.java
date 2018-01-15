@@ -11,7 +11,7 @@ import java.util.Random;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-public class SLIPModelTrackingCostTest
+public class SLIPModelForceTrackingCostTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
@@ -20,7 +20,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -60,12 +60,12 @@ public class SLIPModelTrackingCostTest
       double torqueY = z_k * fx_k - relativeX * fz_k;
       double torqueZ = -relativeY * fx_k + relativeX * fy_k;
 
-      double expectedCost = SLIPModelTrackingCost.qFX * (fx_k - forceX) * (fx_k - forceX);
-      expectedCost += SLIPModelTrackingCost.qFY * (fy_k - forceY) * (fy_k - forceY);
-      expectedCost += SLIPModelTrackingCost.qFZ * (fz_k - forceZ) * (fz_k - forceZ);
-      expectedCost += SLIPModelTrackingCost.qTauX * (tauX_k - torqueX) * (tauX_k - torqueX);
-      expectedCost += SLIPModelTrackingCost.qTauY * (tauY_k - torqueY) * (tauY_k - torqueY);
-      expectedCost += SLIPModelTrackingCost.qTauZ * (tauZ_k - torqueZ) * (tauZ_k - torqueZ);
+      double expectedCost = SLIPModelForceTrackingCost.qFX * (fx_k - forceX) * (fx_k - forceX);
+      expectedCost += SLIPModelForceTrackingCost.qFY * (fy_k - forceY) * (fy_k - forceY);
+      expectedCost += SLIPModelForceTrackingCost.qFZ * (fz_k - forceZ) * (fz_k - forceZ);
+      expectedCost += SLIPModelForceTrackingCost.qTauX * (tauX_k - torqueX) * (tauX_k - torqueX);
+      expectedCost += SLIPModelForceTrackingCost.qTauY * (tauY_k - torqueY) * (tauY_k - torqueY);
+      expectedCost += SLIPModelForceTrackingCost.qTauZ * (tauZ_k - torqueZ) * (tauZ_k - torqueZ);
 
       Assert.assertEquals(expectedCost, cost, 1e-7);
    }
@@ -78,7 +78,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -111,7 +111,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -209,7 +209,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -243,7 +243,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -276,7 +276,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost cost = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -325,12 +325,12 @@ public class SLIPModelTrackingCostTest
       double gradientXTauYError = fz_k;
       double gradientXTauZError = -fy_k;
 
-      double expectedXX = 2.0 * SLIPModelTrackingCost.qFX * gradientXXError * dynamicsXError;
-      double expectedXY = 2.0 * SLIPModelTrackingCost.qFY * gradientXYError * dynamicsYError;
-      double expectedXZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientXZError * dynamicsZError;
-      double expectedXTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientXTauXError * dynamicsTauXError;
-      double expectedXTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientXTauYError * dynamicsTauYError;
-      double expectedXTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientXTauZError * dynamicsTauZError;
+      double expectedXX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientXXError * dynamicsXError;
+      double expectedXY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientXYError * dynamicsYError;
+      double expectedXZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientXZError * dynamicsZError;
+      double expectedXTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientXTauXError * dynamicsTauXError;
+      double expectedXTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientXTauYError * dynamicsTauYError;
+      double expectedXTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientXTauZError * dynamicsTauZError;
       double expectedX = expectedXX + expectedXY + expectedXZ + expectedXTauX + expectedXTauY + expectedXTauZ;
 
       double gradientYXError = k_k * nominalLength * Math.pow(length, -3.0) * relativeX * relativeY;
@@ -340,12 +340,12 @@ public class SLIPModelTrackingCostTest
       double gradientYTauYError = 0.0;
       double gradientYTauZError = fx_k;
 
-      double expectedYX = 2.0 * SLIPModelTrackingCost.qFX * gradientYXError * dynamicsXError;
-      double expectedYY = 2.0 * SLIPModelTrackingCost.qFY * gradientYYError * dynamicsYError;
-      double expectedYZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientYZError * dynamicsZError;
-      double expectedYTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientYTauXError * dynamicsTauXError;
-      double expectedYTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientYTauYError * dynamicsTauYError;
-      double expectedYTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientYTauZError * dynamicsTauZError;
+      double expectedYX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientYXError * dynamicsXError;
+      double expectedYY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientYYError * dynamicsYError;
+      double expectedYZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientYZError * dynamicsZError;
+      double expectedYTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientYTauXError * dynamicsTauXError;
+      double expectedYTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientYTauYError * dynamicsTauYError;
+      double expectedYTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientYTauZError * dynamicsTauZError;
       double expectedY = expectedYX + expectedYY + expectedYZ + expectedYTauX + expectedYTauY + expectedYTauZ;
 
       double gradientZXError = k_k * nominalLength * Math.pow(length, -3.0) * relativeX * z_k;
@@ -355,12 +355,12 @@ public class SLIPModelTrackingCostTest
       double gradientZTauYError = -fx_k;
       double gradientZTauZError = 0.0;
 
-      double expectedZX = 2.0 * SLIPModelTrackingCost.qFX * gradientZXError * dynamicsXError;
-      double expectedZY = 2.0 * SLIPModelTrackingCost.qFY * gradientZYError * dynamicsYError;
-      double expectedZZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientZZError * dynamicsZError;
-      double expectedZTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientZTauXError * dynamicsTauXError;
-      double expectedZTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientZTauYError * dynamicsTauYError;
-      double expectedZTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientZTauZError * dynamicsTauZError;
+      double expectedZX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientZXError * dynamicsXError;
+      double expectedZY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientZYError * dynamicsYError;
+      double expectedZZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientZZError * dynamicsZError;
+      double expectedZTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientZTauXError * dynamicsTauXError;
+      double expectedZTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientZTauYError * dynamicsTauYError;
+      double expectedZTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientZTauZError * dynamicsTauZError;
       double expectedZ = expectedZX + expectedZY + expectedZZ + expectedZTauX + expectedZTauY + expectedZTauZ;
 
       expectedGradient.set(x, expectedX);
@@ -377,7 +377,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost cost = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -427,12 +427,12 @@ public class SLIPModelTrackingCostTest
       double gradientFxTauYError = (zf_k - z_k);
       double gradientFxTauZError = (y_k - yf_k);
 
-      double expectedFxX = 2.0 * SLIPModelTrackingCost.qFX * gradientFxXError * dynamicsXError;
-      double expectedFxY = 2.0 * SLIPModelTrackingCost.qFY * gradientFxYError * dynamicsYError;
-      double expectedFxZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientFxZError * dynamicsZError;
-      double expectedFxTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientFxTauXError * dynamicsTauXError;
-      double expectedFxTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientFxTauYError * dynamicsTauYError;
-      double expectedFxTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientFxTauZError * dynamicsTauZError;
+      double expectedFxX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientFxXError * dynamicsXError;
+      double expectedFxY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientFxYError * dynamicsYError;
+      double expectedFxZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientFxZError * dynamicsZError;
+      double expectedFxTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientFxTauXError * dynamicsTauXError;
+      double expectedFxTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientFxTauYError * dynamicsTauYError;
+      double expectedFxTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientFxTauZError * dynamicsTauZError;
       double expectedFx = expectedFxX + expectedFxY + expectedFxZ + expectedFxTauX + expectedFxTauY + expectedFxTauZ;
 
       double gradientFyXError = 0.0;
@@ -442,12 +442,12 @@ public class SLIPModelTrackingCostTest
       double gradientFyTauYError = 0.0;
       double gradientFyTauZError = -(x_k - xf_k);
 
-      double expectedFyX = 2.0 * SLIPModelTrackingCost.qFX * gradientFyXError * dynamicsXError;
-      double expectedFyY = 2.0 * SLIPModelTrackingCost.qFY * gradientFyYError * dynamicsYError;
-      double expectedFyZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientFyZError * dynamicsZError;
-      double expectedFyTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientFyTauXError * dynamicsTauXError;
-      double expectedFyTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientFyTauYError * dynamicsTauYError;
-      double expectedFyTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientFyTauZError * dynamicsTauZError;
+      double expectedFyX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientFyXError * dynamicsXError;
+      double expectedFyY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientFyYError * dynamicsYError;
+      double expectedFyZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientFyZError * dynamicsZError;
+      double expectedFyTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientFyTauXError * dynamicsTauXError;
+      double expectedFyTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientFyTauYError * dynamicsTauYError;
+      double expectedFyTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientFyTauZError * dynamicsTauZError;
       double expectedFy = expectedFyX + expectedFyY + expectedFyZ + expectedFyTauX + expectedFyTauY + expectedFyTauZ;
 
       double gradientFzXError = 0.0;
@@ -457,17 +457,17 @@ public class SLIPModelTrackingCostTest
       double gradientFzTauYError = -(xf_k - x_k);
       double gradientFzTauZError = 0.0;
 
-      double expectedFzX = 2.0 * SLIPModelTrackingCost.qFX * gradientFzXError * dynamicsXError;
-      double expectedFzY = 2.0 * SLIPModelTrackingCost.qFY * gradientFzYError * dynamicsYError;
-      double expectedFzZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientFzZError * dynamicsZError;
-      double expectedFzTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientFzTauXError * dynamicsTauXError;
-      double expectedFzTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientFzTauYError * dynamicsTauYError;
-      double expectedFzTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientFzTauZError * dynamicsTauZError;
+      double expectedFzX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientFzXError * dynamicsXError;
+      double expectedFzY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientFzYError * dynamicsYError;
+      double expectedFzZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientFzZError * dynamicsZError;
+      double expectedFzTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientFzTauXError * dynamicsTauXError;
+      double expectedFzTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientFzTauYError * dynamicsTauYError;
+      double expectedFzTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientFzTauZError * dynamicsTauZError;
       double expectedFz = expectedFzX + expectedFzY + expectedFzZ + expectedFzTauX + expectedFzTauY + expectedFzTauZ;
 
-      double expectedTauX = 2.0 * SLIPModelTrackingCost.qTauX * dynamicsTauXError;
-      double expectedTauY = 2.0 * SLIPModelTrackingCost.qTauY * dynamicsTauYError;
-      double expectedTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * dynamicsTauZError;
+      double expectedTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * dynamicsTauXError;
+      double expectedTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * dynamicsTauYError;
+      double expectedTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * dynamicsTauZError;
 
       // TODO xf, yf, k
       double gradientXfXError = -k_k * (relativeX * relativeX * nominalLength * Math.pow(length, -3.0) - nominalLength / length + 1.0);
@@ -477,12 +477,12 @@ public class SLIPModelTrackingCostTest
       double gradientXfTauYError = -fz_k;
       double gradientXfTauZError = fy_k;
 
-      double expectedXfX = 2.0 * SLIPModelTrackingCost.qFX * gradientXfXError * dynamicsXError;
-      double expectedXfY = 2.0 * SLIPModelTrackingCost.qFY * gradientXfYError * dynamicsYError;
-      double expectedXfZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientXfZError * dynamicsZError;
-      double expectedXfTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientXfTauXError * dynamicsTauXError;
-      double expectedXfTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientXfTauYError * dynamicsTauYError;
-      double expectedXfTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientXfTauZError * dynamicsTauZError;
+      double expectedXfX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientXfXError * dynamicsXError;
+      double expectedXfY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientXfYError * dynamicsYError;
+      double expectedXfZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientXfZError * dynamicsZError;
+      double expectedXfTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientXfTauXError * dynamicsTauXError;
+      double expectedXfTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientXfTauYError * dynamicsTauYError;
+      double expectedXfTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientXfTauZError * dynamicsTauZError;
       double expectedXf = expectedXfX + expectedXfY + expectedXfZ + expectedXfTauX + expectedXfTauY + expectedXfTauZ;
 
       double gradientYfXError = -k_k * nominalLength * Math.pow(length, -3.0) * relativeX * relativeY;
@@ -492,12 +492,12 @@ public class SLIPModelTrackingCostTest
       double gradientYfTauYError = 0.0;
       double gradientYfTauZError = -fx_k;
 
-      double expectedYfX = 2.0 * SLIPModelTrackingCost.qFX * gradientYfXError * dynamicsXError;
-      double expectedYfY = 2.0 * SLIPModelTrackingCost.qFY * gradientYfYError * dynamicsYError;
-      double expectedYfZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientYfZError * dynamicsZError;
-      double expectedYfTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientYfTauXError * dynamicsTauXError;
-      double expectedYfTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientYfTauYError * dynamicsTauYError;
-      double expectedYfTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientYfTauZError * dynamicsTauZError;
+      double expectedYfX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientYfXError * dynamicsXError;
+      double expectedYfY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientYfYError * dynamicsYError;
+      double expectedYfZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientYfZError * dynamicsZError;
+      double expectedYfTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientYfTauXError * dynamicsTauXError;
+      double expectedYfTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientYfTauYError * dynamicsTauYError;
+      double expectedYfTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientYfTauZError * dynamicsTauZError;
       double expectedYf = expectedYfX + expectedYfY + expectedYfZ + expectedYfTauX + expectedYfTauY + expectedYfTauZ;
 
       double gradientKXError = -(nominalLength / length - 1.0) * relativeX;
@@ -507,12 +507,12 @@ public class SLIPModelTrackingCostTest
       double gradientKTauYError = 0;
       double gradientKTauZError = 0;
 
-      double expectedKX = 2.0 * SLIPModelTrackingCost.qFX * gradientKXError * dynamicsXError;
-      double expectedKY = 2.0 * SLIPModelTrackingCost.qFY * gradientKYError * dynamicsYError;
-      double expectedKZ = 2.0 * SLIPModelTrackingCost.qFZ * gradientKZError * dynamicsZError;
-      double expectedKTauX = 2.0 * SLIPModelTrackingCost.qTauX * gradientKTauXError * dynamicsTauXError;
-      double expectedKTauY = 2.0 * SLIPModelTrackingCost.qTauY * gradientKTauYError * dynamicsTauYError;
-      double expectedKTauZ = 2.0 * SLIPModelTrackingCost.qTauZ * gradientKTauZError * dynamicsTauZError;
+      double expectedKX = 2.0 * SLIPModelForceTrackingCost.qFX * gradientKXError * dynamicsXError;
+      double expectedKY = 2.0 * SLIPModelForceTrackingCost.qFY * gradientKYError * dynamicsYError;
+      double expectedKZ = 2.0 * SLIPModelForceTrackingCost.qFZ * gradientKZError * dynamicsZError;
+      double expectedKTauX = 2.0 * SLIPModelForceTrackingCost.qTauX * gradientKTauXError * dynamicsTauXError;
+      double expectedKTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * gradientKTauYError * dynamicsTauYError;
+      double expectedKTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientKTauZError * dynamicsTauZError;
       double expectedK = expectedKX + expectedKY + expectedKZ + expectedKTauX + expectedKTauY + expectedKTauZ;
 
       expectedGradient.set(fx, expectedFx);
@@ -536,7 +536,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -574,7 +574,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -612,7 +612,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -650,7 +650,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -688,7 +688,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
@@ -726,7 +726,7 @@ public class SLIPModelTrackingCostTest
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelTrackingCost costFunction = new SLIPModelTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost costFunction = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
