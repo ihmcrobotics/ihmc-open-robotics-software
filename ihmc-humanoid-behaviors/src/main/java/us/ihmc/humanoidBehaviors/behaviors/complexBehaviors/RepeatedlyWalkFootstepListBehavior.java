@@ -140,7 +140,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      if(iterationCounter.getIntegerValue() == iterations.getIntegerValue())
+      if(isDone())
       {
          return;
       }
@@ -155,7 +155,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
          else
          {
             iterationCounter.increment();
-            if(iterationCounter.getIntegerValue() < iterations.getIntegerValue())
+            if(isDone())
             {
                return;
             }
