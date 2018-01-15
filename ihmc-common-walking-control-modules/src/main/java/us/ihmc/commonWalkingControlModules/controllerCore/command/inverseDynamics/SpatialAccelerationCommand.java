@@ -297,8 +297,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredAngularAcceleration.get(this.desiredAngularAcceleration);
-      desiredLinearAcceleration.get(this.desiredLinearAcceleration);
+      this.desiredAngularAcceleration.set(desiredAngularAcceleration);
+      this.desiredLinearAcceleration.set(desiredLinearAcceleration);
    }
 
    /**
@@ -332,7 +332,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
 
-      desiredAngularAcceleration.get(this.desiredAngularAcceleration);
+      this.desiredAngularAcceleration.set(desiredAngularAcceleration);
       desiredLinearAcceleration.setToZero();
    }
 
@@ -367,7 +367,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
 
-      desiredLinearAcceleration.get(this.desiredLinearAcceleration);
+      this.desiredLinearAcceleration.set(desiredLinearAcceleration);
       desiredAngularAcceleration.setToZero();
    }
 

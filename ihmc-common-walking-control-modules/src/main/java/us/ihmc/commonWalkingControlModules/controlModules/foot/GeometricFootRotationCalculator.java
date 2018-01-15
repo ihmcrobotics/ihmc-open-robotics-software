@@ -157,7 +157,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       // intersect the foot plane and the ground plane
       footNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0);
       footNormal.changeFrame(worldFrame);
-      footNormal.get(footNormalVector);
+      footNormalVector.set(footNormal);
       footNormalVector.normalize();
       lineOfContactVector.cross(normal, footNormalVector);
       if (lineOfContactVector.epsilonEquals(zero, 10E-12)) return;

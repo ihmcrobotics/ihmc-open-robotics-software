@@ -196,10 +196,7 @@ public class FootCoPOccupancyGrid
    public void registerCenterOfPressureLocation(FramePoint2D copToRegister)
    {
       copToRegister.checkReferenceFrameMatch(soleFrame);
-      copToRegister.get(tempPoint);
-
-      tempPoint.setX(tempPoint.getX() - gridOrigin.getX());
-      tempPoint.setY(tempPoint.getY() - gridOrigin.getY());
+      tempPoint.sub(copToRegister, gridOrigin);
 
       int xIndex = findXIndex(tempPoint.getX());
       int yIndex = findYIndex(tempPoint.getY());
@@ -256,9 +253,7 @@ public class FootCoPOccupancyGrid
    public boolean isCellAtLocationOccupied(FramePoint2D location)
    {
       location.checkReferenceFrameMatch(soleFrame);
-      location.get(tempPoint);
-      tempPoint.setX(tempPoint.getX() - gridOrigin.getX());
-      tempPoint.setY(tempPoint.getY() - gridOrigin.getY());
+      tempPoint.sub(location, gridOrigin);
 
       int xIndex = findXIndex(tempPoint.getX());
       int yIndex = findYIndex(tempPoint.getY());

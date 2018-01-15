@@ -102,8 +102,7 @@ public class FootStepPlanner
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
          temp.setToZero(footFrame);
          temp.changeFrame(bodyZUpFrame);
-         Vector3D offsetFromBodyToFoot = new Vector3D();
-         temp.get(offsetFromBodyToFoot);
+         Vector3D offsetFromBodyToFoot = new Vector3D(temp);
          YoFrameVector yoOffset = new YoFrameVector(prefix + robotSextant.name() + "offsetFromBodyToFoot", bodyZUpFrame, registry);
          yoOffset.set(offsetFromBodyToFoot);
          if (robotSextant == RobotSextant.FRONT_LEFT || robotSextant == RobotSextant.FRONT_RIGHT)

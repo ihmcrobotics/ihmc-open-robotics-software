@@ -22,10 +22,6 @@ public class FramePlane3d implements ReferenceFrameHolder
    private final Vector3D temporaryVector = new Vector3D();
    private final Point3D temporaryPoint = new Point3D();
    
-   private final Point3D temporaryPointA = new Point3D();
-   private final Point3D temporaryPointB = new Point3D();
-   private final Point3D temporaryPointC = new Point3D();
-
    public FramePlane3d()
    {
       this(ReferenceFrame.getWorldFrame());
@@ -132,11 +128,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       pointB.checkReferenceFrameMatch(referenceFrame);
       pointC.checkReferenceFrameMatch(referenceFrame);
 
-      pointA.get(temporaryPointA);
-      pointB.get(temporaryPointB);
-      pointC.get(temporaryPointC);
-      
-      plane3d.set(temporaryPointA, temporaryPointB, temporaryPointC);
+      plane3d.set(pointA, pointB, pointC);
    }
    
    public void changeFrame(ReferenceFrame desiredFrame)

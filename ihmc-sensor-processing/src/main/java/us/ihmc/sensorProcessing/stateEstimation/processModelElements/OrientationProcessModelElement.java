@@ -51,7 +51,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
 
    private void computeOrientationStateMatrixBlock()
    {
-      angularVelocityPort.getData().get(angularVelocity);
+      angularVelocity.set(angularVelocityPort.getData());
       angularVelocity.scale(-0.5);
       tempMatrix3d.setToTildeForm(angularVelocity);
       tempMatrix3d.get(stateMatrixBlocks.get(orientationPort));
@@ -64,7 +64,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
 
    public void propagateState(double dt)
    {
-      angularVelocityPort.getData().get(angularVelocity);
+      angularVelocity.set(angularVelocityPort.getData());
       quaternion.set(orientationPort.getData());
 
       tempRotationVector.set(angularVelocity);

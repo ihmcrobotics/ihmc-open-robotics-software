@@ -207,7 +207,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          orientation.appendRollRotation(roll);
          FrameQuaternion frameOrientation = new FrameQuaternion(pelvisFrame, orientation);
          frameOrientation.changeFrame(worldFrame);
-         frameOrientation.get(orientation);
+         orientation.set(frameOrientation);
 
          double derivativeFactor = 2.0 * Math.PI * frequency * Math.cos(2.0 * Math.PI * time * frequency);
          double yawRate = yawMagnitude * derivativeFactor;
@@ -217,7 +217,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocity);
          FrameVector3D frameAngularVelcoity = new FrameVector3D(pelvisFrame, angularVelocity);
          frameAngularVelcoity.changeFrame(worldFrame);
-         frameAngularVelcoity.get(angularVelocity);
+         angularVelocity.set(frameAngularVelcoity);
 
          if (point == numberOfPoints - 1)
             angularVelocity.setToZero();
@@ -292,7 +292,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       desiredChestOrientation.appendPitchRotation(pitch);
       FrameQuaternion frameChestOrientation = new FrameQuaternion(chestFrame, desiredChestOrientation);
       frameChestOrientation.changeFrame(worldFrame);
-      frameChestOrientation.get(desiredChestOrientation);
+      desiredChestOrientation.set(frameChestOrientation);
       ChestTrajectoryMessage chestMessage = new ChestTrajectoryMessage(chestTrajectoryTime, desiredChestOrientation, worldFrame, worldFrame);
       drcSimulationTestHelper.send(chestMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(chestTrajectoryTime + 1.0);

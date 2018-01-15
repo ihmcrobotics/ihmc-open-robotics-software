@@ -191,7 +191,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
+      desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.setToZero();
       feedForwardLinearAccelerationInWorld.setToZero();
    }
@@ -222,9 +222,9 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
       feedForwardLinearAcceleration.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
-      desiredLinearVelocity.get(desiredLinearVelocityInWorld);
-      feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
+      desiredPositionInWorld.set(desiredPosition);
+      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);
    }
 
    /**
@@ -253,7 +253,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setBodyFixedPointToControl(FramePoint3D bodyFixedPointInEndEffectorFrame)
    {
       bodyFixedPointInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
-      bodyFixedPointInEndEffectorFrame.get(this.bodyFixedPointInEndEffectorFrame);
+      this.bodyFixedPointInEndEffectorFrame.set(bodyFixedPointInEndEffectorFrame);
    }
 
    /**

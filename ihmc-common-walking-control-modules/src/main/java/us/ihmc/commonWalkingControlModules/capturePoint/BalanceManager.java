@@ -758,9 +758,9 @@ public class BalanceManager
 
       SideDependentList<FrameConvexPolygon2d> footSupportPolygons = bipedSupportPolygons.getFootPolygonsInWorldFrame();
 
-      capturePoint2d.get(capturabilityBasedStatus.capturePoint);
-      desiredCapturePoint2d.get(capturabilityBasedStatus.desiredCapturePoint);
-      centerOfMassPosition.get(capturabilityBasedStatus.centerOfMass);
+      capturabilityBasedStatus.capturePoint.set(capturePoint2d);
+      capturabilityBasedStatus.desiredCapturePoint.set(desiredCapturePoint2d);
+      capturabilityBasedStatus.centerOfMass.set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
       {
          capturabilityBasedStatus.setSupportPolygon(robotSide, footSupportPolygons.get(robotSide));

@@ -21,7 +21,7 @@ public class PrismaticJoint extends OneDoFJoint
    @Override
    protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      jointAxis.get(translation);
+      translation.set(jointAxis);
       translation.scale(getQ());
       jointTransform.setTranslationAndIdentityRotation(translation);
    }

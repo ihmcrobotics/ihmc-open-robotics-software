@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -98,14 +97,11 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
       {
-         private final Quaternion rotationToParent = new Quaternion();
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             pelvisFrame.getTransformToDesiredFrame(transformToParent, parentFrame);
-            desiredPelvisOrientation.get(rotationToParent);
-            transformToParent.setRotation(rotationToParent);
+            transformToParent.setRotation(desiredPelvisOrientation);
          }
       };
 

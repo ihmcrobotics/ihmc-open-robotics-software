@@ -82,8 +82,7 @@ public class QuadrupedSupportPolygonTest
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         Point3D tuple3dToPack = new Point3D();
-         quadrupedSupportPolygon.getFootstep(robotQuadrant).get(tuple3dToPack);
+         Point3D tuple3dToPack = new Point3D(quadrupedSupportPolygon.getFootstep(robotQuadrant));
          assertEquals("Point not equal", footPoints.get(robotQuadrant), tuple3dToPack);
       }
       

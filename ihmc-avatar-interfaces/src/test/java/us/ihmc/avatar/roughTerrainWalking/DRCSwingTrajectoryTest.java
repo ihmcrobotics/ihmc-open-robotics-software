@@ -329,7 +329,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       MovingReferenceFrame stanceFrame = referenceFrames.getSoleZUpFrame(swingSide.getOppositeSide());
       FramePoint3D initialStance = new FramePoint3D(stanceFrame);
       initialStance.changeFrame(ReferenceFrame.getWorldFrame());
-      initialStance.get(lastPosition);
+      lastPosition.set(initialStance);
       FrameQuaternion stepOrientation = new FrameQuaternion(stanceFrame);
       stepOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 

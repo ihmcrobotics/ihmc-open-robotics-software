@@ -328,7 +328,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       xyDistanceToStance.changeFrame(worldFrame);
       xyDistanceToStance.normalize();
       xyDistanceToStance.scale(distance);
-      xyDistanceToStance.get(offsetToPack);
+      offsetToPack.set(xyDistanceToStance);
       return true;
    }
 

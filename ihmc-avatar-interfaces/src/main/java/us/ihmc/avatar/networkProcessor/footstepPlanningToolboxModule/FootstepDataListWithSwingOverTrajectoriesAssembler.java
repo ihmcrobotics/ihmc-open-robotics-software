@@ -82,8 +82,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
-         swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
-         swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
+         waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
+         waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          footstepDataMessage.setCustomPositionWaypoints(waypoints);
 
          if (simpleFootstep.hasFoothold())
@@ -145,8 +145,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
-         swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
-         swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
+         waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
+         waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          footstepDataMessage.setCustomPositionWaypoints(waypoints);
 
          if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)

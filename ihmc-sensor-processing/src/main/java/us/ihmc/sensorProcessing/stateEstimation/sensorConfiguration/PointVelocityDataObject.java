@@ -20,8 +20,8 @@ public class PointVelocityDataObject
       this.rigidBodyName = rigidBody.getName();
       this.bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
       this.isPointVelocityValid = isPointVelocityValid;
-      measurementPointInBodyFrame.get(this.measurementPointInBodyFrame);
-      velocityOfMeasurementPointInWorldFrame.get(this.velocityOfMeasurementPointInWorldFrame);
+      this.measurementPointInBodyFrame.set(measurementPointInBodyFrame);
+      this.velocityOfMeasurementPointInWorldFrame.set(velocityOfMeasurementPointInWorldFrame);
    }
 
    public String getRigidBodyName()

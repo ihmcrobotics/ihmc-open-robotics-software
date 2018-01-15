@@ -190,7 +190,7 @@ public class Twist extends SpatialMotionVector
    public void getLinearVelocityOfPointFixedInBodyFrame(FrameVector3D linearVelocityToPack, FramePoint3D pointFixedInBodyFrame)
    {
       pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
-      pointFixedInBodyFrame.get(freeVector);
+      freeVector.set(pointFixedInBodyFrame);
 
       linearVelocityToPack.setToZero(expressedInFrame);
       linearVelocityToPack.cross(angularPart, freeVector);

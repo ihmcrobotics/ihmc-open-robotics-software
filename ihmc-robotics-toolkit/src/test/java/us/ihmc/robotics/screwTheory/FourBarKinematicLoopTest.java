@@ -928,19 +928,15 @@ public class FourBarKinematicLoopTest
       ReferenceFrame jointCFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
       ReferenceFrame jointDFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
 
-      Vector3D jointAxisAFrameA = new Vector3D();
-      Vector3D jointAxisBFrameB = new Vector3D();
-      Vector3D jointAxisCFrameC = new Vector3D();
-      Vector3D jointAxisDFrameD = new Vector3D();
-
       jointAxisA.changeFrame(jointAFrame);
-      jointAxisA.get(jointAxisAFrameA);
       jointAxisB.changeFrame(jointBFrame);
-      jointAxisB.get(jointAxisBFrameB);
       jointAxisC.changeFrame(jointCFrame);
-      jointAxisC.get(jointAxisCFrameC);
       jointAxisD.changeFrame(jointDFrame);
-      jointAxisD.get(jointAxisDFrameD);
+
+      Vector3D jointAxisAFrameA = new Vector3D(jointAxisA);
+      Vector3D jointAxisBFrameB = new Vector3D(jointAxisB);
+      Vector3D jointAxisCFrameC = new Vector3D(jointAxisC);
+      Vector3D jointAxisDFrameD = new Vector3D(jointAxisD);
 
       RigidBodyTransform jointAtoElevator = jointAFrame.getTransformToDesiredFrame(worldFrame);
       RigidBodyTransform jointBtoA = jointBFrame.getTransformToDesiredFrame(jointAFrame);

@@ -157,7 +157,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
       localizationPositionInThePastInWorldFrame.changeFrame(worldFrame);
 
       translationOffsetFrameVector.sub(localizationPositionInThePastInWorldFrame, stateEstimatorPositionInThePastInWorldFrame);
-      translationOffsetFrameVector.get(translationOffsetVector);
+      translationOffsetVector.set(translationOffsetFrameVector);
 
       localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Translation.setTranslationAndIdentityRotation(translationOffsetVector);
 

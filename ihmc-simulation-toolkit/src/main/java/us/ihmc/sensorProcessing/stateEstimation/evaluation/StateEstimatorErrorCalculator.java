@@ -175,8 +175,7 @@ public class StateEstimatorErrorCalculator
       perfectPelvisPosition.set(actualPosition);
       
       orientationEstimator.getEstimatedPelvisPosition(estimatedPelvisPosition);
-      estimatedPelvisPosition.get(positionError);
-      positionError.sub(actualPosition);
+      positionError.sub(estimatedPelvisPosition, actualPosition);
 
       pelvisZPositionError.set(positionError.getZ());
 
@@ -195,8 +194,7 @@ public class StateEstimatorErrorCalculator
       perfectPelvisLinearVelocity.set(actualVelocity);
       
       orientationEstimator.getEstimatedPelvisLinearVelocity(estimatedPelvisVelocityFrameVector);
-      estimatedPelvisVelocityFrameVector.get(linearVelocityError);
-      linearVelocityError.sub(actualVelocity);
+      linearVelocityError.sub(estimatedPelvisVelocityFrameVector, actualVelocity);
 
       pelvisLinearVelocityError.set(linearVelocityError.length());
    }

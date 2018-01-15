@@ -44,10 +44,8 @@ public class Parabolic3dCurveGenerator
       startFramePoint.checkReferenceFrameMatch(endFramePoint);
       ReferenceFrame referenceFrame = startFramePoint.getReferenceFrame();
 
-      Point3D startPoint = new Point3D();
-      startFramePoint.get(startPoint);
-      Point3D endPoint = new Point3D();
-      endFramePoint.get(endPoint);
+      Point3D startPoint = new Point3D(startFramePoint);
+      Point3D endPoint = new Point3D(endFramePoint);
       ArrayList<Point3D> listOf3dPoints = generate3dParabola(startPoint, endPoint, apexOfParabola, numberOfPointsToGenerate);
 
       ArrayList<FramePoint3D> ret = new ArrayList<FramePoint3D>();
