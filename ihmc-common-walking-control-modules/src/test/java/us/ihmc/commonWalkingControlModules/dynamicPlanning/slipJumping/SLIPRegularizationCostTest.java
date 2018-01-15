@@ -51,53 +51,42 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    @Test(timeout = 30000)
    public void testCost()
    {
-      double nominalLength = 1.5;
       LQCostFunction<SLIPState> costFunction = getCostFunction();
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
 
-      double cost = costFunction.getCost(SLIPState.STANCE, currentControl, currentState);
+      double cost = costFunction.getCost(SLIPState.FLIGHT, currentControl, currentState);
 
-      double x_k = currentState.get(x);
-      double y_k = currentState.get(y);
-      double z_k = currentState.get(z);
+      double expectedCost = SLIPRegularizationCost.qX * (currentState.get(x)) * (currentState.get(x));
+      expectedCost += SLIPRegularizationCost.qY * (currentState.get(y)) * (currentState.get(y));
+      expectedCost += SLIPRegularizationCost.qZ * (currentState.get(z)) * (currentState.get(z));
 
-      double xf_k = currentControl.get(xF);
-      double yf_k = currentControl.get(yF);
+      expectedCost += SLIPRegularizationCost.qThetaX * (currentState.get(thetaX)) * (currentState.get(thetaX));
+      expectedCost += SLIPRegularizationCost.qThetaY * (currentState.get(thetaY)) * (currentState.get(thetaY));
+      expectedCost += SLIPRegularizationCost.qThetaZ * (currentState.get(thetaZ)) * (currentState.get(thetaZ));
 
-      double fx_k = currentControl.get(fx);
-      double fy_k = currentControl.get(fy);
-      double fz_k = currentControl.get(fz);
+      expectedCost += SLIPRegularizationCost.qXDot * (currentState.get(xDot)) * (currentState.get(xDot));
+      expectedCost += SLIPRegularizationCost.qYDot * (currentState.get(yDot)) * (currentState.get(yDot));
+      expectedCost += SLIPRegularizationCost.qZDot * (currentState.get(zDot)) * (currentState.get(zDot));
 
-      double tauX_k = currentControl.get(tauX);
-      double tauY_k = currentControl.get(tauY);
-      double tauZ_k = currentControl.get(tauZ);
+      expectedCost += SLIPRegularizationCost.qThetaDotX * (currentState.get(thetaXDot)) * (currentState.get(thetaXDot));
+      expectedCost += SLIPRegularizationCost.qThetaDotY * (currentState.get(thetaYDot)) * (currentState.get(thetaYDot));
+      expectedCost += SLIPRegularizationCost.qThetaDotZ * (currentState.get(thetaZDot)) * (currentState.get(thetaZDot));
 
-      double relativeX = x_k - xf_k;
-      double relativeY = y_k - yf_k;
+      expectedCost += SLIPRegularizationCost.rFx * (currentControl.get(fx)) * (currentControl.get(fx));
+      expectedCost += SLIPRegularizationCost.rFy * (currentControl.get(fy)) * (currentControl.get(fy));
+      expectedCost += SLIPRegularizationCost.rFz * (currentControl.get(fz)) * (currentControl.get(fz));
 
+      expectedCost += SLIPRegularizationCost.rTauX * (currentControl.get(tauX)) * (currentControl.get(tauX));
+      expectedCost += SLIPRegularizationCost.rTauY * (currentControl.get(tauY)) * (currentControl.get(tauY));
+      expectedCost += SLIPRegularizationCost.rTauZ * (currentControl.get(tauZ)) * (currentControl.get(tauZ));
 
-      double k_k = currentControl.get(k);
+      expectedCost += SLIPRegularizationCost.rXf * (currentControl.get(xF)) * (currentControl.get(xF));
+      expectedCost += SLIPRegularizationCost.rYf * (currentControl.get(yF)) * (currentControl.get(yF));
 
-      double length = Math.sqrt(relativeX * relativeX + relativeY * relativeY + z_k * z_k);
-
-      double force = k_k * (nominalLength / length - 1.0);
-
-      double forceX = force * relativeX;
-      double forceY = force * relativeY;
-      double forceZ = force * z_k;
-      double torqueX = -z_k * fy_k + relativeY * fz_k;
-      double torqueY = z_k * fx_k - relativeX * fz_k;
-      double torqueZ = -relativeY * fx_k + relativeX * fy_k;
-
-      double expectedCost = SLIPModelForceTrackingCost.qFX * (fx_k - forceX) * (fx_k - forceX);
-      expectedCost += SLIPModelForceTrackingCost.qFY * (fy_k - forceY) * (fy_k - forceY);
-      expectedCost += SLIPModelForceTrackingCost.qFZ * (fz_k - forceZ) * (fz_k - forceZ);
-      expectedCost += SLIPModelForceTrackingCost.qTauX * (tauX_k - torqueX) * (tauX_k - torqueX);
-      expectedCost += SLIPModelForceTrackingCost.qTauY * (tauY_k - torqueY) * (tauY_k - torqueY);
-      expectedCost += SLIPModelForceTrackingCost.qTauZ * (tauZ_k - torqueZ) * (tauZ_k - torqueZ);
+      expectedCost += SLIPRegularizationCost.rK * (currentControl.get(k)) * (currentControl.get(k));
 
       Assert.assertEquals(expectedCost, cost, 1e-7);
    }

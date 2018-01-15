@@ -51,7 +51,6 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
    @Test(timeout = 30000)
    public void testCost()
    {
-      double nominalLength = 1.5;
       LQTrackingCostFunction<SLIPState> costFunction = getCostFunction();
 
       Random random = new Random(1738L);
@@ -62,44 +61,34 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
 
       double cost = costFunction.getCost(SLIPState.STANCE, currentControl, currentState, desiredControl, desiredState);
 
-      double x_k = currentState.get(x);
-      double y_k = currentState.get(y);
-      double z_k = currentState.get(z);
+      double expectedCost = SLIPTerminalCost.qX * (currentState.get(x) - desiredState.get(x)) * (currentState.get(x) - desiredState.get(x));
+      expectedCost += SLIPTerminalCost.qY * (currentState.get(y) - desiredState.get(y)) * (currentState.get(y) - desiredState.get(y));
+      expectedCost += SLIPTerminalCost.qZ * (currentState.get(z) - desiredState.get(z)) * (currentState.get(z) - desiredState.get(z));
 
-      double xf_k = currentControl.get(xF);
-      double yf_k = currentControl.get(yF);
+      expectedCost += SLIPTerminalCost.qThetaX * (currentState.get(thetaX) - desiredState.get(thetaX)) * (currentState.get(thetaX) - desiredState.get(thetaX));
+      expectedCost += SLIPTerminalCost.qThetaY * (currentState.get(thetaY) - desiredState.get(thetaY)) * (currentState.get(thetaY) - desiredState.get(thetaY));
+      expectedCost += SLIPTerminalCost.qThetaZ * (currentState.get(thetaZ) - desiredState.get(thetaZ)) * (currentState.get(thetaZ) - desiredState.get(thetaZ));
 
-      double fx_k = currentControl.get(fx);
-      double fy_k = currentControl.get(fy);
-      double fz_k = currentControl.get(fz);
+      expectedCost += SLIPTerminalCost.qXDot * (currentState.get(xDot) - desiredState.get(xDot)) * (currentState.get(xDot) - desiredState.get(xDot));
+      expectedCost += SLIPTerminalCost.qYDot * (currentState.get(yDot) - desiredState.get(yDot)) * (currentState.get(yDot) - desiredState.get(yDot));
+      expectedCost += SLIPTerminalCost.qZDot * (currentState.get(zDot) - desiredState.get(zDot)) * (currentState.get(zDot) - desiredState.get(zDot));
 
-      double tauX_k = currentControl.get(tauX);
-      double tauY_k = currentControl.get(tauY);
-      double tauZ_k = currentControl.get(tauZ);
+      expectedCost += SLIPTerminalCost.qThetaDotX * (currentState.get(thetaXDot) - desiredState.get(thetaXDot)) * (currentState.get(thetaXDot) - desiredState.get(thetaXDot));
+      expectedCost += SLIPTerminalCost.qThetaDotY * (currentState.get(thetaYDot) - desiredState.get(thetaYDot)) * (currentState.get(thetaYDot) - desiredState.get(thetaYDot));
+      expectedCost += SLIPTerminalCost.qThetaDotZ * (currentState.get(thetaZDot) - desiredState.get(thetaZDot)) * (currentState.get(thetaZDot) - desiredState.get(thetaZDot));
 
-      double relativeX = x_k - xf_k;
-      double relativeY = y_k - yf_k;
+      expectedCost += SLIPTerminalCost.rFx * (currentControl.get(fx) - desiredControl.get(fx)) * (currentControl.get(fx) - desiredControl.get(fx));
+      expectedCost += SLIPTerminalCost.rFy * (currentControl.get(fy) - desiredControl.get(fy)) * (currentControl.get(fy) - desiredControl.get(fy));
+      expectedCost += SLIPTerminalCost.rFz * (currentControl.get(fz) - desiredControl.get(fz)) * (currentControl.get(fz) - desiredControl.get(fz));
 
+      expectedCost += SLIPTerminalCost.rTauX * (currentControl.get(tauX) - desiredControl.get(tauX)) * (currentControl.get(tauX) - desiredControl.get(tauX));
+      expectedCost += SLIPTerminalCost.rTauY * (currentControl.get(tauY) - desiredControl.get(tauY)) * (currentControl.get(tauY) - desiredControl.get(tauY));
+      expectedCost += SLIPTerminalCost.rTauZ * (currentControl.get(tauZ) - desiredControl.get(tauZ)) * (currentControl.get(tauZ) - desiredControl.get(tauZ));
 
-      double k_k = currentControl.get(k);
+      expectedCost += SLIPTerminalCost.rXf * (currentControl.get(xF) - desiredControl.get(xF)) * (currentControl.get(xF) - desiredControl.get(xF));
+      expectedCost += SLIPTerminalCost.rYf * (currentControl.get(yF) - desiredControl.get(yF)) * (currentControl.get(yF) - desiredControl.get(yF));
 
-      double length = Math.sqrt(relativeX * relativeX + relativeY * relativeY + z_k * z_k);
-
-      double force = k_k * (nominalLength / length - 1.0);
-
-      double forceX = force * relativeX;
-      double forceY = force * relativeY;
-      double forceZ = force * z_k;
-      double torqueX = -z_k * fy_k + relativeY * fz_k;
-      double torqueY = z_k * fx_k - relativeX * fz_k;
-      double torqueZ = -relativeY * fx_k + relativeX * fy_k;
-
-      double expectedCost = SLIPModelForceTrackingCost.qFX * (fx_k - forceX) * (fx_k - forceX);
-      expectedCost += SLIPModelForceTrackingCost.qFY * (fy_k - forceY) * (fy_k - forceY);
-      expectedCost += SLIPModelForceTrackingCost.qFZ * (fz_k - forceZ) * (fz_k - forceZ);
-      expectedCost += SLIPModelForceTrackingCost.qTauX * (tauX_k - torqueX) * (tauX_k - torqueX);
-      expectedCost += SLIPModelForceTrackingCost.qTauY * (tauY_k - torqueY) * (tauY_k - torqueY);
-      expectedCost += SLIPModelForceTrackingCost.qTauZ * (tauZ_k - torqueZ) * (tauZ_k - torqueZ);
+      expectedCost += SLIPTerminalCost.rK * (currentControl.get(k) - desiredControl.get(k)) * (currentControl.get(k) - desiredControl.get(k));
 
       Assert.assertEquals(expectedCost, cost, 1e-7);
    }

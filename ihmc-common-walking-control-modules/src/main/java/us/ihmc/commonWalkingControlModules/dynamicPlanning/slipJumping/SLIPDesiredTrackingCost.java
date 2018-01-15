@@ -9,33 +9,56 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState>
 {
+   static double qX = 1e-1;
+   static double qY = 1e-1;
+   static double qZ = 1e-1;
+   static double qThetaX = 1.0;
+   static double qThetaY = 1.0;
+   static double qThetaZ = 1.0;
+   static double qXDot = 0.0;
+   static double qYDot = 0.0;
+   static double qZDot = 0.0;
+   static double qThetaDotX = 0.0;
+   static double qThetaDotY = 0.0;
+   static double qThetaDotZ = 0.0;
+
+   static double rFx = 0.0;
+   static double rFy = 0.0;
+   static double rFz = 1.0e2;
+   static double rTauX = 0.0;
+   static double rTauY = 0.0;
+   static double rTauZ = 0.0;
+   static double rXf = 1.0e2;
+   static double rYf = 1.0e2;
+   static double rK = 1.0e5;
+
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);
 
    public SLIPDesiredTrackingCost()
    {
-      Q.set(x, x, 1e-1);
-      Q.set(y, y, 1e-1);
-      Q.set(z, z, 1e-1);
-      Q.set(thetaX, thetaX, 1e0);
-      Q.set(thetaY, thetaY, 1e0);
-      Q.set(thetaZ, thetaZ, 1e0);
-      Q.set(xDot, xDot, 0e0);
-      Q.set(yDot, yDot, 0e0);
-      Q.set(zDot, zDot, 0e0);
-      Q.set(thetaXDot, thetaXDot, 0e0);
-      Q.set(thetaYDot, thetaYDot, 0e0);
-      Q.set(thetaZDot, thetaZDot, 0e0);
+      Q.set(x, x, qX);
+      Q.set(y, y, qY);
+      Q.set(z, z, qZ);
+      Q.set(thetaX, thetaX, qThetaX);
+      Q.set(thetaY, thetaY, qThetaY);
+      Q.set(thetaZ, thetaZ, qThetaZ);
+      Q.set(xDot, xDot, qXDot);
+      Q.set(yDot, yDot, qYDot);
+      Q.set(zDot, zDot, qZDot);
+      Q.set(thetaXDot, thetaXDot, qThetaDotX);
+      Q.set(thetaYDot, thetaYDot, qThetaDotY);
+      Q.set(thetaZDot, thetaZDot, qThetaDotZ);
 
-      R.set(fx, fx, 0.0);
-      R.set(fy, fy, 0.0);
-      R.set(fz, fz, 1e2);
-      R.set(tauX, tauX, 0.0);
-      R.set(tauY, tauY, 0.0);
-      R.set(tauZ, tauZ, 0.0);
-      R.set(xF, xF, 1e2);
-      R.set(yF, yF, 1e2);
-      R.set(k, k, 1e5);
+      R.set(fx, fx, rFx);
+      R.set(fy, fy, rFy);
+      R.set(fz, fz, rFz);
+      R.set(tauX, tauX, rTauX);
+      R.set(tauY, tauY, rTauY);
+      R.set(tauZ, tauZ, rTauZ);
+      R.set(xF, xF, rXf);
+      R.set(yF, yF, rYf);
+      R.set(k, k, rK);
    }
 
    private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);
