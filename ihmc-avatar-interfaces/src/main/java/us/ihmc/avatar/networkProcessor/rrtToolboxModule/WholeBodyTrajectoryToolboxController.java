@@ -107,6 +107,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final YoFramePose testFramePose;
    private final YoGraphicCoordinateSystem testFrameViz;
+   private final YoDouble minimumDistanceFromManifold = new YoDouble("minimumDistanceFromManifold", registry);
 
    /*
     * Configuration and Time space Tree
@@ -421,8 +422,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                tree.attachCandidate();
                numberOfValidPosture++;
 
-               // TODO: terminal conditions.
-
+               // TODO: generic terminal conditions.
                if (trajectoryCommands != null)
                {
                   if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
@@ -438,7 +438,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                   testFrameViz.update();
 
                   // TODO : terminal condition for manifold command.
-                  if(toolboxData.getMaximumDistanceFromManifolds(tree.getLastNodeAdded()) < 0.05)
+                  double maximumDistanceFromManifolds = toolboxData.getMaximumDistanceFromManifolds(tree.getLastNodeAdded());
+                  minimumDistanceFromManifold.set(maximumDistanceFromManifolds);
+                  if(maximumDistanceFromManifolds < 0.05)
                      isExpandingTerminalCondition = true;
                }
                else
