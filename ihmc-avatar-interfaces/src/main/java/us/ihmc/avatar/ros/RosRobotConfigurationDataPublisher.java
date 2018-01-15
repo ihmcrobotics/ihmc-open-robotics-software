@@ -128,6 +128,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/left", footForceSensorPublishers.get(RobotSide.LEFT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
+      rosMainNode.attachPublisher(rosNameSpace + "/output/last_robot_config_received", lastReceivedMessagePublisher);
 
       if(!wristForceSensorPublishers.isEmpty())
       {

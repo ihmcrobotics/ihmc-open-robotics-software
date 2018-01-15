@@ -76,7 +76,7 @@ public class SimpleUIMenuController
 
    private void loadAndSubmitPlanarRegions()
    {
-      PlanarRegionsList loadedPlanarRegions = PlanarRegionFileTools.importPlanRegionData(loadedFile);
+      PlanarRegionsList loadedPlanarRegions = PlanarRegionFileTools.importPlanarRegionData(loadedFile);
       directoryChooser.setInitialDirectory(loadedFile.getParentFile());
 
       if (loadedPlanarRegions != null)
