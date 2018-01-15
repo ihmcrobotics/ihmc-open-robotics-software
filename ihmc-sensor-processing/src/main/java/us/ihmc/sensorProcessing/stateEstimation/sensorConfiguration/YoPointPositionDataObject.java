@@ -35,8 +35,8 @@ public class YoPointPositionDataObject extends PointPositionDataObject
       bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
       this.isPointPositionValid = isPointPositionValid;
       
-      measurementPointInBodyFrame.get(this.measurementPointInBodyFrame);
-      positionOfMeasurementPointInWorldFrame.get(this.positionOfMeasurementPointInWorldFrame);
+      this.measurementPointInBodyFrame.set(measurementPointInBodyFrame);
+      this.positionOfMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);
 
       yoMeasurementPointInBodyFrame.set(measurementPointInBodyFrame);
       yoMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);

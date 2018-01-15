@@ -772,11 +772,11 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
          desiredLinearVelocity.setIncludingFrame(pelvisZUp, linearVelocity);
          desiredLinearVelocity.changeFrame(worldFrame);
-         desiredLinearVelocity.get(linearVelocity);
+         linearVelocity.set(desiredLinearVelocity);
 
          desiredAngularVelocity.setIncludingFrame(pelvisZUp, angularVelocity);
          desiredAngularVelocity.changeFrame(worldFrame);
-         desiredAngularVelocity.get(angularVelocity);
+         angularVelocity.set(desiredAngularVelocity);
 
          pelvisTrajectoryMessage.setTrajectoryPoint(i, t + 2.0, position, orientation, linearVelocity, angularVelocity);
 

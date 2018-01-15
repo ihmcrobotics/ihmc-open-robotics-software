@@ -183,7 +183,7 @@ public class Handstep
 
    public void getSurfaceNormal(Vector3D surfaceNormalToPack)
    {
-      this.surfaceNormal.get(surfaceNormalToPack);
+      surfaceNormalToPack.set(this.surfaceNormal);
    }
 
    public RigidBody getBody()

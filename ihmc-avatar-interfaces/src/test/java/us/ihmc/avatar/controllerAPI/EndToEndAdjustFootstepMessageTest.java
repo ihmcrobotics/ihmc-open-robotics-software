@@ -161,8 +161,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       for (int i = 0; i < numberOfFootsteps; i++)
       {
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
-         Point3D position = new Point3D();
-         framePosition.get(position);
+         Point3D position = new Point3D(framePosition);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepDataListMessage.add(new FootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();

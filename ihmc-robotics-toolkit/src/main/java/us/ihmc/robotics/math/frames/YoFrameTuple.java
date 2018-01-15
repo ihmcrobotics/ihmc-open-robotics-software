@@ -62,7 +62,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    public final void get(Tuple3DBasics tuple3dToPack)
    {
       putYoValuesIntoFrameTuple();
-      frameTuple.get(tuple3dToPack);
+      tuple3dToPack.set(frameTuple);
    }
 
    /**

@@ -318,8 +318,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredAngularVelocity.get(this.desiredAngularVelocity);
-      desiredLinearVelocity.get(this.desiredLinearVelocity);
+      this.desiredAngularVelocity.set(desiredAngularVelocity);
+      this.desiredLinearVelocity.set(desiredLinearVelocity);
    }
 
    /**
@@ -353,7 +353,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
 
-      desiredAngularVelocity.get(this.desiredAngularVelocity);
+      this.desiredAngularVelocity.set(desiredAngularVelocity);
       desiredLinearVelocity.setToZero();
    }
 
@@ -388,7 +388,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
 
-      desiredLinearVelocity.get(this.desiredLinearVelocity);
+      this.desiredLinearVelocity.set(desiredLinearVelocity);
       desiredAngularVelocity.setToZero();
    }
 

@@ -309,7 +309,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
+      desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.setToZero();
       feedForwardLinearAccelerationInWorld.setToZero();
    }
@@ -340,9 +340,9 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
       feedForwardLinearAcceleration.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
-      desiredLinearVelocity.get(desiredLinearVelocityInWorld);
-      feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
+      desiredPositionInWorld.set(desiredPosition);
+      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);
    }
 
    /**
@@ -424,9 +424,9 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       desiredLinearVelocity.changeFrame(worldFrame);
       feedForwardLinearAcceleration.changeFrame(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
-      desiredLinearVelocity.get(desiredLinearVelocityInWorld);
-      feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
+      desiredPositionInWorld.set(desiredPosition);
+      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);
    }
 
    /**
@@ -485,7 +485,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      position.get(controlFrameOriginInEndEffectorFrame);
+      controlFrameOriginInEndEffectorFrame.set(position);
       controlFrameOrientationInEndEffectorFrame.setToZero();
    }
 

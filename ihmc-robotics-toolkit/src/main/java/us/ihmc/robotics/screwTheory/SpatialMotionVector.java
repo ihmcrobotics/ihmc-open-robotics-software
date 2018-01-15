@@ -312,8 +312,8 @@ public abstract class SpatialMotionVector implements Clearable
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      linearPart.get(this.linearPart);
-      angularPart.get(this.angularPart);
+      this.linearPart.set(linearPart);
+      this.angularPart.set(angularPart);
    }
 
    public void set(DenseMatrix64F matrix)

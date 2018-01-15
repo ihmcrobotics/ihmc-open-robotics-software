@@ -51,7 +51,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
    public final void get(Tuple2DBasics tuple2dToPack)
    {
       putYoValuesIntoFrameTuple2d();
-      frameTuple2d.get(tuple2dToPack);
+      tuple2dToPack.set(frameTuple2d);
    }
 
    /**

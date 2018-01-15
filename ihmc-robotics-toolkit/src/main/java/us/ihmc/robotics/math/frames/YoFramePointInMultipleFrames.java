@@ -45,7 +45,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       framePoint.setIncludingFrame(currentReferenceFrame, point);
       framePoint.changeFrame(desiredFrame);
-      framePoint.get(point);
+      point.set(framePoint);
       set(point);
    }
 

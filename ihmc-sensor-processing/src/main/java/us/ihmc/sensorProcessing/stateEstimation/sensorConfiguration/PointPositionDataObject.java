@@ -18,8 +18,8 @@ public class PointPositionDataObject
       this.isPointPositionValid = isPointPositionValid;
       positionOfMeasurementPointInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      measurementPointInBodyFrame.get(this.measurementPointInBodyFrame);
-      positionOfMeasurementPointInWorldFrame.get(this.positionOfMeasurementPointInWorldFrame);
+      this.measurementPointInBodyFrame.set(measurementPointInBodyFrame);
+      this.positionOfMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);
    }
 
    public Point3D getMeasurementPointInWorldFrame()

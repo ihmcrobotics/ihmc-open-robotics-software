@@ -408,8 +408,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point);
 
-      point.get(tempPoint2d);
-      return this.lineSegment.isPointOnLeftSideOfLineSegment(tempPoint2d);
+      return this.lineSegment.isPointOnLeftSideOfLineSegment(point);
    }
 
    public boolean isPointOnRightSideOfLineSegment(FramePoint2D point)

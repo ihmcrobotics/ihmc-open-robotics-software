@@ -278,11 +278,11 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       estimationLinkToWorldToPack.setRotation(estimationLinkOrientation);
 
       // R_{estimation}^{w} * r^{estimation}
-      tempCenterOfMassBody.get(tempCenterOfMassBodyVector3d);
+      tempCenterOfMassBodyVector3d.set(tempCenterOfMassBody);
       estimationLinkToWorldToPack.transform(tempCenterOfMassBodyVector3d);
 
       // p_{estimation}^{w} = r^{w} - R_{estimation}^{w} r^{estimation}
-      centerOfMassWorld.get(tempEstimationLinkPosition);
+      tempEstimationLinkPosition.set(centerOfMassWorld);
       tempEstimationLinkPosition.sub(tempCenterOfMassBodyVector3d);
 
       // H_{estimation}^{w}

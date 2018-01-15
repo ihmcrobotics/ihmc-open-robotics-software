@@ -129,7 +129,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       {
          centerOfMassAccelerationCalculator.getCoMAcceleration(comAccelerationFrameVector);
          comAccelerationFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
-         comAccelerationFrameVector.get(comAcceleration);
+         comAcceleration.set(comAccelerationFrameVector);
 
          if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(comAcceleration);

@@ -292,7 +292,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
-            hipPitchPosition.get(hipPitchToParentFrame);
+            hipPitchToParentFrame.set(hipPitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(hipPitchRotationToParentFrame);
             transformToParent.setTranslation(hipPitchToParentFrame);
@@ -317,7 +317,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
-            anklePitchPosition.get(anklePitchToParentFrame);
+            anklePitchToParentFrame.set(anklePitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(anklePitchRotationToParentFrame);
             transformToParent.setTranslation(anklePitchToParentFrame);
