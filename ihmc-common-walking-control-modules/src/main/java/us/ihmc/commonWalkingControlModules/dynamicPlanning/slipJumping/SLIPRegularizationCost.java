@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
-import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
@@ -79,6 +78,7 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
    public void getCostStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
       DiagonalMatrixTools.preMult(Q, stateVector, matrixToPack);
+      CommonOps.scale(2.0, matrixToPack);
    }
 
    /** L_u(X_k, U_k) */
@@ -86,20 +86,21 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
    public void getCostControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
       DiagonalMatrixTools.preMult(R, controlVector, matrixToPack);
+      CommonOps.scale(2.0, matrixToPack);
    }
 
    /** L_xx(X_k, U_k) */
    @Override
    public void getCostStateHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
-      matrixToPack.set(Q);
+      CommonOps.scale(2.0, Q, matrixToPack);
    }
 
    /** L_uu(X_k, U_k) */
    @Override
    public void getCostControlHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
-      matrixToPack.set(R);
+      CommonOps.scale(2.0, R, matrixToPack);
    }
 
    /** L_ux(X_k, U_k) */

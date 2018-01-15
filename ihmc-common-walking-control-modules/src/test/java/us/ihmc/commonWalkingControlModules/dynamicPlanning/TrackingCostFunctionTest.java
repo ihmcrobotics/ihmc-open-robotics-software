@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
@@ -47,7 +48,8 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
             expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
+         double value = Math.abs(CommonOps.elementSum(expectedCostGradient));
+         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-3 * value);
       }
    }
 
@@ -81,7 +83,8 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
             expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
+         double value = Math.abs(CommonOps.elementSum(expectedCostGradient));
+         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-3 * value);
       }
    }
 
@@ -119,7 +122,8 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
                expectedCostHessian.set(state, partialState, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+         double trace = Math.abs(CommonOps.trace(expectedCostHessian));
+         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
 
@@ -144,8 +148,10 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          DenseMatrix64F currentGradient = new DenseMatrix64F(getControlVectorSize(), 1);
          DenseMatrix64F modifiedGradient = new DenseMatrix64F(getControlVectorSize(), 1);
 
+
          costFunction.getCostControlHessian(hybridState, currentControl, currentState, costHessian);
          costFunction.getCostControlGradient(hybridState, currentControl, currentState, desiredControl, desiredState, currentGradient);
+
 
          for (int partialControl = 0; partialControl < getControlVectorSize(); partialControl++)
          {
@@ -157,7 +163,8 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
                expectedCostHessian.set(control, partialControl, (modifiedGradient.get(control) - currentGradient.get(control)) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+         double trace = Math.abs(CommonOps.trace(expectedCostHessian));
+         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
 
@@ -195,7 +202,8 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
                expectedCostHessian.set(state, partialControl, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+         double trace = Math.abs(CommonOps.trace(expectedCostHessian));
+         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
 }
