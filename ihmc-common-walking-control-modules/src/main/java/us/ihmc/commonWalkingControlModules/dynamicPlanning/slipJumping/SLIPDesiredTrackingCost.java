@@ -86,6 +86,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
    {
       CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
       DiagonalMatrixTools.preMult(Q, tempStateMatrix, matrixToPack);
+      CommonOps.scale(2.0, matrixToPack);
    }
 
    /** L_u(X_k, U_k) */
@@ -95,20 +96,21 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
    {
       CommonOps.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
       DiagonalMatrixTools.preMult(R, tempControlMatrix, matrixToPack);
+      CommonOps.scale(2.0, matrixToPack);
    }
 
    /** L_xx(X_k, U_k) */
    @Override
    public void getCostStateHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
-      matrixToPack.set(Q);
+      CommonOps.scale(2.0, Q, matrixToPack);
    }
 
    /** L_uu(X_k, U_k) */
    @Override
    public void getCostControlHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
    {
-      matrixToPack.set(R);
+      CommonOps.scale(2.0, R, matrixToPack);
    }
 
    /** L_ux(X_k, U_k) */
