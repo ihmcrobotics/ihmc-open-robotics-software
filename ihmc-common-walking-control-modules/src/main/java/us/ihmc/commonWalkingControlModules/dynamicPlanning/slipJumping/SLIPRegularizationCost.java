@@ -8,12 +8,12 @@ import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-public class SLIPRegularizationCostFunction implements LQCostFunction<SLIPState>
+public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
 {
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);
 
-   public SLIPRegularizationCostFunction()
+   public SLIPRegularizationCost()
    {
       Q.set(x, x, 1e-5);
       Q.set(y, y, 1e-5);
@@ -34,9 +34,9 @@ public class SLIPRegularizationCostFunction implements LQCostFunction<SLIPState>
       R.set(tauX, tauX, 1e1);
       R.set(tauY, tauY, 1e1);
       R.set(tauZ, tauZ, 1e1);
-      R.set(xF, xF, 1e-5);
-      R.set(yF, yF, 1e-5);
-      R.set(k, k, 1e-8);
+      R.set(xF, xF, 1e-6);
+      R.set(yF, yF, 1e-6);
+      R.set(k, k, 1e-10);
    }
 
    private DenseMatrix64F tempWX = new DenseMatrix64F(stateVectorSize, 1);
