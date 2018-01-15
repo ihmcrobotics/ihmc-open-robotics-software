@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -21,7 +20,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 {
@@ -107,7 +105,8 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    {
       backwardFootstepList.clear();
 
-      ArrayList<FootstepDataMessage> footstepDataList = forwardFootstepList.getDataList();
+      ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<>();
+      footstepDataList.addAll(forwardFootstepList.getDataList());
       footstepDataList.remove(footstepDataList.size() - 1);
 
       Collections.reverse(footstepDataList);
