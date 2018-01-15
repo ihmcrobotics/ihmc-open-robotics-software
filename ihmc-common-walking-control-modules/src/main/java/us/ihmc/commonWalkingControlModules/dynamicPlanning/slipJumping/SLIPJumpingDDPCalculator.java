@@ -72,7 +72,7 @@ public class SLIPJumpingDDPCalculator
    }
 
 
-   public void initialize(DenseMatrix64F currentState, FramePoint3D firstSupport, FramePoint3D secondSupport,
+   public void initialize(DenseMatrix64F currentState, FramePoint3D firstSupport, FramePoint3D apexPoint, FramePoint3D secondSupport,
                           double firstStanceDuration, double flightDuration, double secondStanceDuration)
    {
       // TODO do something with the current state
@@ -128,9 +128,9 @@ public class SLIPJumpingDDPCalculator
       for (int i = numberOfInitialTimeSteps; i < numberOfInitialTimeSteps + numberOfFlightTimeSteps; i++)
       {
          DenseMatrix64F desiredState = desiredSequence.getState(i);
-         desiredState.set(x, 0.5 * (firstSupport.getX() + secondSupport.getX()));
-         desiredState.set(y, 0.5 * (firstSupport.getY() + secondSupport.getY()));
-         desiredState.set(z, 0.5 * (firstSupport.getZ() + secondSupport.getZ())+ nominalHeight);
+         desiredState.set(x, apexPoint.getX());
+         desiredState.set(y, apexPoint.getY());
+         desiredState.set(z, apexPoint.getZ());
 
          DenseMatrix64F desiredControl = desiredSequence.getControl(i);
          desiredControl.set(fz, 0.0);
