@@ -13,7 +13,7 @@ import java.util.Random;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>
+public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
 {
    public int getNumberOfStates()
    {
@@ -43,10 +43,7 @@ public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>
 
    public LQCostFunction<SLIPState> getCostFunction()
    {
-      double mass = 15.0;
-      double nominalLength = 1.5;
-      double gravityZ = 9.81;
-      return new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
+      return new SLIPRegularizationCost();
    }
 
    @Override
