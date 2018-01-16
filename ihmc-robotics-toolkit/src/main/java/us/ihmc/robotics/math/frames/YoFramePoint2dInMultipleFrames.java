@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -48,7 +48,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
       set(point2d);
    }
 
-   public void setIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
+   public void setIncludingFrame(FrameTuple2DReadOnly frameTuple2d)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
       set(frameTuple2d);
