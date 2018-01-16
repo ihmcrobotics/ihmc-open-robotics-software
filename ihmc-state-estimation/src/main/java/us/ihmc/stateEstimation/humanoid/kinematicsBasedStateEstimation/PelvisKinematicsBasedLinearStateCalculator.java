@@ -248,10 +248,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       double scaleFactor = 1.0 / numberOfTrustedFeet;
 
-      footToRootJointPositions.get(trustedFoot).getFrameTuple(tempPosition);
+      tempPosition.set(footToRootJointPositions.get(trustedFoot));
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
-      footPositionsInWorld.get(trustedFoot).getFrameTuple(tempPosition);
+      tempPosition.set(footPositionsInWorld.get(trustedFoot));
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
 
@@ -291,7 +291,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          footToRootJointPosition.getFrameTupleIncludingFrame(tempPosition);
          rootJointPosition.getFrameTupleIncludingFrame(tempFramePoint);
          tempFramePoint.sub(tempPosition); // New foot position
-         footPositionInWorld.getFrameTuple(tempPosition); // Previous foot position
+         tempPosition.set(footPositionInWorld); // Previous foot position
          tempFrameVector.sub(tempFramePoint, tempPosition); // Delta from previous to new foot position
          copPositionsInWorld.get(trustedFoot).add(tempFrameVector); // New CoP position
       }

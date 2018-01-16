@@ -233,7 +233,7 @@ public class SphereNewICPController implements GenericSphereController
 
       @Override public void doTransitionIntoAction()
       {
-         desiredICP.getFrameTuple(desiredCapturePoint);
+         desiredCapturePoint.set(desiredICP);
 
          icpPlanner.clearPlan();
          icpPlanner.holdCurrentICP(desiredCapturePoint);

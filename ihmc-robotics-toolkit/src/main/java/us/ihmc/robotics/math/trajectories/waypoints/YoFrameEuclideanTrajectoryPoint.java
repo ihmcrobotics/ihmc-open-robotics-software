@@ -142,12 +142,12 @@ public class YoFrameEuclideanTrajectoryPoint
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTuple(positionToPack);
+      positionToPack.set(position);
    }
 
    public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
-      linearVelocity.getFrameTuple(linearVelocityToPack);
+      linearVelocityToPack.set(linearVelocity);
    }
 
    public void getPositionIncludingFrame(FramePoint3D positionToPack)

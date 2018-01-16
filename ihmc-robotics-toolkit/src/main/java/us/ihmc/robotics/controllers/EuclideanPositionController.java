@@ -105,7 +105,7 @@ public class EuclideanPositionController implements PositionController
 
       feedbackLinearAction.set(output);
       rateLimitedFeedbackLinearAction.update();
-      rateLimitedFeedbackLinearAction.getFrameTuple(output);
+      output.set(rateLimitedFeedbackLinearAction);
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
@@ -154,7 +154,7 @@ public class EuclideanPositionController implements PositionController
       // Limit the maximum position error considered for control action
       double maximumError = gains.getMaximumProportionalError();
       double errorMagnitude = positionError.length();
-      positionError.getFrameTuple(proportionalTerm);
+      proportionalTerm.set(positionError);
       if (errorMagnitude > maximumError)
       {
          proportionalTerm.scale(maximumError / errorMagnitude);
@@ -203,7 +203,7 @@ public class EuclideanPositionController implements PositionController
          positionErrorCumulated.scale(gains.getMaximumIntegralError() / errorMagnitude);
       }
 
-      positionErrorCumulated.getFrameTuple(integralTerm);
+      integralTerm.set(positionErrorCumulated);
       gains.getIntegralGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(integralTerm.getVector());
    }
@@ -240,7 +240,7 @@ public class EuclideanPositionController implements PositionController
 
    public void getPositionError(FrameVector3D positionErrorToPack)
    {
-      positionError.getFrameTuple(positionErrorToPack);
+      positionErrorToPack.set(positionError);
    }
 
    @Override

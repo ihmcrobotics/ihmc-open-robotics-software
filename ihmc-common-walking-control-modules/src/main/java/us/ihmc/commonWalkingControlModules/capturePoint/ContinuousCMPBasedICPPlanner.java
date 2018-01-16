@@ -1,7 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
-import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCapturePointAcceleration;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCapturePointPosition;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCapturePointVelocity;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCentroidalMomentumPivot;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCornerPointsDoubleSupport;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCornerPointsSingleSupport;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingConstantCMP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +15,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,7 +28,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -373,7 +378,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
-      desiredCoMPosition.getFrameTuple(singleSupportInitialCoM);
+      singleSupportInitialCoM.set(desiredCoMPosition);
       updateSingleSupportPlan();
    }
 
@@ -465,7 +470,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          referenceCMPsCalculator.getNextEntryCMP(tempConstantCMP);
          singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
-         yoSingleSupportInitialCoM.getFrameTuple(singleSupportInitialCoM);
+         singleSupportInitialCoM.set(yoSingleSupportInitialCoM);
          tempICP.changeFrame(worldFrame);
          double swingDuration = swingDurations.get(0).getDoubleValue();
          time = MathTools.clamp(time, 0.0, swingDuration);
@@ -664,7 +669,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       switchCornerPointsToWorldFrame();
       singleSupportInitialICP.switchCurrentReferenceFrame(worldFrame);
       singleSupportFinalICP.switchCurrentReferenceFrame(worldFrame);
-      yoSingleSupportInitialCoM.getFrameTuple(singleSupportInitialCoM);
+      singleSupportInitialCoM.set(yoSingleSupportInitialCoM);
 
       ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide.getEnumValue());
       double omega0 = this.omega0.getDoubleValue();

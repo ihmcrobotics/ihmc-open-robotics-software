@@ -346,7 +346,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void getFinalPosition(FramePoint3D finalPosition)
    {
-      this.finalPosition.getFrameTuple(finalPosition);
+      finalPosition.set(this.finalPosition);
    }
 
    public YoFramePoint getFinalPosition()

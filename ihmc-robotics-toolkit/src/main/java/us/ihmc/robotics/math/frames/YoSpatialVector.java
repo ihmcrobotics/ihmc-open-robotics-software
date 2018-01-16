@@ -196,7 +196,7 @@ public class YoSpatialVector
 
    public void getLinearPart(FrameVector3D linearPartToPack)
    {
-      this.linearPart.getFrameTuple(linearPartToPack);
+      linearPartToPack.set(this.linearPart);
    }
 
    public void getLinearPartIncludingFrame(FrameVector3D linearPartToPack)
@@ -216,7 +216,7 @@ public class YoSpatialVector
 
    public void getAngularPart(FrameVector3D angularPartToPack)
    {
-      this.angularPart.getFrameTuple(angularPartToPack);
+      angularPartToPack.set(this.angularPart);
    }
 
    public void getAngularPartIncludingFrame(FrameVector3D angularPartToPack)

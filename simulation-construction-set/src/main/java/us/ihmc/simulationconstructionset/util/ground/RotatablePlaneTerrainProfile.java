@@ -232,7 +232,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       {
          testPoint.setToNaN(WORLD_FRAME);
          GroundContactPoint groundContactPoint = groundContactPoints.get(i);
-         groundContactPoint.getYoPosition().getFrameTuple(testPoint);
+         testPoint.set(groundContactPoint.getYoPosition());
 
          testPoint.changeFrame(planeFrame);
          if(plane.isOnOrBelow(testPoint))

@@ -505,7 +505,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          super(COM_ESTIMATE_STATES.MOVE_COM_AROUND);
          frameToIncrementOver.set(TrotPair.NONE);
          intialCenterOfMass.changeFrame(worldFrame);
-         desiredCenterOfMassPosition.getFrameTuple(intialCenterOfMass);
+         intialCenterOfMass.set(desiredCenterOfMassPosition);
          intialCenterOfMassReferenceFrame.updateTranslation(intialCenterOfMass);
 
          totalMass = fullRobotModel.getTotalMass();

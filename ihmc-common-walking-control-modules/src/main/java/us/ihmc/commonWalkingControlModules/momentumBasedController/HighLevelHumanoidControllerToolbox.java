@@ -531,7 +531,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getAdjustedDesiredCapturePoint(FramePoint2D desiredCapturePoint, FramePoint2D adjustedDesiredCapturePoint)
    {
-      filteredYoAngularMomentum.getFrameTuple(angularMomentum);
+      angularMomentum.set(filteredYoAngularMomentum);
       ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
       localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
       localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
@@ -551,7 +551,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getCapturePoint(FramePoint3D capturePointToPack)
    {
-      yoCapturePoint.getFrameTuple(capturePointToPack);
+      capturePointToPack.setIncludingFrame(yoCapturePoint);
    }
 
    private final FramePoint2D copDesired = new FramePoint2D();

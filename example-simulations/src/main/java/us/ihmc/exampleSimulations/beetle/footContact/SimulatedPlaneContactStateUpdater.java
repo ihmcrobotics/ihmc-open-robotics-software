@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 
@@ -127,8 +126,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    @Override
    public void getContactNormalFrameVector(FrameVector3D frameVectorToPack)
    {
-      YoFrameVector yoSurfaceNormal = contactPoint.getYoSurfaceNormal();
-      yoSurfaceNormal.getFrameTuple(frameVectorToPack);
+      frameVectorToPack.set(contactPoint.getYoSurfaceNormal());
    }
 
    @Override

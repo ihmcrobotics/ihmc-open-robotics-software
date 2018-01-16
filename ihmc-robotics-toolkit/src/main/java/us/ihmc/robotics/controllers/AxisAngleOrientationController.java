@@ -113,7 +113,7 @@ public class AxisAngleOrientationController
 
       feedbackAngularAction.set(output);
       rateLimitedFeedbackAngularAction.update();
-      rateLimitedFeedbackAngularAction.getFrameTuple(output);
+      output.set(rateLimitedFeedbackAngularAction);
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
@@ -216,7 +216,7 @@ public class AxisAngleOrientationController
          rotationErrorCumulated.scale(gains.getMaximumIntegralError() / errorMagnitude);
       }
 
-      rotationErrorCumulated.getFrameTuple(integralTerm);
+      integralTerm.set(rotationErrorCumulated);
       gains.getIntegralGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(integralTerm.getVector());
    }
