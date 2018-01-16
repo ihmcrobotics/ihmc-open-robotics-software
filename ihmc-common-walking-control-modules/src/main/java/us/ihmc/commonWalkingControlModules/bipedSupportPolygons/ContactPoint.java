@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 
 public class ContactPoint implements ContactPointInterface
@@ -68,7 +69,7 @@ public class ContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void setPosition2d(FrameTuple2D<?, ?> position2d)
+   public void setPosition2d(FrameTuple2DReadOnly position2d)
    {
       position.set(position2d, 0.0);
    }

@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -385,14 +386,14 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void set(FrameTuple2D<?, ?> frameTuple2d)
+   public final void set(FrameTuple2DReadOnly frameTuple2d)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple2d);
       getYoValuesFromFrameTuple();
    }
 
-   public final void set(FrameTuple2D<?, ?> frameTuple2d, double z)
+   public final void set(FrameTuple2DReadOnly frameTuple2d, double z)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple2d, z);
