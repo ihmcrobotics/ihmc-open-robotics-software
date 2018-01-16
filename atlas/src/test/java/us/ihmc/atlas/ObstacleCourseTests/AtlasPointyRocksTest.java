@@ -6,10 +6,12 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.HumanoidPointyRocksTest;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -147,18 +149,40 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       {
          return walkingParameters;
       }
-
    }
 
    private class TestWalkingParameters extends AtlasWalkingControllerParameters
    {
+      private final TestICPOptimizationParameters icpOptimizationParameters;
+
       public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
          super(target, jointMap, contactPointParameters);
+         icpOptimizationParameters = new TestICPOptimizationParameters();
       }
 
       @Override
       public boolean createFootholdExplorationTools()
+      {
+         return true;
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return icpOptimizationParameters;
+      }
+   }
+
+   private class TestICPOptimizationParameters extends AtlasICPOptimizationParameters
+   {
+      public TestICPOptimizationParameters()
+      {
+         super(false);
+      }
+
+      @Override
+      public boolean useAngularMomentum()
       {
          return true;
       }
