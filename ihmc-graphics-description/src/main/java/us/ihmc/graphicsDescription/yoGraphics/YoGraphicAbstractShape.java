@@ -51,7 +51,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
 
    public void getPosition(FramePoint3D framePointToPack)
    {
-      yoFramePoint.getFrameTuple(framePointToPack);
+      framePointToPack.set(yoFramePoint);
    }
 
    public void setPosition(FramePoint3D position)

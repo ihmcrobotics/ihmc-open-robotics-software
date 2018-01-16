@@ -258,7 +258,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       {
          nextFootsteps.clear();
 
-         desiredICP.getFrameTuple(desiredCapturePoint);
+         desiredCapturePoint.set(desiredICP);
 
          icpPlanner.clearPlan();
          icpPlanner.holdCurrentICP(desiredCapturePoint);

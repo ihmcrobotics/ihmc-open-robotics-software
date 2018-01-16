@@ -120,11 +120,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       return point3d;
    }
 
-   public final void getFrameTuple(FrameTuple3D<?, ?> frameTuple)
-   {
-      frameTuple.set(getFrameTuple());
-   }
-
    public final void getFrameTuple2d(FrameTuple2D<?, ?> frameTuple2d)
    {
       frameTuple2d.set(getFrameTuple());

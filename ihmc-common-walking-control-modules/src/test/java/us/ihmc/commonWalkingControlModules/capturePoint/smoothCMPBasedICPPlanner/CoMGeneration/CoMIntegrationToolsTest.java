@@ -74,7 +74,7 @@ public class CoMIntegrationToolsTest
          desiredCoMVelocity.sub(integratedCoMPosition);
          desiredCoMVelocity.scale(omega0.getDoubleValue());
 
-         desiredCoMVelocity.getFrameTuple(dummyPoint);
+         dummyPoint.set(desiredCoMVelocity);
          dummyPoint.scale(integrationDT);
          integratedCoMPosition.add(dummyPoint);
 
@@ -159,7 +159,7 @@ public class CoMIntegrationToolsTest
          desiredCoMVelocity.sub(integratedCoMPosition);
          desiredCoMVelocity.scale(omega0.getDoubleValue());
 
-         desiredCoMVelocity.getFrameTuple(dummyPoint);
+         dummyPoint.set(desiredCoMVelocity);
          dummyPoint.scale(integrationDT);
          integratedCoMPosition.add(dummyPoint);
 
@@ -246,7 +246,7 @@ public class CoMIntegrationToolsTest
          desiredCoMVelocity.sub(integratedCoMPosition);
          desiredCoMVelocity.scale(omega0.getDoubleValue());
 
-         desiredCoMVelocity.getFrameTuple(dummyPoint);
+         dummyPoint.set(desiredCoMVelocity);
          dummyPoint.scale(integrationDT);
          integratedCoMPosition.add(dummyPoint);
 

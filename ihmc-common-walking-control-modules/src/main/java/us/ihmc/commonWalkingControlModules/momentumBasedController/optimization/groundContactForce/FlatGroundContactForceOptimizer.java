@@ -343,8 +343,8 @@ public class FlatGroundContactForceOptimizer
 
    public void getAchievedMomentumRate(FrameVector3D angularMomentumRateToPack, FrameVector3D linearMomentumRateToPack)
    {
-      yoAchievedTorque.getFrameTuple(angularMomentumRateToPack);
-      yoAchievedForce.getFrameTuple(linearMomentumRateToPack);
+      angularMomentumRateToPack.set(yoAchievedTorque);
+      linearMomentumRateToPack.set(yoAchievedForce);
    }
 
    private void hide()
