@@ -51,7 +51,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public FramePose(FramePoint3D position, FrameQuaternion orientation)
    {
-      this(position.getReferenceFrame(), new Pose3D(position.getGeometryObject(), orientation.getGeometryObject()));
+      this(position.getReferenceFrame(), new Pose3D(position, orientation));
 
       if (position.getReferenceFrame() != orientation.getReferenceFrame())
       {
