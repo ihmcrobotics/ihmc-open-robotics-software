@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -154,7 +155,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       frameVectorToPack.set(toPose.getFramePointCopy());
       FrameVector3D frameTuple = frameVectorToPack.getFrameTuple();
       frameTuple.sub(fromPose.getFramePointCopy());
-      frameVectorToPack.setWithoutChecks(frameTuple);
+      frameVectorToPack.set((Tuple3DReadOnly) frameTuple);
    }
 
    private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose fromPose, FramePose toPose)

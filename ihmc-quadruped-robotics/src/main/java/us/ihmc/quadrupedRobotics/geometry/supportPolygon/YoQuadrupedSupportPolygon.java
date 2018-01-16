@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -427,7 +428,7 @@ public class YoQuadrupedSupportPolygon
       putYoValuesIntoSupportPolygon();
       FramePoint3D innerTuple = centroidToPack.getFrameTuple();
       quadrupedSupportPolygon.getCentroid(innerTuple);
-      centroidToPack.setWithoutChecks(innerTuple);
+      centroidToPack.set((Tuple3DReadOnly) innerTuple);
    }
 
    public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2d pointToSnap)
