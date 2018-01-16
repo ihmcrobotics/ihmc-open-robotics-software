@@ -10,25 +10,25 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 public class SLIPTerminalCost implements LQTrackingCostFunction<SLIPState>
 {
-   static double qX = 1e10;
-   static double qY = 1e10;
-   static double qZ = 1e12;
+   static double qX = 1e9;
+   static double qY = 1e9;
+   static double qZ = 1e11;
    static double qThetaX = 1e10;
    static double qThetaY = 1e10;
    static double qThetaZ = 1e10;
-   static double qXDot = 1e10;
-   static double qYDot = 1e10;
-   static double qZDot = 1e10;
+   static double qXDot = 1e15;
+   static double qYDot = 1e15;
+   static double qZDot = 1e15;
    static double qThetaDotX = 1e10;
    static double qThetaDotY = 1e10;
    static double qThetaDotZ = 1e10;
 
-   static double rFx = 1e10;
-   static double rFy = 1e10;
-   static double rFz = 1e10;
-   static double rTauX = 1e10;
-   static double rTauY = 1e10;
-   static double rTauZ = 1e10;
+   static double rFx = 0e0;
+   static double rFy = 0e0;
+   static double rFz = 0e0;
+   static double rTauX = 0e10;
+   static double rTauY = 0e10;
+   static double rTauZ = 0e10;
    static double rXf = 0e0;
    static double rYf = 0e0;
    static double rK = 0e0;
