@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -248,7 +249,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          twoWaypointSwingGenerator.compute(time);
          FramePoint3D frameTupleUnsafe = trajectoryPosition.getFrameTuple();
          twoWaypointSwingGenerator.getPosition(frameTupleUnsafe);
-         trajectoryPosition.setWithoutChecks(frameTupleUnsafe);
+         trajectoryPosition.set((Tuple3DReadOnly) frameTupleUnsafe);
          solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition.getFrameTuple());
 
          footCollisionSphere.setToZero(WORLD);

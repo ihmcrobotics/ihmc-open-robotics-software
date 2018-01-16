@@ -296,18 +296,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   /**
-    * Sets x, y, and z with no checks for reference frame matches.
-    * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.
-    */
-   @Deprecated
-   public final void setWithoutChecks(FrameTuple3DReadOnly frameTuple)
-   {
-      x.set(frameTuple.getX());
-      y.set(frameTuple.getY());
-      z.set(frameTuple.getZ());
-   }
-
    public final void set(ReferenceFrame referenceFrame, double x, double y, double z)
    {
       checkReferenceFrameMatch(referenceFrame);

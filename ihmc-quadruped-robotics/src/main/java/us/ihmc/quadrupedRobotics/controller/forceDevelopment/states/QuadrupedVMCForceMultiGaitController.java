@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -496,7 +497,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       FrameVector3D tempVector = centerOfMassVelocity.getFrameTuple();
       centerOfMassJacobian.getCenterOfMassVelocity(tempVector);
       tempVector.changeFrame(centerOfMassVelocity.getReferenceFrame());
-      centerOfMassVelocity.setWithoutChecks(tempVector);
+      centerOfMassVelocity.set((Tuple3DReadOnly) tempVector);
 
       currentGaitCompletion.set((yoTime.getDoubleValue() - currentGaitStartTime.getDoubleValue()) / desiredGaitPeriod.getDoubleValue());
       if (currentGaitCompletion.getDoubleValue() >= 1.0)
