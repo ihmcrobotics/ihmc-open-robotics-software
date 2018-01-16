@@ -4,10 +4,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector2D>
+public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector2D> implements FrameVector2DReadOnly
 {
    public YoFrameVector2d(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {

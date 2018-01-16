@@ -5,10 +5,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFramePoint2d extends YoFrameTuple2d<YoFramePoint2d, FramePoint2D>
+public class YoFramePoint2d extends YoFrameTuple2d<YoFramePoint2d, FramePoint2D> implements FramePoint2DReadOnly
 {
    public YoFramePoint2d(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {

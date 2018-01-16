@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements ReferenceFrameHolder
+public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements ReferenceFrameHolder, FrameTuple2DReadOnly
 {
    private final YoDouble x, y; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple2d; // This is only for assistance. The data is stored in the YoVariables, not in here!
