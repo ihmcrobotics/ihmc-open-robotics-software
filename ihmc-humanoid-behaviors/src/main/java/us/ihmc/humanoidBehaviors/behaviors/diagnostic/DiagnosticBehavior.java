@@ -535,7 +535,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
-      FrameVector2D desiredPelvisOffset = new FrameVector2D(midFeetZUpFrame);
+      FramePoint2D desiredPelvisOffset = new FramePoint2D(midFeetZUpFrame);
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
@@ -1002,7 +1002,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
-      FrameVector2D desiredPelvisOffset = new FrameVector2D(midFeetZUpFrame);
+      FramePoint2D desiredPelvisOffset = new FramePoint2D(midFeetZUpFrame);
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
