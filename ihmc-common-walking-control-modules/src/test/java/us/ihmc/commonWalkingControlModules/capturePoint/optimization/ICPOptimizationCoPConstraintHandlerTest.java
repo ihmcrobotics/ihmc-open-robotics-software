@@ -52,7 +52,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 
@@ -115,7 +115,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 
@@ -221,7 +221,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 
@@ -278,7 +278,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons);
+      ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, registry);
       ICPOptimizationParameters parameters = new TestICPOptimizationParameters();
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(parameters, 5, false);
 

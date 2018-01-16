@@ -160,4 +160,10 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    {
       return icpOptimizationController;
    }
+
+   @Override
+   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   {
+      this.icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+   }
 }
