@@ -15,7 +15,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 
 /**
  * JointStateUpdater simply reads the joint position/velocity sensors and updates the FullInverseDynamicsStructure.
- * (Based on {@link us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater}.)
+ * (Based on {@link us.ihmc.obsoleteStateEstimation.JointStateFullRobotModelUpdater}.)
  * @author Sylvain
  *
  */
