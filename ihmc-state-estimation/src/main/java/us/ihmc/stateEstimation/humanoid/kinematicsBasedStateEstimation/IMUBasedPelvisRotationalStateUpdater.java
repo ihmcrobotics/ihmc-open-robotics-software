@@ -8,8 +8,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -18,10 +16,10 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * PelvisRotationalStateUpdater reads and transforms the orientation and angular velocity obtained from the IMU to update the pelvis orientation and angular velocity in world. 
