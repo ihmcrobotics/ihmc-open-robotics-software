@@ -9,28 +9,28 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
 {
-   static double qX = 1e-5;
-   static double qY = 1e-5;
-   static double qZ = 1e-5;
-   static double qThetaX = 1e-5;
-   static double qThetaY = 1e-5;
-   static double qThetaZ = 1e-5;
-   static double qXDot = 1e-5;
-   static double qYDot = 1e-5;
-   static double qZDot = 1e-5;
+   static double qX = 0.0;
+   static double qY = 0.0;
+   static double qZ = 0.0;
+   static double qThetaX = 0.0;
+   static double qThetaY = 0.0;
+   static double qThetaZ = 0.0;
+   static double qXDot = 1e-6;
+   static double qYDot = 1e-6;
+   static double qZDot = 1e-6;
    static double qThetaDotX = 1e-5;
    static double qThetaDotY = 1e-5;
    static double qThetaDotZ = 1e-5;
 
-   static double rFx = 1e-5;
-   static double rFy = 1e-5;
-   static double rFz = 1e-8;
-   static double rTauX = 1e1;
-   static double rTauY = 1e1;
-   static double rTauZ = 1e1;
-   static double rXf = 1e-6;
-   static double rYf = 1e-6;
-   static double rK = 1e-10;
+   static double rFx = 1e-8;
+   static double rFy = 1e-8;
+   static double rFz = 1e-12;
+   static double rTauX = 1e0;
+   static double rTauY = 1e0;
+   static double rTauZ = 1e0;
+   static double rXf = 0.0;
+   static double rYf = 0.0;
+   static double rK = 1e-12;
 
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);

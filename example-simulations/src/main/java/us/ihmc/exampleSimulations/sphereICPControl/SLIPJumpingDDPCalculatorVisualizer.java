@@ -129,8 +129,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
          yoGraphicsListRegistry.registerYoGraphic("FootViz", new YoGraphicShape(sidePrefix + "FootViz", footGraphics, currentFootPose, 1.0));
       }
 
-      updatesPerRequest.set(1);
-      trajectoryDT.set(0.01);
+      updatesPerRequest.set(10);
       trajectoryDT.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -139,6 +138,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
             ddp.setDeltaT(trajectoryDT.getDoubleValue());
          }
       });
+      trajectoryDT.set(0.01);
 
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextFootstep", yoNextFootstepPolygon, Color.blue, false));
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextFootstep", yoNextNextFootstepPolygon, Color.blue, false));
