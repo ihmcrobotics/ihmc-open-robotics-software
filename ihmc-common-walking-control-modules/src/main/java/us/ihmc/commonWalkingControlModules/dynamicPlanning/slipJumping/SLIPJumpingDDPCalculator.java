@@ -2,6 +2,10 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPDesiredTrackingCost;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPModelForceTrackingCost;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPRegularizationCost;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPTerminalCost;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.trajectoryOptimization.*;
 import us.ihmc.trajectoryOptimization.SimpleDDPSolver;

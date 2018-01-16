@@ -56,15 +56,14 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 public class SLIPJumpingDDPCalculatorVisualizer
 {
    private static final int BUFFER_SIZE = 16000;
-   private final double dt = 0.006;
+   private final double dt = 0.01;
 
-   private static final double firstTransferDuration = 0.5;
-   private static final double flightDuration = 0.5;
-   private static final double secondTransferDuration = 0.5;
+   private static final double firstTransferDuration = 0.2;
+   private static final double secondTransferDuration = 0.2;
    private static final double landingAngle = Math.toRadians(20);
 
    private static final double nominalComHeight = 1.0;
-   private static final double length = 1.5;
+   private static final double length = 1.0;
    private static final double gravityZ = 9.81;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
@@ -85,8 +84,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private final YoInteger iterations = new YoInteger("iterations", registry);
 
    private final int simulatedTicksPerGraphicUpdate = 1;
-   private final double trailingDuration = 1.0 * (firstTransferDuration + flightDuration + secondTransferDuration);
-   private final int numberOfBalls = (int) (trailingDuration / dt / simulatedTicksPerGraphicUpdate);
+   private final int numberOfBalls = (int) (2.0 / dt / simulatedTicksPerGraphicUpdate);
 
    private final BagOfBalls modifiedCopTrack;
    private final BagOfBalls comTrack;
@@ -94,7 +92,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private final Footstep leftFoot;
    private final Footstep rightFoot;
 
-   private final SLIPJumpingDDPCalculator ddp = new SLIPJumpingDDPCalculator(0.01, 150.0, nominalComHeight, gravityZ);
+   private final SLIPJumpingDDPCalculator ddp = new SLIPJumpingDDPCalculator(dt, 150.0, nominalComHeight, gravityZ);
 
    private final YoInteger updatesPerRequest = new YoInteger("updatesPerRequest", registry);
    private final YoDouble trajectoryDT = new YoDouble("trajectoryDT", registry);
@@ -129,7 +127,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
          yoGraphicsListRegistry.registerYoGraphic("FootViz", new YoGraphicShape(sidePrefix + "FootViz", footGraphics, currentFootPose, 1.0));
       }
 
-      updatesPerRequest.set(10);
+      updatesPerRequest.set(1);
       trajectoryDT.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -138,7 +136,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
             ddp.setDeltaT(trajectoryDT.getDoubleValue());
          }
       });
-      trajectoryDT.set(0.01);
+      trajectoryDT.set(dt);
 
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextFootstep", yoNextFootstepPolygon, Color.blue, false));
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextFootstep", yoNextNextFootstepPolygon, Color.blue, false));

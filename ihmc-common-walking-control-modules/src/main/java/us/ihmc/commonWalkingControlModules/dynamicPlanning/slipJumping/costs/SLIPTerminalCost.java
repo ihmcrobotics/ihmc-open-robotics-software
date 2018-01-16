@@ -1,41 +1,42 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.trajectoryOptimization.LQCostFunction;
+import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
+public class SLIPTerminalCost implements LQTrackingCostFunction<SLIPState>
 {
-   static double qX = 0.0;
-   static double qY = 0.0;
-   static double qZ = 0.0;
-   static double qThetaX = 0.0;
-   static double qThetaY = 0.0;
-   static double qThetaZ = 0.0;
-   static double qXDot = 1e-6;
-   static double qYDot = 1e-6;
-   static double qZDot = 1e-6;
-   static double qThetaDotX = 1e-5;
-   static double qThetaDotY = 1e-5;
-   static double qThetaDotZ = 1e-5;
+   static double qX = 1e10;
+   static double qY = 1e10;
+   static double qZ = 1e12;
+   static double qThetaX = 1e10;
+   static double qThetaY = 1e10;
+   static double qThetaZ = 1e10;
+   static double qXDot = 1e10;
+   static double qYDot = 1e10;
+   static double qZDot = 1e10;
+   static double qThetaDotX = 1e10;
+   static double qThetaDotY = 1e10;
+   static double qThetaDotZ = 1e10;
 
-   static double rFx = 1e-8;
-   static double rFy = 1e-8;
-   static double rFz = 1e-12;
-   static double rTauX = 1e0;
-   static double rTauY = 1e0;
-   static double rTauZ = 1e0;
-   static double rXf = 0.0;
-   static double rYf = 0.0;
-   static double rK = 1e-12;
+   static double rFx = 1e10;
+   static double rFy = 1e10;
+   static double rFz = 1e10;
+   static double rTauX = 1e10;
+   static double rTauY = 1e10;
+   static double rTauZ = 1e10;
+   static double rXf = 0e0;
+   static double rYf = 0e0;
+   static double rK = 0e0;
 
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
    private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);
 
-   public SLIPRegularizationCost()
+   public SLIPTerminalCost()
    {
       Q.set(x, x, qX);
       Q.set(y, y, qY);
@@ -61,31 +62,41 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
       R.set(k, k, rK);
    }
 
+   private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);
+   private DenseMatrix64F tempControlMatrix = new DenseMatrix64F(controlVectorSize, 1);
    private DenseMatrix64F tempWX = new DenseMatrix64F(stateVectorSize, 1);
    private DenseMatrix64F tempWU = new DenseMatrix64F(controlVectorSize, 1);
 
    @Override
-   public double getCost(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector)
+   public double getCost(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                         DenseMatrix64F desiredStateVector)
    {
-      DiagonalMatrixTools.preMult(Q, stateVector, tempWX);
-      DiagonalMatrixTools.preMult(R, controlVector, tempWU);
+      CommonOps.subtract(controlVector, desiredControlVector, tempControlMatrix);
+      CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
 
-      return CommonOps.dot(controlVector, tempWU) + CommonOps.dot(stateVector, tempWX);
+      DiagonalMatrixTools.preMult(Q, tempStateMatrix, tempWX);
+      DiagonalMatrixTools.preMult(R, tempControlMatrix, tempWU);
+
+      return CommonOps.dot(tempControlMatrix, tempWU) + CommonOps.dot(tempStateMatrix, tempWX);
    }
 
    /** L_x(X_k, U_k) */
    @Override
-   public void getCostStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                                    DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
    {
-      DiagonalMatrixTools.preMult(Q, stateVector, matrixToPack);
+      CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
+      DiagonalMatrixTools.preMult(Q, tempStateMatrix, matrixToPack);
       CommonOps.scale(2.0, matrixToPack);
    }
 
    /** L_u(X_k, U_k) */
    @Override
-   public void getCostControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVecotr,
+                                      DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
    {
-      DiagonalMatrixTools.preMult(R, controlVector, matrixToPack);
+      CommonOps.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
+      DiagonalMatrixTools.preMult(R, tempControlMatrix, matrixToPack);
       CommonOps.scale(2.0, matrixToPack);
    }
 
@@ -109,7 +120,6 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
                                                      DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
-      matrixToPack.zero();
    }
 
    /** L_xu(X_k, U_k) */
@@ -118,6 +128,5 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
                                                      DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(stateVectorSize, controlVectorSize);
-      matrixToPack.zero();
    }
 }
