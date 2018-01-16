@@ -418,11 +418,6 @@ public class ICPOptimizationSolutionHandlerTest
          this.resolution = resolution;
       }
 
-      @Override public int numberOfFootstepsToConsider()
-      {
-         return 0;
-      }
-
       @Override public double getForwardFootstepWeight()
       {
          return 5.0;

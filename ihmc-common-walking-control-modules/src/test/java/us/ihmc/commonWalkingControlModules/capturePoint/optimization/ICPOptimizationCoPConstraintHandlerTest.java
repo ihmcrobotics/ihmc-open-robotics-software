@@ -426,12 +426,6 @@ public class ICPOptimizationCoPConstraintHandlerTest
    private class TestICPOptimizationParameters extends ICPOptimizationParameters
    {
       @Override
-      public int numberOfFootstepsToConsider()
-      {
-         return 1;
-      }
-
-      @Override
       public double getForwardFootstepWeight()
       {
          return 10.0;

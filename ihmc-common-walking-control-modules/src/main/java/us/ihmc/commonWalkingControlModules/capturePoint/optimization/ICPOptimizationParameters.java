@@ -8,13 +8,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 public abstract class ICPOptimizationParameters
 {
    /**
-    * How many footsteps the optimization considers for adjustment.
-    * 1 footstep seems to be good.
-    * With a penalization on the dynamics themselves, future steps show little effect on the current dynamics.
-    */
-   public abstract int numberOfFootstepsToConsider();
-
-   /**
     * Specifies a scaling factor on the amount of footstep adjustment. By increasing this past 1.0, the footstep will be adjusted more than explicitly necessary.
     */
    public double getFootstepAdjustmentSafetyFactor()
@@ -77,7 +70,6 @@ public abstract class ICPOptimizationParameters
     * and the step lengths to be constrained when allowing step adjustment.
     */
    public abstract double getDynamicsObjectiveWeight();
-
 
    /**
     * Modifier to reduce the dynamic relaxation penalization when in double support.
