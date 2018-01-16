@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple2D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -83,7 +83,7 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void setPosition(FrameTuple3D<?,?> position)
+   public void setPosition(FrameTuple3DReadOnly position)
    {
       this.yoPosition.set(position);
    }

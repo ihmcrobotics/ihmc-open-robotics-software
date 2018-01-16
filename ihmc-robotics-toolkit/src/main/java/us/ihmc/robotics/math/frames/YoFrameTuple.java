@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -300,7 +301,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
     * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.
     */
    @Deprecated
-   public final void setWithoutChecks(FrameTuple3D<?, ?> frameTuple)
+   public final void setWithoutChecks(FrameTuple3DReadOnly frameTuple)
    {
       x.set(frameTuple.getX());
       y.set(frameTuple.getY());
@@ -313,12 +314,12 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       set(x, y, z);
    }
 
-   public final void setAndMatchFrame(FrameTuple3D<?, ?> frameTuple)
+   public final void setAndMatchFrame(FrameTuple3DReadOnly frameTuple)
    {
       setAndMatchFrame(frameTuple, true);
    }
 
-   public final void setAndMatchFrame(FrameTuple3D<?, ?> frameTuple, boolean notifyListeners)
+   public final void setAndMatchFrame(FrameTuple3DReadOnly frameTuple, boolean notifyListeners)
    {
       this.frameTuple.setIncludingFrame(frameTuple);
       this.frameTuple.changeFrame(getReferenceFrame());
@@ -355,12 +356,12 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       setFromReferenceFrame(referenceFrame, true);
    }
 
-   public final void set(FrameTuple3D<?, ?> frameTuple)
+   public final void set(FrameTuple3DReadOnly frameTuple)
    {
       set(frameTuple, true);
    }
 
-   public final void set(FrameTuple3D<?, ?> frameTuple, boolean notifyListeners)
+   public final void set(FrameTuple3DReadOnly frameTuple, boolean notifyListeners)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple);
@@ -435,7 +436,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void add(FrameTuple3D<?, ?> frameTuple)
+   public final void add(FrameTuple3DReadOnly frameTuple)
    {
       putYoValuesIntoFrameTuple();
       this.frameTuple.add(frameTuple);
@@ -456,7 +457,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void add(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public final void add(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.add(frameTuple1, frameTuple2);
@@ -477,7 +478,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void sub(FrameTuple3D<?, ?> frameTuple)
+   public final void sub(FrameTuple3DReadOnly frameTuple)
    {
       putYoValuesIntoFrameTuple();
       this.frameTuple.sub(frameTuple);
@@ -497,7 +498,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void sub(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public final void sub(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.sub(frameTuple1, frameTuple2);
@@ -516,7 +517,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple)
+   public final void scaleAdd(double scaleFactor, FrameTuple3DReadOnly frameTuple)
    {
       putYoValuesIntoFrameTuple();
       this.frameTuple.scaleAdd(scaleFactor, frameTuple);
@@ -537,7 +538,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
     * @param frameTuple2 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public final void scaleAdd(double scaleFactor, FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.scaleAdd(scaleFactor, frameTuple1, frameTuple2);
@@ -567,7 +568,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
     * @param frameTuple2 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleSub(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
+   public final void scaleSub(double scaleFactor, FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.scaleSub(scaleFactor, frameTuple1, frameTuple2);
@@ -603,7 +604,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
     *  @param alpha  the alpha interpolation parameter
     * @throws ReferenceFrameMismatchException
     */
-   public final void interpolate(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2, double alpha)
+   public final void interpolate(FrameTuple3DReadOnly frameTuple1, FrameTuple3DReadOnly frameTuple2, double alpha)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -632,7 +633,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       return this.frameTuple.epsilonEquals(frameTuple.getFrameTuple(), threshold);
    }
 
-   public final boolean epsilonEquals(FrameTuple3D<?, ?> frameTuple, double threshold)
+   public final boolean epsilonEquals(FrameTuple3DReadOnly frameTuple, double threshold)
    {
       putYoValuesIntoFrameTuple();
       return this.frameTuple.epsilonEquals(frameTuple, threshold);
