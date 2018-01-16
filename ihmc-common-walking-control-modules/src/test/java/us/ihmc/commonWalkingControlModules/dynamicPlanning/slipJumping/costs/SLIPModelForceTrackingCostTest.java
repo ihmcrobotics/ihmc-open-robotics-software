@@ -1,9 +1,11 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPModelForceTrackingCost;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;

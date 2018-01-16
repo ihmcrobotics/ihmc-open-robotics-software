@@ -1,7 +1,10 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.ContinuousSLIPDynamics;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.ContinuousSimpleReactionDynamics;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
