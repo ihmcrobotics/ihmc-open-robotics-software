@@ -11,17 +11,17 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 
 /**
  * <p>Title: FrameConvexPolygon2d </p>
@@ -102,20 +102,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * Note the: pointList.size() can be greater or equal to numberOfVertices.
     * @throws ReferenceFrameMismatchException
     */
-   public FrameConvexPolygon2d(List<FramePoint2D> frameVertices)
-   {
-      this();
-      setIncludingFrameAndUpdate(frameVertices);
-   }
-
-   /**
-    * Creates an empty convex polygon attached to the reference frame of the frame vertex, adds N new vertices using a list of {@code FrameTuple2dArrayList<FramePoint2d>}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
-    * @param vertices {@code FrameTuple2dArrayList<FramePoint2d>} the list of points that is used to creates the vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon.
-    * Note the: pointList.size() can be greater or equal to numberOfVertices.
-    * @throws ReferenceFrameMismatchException
-    */
-   public FrameConvexPolygon2d(FrameTuple2dArrayList<FramePoint2D> frameVertices)
+   public FrameConvexPolygon2d(List<? extends FramePoint2DReadOnly> frameVertices)
    {
       this();
       setIncludingFrameAndUpdate(frameVertices);
@@ -191,7 +178,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * @param newVertex {@code FramePoint2d} the new vertex (it is not modified).
     * @throws ReferenceFrameMismatchException
     */
-   public void addVertex(FramePoint2D vertex)
+   public void addVertex(FramePoint2DReadOnly vertex)
    {
       vertex.checkReferenceFrameMatch(referenceFrame);
       convexPolygon.addVertex(vertex);
@@ -220,7 +207,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * Note that this method recycles memory.
     * @param newVertex {@code FramePoint2d} the new vertex (it is not modified).
     */
-   public void addVertexAndChangeFrame(FramePoint2D newVertex)
+   public void addVertexAndChangeFrame(FramePoint2DReadOnly newVertex)
    {
       tempPoint2d.setIncludingFrame(newVertex);
       tempPoint2d.changeFrame(referenceFrame);
@@ -232,7 +219,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * Note that this method recycles memory.
     * @param newVertex {@code FramePoint2d} the new vertex (it is not modified).
     */
-   public void addVertexChangeFrameAndProjectToXYPlane(FramePoint2D newVertex)
+   public void addVertexChangeFrameAndProjectToXYPlane(FramePoint2DReadOnly newVertex)
    {
       tempPoint2d.setIncludingFrame(newVertex);
       tempPoint2d.changeFrameAndProjectToXYPlane(referenceFrame);
@@ -244,7 +231,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * Note that this method recycles memory.
     * @param newVertex {@code FramePoint} the new vertex (it is not modified).
     */
-   public void addVertexByProjectionOntoXYPlane(FramePoint3D newVertex)
+   public void addVertexByProjectionOntoXYPlane(FramePoint3DReadOnly newVertex)
    {
       tempPoint.setIncludingFrame(newVertex);
       tempPoint.changeFrame(referenceFrame);
@@ -258,36 +245,20 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     * @throws ReferenceFrameMismatchException
     */
-   public void addVertices(List<FramePoint2D> vertices, int numberOfVertices)
+   public void addVertices(List<? extends FramePoint2DReadOnly> vertices, int numberOfVertices)
    {
       for (int i = 0; i < numberOfVertices; i++)
       {
-         FramePoint2D vertex = vertices.get(i);
+         FramePoint2DReadOnly vertex = vertices.get(i);
          addVertex(vertex);
       }
    }
 
-   /**
-    * Adds N new vertices to this polygon using a list of {@code FramePoint2d}.
-    * Note that this method recycles memory.
-    * @param vertices {@code FrameTuple2dArrayList<FramePoint2d>} the list of new vertices (it is not modified).
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
-    * @throws ReferenceFrameMismatchException
-    */
-   public void addVertices(FrameTuple2dArrayList<FramePoint2D> vertices, int numberOfVertices)
-   {
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         FramePoint2D vertex = vertices.get(i);
-         addVertex(vertex);
-      }
-   }
-
-   public void addVertices(FramePoint2D[] vertices)
+   public void addVertices(FramePoint2DReadOnly[] vertices)
    {
       for (int i = 0; i < vertices.length; i++)
       {
-         FramePoint2D vertex = vertices[i];
+         FramePoint2DReadOnly vertex = vertices[i];
          addVertex(vertex);
       }
    }
@@ -298,11 +269,11 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * @param vertices {@code List<FramePoint2d>} the list of new vertices (it is not modified).
     * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     */
-   public void addVerticesByProjectionOntoXYPlane(List<FramePoint3D> vertices, int numberOfVertices)
+   public void addVerticesByProjectionOntoXYPlane(List<? extends FramePoint3DReadOnly> vertices, int numberOfVertices)
    {
       for (int i = 0; i < numberOfVertices; i++)
       {
-         FramePoint3D vertex = vertices.get(i);
+         FramePoint3DReadOnly vertex = vertices.get(i);
          addVertexByProjectionOntoXYPlane(vertex);
       }
    }
@@ -361,7 +332,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     * @throws ReferenceFrameMismatchException
     */
-   public void setAndUpdate(List<FramePoint2D> vertices, int numberOfVertices)
+   public void setAndUpdate(List<? extends FramePoint2DReadOnly> vertices, int numberOfVertices)
    {
       clear();
       addVertices(vertices, numberOfVertices);
@@ -375,7 +346,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * 3- {@code update()}.
     * @param vertices {@code List<FramePoint>} the list of points that is used to creates the vertices.
     */
-   public void setAndUpdate(List<FramePoint3D> vertices)
+   public void setAndUpdate(List<? extends FramePoint3DReadOnly> vertices)
    {
       clear();
       for (int i = 0; i < vertices.size(); i++)
@@ -392,7 +363,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * 3- {@code update()}.
     * @param vertices {@code FramePoint[]} the array of points that is used to creates the vertices.
     */
-   public void setAndUpdate(FramePoint3D[] vertices)
+   public void setAndUpdate(FramePoint3DReadOnly[] vertices)
    {
       clear();
       for (int i = 0; i < vertices.length; i++)
@@ -409,7 +380,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * 3- {@code update()}.
     * @param vertices {@code FramePoint2d[]} the array of points that is used to creates the vertices.
     */
-   public void setAndUpdate(FramePoint2D[] vertices)
+   public void setAndUpdate(FramePoint2DReadOnly[] vertices)
    {
       clear();
       for (int i = 0; i < vertices.length; i++)
@@ -482,7 +453,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * @param vertices {@code List<FramePoint>} the list of points that is used to creates the vertices.
     * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     */
-   public void setByProjectionOntoXYPlaneAndUpdate(List<FramePoint3D> vertices, int numberOfVertices)
+   public void setByProjectionOntoXYPlaneAndUpdate(List<? extends FramePoint3DReadOnly> vertices, int numberOfVertices)
    {
       clear();
       addVerticesByProjectionOntoXYPlane(vertices, numberOfVertices);
@@ -569,33 +540,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * @param vertices {@code List<FramePoint2d>} the list of points that is used to creates the vertices.
     * @throws ReferenceFrameMismatchException
     */
-   public void setIncludingFrameAndUpdate(List<FramePoint2D> vertices)
-   {
-      int numberOfVertices = vertices.size();
-      if (numberOfVertices < 1 )
-      {
-         clear();
-         update();
-      }
-      else
-      {
-         clear(vertices.get(0).getReferenceFrame());
-         addVertices(vertices, numberOfVertices);
-         update();
-      }
-   }
-
-   /**
-    * If the list of vertices is empty, this polygon will be empty and its reference frame won't be changed.
-    * If the list of vertices is not empty, this method does:
-    * 1- {@code clear(vertices.get(0).getReferenceFrame())};
-    * 2- {@code addVertices(vertices)};
-    * 3- {@code update()}.
-    * @param referenceFrame {@code ReferenceFrame} the new reference frame of this polygon.
-    * @param vertices {@code FrameTuple2dArrayList<FramePoint2d>} the list of points that is used to creates the vertices.
-    * @throws ReferenceFrameMismatchException
-    */
-   public void setIncludingFrameAndUpdate(FrameTuple2dArrayList<FramePoint2D> vertices)
+   public void setIncludingFrameAndUpdate(List<? extends FramePoint2DReadOnly> vertices)
    {
       int numberOfVertices = vertices.size();
       if (numberOfVertices < 1 )
@@ -635,7 +580,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
     * @param vertices {@code List<FramePoint>} the list of points that is used to creates the vertices.
     * @throws ReferenceFrameMismatchException
     */
-   public void setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ReferenceFrame referenceFrame, List<FramePoint3D> vertices)
+   public void setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ReferenceFrame referenceFrame, List<? extends FramePoint3DReadOnly> vertices)
    {
       int numberOfVertices = vertices.size();
       clear(referenceFrame);
@@ -677,7 +622,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
       return frameVertexCopy;
    }
 
-   public void getFrameVertex(int vertexIndex, FrameTuple2D<?, ?> vertexToPack)
+   public void getFrameVertex(int vertexIndex, FramePoint2D vertexToPack)
    {
       convexPolygon.checkIfUpToDate();
 
