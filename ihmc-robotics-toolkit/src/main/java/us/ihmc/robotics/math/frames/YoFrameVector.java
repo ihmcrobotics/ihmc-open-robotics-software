@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.frames;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -12,7 +13,7 @@ import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> implements VectorInterface
+public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> implements VectorInterface, FrameVector3DReadOnly
 {
    public YoFrameVector(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
