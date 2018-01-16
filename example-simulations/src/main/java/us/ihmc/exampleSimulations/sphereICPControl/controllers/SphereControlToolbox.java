@@ -702,12 +702,6 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
-         public int numberOfFootstepsToConsider()
-         {
-            return 4;
-         }
-
-         @Override
          public double getForwardFootstepWeight()
          {
             return 20.0;
