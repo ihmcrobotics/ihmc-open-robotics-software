@@ -3,9 +3,9 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.IMUMount;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SimulatedAngularVelocitySensorFromRobot extends SimulatedSensor<Tuple3DBasics>
 {
