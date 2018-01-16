@@ -103,4 +103,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
    {
       return null;
    }
+
+   @Override
+   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   {}
 }
