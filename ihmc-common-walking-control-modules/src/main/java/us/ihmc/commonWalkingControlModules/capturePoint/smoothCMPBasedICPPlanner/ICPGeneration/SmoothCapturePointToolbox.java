@@ -9,6 +9,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -136,7 +137,7 @@ public class SmoothCapturePointToolbox
     * @return
     */
    public void calculateICPQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int icpDerivativeOrder, FrameTrajectory3D cmpPolynomial3D,
-                                                                    FrameTuple3D<?, ?> icpPositionDesiredFinal, FrameTuple3D<?, ?> icpQuantityDesired)
+                                                                    FrameTuple3DReadOnly icpPositionDesiredFinal, FrameTuple3D<?, ?> icpQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if(numberOfCoefficients == -1)
@@ -186,7 +187,7 @@ public class SmoothCapturePointToolbox
     * @return
     */
    public void calculateICPQuantity3D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, double generalizedGammaPrime,
-                                             DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3D<?, ?> icpPositionDesiredFinal,
+                                             DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3DReadOnly icpPositionDesiredFinal,
                                              FrameTuple3D<?, ?> icpQuantityDesired)
    {
       int numRows = generalizedAlphaBetaPrimeMatrix.getNumRows();

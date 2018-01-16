@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -200,12 +201,12 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       getYoValuesFromFrameTuple2d();
    }
 
-   public final void setByProjectionOntoXYPlane(FrameTuple3D<?, ?> frameTuple)
+   public final void setByProjectionOntoXYPlane(FrameTuple3DReadOnly frameTuple)
    {
       setByProjectionOntoXYPlane(frameTuple, true);
    }
 
-   public final void setByProjectionOntoXYPlane(FrameTuple3D<?, ?> frameTuple, boolean notifyListeners)
+   public final void setByProjectionOntoXYPlane(FrameTuple3DReadOnly frameTuple, boolean notifyListeners)
    {
       this.frameTuple2d.set(frameTuple);
       getYoValuesFromFrameTuple2d(notifyListeners);

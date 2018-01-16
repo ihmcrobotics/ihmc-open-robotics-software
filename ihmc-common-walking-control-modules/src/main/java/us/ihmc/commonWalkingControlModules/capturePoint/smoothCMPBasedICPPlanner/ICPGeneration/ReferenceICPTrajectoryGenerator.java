@@ -72,8 +72,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final TIntArrayList icpPhaseEntryCornerPointIndices = new TIntArrayList();
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
-   private List<FrameTuple3D<?, ?>> icpQuantityCalculatedInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
-   private List<FrameTuple3D<?, ?>> icpQuantitySetInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
+   private List<FrameTuple3D<?, ?>> icpQuantityCalculatedInitialConditionList = new ArrayList<>();
+   private List<FrameTuple3D<?, ?>> icpQuantitySetInitialConditionList = new ArrayList<>();
 
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 

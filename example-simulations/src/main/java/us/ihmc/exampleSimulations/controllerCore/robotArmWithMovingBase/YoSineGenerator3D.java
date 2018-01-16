@@ -1,15 +1,15 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoSineGenerator3D implements PositionTrajectoryGenerator
 {
@@ -47,7 +47,7 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
       this.offset.set(offset);
    }
 
-   public void setOffset(FrameTuple3D<?, ?> offset)
+   public void setOffset(FrameTuple3DReadOnly offset)
    {
       this.offset.set(offset);
    }

@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -857,7 +858,7 @@ public class MatrixTools
       ejmlVector.set(indices[2], 0, tuple3d.getZ());
    }
 
-   public static void insertFrameTupleIntoEJMLVector(FrameTuple3D<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   public static void insertFrameTupleIntoEJMLVector(FrameTuple3DReadOnly frameTuple, DenseMatrix64F ejmlVector, int startIndex)
    {
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());
