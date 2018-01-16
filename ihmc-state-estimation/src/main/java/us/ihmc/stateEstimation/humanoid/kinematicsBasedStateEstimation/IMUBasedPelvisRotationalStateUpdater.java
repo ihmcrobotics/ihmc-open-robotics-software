@@ -23,7 +23,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * PelvisRotationalStateUpdater reads and transforms the orientation and angular velocity obtained from the IMU to update the pelvis orientation and angular velocity in world. 
- * (Based on {@link IMUSelectorAndDataConverter} and {@link OrientationStateRobotModelUpdater})
  * @author Sylvain
  *
  */
