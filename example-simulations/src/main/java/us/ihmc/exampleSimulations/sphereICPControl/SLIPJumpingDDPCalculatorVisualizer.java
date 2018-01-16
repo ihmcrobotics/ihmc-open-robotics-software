@@ -1,11 +1,6 @@
 package us.ihmc.exampleSimulations.sphereICPControl;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDDPCalculator;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.ContinuousSLIPDynamics;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPJumpingDDPCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.commons.thread.ThreadTools;
@@ -21,22 +16,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.trajectoryOptimization.DiscreteOptimizationData;
-import us.ihmc.trajectoryOptimization.DiscreteOptimizationTrajectory;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -58,13 +48,16 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private static final int BUFFER_SIZE = 16000;
    private final double dt = 0.01;
 
-   private static final double firstTransferDuration = 0.2;
-   private static final double secondTransferDuration = 0.2;
+   private static final double maxSupportForExtension = 0.3;
+   private static final double firstTransferDuration = 0.5;
+   private static final double secondTransferDuration = 0.5;
    private static final double landingAngle = Math.toRadians(20);
 
    private static final double nominalComHeight = 1.0;
-   private static final double length = 1.0;
+   private static final double length = 1.5;
    private static final double gravityZ = 9.81;
+
+   private static final double mass = 150.0;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
 
@@ -92,7 +85,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private final Footstep leftFoot;
    private final Footstep rightFoot;
 
-   private final SLIPJumpingDDPCalculator ddp = new SLIPJumpingDDPCalculator(dt, 150.0, nominalComHeight, gravityZ);
+   private final SLIPJumpingDDPCalculator ddp = new SLIPJumpingDDPCalculator(dt, mass, nominalComHeight, gravityZ);
 
    private final YoInteger updatesPerRequest = new YoInteger("updatesPerRequest", registry);
    private final YoDouble trajectoryDT = new YoDouble("trajectoryDT", registry);
@@ -127,7 +120,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
          yoGraphicsListRegistry.registerYoGraphic("FootViz", new YoGraphicShape(sidePrefix + "FootViz", footGraphics, currentFootPose, 1.0));
       }
 
-      updatesPerRequest.set(1);
+      updatesPerRequest.set(10);
       trajectoryDT.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -194,7 +187,11 @@ public class SLIPJumpingDDPCalculatorVisualizer
 
       apexPoint.set(length / 2.0, 0.0, apexHeight + nominalComHeight);
 
-      ddp.initialize(currentCoMState, startPoint, apexPoint, endPoint, firstTransferDuration, flightDuration, secondTransferDuration);
+      double nominalInitialStiffness = 4.0 * Math.PI * Math.PI * mass / Math.pow(Math.min(firstTransferDuration, maxSupportForExtension), 2.0);
+      double nominalFinalStiffness = 4.0 * Math.PI * Math.PI * mass / Math.pow(Math.min(secondTransferDuration, maxSupportForExtension), 2.0);
+
+      ddp.initialize(currentCoMState, startPoint, apexPoint, endPoint, firstTransferDuration, flightDuration, secondTransferDuration,
+                     nominalInitialStiffness, nominalFinalStiffness);
       plotCoMPlan();
 
       while(true)

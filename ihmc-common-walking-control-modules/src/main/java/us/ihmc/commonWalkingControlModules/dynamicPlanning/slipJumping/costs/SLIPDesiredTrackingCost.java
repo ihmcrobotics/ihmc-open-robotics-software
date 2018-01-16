@@ -52,8 +52,8 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
    static double rTauXStance = 0.0;
    static double rTauYStance = 0.0;
    static double rTauZStance = 0.0;
-   static double rXfStance = 1.0e6;
-   static double rYfStance = 1.0e6;
+   static double rXfStance = 5.0e6;
+   static double rYfStance = 5.0e6;
    static double rKStance = 1.0e5;
 
    private final DenseMatrix64F QFlight = new DenseMatrix64F(stateVectorSize, stateVectorSize);

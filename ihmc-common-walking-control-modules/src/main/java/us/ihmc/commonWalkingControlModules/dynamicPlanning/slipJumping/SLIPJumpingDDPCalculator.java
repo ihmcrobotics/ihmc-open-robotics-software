@@ -77,17 +77,14 @@ public class SLIPJumpingDDPCalculator
 
 
    public void initialize(DenseMatrix64F currentState, FramePoint3D firstSupport, FramePoint3D apexPoint, FramePoint3D secondSupport,
-                          double firstStanceDuration, double flightDuration, double secondStanceDuration)
+                          double firstStanceDuration, double flightDuration, double secondStanceDuration, double nominalInitialStiffness,
+                          double nominalFinalStiffness)
    {
       // TODO do something with the current state
       initialState.set(currentState);
 
-      double nominalInitialStiffness = 4.0 * Math.PI * Math.PI * mass / (firstStanceDuration  * firstStanceDuration);
       int numberOfInitialTimeSteps = (int) Math.floor(firstStanceDuration / deltaT);
-
       int numberOfFlightTimeSteps = (int) Math.floor(flightDuration / deltaT);
-
-      double nominalFinalStiffness = 4.0 * Math.PI * Math.PI * mass / (secondStanceDuration * secondStanceDuration);
       int numberOfFinalTimeSteps = (int) Math.floor(secondStanceDuration / deltaT);
 
       double modifiedDeltaT = firstStanceDuration / numberOfInitialTimeSteps;

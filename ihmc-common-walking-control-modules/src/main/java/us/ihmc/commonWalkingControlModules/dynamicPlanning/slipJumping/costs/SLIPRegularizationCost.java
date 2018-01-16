@@ -23,11 +23,11 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
    static double qThetaDotY = 1e-5;
    static double qThetaDotZ = 1e-5;
 
-   static double rFx = 1e-5;
-   static double rFy = 1e-5;
-   static double rFz = 1e-6;
-   static double rTauX = 1e1;
-   static double rTauY = 1e1;
+   static double rFx = 1e-7;
+   static double rFy = 1e-7;
+   static double rFz = 1e-8;
+   static double rTauX = 1e0;
+   static double rTauY = 1e0;
    static double rTauZ = 1e1;
    static double rXf = 0.0;
    static double rYf = 0.0;
