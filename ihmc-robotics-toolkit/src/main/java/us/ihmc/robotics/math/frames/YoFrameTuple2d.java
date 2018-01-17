@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -54,16 +53,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
    {
       putYoValuesIntoFrameTuple2d();
       tuple2dToPack.set(frameTuple2d);
-   }
-
-   /**
-    * Pack this tuple2d in tuple3dToPack and tuple3dToPack.z = 0.0.
-    * @param tuple3dToPack {@code Tuple3d}
-    */
-   public final void get(Tuple3DBasics tuple3dToPack)
-   {
-      putYoValuesIntoFrameTuple2d();
-      tuple3dToPack.set(frameTuple2d, 0.0);
    }
    
    public final Vector2D getVector2dCopy()

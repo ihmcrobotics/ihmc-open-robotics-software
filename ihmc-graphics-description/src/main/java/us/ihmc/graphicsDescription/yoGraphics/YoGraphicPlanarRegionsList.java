@@ -419,7 +419,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {
          Point3D32 vertex = new Point3D32();
-         vertexBuffer.get(vertexIndex + indexInVertexBuffer).get(vertex);
+         vertex.set(vertexBuffer.get(vertexIndex + indexInVertexBuffer));
          transform.transform(vertex);
          vertices[vertexIndex] = vertex;
       }

@@ -161,7 +161,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
                transformToParent.setIdentity();
-               copFilteredInFootFrame.get(copOffset);
+               copOffset.set(copFilteredInFootFrame);
                transformToParent.setTranslation(copOffset);
             }
          };
