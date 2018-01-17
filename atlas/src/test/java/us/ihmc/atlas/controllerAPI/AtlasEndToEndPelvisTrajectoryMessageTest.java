@@ -37,7 +37,7 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 50.7)
-   @Test(timeout = 80000)
+   @Test(timeout = 120000)
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       super.testHeightUsingMultipleWaypoints();
