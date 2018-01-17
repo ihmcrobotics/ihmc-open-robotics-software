@@ -155,7 +155,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
       FrameVector2D frameHeadingVector = new FrameVector2D(referenceFrame, 1.0, 0.0);
       frameHeadingVector.changeFrame(worldFrame);
-      double ret = -Math.abs(frameHeadingVector.angle(walkPathVector.getFrameVector2dCopy()));
+      double ret = -Math.abs(frameHeadingVector.angle(new FrameVector2D(walkPathVector)));
 
       if (DEBUG)
       {
