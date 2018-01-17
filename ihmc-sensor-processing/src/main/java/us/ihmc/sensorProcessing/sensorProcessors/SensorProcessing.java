@@ -21,10 +21,12 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -1654,22 +1656,22 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       inputJointTaus.get(oneDoFJoint).set(value);
    }
 
-   public void setOrientationSensorValue(IMUDefinition imuDefinition, Quaternion value)
+   public void setOrientationSensorValue(IMUDefinition imuDefinition, QuaternionReadOnly value)
    {
       inputOrientations.get(imuDefinition).set(value);
    }
 
-   public void setOrientationSensorValue(IMUDefinition imuDefinition, RotationMatrix value)
+   public void setOrientationSensorValue(IMUDefinition imuDefinition, RotationMatrixReadOnly value)
    {
       inputOrientations.get(imuDefinition).set(value);
    }
 
-   public void setAngularVelocitySensorValue(IMUDefinition imuDefinition, Vector3D value)
+   public void setAngularVelocitySensorValue(IMUDefinition imuDefinition, Vector3DReadOnly value)
    {
       inputAngularVelocities.get(imuDefinition).set(value);
    }
 
-   public void setLinearAccelerationSensorValue(IMUDefinition imuDefinition, Vector3D value)
+   public void setLinearAccelerationSensorValue(IMUDefinition imuDefinition, Vector3DReadOnly value)
    {
       inputLinearAccelerations.get(imuDefinition).set(value);
    }
