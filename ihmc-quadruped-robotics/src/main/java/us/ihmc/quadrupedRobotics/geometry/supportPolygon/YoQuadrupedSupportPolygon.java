@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -413,7 +414,7 @@ public class YoQuadrupedSupportPolygon
       putYoValuesIntoSupportPolygon();
       FramePoint2D innerTuple = centroidToPack.getFrameTuple2d();
       quadrupedSupportPolygon.getCentroid2d(innerTuple);
-      centroidToPack.setWithoutChecks(innerTuple);
+      centroidToPack.set((Tuple2DReadOnly) innerTuple);
    }
 
    public void getCentroid(FramePoint3D centroidToPack)

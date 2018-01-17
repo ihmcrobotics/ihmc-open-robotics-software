@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -170,7 +171,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
          fromPose.checkReferenceFrameMatch(vectorToPack);
          frameTuple2d.sub(fromPose.getX(), fromPose.getY());
          frameTuple2d.normalize();
-         vectorToPack.setWithoutChecks(frameTuple2d);
+         vectorToPack.set((Tuple2DReadOnly) frameTuple2d);
       }
    }
 

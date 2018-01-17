@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -796,13 +797,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       FramePoint2D closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();
       leftTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
-      closestIntersection.setWithoutChecks(closestIntersectionFrameTuple);
+      closestIntersection.set((Tuple2DReadOnly) closestIntersectionFrameTuple);
 
       double distanceUpward = closestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
 
       FramePoint2D secondClosestIntersectionFramePoint = secondClosestIntersection.getFrameTuple2d();
       rightTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, secondClosestIntersectionFramePoint);
-      secondClosestIntersection.setWithoutChecks(secondClosestIntersectionFramePoint);
+      secondClosestIntersection.set((Tuple2DReadOnly) secondClosestIntersectionFramePoint);
 
       double distanceDownward = secondClosestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
 
