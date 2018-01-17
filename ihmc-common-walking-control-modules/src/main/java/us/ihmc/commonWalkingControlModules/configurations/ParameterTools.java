@@ -50,7 +50,7 @@ public class ParameterTools
       {
          String name = jointGroupParameter.getGroupName();
          JointAccelerationIntegrationParametersReadOnly defaultParameters = jointGroupParameter.getParameter();
-         TunableJointAccelerationIntegrationParameters parameterizedParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
+         TunableJointAccelerationIntegrationParameters parameterizedParameters = new TunableJointAccelerationIntegrationParameters(prefix + name, registry, defaultParameters);
 
          for (String jointName : jointGroupParameter.getMemberNames())
          {
