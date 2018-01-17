@@ -6,7 +6,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -48,11 +47,6 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
    }
 
    public void setOffset(FrameTuple3DReadOnly offset)
-   {
-      this.offset.set(offset);
-   }
-
-   public void setOffset(YoFrameTuple<?, ?> offset)
    {
       this.offset.set(offset);
    }

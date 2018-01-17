@@ -865,13 +865,6 @@ public class MatrixTools
       ejmlVector.set(startIndex + 2, 0, frameTuple.getZ());
    }
 
-   public static void insertYoFrameTupleIntoEJMLVector(YoFrameTuple<?, ?> yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
-   {
-      ejmlVector.set(startIndex + 0, 0, yoFrameTuple.getX());
-      ejmlVector.set(startIndex + 1, 0, yoFrameTuple.getY());
-      ejmlVector.set(startIndex + 2, 0, yoFrameTuple.getZ());
-   }
-
    public static void insertYoFrameQuaternionIntoEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;

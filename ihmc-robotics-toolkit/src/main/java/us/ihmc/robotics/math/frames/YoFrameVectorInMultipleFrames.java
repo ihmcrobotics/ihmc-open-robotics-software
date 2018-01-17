@@ -65,13 +65,6 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       return previousReferenceFrame;
    }
 
-   public final void subIncludingFrame(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      yoFrameTuple1.checkReferenceFrameMatch(yoFrameTuple2);
-      multipleFramesHelper.switchCurrentReferenceFrame(yoFrameTuple1.getReferenceFrame());
-      sub(yoFrameTuple1, yoFrameTuple2);
-   }
-
    @Override
    public int getNumberOfReferenceFramesRegistered()
    {
