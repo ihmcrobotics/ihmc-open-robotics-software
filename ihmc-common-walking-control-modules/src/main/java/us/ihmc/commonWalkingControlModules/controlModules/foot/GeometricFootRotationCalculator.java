@@ -147,7 +147,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       // This can be updated to do some least square best fit for a plane through all
       // measured cops. For now assume that the surface normal is [0.0, 0.0, 1.0] in world
       copFiltered.update(cop);
-      copFiltered.getPoint(planePoint);
+      planePoint.set(copFiltered);
       normal.set(0.0, 0.0, 1.0);
 
       normal.normalize();
