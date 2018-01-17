@@ -101,11 +101,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       return frameTuple;
    }
 
-   public final FrameVector2D getFrameVector2dCopy()
-   {
-      return new FrameVector2D(getReferenceFrame(), getX(), getY());
-   }
-
    public final FramePoint2D getFramePoint2dCopy()
    {
       return new FramePoint2D(getReferenceFrame(), getX(), getY());
