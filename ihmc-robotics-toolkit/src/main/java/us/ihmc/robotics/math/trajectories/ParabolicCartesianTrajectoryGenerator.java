@@ -3,11 +3,12 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-
 
 public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
 {
@@ -22,7 +23,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
    private final FrameVector3D tempVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    public ParabolicCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider, double groundClearance,
-           YoVariableRegistry parentRegistry)
+                                                YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + namePostFix);
       this.minimumJerkTrajectory = new YoMinimumJerkTrajectory(namePrefix, registry);
@@ -36,8 +37,15 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       this.groundClearance.set(groundClearance);
    }
 
+   @Override
    public void initialize(FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration, FramePoint3D finalDesiredPosition,
                           FrameVector3D finalDesiredVelocity)
+   {
+      this.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredPosition, finalDesiredVelocity);
+   }
+
+   public void initialize(FramePoint3D initialPosition, FrameVector3DReadOnly initialVelocity, FrameVector3DReadOnly initialAcceleration,
+                          FramePoint3DReadOnly finalDesiredPosition, FrameVector3D finalDesiredVelocity)
    {
       timeIntoStep.set(0.0);
       this.stepTime.set(stepTimeProvider.getValue());
@@ -111,7 +119,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       tempVector.scale(minimumJerkTrajectory.getAcceleration());
       accelerationToPack.add(tempVector);
    }
-   
+
    public void computeNextTick(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack, double deltaT)
    {
       timeIntoStep.add(deltaT);
@@ -120,7 +128,7 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
       getVelocity(velocityToPack);
       getAcceleration(accelerationToPack);
    }
-   
+
    public void computeNextTick(FramePoint3D positionToPack, double deltaT)
    {
       timeIntoStep.add(deltaT);

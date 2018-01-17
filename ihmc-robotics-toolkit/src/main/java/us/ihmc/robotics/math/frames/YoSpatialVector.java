@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -133,14 +134,14 @@ public class YoSpatialVector
       return angularPart;
    }
 
-   public FrameVector3D getLinearPart()
+   public FrameVector3DReadOnly getLinearPart()
    {
-      return linearPart.getFrameTuple();
+      return linearPart;
    }
 
-   public FrameVector3D getAngularPart()
+   public FrameVector3DReadOnly getAngularPart()
    {
-      return angularPart.getFrameTuple();
+      return angularPart;
    }
 
    public void setAndMatchFrameLinearPart(FrameTuple3D<?, ?> frameVector)

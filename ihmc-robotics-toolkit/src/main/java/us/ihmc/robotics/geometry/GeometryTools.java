@@ -374,8 +374,8 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code intersectionToPack}.
     */
    // FIXME This method is too confusing and error prone.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint3D firstPointOnLine1, FramePoint3D secondPointOnLine1, FramePoint3D firstPointOnLine2,
-                                                          FramePoint3D secondPointOnLine2, FramePoint3D intersectionToPack)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint3DReadOnly firstPointOnLine1, FramePoint3DReadOnly secondPointOnLine1, FramePoint3DReadOnly firstPointOnLine2,
+                                                          FramePoint3DReadOnly secondPointOnLine2, FramePoint3D intersectionToPack)
    {
       firstPointOnLine1.checkReferenceFrameMatch(secondPointOnLine1);
       firstPointOnLine2.checkReferenceFrameMatch(secondPointOnLine2);

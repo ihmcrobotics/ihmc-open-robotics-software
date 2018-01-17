@@ -3,11 +3,14 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -62,14 +65,14 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       rhoWeights.clear();
    }
 
-   public void addPointInContact(FramePoint3D newPointInContact)
+   public void addPointInContact(FramePoint3DReadOnly newPointInContact)
    {
       contactPoints.add().setIncludingFrame(newPointInContact);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
       rhoWeights.add().setValue(Double.NaN);
    }
 
-   public void addPointInContact(FramePoint2D newPointInContact)
+   public void addPointInContact(FramePoint2DReadOnly newPointInContact)
    {
       contactPoints.add().setIncludingFrame(newPointInContact, 0.0);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
@@ -105,7 +108,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       maxContactPointNormalForces.get(contactPointIndex).setValue(maxNormalForce);
    }
 
-   public void setContactNormal(FrameVector3D contactNormal)
+   public void setContactNormal(FrameVector3DReadOnly contactNormal)
    {
       this.contactNormal.setIncludingFrame(contactNormal);
    }

@@ -5,6 +5,8 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -154,7 +156,7 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
       orientation.set(yoFrameQuaternion);
    }
    
-   public void setOrientation(FrameQuaternion frameOrientation)
+   public void setOrientation(FrameQuaternionReadOnly frameOrientation)
    {
       boolean notifyListeners = true;
       orientation.set(frameOrientation, notifyListeners);
@@ -165,7 +167,7 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
       orientation.set(quaternion);
    }
 
-   public void set(FramePoint3D framePoint, FrameQuaternion frameOrientation)
+   public void set(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
@@ -174,10 +176,10 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
 
    public void set(YoFramePose yoFramePose)
    {
-      set(yoFramePose.getPosition().getFrameTuple(), yoFramePose.getOrientation().getFrameOrientation());
+      set(yoFramePose.getPosition(), yoFramePose.getOrientation().getFrameOrientation());
    }
 
-   public void setAndMatchFrame(FramePoint3D framePoint, FrameQuaternion frameOrientation)
+   public void setAndMatchFrame(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
       boolean notifyListeners = true;
       position.setAndMatchFrame(framePoint, notifyListeners);

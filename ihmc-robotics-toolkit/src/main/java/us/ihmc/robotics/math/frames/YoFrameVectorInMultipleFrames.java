@@ -47,11 +47,6 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       set(vector);
    }
 
-   public void setIncludingFrame(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      setIncludingFrame(yoFrameTuple.getFrameTuple());
-   }
-
    public void setIncludingFrame(FrameTuple3DReadOnly frameTuple)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple.getReferenceFrame());

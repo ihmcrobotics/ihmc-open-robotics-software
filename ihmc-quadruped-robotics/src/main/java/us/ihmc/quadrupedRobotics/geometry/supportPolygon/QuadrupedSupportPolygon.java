@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -291,7 +292,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
 
-   public void setFootstep(RobotQuadrant robotQuadrant, FramePoint3D footstep)
+   public void setFootstep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly footstep)
    {
       if (footstep == null)
       {
@@ -555,7 +556,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint pointToSnap, YoFramePoint innerPoint)
    {
-      if (size() > 0 && !isInside(pointToSnap.getFrameTuple()))
+      if (size() > 0 && !isInside(pointToSnap))
       {
          updateTempFrameConvexPolygon();
 
@@ -783,7 +784,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public boolean isInside(FramePoint3D point)
+   public boolean isInside(FramePoint3DReadOnly point)
    {
       return isInside(point.getX(), point.getY());
    }
@@ -1651,7 +1652,7 @@ public class QuadrupedSupportPolygon implements Serializable
    /**
     * Gets distance from P1 to trotLine specified by front quadrant.
     */
-   public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint3D p1, FramePoint3D p2)
+   public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint3DReadOnly p1, FramePoint3DReadOnly p2)
    {
       boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()), tempIntersection);
 
