@@ -30,9 +30,4 @@ public class YoFramePoint2d extends YoFrameTuple2d<YoFramePoint2d, FramePoint2D>
    {
       return new FramePoint2D();
    }
-   
-   public double distance(FramePoint2D framePoint2d)
-   {
-      return getFrameTuple2d().distance(framePoint2d);
-   }
 }
