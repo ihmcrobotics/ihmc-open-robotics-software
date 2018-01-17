@@ -5,10 +5,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.interfaces.Clearable;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
@@ -99,11 +97,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    {
       putYoValuesIntoFrameTuple();
       return frameTuple;
-   }
-
-   public final FramePoint2D getFramePoint2dCopy()
-   {
-      return new FramePoint2D(getReferenceFrame(), getX(), getY());
    }
 
    public final void getFrameTupleIncludingFrame(FrameTuple3D<?, ?> frameTuple)

@@ -278,7 +278,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
       FramePoint2D endpointTwoD = new FramePoint2D();
       endpointTwoD.setIncludingFrame(endPoint);
-      nominalYawLineSegment.set(centroid.getFramePoint2dCopy(), endpointTwoD);
+      nominalYawLineSegment.set(new FramePoint2D(centroid), endpointTwoD);
       nominalYawGraphic.update();
 
       rootJoint.setPosition(temporaryCentroid.getPoint());
