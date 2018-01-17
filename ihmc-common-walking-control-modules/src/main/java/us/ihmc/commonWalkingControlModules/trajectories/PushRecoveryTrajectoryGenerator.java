@@ -163,7 +163,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       {
          tForViz = t0ForViz + (double) i / (double) (numberOfBallsInBag) * (tfForViz - t0ForViz);
          computePositionsForVis(tForViz);
-         bagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+         bagOfBalls.setBall(desiredPosition, i);
       }
    }
 

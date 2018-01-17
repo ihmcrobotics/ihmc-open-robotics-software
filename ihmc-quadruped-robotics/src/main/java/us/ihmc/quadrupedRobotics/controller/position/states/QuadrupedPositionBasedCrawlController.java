@@ -1883,7 +1883,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       public void setCoMTrajectoryToCurrentAndSetToDone()
       {
          desiredCoMVelocity.setToZero();
-         FramePoint3D desiredBodyCurrent = desiredCoMPose.getPosition().getFramePointCopy();
+         FramePoint3D desiredBodyCurrent = new FramePoint3D(desiredCoMPose.getPosition());
          initialCoMPosition.set(desiredBodyCurrent);
          initializeCoMTrajectory(new FramePoint2D(ReferenceFrame.getWorldFrame(), initialCoMPosition.getX(), initialCoMPosition.getY()));
          comTrajectoryGenerator.setToDone();

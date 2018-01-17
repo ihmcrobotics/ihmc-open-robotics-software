@@ -6,7 +6,6 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -100,11 +99,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    {
       putYoValuesIntoFrameTuple();
       return frameTuple;
-   }
-
-   public final FramePoint3D getFramePointCopy()
-   {
-      return new FramePoint3D(getFrameTuple());
    }
 
    public final FrameVector2D getFrameVector2dCopy()

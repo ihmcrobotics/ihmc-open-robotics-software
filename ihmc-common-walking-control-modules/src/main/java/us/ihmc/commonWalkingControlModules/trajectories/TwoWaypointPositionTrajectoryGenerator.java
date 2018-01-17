@@ -361,7 +361,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          oppositeWaypointToEndpoint.normalize();
          oppositeWaypointToEndpoint.scale(scaleFactor);
 
-         allPositions[accelerationEndpointIndices[i]].set(allPositions[waypointIndices[i]].getFramePointCopy());
+         allPositions[accelerationEndpointIndices[i]].set(allPositions[waypointIndices[i]]);
          allPositions[accelerationEndpointIndices[i]].add(oppositeWaypointToEndpoint);
       }
    }
@@ -453,8 +453,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       if (waypointsAreCloseTogether())
       {
-         FramePoint3D midpoint = allPositions[waypointIndices[0]].getFramePointCopy();
-         midpoint.add(allPositions[waypointIndices[1]].getFramePointCopy());
+         FramePoint3D midpoint = new FramePoint3D(allPositions[waypointIndices[0]]);
+         midpoint.add(allPositions[waypointIndices[1]]);
          midpoint.scale(0.5);
 
          for (int i = 0; i < 2; i++)
@@ -501,8 +501,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private List<FramePoint3D> getWaypointsForObstacleClearance(double swingHeight)
    {
       List<FramePoint3D> waypoints = new ArrayList<FramePoint3D>();
-      waypoints.add(allPositions[endpointIndices[0]].getFramePointCopy());
-      waypoints.add(allPositions[endpointIndices[1]].getFramePointCopy());
+      waypoints.add(new FramePoint3D(allPositions[endpointIndices[0]]));
+      waypoints.add(new FramePoint3D(allPositions[endpointIndices[1]]));
 
       double zSwingHeight = waypoints.get(0).getZ() + swingHeight;
 
@@ -548,8 +548,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private List<FramePoint3D> getWaypointsAtGroundClearance(double groundClearance, double[] proportionsThroughTrajectoryForGroundClearance)
    {
-      FramePoint3D initialPosition = allPositions[0].getFramePointCopy();
-      FramePoint3D finalPosition = allPositions[3].getFramePointCopy();
+      FramePoint3D initialPosition = new FramePoint3D(allPositions[0]);
+      FramePoint3D finalPosition = new FramePoint3D(allPositions[3]);
       positionSources[0].getPosition(initialPosition);
       positionSources[1].getPosition(finalPosition);
       initialPosition.changeFrame(referenceFrame);
@@ -587,8 +587,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private List<FramePoint3D> getWaypointsAtGroundClearances(double[] groundClearances, double[] proportionsThroughTrajectoryForGroundClearance)
    {
-      FramePoint3D initialPosition = allPositions[0].getFramePointCopy();
-      FramePoint3D finalPosition = allPositions[3].getFramePointCopy();
+      FramePoint3D initialPosition = new FramePoint3D(allPositions[0]);
+      FramePoint3D finalPosition = new FramePoint3D(allPositions[3]);
       positionSources[0].getPosition(initialPosition);
       positionSources[1].getPosition(finalPosition);
       initialPosition.changeFrame(referenceFrame);
@@ -625,7 +625,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       for (int i = 0; i < 4; i++)
       {
          nonAccelerationEndpointTimes[i] = allTimes[nonAccelerationEndpointIndices[i]].getDoubleValue();
-         nonAccelerationEndpointPositions[i] = allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy();
+         nonAccelerationEndpointPositions[i] = new FramePoint3D(allPositions[nonAccelerationEndpointIndices[i]]);
          nonAccelerationEndpointVelocities[i] = new FrameVector3D(allVelocities[nonAccelerationEndpointIndices[i]]);
       }
 
@@ -650,12 +650,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
          t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
          compute(t);
-         trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+         trajectoryBagOfBalls.setBall(desiredPosition, i);
       }
 
       for (int i = 0; i < nonAccelerationEndpointIndices.length; i++)
       {
-         fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy(), YoAppearance.AliceBlue(), i);
+         fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]], YoAppearance.AliceBlue(), i);
       }
    }
 

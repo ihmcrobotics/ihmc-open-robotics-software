@@ -903,7 +903,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             for (RobotSide robotSide : RobotSide.values())
             {
                YoFramePose footIK = feetIKs.get(robotSide);
-               FramePoint3D position = footIK.getPosition().getFramePointCopy();
+               FramePoint3D position = new FramePoint3D(footIK.getPosition());
                FrameQuaternion orientation = footIK.getOrientation().getFrameOrientationCopy();
                FramePose framePose = new FramePose(position, orientation);
                framePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
@@ -911,7 +911,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
                legInverseKinematicsCalculators.get(robotSide).solve(desiredTransform);
 
                YoFramePose handIK = handIKs.get(robotSide);
-               position = handIK.getPosition().getFramePointCopy();
+               position = new FramePoint3D(handIK.getPosition());
                orientation = handIK.getOrientation().getFrameOrientationCopy();
                framePose = new FramePose(position, orientation);
                framePose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());

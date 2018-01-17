@@ -185,9 +185,9 @@ public class SphereICPOptimizationController implements GenericSphereController
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
-         icpReferenceTrack.setBallLoop(desiredICP.getFramePointCopy());
-         icpTrack.setBallLoop(icp.getFramePointCopy());
-         cmpTrack.setBallLoop(yoDesiredCMP.getFramePointCopy());
+         icpReferenceTrack.setBallLoop(desiredICP);
+         icpTrack.setBallLoop(icp);
+         cmpTrack.setBallLoop(yoDesiredCMP);
          comTrack.setBallLoop(centerOfMass);
       }
    }

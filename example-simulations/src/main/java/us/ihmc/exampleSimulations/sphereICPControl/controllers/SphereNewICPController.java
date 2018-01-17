@@ -182,8 +182,8 @@ public class SphereNewICPController implements GenericSphereController
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
-         icpTrack.setBallLoop(desiredICP.getFramePointCopy());
-         cmpTrack.setBallLoop(yoDesiredCMP.getFramePointCopy());
+         icpTrack.setBallLoop(desiredICP);
+         cmpTrack.setBallLoop(yoDesiredCMP);
          comTrack.setBallLoop(centerOfMass);
       }
    }

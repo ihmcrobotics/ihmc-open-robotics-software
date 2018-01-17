@@ -406,7 +406,7 @@ public class YoSpline3D
     */
    public FramePoint3D getPositionCopy()
    {
-      return position.getFramePointCopy();
+      return new FramePoint3D(position);
    }
 
    /**
