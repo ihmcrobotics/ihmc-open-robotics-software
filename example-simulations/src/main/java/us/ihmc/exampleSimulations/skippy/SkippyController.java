@@ -583,7 +583,7 @@ public class SkippyController implements RobotController
       Point3D footLocationInWorld = new Point3D();
       footLocationInWorld.set(robot.computeFootLocation());
       tempFootToComPositionVector.set(com);
-      footToComPositionVector.setVector(tempFootToComPositionVector);
+      footToComPositionVector.set(tempFootToComPositionVector);
       footToComPositionVector.sub(footLocationInWorld);
    }
 

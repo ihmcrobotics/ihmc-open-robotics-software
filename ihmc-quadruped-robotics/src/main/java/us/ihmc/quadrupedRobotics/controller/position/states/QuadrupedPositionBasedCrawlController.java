@@ -886,7 +886,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          //body velocity
          Vector3D planarVelocityInput = planarVelocityProvider.get();//Frame up to controller - feedForwardBodyFrame
-         desiredVelocity.setVector(planarVelocityInput);
+         desiredVelocity.set(planarVelocityInput);
          desiredVelocity.setY(0.0);
          desiredVelocity.setZ(0.0);
 

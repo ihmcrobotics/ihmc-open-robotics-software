@@ -8,12 +8,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 
-
-//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
-//since they contain YoVariables.
-public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> implements VectorInterface, FrameVector3DReadOnly
+// Note: You should only make these once at the initialization of a controller. You shouldn't make
+// any on the fly
+// since they contain YoVariables.
+public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> implements FrameVector3DReadOnly
 {
    public YoFrameVector(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -53,26 +52,7 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> im
       getYoValuesFromFrameTuple();
    }
 
-   @Override
-   public void getVector(Vector3D VectorToPack)
-   {
-      VectorToPack.set(this);
-   }
-
    private final Vector3D tempVector = new Vector3D();
-
-   @Override
-   public void setVector(VectorInterface vectorInterface)
-   {
-      vectorInterface.getVector(tempVector);
-      this.set(tempVector);
-   }
-
-   @Override
-   public void setVector(Vector3D vector)
-   {
-      this.set(vector);
-   }
 
    public void setAsRotationVector(QuaternionReadOnly quaternion)
    {
