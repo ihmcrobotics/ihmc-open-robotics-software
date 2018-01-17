@@ -374,8 +374,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
       }
 
-      double actualDistanceDueToDisturbance = desiredCMPPosition.getXYPlaneDistance(actualICP2d);
-      double expectedDistanceAccordingToPlan = desiredCMPPosition.getXYPlaneDistance(desiredICPPosition);
+      double actualDistanceDueToDisturbance = desiredCMPPosition.distanceXY(actualICP2d);
+      double expectedDistanceAccordingToPlan = desiredCMPPosition.distanceXY(desiredICPPosition);
 
       double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
 
