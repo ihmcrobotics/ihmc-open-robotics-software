@@ -254,7 +254,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          {
             Point3D desiredHandPosition = new Point3D();
             Quaternion desiredHandOrientation = new Quaternion();
-            yoDesiredHandPosition.get(desiredHandPosition);
+            desiredHandPosition.set(yoDesiredHandPosition);
             yoDesiredHandOrientation.get(desiredHandOrientation);
             RigidBody hand = fullRobotModel.getHand(robotSide);
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
@@ -296,7 +296,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       if (!yoDesiredPelvisPosition.containsNaN())
       {
          Point3D desiredPelvisPosition = new Point3D();
-         yoDesiredPelvisPosition.get(desiredPelvisPosition);
+         desiredPelvisPosition.set(yoDesiredPelvisPosition);
          pelvisMessage.setDesiredPosition(desiredPelvisPosition);
          pelvisMessage.setWeight(0.02);
       }

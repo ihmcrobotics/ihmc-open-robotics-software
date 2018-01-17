@@ -104,7 +104,7 @@ public class GroundContactPoint extends ExternalForcePoint
 
    public void getTouchdownLocation(Point3D touchdownLocationToPack)
    {
-      touchdownLocation.get(touchdownLocationToPack);
+      touchdownLocationToPack.set(touchdownLocation);
    }
    
    public YoFramePoint getYoTouchdownLocation()
@@ -130,7 +130,7 @@ public class GroundContactPoint extends ExternalForcePoint
    
    public void getSurfaceNormal(Vector3D vectorToPack)
    {
-      surfaceNormal.get(vectorToPack);
+      vectorToPack.set(surfaceNormal);
    }
 
    public void setSurfaceNormal(Vector3D surfaceNormal)

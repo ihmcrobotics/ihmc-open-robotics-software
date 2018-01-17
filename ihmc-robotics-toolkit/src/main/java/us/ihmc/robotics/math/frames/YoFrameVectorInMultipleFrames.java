@@ -40,7 +40,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
    @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      get(vector);
+      vector.set(this);
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       frameVector.setIncludingFrame(currentReferenceFrame, vector);
       frameVector.changeFrame(desiredFrame);

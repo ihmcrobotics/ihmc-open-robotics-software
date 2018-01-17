@@ -5,17 +5,15 @@ import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoSE3OffsetFrame extends MovingReferenceFrame
 {
-   private final Vector3D tempVector = new Vector3D();
    private final Quaternion tempQuaternion = new Quaternion();
    private final YoFrameVector translationToParent;
    private final YoFrameQuaternion rotationToParent;
@@ -86,9 +84,8 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      translationToParent.get(tempVector);
       rotationToParent.get(tempQuaternion);
-      transformToParent.set(tempQuaternion, tempVector);
+      transformToParent.set(tempQuaternion, translationToParent);
    }
 
    @Override

@@ -384,14 +384,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    private void computeDrift(double time, double alphaDecay, YoFrameVector angularVelocity, Quaternion driftToPack)
    {
-      angularVelocity.get(tempAngularVelocityForDrift);
+      tempAngularVelocityForDrift.set(angularVelocity);
       tempAngularVelocity.scale(alphaDecay);
       RotationTools.integrateAngularVelocity(tempAngularVelocityForDrift, time, driftToPack);
    }
 
    private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector angularVelocity, YoDouble angularVelocityMagnitude, Quaternion driftToPack)
    {
-      angularVelocity.get(tempAngularVelocityForDrift);
+      tempAngularVelocityForDrift.set(angularVelocity);
 
       double maxTime = Math.signum(time) * PI / angularVelocityMagnitude.getDoubleValue() - 1.0e-5;
       time = alphaSaturation * maxTime + (1.0 - alphaSaturation) * time;

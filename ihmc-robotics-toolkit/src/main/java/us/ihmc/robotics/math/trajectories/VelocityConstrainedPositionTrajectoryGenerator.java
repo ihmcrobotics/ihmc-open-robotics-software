@@ -294,7 +294,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void get(Point3D positionToPack)
    {
-      currentPosition.get(positionToPack);
+      positionToPack.set(currentPosition);
    }
 
    @Override
@@ -310,7 +310,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void getVelocity(Vector3D velocityToPack)
    {
-      currentVelocity.get(velocityToPack);
+      velocityToPack.set(currentVelocity);
    }
 
    @Override
@@ -326,7 +326,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void getAcceleration(Vector3D accelerationToPack)
    {
-      currentAcceleration.get(accelerationToPack);
+      accelerationToPack.set(currentAcceleration);
    }
 
    @Override

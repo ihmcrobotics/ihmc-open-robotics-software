@@ -186,7 +186,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
 
    public void get(Point3D positionToPack)
    {
-      currentPosition.get(positionToPack);
+      positionToPack.set(currentPosition);
    }
 
    @Override
@@ -202,7 +202,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
 
    public void getVelocity(Vector3D velocityToPack)
    {
-      currentVelocity.get(velocityToPack);
+      velocityToPack.set(currentVelocity);
    }
 
    @Override
@@ -213,7 +213,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
 
    public void getAcceleration(Vector3D accelerationToPack)
    {
-      currentAcceleration.get(accelerationToPack);
+      accelerationToPack.set(currentAcceleration);
    }
 
    @Override

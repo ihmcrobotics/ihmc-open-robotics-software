@@ -334,7 +334,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).get(desiredFootPositionForInverseKinematics);
+         desiredFootPositionForInverseKinematics.set(desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant));
          inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, desiredFootPositionForInverseKinematics, fullRobotModel);
       }
    }

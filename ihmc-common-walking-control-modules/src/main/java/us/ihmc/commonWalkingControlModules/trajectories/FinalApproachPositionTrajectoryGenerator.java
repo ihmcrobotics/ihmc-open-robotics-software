@@ -185,7 +185,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    {
       this.finalDirection.set(finalDirection);
       this.finalDirection.normalize();
-      this.finalDirection.get(tempVector);
+      tempVector.set(this.finalDirection);
       tempVector.negate();
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.finalDirection.getReferenceFrame(), axisAngleToWorld);

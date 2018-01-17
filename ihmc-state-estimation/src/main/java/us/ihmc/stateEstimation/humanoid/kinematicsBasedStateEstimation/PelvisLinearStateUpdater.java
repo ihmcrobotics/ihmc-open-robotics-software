@@ -311,7 +311,7 @@ public class PelvisLinearStateUpdater
    public void updateForFrozenState()
    {
       // Keep setting the position so the localization updater works properly.
-      yoRootJointPosition.get(tempRootJointTranslation);
+      tempRootJointTranslation.set(yoRootJointPosition);
       rootJoint.setPosition(tempRootJointTranslation);
 
       // Set the rootJoint twist to zero.
@@ -399,7 +399,7 @@ public class PelvisLinearStateUpdater
 
    private void updateRootJoint()
    {
-      yoRootJointPosition.get(tempRootJointTranslation);
+      tempRootJointTranslation.set(yoRootJointPosition);
       rootJoint.setPosition(tempRootJointTranslation);
 
       tempVelocity.setIncludingFrame(rootJointVelocity);

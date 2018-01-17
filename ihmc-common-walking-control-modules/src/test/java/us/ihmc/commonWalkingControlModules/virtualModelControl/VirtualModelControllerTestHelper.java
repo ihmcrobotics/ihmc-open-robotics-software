@@ -34,8 +34,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -70,6 +68,8 @@ import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsR
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VirtualModelControllerTestHelper
 {
@@ -2569,7 +2569,7 @@ public class VirtualModelControllerTestHelper
       public Vector3D getCurrentTorque()
       {
          Vector3D contactTorque = new Vector3D();
-         this.contactTorque.get(contactTorque);
+         contactTorque.set(this.contactTorque);
          contactTorque.negate();
          return contactTorque;
       }
@@ -2577,7 +2577,7 @@ public class VirtualModelControllerTestHelper
       public Vector3D getCurrentForce()
       {
          Vector3D contactForce = new Vector3D();
-         this.contactForce.get(contactForce);
+         contactForce.set(this.contactForce);
          contactForce.negate();
          return contactForce;
       }

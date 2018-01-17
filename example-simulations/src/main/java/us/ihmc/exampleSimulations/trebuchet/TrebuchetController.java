@@ -71,7 +71,7 @@ public class TrebuchetController implements RobotController
          ropeForce.set(0.0);
 
       // Apply to external force points:
-      poleToBallPosition.get(forceOnPole);
+      forceOnPole.set(poleToBallPosition);
       forceOnPole.normalize();
 
       forceOnPole.scale(ropeForce.getDoubleValue());

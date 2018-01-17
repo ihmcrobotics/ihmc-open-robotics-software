@@ -235,7 +235,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    {
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
-      this.initialDirection.get(tempVector);
+      tempVector.set(this.initialDirection);
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.initialDirection.getReferenceFrame(), axisAngleToWorld);
 

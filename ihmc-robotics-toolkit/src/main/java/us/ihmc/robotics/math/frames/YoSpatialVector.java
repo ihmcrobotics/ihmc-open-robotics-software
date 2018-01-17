@@ -191,7 +191,7 @@ public class YoSpatialVector
 
    public void getLinearPart(Vector3DBasics linearPartToPack)
    {
-      this.linearPart.get(linearPartToPack);
+      linearPartToPack.set(this.linearPart);
    }
 
    public void getLinearPart(FrameVector3D linearPartToPack)
@@ -211,7 +211,7 @@ public class YoSpatialVector
 
    public void getAngularPart(Vector3DBasics angularPartToPack)
    {
-      this.angularPart.get(angularPartToPack);
+      angularPartToPack.set(this.angularPart);
    }
 
    public void getAngularPart(FrameVector3D angularPartToPack)

@@ -188,7 +188,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.initialPosition.set(initialPosition);
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
-      this.initialDirection.get(tempVector);
+      tempVector.set(this.initialDirection);
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 
       initialDistortionPose.setToZero(this.initialPosition.getReferenceFrame());
@@ -203,7 +203,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.finalPosition.set(finalPosition);
       this.finalDirection.set(finalDirection);
       this.finalDirection.normalize();
-      this.finalDirection.get(tempVector);
+      tempVector.set(this.finalDirection);
       tempVector.negate();
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 

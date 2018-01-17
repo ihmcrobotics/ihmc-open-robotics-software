@@ -41,7 +41,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
    @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      get(point);
+      point.set(this);
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       framePoint.setIncludingFrame(currentReferenceFrame, point);
       framePoint.changeFrame(desiredFrame);

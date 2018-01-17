@@ -323,8 +323,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       FrameQuaternion qa = initialOrientation.getFrameOrientation();
       FrameQuaternion qb = finalOrientation.getFrameOrientation();
-      initialAngularVelocity.get(wa);
-      finalAngularVelocity.get(wb);
+      wa.set(initialAngularVelocity);
+      wb.set(finalAngularVelocity);
       qa.inverseTransform(wa);
       qb.inverseTransform(wb);
 
@@ -340,7 +340,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       if (numberOfRevolutions.getIntegerValue() != 0)
       {
-         controlRotations[2].get(delta);
+         delta.set(controlRotations[2]);
          if (delta.lengthSquared() > 1.0e-10)
          {
             delta.normalize();
@@ -461,9 +461,9 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       // Changing naming convention to make expressions smaller
       QuaternionReadOnly q0 = initialOrientation.getFrameOrientation().getQuaternion();
-      controlRotations[1].get(d1);
-      controlRotations[2].get(d2);
-      controlRotations[3].get(d3);
+      d1.set(controlRotations[1]);
+      d2.set(controlRotations[2]);
+      d3.set(controlRotations[3]);
 
       // Update intermediate variables
       expD1B1.set(exp(cumulativeBeziers[1].getDoubleValue(), d1));

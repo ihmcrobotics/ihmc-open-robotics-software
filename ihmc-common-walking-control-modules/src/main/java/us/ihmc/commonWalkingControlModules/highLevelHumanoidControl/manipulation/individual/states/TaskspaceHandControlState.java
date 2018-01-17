@@ -102,8 +102,8 @@ public class TaskspaceHandControlState extends HandControlState
       yoLinearWeight = new YoFrameVector(namePrefix + "LinearTaskspaceWeight", null, registry);
       yoAngularWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
       yoLinearWeight.set(SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT, SolverWeightLevels.HAND_TASKSPACE_WEIGHT);
-      yoAngularWeight.get(angularWeight);
-      yoLinearWeight.get(linearWeight);
+      angularWeight.set(yoAngularWeight);
+      linearWeight.set(yoLinearWeight);
 
       spatialFeedbackControlCommand.set(base, endEffector);
       spatialFeedbackControlCommand.setPrimaryBase(chest);
@@ -239,8 +239,8 @@ public class TaskspaceHandControlState extends HandControlState
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       spatialFeedbackControlCommand.setGains(gains);
-      yoAngularWeight.get(angularWeight);
-      yoLinearWeight.get(linearWeight);
+      angularWeight.set(yoAngularWeight);
+      linearWeight.set(yoLinearWeight);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
    }
 
