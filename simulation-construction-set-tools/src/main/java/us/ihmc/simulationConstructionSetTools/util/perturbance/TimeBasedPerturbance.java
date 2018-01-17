@@ -4,12 +4,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TimeBasedPerturbance implements RobotController
 {
@@ -115,7 +115,7 @@ public class TimeBasedPerturbance implements RobotController
       if (time.getDoubleValue() > timeToDoPerturbance.getDoubleValue())
       {
          computeForcePerturbance();
-         perturbable.setForcePerturbance(perturbanceForce.getFrameVectorCopy().getVector(), perturbanceDuration.getDoubleValue());
+         perturbable.setForcePerturbance(perturbanceForce, perturbanceDuration.getDoubleValue());
          perturbanceApplicationPoint.set(perturbable.getForcePerturbanceApplicationPoint());
       }
       

@@ -414,7 +414,7 @@ public class YoSpline3D
     */
    public FrameVector3D getVelocityCopy()
    {
-      return velocity.getFrameVectorCopy();
+      return new FrameVector3D(velocity);
    }
    
    /**
@@ -422,7 +422,7 @@ public class YoSpline3D
     */
    public FrameVector3D getAccelerationCopy()
    {
-      return acceleration.getFrameVectorCopy();
+      return new FrameVector3D(acceleration);
    }
 
    public void getPosition(FramePoint3D positionToPack)
