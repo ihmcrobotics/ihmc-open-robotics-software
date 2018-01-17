@@ -359,7 +359,7 @@ public class PelvisICPBasedTranslationManager
       tempPosition2d.changeFrame(worldFrame);
       pelvisPositionError.sub(tempPosition2d);
 
-      pelvisPositionError.getFrameTuple2dIncludingFrame(tempError2d);
+      tempError2d.setIncludingFrame(pelvisPositionError);
       tempError2d.scale(controlDT);
       pelvisPositionCumulatedError.add(tempError2d);
 
@@ -408,7 +408,7 @@ public class PelvisICPBasedTranslationManager
 
       else
       {
-         desiredICPOffset.getFrameTuple2dIncludingFrame(tempICPOffset);
+         tempICPOffset.setIncludingFrame(desiredICPOffset);
          tempICPOffset.changeFrame(supportFrame);
       }
 

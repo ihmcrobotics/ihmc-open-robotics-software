@@ -782,7 +782,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
    public void getCapturePoint(FramePoint2D capturePoinToPack)
    {
-      yoICP.getFrameTuple2dIncludingFrame(capturePoinToPack);
+      capturePoinToPack.setIncludingFrame(yoICP);
    }
    
    // Set initial velocity

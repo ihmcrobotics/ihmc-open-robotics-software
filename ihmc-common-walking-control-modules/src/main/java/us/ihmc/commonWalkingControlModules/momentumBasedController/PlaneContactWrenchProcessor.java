@@ -146,7 +146,7 @@ public class PlaneContactWrenchProcessor
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
       YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
-      yoCop.getFrameTuple2dIncludingFrame(desiredCoPToPack);
+      desiredCoPToPack.setIncludingFrame(yoCop);
    }
 
    public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()

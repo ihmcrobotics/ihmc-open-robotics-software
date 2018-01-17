@@ -718,12 +718,12 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
-      footDesiredCenterOfPressures.get(contactablePlaneBody).getFrameTuple2dIncludingFrame(desiredCoPToPack);
+      desiredCoPToPack.setIncludingFrame(footDesiredCenterOfPressures.get(contactablePlaneBody));
    }
 
    public void getFilteredDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
-      filteredFootDesiredCenterOfPressures.get(contactablePlaneBody).getFrameTuple2dIncludingFrame(desiredCoPToPack);
+      desiredCoPToPack.setIncludingFrame(filteredFootDesiredCenterOfPressures.get(contactablePlaneBody));
    }
 
    public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)
@@ -1016,7 +1016,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getCoP(FramePoint2D copToPack)
    {
-      yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
+      copToPack.setIncludingFrame(yoCenterOfPressure);
    }
 
    public void getAngularMomentum(FrameVector3D upperBodyAngularMomentumToPack)

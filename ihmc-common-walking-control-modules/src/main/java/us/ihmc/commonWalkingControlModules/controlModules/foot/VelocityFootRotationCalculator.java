@@ -208,7 +208,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       angularVelocity2d.setIncludingFrame(soleFrame, angularVelocity.getX(), angularVelocity.getY());
 
       yoFootAngularVelocityFiltered.update(angularVelocity2d);
-      yoFootAngularVelocityFiltered.getFrameTuple2dIncludingFrame(angularVelocity2d);
+      angularVelocity2d.setIncludingFrame(yoFootAngularVelocityFiltered);
 
       yoAngleOfLoR.set(Math.atan2(angularVelocity2d.getY(), angularVelocity2d.getX()));
       yoLoRAngularVelocityFiltered.updateForAngles();
@@ -219,11 +219,11 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 //      yoCoPErrorFiltered.update(copError2d);
 //      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(footAngularVelocityUnitVector));
 
-      yoFootAngularVelocityFiltered.getFrameTuple2dIncludingFrame(footAngularVelocityUnitVector);
+      footAngularVelocityUnitVector.setIncludingFrame(yoFootAngularVelocityFiltered);
       footAngularVelocityUnitVector.normalize();
 
       yoCoRPositionFiltered.update(centerOfPressure);
-      yoCoRPositionFiltered.getFrameTuple2dIncludingFrame(centerOfRotation);
+      centerOfRotation.setIncludingFrame(yoCoRPositionFiltered);
       yoCoRVelocityFiltered.update();
       yoCoRTransversalVelocity.set(yoCoRVelocityFiltered.cross(footAngularVelocityUnitVector));
 

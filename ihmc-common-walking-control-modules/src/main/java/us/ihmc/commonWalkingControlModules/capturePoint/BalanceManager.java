@@ -425,7 +425,7 @@ public class BalanceManager
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
 
-      yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
+      finalDesiredCapturePoint2d.setIncludingFrame(yoFinalDesiredICP);
 
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);
@@ -503,22 +503,22 @@ public class BalanceManager
 
    public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
-      yoDesiredCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
+      desiredCMPToPack.setIncludingFrame(yoDesiredCMP);
    }
 
    public void getPerfectCMP(FramePoint2D desiredCMPToPack)
    {
-      yoPerfectCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
+      desiredCMPToPack.setIncludingFrame(yoPerfectCMP);
    }
 
    public void getDesiredICP(FramePoint2D desiredICPToPack)
    {
-      yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredICPToPack);
+      desiredICPToPack.setIncludingFrame(yoDesiredCapturePoint);
    }
 
    public void getDesiredICPVelocity(FrameVector2D desiredICPVelocityToPack)
    {
-      yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredICPVelocityToPack);
+      desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
    }
 
    public MomentumRateCommand getInverseDynamicsCommand()
@@ -642,7 +642,7 @@ public class BalanceManager
    public void getICPError(FrameVector2D icpErrorToPack)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
-      yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
+      desiredCapturePoint2d.setIncludingFrame(yoDesiredCapturePoint);
       icpErrorToPack.setIncludingFrame(desiredCapturePoint2d);
       icpErrorToPack.sub(capturePoint2d);
    }
@@ -749,7 +749,7 @@ public class BalanceManager
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
    {
-      yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
+      desiredCapturePoint2d.setIncludingFrame(yoDesiredCapturePoint);
       centerOfMassPosition.setToZero(centerOfMassFrame);
       centerOfMassPosition.changeFrame(worldFrame);
 

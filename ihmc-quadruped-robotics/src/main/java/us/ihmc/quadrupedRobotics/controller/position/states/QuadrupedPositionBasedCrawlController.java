@@ -1865,7 +1865,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          }
          inscribedCircleRadius.set(radius);
 
-         desiredCoMOffset.getFrameTuple2dIncludingFrame(tempFrameVector);
+         tempFrameVector.setIncludingFrame(desiredCoMOffset);
 //         tempFrameVector.scale(velocitySign.getDoubleValue());
          tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
 
