@@ -97,9 +97,9 @@ public class PrecomputedICPPlanner
       if (isWithinInterval(time))
       {
          compute(time);
-         yoDesiredICPPosition.getFrameTuple2dIncludingFrame(desiredCapturePoint2dToPack);
-         yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocity2dToPack);
-         yoDesiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCMPToPack);
+         desiredCapturePoint2dToPack.setIncludingFrame(yoDesiredICPPosition);
+         desiredCapturePointVelocity2dToPack.setIncludingFrame(yoDesiredICPVelocity);
+         desiredCMPToPack.setIncludingFrame(yoDesiredCMPPosition);
       }
       else
       {
@@ -166,7 +166,7 @@ public class PrecomputedICPPlanner
     */
    public void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack)
    {
-      yoDesiredICPPosition.getFrameTuple2dIncludingFrame(desiredCapturePointPositionToPack);
+      desiredCapturePointPositionToPack.setIncludingFrame(yoDesiredICPPosition);
    }
 
    /**
@@ -180,7 +180,7 @@ public class PrecomputedICPPlanner
     */
    public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
-      yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
+      desiredCapturePointVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
    }
 
    /**
@@ -194,7 +194,7 @@ public class PrecomputedICPPlanner
     */
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
-      yoDesiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+      desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(yoDesiredCMPPosition);
    }
 
    private void hideViz()

@@ -355,8 +355,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2D actualCapturePointPosition)
    {
-      desiredICPPosition.getFrameTuple2dIncludingFrame(desiredICP2d);
-      singleSupportFinalICP.getFrameTuple2dIncludingFrame(finalICP2d);
+      desiredICP2d.setIncludingFrame(desiredICPPosition);
+      finalICP2d.setIncludingFrame(singleSupportFinalICP);
 
       if (desiredICP2d.distance(finalICP2d) < 1.0e-10)
          return Double.NaN;
@@ -450,7 +450,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
-      desiredICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
+      desiredCapturePointVelocityToPack.setIncludingFrame(desiredICPVelocity);
    }
 
    @Override
@@ -478,7 +478,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
-      desiredCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+      desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(desiredCMPPosition);
    }
    
    /** {@inheritDoc} */
@@ -498,7 +498,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
-      desiredCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
+      desiredCentroidalMomentumPivotVelocityToPack.setIncludingFrame(desiredCMPVelocity);
    }
    
    /** {@inheritDoc} */
@@ -516,7 +516,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
    {
-      desiredCoPPosition.getFrameTuple2dIncludingFrame(desiredCenterOfPressurePositionToPack);
+      desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
    }
 
    /** {@inheritDoc} */
@@ -534,7 +534,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
    {
-      desiredCoPVelocity.getFrameTuple2dIncludingFrame(desiredCenterOfPressureVelocityToPack);
+      desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
    }
 
    /** {@inheritDoc} */
