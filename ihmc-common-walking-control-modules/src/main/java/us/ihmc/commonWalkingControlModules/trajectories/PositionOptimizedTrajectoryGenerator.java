@@ -352,9 +352,9 @@ public class PositionOptimizedTrajectoryGenerator
 
       if (isDone())
       {
-         desiredPosition.setToZero(true);
-         desiredVelocity.setToZero(true);
-         desiredAcceleration.setToZero(true);
+         desiredPosition.setToZero();
+         desiredVelocity.setToZero();
+         desiredAcceleration.setToZero();
          return;
       }
 
@@ -438,9 +438,9 @@ public class PositionOptimizedTrajectoryGenerator
 
    public void informDone()
    {
-      desiredPosition.setToZero(true);
-      desiredVelocity.setToZero(true);
-      desiredAcceleration.setToZero(true);
+      desiredPosition.setToZero();
+      desiredVelocity.setToZero();
+      desiredAcceleration.setToZero();
    }
 
    public void showVisualization()

@@ -83,32 +83,22 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
 
    public void set(FramePose framePose)
    {
-      set(framePose, true);
-   }
-
-   public void set(FramePose framePose, boolean notifyListeners)
-   {
       framePose.checkReferenceFrameMatch(getReferenceFrame());
 
       framePose.getPositionIncludingFrame(tempFramePoint);
       framePose.getOrientationIncludingFrame(tempFrameOrientation);
-      position.set(tempFramePoint, notifyListeners);
-      orientation.set(tempFrameOrientation, notifyListeners);
+      position.set(tempFramePoint);
+      orientation.set(tempFrameOrientation);
    }
 
    public void setAndMatchFrame(FramePose framePose)
-   {
-      setAndMatchFrame(framePose, true);
-   }
-
-   public void setAndMatchFrame(FramePose framePose, boolean notifyListeners)
    {
       framePose.getPositionIncludingFrame(tempFramePoint);
       framePose.getOrientationIncludingFrame(tempFrameOrientation);
       tempFramePoint.changeFrame(getReferenceFrame());
       tempFrameOrientation.changeFrame(getReferenceFrame());
-      position.set(tempFramePoint, notifyListeners);
-      orientation.set(tempFrameOrientation, notifyListeners);
+      position.set(tempFramePoint);
+      orientation.set(tempFrameOrientation);
    }
 
    /**
@@ -124,15 +114,10 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
 
    public void setPose(RigidBodyTransform rigidBodyTransform)
    {
-      setPose(rigidBodyTransform, true);
-   }
-
-   public void setPose(RigidBodyTransform rigidBodyTransform, boolean notifyListeners)
-   {
-      rigidBodyTransform.getTranslation(tempFramePoint.getGeometryObject());
-      rigidBodyTransform.getRotation(tempFrameOrientation.getGeometryObject());
-      position.set(tempFramePoint.getGeometryObject());
-      orientation.set(tempFrameOrientation.getGeometryObject());
+      rigidBodyTransform.getTranslation(tempFramePoint);
+      rigidBodyTransform.getRotation(tempFrameOrientation);
+      position.set(tempFramePoint);
+      orientation.set(tempFrameOrientation);
    }
 
    public void setPosition(YoFramePoint yoFramePoint)
@@ -142,8 +127,7 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
 
    public void setPosition(FramePoint3D framePoint)
    {
-      boolean notifyListeners = true;
-      position.set(framePoint, notifyListeners);
+      position.set(framePoint);
    }
 
    public void setPosition(Tuple3DReadOnly position)
@@ -169,9 +153,8 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
 
    public void set(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
-      boolean notifyListeners = true;
-      position.set(framePoint, notifyListeners);
-      orientation.set(frameOrientation, notifyListeners);
+      position.set(framePoint);
+      orientation.set(frameOrientation);
    }
 
    public void set(YoFramePose yoFramePose)
@@ -181,9 +164,8 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
 
    public void setAndMatchFrame(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
-      boolean notifyListeners = true;
-      position.setAndMatchFrame(framePoint, notifyListeners);
-      orientation.setAndMatchFrame(frameOrientation, notifyListeners);
+      position.setAndMatchFrame(framePoint);
+      orientation.setAndMatchFrame(frameOrientation);
    }
 
    public void setPosition(double x, double y, double z)

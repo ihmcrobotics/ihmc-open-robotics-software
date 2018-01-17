@@ -179,44 +179,26 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
 
    public final void setAndMatchFrame(FrameTuple3DReadOnly frameTuple)
    {
-      setAndMatchFrame(frameTuple, true);
-   }
-
-   public final void setAndMatchFrame(FrameTuple3DReadOnly frameTuple, boolean notifyListeners)
-   {
       this.frameTuple.setIncludingFrame(frameTuple);
       this.frameTuple.changeFrame(getReferenceFrame());
-      getYoValuesFromFrameTuple(notifyListeners);
+      getYoValuesFromFrameTuple(true);
    }
 
-   /**
-    * Sets this tuple to the location of the origin of passed in referenceFrame.
-    */
-   private final void setFromReferenceFrame(ReferenceFrame referenceFrame, boolean notifyListeners)
-   {
-      this.frameTuple.setToZero(referenceFrame);
-      this.frameTuple.changeFrame(getReferenceFrame());
-      getYoValuesFromFrameTuple(notifyListeners);
-   }
-   
    /**
     * Sets this tuple to the location of the origin of passed in referenceFrame.
     */
    protected void setFromReferenceFrame(ReferenceFrame referenceFrame)
    {
-      setFromReferenceFrame(referenceFrame, true);
+      this.frameTuple.setToZero(referenceFrame);
+      this.frameTuple.changeFrame(getReferenceFrame());
+      getYoValuesFromFrameTuple(true);
    }
-
+   
    public final void set(FrameTuple3DReadOnly frameTuple)
-   {
-      set(frameTuple, true);
-   }
-
-   public final void set(FrameTuple3DReadOnly frameTuple, boolean notifyListeners)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple);
-      getYoValuesFromFrameTuple(notifyListeners);
+      getYoValuesFromFrameTuple(true);
    }
 
    public final void set(Tuple2DReadOnly tuple2d)
@@ -387,7 +369,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    }
 
    @Override
-   public final boolean containsNaN()
+   public boolean containsNaN()
    {
       putYoValuesIntoFrameTuple();
       return frameTuple.containsNaN();
@@ -396,13 +378,8 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    @Override
    public final void setToZero()
    {
-      setToZero(false);
-   }
-
-   public final void setToZero(boolean notifyListeners)
-   {
       frameTuple.setToZero(getReferenceFrame());
-      getYoValuesFromFrameTuple(notifyListeners);
+      getYoValuesFromFrameTuple(true);
    }
 
    @Override
