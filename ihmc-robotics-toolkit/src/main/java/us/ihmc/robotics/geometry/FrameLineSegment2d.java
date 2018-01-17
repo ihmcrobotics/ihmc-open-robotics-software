@@ -5,9 +5,9 @@ import java.util.Random;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -81,7 +81,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       this.lineSegment.set(firstEndpoint.getPoint(), secondEndpoint.getPoint());
    }
 
-   public void setByProjectionOntoXYPlane(FramePoint3D firstEndpoint, FramePoint3D secondEndpoint)
+   public void setByProjectionOntoXYPlane(FramePoint3DReadOnly firstEndpoint, FramePoint3DReadOnly secondEndpoint)
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(secondEndpoint);

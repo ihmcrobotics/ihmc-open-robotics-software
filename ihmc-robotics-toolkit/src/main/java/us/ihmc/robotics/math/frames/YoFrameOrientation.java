@@ -5,6 +5,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.rotationConversion.QuaternionConversion;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
@@ -87,24 +88,18 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       this.roll.set(roll);
    }
 
-   public void set(QuaternionReadOnly rotation)
-   {
-      tempFrameOrientation.setIncludingFrame(getReferenceFrame(), rotation);
-      set(tempFrameOrientation);
-   }
-
    public void set(RotationMatrixReadOnly rotation)
    {
       tempFrameOrientation.setIncludingFrame(getReferenceFrame(), rotation);
       set(tempFrameOrientation);
    }
 
-   public void set(Quaternion quaternion)
+   public void set(QuaternionReadOnly quaternion)
    {
       set(quaternion, true);
    }
 
-   public void set(Quaternion quaternion, boolean notifyListeners)
+   public void set(QuaternionReadOnly quaternion, boolean notifyListeners)
    {
       tempFrameOrientation.setIncludingFrame(getReferenceFrame(), quaternion);
       set(tempFrameOrientation, notifyListeners);
@@ -121,7 +116,7 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       set(orientation, true);
    }
 
-   public void set(FrameQuaternion orientation, boolean notifyListeners)
+   public void set(FrameQuaternionReadOnly orientation, boolean notifyListeners)
    {
       orientation.checkReferenceFrameMatch(getReferenceFrame());
       orientation.getYawPitchRoll(tempYawPitchRoll);
@@ -145,12 +140,12 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       set(tempFrameOrientation);
    }
 
-   public void setAndMatchFrame(FrameQuaternion orientation)
+   public void setAndMatchFrame(FrameQuaternionReadOnly orientation)
    {
       setAndMatchFrame(orientation, true);
    }
 
-   public void setAndMatchFrame(FrameQuaternion orientation, boolean notifyListeners)
+   public void setAndMatchFrame(FrameQuaternionReadOnly orientation, boolean notifyListeners)
    {
       tempFrameOrientation.setIncludingFrame(orientation);
       tempFrameOrientation.changeFrame(getReferenceFrame());

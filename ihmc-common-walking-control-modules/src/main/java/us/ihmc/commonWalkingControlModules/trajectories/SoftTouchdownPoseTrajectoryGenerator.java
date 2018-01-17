@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -51,7 +53,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
       constantAngularAcceleration.setToZero(worldFrame);
    }
 
-   public void setLinearTrajectory(double initialTime, FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration)
+   public void setLinearTrajectory(double initialTime, FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, FrameVector3DReadOnly initialAcceleration)
    {
       this.timeInitial.set(initialTime);
       
