@@ -194,7 +194,7 @@ public class SphereICPController implements GenericSphereController
       desiredForces.setY(planarForces.getY());
       desiredForces.setZ(heightController.getVerticalForce());
 
-      return desiredForces.getVector3dCopy();
+      return new Vector3D(desiredForces);
    }
 
    private final FramePoint3D cmp3d = new FramePoint3D();
