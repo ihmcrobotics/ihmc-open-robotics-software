@@ -34,15 +34,9 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> im
       return new FrameVector3D();
    }
 
-   public void cross(FrameVector3D vector1, FrameVector3D vector2)
+   public void cross(FrameVector3DReadOnly vector1, FrameVector3DReadOnly vector2)
    {
-      getFrameTuple().cross(vector1.getVector(), vector2.getVector());
-      getYoValuesFromFrameTuple();
-   }
-
-   public void cross(YoFrameVector yoFrameVector1, YoFrameVector yoFrameVector2)
-   {
-      getFrameTuple().cross(yoFrameVector1.getFrameTuple().getVector(), yoFrameVector2.getFrameTuple().getVector());
+      getFrameTuple().cross(vector1, vector2);
       getYoValuesFromFrameTuple();
    }
 
