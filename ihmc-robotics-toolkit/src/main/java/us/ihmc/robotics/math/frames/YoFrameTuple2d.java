@@ -50,11 +50,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       return frameTuple2d;
    }
 
-   public final void getFrameTupleIncludingFrame(FrameTuple3D<?, ?> frameTupleToPack)
-   {
-      getFrameTupleIncludingFrame(0.0, frameTupleToPack);
-   }
-
    public final void getFrameTupleIncludingFrame(double z, FrameTuple3D<?, ?> frameTupleToPack)
    {
       frameTupleToPack.setIncludingFrame(getFrameTuple2d(), z);
