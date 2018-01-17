@@ -4,14 +4,13 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalculator
 {
@@ -153,9 +152,9 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose fromPose, FramePose toPose)
    {
       frameVectorToPack.set(toPose.getFramePointCopy());
-      FrameVector3D frameTuple = frameVectorToPack.getFrameTuple();
+      FrameVector3D frameTuple = new FrameVector3D(frameVectorToPack);
       frameTuple.sub(fromPose.getFramePointCopy());
-      frameVectorToPack.set((Tuple3DReadOnly) frameTuple);
+      frameVectorToPack.set(frameTuple);
    }
 
    private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose fromPose, FramePose toPose)
