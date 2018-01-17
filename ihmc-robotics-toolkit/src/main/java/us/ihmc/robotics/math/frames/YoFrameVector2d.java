@@ -35,16 +35,6 @@ public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector
       return new FrameVector2D();
    }
 
-   public double dot(FrameVector2D vector)
-   {
-      return getFrameTuple2d().dot(vector);
-   }
-
-   public double dot(YoFrameVector2d yoFrameVector)
-   {
-      return dot(yoFrameVector.getFrameTuple2d());
-   }
-
    public double cross(FrameVector2D frameVector)
    {
       checkReferenceFrameMatch(frameVector);
