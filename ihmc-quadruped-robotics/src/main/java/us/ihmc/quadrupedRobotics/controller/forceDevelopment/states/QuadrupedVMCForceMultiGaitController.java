@@ -730,8 +730,8 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       icpTrajectory.initialize();
       icpTrajectory.compute(currentGaitPhaseCompletion.getDoubleValue());
       icpTrajectory.getProjectedOntoXYPlane(desiredICP);
-      icpTrajectory2dInitialPosition.setByProjectionOntoXYPlane(icpTrajectory.getInitialPosition());
-      icpTrajectory2dFinalPosition.setByProjectionOntoXYPlane(icpTrajectory.getFinalPosition());
+      icpTrajectory2dInitialPosition.set(icpTrajectory.getInitialPosition());
+      icpTrajectory2dFinalPosition.set(icpTrajectory.getFinalPosition());
 
       targetSupportPolygon.getCentroid2d(desiredICP);
       desiredICP.add(desiredStancePoseOffset.getX(), desiredStancePoseOffset.getY());

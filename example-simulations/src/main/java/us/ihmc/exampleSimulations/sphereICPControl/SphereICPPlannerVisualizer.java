@@ -406,7 +406,7 @@ public class SphereICPPlannerVisualizer
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, eCMP);
 
-      centerOfMassVelocity.setByProjectionOntoXYPlane(desiredICP);
+      centerOfMassVelocity.set(desiredICP);
       centerOfMassVelocity.sub(centerOfMass);
       centerOfMassVelocity.scale(omega0);
 

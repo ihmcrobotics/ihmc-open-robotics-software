@@ -413,7 +413,7 @@ public class YoQuadrupedSupportPolygon
    public void getCentroid2d(YoFramePoint2d centroidToPack)
    {
       getCentroid(tempCentroid);
-      centroidToPack.setByProjectionOntoXYPlane(tempCentroid);
+      centroidToPack.set(tempCentroid);
    }
 
    public void getCentroid(FramePoint3D centroidToPack)
