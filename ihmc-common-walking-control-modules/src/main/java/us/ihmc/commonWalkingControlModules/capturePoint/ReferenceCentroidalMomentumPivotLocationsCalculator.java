@@ -568,7 +568,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
          if (previousExitCMP != null)
          {
-            previousExitCMP.getFrameTuple2dIncludingFrame(previousExitCMP2d);
+            previousExitCMP2d.setIncludingFrame(previousExitCMP);
             previousExitCMP2d.changeFrameAndProjectToXYPlane(soleFrame);
             // Choose the laziest option
             if (Math.abs(previousExitCMP2d.getX()) < Math.abs(centroidOfFootstepToConsider.getX()))

@@ -546,7 +546,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getCapturePoint(FramePoint2D capturePointToPack)
    {
-      yoCapturePoint.getFrameTuple2dIncludingFrame(capturePointToPack);
+      capturePointToPack.setIncludingFrame(yoCapturePoint);
    }
 
    public void getCapturePoint(FramePoint3D capturePointToPack)

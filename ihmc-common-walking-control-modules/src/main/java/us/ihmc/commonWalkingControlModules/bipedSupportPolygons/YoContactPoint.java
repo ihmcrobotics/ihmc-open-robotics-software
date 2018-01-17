@@ -61,7 +61,7 @@ public class YoContactPoint implements ContactPointInterface
    @Override
    public void getPosition2d(FrameTuple2D<?, ?> framePoint2dToPack)
    {
-      yoPosition.getFrameTuple2dIncludingFrame(framePoint2dToPack);
+      framePoint2dToPack.setIncludingFrame(yoPosition);
    }
 
    @Override

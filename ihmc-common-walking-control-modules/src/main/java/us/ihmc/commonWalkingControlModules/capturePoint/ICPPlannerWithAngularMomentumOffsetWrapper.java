@@ -177,7 +177,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    @Override
    public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
-      modifiedICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
+      desiredCapturePointVelocityToPack.setIncludingFrame(modifiedICPVelocity);
    }
 
    /** {@inheritDoc} */
@@ -198,7 +198,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    @Override
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
-      modifiedCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+      desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(modifiedCMPPosition);
    }
 
    /** {@inheritDoc} */
@@ -212,7 +212,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    @Override
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
-      modifiedCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
+      desiredCentroidalMomentumPivotVelocityToPack.setIncludingFrame(modifiedCMPVelocity);
    }
 
    /** {@inheritDoc} */

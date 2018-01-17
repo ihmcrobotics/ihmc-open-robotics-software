@@ -772,7 +772,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
    //CoM and ICP
    public void getCoM(FramePoint2D comToPack)
    {
-      yoCoM.getFrameTuple2dIncludingFrame(comToPack);
+      comToPack.setIncludingFrame(yoCoM);
    }
 
    public void getCoM(FramePoint3D centerOfMassToPack)
