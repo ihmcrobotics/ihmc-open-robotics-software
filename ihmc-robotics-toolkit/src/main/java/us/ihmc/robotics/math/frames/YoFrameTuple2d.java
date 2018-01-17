@@ -219,7 +219,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
 
    public final void setByProjectionOntoXYPlane(YoFrameTuple<?, ?> yoFrameTuple, boolean notifyListeners)
    {
-      yoFrameTuple.getFrameTuple2d(frameTuple2d);
+      frameTuple2d.set(yoFrameTuple);
       getYoValuesFromFrameTuple2d(notifyListeners);
    }
 

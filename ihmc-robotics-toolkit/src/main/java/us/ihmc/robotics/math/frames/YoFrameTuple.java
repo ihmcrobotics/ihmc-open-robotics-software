@@ -97,11 +97,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       frameTuple.get(startRow, column, tupleMatrixToPack);
    }
 
-   public final void getFrameTuple2d(FrameTuple2D<?, ?> frameTuple2d)
-   {
-      frameTuple2d.set(getFrameTuple());
-   }
-
    public final T getFrameTuple()
    {
       putYoValuesIntoFrameTuple();
