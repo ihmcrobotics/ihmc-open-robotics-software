@@ -56,7 +56,7 @@ public class TreeStateVisualizer
       yoFramePointCurrentTimeLineOrigin.setPoint(pointCurrentTimeLineOrigin);
 
       YoFrameVector currentTimeLineVector = new YoFrameVector("currentTimeLineVector", worldFrame, registry);
-      currentTimeLineVector.setVector(new Vector3D(0.0, 1.0, 0.0));
+      currentTimeLineVector.set(new Vector3D(0.0, 1.0, 0.0));
 
       currentTimeLineViz = new YoGraphicCylinder("currentTimeLine", yoFramePointCurrentTimeLineOrigin, currentTimeLineVector, YoAppearance.LightBlue(), 0.03);
 
