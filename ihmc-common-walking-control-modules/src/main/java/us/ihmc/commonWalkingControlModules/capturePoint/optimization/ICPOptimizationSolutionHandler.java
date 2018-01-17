@@ -118,7 +118,7 @@ public class ICPOptimizationSolutionHandler
       ReferenceFrame deadbandFrame = upcomingFootstep.getSoleReferenceFrame();
 
       upcomingFootstep.getPosition2d(referenceFootstepLocation);
-      footstepSolutionToPack.getFrameTuple2d(previousLocationSolution);
+      previousLocationSolution.set(footstepSolutionToPack);
       clippedLocationSolution.set(locationSolution);
       boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation,
             deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());

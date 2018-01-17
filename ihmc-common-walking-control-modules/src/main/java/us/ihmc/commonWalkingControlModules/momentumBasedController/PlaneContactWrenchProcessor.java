@@ -105,7 +105,7 @@ public class PlaneContactWrenchProcessor
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          FramePoint2D cop = cops.get(contactablePlaneBody);
          YoFramePoint2d yoCop = yoCops.get(contactablePlaneBody);
-         yoCop.getFrameTuple2d(cop);
+         cop.set(yoCop);
 
          Wrench wrench = externalWrenches.get(contactablePlaneBody.getRigidBody());
 
