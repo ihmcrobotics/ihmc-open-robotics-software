@@ -35,16 +35,6 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> im
       return new FrameVector3D();
    }
 
-   public double length()
-   {
-      return getFrameTuple().length();
-   }
-
-   public double lengthSquared()
-   {
-      return getFrameTuple().lengthSquared();
-   }
-   
    public void cross(FrameVector3D vector1, FrameVector3D vector2)
    {
       getFrameTuple().cross(vector1.getVector(), vector2.getVector());
@@ -55,16 +45,6 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> im
    {
       getFrameTuple().cross(yoFrameVector1.getFrameTuple().getVector(), yoFrameVector2.getFrameTuple().getVector());
       getYoValuesFromFrameTuple();
-   }
-
-   public double dot(FrameVector3D vector)
-   {
-      return this.getFrameTuple().dot(vector);
-   }
-
-   public double dot(YoFrameVector yoFrameVector)
-   {
-      return dot(yoFrameVector.getFrameTuple());
    }
 
    public void normalize()
