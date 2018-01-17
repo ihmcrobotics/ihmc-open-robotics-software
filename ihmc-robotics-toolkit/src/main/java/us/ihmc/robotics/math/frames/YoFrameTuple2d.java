@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -45,11 +44,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       this.referenceFrame = referenceFrame;
       this.frameTuple2d = createEmptyFrameTuple2d();
       putYoValuesIntoFrameTuple2d();
-   }
-   
-   public final Point2D getPoint2dCopy()
-   {
-      return new Point2D(this);
    }
 
    public final void getFrameTuple2d(FrameTuple2D<?, ?> frameTuple2dToPack)
