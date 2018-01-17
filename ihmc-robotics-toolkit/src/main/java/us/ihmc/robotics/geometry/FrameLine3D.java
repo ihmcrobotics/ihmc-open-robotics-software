@@ -6,6 +6,8 @@ import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -63,15 +65,15 @@ public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
       line3D = getGeometryObject();
    }
 
-   public FrameLine3D(FramePoint3D pointOnLine, FrameVector3D lineDirection)
+   public FrameLine3D(FramePoint3DReadOnly pointOnLine, FrameVector3DReadOnly lineDirection)
    {
-      this(pointOnLine.getReferenceFrame(), pointOnLine.getGeometryObject(), lineDirection.getGeometryObject());
+      this(pointOnLine.getReferenceFrame(), pointOnLine, lineDirection);
       pointOnLine.checkReferenceFrameMatch(lineDirection);
    }
 
-   public FrameLine3D(FramePoint3D firstPointOnLine, FramePoint3D secondPointOnLine)
+   public FrameLine3D(FramePoint3DReadOnly firstPointOnLine, FramePoint3DReadOnly secondPointOnLine)
    {
-      this(firstPointOnLine.getReferenceFrame(), firstPointOnLine.getGeometryObject(), secondPointOnLine.getGeometryObject());
+      this(firstPointOnLine.getReferenceFrame(), firstPointOnLine, secondPointOnLine);
       firstPointOnLine.checkReferenceFrameMatch(secondPointOnLine);
    }
 

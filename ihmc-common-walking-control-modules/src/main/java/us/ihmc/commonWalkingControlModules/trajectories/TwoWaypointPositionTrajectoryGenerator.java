@@ -684,8 +684,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public void informDone()
    {
-      desiredPosition.setToZero(true);
-      desiredVelocity.setToZero(true);
-      desiredAcceleration.setToZero(true);
+      desiredPosition.setToZero();
+      desiredVelocity.setToZero();
+      desiredAcceleration.setToZero();
    }
 }

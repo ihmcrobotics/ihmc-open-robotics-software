@@ -74,32 +74,22 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
 
    public void set(FramePose framePose)
    {
-      set(framePose, true);
-   }
-
-   public void set(FramePose framePose, boolean notifyListeners)
-   {
       framePose.checkReferenceFrameMatch(getReferenceFrame());
 
       framePose.getPositionIncludingFrame(tempFramePoint);
       framePose.getOrientationIncludingFrame(tempFrameOrientation);
-      position.set(tempFramePoint, notifyListeners);
-      orientation.set(tempFrameOrientation, notifyListeners);
+      position.set(tempFramePoint);
+      orientation.set(tempFrameOrientation);
    }
 
    public void setAndMatchFrame(FramePose framePose)
-   {
-      setAndMatchFrame(framePose, true);
-   }
-
-   public void setAndMatchFrame(FramePose framePose, boolean notifyListeners)
    {
       framePose.getPositionIncludingFrame(tempFramePoint);
       framePose.getOrientationIncludingFrame(tempFrameOrientation);
       tempFramePoint.changeFrame(getReferenceFrame());
       tempFrameOrientation.changeFrame(getReferenceFrame());
-      position.set(tempFramePoint, notifyListeners);
-      orientation.set(tempFrameOrientation, notifyListeners);
+      position.set(tempFramePoint);
+      orientation.set(tempFrameOrientation);
    }
 
    /**
@@ -115,8 +105,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
 
    public void setPosition(FramePoint3D framePoint)
    {
-      boolean notifyListeners = true;
-      position.set(framePoint, notifyListeners);
+      position.set(framePoint);
    }
 
    public void setPosition(Tuple3DReadOnly position)
@@ -126,8 +115,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
 
    public void setOrientation(FrameQuaternion frameOrientation)
    {
-      boolean notifyListeners = true;
-      orientation.set(frameOrientation, notifyListeners);
+      orientation.set(frameOrientation);
    }
 
    public void setOrientation(QuaternionReadOnly quaternion)
@@ -137,9 +125,8 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
 
    public void set(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
-      boolean notifyListeners = true;
-      position.set(framePoint, notifyListeners);
-      orientation.set(frameOrientation, notifyListeners);
+      position.set(framePoint);
+      orientation.set(frameOrientation);
    }
 
    public void set(YoFramePose yoFramePose)
@@ -149,9 +136,8 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
 
    public void setAndMatchFrame(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
-      boolean notifyListeners = true;
-      position.setAndMatchFrame(framePoint, notifyListeners);
-      orientation.setAndMatchFrame(frameOrientation, notifyListeners);
+      position.setAndMatchFrame(framePoint);
+      orientation.setAndMatchFrame(frameOrientation);
    }
 
    public void setPosition(double x, double y, double z)
