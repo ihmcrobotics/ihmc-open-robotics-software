@@ -533,7 +533,7 @@ public class TaskspaceToJointspaceCalculator
       yoBaseParentJointFramePositionFiltered.update();
 
       yoBaseParentJointFrameOrientationFiltered.getFrameOrientationIncludingFrame(baseParentJointFrameOrientation);
-      yoBaseParentJointFramePositionFiltered.getFrameTupleIncludingFrame(baseParentJointFramePosition);
+      baseParentJointFramePosition.setIncludingFrame(yoBaseParentJointFramePositionFiltered);
 
       localBaseParentJointFrame.setPoseAndUpdate(baseParentJointFramePosition, baseParentJointFrameOrientation);
       updateFrames();
@@ -627,8 +627,8 @@ public class TaskspaceToJointspaceCalculator
 
    private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, YoFrameVector yoAngularPart, YoFrameVector yoLinearPart)
    {
-      yoAngularPart.getFrameTupleIncludingFrame(angularPart);
-      yoLinearPart.getFrameTupleIncludingFrame(linearPart);
+      angularPart.setIncludingFrame(yoAngularPart);
+      linearPart.setIncludingFrame(yoLinearPart);
       MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, spatialVectorToPack, 0);
       MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, spatialVectorToPack, 3);
    }

@@ -416,17 +416,17 @@ public class PositionOptimizedTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      desiredPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(desiredVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(desiredAcceleration);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

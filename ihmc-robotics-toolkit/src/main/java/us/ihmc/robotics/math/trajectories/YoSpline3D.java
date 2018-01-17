@@ -427,17 +427,17 @@ public class YoSpline3D
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      velocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(velocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      acceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(acceleration);
    }
 
    public void getPosition(YoFramePoint positionToPack)

@@ -73,7 +73,7 @@ public class YoContactPoint implements ContactPointInterface
    @Override
    public void getPosition(FramePoint3D framePointToPack)
    {
-      yoPosition.getFrameTupleIncludingFrame(framePointToPack);
+      framePointToPack.setIncludingFrame(yoPosition);
    }
 
    @Override

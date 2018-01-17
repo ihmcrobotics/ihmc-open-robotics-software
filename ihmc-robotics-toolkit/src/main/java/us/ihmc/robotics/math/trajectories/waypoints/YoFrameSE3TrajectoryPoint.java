@@ -236,7 +236,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
 
    public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
@@ -246,12 +246,12 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
 
    public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
-      linearVelocity.getFrameTupleIncludingFrame(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(linearVelocity);
    }
 
    public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
-      angularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(angularVelocity);
    }
 
    public void getPosition(YoFramePoint positionToPack)

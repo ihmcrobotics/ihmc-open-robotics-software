@@ -273,7 +273,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       {
          double t = i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t);
-         currentPosition.getFrameTupleIncludingFrame(ballPosition);
+         ballPosition.setIncludingFrame(currentPosition);
          ballPosition.changeFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(ballPosition);
       }
@@ -300,19 +300,19 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    @Override

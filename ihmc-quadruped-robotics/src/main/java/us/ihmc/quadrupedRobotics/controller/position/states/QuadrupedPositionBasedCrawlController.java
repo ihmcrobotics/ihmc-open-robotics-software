@@ -1511,7 +1511,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       private void calculateNextSwingLeg()
       {
-         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
+         desiredBodyVelocity.setIncludingFrame(desiredVelocity);
          RobotQuadrant lastSwingLeg = swingLeg.getEnumValue();
          RobotQuadrant newSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, lastSwingLeg, desiredBodyVelocity,
                desiredYawRate.getDoubleValue());
@@ -1520,7 +1520,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       private void calculateNextCoMTarget(boolean recalculateCurrent)
       {
-         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
+         desiredBodyVelocity.setIncludingFrame(desiredVelocity);
          RobotQuadrant currentSwingLeg = swingLeg.getEnumValue();
          estimatedCommonTriangle.clear();
          if(recalculateCurrent)
@@ -1901,7 +1901,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          desiredCoMTarget.set(target, desiredBodyCurrent.getZ());
 
          double distance = initialCoMPosition.distance(desiredCoMTarget);
-         desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
+         desiredBodyVelocity.setIncludingFrame(desiredVelocity);
 
          if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
          {

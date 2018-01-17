@@ -662,22 +662,22 @@ public class PelvisLinearStateUpdater
 
    public void getEstimatedPelvisPosition(FramePoint3D pelvisPositionToPack)
    {
-      yoRootJointPosition.getFrameTupleIncludingFrame(pelvisPositionToPack);
+      pelvisPositionToPack.setIncludingFrame(yoRootJointPosition);
    }
 
    public void getEstimatedPelvisLinearVelocity(FrameVector3D pelvisLinearVelocityToPack)
    {
-      yoRootJointVelocity.getFrameTupleIncludingFrame(pelvisLinearVelocityToPack);
+      pelvisLinearVelocityToPack.setIncludingFrame(yoRootJointVelocity);
    }
 
    public void getEstimatedCoMPosition(FramePoint3D comPositionToPack)
    {
-      yoCenterOfMassPosition.getFrameTupleIncludingFrame(comPositionToPack);
+      comPositionToPack.setIncludingFrame(yoCenterOfMassPosition);
    }
 
    public void getEstimatedCoMVelocity(FrameVector3D comVelocityToPack)
    {
-      yoCenterOfMassVelocity.getFrameTupleIncludingFrame(comVelocityToPack);
+      comVelocityToPack.setIncludingFrame(yoCenterOfMassVelocity);
    }
 
    public List<RigidBody> getCurrentListOfTrustedFeet()

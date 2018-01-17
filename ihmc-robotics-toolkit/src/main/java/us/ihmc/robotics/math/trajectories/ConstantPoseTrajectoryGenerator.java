@@ -139,7 +139,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)

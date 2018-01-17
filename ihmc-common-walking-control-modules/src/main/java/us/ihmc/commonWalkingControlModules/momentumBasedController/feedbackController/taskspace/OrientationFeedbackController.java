@@ -231,7 +231,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
-      yoFeedForwardAngularAcceleration.getFrameTupleIncludingFrame(feedForwardAngularAcceleration);
+      feedForwardAngularAcceleration.setIncludingFrame(yoFeedForwardAngularAcceleration);
       feedForwardAngularAcceleration.changeFrame(endEffectorFrame);
 
       desiredAngularAcceleration.setIncludingFrame(proportionalFeedback);
@@ -240,7 +240,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
       rateLimitedFeedbackAngularAcceleration.update();
-      rateLimitedFeedbackAngularAcceleration.getFrameTupleIncludingFrame(desiredAngularAcceleration);
+      desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAngularAcceleration);
 
       desiredAngularAcceleration.changeFrame(endEffectorFrame);
       desiredAngularAcceleration.add(feedForwardAngularAcceleration);
@@ -258,7 +258,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       inverseKinematicsOutput.setProperties(inverseDynamicsOutput);
 
-      yoFeedForwardAngularVelocity.getFrameTupleIncludingFrame(feedForwardAngularVelocity);
+      feedForwardAngularVelocity.setIncludingFrame(yoFeedForwardAngularVelocity);
       computeProportionalTerm(proportionalFeedback);
       computeIntegralTerm(integralFeedback);
 
@@ -267,7 +267,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
       rateLimitedFeedbackAngularVelocity.update();
-      rateLimitedFeedbackAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
+      desiredAngularVelocity.setIncludingFrame(rateLimitedFeedbackAngularVelocity);
 
       desiredAngularVelocity.add(feedForwardAngularVelocity);
 
@@ -357,7 +357,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentAngularVelocity.changeFrame(worldFrame);
       yoCurrentAngularVelocity.set(currentAngularVelocity);
 
-      yoDesiredAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
+      desiredAngularVelocity.setIncludingFrame(yoDesiredAngularVelocity);
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);

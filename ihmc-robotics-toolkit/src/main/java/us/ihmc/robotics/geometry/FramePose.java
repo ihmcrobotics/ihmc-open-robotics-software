@@ -18,6 +18,8 @@ import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -49,7 +51,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       this.pose = getGeometryObject();
    }
 
-   public FramePose(FramePoint3D position, FrameQuaternion orientation)
+   public FramePose(FramePoint3DReadOnly position, FrameQuaternion orientation)
    {
       this(position.getReferenceFrame(), new Pose3D(position, orientation));
 
@@ -108,7 +110,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       set(pose);
    }
 
-   public void setPose(FramePoint3D position, FrameQuaternion orientation)
+   public void setPose(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       setPosition(position);
       setOrientation(orientation);
@@ -135,11 +137,11 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       referenceFrame = framePose.referenceFrame;
    }
 
-   public void setPoseIncludingFrame(FramePoint3D position, FrameQuaternion orientation)
+   public void setPoseIncludingFrame(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       position.checkReferenceFrameMatch(orientation);
       referenceFrame = position.getReferenceFrame();
-      setPose(position.getPoint(), orientation.getQuaternion());
+      pose.set(position, orientation);
    }
 
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, QuaternionReadOnly orientation)
@@ -154,10 +156,10 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       this.referenceFrame = referenceFrame;
    }
 
-   public void setPosition(FramePoint3D framePoint)
+   public void setPosition(FramePoint3DReadOnly framePoint)
    {
       checkReferenceFrameMatch(framePoint);
-      pose.setPosition(framePoint.getPoint());
+      pose.setPosition(framePoint);
    }
 
    public void setPosition(Tuple3DReadOnly position)
@@ -200,10 +202,10 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.setOrientationYawPitchRoll(yaw, pitch, roll);
    }
 
-   public void setOrientation(FrameQuaternion frameOrientation)
+   public void setOrientation(FrameQuaternionReadOnly frameOrientation)
    {
       checkReferenceFrameMatch(frameOrientation);
-      pose.setOrientation(frameOrientation.getQuaternion());
+      pose.setOrientation((QuaternionReadOnly) frameOrientation);
    }
 
    public void setXYFromPosition2d(FramePoint2D position2d)

@@ -99,11 +99,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       return frameTuple;
    }
 
-   public final void getFrameTupleIncludingFrame(FrameTuple3D<?, ?> frameTuple)
-   {
-      frameTuple.setIncludingFrame(getReferenceFrame(), getX(), getY(), getZ());
-   }
-
    public final void getFrameTuple2dIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
    {
       putYoValuesIntoFrameTuple();
@@ -264,7 +259,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
 
    public final void setAndMatchFrame(YoFrameTuple<?, ?> yoFrameTuple, boolean notifyListeners)
    {
-      yoFrameTuple.getFrameTupleIncludingFrame(frameTuple);
+      frameTuple.setIncludingFrame(yoFrameTuple);
       this.frameTuple.changeFrame(getReferenceFrame());
       getYoValuesFromFrameTuple(notifyListeners);
    }

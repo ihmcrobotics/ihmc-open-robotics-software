@@ -52,7 +52,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       if (isFootInContact())
       {
          YoFramePoint yoPosition = contactPoint.getYoPosition();
-         yoPosition.getFrameTupleIncludingFrame(touchdownPoint);
+         touchdownPoint.setIncludingFrame(yoPosition);
          touchdownPoint.changeFrame(soleFrame);
          planeContactStateCommand.addPointInContact(touchdownPoint);
       }
@@ -69,7 +69,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
       YoFramePoint yoPosition = contactPoint.getYoPosition();
-      yoPosition.getFrameTupleIncludingFrame(touchdownPoint);
+      touchdownPoint.setIncludingFrame(yoPosition);
       touchdownPoint.changeFrame(soleFrame);
       planeContactStateCommand.addPointInContact(touchdownPoint);
 

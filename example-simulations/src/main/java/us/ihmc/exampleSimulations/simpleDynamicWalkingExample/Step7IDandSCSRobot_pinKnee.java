@@ -720,7 +720,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
    public void getFootLinearVelocity(RobotSide robotSide, FrameVector3D linearVelocityToPack)
    {
-      GCpointsHeel.get(robotSide).getYoVelocity().getFrameTupleIncludingFrame(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(GCpointsHeel.get(robotSide).getYoVelocity());
    }
    
    // Others
@@ -777,7 +777,7 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
 
    public void getCoM(FramePoint3D centerOfMassToPack)
    {
-      yoCoM.getFrameTupleIncludingFrame(centerOfMassToPack);
+      centerOfMassToPack.setIncludingFrame(yoCoM);
    }
 
    public void getCapturePoint(FramePoint2D capturePoinToPack)

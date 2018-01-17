@@ -105,19 +105,19 @@ public class YoSineGenerator3D implements PositionTrajectoryGenerator
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      velocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(velocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      acceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(acceleration);
    }
 
    @Override

@@ -305,7 +305,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       currentTime.set(0.0);
 
-      yoInitialPosition.getFrameTupleIncludingFrame(initialPosition);
+      initialPosition.setIncludingFrame(yoInitialPosition);
       initialPosition.changeFrame(steeringWheelFrame);
 
       finalOrientation.setIncludingFrame(initialOrientation);
@@ -476,16 +476,16 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private void visualizeTrajectory()
    {
-      yoInitialPosition.getFrameTupleIncludingFrame(initialPosition);
+      initialPosition.setIncludingFrame(yoInitialPosition);
       yoInitialPositionWorld.setAndMatchFrame(initialPosition);
-      yoFinalPosition.getFrameTupleIncludingFrame(finalPosition);
+      finalPosition.setIncludingFrame(yoFinalPosition);
       yoFinalPositionWorld.setAndMatchFrame(finalPosition);
 
       for (int i = 0; i < numberOfBalls; i++)
       {
          double t = (double) i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t, false);
-         yoCurrentPosition.getFrameTupleIncludingFrame(ballPosition);
+         ballPosition.setIncludingFrame(yoCurrentPosition);
          ballPosition.changeFrame(worldFrame);
          bagOfBalls.setBallLoop(ballPosition);
       }
@@ -519,17 +519,17 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(yoCurrentAdjustedPositionWorld);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      yoCurrentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(yoCurrentVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      yoCurrentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(yoCurrentAcceleration);
    }
 
    public void getOrientation(FrameQuaternion orientationToPack)
@@ -539,20 +539,19 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
-      yoCurrentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(yoCurrentAngularVelocity);
    }
 
    public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
-      yoCurrentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
+      angularAccelerationToPack.setIncludingFrame(yoCurrentAngularAcceleration);
    }
 
    @Override
    public void getPose(FramePose framePoseToPack)
    {
-      yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(currentPosition);
       yoCurrentOrientation.getFrameOrientationIncludingFrame(currentOrientation);
-      framePoseToPack.setPoseIncludingFrame(currentPosition, currentOrientation);
+      framePoseToPack.setPoseIncludingFrame(yoCurrentAdjustedPositionWorld, currentOrientation);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

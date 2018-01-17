@@ -140,7 +140,7 @@ public class FootStepPlanner
    public void getDesiredFootPosition(RobotSextant robotSextant, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity, double swingTime, FramePoint3D framePointToPack)
    {
       YoFrameVector offsetFromBodyToFootDesired = nominalOffsetsFromBodyToFeet.get(robotSextant);
-      offsetFromBodyToFootDesired.getFrameTupleIncludingFrame(offsetFromBodyToFoot);
+      offsetFromBodyToFoot.setIncludingFrame(offsetFromBodyToFootDesired);
       offsetFromBodyToFoot.scale(footScalarFromNominalToBody.getX(), footScalarFromNominalToBody.getY(), footScalarFromNominalToBody.getZ());
       
       desiredVelocityScaled.setToNaN(desiredLinearVelocity.getReferenceFrame());

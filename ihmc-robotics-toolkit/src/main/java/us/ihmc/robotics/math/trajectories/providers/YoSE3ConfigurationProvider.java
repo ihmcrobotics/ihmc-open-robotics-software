@@ -35,7 +35,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void setPose(FramePose pose)

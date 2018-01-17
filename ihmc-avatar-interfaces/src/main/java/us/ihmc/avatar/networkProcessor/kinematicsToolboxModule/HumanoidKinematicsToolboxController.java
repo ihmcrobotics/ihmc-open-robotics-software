@@ -290,8 +290,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return null;
       }
 
-      FramePoint3D positionToHold = new FramePoint3D();
-      initialCenterOfMassPosition.getFrameTupleIncludingFrame(positionToHold);
+      FramePoint3D positionToHold = new FramePoint3D(initialCenterOfMassPosition);
 
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
       feedbackControlCommand.setGains(getDefaultGains().getPositionGains());
