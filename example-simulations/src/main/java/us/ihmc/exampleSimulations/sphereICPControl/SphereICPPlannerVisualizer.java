@@ -410,7 +410,7 @@ public class SphereICPPlannerVisualizer
       centerOfMassVelocity.sub(centerOfMass);
       centerOfMassVelocity.scale(omega0);
 
-      centerOfMassVelocity.getFrameTuple2d(tempVector2d);
+      tempVector2d.set(centerOfMassVelocity);
       tempVector2d.scale(dt);
       centerOfMass.add(tempVector2d);
 

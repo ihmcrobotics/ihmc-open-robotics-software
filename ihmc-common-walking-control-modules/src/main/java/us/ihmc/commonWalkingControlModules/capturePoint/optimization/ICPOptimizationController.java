@@ -401,13 +401,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    @Override
    public void getDesiredCMP(FramePoint2D desiredCMP)
    {
-      feedbackCMP.getFrameTuple2d(desiredCMP);
+      desiredCMP.set(feedbackCMP);
    }
 
    @Override
    public void getFootstepSolution(FramePoint2D footstepSolutionToPack)
    {
-      footstepSolution.getFrameTuple2d(footstepSolutionToPack);
+      footstepSolutionToPack.set(footstepSolution);
    }
 
    @Override
@@ -537,7 +537,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
-         yoPerfectCMP.getFrameTuple2d(perfectCMP);
+         perfectCMP.set(yoPerfectCMP);
          predictedEndOfStateICP.set(desiredICP);
          predictedEndOfStateICP.sub(perfectCMP);
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
@@ -556,7 +556,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       NoConvergenceException noConvergenceException = null;
       try
       {
-         yoPerfectCMP.getFrameTuple2d(perfectCMP);
+         perfectCMP.set(yoPerfectCMP);
          solver.compute(icpError, perfectCMP);
       }
       catch (NoConvergenceException e)
@@ -604,7 +604,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       feedbackCMPDelta.set(feedbackCoPDelta);
       feedbackCMPDelta.add(cmpCoPDifferenceSolution);
 
-      yoPerfectCMP.getFrameTuple2d(perfectCMP);
+      perfectCMP.set(yoPerfectCMP);
       feedbackCMP.set(perfectCMP);
       feedbackCMP.add(feedbackCMPDelta);
 
