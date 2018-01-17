@@ -40,7 +40,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
    @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      get(point2d);
+      point2d.set(this);
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       framePoint2d.setIncludingFrame(currentReferenceFrame, point2d);
       framePoint2d.changeFrame(desiredFrame);
