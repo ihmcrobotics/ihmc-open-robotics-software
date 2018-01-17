@@ -528,7 +528,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
       getFinalDesiredCapturePointPosition(tempFinalICP);
-      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+      finalDesiredCapturePointPositionToPack.set(tempFinalICP);
    }
 
    public List<FramePoint3D> getInitialDesiredCapturePointPositions()

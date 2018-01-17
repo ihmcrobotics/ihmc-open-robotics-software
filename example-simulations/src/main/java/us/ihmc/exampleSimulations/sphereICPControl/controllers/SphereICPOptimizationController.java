@@ -181,7 +181,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       double fZ = heightController.getVerticalForce();
       FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);
       reactionForces.changeFrame(worldFrame);
-      planarForces.setByProjectionOntoXYPlane(reactionForces);
+      planarForces.set(reactionForces);
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {

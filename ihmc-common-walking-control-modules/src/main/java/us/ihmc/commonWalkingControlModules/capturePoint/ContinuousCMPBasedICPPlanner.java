@@ -814,13 +814,13 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          tempFinalICP.setToZero(midFeetZUpFrame);
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
       else
       {
          tempFinalICP.setIncludingFrame(entryCornerPoints.get(1));
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
    }
 

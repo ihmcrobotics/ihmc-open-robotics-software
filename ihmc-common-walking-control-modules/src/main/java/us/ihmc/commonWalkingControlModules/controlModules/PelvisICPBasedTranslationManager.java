@@ -177,7 +177,7 @@ public class PelvisICPBasedTranslationManager
          }
          positionTrajectoryGenerator.getPosition(tempPosition);
          tempPosition.changeFrame(desiredPelvisPosition.getReferenceFrame());
-         desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
+         desiredPelvisPosition.set(tempPosition);
       }
 
       if (!isRunning.getBooleanValue())

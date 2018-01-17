@@ -175,7 +175,7 @@ public class SphereICPController implements GenericSphereController
       double fZ = heightController.getVerticalForce();
       FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);
       reactionForces.changeFrame(worldFrame);
-      planarForces.setByProjectionOntoXYPlane(reactionForces);
+      planarForces.set(reactionForces);
 
       desiredCMP.changeFrame(worldFrame);
       yoDesiredCMP.set(desiredCMP, 0.0);
