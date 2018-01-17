@@ -186,7 +186,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void getPose(FramePose framePoseToPack)
    {
       framePoseToPack.changeFrame(position.getReferenceFrame());
-      framePoseToPack.setPosition(position.getFrameTuple());
+      framePoseToPack.setPosition(position);
       
       orientation.get(temp);
       framePoseToPack.setOrientation(temp);

@@ -100,7 +100,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
       endEffectorPosition.setToZero(endEffectorFrame); //set(targetPosition.getFrameTuple());  //
 
-      errorVector.setIncludingFrame(targetPosition.getFrameTuple());
+      errorVector.setIncludingFrame(targetPosition);
       errorVector.sub(endEffectorPosition);
       errorVector.changeFrame(endEffectorFrame);
 

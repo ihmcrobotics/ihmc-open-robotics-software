@@ -559,7 +559,7 @@ public class SkippyController implements RobotController
       /*
        * CoM to Foot error
        */
-      comToFootError.sub(com.getFrameTuple(), footLocation.getFrameTuple());
+      comToFootError.sub(com, footLocation);
       comToFootError.setZ(0.0);
    }
 
@@ -595,7 +595,7 @@ public class SkippyController implements RobotController
       /*
        * ICP to Foot error
        */
-      icpToFootError.sub(icp.getFrameTuple(), footLocation.getFrameTuple());
+      icpToFootError.sub(icp, footLocation);
       /*
        * Compute CMP from ICP-CMP dynamics
        */

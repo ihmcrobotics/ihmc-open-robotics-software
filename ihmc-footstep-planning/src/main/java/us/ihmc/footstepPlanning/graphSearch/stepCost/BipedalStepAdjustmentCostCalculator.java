@@ -124,7 +124,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    private double penalizeCandidateFootstep(YoFrameVector penalizationVector, double penalizationWeight)
    {
       // TODO sqrt??
-      double dotProduct = idealToCandidateVector.dot(penalizationVector.getFrameTuple());
+      double dotProduct = idealToCandidateVector.dot(penalizationVector);
       dotProduct = Math.max(0.0, dotProduct);
       return penalizationWeight * dotProduct;
    }

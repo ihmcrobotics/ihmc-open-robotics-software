@@ -247,7 +247,7 @@ public class VisibilityGraphsOcclusionTest
 
       int iteration = -1;
 
-      while (!currentPosition.getFrameTuple().epsilonEquals(goal, 1.0e-3))
+      while (!currentPosition.epsilonEquals(goal, 1.0e-3))
       {
          iteration++;
 
@@ -259,7 +259,7 @@ public class VisibilityGraphsOcclusionTest
             PrintTools.info("Too many iterations too reach goal.");
             break;
          }
-         Point3D observer = new Point3D(currentPosition.getFrameTuple());
+         Point3D observer = new Point3D(currentPosition);
          observer.addZ(0.05);
 
          if (occlusionMethod != OcclusionMethod.NO_OCCLUSION)

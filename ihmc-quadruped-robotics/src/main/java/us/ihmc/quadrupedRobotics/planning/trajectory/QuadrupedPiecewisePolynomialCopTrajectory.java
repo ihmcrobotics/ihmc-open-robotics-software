@@ -302,7 +302,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
 
    public void getPosition(FramePoint3D copPositionAtCurrentTime)
    {
-      copPositionAtCurrentTime.setIncludingFrame(yoCopPositionAtCurrentTime.getFrameTuple());
+      copPositionAtCurrentTime.setIncludingFrame(yoCopPositionAtCurrentTime);
    }
 
    private boolean isEqualEndContactState(RobotEnd robotEnd, QuadrantDependentList<ContactState> contactStateA,

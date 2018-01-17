@@ -177,8 +177,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       // assemble contact command
       planeContactStateCommand.clearContactPoints();
       planeContactStateCommand.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
-      planeContactStateCommand.setContactNormal(contactNormal.getFrameTuple());
-      planeContactStateCommand.addPointInContact(contactPoint.getFrameTuple());
+      planeContactStateCommand.setContactNormal(contactNormal);
+      planeContactStateCommand.addPointInContact(contactPoint);
       planeContactStateCommand.setHasContactStateChanged(hasContactStateNotChanged());
 
       // assemble zero acceleration command
@@ -297,8 +297,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    private boolean hasContactStateNotChanged()
    {
-      boolean hasContactStateNotChanged = previousContactNormal.equals(contactNormal.getFrameTuple());
-      hasContactStateNotChanged &= previousContactPoint.equals(contactPoint.getFrameTuple());
+      boolean hasContactStateNotChanged = previousContactNormal.equals(contactNormal);
+      hasContactStateNotChanged &= previousContactPoint.equals(contactPoint);
       hasContactStateNotChanged &= previousCoefficientOfFriction == coefficientOfFriction.getDoubleValue();
 
       return hasContactStateNotChanged;

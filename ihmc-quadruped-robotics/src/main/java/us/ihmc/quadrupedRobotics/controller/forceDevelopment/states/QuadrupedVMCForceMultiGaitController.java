@@ -351,7 +351,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       currentSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant));
       }
       targetSupportPolygon.setWithoutChecks(currentSupportPolygon);
 
@@ -480,7 +480,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       {
          bodyPoseWorld.setZ(q_z.getDoubleValue() + SIMULATION_TO_ROBOT_MODEL_Z_DIFFERNCE);
       }
-      bodyPoseReferenceFrame.setPoseAndUpdate(bodyPoseWorld.getPosition().getFrameTuple(), bodyPoseWorld.getOrientation().getFrameOrientation());
+      bodyPoseReferenceFrame.setPoseAndUpdate(bodyPoseWorld.getPosition(), bodyPoseWorld.getOrientation().getFrameOrientation());
 
       bodyTwist.setLinearPart(fullRobotModel.getRootJoint().getLinearVelocityForReading());
       bodyTwist.setAngularPart(fullRobotModel.getRootJoint().getAngularVelocityForReading());
@@ -497,8 +497,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       centerOfMassJacobian.compute();
 
       centerOfMassJacobian.getCenterOfMassVelocity(tempCoMVelocity);
-      tempCoMVelocity.changeFrame(centerOfMassVelocity.getReferenceFrame());
-      centerOfMassVelocity.set(tempCoMVelocity);
+      centerOfMassVelocity.setAndMatchFrame(tempCoMVelocity);
 
       currentGaitCompletion.set((yoTime.getDoubleValue() - currentGaitStartTime.getDoubleValue()) / desiredGaitPeriod.getDoubleValue());
       if (currentGaitCompletion.getDoubleValue() >= 1.0)
@@ -551,7 +550,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       nextSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : nextGaitPhase.getEnumValue().supportQuadrants())
       {
-         nextSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         nextSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant));
 //         nextSupportPolygon.reviveFootstep(robotQuadrant);
          nextSupportPolygon.getFootstep(robotQuadrant).setX(shoulderPositions.get(robotQuadrant).getX());
          nextSupportPolygon.getFootstep(robotQuadrant).setY(shoulderPositions.get(robotQuadrant).getY());
@@ -595,7 +594,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       currentSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : currentGaitPhase.getEnumValue().supportQuadrants())
       {
-         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
+         currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant));
       }
       currentShrunkenSupportPolygon.setWithoutChecks(currentSupportPolygon);
       currentShrunkenSupportPolygon.shrinkPolygon2d(ICP_BOUNDS_MARGIN);
@@ -708,7 +707,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       desiredFootPositions.get(robotQuadrant).setY((endY - startY) * currentPhaseCompletion + startY);
 
       int ballIndex = MathTools.clamp((int) Math.floor(currentPhaseCompletion * 20.0), 0, 20);
-      swingTrajectoryBagsOfBalls.get(robotQuadrant).setBall(desiredFootPositions.get(robotQuadrant).getFrameTuple(), YoAppearance.White(), ballIndex);
+      swingTrajectoryBagsOfBalls.get(robotQuadrant).setBall(desiredFootPositions.get(robotQuadrant), YoAppearance.White(), ballIndex);
    }
 
    private void doICPControl()
@@ -773,11 +772,11 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       sidewaysMidLine.setByProjectionOntoXYPlane(leftMidpoint, rightMidpoint);
       lengthwiseMidLine.setByProjectionOntoXYPlane(frontMidpoint, hindMidpoint);
 
-      lineSegmentLeftTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_LEFT).getFrameTuple());
-      lineSegmentRightTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple());
+      lineSegmentLeftTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT), footPositions.get(RobotQuadrant.FRONT_LEFT));
+      lineSegmentRightTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT), footPositions.get(RobotQuadrant.FRONT_RIGHT));
 
-      leftTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_LEFT).getFrameTuple());
-      rightTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple());
+      leftTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT), footPositions.get(RobotQuadrant.FRONT_LEFT));
+      rightTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT), footPositions.get(RobotQuadrant.FRONT_RIGHT));
 
       leftTrotLine.getIntersectionWithLine(rightTrotLine, trotCrossPoint);
 
@@ -996,11 +995,11 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          oneDoFJoint.getJointAxis(jointAxis);
          jointAxis.changeFrame(ReferenceFrame.getWorldFrame());
 
-         jointToFootVector.set(footPositions.get(robotQuadrant).getFrameTuple());
+         jointToFootVector.set(footPositions.get(robotQuadrant));
          jointToFootVector.sub(jointPosition);
 
          vmcRequestedTorqueFromJoint.setToZero();
-         vmcRequestedTorqueFromJoint.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
+         vmcRequestedTorqueFromJoint.cross(jointToFootVector, vmcFootForces.get(robotQuadrant));
 
          double tau = -jointAxis.dot(vmcRequestedTorqueFromJoint);
 

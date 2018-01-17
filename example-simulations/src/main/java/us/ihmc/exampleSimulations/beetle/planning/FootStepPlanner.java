@@ -193,7 +193,7 @@ public class FootStepPlanner
       
       framePointToPack.setToZero(bodyFrameEndRotationProjectedInFuture);
       framePointToPack.add(offsetFromBodyToFoot.getVector());
-      framePointToPack.add(feetOffsetFromBody.getFrameTuple().getVector());
+      framePointToPack.add(feetOffsetFromBody);
       framePointToPack.changeFrame(ReferenceFrame.getWorldFrame());
       framePointToPack.setZ(0.0);
       

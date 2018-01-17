@@ -69,9 +69,9 @@ public class TaskSpaceStiffnessCalculator
       return yoForceAlongDirectionOfMotion.getDoubleValue();
    }
    
-   public FrameVector3D getForceRateOfChange()
+   public FrameVector3DReadOnly getForceRateOfChange()
    {
-      return yoForcePointForceRateOfChange.getFrameTuple();
+      return yoForcePointForceRateOfChange;
    }
    
    public double getForceRateOfChangeAlongDirectionOfMotion()
@@ -86,7 +86,7 @@ public class TaskSpaceStiffnessCalculator
 
    public void update(ExternalForcePoint efp)
    {
-      update(efp.getYoPosition().getFrameTuple(), efp.getYoForce().getFrameTuple());
+      update(efp.getYoPosition(), efp.getYoForce());
    }
 
    private boolean updateHasBeenCalled = false;
@@ -148,7 +148,7 @@ public class TaskSpaceStiffnessCalculator
 
    private void doYoVectorCrossProduct(YoFrameVector v1, YoFrameVector v2, YoFrameVector vecToPack)
    {
-      temp.cross(v1.getFrameTuple(), v2.getFrameTuple());
+      temp.cross(v1, v2);
       if (temp.length() > 0)
       {
          temp.normalize();

@@ -587,8 +587,8 @@ public class PelvisLinearStateUpdater
          comAcceleration.scale(estimatorDT);
          yoCenterOfMassVelocityIntegrateGRF.add(comAcceleration);
 
-         comVelocityGRFPart.set(yoCenterOfMassVelocity.getFrameTuple());
-         comVelocityGRFPart.add(comAcceleration.getFrameTuple());
+         comVelocityGRFPart.set(yoCenterOfMassVelocity);
+         comVelocityGRFPart.add(comAcceleration);
          comAcceleration.scale(1.0/estimatorDT);
 
          comVelocityPelvisAndKinPart.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
@@ -604,7 +604,7 @@ public class PelvisLinearStateUpdater
          yoCenterOfMassVelocity.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
       }
       
-      if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity.getFrameTuple());
+      if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity);
    }
 
 

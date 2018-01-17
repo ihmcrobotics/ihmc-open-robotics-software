@@ -284,7 +284,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
          // Use the desired foot locations instead of the actual locations
          YoFramePoint desiredFootLocation = desiredFeetLocations.get(robotQuadrant);
-         fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation.getFrameTuple());
+         fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation);
       }
    }
 
@@ -318,7 +318,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
 
          //get the pose from desired feet to the desired center of mass
-         desiredFootPosition.setIncludingFrame(desiredFeetLocations.get(robotQuadrant).getFrameTuple());
+         desiredFootPosition.setIncludingFrame(desiredFeetLocations.get(robotQuadrant));
          desiredFootPosition.changeFrame(desiredCoMPoseReferenceFrame);
 
          desiredFootPositionInLegAttachmentFrame.setIncludingFrame(centerOfMassFrame, desiredFootPosition.getPoint());

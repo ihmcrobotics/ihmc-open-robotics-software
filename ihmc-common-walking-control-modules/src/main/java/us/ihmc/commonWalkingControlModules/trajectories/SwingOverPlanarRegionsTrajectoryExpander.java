@@ -250,7 +250,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          FramePoint3D frameTupleUnsafe = new FramePoint3D(trajectoryPosition);
          twoWaypointSwingGenerator.getPosition(frameTupleUnsafe);
          trajectoryPosition.set(frameTupleUnsafe);
-         solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition.getFrameTuple());
+         solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition);
 
          footCollisionSphere.setToZero(WORLD);
          footCollisionSphere.setRadius(collisionSphereRadius);

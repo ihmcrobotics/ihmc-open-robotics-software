@@ -344,7 +344,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.setIncludingFrame(yoErrorPosition);
       feedbackTermToPack.scale(dt);
-      feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+      feedbackTermToPack.add(yoErrorPositionIntegrated);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);

@@ -541,7 +541,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    {
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         quadrupedSupportPolygon.setFootstep(quadrant, yoFootPositions.get(quadrant).getFrameTuple());
+         quadrupedSupportPolygon.setFootstep(quadrant, yoFootPositions.get(quadrant));
       }
 
       if (!cartesianTrajectoryGenerator.isDone())
@@ -558,15 +558,15 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       {
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
          robotQuadrant = robotQuadrant.getNextRegularGaitSwingQuadrant();
-         nextStepFootChooser.chooseNextSwingLeg(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredYawRate.getDoubleValue());
+         nextStepFootChooser.chooseNextSwingLeg(quadrupedSupportPolygon, robotQuadrant, desiredVelocity, desiredYawRate.getDoubleValue());
          swingLeg.set(robotQuadrant);
 
          FramePoint3D initialPosition = new FramePoint3D(yoFootPositions.get(robotQuadrant));
          FramePoint3D desiredFootPosition = new FramePoint3D();
 
          swingTimeTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
-         swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
-         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity.getFrameTuple());
+         swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity, desiredFootPosition, desiredYawRate.getDoubleValue());
+         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity);
          cartesianTrajectoryGenerator.initialize();
          swingTarget.set(desiredFootPosition);
       }
