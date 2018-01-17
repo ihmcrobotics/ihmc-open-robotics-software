@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -48,7 +48,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.getParent()}.
     */
-   public void setOffsetToParentToTranslationOnly(FrameTuple3D<?, ?> translationToParent)
+   public void setOffsetToParentToTranslationOnly(FrameTuple3DReadOnly translationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.setToZero();
@@ -65,7 +65,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
     *            {@code this.getParent()}.
     */
-   public void setOffsetToParent(FrameTuple3D<?, ?> translationToParent, FrameQuaternion rotationToParent)
+   public void setOffsetToParent(FrameTuple3DReadOnly translationToParent, FrameQuaternionReadOnly rotationToParent)
    {
       this.translationToParent.set(translationToParent);
       this.rotationToParent.set(rotationToParent);
