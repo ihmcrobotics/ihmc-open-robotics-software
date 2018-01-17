@@ -11,6 +11,8 @@ import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSol
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -584,12 +586,7 @@ public class ICPOptimizationQPSolver
     * @param perfectCMP current desired value of the CMP based on the nominal ICP location.
     * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
     */
-   public void compute(YoFrameVector2d currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
-   {
-      compute(currentICPError.getFrameTuple2d(), perfectCMP);
-   }
-
-   public void compute(FrameVector2D currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
+   public void compute(FrameVector2DReadOnly currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
    {
       indexHandler.computeProblemSize();
 

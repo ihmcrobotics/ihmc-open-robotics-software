@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -759,6 +760,8 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       currentShrunkenSupportPolygon.snapPointToClosestEdgeOfPolygonIfOutside2d(snappedDesiredCenterOfPressure);
    }
 
+   private final FramePoint2D closestIntersectionFrameTuple = new FramePoint2D(); 
+
    private YoFramePoint2d findTrotSpecificCenterOfPressure()
    {
       targetSupportPolygon.getFrontMidpoint(frontMidpoint);
@@ -780,10 +783,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       leftTrotLine.getIntersectionWithLine(rightTrotLine, trotCrossPoint);
 
-      isInFrontOfLeftTrotLine.set(leftTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
-      isInFrontOfRightTrotLine.set(rightTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
+      isInFrontOfLeftTrotLine.set(leftTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure));
+      isInFrontOfRightTrotLine.set(rightTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure));
 
-      lineForFindingClosestLineSegment.setPoint(desiredCenterOfPressure.getFrameTuple2d());
+      lineForFindingClosestLineSegment.setPoint(desiredCenterOfPressure);
 
       if (isInFrontOfLeftTrotLine.getBooleanValue() == isInFrontOfRightTrotLine.getBooleanValue())
       {
@@ -794,43 +797,43 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          lineForFindingClosestLineSegment.getLine2d().setDirection(lengthwiseMidLine.getLine2d().getDirection());
       }
 
-      FramePoint2D closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();
+      closestIntersectionFrameTuple.setIncludingFrame(closestIntersectionFrameTuple);
       leftTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
       closestIntersection.set((Tuple2DReadOnly) closestIntersectionFrameTuple);
 
-      double distanceUpward = closestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
+      double distanceUpward = closestIntersection.distance(desiredCenterOfPressure);
 
-      FramePoint2D secondClosestIntersectionFramePoint = secondClosestIntersection.getFrameTuple2d();
-      rightTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, secondClosestIntersectionFramePoint);
-      secondClosestIntersection.set((Tuple2DReadOnly) secondClosestIntersectionFramePoint);
+      closestIntersectionFrameTuple.setIncludingFrame(secondClosestIntersection);
+      rightTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
+      secondClosestIntersection.set((Tuple2DReadOnly) closestIntersectionFrameTuple);
 
-      double distanceDownward = secondClosestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
+      double distanceDownward = secondClosestIntersection.distance(desiredCenterOfPressure);
 
       if (distanceUpward > distanceDownward)
       {
-         double x = secondClosestIntersection.getFrameTuple2d().getX();
-         double y = secondClosestIntersection.getFrameTuple2d().getY();
-         secondClosestIntersection.set(closestIntersection.getFrameTuple2d());
+         double x = secondClosestIntersection.getX();
+         double y = secondClosestIntersection.getY();
+         secondClosestIntersection.set(closestIntersection);
          closestIntersection.set(x, y);
       }
 
-      midPointOfIntersections.interpolate(closestIntersection.getFrameTuple2d(), secondClosestIntersection.getFrameTuple2d(), 0.5);
+      midPointOfIntersections.interpolate(closestIntersection, secondClosestIntersection, 0.5);
 
-      double midPointOfIntersectionsToDesiredCenterOfPressure = midPointOfIntersections.distance(desiredCenterOfPressure.getFrameTuple2d());
-      double midPointOfIntersectionsToClosestIntersection = midPointOfIntersections.distance(closestIntersection.getFrameTuple2d());
+      double midPointOfIntersectionsToDesiredCenterOfPressure = midPointOfIntersections.distance(desiredCenterOfPressure);
+      double midPointOfIntersectionsToClosestIntersection = midPointOfIntersections.distance(closestIntersection);
 
       ratioFromMidToClosest = midPointOfIntersectionsToDesiredCenterOfPressure / midPointOfIntersectionsToClosestIntersection;
 
-      innerCenterOfPressure.interpolate(secondClosestIntersection.getFrameTuple2d(), trotCrossPoint, ratioFromMidToClosest);
+      innerCenterOfPressure.interpolate(secondClosestIntersection, trotCrossPoint, ratioFromMidToClosest);
 
-      awayFromCentroidToClosestIntersection.sub(closestIntersection.getFrameTuple2d(), trotCrossPoint);
+      awayFromCentroidToClosestIntersection.sub(closestIntersection, trotCrossPoint);
       awayFromCentroidToClosestIntersection.scale(ratioFromMidToClosest);
 
-      outerCenterOfPressure.set(closestIntersection.getFrameTuple2d());
+      outerCenterOfPressure.set(closestIntersection);
       outerCenterOfPressure.add(awayFromCentroidToClosestIntersection);
 
-      double distanceFromInnerCenterOfPressureToPolygon = currentSupportPolygon.getDistanceInside2d(innerCenterOfPressure.getFrameTuple2d());
-      double distanceFromOuterCenterOfPressureToPolygon = currentSupportPolygon.getDistanceInside2d(outerCenterOfPressure.getFrameTuple2d());
+      double distanceFromInnerCenterOfPressureToPolygon = currentSupportPolygon.getDistanceInside2d(innerCenterOfPressure);
+      double distanceFromOuterCenterOfPressureToPolygon = currentSupportPolygon.getDistanceInside2d(outerCenterOfPressure);
 
       if (distanceFromInnerCenterOfPressureToPolygon > distanceFromOuterCenterOfPressureToPolygon)
       {

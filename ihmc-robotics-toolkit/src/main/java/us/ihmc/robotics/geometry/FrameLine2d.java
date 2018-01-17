@@ -7,7 +7,9 @@ import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -141,11 +143,11 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       this.line.rotate(radians);
    }
 
-   public void setPoint(FramePoint2D framePoint2d)
+   public void setPoint(FramePoint2DReadOnly framePoint2d)
    {
       checkReferenceFrameMatch(framePoint2d);
 
-      line.setPoint(framePoint2d.getPoint());
+      line.setPoint(framePoint2d);
    }
 
    public void setVector(FrameVector2D frameVector2d)
@@ -398,14 +400,14 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       return isPointOnSideOfLine(point, RobotSide.RIGHT);
    }
 
-   public boolean isPointOnSideOfLine(FramePoint2D point, RobotSide side)
+   public boolean isPointOnSideOfLine(FramePoint2DReadOnly point, RobotSide side)
    {
       checkReferenceFrameMatch(point);
 
       return line.isPointOnSideOfLine(point, side == RobotSide.LEFT);
    }
 
-   public boolean isPointInFrontOfLine(FrameVector2D frontDirection, FramePoint2D framePoint)
+   public boolean isPointInFrontOfLine(FrameVector2DReadOnly frontDirection, FramePoint2DReadOnly framePoint)
    {
       checkReferenceFrameMatch(frontDirection);
       checkReferenceFrameMatch(framePoint);
