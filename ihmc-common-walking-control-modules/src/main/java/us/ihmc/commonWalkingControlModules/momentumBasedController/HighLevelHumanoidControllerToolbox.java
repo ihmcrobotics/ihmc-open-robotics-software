@@ -1011,7 +1011,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getCoP(FramePoint3D copToPack)
    {
-      yoCenterOfPressure.getFrameTupleIncludingFrame(copToPack);
+      copToPack.setIncludingFrame(yoCenterOfPressure, 0.0);
    }
 
    public void getCoP(FramePoint2D copToPack)
