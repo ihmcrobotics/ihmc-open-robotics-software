@@ -516,10 +516,10 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          tempICP.setToZero(midFeetZUpFrame);
          tempICP.changeFrame(worldFrame);
-         double distanceFromDesiredICPToMidfeetZUpFrame = desiredICPPosition.getXYPlaneDistance(tempICP);
+         double distanceFromDesiredICPToMidfeetZUpFrame = desiredICPPosition.distanceXY(tempICP);
          tempICP.setToZero(transferFromSoleFrame);
          tempICP.changeFrame(worldFrame);
-         double distanceFromDesiredICPToTransferFromSoleFrame = desiredICPPosition.getXYPlaneDistance(tempICP);
+         double distanceFromDesiredICPToTransferFromSoleFrame = desiredICPPosition.distanceXY(tempICP);
 
          if (distanceFromDesiredICPToMidfeetZUpFrame < distanceFromDesiredICPToTransferFromSoleFrame)
             initialFrame = midFeetZUpFrame;
