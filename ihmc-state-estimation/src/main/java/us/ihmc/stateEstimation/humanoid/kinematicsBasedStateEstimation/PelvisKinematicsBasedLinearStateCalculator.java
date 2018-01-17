@@ -352,7 +352,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
                }
                else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
                {
-                  copsRawInFootFrame.get(trustedFoot).getFrameTuple2dIncludingFrame(tempCoP2d);
+                  tempCoP2d.setIncludingFrame(copsRawInFootFrame.get(trustedFoot));
                }
             }
          }
@@ -437,7 +437,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));
          footTwistInWorld.changeFrame(soleFrames.get(foot));
 
-         this.copsFilteredInFootFrame.get(foot).getFrameTuple2dIncludingFrame(tempCoP2d);
+         tempCoP2d.setIncludingFrame(this.copsFilteredInFootFrame.get(foot));
          tempCoP.setIncludingFrame(tempCoP2d, 0.0);
          footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
          tempCoP.changeFrame(footTwistInWorld.getExpressedInFrame());
