@@ -336,7 +336,7 @@ public class SwingState extends AbstractUnconstrainedState
    private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
       footstepPose.getPoseIncludingFrame(finalPosition, finalOrientation);
-      finalLinearVelocity.setIncludingFrame(yoTouchdownVelocity.getFrameTuple());
+      finalLinearVelocity.setIncludingFrame(yoTouchdownVelocity);
       finalAngularVelocity.setToZero(worldFrame);
 
       // append current pose as initial trajectory point
@@ -401,8 +401,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       // setup touchdown trajectory
       // TODO: revisit the touchdown velocity and accelerations
-      FrameVector3D touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
-      touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
+      touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, yoTouchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
 
       swingTrajectory.initialize();
@@ -543,7 +542,7 @@ public class SwingState extends AbstractUnconstrainedState
          adjustmentVelocityCorrection.setZ(0.0);
          adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getDoubleValue());
 
-         desiredLinearVelocity.add(adjustmentVelocityCorrection.getFrameTuple());
+         desiredLinearVelocity.add(adjustmentVelocityCorrection);
       }
       else
       {

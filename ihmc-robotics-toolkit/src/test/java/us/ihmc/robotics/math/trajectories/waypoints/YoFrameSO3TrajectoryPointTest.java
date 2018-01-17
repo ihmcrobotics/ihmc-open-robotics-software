@@ -364,7 +364,7 @@ public class YoFrameSO3TrajectoryPointTest
 
       assertEquals(time, yoFrameSO3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(quaternionForVerification.getFrameOrientation().epsilonEquals(orientation, 1e-10));
-      assertTrue(angularVelocityForVerification.getFrameTuple().epsilonEquals(angularVelocity, 1e-10));
+      assertTrue(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-10));
 
       // Check NaN calls:
       assertFalse(yoFrameSO3TrajectoryPoint.containsNaN());
@@ -391,7 +391,7 @@ public class YoFrameSO3TrajectoryPointTest
 
       assertFalse(Math.abs(yoFrameSO3TrajectoryPoint.getTime() - time) < 1e-7);
       assertFalse(quaternionForVerification.getFrameOrientation().epsilonEquals(orientation, 1e-7));
-      assertFalse(angularVelocityForVerification.getFrameTuple().epsilonEquals(angularVelocity, 1e-7));
+      assertFalse(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-7));
 
       yoFrameSO3TrajectoryPoint.set(time, quaternionForVerification, angularVelocityForVerification);
 
@@ -400,7 +400,7 @@ public class YoFrameSO3TrajectoryPointTest
 
       assertEquals(time, yoFrameSO3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(quaternionForVerification.getFrameOrientation().epsilonEquals(orientation, 1e-10));
-      assertTrue(angularVelocityForVerification.getFrameTuple().epsilonEquals(angularVelocity, 1e-10));
+      assertTrue(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-10));
 
       YoFrameSO3TrajectoryPoint yoFrameSO3TrajectoryPointTwo = new YoFrameSO3TrajectoryPoint(namePrefix, nameSuffix + "Two", registry, worldFrame);
 

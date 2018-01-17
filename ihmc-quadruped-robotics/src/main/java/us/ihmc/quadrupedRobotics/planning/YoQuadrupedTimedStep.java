@@ -58,26 +58,28 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
       this.timeInterval.set(timeInterval);
    }
 
+   private final Point3D tempGoalPosition = new Point3D();
    /**
     * Unsafe for external use.
     */
    @Override
    protected Point3D getGoalPosition()
    {
-      return this.goalPosition.getFrameTuple().getPoint();
+      tempGoalPosition.set(goalPosition);
+      return tempGoalPosition;
    }
 
    @Override
    public void getGoalPosition(Point3D goalPosition)
    {
-      goalPosition.set(this.goalPosition.getFrameTuple().getPoint());
+      goalPosition.set(this.goalPosition);
    }
 
    @Override
    public void getGoalPosition(FramePoint3D goalPosition)
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
-      goalPosition.setIncludingFrame(this.goalPosition.getFrameTuple());
+      goalPosition.setIncludingFrame(this.goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
 

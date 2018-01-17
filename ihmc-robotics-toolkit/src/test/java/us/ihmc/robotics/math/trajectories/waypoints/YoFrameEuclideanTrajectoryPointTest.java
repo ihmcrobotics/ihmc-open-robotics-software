@@ -366,8 +366,8 @@ public class YoFrameEuclideanTrajectoryPointTest
       yoFrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocityForVerification);
 
       assertEquals(time, yoFrameEuclideanTrajectoryPoint.getTime(), 1e-10);
-      assertTrue(pointForVerification.getFrameTuple().epsilonEquals(position, 1e-10));
-      assertTrue(linearVelocityForVerification.getFrameTuple().epsilonEquals(linearVelocity, 1e-10));
+      assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
+      assertTrue(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-10));
 
       // Check NaN calls:
       assertFalse(yoFrameEuclideanTrajectoryPoint.containsNaN());
@@ -392,8 +392,8 @@ public class YoFrameEuclideanTrajectoryPointTest
       linearVelocityForVerification.set(8.8, 1.4, 9.22);
 
       assertFalse(Math.abs(yoFrameEuclideanTrajectoryPoint.getTime() - time) < 1e-7);
-      assertFalse(pointForVerification.getFrameTuple().epsilonEquals(position, 1e-7));
-      assertFalse(linearVelocityForVerification.getFrameTuple().epsilonEquals(linearVelocity, 1e-7));
+      assertFalse(pointForVerification.epsilonEquals(position, 1e-7));
+      assertFalse(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-7));
 
       yoFrameEuclideanTrajectoryPoint.set(time, pointForVerification, linearVelocityForVerification);
 
@@ -401,8 +401,8 @@ public class YoFrameEuclideanTrajectoryPointTest
       yoFrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocity);
 
       assertEquals(time, yoFrameEuclideanTrajectoryPoint.getTime(), 1e-10);
-      assertTrue(pointForVerification.getFrameTuple().epsilonEquals(position, 1e-10));
-      assertTrue(linearVelocityForVerification.getFrameTuple().epsilonEquals(linearVelocity, 1e-10));
+      assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
+      assertTrue(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-10));
 
       YoFrameEuclideanTrajectoryPoint yoFrameEuclideanTrajectoryPointTwo = new YoFrameEuclideanTrajectoryPoint(namePrefix, nameSuffix + "Two", registry,
                                                                                                                worldFrame);

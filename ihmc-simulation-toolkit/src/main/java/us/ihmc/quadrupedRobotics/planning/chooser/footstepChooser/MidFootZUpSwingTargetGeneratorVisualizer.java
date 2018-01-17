@@ -229,7 +229,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    {
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         quadrupedSupportPolygon.setFootstep(quadrant, yoFootPositions.get(quadrant).getFrameTuple());
+         quadrupedSupportPolygon.setFootstep(quadrant, yoFootPositions.get(quadrant));
       }
 //      referenceFrames.update(yoFootPositions);
       if (!cartesianTrajectoryGenerator.isDone())
@@ -246,15 +246,15 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       {
          RobotQuadrant robotQuadrant = swingLeg.getEnumValue();
 //         robotQuadrant = robotQuadrant.getNextRegularGaitSwingQuadrant();
-         robotQuadrant = nextStepFootChooser.chooseNextSwingLeg(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredYawRate.getDoubleValue());
+         robotQuadrant = nextStepFootChooser.chooseNextSwingLeg(quadrupedSupportPolygon, robotQuadrant, desiredVelocity, desiredYawRate.getDoubleValue());
          swingLeg.set(robotQuadrant);
 
          FramePoint3D initialPosition = new FramePoint3D(yoFootPositions.get(robotQuadrant));
          FramePoint3D desiredFootPosition = new FramePoint3D();
 
          swingTimeTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
-         swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
-         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity.getFrameTuple());
+         swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity, desiredFootPosition, desiredYawRate.getDoubleValue());
+         cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity);
          cartesianTrajectoryGenerator.initialize();
          swingTarget.set(desiredFootPosition);
       }

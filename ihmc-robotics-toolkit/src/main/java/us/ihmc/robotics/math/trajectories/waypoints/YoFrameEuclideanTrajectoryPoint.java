@@ -203,8 +203,8 @@ public class YoFrameEuclideanTrajectoryPoint
       frameWaypoint.setToZero(getReferenceFrame());
 
       frameWaypoint.setTime(time.getDoubleValue());
-      frameWaypoint.setPosition(position.getFrameTuple());
-      frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
+      frameWaypoint.setPosition(position);
+      frameWaypoint.setLinearVelocity(linearVelocity);
    }
 
    @Override

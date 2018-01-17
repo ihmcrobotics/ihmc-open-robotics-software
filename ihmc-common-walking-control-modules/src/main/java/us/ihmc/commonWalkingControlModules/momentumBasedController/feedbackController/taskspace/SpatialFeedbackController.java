@@ -502,7 +502,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoErrorVector.getLinearPartIncludingFrame(linearFeedbackTermToPack);
          linearFeedbackTermToPack.scale(dt);
-         linearFeedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+         linearFeedbackTermToPack.add(yoErrorPositionIntegrated);
          selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
          linearFeedbackTermToPack.clipToMaxLength(maximumLinearIntegralError);
          yoErrorPositionIntegrated.set(linearFeedbackTermToPack);
