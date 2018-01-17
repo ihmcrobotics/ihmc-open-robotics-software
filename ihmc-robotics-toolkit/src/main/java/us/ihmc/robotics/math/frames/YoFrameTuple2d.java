@@ -120,22 +120,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       getYoValuesFromFrameTuple2d();
    }
 
-   /**
-    * @deprecated Use {@link #set(FrameTuple3DReadOnly)} instead
-    */
-   public final void setByProjectionOntoXYPlane(FrameTuple3DReadOnly frameTuple)
-   {
-      set(frameTuple);
-   }
-
-   /**
-    * @deprecated Use {@link #set(FrameTuple3DReadOnly,boolean)} instead
-    */
-   public final void setByProjectionOntoXYPlane(FrameTuple3DReadOnly frameTuple, boolean notifyListeners)
-   {
-      set(frameTuple, notifyListeners);
-   }
-
    public final void set(FrameTuple3DReadOnly frameTuple)
    {
       set(frameTuple, true);
