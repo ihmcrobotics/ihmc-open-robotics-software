@@ -245,18 +245,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple(notifyListeners);
    }
 
-   public final void setAndMatchFrame(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      setAndMatchFrame(yoFrameTuple, true);
-   }
-
-   public final void setAndMatchFrame(YoFrameTuple<?, ?> yoFrameTuple, boolean notifyListeners)
-   {
-      frameTuple.setIncludingFrame(yoFrameTuple);
-      this.frameTuple.changeFrame(getReferenceFrame());
-      getYoValuesFromFrameTuple(notifyListeners);
-   }
-   
    /**
     * Sets this tuple to the location of the origin of passed in referenceFrame.
     */
@@ -287,11 +275,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple(notifyListeners);
    }
 
-   public final void set(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      set(yoFrameTuple.getFrameTuple());
-   }
-
    public final void set(Tuple2DReadOnly tuple2d)
    {
       this.frameTuple.setToZero(getReferenceFrame());
@@ -317,20 +300,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple2d, z);
-      getYoValuesFromFrameTuple();
-   }
-
-   public final void set(YoFrameTuple2d<?, ?> yoFrameTuple2d)
-   {
-      this.frameTuple.setToZero(getReferenceFrame());
-      yoFrameTuple2d.getFrameTupleIncludingFrame(frameTuple);
-      getYoValuesFromFrameTuple();
-   }
-
-   public final void set(YoFrameTuple2d<?, ?> yoFrameTuple2d, double z)
-   {
-      this.frameTuple.setToZero(getReferenceFrame());
-      yoFrameTuple2d.getFrameTupleIncludingFrame(frameTuple);
       getYoValuesFromFrameTuple();
    }
 
@@ -362,13 +331,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void add(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.add(yoFrameTuple.getFrameTuple());
-      getYoValuesFromFrameTuple();
-   }
-
    public final void add(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
@@ -380,13 +342,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.add(frameTuple1, frameTuple2);
-      getYoValuesFromFrameTuple();
-   }
-
-   public final void add(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.add(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
       getYoValuesFromFrameTuple();
    }
 
@@ -404,13 +359,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       getYoValuesFromFrameTuple();
    }
 
-   public final void sub(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.sub(yoFrameTuple.getFrameTuple());
-      getYoValuesFromFrameTuple();
-   }
-
    public final void sub(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       frameTuple.sub(tuple1, tuple2);
@@ -422,11 +370,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.sub(frameTuple1, frameTuple2);
       getYoValuesFromFrameTuple();
-   }
-
-   public final void sub(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      sub(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
    }
 
    public final void scale(double scaleFactor)
@@ -441,11 +384,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       putYoValuesIntoFrameTuple();
       this.frameTuple.scaleAdd(scaleFactor, frameTuple);
       getYoValuesFromFrameTuple();
-   }
-
-   public final void scaleAdd(double scaleFactor, YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      scaleAdd(scaleFactor, yoFrameTuple.getFrameTuple());
    }
 
    /**
@@ -465,20 +403,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
    }
 
    /**
-    * Sets the value of this yoFrameTuple to the scalar multiplication of yoFrameTuple1 and then adds yoFrameTuple2 (this = scaleFactor * yoFrameTuple1 + yoFrameTuple2).
-    * Checks if reference frames match.
-    *
-    * @param scaleFactor double
-    * @param yoFrameTuple1 YoFrameTuple<?, ?>
-    * @param yoFrameTuple2 YoFrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void scaleAdd(double scaleFactor, YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      scaleAdd(scaleFactor, yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
-   }
-
-   /**
     * Sets the value of this yoFrameTuple to the scalar multiplication of frameTuple1 and then subs frameTuple2 (this = scaleFactor * frameTuple1 - frameTuple2).
     * Checks if reference frames match.
     *
@@ -492,20 +416,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.scaleSub(scaleFactor, frameTuple1, frameTuple2);
       getYoValuesFromFrameTuple();
-   }
-
-   /**
-    * Sets the value of this yoFrameTuple to the scalar multiplication of yoFrameTuple1 and then subs yoFrameTuple2 (this = scaleFactor * yoFrameTuple1 - yoFrameTuple2).
-    * Checks if reference frames match.
-    *
-    * @param scaleFactor double
-    * @param yoFrameTuple1 YoFrameTuple<?, ?>
-    * @param yoFrameTuple2 YoFrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void scaleSub(double scaleFactor, YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      scaleSub(scaleFactor, yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
    }
 
    /**
@@ -530,26 +440,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       putYoValuesIntoFrameTuple();
       frameTuple.interpolate(frameTuple1, frameTuple2, alpha);
       getYoValuesFromFrameTuple();
-   }
-
-   /**
-    *  Linearly interpolates between tuples yoFrameTuple1 and yoFrameTuple2 and places the result into this tuple:  this = (1-alpha) * yoFrameTuple1 + alpha * yoFrameTuple2.
-    *  @param yoFrameTuple1  the first tuple
-    *  @param yoFrameTuple2  the second tuple  
-    *  @param alpha  the alpha interpolation parameter
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void interpolate(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2, double alpha)
-   {
-      checkReferenceFrameMatch(yoFrameTuple1);
-      checkReferenceFrameMatch(yoFrameTuple2);
-      interpolate(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple(), alpha);
-   }
-
-   public final boolean epsilonEquals(YoFrameTuple<?, ?> frameTuple, double threshold)
-   {
-      putYoValuesIntoFrameTuple();
-      return this.frameTuple.epsilonEquals(frameTuple.getFrameTuple(), threshold);
    }
 
    public final boolean epsilonEquals(FrameTuple3DReadOnly frameTuple, double threshold)
