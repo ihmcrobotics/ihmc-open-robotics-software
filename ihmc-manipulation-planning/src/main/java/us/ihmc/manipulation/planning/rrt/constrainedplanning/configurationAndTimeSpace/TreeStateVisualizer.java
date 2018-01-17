@@ -53,7 +53,7 @@ public class TreeStateVisualizer
        * set currentTimeLine.
        */
       yoFramePointCurrentTimeLineOrigin = new YoFramePoint(name + "currentTimeOrigin", worldFrame, registry);
-      yoFramePointCurrentTimeLineOrigin.setPoint(pointCurrentTimeLineOrigin);
+      yoFramePointCurrentTimeLineOrigin.set(pointCurrentTimeLineOrigin);
 
       YoFrameVector currentTimeLineVector = new YoFrameVector("currentTimeLineVector", worldFrame, registry);
       currentTimeLineVector.set(new Vector3D(0.0, 1.0, 0.0));
@@ -67,11 +67,11 @@ public class TreeStateVisualizer
        */
       yoFramePointCurrentTime = new YoFramePoint(name + "currentTime", worldFrame, registry);
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
-      yoFramePointCurrentTime.setPoint(pointCurrentTime);
+      yoFramePointCurrentTime.set(pointCurrentTime);
       
       yoFramePointCurrentTimeInvalid = new YoFramePoint(name + "currentTimeInvalid", worldFrame, registry);
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
-      yoFramePointCurrentTimeInvalid.setPoint(pointCurrentTime);
+      yoFramePointCurrentTimeInvalid.set(pointCurrentTime);
 
       currentTimeViz = new YoGraphicPosition("currentTime", yoFramePointCurrentTime, 0.06, YoAppearance.Blue(), GraphicType.BALL);
       yoGraphicsList.add(currentTimeViz);
@@ -84,7 +84,7 @@ public class TreeStateVisualizer
        */
       yoFramePointTreeReachingTime = new YoFramePoint(name + "treeReachingTime", worldFrame, registry);
       pointCurrentTime.set(pointCurrentTimeLineOrigin);
-      yoFramePointTreeReachingTime.setPoint(pointCurrentTime);
+      yoFramePointTreeReachingTime.set(pointCurrentTime);
 
       treeReachingTimeViz = new YoGraphicPosition("treeReachingTime", yoFramePointTreeReachingTime, 0.05, YoAppearance.Black(), GraphicType.BALL);
       yoGraphicsList.add(treeReachingTimeViz);
@@ -113,24 +113,24 @@ public class TreeStateVisualizer
       {
          pointCurrentTime.set(pointCurrentTimeLineOrigin);
          pointCurrentTime.add(new Vector3D(0.0, currentNormalizedTime, 0.0));
-         yoFramePointCurrentTime.setPoint(pointCurrentTime);
+         yoFramePointCurrentTime.set(pointCurrentTime);
          
          pointCurrentTime.setToNaN();
-         yoFramePointCurrentTimeInvalid.setPoint(pointCurrentTime);
+         yoFramePointCurrentTimeInvalid.set(pointCurrentTime);
       }
       else
       {
          pointCurrentTime.set(pointCurrentTimeLineOrigin);
          pointCurrentTime.add(new Vector3D(0.0, currentNormalizedTime, 0.0));
-         yoFramePointCurrentTimeInvalid.setPoint(pointCurrentTime);
+         yoFramePointCurrentTimeInvalid.set(pointCurrentTime);
          
          pointCurrentTime.setToNaN();
-         yoFramePointCurrentTime.setPoint(pointCurrentTime);  
+         yoFramePointCurrentTime.set(pointCurrentTime);  
       }
       
       pointTreeReachingTime.set(pointCurrentTimeLineOrigin);
       pointTreeReachingTime.add(new Vector3D(0.0, treeReachingTime, 0.0));
-      yoFramePointTreeReachingTime.setPoint(pointTreeReachingTime);
+      yoFramePointTreeReachingTime.set(pointTreeReachingTime);
 
       currentTimeInvalidViz.update();
       treeReachingTimeViz.update();

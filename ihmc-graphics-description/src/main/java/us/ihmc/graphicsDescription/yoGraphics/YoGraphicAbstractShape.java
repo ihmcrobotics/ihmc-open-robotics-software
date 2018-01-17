@@ -38,7 +38,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       yoFramePoint.checkReferenceFrameMatch(framePose.getReferenceFrame());
 
       framePose.getPosition(tempPoint);
-      yoFramePoint.setPoint(tempPoint);
+      yoFramePoint.set(tempPoint);
 
       framePose.getOrientation(tempQuaternion);
       yoFrameOrientation.set(tempQuaternion);
