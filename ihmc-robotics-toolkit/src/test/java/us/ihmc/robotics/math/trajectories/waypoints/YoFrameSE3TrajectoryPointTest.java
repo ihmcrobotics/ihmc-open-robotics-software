@@ -15,6 +15,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -175,8 +178,8 @@ public class YoFrameSE3TrajectoryPointTest
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, testedYoFrameSE3TrajectoryPoint.getReferenceFrame(),
                                          testedYoFrameSE3TrajectoryPoint.getTime(), testedYoFrameSE3TrajectoryPoint.getPosition().getFramePointCopy(),
                                          testedYoFrameSE3TrajectoryPoint.getOrientation().getFrameOrientationCopy(),
-                                         testedYoFrameSE3TrajectoryPoint.getLinearVelocity().getFrameVectorCopy(),
-                                         testedYoFrameSE3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), testedYoFrameSE3TrajectoryPoint, epsilon);
+                                         testedYoFrameSE3TrajectoryPoint.getLinearVelocity(), testedYoFrameSE3TrajectoryPoint.getAngularVelocity(),
+                                         testedYoFrameSE3TrajectoryPoint, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
@@ -204,7 +207,7 @@ public class YoFrameSE3TrajectoryPointTest
       randomFrames[0] = worldFrame;
       for (int i = 1; i < 10; i++)
          randomFrames[i] = EuclidFrameRandomTools.nextReferenceFrame("randomFrame" + i, random,
-                                                                       random.nextBoolean() ? worldFrame : randomFrames[random.nextInt(i)]);
+                                                                     random.nextBoolean() ? worldFrame : randomFrames[random.nextInt(i)]);
 
       for (int i = 0; i < 10000; i++)
       {
@@ -323,8 +326,9 @@ public class YoFrameSE3TrajectoryPointTest
    }
 
    private void assertWaypointContainsExpectedData(String expectedNamePrefix, String expectedNameSuffix, ReferenceFrame expectedFrame, double expectedTime,
-         FramePoint3D expectedPosition, FrameQuaternion expectedOrientation, FrameVector3D expectedLinearVelocity, FrameVector3D expectedAngularVelocity,
-         YoFrameSE3TrajectoryPoint testedYoFrameSE3TrajectoryPoint, double epsilon)
+                                                   FramePoint3DReadOnly expectedPosition, FrameQuaternionReadOnly expectedOrientation,
+                                                   FrameVector3DReadOnly expectedLinearVelocity, FrameVector3DReadOnly expectedAngularVelocity,
+                                                   YoFrameSE3TrajectoryPoint testedYoFrameSE3TrajectoryPoint, double epsilon)
    {
       assertTrue(expectedFrame == testedYoFrameSE3TrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedYoFrameSE3TrajectoryPoint.getTime(), epsilon);
@@ -333,9 +337,9 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(expectedPosition.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getPosition().getFramePointCopy(), epsilon));
       Quaternion trajectoryPointQuaternion = new Quaternion(testedYoFrameSE3TrajectoryPoint.getOrientation().getFrameOrientationCopy());
       assertEquals(expectedOrientation.getReferenceFrame(), testedYoFrameSE3TrajectoryPoint.getOrientation().getReferenceFrame());
-      EuclidCoreTestTools.assertQuaternionEquals(expectedOrientation.getQuaternion(), trajectoryPointQuaternion, epsilon);
-      assertTrue(expectedLinearVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getLinearVelocity().getFrameVectorCopy(), epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), epsilon));
+      EuclidCoreTestTools.assertQuaternionEquals(expectedOrientation, trajectoryPointQuaternion, epsilon);
+      assertTrue(expectedLinearVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getLinearVelocity(), epsilon));
+      assertTrue(expectedAngularVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getAngularVelocity(), epsilon));
 
       FrameSE3TrajectoryPoint actualFrameSE3TrajectoryPoint = new FrameSE3TrajectoryPoint();
       testedYoFrameSE3TrajectoryPoint.getIncludingFrame(actualFrameSE3TrajectoryPoint);
@@ -568,8 +572,8 @@ public class YoFrameSE3TrajectoryPointTest
 
       assertFalse(position.epsilonEquals(yoFrameSE3TrajectoryPoint.getPosition().getFramePointCopy(), 1e-10));
       assertFalse(orientation.epsilonEquals(yoFrameSE3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), 1e-10));
-      assertFalse(linearVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getLinearVelocity().getFrameVectorCopy(), 1e-10));
-      assertFalse(angularVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), 1e-10));
+      assertFalse(linearVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getLinearVelocity(), 1e-10));
+      assertFalse(angularVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getAngularVelocity(), 1e-10));
 
       position.changeFrame(poseFrame);
       orientation.changeFrame(poseFrame);
@@ -578,8 +582,8 @@ public class YoFrameSE3TrajectoryPointTest
 
       assertTrue(position.epsilonEquals(yoFrameSE3TrajectoryPoint.getPosition().getFramePointCopy(), 1e-10));
       assertTrue(orientation.epsilonEquals(yoFrameSE3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), 1e-10));
-      assertTrue(linearVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getLinearVelocity().getFrameVectorCopy(), 1e-10));
-      assertTrue(angularVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), 1e-10));
+      assertTrue(linearVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getLinearVelocity(), 1e-10));
+      assertTrue(angularVelocity.epsilonEquals(yoFrameSE3TrajectoryPoint.getAngularVelocity(), 1e-10));
 
       YoFrameSE3TrajectoryPoint yoFrameSE3TrajectoryPointTwo = new YoFrameSE3TrajectoryPoint(namePrefix, nameSuffix + "Two", registry, poseFrame);
 

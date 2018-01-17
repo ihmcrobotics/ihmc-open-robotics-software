@@ -181,7 +181,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       {
          comData.rigidBody.getCoMOffset(tempCoMPosition);
          tempCoMPosition.changeFrame(worldFrame);
-         tempCoMPosition.add(inertiaEllipsoidGhostOffset.getFrameVectorCopy());
+         tempCoMPosition.add(inertiaEllipsoidGhostOffset);
 
          FrameQuaternion orientation = new FrameQuaternion(comData.rigidBody.getBodyFixedFrame());
          orientation.changeFrame(worldFrame);

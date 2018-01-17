@@ -32,7 +32,7 @@ public class RandomExternalForceApplier implements RobotController
    public void doControl()
    {
       computeCurrentDisturbanceForce();
-      perturbable.setForcePerturbance(currentDisturbanceForce.getFrameVectorCopy().getVector(), Double.POSITIVE_INFINITY);
+      perturbable.setForcePerturbance(currentDisturbanceForce, Double.POSITIVE_INFINITY);
    }
 
    public void computeCurrentDisturbanceForce()

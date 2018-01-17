@@ -368,16 +368,16 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private FrameVector3D getOppositeWaypointToEndpoint(int i)
    {
-      FrameVector3D oppositeWaypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
-      oppositeWaypointToEndpoint.sub(allPositions[oppositeWaypointIndices[i]].getFrameVectorCopy());
+      FrameVector3D oppositeWaypointToEndpoint = new FrameVector3D(allPositions[endpointIndices[i]]);
+      oppositeWaypointToEndpoint.sub(allPositions[oppositeWaypointIndices[i]]);
 
       return oppositeWaypointToEndpoint;
    }
 
    private FrameVector3D getWaypointToEndpoint(int i)
    {
-      FrameVector3D waypointToEndpoint = allPositions[endpointIndices[i]].getFrameVectorCopy();
-      waypointToEndpoint.sub(allPositions[waypointIndices[i]].getFrameVectorCopy());
+      FrameVector3D waypointToEndpoint = new FrameVector3D(allPositions[endpointIndices[i]]);
+      waypointToEndpoint.sub(allPositions[waypointIndices[i]]);
 
       return waypointToEndpoint;
    }
@@ -514,8 +514,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          waypoint.setZ(zSwingHeight);
       }
 
-      FrameVector3D planarEndpointOffset = allPositions[endpointIndices[1]].getFrameVectorCopy();
-      planarEndpointOffset.sub(allPositions[endpointIndices[0]].getFrameVectorCopy());
+      FrameVector3D planarEndpointOffset = new FrameVector3D(allPositions[endpointIndices[1]]);
+      planarEndpointOffset.sub(allPositions[endpointIndices[0]]);
       planarEndpointOffset.setZ(0.0);
 
       double[] fractionsOfStepDistanceToMoveWaypointForStepOnOrOff = TwoWaypointTrajectoryGeneratorParameters
@@ -626,7 +626,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          nonAccelerationEndpointTimes[i] = allTimes[nonAccelerationEndpointIndices[i]].getDoubleValue();
          nonAccelerationEndpointPositions[i] = allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy();
-         nonAccelerationEndpointVelocities[i] = allVelocities[nonAccelerationEndpointIndices[i]].getFrameVectorCopy();
+         nonAccelerationEndpointVelocities[i] = new FrameVector3D(allVelocities[nonAccelerationEndpointIndices[i]]);
       }
 
       for (int i = 0; i < 2; i++)

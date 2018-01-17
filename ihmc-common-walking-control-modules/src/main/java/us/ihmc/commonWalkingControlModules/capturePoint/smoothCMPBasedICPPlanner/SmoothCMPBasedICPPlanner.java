@@ -17,8 +17,9 @@ import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParame
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -462,7 +463,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          decayDesiredVelocityIfNeeded();
 
          if (debug)
-            checkCoMDynamics(desiredCoMVelocity.getFrameVectorCopy(), desiredICPPosition.getFramePointCopy(), desiredCoMPosition.getFramePointCopy());
+            checkCoMDynamics(desiredCoMVelocity, desiredICPPosition.getFramePointCopy(), desiredCoMPosition.getFramePointCopy());
 
          timer.stopMeasurement();
          // done to account for the delayed velocity
@@ -627,7 +628,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.holdPosition(icpPositionToHold);
    }
 
-   private void checkCoMDynamics(FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3D comPositionDesiredCurrent)
+   private void checkCoMDynamics(FrameVector3DReadOnly comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3DReadOnly comPositionDesiredCurrent)
    {
       FramePoint3D comVelocityDynamicsCurrent = icpPositionDesiredCurrent;
       comVelocityDynamicsCurrent.sub(comPositionDesiredCurrent);

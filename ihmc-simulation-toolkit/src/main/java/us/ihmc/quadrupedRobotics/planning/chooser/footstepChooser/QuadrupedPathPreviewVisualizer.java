@@ -1,12 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.MockQuadrupedReferenceFrames;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
@@ -16,6 +14,9 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedPathPreviewVisualizer implements RobotController
 {
@@ -104,7 +105,7 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
    public void doControl()
    {
       referenceFrames.update(yoFootPositions);
-      pathPreview.update(swingLeg.getEnumValue(), desiredVelocity.getFrameVectorCopy(), desiredYawRate.getDoubleValue());
+      pathPreview.update(swingLeg.getEnumValue(), new FrameVector3D(desiredVelocity), desiredYawRate.getDoubleValue());
    }
    
    public static void main(String[] args)
