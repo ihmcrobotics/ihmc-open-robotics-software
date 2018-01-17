@@ -7,12 +7,12 @@ import java.util.EnumMap;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -31,11 +31,6 @@ import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -54,6 +49,10 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 {
@@ -456,6 +455,8 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       }
    }
 
+   private final FrameVector3D tempCoMVelocity = new FrameVector3D();
+
    private void updatePreGaitCheckEstimates()
    {
       //update frames
@@ -494,10 +495,9 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       centerOfMassJacobian.compute();
 
-      FrameVector3D tempVector = centerOfMassVelocity.getFrameTuple();
-      centerOfMassJacobian.getCenterOfMassVelocity(tempVector);
-      tempVector.changeFrame(centerOfMassVelocity.getReferenceFrame());
-      centerOfMassVelocity.set((Tuple3DReadOnly) tempVector);
+      centerOfMassJacobian.getCenterOfMassVelocity(tempCoMVelocity);
+      tempCoMVelocity.changeFrame(centerOfMassVelocity.getReferenceFrame());
+      centerOfMassVelocity.set(tempCoMVelocity);
 
       currentGaitCompletion.set((yoTime.getDoubleValue() - currentGaitStartTime.getDoubleValue()) / desiredGaitPeriod.getDoubleValue());
       if (currentGaitCompletion.getDoubleValue() >= 1.0)
