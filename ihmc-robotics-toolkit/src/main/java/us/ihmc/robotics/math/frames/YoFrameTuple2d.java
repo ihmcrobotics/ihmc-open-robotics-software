@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.frames;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -51,11 +50,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       return frameTuple2d;
    }
 
-   public final FramePoint2D getFramePoint2dCopy()
-   {
-      return new FramePoint2D(getFrameTuple2d());
-   }
-   
    public final void getFrameTuple2dIncludingFrame(FrameTuple2D<?, ?> frameTuple2dToPack)
    {
       frameTuple2dToPack.setIncludingFrame(getFrameTuple2d());
