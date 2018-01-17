@@ -53,45 +53,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       this.frameTuple = createEmptyFrameTuple();
    }
 
-   /**
-    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
-    * its first row index.
-    *
-    * @param tupleMatrixToPack the array in which this tuple is stored. Modified.
-    */
-   public void get(DenseMatrix64F tupleMatrixToPack)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.get(tupleMatrixToPack);
-   }
-
-   /**
-    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
-    * {@code startRow}.
-    *
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param tupleMatrixToPack the column vector in which this tuple is stored. Modified.
-    */
-   public void get(int startRow, DenseMatrix64F tupleMatrixToPack)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.get(startRow, tupleMatrixToPack);
-   }
-
-   /**
-    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
-    * {@code startRow} at the column index {@code column}.
-    *
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param column the column index to write in the dense-matrix.
-    * @param tupleMatrixToPack the matrix in which this tuple is stored. Modified.
-    */
-   public void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.get(startRow, column, tupleMatrixToPack);
-   }
-
    public final T getFrameTuple()
    {
       putYoValuesIntoFrameTuple();
@@ -129,23 +90,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       default:
          throw new IndexOutOfBoundsException();
       }
-   }
-
-   /**
-    * Selects a component of this tuple based on {@code index} and returns its value.
-    * <p>
-    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
-    * is {@code z}.
-    * </p>
-    *
-    * @param index the index of the component to get.
-    * @return the value of the component.
-    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
-    */
-   public double getElement(int index)
-   {
-      putYoValuesIntoFrameTuple();
-      return frameTuple.getElement(index);
    }
 
    public final YoDouble getYoX()
@@ -440,12 +384,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements R
       putYoValuesIntoFrameTuple();
       frameTuple.interpolate(frameTuple1, frameTuple2, alpha);
       getYoValuesFromFrameTuple();
-   }
-
-   public final boolean epsilonEquals(FrameTuple3DReadOnly frameTuple, double threshold)
-   {
-      putYoValuesIntoFrameTuple();
-      return this.frameTuple.epsilonEquals(frameTuple, threshold);
    }
 
    @Override
