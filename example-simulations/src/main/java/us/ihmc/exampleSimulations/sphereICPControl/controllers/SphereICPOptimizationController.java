@@ -176,7 +176,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       desiredCapturePointVelocity2d.set(desiredCapturePointVelocity);
       finalDesiredCapturePoint2d.set(finalDesiredCapturePoint);
 
-      FramePoint2D desiredCMP = yoDesiredCMP.getFramePoint2dCopy();
+      FramePoint2D desiredCMP = new FramePoint2D(yoDesiredCMP);
 
       double fZ = heightController.getVerticalForce();
       FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);

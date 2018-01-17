@@ -377,10 +377,10 @@ public class CapturePointToolsTest
 
          for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
          {
-            p1.set(constantCentersOfPressures.get(i).getFramePoint2dCopy());
-            p2.set(capturePointsToPack.get(i).getFramePoint2dCopy());
+            p1.set(constantCentersOfPressures.get(i));
+            p2.set(capturePointsToPack.get(i));
             Line2D line = new Line2D(p1, p2);
-            p1.set(capturePointsToPack.get(i + 1).getFramePoint2dCopy());
+            p1.set(capturePointsToPack.get(i + 1));
             boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
             assertTrue(isPointOnLine);
          }
@@ -442,10 +442,10 @@ public class CapturePointToolsTest
             CapturePointTools.computeDesiredCapturePointPosition(omega0, timeIntoStep, capturePointsToPack.get(i), constantCentersOfPressures.get(i),
                   desiredICP);
 
-            p1.set(constantCentersOfPressures.get(i).getFramePoint2dCopy());
-            p2.set(capturePointsToPack.get(i).getFramePoint2dCopy());
+            p1.set(constantCentersOfPressures.get(i));
+            p2.set(capturePointsToPack.get(i));
             Line2D line = new Line2D(p1, p2);
-            p1.set(desiredICP.getFramePoint2dCopy());
+            p1.set(desiredICP);
             boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
             assertTrue(isPointOnLine);
          }
@@ -539,10 +539,10 @@ public class CapturePointToolsTest
 
          CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCenterOfPressure, finalDesiredICP, initialICP, omega0, time);
 
-         p1.set(initialICP.getFramePoint2dCopy());
-         p2.set(finalDesiredICP.getFramePoint2dCopy());
+         p1.set(initialICP);
+         p2.set(finalDesiredICP);
          Line2D line = new Line2D(p1, p2);
-         p1.set(constantCenterOfPressure.getFramePoint2dCopy());
+         p1.set(constantCenterOfPressure);
          boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
          assertTrue(isPointOnLine);
       }
