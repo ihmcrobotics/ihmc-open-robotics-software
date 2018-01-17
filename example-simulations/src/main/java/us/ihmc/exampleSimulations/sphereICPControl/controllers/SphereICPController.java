@@ -157,7 +157,7 @@ public class SphereICPController implements GenericSphereController
 
       controlToolbox.update();
 
-      icp.getFrameTuple2d(capturePoint2d);
+      capturePoint2d.set(icp);
       icpPlanner.compute(yoTime.getDoubleValue());
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity);
