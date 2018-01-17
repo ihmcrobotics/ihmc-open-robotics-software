@@ -20,9 +20,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -37,6 +34,9 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class SkippyController implements RobotController
 {
@@ -500,7 +500,7 @@ public class SkippyController implements RobotController
        */
       robot.getHipJoint().getTranslationToWorld(hipToFootInWorld.getVector());
       hipJointPosition.set(hipToFootInWorld);
-      hipToFootPositionVector.sub(footLocation.getVector3dCopy(), hipToFootInWorld.getVector());
+      hipToFootPositionVector.sub(footLocation, hipToFootInWorld.getVector());
       hipToFootUnitVector.set(hipToFootPositionVector);
       hipToFootUnitVector.normalize();
       /*
@@ -508,7 +508,7 @@ public class SkippyController implements RobotController
        */
       robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld.getVector());
       shoulderJointPosition.set(shoulderToFootInWorld);
-      shoulderToFootPositionVector.sub(footLocation.getVector3dCopy(), shoulderToFootInWorld.getVector());
+      shoulderToFootPositionVector.sub(footLocation, shoulderToFootInWorld.getVector());
       shoulderToFootUnitVector.set(shoulderToFootPositionVector);
       shoulderToFootUnitVector.normalize();
    }
