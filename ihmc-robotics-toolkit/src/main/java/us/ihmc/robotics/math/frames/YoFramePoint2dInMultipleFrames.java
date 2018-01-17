@@ -32,6 +32,12 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
    }
 
    @Override
+   public boolean containsNaN()
+   {
+      return super.containsNaN();
+   }
+
+   @Override
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
       multipleFramesHelper.registerReferenceFrame(newReferenceFrame);

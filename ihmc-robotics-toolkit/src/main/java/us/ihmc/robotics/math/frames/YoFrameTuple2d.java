@@ -85,15 +85,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       y.set(newY);
    }
    
-   /**
-    * Sets x and y with no checks for reference frame matches.
-    */
-   public final void setWithoutChecks(FrameTuple2DReadOnly frameTuple2d)
-   {
-      x.set(frameTuple2d.getX());
-      y.set(frameTuple2d.getY());
-   }
-
    public final void setAndMatchFrame(FrameTuple2DReadOnly frameTuple2d)
    {
       setAndMatchFrame(frameTuple2d, true);
@@ -123,11 +114,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       getYoValuesFromFrameTuple2d(notifyListeners);
    }
 
-   public final void set(YoFrameTuple2d<?, ?> yoFrameTuple2d)
-   {
-      set(yoFrameTuple2d.getFrameTuple2d());
-   }
-
    public final void set(Tuple2DReadOnly tuple2d)
    {
       this.frameTuple2d.set(tuple2d);
@@ -142,17 +128,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
    public final void setByProjectionOntoXYPlane(FrameTuple3DReadOnly frameTuple, boolean notifyListeners)
    {
       this.frameTuple2d.set(frameTuple);
-      getYoValuesFromFrameTuple2d(notifyListeners);
-   }
-
-   public final void setByProjectionOntoXYPlane(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      setByProjectionOntoXYPlane(yoFrameTuple, true);
-   }
-
-   public final void setByProjectionOntoXYPlane(YoFrameTuple<?, ?> yoFrameTuple, boolean notifyListeners)
-   {
-      frameTuple2d.set(yoFrameTuple);
       getYoValuesFromFrameTuple2d(notifyListeners);
    }
 
@@ -176,13 +151,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       getYoValuesFromFrameTuple2d();
    }
 
-   public final void add(YoFrameTuple2d<?, ?> yoFrameTuple2d)
-   {
-      putYoValuesIntoFrameTuple2d();
-      frameTuple2d.add(yoFrameTuple2d.getFrameTuple2d());
-      getYoValuesFromFrameTuple2d();
-   }
-
    public final void sub(Tuple2DReadOnly tuple2d)
    {
       putYoValuesIntoFrameTuple2d();
@@ -194,13 +162,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
    {
       putYoValuesIntoFrameTuple2d();
       this.frameTuple2d.sub(frameTuple2d);
-      getYoValuesFromFrameTuple2d();
-   }
-
-   public final void sub(YoFrameTuple2d<?, ?> yoFrameTuple2d)
-   {
-      putYoValuesIntoFrameTuple2d();
-      frameTuple2d.sub(yoFrameTuple2d.getFrameTuple2d());
       getYoValuesFromFrameTuple2d();
    }
 
@@ -233,15 +194,10 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       getYoValuesFromFrameTuple2d();
    }
 
-   public final void scaleAdd(double scaleFactor, YoFrameTuple2d<?, ?> yoFrameTuple2d)
-   {
-      scaleAdd(scaleFactor, yoFrameTuple2d.getFrameTuple2d());
-   }
-
-   public final void scaleAdd(double scaleFactor, YoFrameTuple2d<?, ?> yoFrameTuple1, YoFrameTuple2d<?, ?> yoFrameTuple2)
+   public final void scaleAdd(double scaleFactor, FrameTuple2DReadOnly frameTuple1, FrameTuple2DReadOnly frameTuple2)
    {
       putYoValuesIntoFrameTuple2d();
-      frameTuple2d.scaleAdd(scaleFactor, yoFrameTuple1.getFrameTuple2d(), yoFrameTuple2.getFrameTuple2d());
+      frameTuple2d.scaleAdd(scaleFactor, frameTuple1, frameTuple2);
       getYoValuesFromFrameTuple2d();
    }
 
@@ -266,18 +222,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.interpolate(frameTuple1, frameTuple2, alpha);
       getYoValuesFromFrameTuple2d();
-   }
-
-   public final boolean epsilonEquals(FrameTuple2DReadOnly frameTuple2d, double threshold)
-   {
-      putYoValuesIntoFrameTuple2d();
-      return this.frameTuple2d.epsilonEquals(frameTuple2d, threshold);
-   }
-
-   public final boolean containsNaN()
-   {
-      putYoValuesIntoFrameTuple2d();
-      return frameTuple2d.containsNaN();
    }
 
    public final void setToZero()
