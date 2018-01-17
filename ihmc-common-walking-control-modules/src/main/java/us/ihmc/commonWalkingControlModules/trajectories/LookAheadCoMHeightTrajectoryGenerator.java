@@ -1044,6 +1044,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void getCurrentDesiredHeight(FramePoint3D positionToPack)
    {
-      desiredCoMPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredCoMPosition);
    }
 }

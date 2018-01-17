@@ -259,7 +259,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       rootJointPositionPerFoot.set(footPositionsInWorld.get(trustedFoot));
       rootJointPositionPerFoot.add(footToRootJointPositions.get(trustedFoot));
 
-      footVelocitiesInWorld.get(trustedFoot).getFrameTupleIncludingFrame(tempFrameVector);
+      tempFrameVector.setIncludingFrame(footVelocitiesInWorld.get(trustedFoot));
       tempFrameVector.scale(scaleFactor * alphaRootJointLinearVelocityNewTwist.getDoubleValue());
       rootJointLinearVelocityNewTwist.sub(tempFrameVector);
    }
@@ -288,8 +288,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
-         footToRootJointPosition.getFrameTupleIncludingFrame(tempPosition);
-         rootJointPosition.getFrameTupleIncludingFrame(tempFramePoint);
+         tempPosition.setIncludingFrame(footToRootJointPosition);
+         tempFramePoint.setIncludingFrame(rootJointPosition);
          tempFramePoint.sub(tempPosition); // New foot position
          tempPosition.set(footPositionInWorld); // Previous foot position
          tempFrameVector.sub(tempFramePoint, tempPosition); // Delta from previous to new foot position
@@ -420,7 +420,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       rootJoint.getJointTwist(tempRootBodyTwist);
 
-      rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(tempFrameVector);
+      tempFrameVector.setIncludingFrame(rootJointLinearVelocityNewTwist);
       tempFrameVector.changeFrame(tempRootBodyTwist.getExpressedInFrame());
 
       tempRootBodyTwist.setLinearPart(tempFrameVector);
@@ -503,16 +503,16 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    public void getPelvisPosition(FramePoint3D positionToPack)
    {
-      rootJointPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(rootJointPosition);
    }
 
    public void getPelvisVelocity(FrameVector3D linearVelocityToPack)
    {
-      rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(rootJointLinearVelocityNewTwist);
    }
 
    public void getFootToPelvisPosition(FramePoint3D positionToPack, RigidBody foot)
    {
-      footToRootJointPositions.get(foot).getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(footToRootJointPositions.get(foot));
    }
 }

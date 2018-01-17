@@ -164,11 +164,11 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
 
    private void updateFrameAndKinematics()
    {
-      yoConnectionAPosition.getFrameTupleIncludingFrame(connectionAPosition);
-      yoConnectionBPosition.getFrameTupleIncludingFrame(connectionBPosition);
+      connectionAPosition.setIncludingFrame(yoConnectionAPosition);
+      connectionBPosition.setIncludingFrame(yoConnectionBPosition);
 
-      yoConnectionAVelocity.getFrameTupleIncludingFrame(connectionAVelocity);
-      yoConnectionBVelocity.getFrameTupleIncludingFrame(connectionBVelocity);
+      connectionAVelocity.setIncludingFrame(yoConnectionAVelocity);
+      connectionBVelocity.setIncludingFrame(yoConnectionBVelocity);
 
       stiffnessFrame.update();
    }

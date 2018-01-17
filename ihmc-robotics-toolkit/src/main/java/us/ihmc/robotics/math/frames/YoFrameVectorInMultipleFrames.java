@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.frames;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -121,7 +120,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               getFrameTupleIncludingFrame(localFrameVector);
+               localFrameVector.setIncludingFrame(YoFrameVectorInMultipleFrames.this);
                vector.setAndMatchFrame(localFrameVector);
             }
          });
@@ -149,7 +148,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
    
    public String toStringForASingleReferenceFrame(ReferenceFrame referenceFrame)
    {
-      getFrameTupleIncludingFrame(frameVector);
+      frameVector.setIncludingFrame(this);
       frameVector.changeFrame(referenceFrame);
       return frameVector.toString();
    }

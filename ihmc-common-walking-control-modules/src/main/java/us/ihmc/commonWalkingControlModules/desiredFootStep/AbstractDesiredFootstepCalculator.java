@@ -47,7 +47,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
-      footstepPositions.get(swingLegSide).getFrameTupleIncludingFrame(framePosition);
+      framePosition.setIncludingFrame(footstepPositions.get(swingLegSide));
       footstepOrientations.get(swingLegSide).getFrameOrientationIncludingFrame(frameOrientation);
 
       framePosition.changeFrame(worldFrame);

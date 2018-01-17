@@ -469,7 +469,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       else
       {
          referenceCMPsCalculator.getNextEntryCMP(tempConstantCMP);
-         singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
+         tempICP.setIncludingFrame(singleSupportInitialICP);
          singleSupportInitialCoM.set(yoSingleSupportInitialCoM);
          tempICP.changeFrame(worldFrame);
          double swingDuration = swingDurations.get(0).getDoubleValue();
@@ -797,7 +797,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       if (isStanding.getBooleanValue())
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
       else
-         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+         tempFinalICP.setIncludingFrame(entryCornerPoints.get(1));
       tempFinalICP.changeFrame(worldFrame);
       finalDesiredCapturePointPositionToPack.setIncludingFrame(tempFinalICP);
    }
@@ -818,7 +818,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       }
       else
       {
-         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+         tempFinalICP.setIncludingFrame(entryCornerPoints.get(1));
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
          finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
       }

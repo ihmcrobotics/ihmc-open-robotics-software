@@ -328,7 +328,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       {
          double t = (double) i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t);
-         currentPosition.getFrameTupleIncludingFrame(ballPosition);
+         ballPosition.setIncludingFrame(currentPosition);
          ballPosition.changeFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(ballPosition);
       }
@@ -353,17 +353,17 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    public void getOrientation(FrameQuaternion orientationToPack)
@@ -373,12 +373,12 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
-      currentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
    public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
-      currentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
+      angularAccelerationToPack.setIncludingFrame(currentAngularAcceleration);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

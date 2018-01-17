@@ -692,8 +692,8 @@ public class SkippyController implements RobotController
 
       footLocation.set(robot.computeFootLocation());
 
-      footLocation.getFrameTupleIncludingFrame(tempFootLocation);
-      com.getFrameTupleIncludingFrame(tempCoMLocation);
+      tempFootLocation.setIncludingFrame(footLocation);
+      tempCoMLocation.setIncludingFrame(com);
       tempFootLocation.changeFrame(bodyFrame);
       tempCoMLocation.changeFrame(bodyFrame);
 

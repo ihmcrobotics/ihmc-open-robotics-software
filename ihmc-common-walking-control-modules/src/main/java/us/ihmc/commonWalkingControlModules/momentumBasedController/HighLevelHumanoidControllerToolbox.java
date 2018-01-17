@@ -957,8 +957,8 @@ public class HighLevelHumanoidControllerToolbox
       if (wristRawMeasuredForces == null || wristRawMeasuredTorques == null)
          return;
 
-      wristRawMeasuredForces.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
-      wristRawMeasuredTorques.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+      tempWristForce.setIncludingFrame(wristRawMeasuredForces.get(robotSide));
+      tempWristTorque.setIncludingFrame(wristRawMeasuredTorques.get(robotSide));
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
       wrenchToPack.setLinearPart(tempWristForce);
@@ -970,8 +970,8 @@ public class HighLevelHumanoidControllerToolbox
       if (wristForcesHandWeightCancelled == null || wristTorquesHandWeightCancelled == null)
          return;
 
-      wristForcesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
-      wristTorquesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+      tempWristForce.setIncludingFrame(wristForcesHandWeightCancelled.get(robotSide));
+      tempWristTorque.setIncludingFrame(wristTorquesHandWeightCancelled.get(robotSide));
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
       wrenchToPack.setLinearPart(tempWristForce);

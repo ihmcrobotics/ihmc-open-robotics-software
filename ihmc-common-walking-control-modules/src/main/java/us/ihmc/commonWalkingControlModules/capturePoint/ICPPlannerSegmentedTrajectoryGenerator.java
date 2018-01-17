@@ -173,29 +173,29 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    public void setCornerPoints(YoFramePoint initialCornerPoint, YoFramePoint finalCornerPoint)
    {
-      initialCornerPoint.getFrameTupleIncludingFrame(initialCornerPointInitialFrame);
-      initialCornerPoint.getFrameTupleIncludingFrame(initialCornerPointFinalFrame);
+      initialCornerPointInitialFrame.setIncludingFrame(initialCornerPoint);
+      initialCornerPointFinalFrame.setIncludingFrame(initialCornerPoint);
 
-      finalCornerPoint.getFrameTupleIncludingFrame(finalCornerPointInitialFrame);
-      finalCornerPoint.getFrameTupleIncludingFrame(finalCornerPointFinalFrame);
+      finalCornerPointInitialFrame.setIncludingFrame(finalCornerPoint);
+      finalCornerPointFinalFrame.setIncludingFrame(finalCornerPoint);
    }
 
    public void setReferenceCMPs(YoFramePoint initialCMP, YoFramePoint finalCMP)
    {
-      initialCMP.getFrameTupleIncludingFrame(initialCMPInitialFrame);
-      initialCMP.getFrameTupleIncludingFrame(initialCMPFinalFrame);
+      initialCMPInitialFrame.setIncludingFrame(initialCMP);
+      initialCMPFinalFrame.setIncludingFrame(initialCMP);
 
-      finalCMP.getFrameTupleIncludingFrame(finalCMPInitialFrame);
-      finalCMP.getFrameTupleIncludingFrame(finalCMPFinalFrame);
+      finalCMPInitialFrame.setIncludingFrame(finalCMP);
+      finalCMPFinalFrame.setIncludingFrame(finalCMP);
    }
 
    public void setBoundaryICP(YoFramePoint initialICP, YoFramePoint finalICP)
    {
-      initialICP.getFrameTupleIncludingFrame(initialICPInitialFrame);
-      initialICP.getFrameTupleIncludingFrame(initialICPFinalFrame);
+      initialICPInitialFrame.setIncludingFrame(initialICP);
+      initialICPFinalFrame.setIncludingFrame(initialICP);
 
-      finalICP.getFrameTupleIncludingFrame(finalICPInitialFrame);
-      finalICP.getFrameTupleIncludingFrame(finalICPFinalFrame);
+      finalICPInitialFrame.setIncludingFrame(finalICP);
+      finalICPFinalFrame.setIncludingFrame(finalICP);
    }
 
    public void setInitialCoMPosition(FramePoint3D startOfSingleSupportCoM, ReferenceFrame attachedFrame)

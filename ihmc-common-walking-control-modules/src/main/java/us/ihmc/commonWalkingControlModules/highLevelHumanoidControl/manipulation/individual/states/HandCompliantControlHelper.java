@@ -9,9 +9,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -143,8 +140,8 @@ public class HandCompliantControlHelper
    {
       updateWristMeasuredWrench(measuredForce, measuredTorque);
 
-      yoCompliantControlLinearDisplacement.getFrameTupleIncludingFrame(totalLinearCorrection);
-      yoCompliantControlAngularDisplacement.getFrameTupleIncludingFrame(totalAngularCorrection);
+      totalLinearCorrection.setIncludingFrame(yoCompliantControlLinearDisplacement);
+      totalAngularCorrection.setIncludingFrame(yoCompliantControlAngularDisplacement);
 
       measuredForce.changeFrame(controlFrame);
       measuredTorque.changeFrame(controlFrame);
@@ -229,8 +226,8 @@ public class HandCompliantControlHelper
       filteredMeasuredForce.update();
       filteredMeasuredTorque.update();
 
-      filteredMeasuredForce.getFrameTupleIncludingFrame(tempForceVector);
-      filteredMeasuredTorque.getFrameTupleIncludingFrame(tempTorqueVector);
+      tempForceVector.setIncludingFrame(filteredMeasuredForce);
+      tempTorqueVector.setIncludingFrame(filteredMeasuredTorque);
 
       measuredWrench.setLinearPart(tempForceVector);
       measuredWrench.setAngularPart(tempTorqueVector);
@@ -265,8 +262,8 @@ public class HandCompliantControlHelper
       yoCompliantControlLinearDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
       yoCompliantControlAngularDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
 
-      yoCompliantControlLinearDisplacement.getFrameTupleIncludingFrame(totalLinearCorrection);
-      yoCompliantControlAngularDisplacement.getFrameTupleIncludingFrame(totalAngularCorrection);
+      totalLinearCorrection.setIncludingFrame(yoCompliantControlLinearDisplacement);
+      totalAngularCorrection.setIncludingFrame(yoCompliantControlAngularDisplacement);
 
       totalLinearCorrection.changeFrame(controlFrame);
       totalAngularCorrection.changeFrame(controlFrame);

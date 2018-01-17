@@ -205,8 +205,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
          jointControlHelper.doAction(timeInTrajectory);
       }
 
-      contactNormal.getFrameTupleIncludingFrame(previousContactNormal);
-      contactPoint.getFrameTupleIncludingFrame(previousContactPoint);
+      previousContactNormal.setIncludingFrame(contactNormal);
+      previousContactPoint.setIncludingFrame(contactPoint);
       previousCoefficientOfFriction = coefficientOfFriction.getDoubleValue();
 
       updateGraphics();

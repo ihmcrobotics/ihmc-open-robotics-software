@@ -571,7 +571,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       if (positionData == null || !hasData(positionData.getRight()))
          return false;
 
-      positionData.getLeft().getFrameTupleIncludingFrame(positionDataToPack);
+      positionDataToPack.setIncludingFrame(positionData.getLeft());
       return true;
    }
 
@@ -588,7 +588,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       if (vectorData == null || !hasData(vectorData.getRight()))
          return false;
 
-      vectorData.getLeft().getFrameTupleIncludingFrame(vectorDataToPack);
+      vectorDataToPack.setIncludingFrame(vectorData.getLeft());
       return true;
    }
 
@@ -605,7 +605,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       if (positionData == null || !hasData(positionData.getRight()))
          return false;
 
-      positionData.getLeft().getFrameTupleIncludingFrame(positionDataToPack);
+      positionDataToPack.setIncludingFrame(positionData.getLeft());
       return true;
    }
 
@@ -644,7 +644,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       if (vectorData == null || !hasData(vectorData.getRight()))
          return false;
 
-      vectorData.getLeft().getFrameTupleIncludingFrame(vectorDataToPack);
+      vectorDataToPack.setIncludingFrame(vectorData.getLeft());
       return true;
    }
 

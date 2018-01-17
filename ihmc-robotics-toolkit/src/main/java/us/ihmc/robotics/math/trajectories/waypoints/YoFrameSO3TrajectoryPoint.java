@@ -146,7 +146,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
 
    public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
-      angularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(angularVelocity);
    }
 
    public void getOrientation(YoFrameQuaternion orientationToPack)

@@ -128,7 +128,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               getFrameTupleIncludingFrame(localFramePoint);
+               localFramePoint.setIncludingFrame(YoFramePointInMultipleFrames.this);
                point.setAndMatchFrame(localFramePoint);
             }
          });
@@ -156,7 +156,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
    
    public String toStringForASingleReferenceFrame(ReferenceFrame referenceFrame)
    {
-      getFrameTupleIncludingFrame(framePoint);
+      framePoint.setIncludingFrame(this);
       framePoint.changeFrame(referenceFrame);
       return framePoint.toString();
    }

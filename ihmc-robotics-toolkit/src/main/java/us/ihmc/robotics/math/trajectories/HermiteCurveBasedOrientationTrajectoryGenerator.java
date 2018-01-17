@@ -603,13 +603,13 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    @Override
    public void getAngularVelocity(FrameVector3D velocityToPack)
    {
-      currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
    @Override
    public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAngularAcceleration);
    }
 
    @Override

@@ -786,12 +786,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public void getNextEntryCMP(FramePoint3D entryCMPToPack)
    {
-      entryCMPsInWorldFrameReadOnly.get(0).getFrameTupleIncludingFrame(entryCMPToPack);
+      entryCMPToPack.setIncludingFrame(entryCMPsInWorldFrameReadOnly.get(0));
    }
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
-      exitCMPsInWorldFrameReadOnly.get(0).getFrameTupleIncludingFrame(entryCMPToPack);
+      entryCMPToPack.setIncludingFrame(exitCMPsInWorldFrameReadOnly.get(0));
    }
 
    public boolean isDoneWalking()
