@@ -298,7 +298,7 @@ public class VisibilityGraphsOcclusionTest
          {
             long startTime = System.currentTimeMillis();
 //            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
-            bodyPath = vizGraphs.calculateBodyPathWithOcclussions(currentPosition.getPoint3dCopy(), goal);
+            bodyPath = vizGraphs.calculateBodyPathWithOcclussions(currentPosition, goal);
 
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             solveTime.set(seconds);
@@ -343,11 +343,11 @@ public class VisibilityGraphsOcclusionTest
                scs.setTime(iteration);
                scs.tickAndUpdate();
             }
-            PrintTools.info("Failed, not starting from current position: " + currentPosition.getPoint3dCopy() + ", beginning of plan: " + bodyPath.get(0));
+            PrintTools.info("Failed, not starting from current position: " + new Point3D(currentPosition) + ", beginning of plan: " + bodyPath.get(0));
             plannerFailed.set(true);
          }
 
-         if (currentPosition.getPoint3dCopy().distance(goal) < 0.05)
+         if (currentPosition.distance(goal) < 0.05)
          {
             if (bodyPath.size() > 2)
             {
@@ -369,9 +369,9 @@ public class VisibilityGraphsOcclusionTest
          }
 
          currentPosition.set(bodyPath.get(0)); // Set to remove precision problems causing the travel method to fail. Already checked that the bodyPath starts from the currentPosition.
-         currentPosition.set(travelAlongBodyPath(marchingSpeedInMetersPerTick, currentPosition.getPoint3dCopy(), bodyPath));
+         currentPosition.set(travelAlongBodyPath(marchingSpeedInMetersPerTick, currentPosition, bodyPath));
 
-         if (regions.findPlanarRegionsContainingPoint(currentPosition.getPoint3dCopy(), maximumFlyingDistance) == null)
+         if (regions.findPlanarRegionsContainingPoint(currentPosition, maximumFlyingDistance) == null)
          {
             PrintTools.info("Planner failed: path results in a flying robot.");
             plannerFailed.set(true);
@@ -417,7 +417,7 @@ public class VisibilityGraphsOcclusionTest
       }
    }
 
-   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
+   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3DReadOnly startingPosition, List<Point3DReadOnly> bodyPath)
    {
       Point3D newPosition = new Point3D();
 
