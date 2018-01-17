@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.frames;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
@@ -50,11 +49,6 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2D<?, ?>> implements
    {
       putYoValuesIntoFrameTuple2d();
       return frameTuple2d;
-   }
-
-   public final FrameVector2D getFrameVector2dCopy()
-   {
-      return new FrameVector2D(getFrameTuple2d());
    }
 
    public final FramePoint2D getFramePoint2dCopy()
