@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -812,7 +813,7 @@ public class QuadrupedSupportPolygon implements Serializable
       return false;
    }
    
-   public double getDistanceInside2d(FramePoint2D point)
+   public double getDistanceInside2d(FramePoint2DReadOnly point)
    {
       return getDistanceInside2d(point.getX(), point.getY());
    }

@@ -636,7 +636,7 @@ public class BalanceManager
    public double getICPErrorMagnitude()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
-      return capturePoint2d.distance(yoDesiredCapturePoint.getFrameTuple2d());
+      return capturePoint2d.distance(yoDesiredCapturePoint);
    }
 
    public void getICPError(FrameVector2D icpErrorToPack)

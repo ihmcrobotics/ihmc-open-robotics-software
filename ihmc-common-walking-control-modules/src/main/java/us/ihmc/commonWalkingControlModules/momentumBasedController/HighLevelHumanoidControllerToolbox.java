@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -702,7 +703,7 @@ public class HighLevelHumanoidControllerToolbox
       return getName();
    }
 
-   public void setDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoP)
+   public void setDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2DReadOnly desiredCoP)
    {
       YoFramePoint2d cop = footDesiredCenterOfPressures.get(contactablePlaneBody);
       if (cop != null)

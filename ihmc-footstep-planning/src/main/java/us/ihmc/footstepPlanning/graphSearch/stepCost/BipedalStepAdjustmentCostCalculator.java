@@ -139,7 +139,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private double dot3dVectorWith2dVector(YoFrameVector vector3d, YoFrameVector2d vector2d)
    {
-      tempFrameVectorForDot.setIncludingFrame(vector2d.getFrameTuple2d(), 0.0);
+      tempFrameVectorForDot.setIncludingFrame(vector2d, 0.0);
       return vector3d.dot(tempFrameVectorForDot);
    }
 
@@ -166,7 +166,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       }
       else
       {
-         FrameVector2D frameTuple2d = vectorToPack.getFrameTuple2d();
+         FrameVector2D frameTuple2d = new FrameVector2D(vectorToPack);
          frameTuple2d.set(toPose.getFramePointCopy());
          fromPose.checkReferenceFrameMatch(vectorToPack);
          frameTuple2d.sub(fromPose.getX(), fromPose.getY());
