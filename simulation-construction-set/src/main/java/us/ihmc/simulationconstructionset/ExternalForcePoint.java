@@ -220,12 +220,12 @@ public class ExternalForcePoint extends KinematicPoint
 
    public void getForce(Vector3D vectorToPack)
    {
-      force.get(vectorToPack);
+      vectorToPack.set(force);
    }
 
    public void getMoment(Vector3D vectorToPack)
    {
-      moment.get(vectorToPack);
+      vectorToPack.set(moment);
    }
 
    public void setForce(Vector3D force)
@@ -250,7 +250,7 @@ public class ExternalForcePoint extends KinematicPoint
 
    public void getImpulse(Vector3D vectorToPack)
    {
-      impulse.get(vectorToPack);
+      vectorToPack.set(impulse);
    }
 
    public void setImpulse(Vector3D impulse)

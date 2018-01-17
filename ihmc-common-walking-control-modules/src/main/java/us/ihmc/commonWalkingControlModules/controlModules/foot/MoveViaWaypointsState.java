@@ -155,8 +155,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    {
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      angularWeight.get(tempAngularWeightVector);
-      linearWeight.get(tempLinearWeightVector);
+      tempAngularWeightVector.set(angularWeight);
+      tempLinearWeightVector.set(linearWeight);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
    }
 

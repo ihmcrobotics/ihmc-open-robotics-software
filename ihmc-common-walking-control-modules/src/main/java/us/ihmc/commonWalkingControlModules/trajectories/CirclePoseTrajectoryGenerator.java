@@ -177,8 +177,8 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            circleOrigin.get(localTranslation);
-            rotationAxis.get(localRotationAxis);
+            localTranslation.set(circleOrigin);
+            localRotationAxis.set(rotationAxis);
             EuclidGeometryTools.axisAngleFromZUpToVector3D(localRotationAxis, localAxisAngle);
             transformToParent.set(localAxisAngle, localTranslation);
          }

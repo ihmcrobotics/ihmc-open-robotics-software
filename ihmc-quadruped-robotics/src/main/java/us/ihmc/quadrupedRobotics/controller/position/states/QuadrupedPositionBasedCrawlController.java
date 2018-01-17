@@ -938,7 +938,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       actualRoll.set(yawPitchRollArray[2]);
 
       filteredFeedForwardCenterOfMassOffset.update();
-      filteredFeedForwardCenterOfMassOffset.get(centerOfMassOffset);
+      centerOfMassOffset.set(filteredFeedForwardCenterOfMassOffset);
       feedForwardCenterOfMassFrame.updateTranslation(centerOfMassOffset);
 
       // compute center of mass position and velocity
@@ -1170,7 +1170,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).get(desiredFootPositionForInverseKinematics);
+         desiredFootPositionForInverseKinematics.set(desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant));
          inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, desiredFootPositionForInverseKinematics, fullRobotModel);
       }
    }

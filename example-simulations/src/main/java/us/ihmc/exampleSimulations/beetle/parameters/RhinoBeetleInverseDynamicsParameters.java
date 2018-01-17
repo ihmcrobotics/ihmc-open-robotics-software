@@ -84,13 +84,13 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    @Override
    public void getBodySpatialLinearQPWeight(Vector3D linearWeight)
    {
-      bodySpatialLinearQPWeight.get(linearWeight);
+      linearWeight.set(bodySpatialLinearQPWeight);
    }
 
    @Override
    public void getBodySpatialAngularQPWeight(Vector3D angularWeight)
    {
-      bodySpatialAngularQPWeight.get(angularWeight);
+      angularWeight.set(bodySpatialAngularQPWeight);
    }
 
    @Override

@@ -155,11 +155,11 @@ public class LogDataRawSensorMap
 
    public void getRawIMUAngularVelocity(String imuName, Vector3D angularVelocityToPack)
    {
-      rawIMUAngularVelocityMap.get(imuName).get(angularVelocityToPack);
+      angularVelocityToPack.set(rawIMUAngularVelocityMap.get(imuName));
    }
 
    public void getRawIMULinearAcceleration(String imuName, Vector3D linearAccelerationToPack)
    {
-      rawIMULinearAccelerationMap.get(imuName).get(linearAccelerationToPack);
+      linearAccelerationToPack.set(rawIMULinearAccelerationMap.get(imuName));
    }
 }

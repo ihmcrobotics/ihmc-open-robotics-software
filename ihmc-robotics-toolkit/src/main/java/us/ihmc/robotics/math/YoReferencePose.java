@@ -89,6 +89,6 @@ public class YoReferencePose extends ReferenceFrame
 
    public void get(Vector3D translation)
    {
-      yoFramePose.getPosition().get(translation);
+      translation.set(yoFramePose.getPosition());
    }
 }

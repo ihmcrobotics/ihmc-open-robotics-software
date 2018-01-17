@@ -76,7 +76,7 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> im
    @Override
    public void getVector(Vector3D VectorToPack)
    {
-      this.get(VectorToPack);
+      VectorToPack.set(this);
    }
 
    private final Vector3D tempVector = new Vector3D();

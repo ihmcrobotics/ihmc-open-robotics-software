@@ -61,7 +61,7 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint3D> imple
    @Override
    public void getPoint(Point3D pointToPack)
    {
-      this.get(pointToPack);
+      pointToPack.set(this);
    }
 
    private final Point3D tempPoint = new Point3D();

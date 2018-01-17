@@ -173,14 +173,14 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            steeringWheelRotationAxis.get(localZAxis);
-            steeringWheelZeroAxis.get(localXAxis);
+            localZAxis.set(steeringWheelRotationAxis);
+            localXAxis.set(steeringWheelZeroAxis);
             localYAxis.cross(localZAxis, localXAxis);
             localYAxis.normalize();
             localXAxis.cross(localYAxis, localZAxis);
             steeringWheelZeroAxis.set(localXAxis);
 
-            steeringWheelCenter.get(localTranslation);
+            localTranslation.set(steeringWheelCenter);
             localRotation.setColumns(localXAxis, localYAxis, localZAxis);
             transformToParent.set(localRotation, localTranslation);
          }

@@ -100,7 +100,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
-      angularVelocity.get(angularVelocityToPack);
+      angularVelocityToPack.set(angularVelocity);
    }
 
    public void set(SO3WaypointInterface<?> so3Waypoint)

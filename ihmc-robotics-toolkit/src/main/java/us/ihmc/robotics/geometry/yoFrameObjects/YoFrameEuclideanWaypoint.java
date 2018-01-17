@@ -98,13 +98,13 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
    @Override
    public void getPosition(Point3DBasics positionToPack)
    {
-      position.get(positionToPack);
+      positionToPack.set(position);
    }
 
    @Override
    public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
-      linearVelocity.get(linearVelocityToPack);
+      linearVelocityToPack.set(linearVelocity);
    }
 
    @Override

@@ -189,7 +189,7 @@ public class KinematicPoint implements java.io.Serializable
 
    public void getOffset(Tuple3DBasics offsetToPack)
    {
-      offsetYoFrameVector.get(offsetToPack);
+      offsetToPack.set(offsetYoFrameVector);
    }
 
    public Vector3D getOffsetCopy()
@@ -232,7 +232,7 @@ public class KinematicPoint implements java.io.Serializable
 
    public void getPosition(Tuple3DBasics positionToPack)
    {
-      positionInWorld.get(positionToPack);
+      positionToPack.set(positionInWorld);
    }
 
    public Point3D getPositionPoint()
@@ -245,15 +245,12 @@ public class KinematicPoint implements java.io.Serializable
 
    public void getVelocity(Vector3DBasics velocityToPack)
    {
-      velocityInWorld.get(velocityToPack);
+      velocityToPack.set(velocityInWorld);
    }
 
    public Vector3D getVelocityVector()
    {
-      Vector3D velocityToReturn = new Vector3D();
-      velocityInWorld.get(velocityToReturn);
-
-      return velocityToReturn;
+      return new Vector3D(velocityInWorld);
    }
 
    public void setVelocity(Vector3DReadOnly velocity)
@@ -263,7 +260,7 @@ public class KinematicPoint implements java.io.Serializable
 
    public void getAngularVelocity(Vector3DBasics angularVelocityInWorldToPack)
    {
-      this.angularVelocityInWorld.get(angularVelocityInWorldToPack);
+      angularVelocityInWorldToPack.set(this.angularVelocityInWorld);
    }
 
    public void setAngularVelocity(Vector3DReadOnly angularVelocityInWorld)
