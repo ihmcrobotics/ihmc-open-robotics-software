@@ -58,7 +58,7 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePose footPose = footPoses.get(robotQuadrant);
-         footPose.setPosition(yoFootPositions.get(robotQuadrant).getFramePointCopy());
+         footPose.setPosition(yoFootPositions.get(robotQuadrant));
          soleFrames.get(robotQuadrant).setPoseAndUpdate(footPose);
       }
       for (RobotEnd robotEnd : RobotEnd.values)

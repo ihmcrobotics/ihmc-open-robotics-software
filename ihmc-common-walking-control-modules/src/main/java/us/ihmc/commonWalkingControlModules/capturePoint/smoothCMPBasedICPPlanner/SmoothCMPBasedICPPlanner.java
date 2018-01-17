@@ -463,7 +463,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          decayDesiredVelocityIfNeeded();
 
          if (debug)
-            checkCoMDynamics(desiredCoMVelocity, desiredICPPosition.getFramePointCopy(), desiredCoMPosition.getFramePointCopy());
+            checkCoMDynamics(desiredCoMVelocity, desiredICPPosition, desiredCoMPosition);
 
          timer.stopMeasurement();
          // done to account for the delayed velocity
@@ -628,9 +628,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.holdPosition(icpPositionToHold);
    }
 
-   private void checkCoMDynamics(FrameVector3DReadOnly comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3DReadOnly comPositionDesiredCurrent)
+   private final FramePoint3D comVelocityDynamicsCurrent = new FramePoint3D();
+
+   private void checkCoMDynamics(FrameVector3DReadOnly comVelocityDesiredCurrent, FramePoint3DReadOnly icpPositionDesiredCurrent, FramePoint3DReadOnly comPositionDesiredCurrent)
    {
-      FramePoint3D comVelocityDynamicsCurrent = icpPositionDesiredCurrent;
+      comVelocityDynamicsCurrent.setIncludingFrame(icpPositionDesiredCurrent);
       comVelocityDynamicsCurrent.sub(comPositionDesiredCurrent);
       comVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
 

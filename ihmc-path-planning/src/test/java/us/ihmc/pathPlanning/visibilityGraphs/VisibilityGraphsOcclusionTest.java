@@ -336,7 +336,7 @@ public class VisibilityGraphsOcclusionTest
          }
 
          // Use different epsilon for xy and z in case the point got projected onto a region
-         if (bodyPath.get(0).distanceXY(currentPosition.getFramePointCopy()) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(0).getZ(), currentPosition.getZ(), 0.1))
+         if (bodyPath.get(0).distanceXY(currentPosition) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(0).getZ(), currentPosition.getZ(), 0.1))
          {
             if (visualize)
             {

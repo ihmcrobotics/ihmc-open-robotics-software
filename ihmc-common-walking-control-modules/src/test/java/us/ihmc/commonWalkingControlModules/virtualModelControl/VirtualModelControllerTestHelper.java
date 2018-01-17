@@ -2448,7 +2448,6 @@ public class VirtualModelControllerTestHelper
          pidControllerLinearZ = new PIDController(linearPidGains, "linear_Z" + suffix, registry);
 
          AppearanceDefinition forceAppearance = YoAppearance.Red();
-         forcePoint.getYoPosition().getFramePointCopy();
          forceVisualizer = new YoGraphicVector("contactForceVisualizer" + suffix, forcePoint.getYoPosition(), contactForce, 0.05, forceAppearance);
 
          yoGraphicsList.add(forceVisualizer);

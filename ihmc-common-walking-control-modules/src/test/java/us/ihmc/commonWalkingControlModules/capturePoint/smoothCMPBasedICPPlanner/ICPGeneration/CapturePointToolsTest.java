@@ -373,7 +373,7 @@ public class CapturePointToolsTest
          CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), constantCentersOfPressures.get(0), icpToCheck);
 
          
-         EuclidFrameTestTools.assertFrameTuple3DEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(capturePointsToPack.get(0), icpToCheck, 1e-8);
 
          for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
          {

@@ -416,8 +416,8 @@ public class SphereICPPlannerVisualizer
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
-         icpTrack.setBallLoop(desiredICP.getFramePointCopy());
-         cmpTrack.setBallLoop(eCMP.getFramePointCopy());
+         icpTrack.setBallLoop(desiredICP);
+         cmpTrack.setBallLoop(eCMP);
       }
       yoTime.add(dt);
 
