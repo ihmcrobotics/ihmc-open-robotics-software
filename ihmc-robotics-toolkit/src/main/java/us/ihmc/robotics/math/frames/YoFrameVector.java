@@ -62,7 +62,9 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> im
 
    public void setAsRotationVector(YoFrameQuaternion yoFrameQuaternion)
    {
-      yoFrameQuaternion.getRotationVector(getFrameTuple());
+      FrameVector3D frameTuple = getFrameTuple();
+      yoFrameQuaternion.get(frameTuple);
+      checkReferenceFrameMatch(frameTuple);
       getYoValuesFromFrameTuple();
    }
 }
