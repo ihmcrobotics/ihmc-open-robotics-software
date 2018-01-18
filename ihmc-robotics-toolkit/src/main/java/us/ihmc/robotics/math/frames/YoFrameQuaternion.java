@@ -27,7 +27,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 // Note: You should only make these once at the initialization of a controller. You shouldn't make
 // any on the fly since they contain YoVariables.
-public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
+public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, FrameQuaternionReadOnly
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -332,22 +332,26 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
       return qs;
    }
 
-   public double getQx()
+   @Override
+   public double getX()
    {
       return qx.getDoubleValue();
    }
 
-   public double getQy()
+   @Override
+   public double getY()
    {
       return qy.getDoubleValue();
    }
 
-   public double getQz()
+   @Override
+   public double getZ()
    {
       return qz.getDoubleValue();
    }
 
-   public double getQs()
+   @Override
+   public double getS()
    {
       return qs.getDoubleValue();
    }
