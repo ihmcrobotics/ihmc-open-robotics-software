@@ -555,7 +555,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(yoCurrentOrientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
@@ -571,9 +571,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    @Override
    public void getPose(FramePose framePoseToPack)
    {
-      currentPosition.setIncludingFrame(yoCurrentAdjustedPositionWorld);
-      yoCurrentOrientation.getFrameOrientationIncludingFrame(currentOrientation);
-      framePoseToPack.setPoseIncludingFrame(currentPosition, currentOrientation);
+      framePoseToPack.setPoseIncludingFrame(yoCurrentAdjustedPositionWorld, yoCurrentOrientation);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

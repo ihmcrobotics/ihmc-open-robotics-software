@@ -241,7 +241,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
 
    public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(orientation);
    }
 
    public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)

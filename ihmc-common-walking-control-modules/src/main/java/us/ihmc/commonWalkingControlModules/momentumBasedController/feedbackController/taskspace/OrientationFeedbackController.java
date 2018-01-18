@@ -315,7 +315,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoCurrentOrientation.set(currentOrientation);
       yoCurrentRotationVector.setAsRotationVector(yoCurrentOrientation);
 
-      yoDesiredOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
+      desiredOrientation.setIncludingFrame(yoDesiredOrientation);
       desiredOrientation.changeFrame(endEffectorFrame);
 
       desiredOrientation.normalizeAndLimitToPi();
@@ -402,7 +402,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          return;
       }
 
-      yoErrorOrientationCumulated.getFrameOrientationIncludingFrame(errorOrientationCumulated);
+      errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
       errorOrientationCumulated.multiply(yoErrorOrientation.getFrameOrientation());
       yoErrorOrientationCumulated.set(errorOrientationCumulated);
       errorOrientationCumulated.normalizeAndLimitToPi();

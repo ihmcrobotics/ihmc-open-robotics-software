@@ -622,7 +622,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       if (orientationData == null || !hasData(orientationData.getRight()))
          return false;
 
-      orientationData.getLeft().getFrameOrientationIncludingFrame(orientationDataToPack);
+      orientationDataToPack.setIncludingFrame(orientationData.getLeft());
       return true;
    }
 

@@ -50,8 +50,7 @@ public class YoFrameQuaternionTest
       matrix3dExpected.setIdentity();
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
 
-      FrameQuaternion frameOrientationActual = new FrameQuaternion(worldFrame);
-      yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientationActual);
+      FrameQuaternion frameOrientationActual = new FrameQuaternion(yoFrameQuaternion);
       FrameQuaternion frameOrientationExpected = new FrameQuaternion(worldFrame);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
@@ -91,8 +90,7 @@ public class YoFrameQuaternionTest
       FrameQuaternion frameOrientationExpected = new FrameQuaternion(worldFrame);
       frameOrientationExpected.set(RandomGeometry.nextQuaternion(random));
       yoFrameQuaternion.set(frameOrientationExpected);
-      FrameQuaternion frameOrientationActual = new FrameQuaternion(worldFrame);
-      yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientationActual);
+      FrameQuaternion frameOrientationActual = new FrameQuaternion(yoFrameQuaternion);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
       double[] yawPitchRollExpected = RandomNumbers.nextDoubleArray(random, 3, 2.0 * Math.PI);
@@ -198,7 +196,7 @@ public class YoFrameQuaternionTest
       {
          interpolatedFrameOrientation.interpolate(initialFrameOrientation, finalFrameOrientation, alpha);
          interpolatedYoFrameQuaternion.interpolate(initialYoFrameQuaternion, finalYoFrameQuaternion, alpha);
-         interpolatedYoFrameQuaternion.getFrameOrientationIncludingFrame(temp);
+         temp.setIncludingFrame(interpolatedYoFrameQuaternion);
 
          assertTrue(interpolatedFrameOrientation.epsilonEquals(temp, EPS));
       }
