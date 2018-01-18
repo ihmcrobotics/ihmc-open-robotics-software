@@ -31,7 +31,7 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    @Override
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      get(quaternion);
+      quaternion.set(this);
       ReferenceFrame currentReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(desiredFrame);
       frameOrientation.setIncludingFrame(currentReferenceFrame, quaternion);
       frameOrientation.changeFrame(desiredFrame);

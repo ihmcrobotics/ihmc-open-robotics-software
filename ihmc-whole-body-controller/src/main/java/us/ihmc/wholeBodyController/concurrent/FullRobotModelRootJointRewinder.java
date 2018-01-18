@@ -43,11 +43,8 @@ public class FullRobotModelRootJointRewinder implements RewoundListener
    {      
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       
-      rootJointTranslation.set(yoRootJointTranslation);
-      rootJoint.setPosition(rootJointTranslation);
-      
-      yoRootJointRotation.get(rootJointRotation);
-      rootJoint.setRotation(rootJointRotation);
+      rootJoint.setPosition(yoRootJointTranslation);
+      rootJoint.setRotation(yoRootJointRotation);
    }
 }
 

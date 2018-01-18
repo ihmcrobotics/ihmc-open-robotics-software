@@ -94,7 +94,7 @@ public class YoFrameSO3Waypoint extends YoFrameWaypoint<YoFrameSO3Waypoint, Fram
    @Override
    public void getOrientation(QuaternionBasics orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    @Override

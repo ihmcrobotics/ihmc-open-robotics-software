@@ -1,9 +1,13 @@
 package us.ihmc.robotics.math.frames;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Clearable;
@@ -18,9 +22,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -206,12 +208,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.set(rotationVector);
       getYoValuesFromFrameOrientation();
-   }
-
-   public void get(QuaternionBasics quaternionToPack)
-   {
-      putYoValuesIntoFrameOrientation();
-      quaternionToPack.set(frameOrientation);
    }
 
    public void get(RotationMatrix matrixToPack)

@@ -2,23 +2,17 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -28,6 +22,11 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -395,15 +394,11 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   private final Quaternion temp = new Quaternion();
-
    public void getPose(FramePose framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
       framePoseToPack.setPosition(currentPosition);
-
-      currentOrientation.get(temp);
-      framePoseToPack.setOrientation(temp);
+      framePoseToPack.setOrientation(currentOrientation);
    }
 
    public boolean isDone()

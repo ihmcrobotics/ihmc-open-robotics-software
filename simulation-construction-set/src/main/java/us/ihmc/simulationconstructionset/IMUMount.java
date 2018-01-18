@@ -158,7 +158,7 @@ public class IMUMount
 
    public void getOrientation(Quaternion orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    public void getOrientation(RotationMatrix rotationMatrixToPack)
