@@ -6,14 +6,13 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
 public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -181,15 +180,11 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   private final Quaternion temp = new Quaternion();
-   
    public void getPose(FramePose framePoseToPack)
    {
       framePoseToPack.changeFrame(position.getReferenceFrame());
       framePoseToPack.setPosition(position);
-      
-      orientation.get(temp);
-      framePoseToPack.setOrientation(temp);
+      framePoseToPack.setOrientation(orientation);
    }
    
    public String toString()

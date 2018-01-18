@@ -199,7 +199,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    @Override
    public void getOrientation(QuaternionBasics orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    @Override

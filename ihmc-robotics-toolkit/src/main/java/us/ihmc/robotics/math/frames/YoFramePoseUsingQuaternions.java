@@ -252,7 +252,7 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
 
    public void getOrientation(Quaternion quaternionToPack)
    {
-      getOrientation().get(quaternionToPack);
+      quaternionToPack.set(getOrientation());
    }
 
    public YoDouble getYoX()

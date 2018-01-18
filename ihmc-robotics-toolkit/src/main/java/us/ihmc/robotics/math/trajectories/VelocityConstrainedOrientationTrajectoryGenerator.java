@@ -370,8 +370,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
          computeDrift(finalDriftIntegrationTime, alphaDecay, finalAngularVelocity, finalDrift);
       }
 
-      initialOrientation.get(initialQuaternionDriftedToPack);
-      finalOrientation.get(finalQuaternionDriftedToPack);
+      initialQuaternionDriftedToPack.set(initialOrientation);
+      finalQuaternionDriftedToPack.set(finalOrientation);
       quaternionCalculus.interpolate(alpha, initialQuaternionDriftedToPack, finalQuaternionDriftedToPack, qInterpolated, true);
       quaternionCalculus.interpolate(alpha, initialDrift, finalDrift, interpolatedDrift, false);
       qInterpolated.multiply(interpolatedDrift, qInterpolated);

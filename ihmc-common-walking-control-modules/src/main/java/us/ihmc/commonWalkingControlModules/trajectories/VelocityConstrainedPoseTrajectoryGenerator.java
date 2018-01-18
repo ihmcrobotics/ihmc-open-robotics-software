@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -18,12 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -33,6 +28,11 @@ import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -680,15 +680,11 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   private final Quaternion temp = new Quaternion();
-
    public void getPose(FramePose framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
       framePoseToPack.setPosition(currentPosition);
-
-      currentOrientation.get(temp);
-      framePoseToPack.setOrientation(temp);
+      framePoseToPack.setOrientation(currentOrientation);
    }
 
    public boolean isDone()

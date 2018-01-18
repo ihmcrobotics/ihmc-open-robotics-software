@@ -37,8 +37,7 @@ public class YoFrameQuaternionTest
 
       yoFrameQuaternion.checkReferenceFrameMatch(worldFrame);
 
-      Quaternion quat4dActual = new Quaternion();
-      yoFrameQuaternion.get(quat4dActual);
+      Quaternion quat4dActual = new Quaternion(yoFrameQuaternion);
       Quaternion quat4dExpected = new Quaternion(0.0, 0.0, 0.0, 1.0);
       assertTrue(quat4dActual.epsilonEquals(quat4dExpected, EPS));
 
@@ -78,8 +77,7 @@ public class YoFrameQuaternionTest
 
       Quaternion quat4dExpected = RandomGeometry.nextQuaternion(random);
       yoFrameQuaternion.set(quat4dExpected);
-      Quaternion quat4dActual = new Quaternion();
-      yoFrameQuaternion.get(quat4dActual);
+      Quaternion quat4dActual = new Quaternion(yoFrameQuaternion);
       assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
       AxisAngle axisAngle4dExpected = RandomGeometry.nextAxisAngle(random);
@@ -168,13 +166,13 @@ public class YoFrameQuaternionTest
 
          yoFrameQuaternion.set(quat4dA);
          yoFrameQuaternion.multiply(quat4dB);
-         yoFrameQuaternion.get(quat4dActual);
+         quat4dActual.set(yoFrameQuaternion);
          assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
          yoFrameQuaternion.set(quat4dA);
          frameOrientation.set(quat4dB);
          yoFrameQuaternion.multiply(frameOrientation);
-         yoFrameQuaternion.get(quat4dActual);
+         quat4dActual.set(yoFrameQuaternion);
          assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
       }

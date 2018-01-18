@@ -123,7 +123,7 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
    @Override
    public void getOrientation(QuaternionBasics orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    @Override

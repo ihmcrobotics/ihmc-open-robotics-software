@@ -56,8 +56,8 @@ public class OrientationInterpolationCalculator
       angularVelocityToPack.checkReferenceFrameMatch(startOrientation);
       startOrientation.checkReferenceFrameMatch(endOrientation);
 
-      startOrientation.get(startRotationQuaternion);
-      endOrientation.get(endRotationQuaternion);
+      startRotationQuaternion.set(startOrientation);
+      endRotationQuaternion.set(endOrientation);
 
       computeAngularVelocity(angularVelocity, startRotationQuaternion, endRotationQuaternion, alphaDot);
 

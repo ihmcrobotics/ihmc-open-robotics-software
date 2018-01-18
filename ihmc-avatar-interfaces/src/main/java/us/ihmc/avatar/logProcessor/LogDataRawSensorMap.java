@@ -150,7 +150,7 @@ public class LogDataRawSensorMap
 
    public void getRawIMUOrientation(String imuName, Quaternion orientationToPack)
    {
-      rawIMUOrientationMap.get(imuName).get(orientationToPack);
+      orientationToPack.set(rawIMUOrientationMap.get(imuName));
    }
 
    public void getRawIMUAngularVelocity(String imuName, Vector3D angularVelocityToPack)
