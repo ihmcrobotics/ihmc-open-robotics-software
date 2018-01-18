@@ -208,12 +208,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       getYoValuesFromFrameOrientation();
    }
 
-   public void getFrameOrientation(FrameQuaternion frameOrientationToPack)
-   {
-      putYoValuesIntoFrameOrientation();
-      frameOrientationToPack.set(this.frameOrientation);
-   }
-
    public void getFrameOrientationIncludingFrame(FrameQuaternion frameOrientationToPack)
    {
       putYoValuesIntoFrameOrientation();
