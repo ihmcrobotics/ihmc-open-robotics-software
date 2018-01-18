@@ -139,13 +139,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       getYoValuesFromFrameOrientation(notifyListeners);
    }
 
-   public void set(YoFrameQuaternion yoFrameQuaternion)
-   {
-      checkReferenceFrameMatch(yoFrameQuaternion);
-      frameOrientation.setIncludingFrame(yoFrameQuaternion);
-      getYoValuesFromFrameOrientation();
-   }
-
    /**
     * Sets the orientation of this to the origin of the passed in ReferenceFrame.
     *
