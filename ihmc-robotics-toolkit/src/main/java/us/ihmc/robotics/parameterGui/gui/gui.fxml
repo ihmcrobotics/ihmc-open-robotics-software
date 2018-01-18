@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import us.ihmc.robotics.parameterGui.tree.ParameterTree?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
+	fx:controller="us.ihmc.robotics.parameterGui.gui.GuiController"
+	xmlns:fx="http://javafx.com/fxml">
+
+	<children>
+		<VBox maxWidth="600.0" spacing="10.0" AnchorPane.leftAnchor="10.0"
+			AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0"
+			AnchorPane.rightAnchor="10.0">
+			<children>
+				<Label text="Offline Parameter Tuner">
+					<font>
+						<Font size="20.0" />
+					</font>
+				</Label>
+				<TextField fx:id="searchField" />
+				<CheckBox text="Hide Namespaces" fx:id="hideNamespaces"
+					onAction="#handleNamespaceButton" />
+				<ParameterTree VBox.vgrow="ALWAYS" fx:id="tree" />
+			</children>
+		</VBox>
+
+	</children>
+</AnchorPane>

@@ -29,10 +29,10 @@ import javax.swing.tree.TreeSelectionModel;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.robotics.parameterGui.RegularExpression;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
-import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.RegistrySettingsChangedListener;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
