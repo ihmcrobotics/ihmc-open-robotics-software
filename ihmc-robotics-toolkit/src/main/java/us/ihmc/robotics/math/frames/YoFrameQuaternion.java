@@ -115,38 +115,16 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
 
    public void set(FrameQuaternionReadOnly frameOrientation)
    {
-      set(frameOrientation, true);
-   }
-
-   public void set(FrameQuaternionReadOnly frameOrientation, boolean notifyListeners)
-   {
       checkReferenceFrameMatch(frameOrientation);
       this.frameOrientation.setIncludingFrame(frameOrientation);
-      getYoValuesFromFrameOrientation(notifyListeners);
+      getYoValuesFromFrameOrientation(true);
    }
 
    public void setAndMatchFrame(FrameQuaternionReadOnly frameOrientation)
    {
-      setAndMatchFrame(frameOrientation, true);
-   }
-
-   public void setAndMatchFrame(FrameQuaternionReadOnly frameOrientation, boolean notifyListeners)
-   {
       this.frameOrientation.setIncludingFrame(frameOrientation);
       this.frameOrientation.changeFrame(getReferenceFrame());
-      getYoValuesFromFrameOrientation(notifyListeners);
-   }
-
-   /**
-    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
-    *
-    * @param referenceFrame
-    */
-   public void setFromReferenceFrame(ReferenceFrame referenceFrame, boolean notifyListeners)
-   {
-      frameOrientation.setToZero(referenceFrame);
-      frameOrientation.changeFrame(getReferenceFrame());
-      getYoValuesFromFrameOrientation(notifyListeners);
+      getYoValuesFromFrameOrientation(true);
    }
 
    /**
@@ -156,7 +134,9 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
     */
    public void setFromReferenceFrame(ReferenceFrame referenceFrame)
    {
-      setFromReferenceFrame(referenceFrame, true);
+      frameOrientation.setToZero(referenceFrame);
+      frameOrientation.changeFrame(getReferenceFrame());
+      getYoValuesFromFrameOrientation(true);
    }
 
    /**
@@ -171,7 +151,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
     * @param rotation vector the rotation vector used to set this {@code YoFrameQuaternion}. Not
     *           modified.
     */
-   public void setRotationVector(Vector3DReadOnly rotationVector)
+   public void set(Vector3DReadOnly rotationVector)
    {
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.set(rotationVector);
@@ -192,7 +172,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void setRotationVector(FrameVector3DReadOnly rotationVector)
+   public void set(FrameVector3DReadOnly rotationVector)
    {
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.set(rotationVector);

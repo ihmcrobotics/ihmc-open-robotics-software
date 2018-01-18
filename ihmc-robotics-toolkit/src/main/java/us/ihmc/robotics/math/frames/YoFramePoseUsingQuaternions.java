@@ -139,8 +139,7 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
    
    public void setOrientation(FrameQuaternionReadOnly frameOrientation)
    {
-      boolean notifyListeners = true;
-      orientation.set(frameOrientation, notifyListeners);
+      orientation.set(frameOrientation);
    }
 
    public void setOrientation(QuaternionReadOnly quaternion)

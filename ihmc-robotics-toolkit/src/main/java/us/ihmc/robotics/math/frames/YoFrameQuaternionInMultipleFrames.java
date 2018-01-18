@@ -23,6 +23,12 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    }
 
    @Override
+   public boolean containsNaN()
+   {
+      return super.containsNaN();
+   }
+
+   @Override
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
       multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
