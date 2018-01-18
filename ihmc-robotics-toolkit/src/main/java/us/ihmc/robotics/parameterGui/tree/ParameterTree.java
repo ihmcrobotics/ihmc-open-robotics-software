@@ -58,7 +58,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       {
          for (Registry child : children)
          {
-            ParameterTreeValue childValue = new ParameterTreeValue(child);
+            ParameterTreeValue childValue = new ParameterTreeRegistry(child);
             TreeItem<ParameterTreeValue> childItem = new TreeItem<>(childValue);
             boolean noParameters = child.getParameters() == null || child.getParameters().isEmpty();
             if (!searching && noParameters)
@@ -95,7 +95,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       {
          for (Parameter parameter : parameters)
          {
-            ParameterTreeValue parameterValue = new ParameterTreeValue(parameter);
+            ParameterTreeValue parameterValue = new ParameterTreeParameter(parameter);
             TreeItem<ParameterTreeValue> parameterItem = new TreeItem<>(parameterValue);
 
             if (!searching)
