@@ -211,7 +211,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void setXYFromPosition2d(FramePoint2DReadOnly position2d)
    {
-      pose.setPositionXY(position2d);
+      pose.setPosition(position2d);
    }
 
    public void getPose(Tuple3DBasics tupleToPack, QuaternionBasics quaternionToPack)
