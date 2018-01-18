@@ -529,7 +529,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       else
       {
          errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
-         errorOrientationCumulated.multiply(yoErrorOrientation.getFrameOrientation());
+         errorOrientationCumulated.multiply(yoErrorOrientation);
          yoErrorOrientationCumulated.set(errorOrientationCumulated);
          errorOrientationCumulated.normalizeAndLimitToPi();
 

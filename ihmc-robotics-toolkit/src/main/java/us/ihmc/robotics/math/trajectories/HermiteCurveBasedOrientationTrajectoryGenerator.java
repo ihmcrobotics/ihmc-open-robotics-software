@@ -295,8 +295,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    {
       double TOverThree = trajectoryTime.getDoubleValue() / 3.0;
 
-      FrameQuaternion qa = initialOrientation.getFrameOrientation();
-      FrameQuaternion qb = finalOrientation.getFrameOrientation();
+      FrameQuaternionReadOnly qa = initialOrientation;
+      FrameQuaternionReadOnly qb = finalOrientation;
       wa.set(initialAngularVelocity);
       wb.set(finalAngularVelocity);
       qa.inverseTransform(wa);
@@ -434,7 +434,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       updateBezierCoefficients(time);
 
       // Changing naming convention to make expressions smaller
-      QuaternionReadOnly q0 = initialOrientation.getFrameOrientation().getQuaternion();
+      QuaternionReadOnly q0 = initialOrientation;
       d1.set(controlRotations[1]);
       d2.set(controlRotations[2]);
       d3.set(controlRotations[3]);

@@ -192,7 +192,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       frameWaypoint.setToZero(getReferenceFrame());
 
       frameWaypoint.setTime(time.getDoubleValue());
-      frameWaypoint.setOrientation(orientation.getFrameOrientation());
+      frameWaypoint.setOrientation(orientation);
       frameWaypoint.setAngularVelocity(angularVelocity);
    }
 

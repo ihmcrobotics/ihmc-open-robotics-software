@@ -436,7 +436,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       assertEquals(time, yoFrameSE3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
-      assertTrue(quaternionForVerification.getFrameOrientation().epsilonEquals(orientation, 1e-10));
+      assertTrue(quaternionForVerification.epsilonEquals(orientation, 1e-10));
       assertTrue(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-10));
       assertTrue(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-10));
 
@@ -481,7 +481,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       assertFalse(Math.abs(yoFrameSE3TrajectoryPoint.getTime() - time) < 1e-7);
       assertFalse(pointForVerification.epsilonEquals(position, 1e-7));
-      assertFalse(quaternionForVerification.getFrameOrientation().epsilonEquals(orientation, 1e-7));
+      assertFalse(quaternionForVerification.epsilonEquals(orientation, 1e-7));
       assertFalse(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-7));
       assertFalse(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-7));
 
@@ -494,7 +494,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       assertEquals(time, yoFrameSE3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
-      assertTrue(quaternionForVerification.getFrameOrientation().epsilonEquals(orientation, 1e-10));
+      assertTrue(quaternionForVerification.epsilonEquals(orientation, 1e-10));
       assertTrue(linearVelocityForVerification.epsilonEquals(linearVelocity, 1e-10));
       assertTrue(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-10));
 

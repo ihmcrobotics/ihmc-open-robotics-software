@@ -403,7 +403,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       }
 
       errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
-      errorOrientationCumulated.multiply(yoErrorOrientation.getFrameOrientation());
+      errorOrientationCumulated.multiply(yoErrorOrientation);
       yoErrorOrientationCumulated.set(errorOrientationCumulated);
       errorOrientationCumulated.normalizeAndLimitToPi();
 
