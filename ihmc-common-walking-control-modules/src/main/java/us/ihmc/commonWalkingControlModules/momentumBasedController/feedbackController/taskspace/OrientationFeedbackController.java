@@ -323,7 +323,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
-      yoErrorOrientation.setRotationVector(yoErrorRotationVector);
+      yoErrorOrientation.set(yoErrorRotationVector);
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);
