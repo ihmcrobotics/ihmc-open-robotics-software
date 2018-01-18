@@ -28,6 +28,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
+import us.ihmc.robotics.parameterGui.RegularExpression;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
@@ -37,7 +38,6 @@ import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesPanel;
 import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
-import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.YoEntryBox;
 import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 
