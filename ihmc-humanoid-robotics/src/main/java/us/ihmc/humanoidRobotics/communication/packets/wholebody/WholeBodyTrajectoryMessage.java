@@ -44,6 +44,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    @RosExportedField(documentation = "Trajectory for the right foot")
    public FootTrajectoryMessage rightFootTrajectoryMessage;
 
+   @RosExportedField(documentation = "Trajectory for the head")
    public HeadTrajectoryMessage headTrajectoryMessage;
 
    /** the time to delay this command on the controller side before being executed **/
