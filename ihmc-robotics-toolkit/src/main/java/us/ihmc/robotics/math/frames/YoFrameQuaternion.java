@@ -8,7 +8,6 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -207,12 +206,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.set(rotationVector);
       getYoValuesFromFrameOrientation();
-   }
-
-   public void get(AxisAngleBasics axisAngleToPack)
-   {
-      putYoValuesIntoFrameOrientation();
-      axisAngleToPack.set(frameOrientation);
    }
 
    public void getFrameOrientation(FrameQuaternion frameOrientationToPack)

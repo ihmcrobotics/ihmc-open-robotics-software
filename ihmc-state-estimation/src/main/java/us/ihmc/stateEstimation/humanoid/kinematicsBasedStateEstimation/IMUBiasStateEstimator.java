@@ -258,7 +258,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
                AlphaFilteredYoFrameQuaternion yoOrientationBias = orientationBiases.get(imuIndex);
                yoOrientationBias.update();
-               yoOrientationBias.get(biasAxisAngle);
+               biasAxisAngle.set(yoOrientationBias);
                orientationBiasMagnitudes.get(imuIndex).set(Math.abs(biasAxisAngle.getAngle()));
 
                measurementMinusGravityInWorld.add(measurementInWorld, gravityVectorInWorld);
