@@ -11,7 +11,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Clearable;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -208,12 +207,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.set(rotationVector);
       getYoValuesFromFrameOrientation();
-   }
-
-   public void get(RotationMatrix matrixToPack)
-   {
-      putYoValuesIntoFrameOrientation();
-      matrixToPack.set(frameOrientation);
    }
 
    public void get(AxisAngleBasics axisAngleToPack)

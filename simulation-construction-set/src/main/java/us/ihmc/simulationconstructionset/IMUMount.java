@@ -163,7 +163,7 @@ public class IMUMount
 
    public void getOrientation(RotationMatrix rotationMatrixToPack)
    {
-      orientation.get(rotationMatrixToPack);
+      rotationMatrixToPack.set(orientation);
    }
 
    public void setAngularVelocityInBody(Vector3D angularVelocityInBody)
