@@ -41,8 +41,7 @@ public class YoFrameQuaternionTest
       Quaternion quat4dExpected = new Quaternion(0.0, 0.0, 0.0, 1.0);
       assertTrue(quat4dActual.epsilonEquals(quat4dExpected, EPS));
 
-      AxisAngle axisAngle4dActual = new AxisAngle();
-      yoFrameQuaternion.get(axisAngle4dActual);
+      AxisAngle axisAngle4dActual = new AxisAngle(yoFrameQuaternion);
       AxisAngle axisAngle4dExpected = new AxisAngle(1.0, 0.0, 0.0, 0.0);
       assertTrue(axisAngle4dActual.epsilonEquals(axisAngle4dExpected, EPS));
 
@@ -81,8 +80,7 @@ public class YoFrameQuaternionTest
 
       AxisAngle axisAngle4dExpected = RandomGeometry.nextAxisAngle(random);
       yoFrameQuaternion.set(axisAngle4dExpected);
-      AxisAngle axisAngle4dActual = new AxisAngle();
-      yoFrameQuaternion.get(axisAngle4dActual);
+      AxisAngle axisAngle4dActual = new AxisAngle(yoFrameQuaternion);
       assertTrue(RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngle4dExpected, axisAngle4dActual, EPS));
 
       matrix3dExpected.set(RandomGeometry.nextAxisAngle(random));
