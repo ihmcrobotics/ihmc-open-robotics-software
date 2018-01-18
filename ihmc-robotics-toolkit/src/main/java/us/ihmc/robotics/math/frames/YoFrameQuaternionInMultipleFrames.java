@@ -53,7 +53,7 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame referenceFrame)
    {
       ReferenceFrame previousReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(referenceFrame);
-      set(0.0, 0.0, 0.0);
+      setYawPitchRoll(0.0, 0.0, 0.0);
       return previousReferenceFrame;
    }
 

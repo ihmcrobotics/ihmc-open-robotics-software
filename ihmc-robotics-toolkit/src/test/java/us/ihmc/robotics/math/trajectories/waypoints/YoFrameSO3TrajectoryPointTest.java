@@ -386,7 +386,7 @@ public class YoFrameSO3TrajectoryPointTest
       assertTrue(angularVelocity.epsilonEquals(new Vector3D(), 1e-10));
 
       time = 9.9;
-      quaternionForVerification.set(0.2, 0.6, 1.1);
+      quaternionForVerification.setYawPitchRoll(0.2, 0.6, 1.1);
       angularVelocityForVerification.set(7.1, 2.2, 3.33);
 
       assertFalse(Math.abs(yoFrameSO3TrajectoryPoint.getTime() - time) < 1e-7);

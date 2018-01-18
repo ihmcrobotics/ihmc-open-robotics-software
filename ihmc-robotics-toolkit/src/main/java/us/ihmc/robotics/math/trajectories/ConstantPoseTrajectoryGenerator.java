@@ -112,7 +112,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       position.checkReferenceFrameMatch(constantPose);
       position.set(constantPose.getX(), constantPose.getY(), constantPose.getZ());
-      orientation.set(constantPose.getYaw(), constantPose.getPitch(), constantPose.getRoll());
+      orientation.setYawPitchRoll(constantPose.getYaw(), constantPose.getPitch(), constantPose.getRoll());
    }
 
    public void setConstantPose(FramePoint3D constantPosition, FrameQuaternion constantOrientation)

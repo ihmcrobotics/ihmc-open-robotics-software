@@ -475,7 +475,7 @@ public class YoFrameSE3TrajectoryPointTest
 
       time = 9.9;
       pointForVerification.set(3.9, 2.2, 1.1);
-      quaternionForVerification.set(0.2, 0.6, 1.1);
+      quaternionForVerification.setYawPitchRoll(0.2, 0.6, 1.1);
       linearVelocityForVerification.set(8.8, 1.4, 9.22);
       angularVelocityForVerification.set(7.1, 2.2, 3.33);
 
