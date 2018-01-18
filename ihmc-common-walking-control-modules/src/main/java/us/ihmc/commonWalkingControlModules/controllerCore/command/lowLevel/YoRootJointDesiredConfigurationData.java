@@ -153,7 +153,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
       else
       {
          desiredConfiguration.reshape(7, 1);
-         MatrixTools.insertYoFrameQuaternionIntoEJMLVector(orientation, desiredConfiguration, 0);
+         MatrixTools.insertFrameQuaternionIntoEJMLVector(orientation, desiredConfiguration, 0);
          MatrixTools.insertFrameTupleIntoEJMLVector(position, desiredConfiguration, 4);
          return desiredConfiguration;
       }
