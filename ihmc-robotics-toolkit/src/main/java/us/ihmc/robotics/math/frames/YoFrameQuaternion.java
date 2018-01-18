@@ -99,7 +99,15 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       getYoValuesFromFrameOrientation();
    }
 
+   /**
+    * @deprecated Use {@link #setYawPitchRoll(double,double,double)} instead
+    */
    public void set(double yaw, double pitch, double roll)
+   {
+      setYawPitchRoll(yaw, pitch, roll);
+   }
+
+   public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
       frameOrientation.setYawPitchRoll(yaw, pitch, roll);
       getYoValuesFromFrameOrientation();
