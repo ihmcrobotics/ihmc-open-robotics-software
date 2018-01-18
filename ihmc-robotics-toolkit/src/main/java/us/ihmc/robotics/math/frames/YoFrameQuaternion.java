@@ -18,7 +18,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -200,25 +199,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       getYoValuesFromFrameOrientation();
    }
 
-   /**
-    * Computes and packs the orientation described by this {@code YoFrameQuaternion} as a rotation
-    * vector.
-    * <p>
-    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
-    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
-    * of the same axis-angle.
-    * </p>
-    *
-    * @param yoFrameRotationVectorToPack the vector in which the rotation vector and the reference
-    *           frame it is expressed in are stored. Modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in
-    *            {@code this.referenceFrame}.
-    */
-   public void getRotationVector(YoFrameVector yoFrameRotationVectorToPack)
-   {
-      yoFrameRotationVectorToPack.setAsRotationVector(getFrameOrientation());
-   }
-
    public YoDouble getYoQx()
    {
       return qx;
@@ -263,15 +243,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       return qs.getDoubleValue();
    }
 
-   public void interpolate(YoFrameQuaternion yoFrameQuaternion1, YoFrameQuaternion yoFrameQuaternion2, double alpha)
-   {
-      yoFrameQuaternion1.putYoValuesIntoFrameOrientation();
-      yoFrameQuaternion2.putYoValuesIntoFrameOrientation();
-
-      interpolate(yoFrameQuaternion1.frameOrientation, yoFrameQuaternion2.frameOrientation, alpha);
-   }
-
-   public void interpolate(FrameQuaternion frameOrientation1, FrameQuaternion frameOrientation2, double alpha)
+   public void interpolate(FrameQuaternionReadOnly frameOrientation1, FrameQuaternionReadOnly frameOrientation2, double alpha)
    {
       checkReferenceFrameMatch(frameOrientation1);
       checkReferenceFrameMatch(frameOrientation2);
@@ -298,7 +270,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
     *
     * @param quaternion the other quaternion to multiply this. Not modified.
     */
-   public void multiply(Quaternion quaternion)
+   public void multiply(QuaternionReadOnly quaternion)
    {
       putYoValuesIntoFrameOrientation();
       frameOrientation.multiply(quaternion);
@@ -313,25 +285,10 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
     *
     * @param frameOrientation the frame orientation to multiply this. Not modified.
     */
-   public void multiply(FrameQuaternion frameOrientation)
+   public void multiply(FrameQuaternionReadOnly frameOrientation)
    {
       putYoValuesIntoFrameOrientation();
       this.frameOrientation.multiply(frameOrientation);
-      getYoValuesFromFrameOrientation();
-   }
-
-   /**
-    * Multiplies this quaternion by {@code other}.
-    * <p>
-    * this = this * other
-    * </p>
-    *
-    * @param other the quaternion to multiply this. Not modified.
-    */
-   public void multiply(YoFrameQuaternion other)
-   {
-      putYoValuesIntoFrameOrientation();
-      this.frameOrientation.multiply(other.getFrameOrientation());
       getYoValuesFromFrameOrientation();
    }
 
