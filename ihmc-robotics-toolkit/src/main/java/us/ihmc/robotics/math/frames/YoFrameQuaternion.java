@@ -226,12 +226,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       axisAngleToPack.set(frameOrientation);
    }
 
-   public void getYawPitchRoll(double[] yawPitchRollToPack)
-   {
-      putYoValuesIntoFrameOrientation();
-      frameOrientation.getYawPitchRoll(yawPitchRollToPack);
-   }
-
    public void getFrameOrientation(FrameQuaternion frameOrientationToPack)
    {
       putYoValuesIntoFrameOrientation();
