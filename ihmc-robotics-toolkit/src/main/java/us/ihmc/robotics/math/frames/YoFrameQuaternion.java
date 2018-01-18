@@ -12,7 +12,6 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -199,43 +198,6 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable, Frame
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.set(rotationVector);
       getYoValuesFromFrameOrientation();
-   }
-
-   /**
-    * Computes and packs the orientation described by this {@code YoFrameQuaternion} as a rotation
-    * vector.
-    * <p>
-    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
-    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
-    * of the same axis-angle.
-    * </p>
-    *
-    * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
-    *           frame it is expressed in are stored. Modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in
-    *            {@code this.referenceFrame}.
-    */
-   public void getRotationVector(FrameVector3D frameRotationVectorToPack)
-   {
-      checkReferenceFrameMatch(frameRotationVectorToPack);
-      getFrameOrientation().get(frameRotationVectorToPack);
-   }
-
-   /**
-    * Computes and packs the orientation described by this {@code YoFrameQuaternion} as a rotation
-    * vector including the reference frame it is expressed in.
-    * <p>
-    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
-    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
-    * of the same axis-angle.
-    * </p>
-    *
-    * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
-    *           frame it is expressed in are stored. Modified.
-    */
-   public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
-   {
-      getFrameOrientation().get(frameRotationVectorToPack);
    }
 
    /**
