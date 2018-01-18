@@ -94,7 +94,7 @@ public class YoFrameQuaternionTest
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
       double[] yawPitchRollExpected = RandomNumbers.nextDoubleArray(random, 3, 2.0 * Math.PI);
-      yoFrameQuaternion.set(yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
+      yoFrameQuaternion.setYawPitchRoll(yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
       double[] yawPitchRollActual = new double[3];
       yoFrameQuaternion.getYawPitchRoll(yawPitchRollActual);
 
