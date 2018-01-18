@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -865,16 +866,7 @@ public class MatrixTools
       ejmlVector.set(startIndex + 2, 0, frameTuple.getZ());
    }
 
-   public static void insertYoFrameQuaternionIntoEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      matrix.set(index++, 0, yoFrameQuaternion.getX());
-      matrix.set(index++, 0, yoFrameQuaternion.getY());
-      matrix.set(index++, 0, yoFrameQuaternion.getZ());
-      matrix.set(index++, 0, yoFrameQuaternion.getS());
-   }
-
-   public static void insertFrameOrientationIntoEJMLVector(FrameQuaternion frameOrientation, DenseMatrix64F matrix, int rowStart)
+   public static void insertFrameQuaternionIntoEJMLVector(FrameQuaternionReadOnly frameOrientation, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
       matrix.set(index++, 0, frameOrientation.getX());
