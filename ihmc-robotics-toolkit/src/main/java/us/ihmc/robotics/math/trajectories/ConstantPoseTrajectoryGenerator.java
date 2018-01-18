@@ -160,7 +160,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(orientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)

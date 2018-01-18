@@ -136,7 +136,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    @Override
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(currentOrientation);
    }
 
    @Override

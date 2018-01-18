@@ -534,7 +534,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(yoCurrentOrientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
@@ -550,8 +550,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    @Override
    public void getPose(FramePose framePoseToPack)
    {
-      yoCurrentOrientation.getFrameOrientationIncludingFrame(currentOrientation);
-      framePoseToPack.setPoseIncludingFrame(yoCurrentAdjustedPositionWorld, currentOrientation);
+      framePoseToPack.setPoseIncludingFrame(yoCurrentAdjustedPositionWorld, yoCurrentOrientation);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

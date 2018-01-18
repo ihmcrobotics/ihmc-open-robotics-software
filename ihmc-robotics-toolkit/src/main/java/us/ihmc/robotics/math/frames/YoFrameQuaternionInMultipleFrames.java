@@ -95,7 +95,7 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    
    public String toStringForASingleReferenceFrame(ReferenceFrame referenceFrame)
    {
-      getFrameOrientationIncludingFrame(frameOrientation);
+      frameOrientation.setIncludingFrame(this);
       frameOrientation.changeFrame(referenceFrame);
       return frameOrientation.toString();
    }

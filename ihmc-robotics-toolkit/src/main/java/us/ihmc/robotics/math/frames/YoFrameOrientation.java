@@ -111,7 +111,7 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       set(tempFrameOrientation);
    }
 
-   public void set(FrameQuaternion orientation)
+   public void set(FrameQuaternionReadOnly orientation)
    {
       set(orientation, true);
    }
@@ -133,13 +133,6 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       roll.set(orientation.roll.getDoubleValue());
    }
 
-   public void set(YoFrameQuaternion orientation)
-   {
-      orientation.checkReferenceFrameMatch(getReferenceFrame());
-      orientation.getFrameOrientationIncludingFrame(tempFrameOrientation);
-      set(tempFrameOrientation);
-   }
-
    public void setAndMatchFrame(FrameQuaternionReadOnly orientation)
    {
       setAndMatchFrame(orientation, true);
@@ -148,21 +141,6 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
    public void setAndMatchFrame(FrameQuaternionReadOnly orientation, boolean notifyListeners)
    {
       tempFrameOrientation.setIncludingFrame(orientation);
-      tempFrameOrientation.changeFrame(getReferenceFrame());
-      tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
-      yaw.set(tempYawPitchRoll[0], notifyListeners);
-      pitch.set(tempYawPitchRoll[1], notifyListeners);
-      roll.set(tempYawPitchRoll[2], notifyListeners);
-   }
-
-   public void setAndMatchFrame(YoFrameQuaternion yoFrameQuaternion)
-   {
-      setAndMatchFrame(yoFrameQuaternion, true);
-   }
-
-   public void setAndMatchFrame(YoFrameQuaternion yoFrameQuaternion, boolean notifyListeners)
-   {
-      yoFrameQuaternion.getFrameOrientationIncludingFrame(tempFrameOrientation);
       tempFrameOrientation.changeFrame(getReferenceFrame());
       tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
       yaw.set(tempYawPitchRoll[0], notifyListeners);

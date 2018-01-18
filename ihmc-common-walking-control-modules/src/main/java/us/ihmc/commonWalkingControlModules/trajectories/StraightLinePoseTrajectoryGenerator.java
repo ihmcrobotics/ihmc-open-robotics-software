@@ -316,7 +316,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaAngVel);
          orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaAngAcc);
       }
-      currentOrientation.getFrameOrientationIncludingFrame(tempOrientation);
+      tempOrientation.setIncludingFrame(currentOrientation);
       tempOrientation.changeFrame(currentOrientationForViz.getReferenceFrame());
       currentOrientationForViz.set(tempOrientation);
    }
@@ -367,7 +367,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(currentOrientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
