@@ -868,10 +868,10 @@ public class MatrixTools
    public static void insertYoFrameQuaternionIntoEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
-      matrix.set(index++, 0, yoFrameQuaternion.getQx());
-      matrix.set(index++, 0, yoFrameQuaternion.getQy());
-      matrix.set(index++, 0, yoFrameQuaternion.getQz());
-      matrix.set(index++, 0, yoFrameQuaternion.getQs());
+      matrix.set(index++, 0, yoFrameQuaternion.getX());
+      matrix.set(index++, 0, yoFrameQuaternion.getY());
+      matrix.set(index++, 0, yoFrameQuaternion.getZ());
+      matrix.set(index++, 0, yoFrameQuaternion.getS());
    }
 
    public static void insertFrameOrientationIntoEJMLVector(FrameQuaternion frameOrientation, DenseMatrix64F matrix, int rowStart)
