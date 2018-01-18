@@ -4,17 +4,27 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import geometry_msgs.Point;
-import ihmc_msgs.*;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 
+import geometry_msgs.Point;
+import ihmc_msgs.ArmTrajectoryRosMessage;
+import ihmc_msgs.ChestTrajectoryRosMessage;
+import ihmc_msgs.FootTrajectoryRosMessage;
+import ihmc_msgs.FootstepDataListRosMessage;
+import ihmc_msgs.FootstepDataRosMessage;
+import ihmc_msgs.FrameInformationRosMessage;
+import ihmc_msgs.HandTrajectoryRosMessage;
+import ihmc_msgs.HeadTrajectoryRosMessage;
+import ihmc_msgs.PelvisTrajectoryRosMessage;
+import ihmc_msgs.Point2dRosMessage;
+import ihmc_msgs.WholeBodyTrajectoryRosMessage;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -22,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -163,6 +174,7 @@ public class IHMCROSTranslationRuntimeTools
          wholeBodyTrajectoryMessage.rightFootTrajectoryMessage = (FootTrajectoryMessage) convertToIHMCMessage(message.getRightFootTrajectoryMessage());
          wholeBodyTrajectoryMessage.chestTrajectoryMessage = (ChestTrajectoryMessage) convertToIHMCMessage(message.getChestTrajectoryMessage());
          wholeBodyTrajectoryMessage.pelvisTrajectoryMessage = (PelvisTrajectoryMessage) convertToIHMCMessage(message.getPelvisTrajectoryMessage());
+         wholeBodyTrajectoryMessage.headTrajectoryMessage = (HeadTrajectoryMessage) convertToIHMCMessage(message.getHeadTrajectoryMessage());
       }
       catch(ClassNotFoundException | InvocationTargetException | IllegalAccessException | RosEnumConversionException | NoSuchFieldException | InstantiationException e)
       {
@@ -192,6 +204,7 @@ public class IHMCROSTranslationRuntimeTools
          message.setRightFootTrajectoryMessage((FootTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getFootTrajectoryMessage(RobotSide.RIGHT)));
          message.setLeftHandTrajectoryMessage((HandTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT)));
          message.setRightHandTrajectoryMessage((HandTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT)));
+         message.setHeadTrajectoryMessage((HeadTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getHeadTrajectoryMessage()));
       }
       catch(InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e)
       {
@@ -256,6 +269,12 @@ public class IHMCROSTranslationRuntimeTools
          component.robotSide = RobotSide.RIGHT;
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(component);
+      }
+      if(wholeBodyTrajectoryMessage.getHeadTrajectoryMessage() == null)
+      {
+         HeadTrajectoryMessage component = new HeadTrajectoryMessage();
+         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
+         wholeBodyTrajectoryMessage.setHeadTrajectoryMessage(component);
       }
    }
 
