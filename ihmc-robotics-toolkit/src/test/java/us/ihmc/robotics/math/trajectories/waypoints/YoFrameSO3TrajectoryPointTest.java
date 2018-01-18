@@ -156,7 +156,7 @@ public class YoFrameSO3TrajectoryPointTest
 
       assertTrue(expectedYoFrameSO3TrajectoryPoint.epsilonEquals(testedYoFrameSO3TrajectoryPoint, epsilon));
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, testedYoFrameSO3TrajectoryPoint.getReferenceFrame(),
-                                         testedYoFrameSO3TrajectoryPoint.getTime(), testedYoFrameSO3TrajectoryPoint.getOrientation().getFrameOrientationCopy(),
+                                         testedYoFrameSO3TrajectoryPoint.getTime(), testedYoFrameSO3TrajectoryPoint.getOrientation(),
                                          testedYoFrameSO3TrajectoryPoint.getAngularVelocity(), testedYoFrameSO3TrajectoryPoint, epsilon);
    }
 
@@ -291,7 +291,7 @@ public class YoFrameSO3TrajectoryPointTest
       assertEquals(expectedTime, testedYoFrameSO3TrajectoryPoint.getTime(), epsilon);
       assertEquals(expectedNamePrefix, testedYoFrameSO3TrajectoryPoint.getNamePrefix());
       assertEquals(expectedNameSuffix, testedYoFrameSO3TrajectoryPoint.getNameSuffix());
-      assertTrue(expectedOrientation.epsilonEquals(testedYoFrameSO3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), epsilon));
+      assertTrue(expectedOrientation.epsilonEquals(testedYoFrameSO3TrajectoryPoint.getOrientation(), epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(testedYoFrameSO3TrajectoryPoint.getAngularVelocity(), epsilon));
 
       FrameSO3TrajectoryPoint actualFrameSO3TrajectoryPoint = new FrameSO3TrajectoryPoint();
@@ -461,13 +461,13 @@ public class YoFrameSO3TrajectoryPointTest
 
       yoFrameSO3TrajectoryPoint.changeFrame(poseFrame);
 
-      assertFalse(orientation.epsilonEquals(yoFrameSO3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), 1e-10));
+      assertFalse(orientation.epsilonEquals(yoFrameSO3TrajectoryPoint.getOrientation(), 1e-10));
       assertFalse(angularVelocity.epsilonEquals(yoFrameSO3TrajectoryPoint.getAngularVelocity(), 1e-10));
 
       orientation.changeFrame(poseFrame);
       angularVelocity.changeFrame(poseFrame);
 
-      assertTrue(orientation.epsilonEquals(yoFrameSO3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), 1e-10));
+      assertTrue(orientation.epsilonEquals(yoFrameSO3TrajectoryPoint.getOrientation(), 1e-10));
       assertTrue(angularVelocity.epsilonEquals(yoFrameSO3TrajectoryPoint.getAngularVelocity(), 1e-10));
 
       YoFrameSO3TrajectoryPoint yoFrameSO3TrajectoryPointTwo = new YoFrameSO3TrajectoryPoint(namePrefix, nameSuffix + "Two", registry, poseFrame);
