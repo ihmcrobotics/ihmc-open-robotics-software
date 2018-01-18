@@ -1,14 +1,16 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
 {
@@ -55,11 +57,11 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
                + "orientation variable to call update(), otherwise use update(FrameOrientation)");
       }
 
-      orientation.get(currentOrientationMatrix);
+      currentOrientationMatrix.set(orientation);
       update(currentOrientationMatrix);
    }
 
-   public void update(FrameQuaternion currentOrientation)
+   public void update(FrameQuaternionReadOnly currentOrientation)
    {
       checkReferenceFrameMatch(currentOrientation);
 
@@ -67,19 +69,19 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
       update(currentOrientationMatrix);
    }
 
-   public void update(Quaternion currentOrientation)
+   public void update(QuaternionReadOnly currentOrientation)
    {
       currentOrientationMatrix.set(currentOrientation);
       update(currentOrientationMatrix);
    }
 
-   public void update(AxisAngle currentOrientation)
+   public void update(AxisAngleReadOnly currentOrientation)
    {
       currentOrientationMatrix.set(currentOrientation);
       update(currentOrientationMatrix);
    }
 
-   public void update(RotationMatrix rotationMatrix)
+   public void update(RotationMatrixReadOnly rotationMatrix)
    {
       if (!hasBeenCalled.getBooleanValue())
       {
@@ -89,7 +91,7 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
 
       if (rotationMatrix != currentOrientationMatrix)
          currentOrientationMatrix.set(rotationMatrix);
-      orientationPreviousValue.get(previousOrientationMatrix);
+      previousOrientationMatrix.set(orientationPreviousValue);
       deltaOrientationMatrix.set(currentOrientationMatrix);
       deltaOrientationMatrix.multiplyTransposeOther(previousOrientationMatrix);
       deltaAxisAngle.set(deltaOrientationMatrix);

@@ -134,8 +134,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointFrameQuaternion.setToZero();
       yoRootJointFrameOrientation.setToZero();
 
-      yoRootJointFrameQuaternion.get(rotationFromRootJointFrameToWorld);
-      rootJoint.setRotation(rotationFromRootJointFrameToWorld);
+      rootJoint.setRotation(yoRootJointFrameQuaternion);
 
       // Set the rootJoint twist to zero.
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
@@ -169,8 +168,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rotationFrozenOffset.setToYawMatrix(yawDifference);
 
       // Keep setting the orientation so that the localization updater works properly.
-      yoRootJointFrameQuaternion.get(rotationFromRootJointFrameToWorld);
-      rootJoint.setRotation(rotationFromRootJointFrameToWorld);
+      rootJoint.setRotation(yoRootJointFrameQuaternion);
 
       // Set the rootJoint twist to zero.
       rootJoint.getJointTwist(twistRootBodyRelativeToWorld);

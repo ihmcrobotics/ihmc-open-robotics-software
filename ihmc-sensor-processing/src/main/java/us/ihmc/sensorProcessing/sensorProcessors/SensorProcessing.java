@@ -374,7 +374,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
 
          IMUSensor inputIMU = inputIMUs.get(i);
-         inputOrientations.get(imuDefinition).get(tempOrientation);
+         tempOrientation.set(inputOrientations.get(imuDefinition));
          inputIMU.setOrientationMeasurement(tempOrientation);
          inputIMU.setAngularVelocityMeasurement(inputAngularVelocities.get(imuDefinition));
          inputIMU.setLinearAccelerationMeasurement(inputLinearAccelerations.get(imuDefinition));
@@ -384,7 +384,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          updateProcessors(processedLinearAccelerations.get(imuDefinition));
          
          IMUSensor outputIMU = outputIMUs.get(i);
-         intermediateOrientations.get(imuDefinition).get(tempOrientation);
+         tempOrientation.set(intermediateOrientations.get(imuDefinition));
          outputIMU.setOrientationMeasurement(tempOrientation);
          outputIMU.setAngularVelocityMeasurement(intermediateAngularVelocities.get(imuDefinition));
          outputIMU.setLinearAccelerationMeasurement(intermediateLinearAccelerations.get(imuDefinition));
