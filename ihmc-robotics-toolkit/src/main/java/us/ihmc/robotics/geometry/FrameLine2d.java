@@ -116,7 +116,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
    public double getParameterGivenPointEpsilon(FramePoint2D point, double epsilon)
    {
-      return line.parameterGivenPointOnLine(point.getPoint(), epsilon);
+      return line.parameterGivenPointOnLine(point, epsilon);
    }
 
    public boolean containsEpsilon(FramePoint2D framePoint, double epsilon)
@@ -179,7 +179,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       checkReferenceFrameMatch(endpoint0);
       checkReferenceFrameMatch(endpoint1);
-      this.line.set(endpoint0.getPoint(), endpoint1.getPoint());
+      this.line.set(endpoint0, endpoint1);
    }
 
    public void set(FramePoint2D startPoint, FrameVector2D vector)
@@ -194,14 +194,14 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       checkReferenceFrameMatch(endpoints[0]);
       checkReferenceFrameMatch(endpoints[1]);
 
-      this.line.set(endpoints[0].getPoint(), endpoints[1].getPoint());
+      this.line.set(endpoints[0], endpoints[1]);
    }
 
    public void setIncludingFrame(FramePoint2D endpoint0, FramePoint2D endpoint1)
    {
       endpoint0.checkReferenceFrameMatch(endpoint1);
       this.referenceFrame = endpoint0.getReferenceFrame();
-      this.line.set(endpoint0.getPoint(), endpoint1.getPoint());
+      this.line.set(endpoint0, endpoint1);
    }
 
    public void setIncludingFrame(FramePoint2D startPoint, FrameVector2D vector)
@@ -322,7 +322,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
-      Point2D projected = line.orthogonalProjectionCopy(point.getPoint());
+      Point2D projected = line.orthogonalProjectionCopy(point);
 
       return new FramePoint2D(point.getReferenceFrame(), projected);
    }
@@ -373,14 +373,14 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       checkReferenceFrameMatch(point);
 
-      return this.line.distance(point.getPoint());
+      return this.line.distance(point);
    }
 
    public boolean isPointOnLine(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
 
-      return this.line.isPointOnLine(point.getPoint());
+      return this.line.isPointOnLine(point);
    }
 
    public boolean areLinesPerpendicular(FrameLine2d line)

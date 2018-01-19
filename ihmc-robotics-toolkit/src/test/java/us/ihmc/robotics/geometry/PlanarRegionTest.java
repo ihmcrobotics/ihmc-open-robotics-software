@@ -632,13 +632,13 @@ public class PlanarRegionTest
 
          // Do a bunch of trivial queries with isPointInside(Point2d) method.
          point2d.setIncludingFrame(localFrame, 0.0, 0.0);
-         assertTrue(planarRegion.isPointInside(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInside(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 0.0);
-         assertTrue(planarRegion.isPointInside(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInside(point2d));
          point2d.setIncludingFrame(localFrame, 0.0, 2.0);
-         assertTrue(planarRegion.isPointInside(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInside(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 2.0);
-         assertFalse(planarRegion.isPointInside(point2d.getPoint()));
+         assertFalse(planarRegion.isPointInside(point2d));
 
          FramePoint3D point3d = new FramePoint3D();
          double maximumOrthogonalDistance = 1.0e-3;
@@ -711,16 +711,16 @@ public class PlanarRegionTest
          // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point2d) method.
          point2d.setIncludingFrame(localFrame, 0.0, 0.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 0.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
          point2d.setIncludingFrame(localFrame, 0.0, 2.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
          point2d.setIncludingFrame(localFrame, 2.0, 2.0);
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
-         assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
+         assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
 
          // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point3D) method.
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.0);

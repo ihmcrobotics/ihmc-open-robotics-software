@@ -78,7 +78,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(secondEndpoint);
-      this.lineSegment.set(firstEndpoint.getPoint(), secondEndpoint.getPoint());
+      this.lineSegment.set(firstEndpoint, secondEndpoint);
    }
 
    public void setByProjectionOntoXYPlane(FramePoint3DReadOnly firstEndpoint, FramePoint3DReadOnly secondEndpoint)
@@ -116,13 +116,13 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public void setFirstEndpoint(FramePoint2D firstEndpoint)
    {
       firstEndpoint.checkReferenceFrameMatch(referenceFrame);
-      lineSegment.set(firstEndpoint.getPoint(), lineSegment.getSecondEndpoint());
+      lineSegment.set(firstEndpoint, lineSegment.getSecondEndpoint());
    }
 
    public void setSecondEndpoint(FramePoint2D secondEndpoint)
    {
       secondEndpoint.checkReferenceFrameMatch(referenceFrame);
-      lineSegment.set(lineSegment.getFirstEndpoint(), secondEndpoint.getPoint());
+      lineSegment.set(lineSegment.getFirstEndpoint(), secondEndpoint);
    }
 
    public void setFirstEndpoint(ReferenceFrame referenceFrame, Point2DReadOnly firstEndPoint)
@@ -200,7 +200,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       checkReferenceFrameMatch(endpoints[0]);
       checkReferenceFrameMatch(endpoints[1]);
 
-      this.lineSegment.set(endpoints[0].getPoint(), endpoints[1].getPoint());
+      this.lineSegment.set(endpoints[0], endpoints[1]);
    }
 
    public void set(ReferenceFrame referenceFrame, Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
@@ -269,14 +269,14 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point2d);
 
-      return lineSegment.isBetweenEndpoints(point2d.getPoint(), epsilon);
+      return lineSegment.isBetweenEndpoints(point2d, epsilon);
    }
 
    public double percentageAlongLineSegment(FramePoint2D point2d)
    {
       checkReferenceFrameMatch(point2d);
 
-      return lineSegment.percentageAlongLineSegment(point2d.getPoint());
+      return lineSegment.percentageAlongLineSegment(point2d);
    }
 
    public void applyTransformAndProjectToXYPlane(Transform transform)
@@ -332,13 +332,13 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point);
       projectedPointToPack.setToZero(referenceFrame);
-      lineSegment.orthogonalProjection(point.getPoint(), projectedPointToPack);
+      lineSegment.orthogonalProjection(point, projectedPointToPack);
    }
 
    public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
-      Point2D projected = lineSegment.orthogonalProjectionCopy(point.getPoint());
+      Point2D projected = lineSegment.orthogonalProjectionCopy(point);
 
       return new FramePoint2D(point.getReferenceFrame(), projected);
    }
@@ -401,7 +401,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    {
       checkReferenceFrameMatch(point);
 
-      return this.lineSegment.distance(point.getPoint());
+      return this.lineSegment.distance(point);
    }
 
    public boolean isPointOnLeftSideOfLineSegment(FramePoint2D point)

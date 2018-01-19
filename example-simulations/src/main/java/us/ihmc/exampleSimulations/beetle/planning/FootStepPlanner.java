@@ -179,7 +179,7 @@ public class FootStepPlanner
          frameEndPoint.setX(0.3);
          frameEndPoint.changeFrame(ReferenceFrame.getWorldFrame());
 
-         bodyFrameProjectedInFutureLineArtifact.setPoints(startPoint, frameEndPoint.getPoint());
+         bodyFrameProjectedInFutureLineArtifact.setPoints(startPoint, frameEndPoint);
 //      }
 //      else
 //      {

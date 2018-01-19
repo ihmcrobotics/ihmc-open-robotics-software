@@ -40,6 +40,6 @@ public class DistanceAndYawBasedCost implements FootstepCost
       double ySign = node.getRobotSide().negateIfLeftSide(1.0);
       midFootPoint.setY(ySign * idealStepWidth / 2.0);
       midFootPoint.changeFrame(ReferenceFrame.getWorldFrame());
-      return midFootPoint.getPoint();
+      return new Point2D(midFootPoint);
    }
 }
