@@ -19,6 +19,7 @@ public class OfflineTuningApplication extends Application
       Scene mainScene = new Scene(mainLoader.<Pane>load());
       mainScene.getStylesheets().add(getClass().getResource(CSS_FILE).toString());
 
+      primaryStage.setTitle("Parameter Tuner");
       primaryStage.setScene(mainScene);
       primaryStage.setHeight(800.0);
       primaryStage.setWidth(600.0);
