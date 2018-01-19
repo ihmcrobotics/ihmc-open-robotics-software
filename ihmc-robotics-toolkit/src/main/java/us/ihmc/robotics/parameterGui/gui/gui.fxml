@@ -6,36 +6,43 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import us.ihmc.robotics.parameterGui.tree.ParameterTree?>
+<?import us.ihmc.robotics.parameterGui.tuning.Tuner?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
 	fx:controller="us.ihmc.robotics.parameterGui.gui.GuiController"
 	xmlns:fx="http://javafx.com/fxml">
-
 	<children>
-		<VBox maxWidth="600.0" spacing="10.0" AnchorPane.leftAnchor="10.0"
+		<HBox spacing="20.0" AnchorPane.leftAnchor="10.0"
 			AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0"
 			AnchorPane.rightAnchor="10.0">
 			<children>
-				<Label text="Parameter Tuner">
-					<font>
-						<Font size="20.0" />
-					</font>
-				</Label>
-				<TextField fx:id="searchField" />
-				<CheckBox text="Hide Namespaces" fx:id="hideNamespaces"
-					onAction="#handleNamespaceButton" />
-				<ParameterTree VBox.vgrow="ALWAYS" fx:id="tree" />
-				<HBox spacing="10.0">
+				<VBox prefWidth="600.0" spacing="10.0">
 					<children>
-						<Button text="Open" fx:id="open" onAction="#handleOpen" />
-						<Button text="Connect" disable="true" />
-						<Button text="Save" fx:id="save" onAction="#handleSave" />
-						<Button text="Save as..." fx:id="saveAs" onAction="#handleSaveAs" />
-						<Region HBox.hgrow="ALWAYS" />
-						<Text fx:id="stats" />
+						<Label text="Parameters">
+							<font>
+								<Font size="20.0" />
+							</font>
+						</Label>
+						<TextField fx:id="searchField" />
+						<CheckBox text="Hide Namespaces" fx:id="hideNamespaces"
+							onAction="#handleNamespaceButton" />
+						<ParameterTree VBox.vgrow="ALWAYS" fx:id="tree" />
+						<HBox spacing="10.0">
+							<children>
+								<Button text="Open" fx:id="open" onAction="#handleOpen" />
+								<Button text="Connect" disable="true" />
+								<Button text="Save" fx:id="save" onAction="#handleSave" />
+								<Button text="Save as..." fx:id="saveAs" onAction="#handleSaveAs" />
+							</children>
+						</HBox>
 					</children>
-				</HBox>
+				</VBox>
+				<ScrollPane>
+					<content>
+						<VBox fx:id="tuningBox" prefWidth="750.0" spacing="10.0" HBox.hgrow="ALWAYS"/>
+					</content>
+				</ScrollPane>
 			</children>
-		</VBox>
+		</HBox>
 	</children>
 </AnchorPane>
