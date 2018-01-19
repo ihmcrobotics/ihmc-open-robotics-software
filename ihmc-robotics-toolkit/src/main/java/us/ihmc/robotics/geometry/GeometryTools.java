@@ -83,7 +83,7 @@ public class GeometryTools
    {
       point.checkReferenceFrameMatch(lineSegmentStart);
       point.checkReferenceFrameMatch(lineSegmentEnd);
-      return EuclidGeometryTools.distanceFromPoint3DToLineSegment3D(point.getPoint(), lineSegmentStart.getPoint(), lineSegmentEnd.getPoint());
+      return EuclidGeometryTools.distanceFromPoint3DToLineSegment3D(point, lineSegmentStart, lineSegmentEnd);
    }
 
    /**
@@ -170,7 +170,7 @@ public class GeometryTools
       pointToProject.checkReferenceFrameMatch(pointOnPlane);
       pointToProject.checkReferenceFrameMatch(planeNormal);
       projectionToPack.setToZero(pointToProject.getReferenceFrame());
-      return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject.getPoint(), pointOnPlane.getPoint(), planeNormal, projectionToPack.getPoint());
+      return EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, pointOnPlane, planeNormal, projectionToPack);
    }
 
    /**
@@ -196,8 +196,8 @@ public class GeometryTools
       closestPointOnLine1ToPack.setToZero(pointOnLine1.getReferenceFrame());
       closestPointOnLine2ToPack.setToZero(pointOnLine1.getReferenceFrame());
 
-      return EuclidGeometryTools.closestPoint3DsBetweenTwoLine3Ds(pointOnLine1.getPoint(), lineDirection1, pointOnLine2.getPoint(), lineDirection2,
-                                         closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
+      return EuclidGeometryTools.closestPoint3DsBetweenTwoLine3Ds(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2,
+                                         closestPointOnLine1ToPack, closestPointOnLine2ToPack);
    }
 
    /**
@@ -222,7 +222,7 @@ public class GeometryTools
       pointOnLine.checkReferenceFrameMatch(lineDirection);
       pointOnPlane.checkReferenceFrameMatch(pointOnLine);
 
-      Point3DReadOnly intersection = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane.getPoint(), planeNormal, pointOnLine.getPoint(),
+      Point3DReadOnly intersection = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLine,
                                                                 lineDirection);
 
       if (intersection == null)
@@ -263,8 +263,8 @@ public class GeometryTools
       lineSegmentStart.checkReferenceFrameMatch(lineSegmentEnd);
       pointOnPlane.checkReferenceFrameMatch(lineSegmentStart);
 
-      Point3D intersection = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(pointOnPlane.getPoint(), planeNormal, lineSegmentStart.getPoint(),
-                                                                       lineSegmentEnd.getPoint());
+      Point3D intersection = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(pointOnPlane, planeNormal, lineSegmentStart,
+                                                                       lineSegmentEnd);
 
       if (intersection == null)
          return null;
@@ -295,7 +295,7 @@ public class GeometryTools
       pointOnPlane.checkReferenceFrameMatch(planeNormal);
       lineSegmentStart.checkReferenceFrameMatch(lineSegmentEnd);
       pointOnPlane.checkReferenceFrameMatch(lineSegmentStart);
-      return EuclidGeometryTools.doesLineSegment3DIntersectPlane3D(pointOnPlane.getPoint(), planeNormal, lineSegmentStart.getPoint(), lineSegmentEnd.getPoint());
+      return EuclidGeometryTools.doesLineSegment3DIntersectPlane3D(pointOnPlane, planeNormal, lineSegmentStart, lineSegmentEnd);
    }
 
    /**
@@ -312,7 +312,7 @@ public class GeometryTools
       point.checkReferenceFrameMatch(pointOnPlane);
       point.checkReferenceFrameMatch(planeNormal);
 
-      return EuclidGeometryTools.distanceFromPoint3DToPlane3D(point.getPoint(), pointOnPlane.getPoint(), planeNormal);
+      return EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnPlane, planeNormal);
    }
 
    /**
@@ -340,7 +340,7 @@ public class GeometryTools
       lineSegmentStart1.checkReferenceFrameMatch(lineSegmentEnd1);
       lineSegmentStart2.checkReferenceFrameMatch(lineSegmentEnd2);
       lineSegmentStart1.checkReferenceFrameMatch(lineSegmentStart2);
-      return EuclidGeometryTools.doLineSegment2DsIntersect(lineSegmentStart1.getPoint(), lineSegmentEnd1.getPoint(), lineSegmentStart2.getPoint(), lineSegmentEnd2.getPoint());
+      return EuclidGeometryTools.doLineSegment2DsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
    }
 
    private static final ThreadLocal<Point2D> tempIntersection = new ThreadLocal<Point2D>()
@@ -483,8 +483,8 @@ public class GeometryTools
       pointOnPlane1.checkReferenceFrameMatch(pointOnPlane2);
       pointOnIntersectionToPack.setToZero(pointOnPlane1.getReferenceFrame());
       intersectionDirectionToPack.setToZero(pointOnPlane1.getReferenceFrame());
-      return EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(pointOnPlane1.getPoint(), planeNormal1, pointOnPlane2.getPoint(), planeNormal2,
-                                             angleThreshold, pointOnIntersectionToPack.getPoint(), intersectionDirectionToPack);
+      return EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2,
+                                             angleThreshold, pointOnIntersectionToPack, intersectionDirectionToPack);
    }
 
    /**
@@ -540,7 +540,7 @@ public class GeometryTools
       firstPointOnPlane.checkReferenceFrameMatch(thirdPointOnPlane);
       normalToPack.setToZero(firstPointOnPlane.getReferenceFrame());
 
-      return EuclidGeometryTools.normal3DFromThreePoint3Ds(firstPointOnPlane.getPoint(), secondPointOnPlane.getPoint(), thirdPointOnPlane.getPoint(),
+      return EuclidGeometryTools.normal3DFromThreePoint3Ds(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane,
                                             normalToPack);
    }
 
@@ -609,14 +609,14 @@ public class GeometryTools
 
       if (orthogonalProjectionToPack == null)
       {
-         return EuclidGeometryTools.perpendicularVector3DFromLine3DToPoint3D(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), null,
+         return EuclidGeometryTools.perpendicularVector3DFromLine3DToPoint3D(point, firstPointOnLine, secondPointOnLine, null,
                                                       perpendicularVectorToPack);
       }
       else
       {
          orthogonalProjectionToPack.setToZero(point.getReferenceFrame());
-         return EuclidGeometryTools.perpendicularVector3DFromLine3DToPoint3D(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(),
-                                                      orthogonalProjectionToPack.getPoint(), perpendicularVectorToPack);
+         return EuclidGeometryTools.perpendicularVector3DFromLine3DToPoint3D(point, firstPointOnLine, secondPointOnLine,
+                                                      orthogonalProjectionToPack, perpendicularVectorToPack);
       }
    }
 
@@ -662,8 +662,8 @@ public class GeometryTools
       trianglePlaneNormal.checkReferenceFrameMatch(commonFrame);
       topVertexBToPack.setToZero(commonFrame);
 
-      EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(baseVertexA.getPoint(), baseVertexC.getPoint(), trianglePlaneNormal, ccwAngleAboutNormalAtTopVertex,
-                                      topVertexBToPack.getPoint());
+      EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(baseVertexA, baseVertexC, trianglePlaneNormal, ccwAngleAboutNormalAtTopVertex,
+                                      topVertexBToPack);
    }
 
    /**
@@ -884,7 +884,7 @@ public class GeometryTools
       AxisAngle rotationToDesired = new AxisAngle();
       EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(axisToAlign, alignAxisWithThis, rotationToDesired);
    
-      RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point.getPoint());
+      RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point);
    
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
    }

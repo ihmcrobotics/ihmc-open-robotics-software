@@ -184,7 +184,7 @@ public class FlatGroundContactForceOptimizer
          {
             int index = pointIdx + indexOffset;
             FrameVector3D contactForce = contactForces.get(index);
-            offset.sub(planeCenter.getPoint(), contactPoints.get(index).getPoint());
+            offset.sub(planeCenter, contactPoints.get(index));
             torqueVector.cross(forceVector, offset);
             resultForce.add(contactForce);
             resultTorque.add(torqueVector);
@@ -252,7 +252,7 @@ public class FlatGroundContactForceOptimizer
       for (int contactIdx = 0; contactIdx < contactPoints.size(); contactIdx++)
       {
          // vector from contact to center of mass
-         offset.sub(centerOfMass.getPoint(), contactPoints.get(contactIdx).getPoint());
+         offset.sub(centerOfMass, contactPoints.get(contactIdx));
 
          for (int vectorIdx = 0; vectorIdx < vectorsPerPoint; vectorIdx++)
          {
@@ -322,7 +322,7 @@ public class FlatGroundContactForceOptimizer
             forceVector.scale(x.get(contactIdx * vectorsPerPoint + vectorIdx));
             yoGRFVectors.get(contactIdx).get(vectorIdx).set(forceVector);
 
-            offset.sub(centerOfMass.getPoint(), contactPoints.get(contactIdx).getPoint());
+            offset.sub(centerOfMass, contactPoints.get(contactIdx));
             torqueVector.cross(forceVector, offset);
 
             contactForce.add(forceVector);

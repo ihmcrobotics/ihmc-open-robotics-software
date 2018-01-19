@@ -301,7 +301,7 @@ public class SmoothCapturePointToolboxTest
          
          double time = t0 + random.nextDouble() * (tFinal - t0);
                   
-         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal.getPoint());
+         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal);
          
          // Position
          FramePoint3D icpPositionDesiredCurrent = new FramePoint3D(worldFrame);
@@ -313,7 +313,7 @@ public class SmoothCapturePointToolboxTest
 //         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
 //         PrintTools.debug("ICP pos hand: " + icpPositionDesiredCurrentByHand.toString());
 
-         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent, icpPositionDesiredCurrentByHand, EPSILON);
          
          //Velocity
          FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D(worldFrame);
@@ -364,7 +364,7 @@ public class SmoothCapturePointToolboxTest
          
          double time = t0 + random.nextDouble() * (tFinal - t0);
                   
-         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal.getPoint());
+         FramePoint3D icpPositionDesiredFinal = new FramePoint3D(worldFrame, cmpFinal);
          
          // Position
          FramePoint3D icpPositionDesiredCurrent = new FramePoint3D(worldFrame);
@@ -376,7 +376,7 @@ public class SmoothCapturePointToolboxTest
 //         PrintTools.debug("ICP pos calc: " + icpPositionDesiredCurrent.toString());
 //         PrintTools.debug("ICP pos hand: " + icpPositionDesiredCurrentByHand.toString());
 
-         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent.getPoint(), icpPositionDesiredCurrentByHand.getPoint(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpPositionDesiredCurrent, icpPositionDesiredCurrentByHand, EPSILON);
          
          // Velocity
          FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D(worldFrame);
@@ -489,9 +489,9 @@ public class SmoothCapturePointToolboxTest
       double dGamma = omega0 * Math.exp(omega0*(time-timeFinal));
       
       icpVelocityDesiredCurrent.setToZero();
-      icpVelocityDesiredCurrent.scaleAdd(dAlpha, cmpRefInit.getPoint()             , icpVelocityDesiredCurrent);
-      icpVelocityDesiredCurrent.scaleAdd(dBeta, cmpRefFinal.getPoint()             , icpVelocityDesiredCurrent);
-      icpVelocityDesiredCurrent.scaleAdd(dGamma, icpPositionDesiredFinal.getPoint(), icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dAlpha, cmpRefInit             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dBeta, cmpRefFinal             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dGamma, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
    }
    
    public static double calculateSigmaLinear(double t, double T, double omega0)

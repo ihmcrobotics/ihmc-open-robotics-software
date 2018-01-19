@@ -470,7 +470,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String varnameOrientationDesired = footName + Type.DESIRED.getName() + Space.ORIENTATION.getName();
       Quaternion currentDesiredOrientation = findQuat4d(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
 
-      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), currentDesiredPosition, 0.001);
+      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), currentDesiredPosition, 0.001);
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), currentDesiredOrientation, 0.001);
       
       drcSimulationTestHelper.createVideo(robotModel.getSimpleRobotName(), 2);
@@ -626,7 +626,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                      circleRadius.getZ() * Math.sin(2.0 * angle) * Math.cos(rot));
             tempPoint.add(circleCenter);
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
       }
 

@@ -120,7 +120,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setRobotSide(futureSwingLegSide);
-      predictedFootstep.setLocation(footstepPosition.getPoint());
+      predictedFootstep.setLocation(footstepPosition);
       predictedFootstep.setOrientation(footstepOrientation);
       return predictedFootstep;
    }

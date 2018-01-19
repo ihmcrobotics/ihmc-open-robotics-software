@@ -236,7 +236,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       FramePoint3D activeArmEEtoCamera = new FramePoint3D(fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM), 0, magicNumber, 0); // todo look at this later
       activeArmEEtoCamera.changeFrame(cameraImageFrame);
-      Point3D activeArmEEinImageFrame = activeArmEEtoCamera.getPoint();
+      Point3D activeArmEEinImageFrame = new Point3D(activeArmEEtoCamera);
 
       Point2D_F64 norm = new Point2D_F64(activeArmEEinImageFrame.getX() / activeArmEEinImageFrame.getZ(), activeArmEEinImageFrame.getY() / activeArmEEinImageFrame.getZ());
       Point2D_F64 pixel = new Point2D_F64();

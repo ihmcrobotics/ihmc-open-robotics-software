@@ -192,23 +192,23 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       adjustSwingEndIfCoincidentWithSwingStart();
 
-      waypointAdjustmentPlane.set(swingStartPosition.getPoint(), adjustedWaypoints.get(0).getPoint(), swingEndPosition.getPoint());
+      waypointAdjustmentPlane.set(swingStartPosition, adjustedWaypoints.get(0), swingEndPosition);
 
       axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI / 2.0);
       rigidBodyTransform.setRotation(axisAngle);
-      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      tempPlaneNormal.sub(swingStartPosition, swingEndPosition);
       rigidBodyTransform.transform(tempPlaneNormal);
       tempPlaneNormal.normalize();
-      swingFloorPlane.set(swingStartPosition.getPoint(), tempPlaneNormal);
+      swingFloorPlane.set(swingStartPosition, tempPlaneNormal);
 
-      tempPlaneNormal.sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
+      tempPlaneNormal.sub(swingEndPosition, swingStartPosition);
       tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingStartPosition.getPoint());
+      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingStartPosition);
       swingStartToeFacingSwingEndPlane.set(tempPointOnPlane, tempPlaneNormal);
 
-      tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      tempPlaneNormal.sub(swingStartPosition, swingEndPosition);
       tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingEndPosition.getPoint());
+      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingEndPosition);
       swingEndHeelFacingSwingStartPlane.set(tempPointOnPlane, tempPlaneNormal);
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
@@ -277,13 +277,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                {
                   updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_BELOW_IGNORE_PLANE);
 
-                  if (swingFloorPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint())
-                        && swingFloorPlane.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint()) > ignoreDistanceFromFloor)
+                  if (swingFloorPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon())
+                        && swingFloorPlane.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) > ignoreDistanceFromFloor)
                   {
                      updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_OUTSIDE_TRAJECTORY);
 
-                     if ((swingStartToeFacingSwingEndPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint())
-                           && swingEndHeelFacingSwingStartPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint()))
+                     if ((swingStartToeFacingSwingEndPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon())
+                           && swingEndHeelFacingSwingStartPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()))
                            || midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint.distance(solePoseReferenceFrame.getPosition()))
                      {
                         updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.CRITICAL_INTERSECTION);
@@ -291,14 +291,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                         axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI * time);
                         rigidBodyTransform.setRotation(axisAngle);
 
-                        waypointAdjustmentVector.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+                        waypointAdjustmentVector.sub(swingStartPosition, swingEndPosition);
                         waypointAdjustmentVector.normalize();
                         rigidBodyTransform.transform(waypointAdjustmentVector);
                         waypointAdjustmentVector.scale(incrementalAdjustmentDistance.getDoubleValue());
                         waypointAdjustmentVector.scale(1.0 - time);
                         adjustedWaypoints.get(0).add(waypointAdjustmentVector);
 
-                        waypointAdjustmentVector.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+                        waypointAdjustmentVector.sub(swingStartPosition, swingEndPosition);
                         waypointAdjustmentVector.normalize();
                         rigidBodyTransform.transform(waypointAdjustmentVector);
                         waypointAdjustmentVector.scale(incrementalAdjustmentDistance.getDoubleValue());

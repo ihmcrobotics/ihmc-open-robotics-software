@@ -114,7 +114,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       PrintTools.debug(this, " final Chest Pose :\n" + finalChestPose);
       FramePose desiredChestPose = new FramePose();
 
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestTrajectoryMessage.getLastTrajectoryPoint().orientation);
+      desiredChestPose.setPose(initialChestPose.getFramePointCopy(), chestTrajectoryMessage.getLastTrajectoryPoint().orientation);
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 
       assertTrue(success);

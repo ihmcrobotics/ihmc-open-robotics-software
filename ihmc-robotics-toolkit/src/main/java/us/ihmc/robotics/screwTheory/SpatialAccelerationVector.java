@@ -264,11 +264,11 @@ public class SpatialAccelerationVector extends SpatialMotionVector
 
       linearAccelerationToPack.setToZero(expressedInFrame);
 
-      tempVector.set(pointFixedInBodyFrame.getPoint());
+      tempVector.set(pointFixedInBodyFrame);
       linearAccelerationToPack.cross(angularPart, tempVector);
       linearAccelerationToPack.add(linearPart);
 
-      tempVector.set(pointFixedInBodyFrame.getPoint());
+      tempVector.set(pointFixedInBodyFrame);
       tempVector.cross(twist.getAngularPart(), tempVector);
       tempVector.add(twist.getLinearPart());
       tempVector.cross(twist.getAngularPart(), tempVector);

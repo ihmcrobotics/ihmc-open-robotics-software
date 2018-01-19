@@ -65,7 +65,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
    public void getCenter(FramePoint3D pointToPack)
    {
       pointToPack.setToZero(referenceFrame);
-      box3d.getCenter(pointToPack.getPoint());
+      box3d.getCenter(pointToPack);
    }
 
    public FramePoint3D getCenterCopy()

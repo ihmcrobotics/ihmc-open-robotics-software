@@ -233,11 +233,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(valveFrame);
 
-      if (valveTorus.checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))
+      if (valveTorus.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
          return;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
-         if (spokesCylinders.get(i).checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))
+         if (spokesCylinders.get(i).checkIfInside(pointToCheck, intersectionToPack, normalToPack))
             return;
       }
    }

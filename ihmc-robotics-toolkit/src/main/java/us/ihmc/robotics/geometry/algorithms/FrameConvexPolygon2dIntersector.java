@@ -107,9 +107,9 @@ public class FrameConvexPolygon2dIntersector
    {
       if (allAreValid(point1, point2, point3, point4))
       {
-         point2Vector.sub(point2.getPoint(), point1.getPoint());
-         point3Vector.sub(point3.getPoint(), point1.getPoint());
-         point4Vector.sub(point4.getPoint(), point1.getPoint());
+         point2Vector.sub(point2, point1);
+         point3Vector.sub(point3, point1);
+         point4Vector.sub(point4, point1);
 
          double oneToTwoSqaured = point2Vector.lengthSquared();
 

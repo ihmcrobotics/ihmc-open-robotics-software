@@ -626,7 +626,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       else
       {
          EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPosition(), otherPose.pose.getPosition(), rotationAxis, rotationAngle,
-                                                              originToPack.getPoint());
+                                                              originToPack);
       }
    }
 

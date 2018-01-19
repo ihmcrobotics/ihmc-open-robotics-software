@@ -218,7 +218,7 @@ public class UserDesiredFootstepDataMessageGenerator
       desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), stepPitch, stepRoll);
 
       footstepPoseFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
-      desiredFootstepCommand.setPose(desiredPosition.getPoint(), desiredOrientation);
+      desiredFootstepCommand.setPose(desiredPosition, desiredOrientation);
 
       // set contact points
       contactFramePoints = swingFoot.getContactPoints2d();

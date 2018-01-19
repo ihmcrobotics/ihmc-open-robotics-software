@@ -548,11 +548,11 @@ public class QuadrupedSupportPolygonTest
       
       polygon.yawAboutCentroid(-Math.PI / 2);
       
-      String message = "not equal expected: " + bottomRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_LEFT).getPoint();
+      String message = "not equal expected: " + bottomRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_LEFT);
       assertTrue(message, polygon.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(bottomRight, 1e-7));
-      String message2 = "not equal expected: " + topRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_RIGHT).getPoint();
+      String message2 = "not equal expected: " + topRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_RIGHT);
       assertTrue(message2, polygon.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(topRight, 1e-7));
-      String message3 = "not equal expected: " + origin + " actual " + polygon.getFootstep(RobotQuadrant.FRONT_LEFT).getPoint();
+      String message3 = "not equal expected: " + origin + " actual " + polygon.getFootstep(RobotQuadrant.FRONT_LEFT);
       assertTrue(message3, polygon.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(origin, 1e-7));
       
       polygon.removeFootstep(RobotQuadrant.FRONT_RIGHT);
@@ -691,13 +691,13 @@ public class QuadrupedSupportPolygonTest
       FramePoint3D actual;
       actual = poly3.getFootstep(RobotQuadrant.HIND_LEFT);
       expected = new Vector3D(0.24142, 0.1, 0.0);
-      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      assertTrue("not common expected: " + expected + " actual: " + actual, actual.epsilonEquals(expected, 1e-5));
       actual = poly3.getFootstep(RobotQuadrant.HIND_RIGHT);
       expected = new Vector3D(0.75858, 0.1, 0.0);
-      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      assertTrue("not common expected: " + expected + " actual: " + actual, actual.epsilonEquals(expected, 1e-5));
       actual = poly3.getFootstep(RobotQuadrant.FRONT_RIGHT);
       expected = new Vector3D(0.5, 0.35858, 0.0);
-      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      assertTrue("not common expected: " + expected + " actual: " + actual, actual.epsilonEquals(expected, 1e-5));
       
       poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
       poly2 = createPolygonWithoutLeg(RobotQuadrant.HIND_LEFT);

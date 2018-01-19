@@ -113,7 +113,7 @@ public class SingleFootstepVisualizer
          FramePoint3D pointInWorld = new FramePoint3D(soleReferenceFrame, contactPoint.getX(), contactPoint.getY(), 0.0);
          pointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          
-         yoContactPoints[i].set(pointInWorld.getPoint());
+         yoContactPoints[i].set(pointInWorld);
       }
 
       footPolygon.setConvexPolygon2d(new ConvexPolygon2D(predictedContactPoints));

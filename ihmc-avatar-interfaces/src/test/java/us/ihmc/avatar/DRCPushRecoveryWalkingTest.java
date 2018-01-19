@@ -274,7 +274,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          location.changeFrame(ReferenceFrame.getWorldFrame());
          location.setZ(0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location.getPoint(), orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
          footsteps.add(footstepData);
       }
 

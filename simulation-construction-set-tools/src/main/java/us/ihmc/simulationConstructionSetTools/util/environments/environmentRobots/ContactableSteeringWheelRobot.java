@@ -291,11 +291,11 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       FramePoint3D pointToCheck = new FramePoint3D(worldFrame, pointInWorldToCheck);
       pointToCheck.changeFrame(steeringWheelFrame);
 
-      if (steeringWheelTorus.checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))
+      if (steeringWheelTorus.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
          return;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
-         if (spokesCylinders.get(i).checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))
+         if (spokesCylinders.get(i).checkIfInside(pointToCheck, intersectionToPack, normalToPack))
             return;
       }
    }

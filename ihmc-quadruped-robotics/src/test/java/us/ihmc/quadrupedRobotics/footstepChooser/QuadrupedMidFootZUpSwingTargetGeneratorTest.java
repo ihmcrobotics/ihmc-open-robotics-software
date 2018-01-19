@@ -591,7 +591,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
       endpointTwoD.setIncludingFrame(endPoint);
       nominalYawLineSegment.set(new FramePoint2D(centroid), endpointTwoD);
 
-      rootJoint.setPosition(temporaryCentroid.getPoint());
+      rootJoint.setPosition(temporaryCentroid);
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
 
       if(simulationTestingParameters.getCreateGUI())

@@ -45,7 +45,7 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    public void setFirstEndpoint(FramePoint3D firstEndpoint)
    {
       checkReferenceFrameMatch(firstEndpoint);
-      lineSegment3d.setFirstEndpoint(firstEndpoint.getPoint());
+      lineSegment3d.setFirstEndpoint(firstEndpoint);
    }
 
    public void setSecondEndpoint(Point3D secondEndpoint)
@@ -56,7 +56,7 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    public void setSecondEndpoint(FramePoint3D secondEndpoint)
    {
       checkReferenceFrameMatch(secondEndpoint);
-      lineSegment3d.setSecondEndpoint(secondEndpoint.getPoint());
+      lineSegment3d.setSecondEndpoint(secondEndpoint);
    }
 
    public void set(Point3D firstEndpoint, Point3D secondEndpoint)
@@ -87,7 +87,7 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(fromFirstToSecondEndpoint);
-      lineSegment3d.set(firstEndpoint.getPoint(), fromFirstToSecondEndpoint);
+      lineSegment3d.set(firstEndpoint, fromFirstToSecondEndpoint);
    }
 
    public void setIncludingFrame(FramePoint3D firstEndpoint, FrameVector3D fromFirstToSecondEndpoint)
@@ -100,20 +100,20 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    public double getDistance(FramePoint3D framePoint)
    {
       checkReferenceFrameMatch(framePoint);
-      return lineSegment3d.distance(framePoint.getPoint());
+      return lineSegment3d.distance(framePoint);
    }
 
    public void orthogonalProjection(FramePoint3D pointToProject, FramePoint3D projectionToPack)
    {
       checkReferenceFrameMatch(pointToProject);
       checkReferenceFrameMatch(projectionToPack);
-      lineSegment3d.orthogonalProjection(pointToProject.getPoint(), projectionToPack.getPoint());
+      lineSegment3d.orthogonalProjection(pointToProject, projectionToPack);
    }
 
    public void pointBetweenEndPointsGivenPercantage(double percentage, FramePoint3D pointToPack)
    {
       checkReferenceFrameMatch(pointToPack);
-      lineSegment3d.pointBetweenEndpointsGivenPercentage(percentage, pointToPack.getPoint());
+      lineSegment3d.pointBetweenEndpointsGivenPercentage(percentage, pointToPack);
    }
 
    public double length()
@@ -124,13 +124,13 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    public boolean isBetweenEndpoints(FramePoint3D point, double epsilon)
    {
       checkReferenceFrameMatch(point);
-      return lineSegment3d.isBetweenEndpoints(point.getPoint(), epsilon);
+      return lineSegment3d.isBetweenEndpoints(point, epsilon);
    }
 
    public void getMidpoint(FramePoint3D midpointToPack)
    {
       checkReferenceFrameMatch(midpointToPack);
-      lineSegment3d.midpoint(midpointToPack.getPoint());
+      lineSegment3d.midpoint(midpointToPack);
    }
 
    public void getDirection(boolean normalize, FrameVector3D directionToPack)

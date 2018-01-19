@@ -59,7 +59,7 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    {
       desiredConfiguration.reshape(7, 1);
       orientation.get(0, desiredConfiguration);
-      position.getPoint().get(4, desiredConfiguration);
+      position.get(4, desiredConfiguration);
    }
 
    public void setDesiredVelocity(FrameVector3D angularVelocity, FrameVector3D linearVelocity)

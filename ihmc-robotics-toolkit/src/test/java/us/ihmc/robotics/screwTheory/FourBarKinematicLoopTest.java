@@ -1024,10 +1024,10 @@ public class FourBarKinematicLoopTest
       jointCPosition.changeFrame(worldFrame);
       jointDPosition.changeFrame(worldFrame);
 
-      System.out.println("joint a position = " + jointAPosition.getPoint());
-      System.out.println("joint b position = " + jointBPosition.getPoint());
-      System.out.println("joint c position = " + jointCPosition.getPoint());
-      System.out.println("joint d position = " + jointDPosition.getPoint());
+      System.out.println("joint a position = " + jointAPosition);
+      System.out.println("joint b position = " + jointBPosition);
+      System.out.println("joint c position = " + jointCPosition);
+      System.out.println("joint d position = " + jointDPosition);
    }
 
    private void printInitialJointPositions()
@@ -1047,9 +1047,9 @@ public class FourBarKinematicLoopTest
       jointCPosition.changeFrame(worldFrame);
       jointDPosition.changeFrame(worldFrame);
 
-      System.out.println("\njoint a position = " + jointAPosition.getPoint());
-      System.out.println("joint b position = " + jointBPosition.getPoint());
-      System.out.println("joint c position = " + jointCPosition.getPoint());
-      System.out.println("joint d position = " + jointDPosition.getPoint());
+      System.out.println("\njoint a position = " + jointAPosition);
+      System.out.println("joint b position = " + jointBPosition);
+      System.out.println("joint c position = " + jointCPosition);
+      System.out.println("joint d position = " + jointDPosition);
    }
 }

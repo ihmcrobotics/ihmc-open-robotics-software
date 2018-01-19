@@ -400,7 +400,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
                stepGoalPosition.changeFrame(worldFrame);
                stepGoalPosition.add(instantaneousStepAdjustment);
                crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), robotQuadrant);
-               groundPlaneEstimator.projectZ(stepGoalPosition.getPoint());
+               groundPlaneEstimator.projectZ(stepGoalPosition);
                footStateMachine.get(robotQuadrant).adjustStep(stepGoalPosition);
             }
          }
