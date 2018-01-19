@@ -321,10 +321,10 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          desiredFootPosition.setIncludingFrame(desiredFeetLocations.get(robotQuadrant));
          desiredFootPosition.changeFrame(desiredCoMPoseReferenceFrame);
 
-         desiredFootPositionInLegAttachmentFrame.setIncludingFrame(centerOfMassFrame, desiredFootPosition.getPoint());
+         desiredFootPositionInLegAttachmentFrame.setIncludingFrame(centerOfMassFrame, desiredFootPosition);
          desiredFootPositionInLegAttachmentFrame.changeFrame(legAttachmentFrame);
 
-         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInLegAttachmentFrame.getPoint());
+         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInLegAttachmentFrame);
       }
    }
 

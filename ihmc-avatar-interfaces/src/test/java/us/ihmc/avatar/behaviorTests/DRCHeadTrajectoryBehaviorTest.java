@@ -177,7 +177,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       }
 
       FramePose desiredHeadPose = new FramePose();
-      desiredHeadPose.setPose(initialHeadPose.getFramePointCopy().getPoint(), headTrajectoryMessage.getLastTrajectoryPoint().orientation);
+      desiredHeadPose.setPose(initialHeadPose.getFramePointCopy(), headTrajectoryMessage.getLastTrajectoryPoint().orientation);
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
       assertTrue(headTrajectoryBehavior.isDone());
    }

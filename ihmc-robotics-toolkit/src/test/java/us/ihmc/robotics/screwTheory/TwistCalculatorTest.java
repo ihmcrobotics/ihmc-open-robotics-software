@@ -493,7 +493,7 @@ public class TwistCalculatorTest
       pointInFuture.changeFrame(baseFrameInFuture);
 
       FrameVector3D pointLinearVelocity = new FrameVector3D(baseFrame);
-      pointLinearVelocity.sub(pointInFuture.getPoint(), point.getPoint());
+      pointLinearVelocity.sub(pointInFuture, point);
       pointLinearVelocity.scale(1.0 / dt);
       return pointLinearVelocity;
    }

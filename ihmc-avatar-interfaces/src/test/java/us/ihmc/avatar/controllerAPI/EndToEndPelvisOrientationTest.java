@@ -335,7 +335,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          location.changeFrame(worldFrame);
          FrameQuaternion orientation = new FrameQuaternion(midFootZUpGroundFrame);
          orientation.changeFrame(worldFrame);
-         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location.getPoint(), orientation);
+         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
          messageToPack.add(footstep);
          robotSide = robotSide.getOppositeSide();
          time += swingDuration + transferDuration;

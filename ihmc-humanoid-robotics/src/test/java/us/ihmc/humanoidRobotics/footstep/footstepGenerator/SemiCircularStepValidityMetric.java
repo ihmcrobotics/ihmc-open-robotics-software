@@ -255,7 +255,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       circleCenter.add(translationFromFootCenterToCircleCenter);//change frame of translation first?
 
       FrameVector3D vectorToSwingEnd = new FrameVector3D(ReferenceFrame.getWorldFrame());
-      vectorToSwingEnd.set(swingEndSole.getFramePointCopy().getPoint());
+      vectorToSwingEnd.set(swingEndSole.getFramePointCopy());
       vectorToSwingEnd.sub(circleCenter);
 
       return vectorToSwingEnd;

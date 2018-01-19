@@ -265,6 +265,6 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       testPoint.changeFrame(plane.getReferenceFrame());
       plane.getPoint(testPoint);
       testPoint.changeFrame(WORLD_FRAME);
-      previousPlane.setPoint(testPoint.getPoint());
+      previousPlane.setPoint(testPoint);
    }
 }

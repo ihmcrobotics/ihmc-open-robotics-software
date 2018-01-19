@@ -177,9 +177,9 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
             point.rotatePoseAboutAxis(valvePose, Axis.Z, degrees);
 
-            sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
+            sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy()));
 
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
+            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy(),
                   point.getFrameOrientationCopy(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
             handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
 
@@ -201,9 +201,9 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       FramePose point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
       //      System.out.println("-orient.x,orient.y, orient.z " + (-orient.x) + "," + orient.y + "," + orient.z);
 
-      sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
+      sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy()));
 
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy(),
             point.getFrameOrientationCopy(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
 

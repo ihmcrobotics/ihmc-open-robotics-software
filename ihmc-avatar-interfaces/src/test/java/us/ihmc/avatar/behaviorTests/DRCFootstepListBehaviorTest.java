@@ -255,7 +255,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position, orientation);
          ret.add(footstepData);
       }
 

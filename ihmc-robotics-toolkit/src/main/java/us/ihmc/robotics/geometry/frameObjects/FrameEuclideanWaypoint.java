@@ -37,7 +37,7 @@ public class FrameEuclideanWaypoint extends FrameGeometryObject<FrameEuclideanWa
    public void setPosition(FramePoint3D position)
    {
       checkReferenceFrameMatch(position);
-      geometryObject.setPosition(position.getPoint());
+      geometryObject.setPosition(position);
    }
 
    @Override
@@ -67,14 +67,14 @@ public class FrameEuclideanWaypoint extends FrameGeometryObject<FrameEuclideanWa
    {
       checkReferenceFrameMatch(position);
       checkReferenceFrameMatch(linearVelocity);
-      geometryObject.set(position.getPoint(), linearVelocity);
+      geometryObject.set(position, linearVelocity);
    }
 
    public void setIncludingFrame(FramePoint3D position, FrameVector3D linearVelocity)
    {
       position.checkReferenceFrameMatch(linearVelocity);
       setToZero(position.getReferenceFrame());
-      geometryObject.set(position.getPoint(), linearVelocity);
+      geometryObject.set(position, linearVelocity);
    }
 
    public void set(EuclideanWaypointInterface<?> euclideanWaypoint)
@@ -127,13 +127,13 @@ public class FrameEuclideanWaypoint extends FrameGeometryObject<FrameEuclideanWa
    public void getPosition(FramePoint3D positionToPack)
    {
       checkReferenceFrameMatch(positionToPack);
-      geometryObject.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack);
    }
 
    public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
-      geometryObject.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack);
    }
 
    @Override

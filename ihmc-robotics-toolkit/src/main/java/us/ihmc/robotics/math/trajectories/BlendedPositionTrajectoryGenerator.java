@@ -191,8 +191,8 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
 
       trajectory.getPosition(tempPosition);
       tempPosition.changeFrame(trajectoryFrame);
-      initialConstraintPositionError.set(initialPosition.getPoint());
-      initialConstraintPositionError.sub(tempPosition.getPoint());
+      initialConstraintPositionError.set(initialPosition);
+      initialConstraintPositionError.sub(tempPosition);
    }
 
    private void computeInitialConstraintError(FramePoint3D initialPosition, FrameVector3D initialVelocity, double initialTime)
@@ -213,8 +213,8 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
 
       trajectory.getPosition(tempPosition);
       tempPosition.changeFrame(trajectoryFrame);
-      finalConstraintPositionError.set(finalPosition.getPoint());
-      finalConstraintPositionError.sub(tempPosition.getPoint());
+      finalConstraintPositionError.set(finalPosition);
+      finalConstraintPositionError.sub(tempPosition);
    }
 
    private void computeFinalConstraintError(FramePoint3D finalPosition, FrameVector3D finalVelocity, double finalTime)

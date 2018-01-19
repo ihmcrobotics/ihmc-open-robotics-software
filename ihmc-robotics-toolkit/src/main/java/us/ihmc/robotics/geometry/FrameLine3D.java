@@ -126,7 +126,7 @@ public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
    public void setPoint(FramePoint3D pointOnLine)
    {
       checkReferenceFrameMatch(pointOnLine);
-      line3D.setPoint(pointOnLine.getPoint());
+      line3D.setPoint(pointOnLine);
    }
 
    public void setDirection(double lineDirectionX, double lineDirectionY, double lineDirectionZ)

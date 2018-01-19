@@ -90,7 +90,7 @@ public class TransformToolsTest
 
       // System.out.println("a2OriginFramePoint = " + a2OriginFramePoint);
 
-      a2Origin.epsilonEquals(a2OriginFramePoint.getPoint(), 1e-9);
+      a2Origin.epsilonEquals(a2OriginFramePoint, 1e-9);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -123,7 +123,7 @@ public class TransformToolsTest
 
       // System.out.println("a2OriginFramePoint = " + a2OriginFramePoint);
 
-      a2Origin.epsilonEquals(a2OriginFramePoint.getPoint(), 1e-9);
+      a2Origin.epsilonEquals(a2OriginFramePoint, 1e-9);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

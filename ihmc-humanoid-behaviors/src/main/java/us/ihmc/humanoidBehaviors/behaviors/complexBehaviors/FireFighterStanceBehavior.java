@@ -160,7 +160,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             FramePoint3D p = new FramePoint3D(referenceFrames.getPelvisZUpFrame(), new double[] {0.075, 0.04, 0});
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
             p.changeFrame(ReferenceFrame.getWorldFrame());
-            PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(2, p.getPoint(), orientation);
+            PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(2, p, orientation);
             pelvisTrajectoryBehavior.setInput(message);
             TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Pelvis To Final Location");
             sendPacket(p1);

@@ -223,7 +223,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void setDesiredPosition(FramePoint3D desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPosition(desiredPosition.getPoint());
+      setDesiredPosition(desiredPosition);
    }
 
    /**

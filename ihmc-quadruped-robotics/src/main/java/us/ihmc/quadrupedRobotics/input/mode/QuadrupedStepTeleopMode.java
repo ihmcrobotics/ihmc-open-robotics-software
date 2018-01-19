@@ -186,7 +186,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       TimeInterval timeInterval = new TimeInterval(0.0, singleStepSwingDuration.get());
       timeInterval.shiftInterval(singleStepShiftDuration.get());
 
-      QuadrupedTimedStep step = new QuadrupedTimedStep(quadrant, goalPosition.getPoint(), groundClearance, timeInterval);
+      QuadrupedTimedStep step = new QuadrupedTimedStep(quadrant, goalPosition, groundClearance, timeInterval);
       List<QuadrupedTimedStep> steps = Collections.singletonList(step);
       QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, false);
       packetCommunicator.send(timedStepPacket);

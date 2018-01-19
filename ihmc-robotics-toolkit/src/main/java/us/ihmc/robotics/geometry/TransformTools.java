@@ -19,7 +19,7 @@ public class TransformTools
    {
       RigidBodyTransform ret = new RigidBodyTransform();
       ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis));
-      ret.setTranslation(point.getPoint());
+      ret.setTranslation(point);
       return ret;
    }
 

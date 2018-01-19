@@ -96,7 +96,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
 
       FramePose point = offsetPointFromChestInWorldFrame(x, y, z, yaw, pitch, roll);
 
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy(),
             point.getFrameOrientationCopy(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
 

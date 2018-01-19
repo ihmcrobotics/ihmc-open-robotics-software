@@ -276,7 +276,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void getPosition(FramePoint3D positionToPack)
    {
       checkReferenceFrameMatch(positionToPack);
-      geometryObject.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack);
    }
 
    public FramePoint3D getPositionCopy()
@@ -336,7 +336,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
-      geometryObject.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack);
    }
 
    public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)

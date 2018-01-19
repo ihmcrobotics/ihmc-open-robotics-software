@@ -338,7 +338,7 @@ public class CirclePoseTrajectoryGeneratorTest
          difference.difference(initialOrientation, orientation);
 
          FramePoint3D rotatedInitialPosition = new FramePoint3D(initialPosition);
-         difference.transform(rotatedInitialPosition.getPoint());
+         difference.transform(rotatedInitialPosition);
          //         JUnitTools.assertFramePointEquals(newPosition, rotatedInitialPosition, 1e-9);
       }
    }

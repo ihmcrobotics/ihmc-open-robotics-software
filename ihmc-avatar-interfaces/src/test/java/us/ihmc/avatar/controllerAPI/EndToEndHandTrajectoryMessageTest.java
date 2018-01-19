@@ -300,7 +300,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, 0.0, radius * Math.cos(angle), radius * Math.sin(angle));
             tempPoint.add(circleCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
@@ -508,7 +508,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          tempPoint.setIncludingFrame(chestBodyFixedFrame, pointsOnSphere[i]);
          tempPoint.add(sphereCenter);
          tempPoint.changeFrame(worldFrame);
-         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
       }
 
       euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
@@ -632,7 +632,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = findQuat4d(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
 
       lastPoint.changeFrame(worldFrame);
-      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), desiredPosition, 0.001);
+      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), desiredPosition, 0.001);
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), desiredOrientation, 0.001);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
@@ -693,7 +693,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
@@ -812,7 +812,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);

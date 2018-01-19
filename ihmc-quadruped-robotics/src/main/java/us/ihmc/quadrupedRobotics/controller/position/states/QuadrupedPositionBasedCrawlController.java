@@ -859,7 +859,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 	   centerOfMassInBody.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
 	   centerOfMassInBody.changeFrame(feedForwardRootJoint.getFrameAfterJoint());
 
-	   vectorToSubtractHolder.setIncludingFrame(feedForwardFullRobotModel.getRootJoint().getFrameAfterJoint(), centerOfMassInBody.getPoint());
+	   vectorToSubtractHolder.setIncludingFrame(feedForwardFullRobotModel.getRootJoint().getFrameAfterJoint(), centerOfMassInBody);
 	   vectorToSubtractHolder.changeFrame(ReferenceFrame.getWorldFrame());
 
 	   yoVectorToSubtract.set(vectorToSubtractHolder);
@@ -868,8 +868,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 	   desiredRootJointPosition.setIncludingFrame(desiredCoM);
 	   desiredRootJointPosition.sub(vectorToSubtractHolder);
       feedForwardRootJoint.getTranslation(linearVelocityHolder);
-	   feedForwardRootJoint.setPosition(desiredRootJointPosition.getPoint());
-	   linearVelocityHolder.sub(desiredRootJointPosition.getPoint(), linearVelocityHolder);
+	   feedForwardRootJoint.setPosition(desiredRootJointPosition);
+	   linearVelocityHolder.sub(desiredRootJointPosition, linearVelocityHolder);
 //	   feedForwardRootJoint.setLinearVelocityInWorld(linearVelocityHolder);
 
 //	   feedForwardFullRobotModel.updateFrames();
@@ -1187,10 +1187,10 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       desiredFootPosition.changeFrame(desiredCoMPoseReferenceFrame);
 
       // Fix this for feed forward!!!
-      desiredFootPositionInBody.setIncludingFrame(feedForwardCenterOfMassFrame, desiredFootPosition.getPoint());
+      desiredFootPositionInBody.setIncludingFrame(feedForwardCenterOfMassFrame, desiredFootPosition);
       desiredFootPositionInBody.changeFrame(feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant));
 
-      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInBody.getPoint());
+      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInBody);
    }
 
 

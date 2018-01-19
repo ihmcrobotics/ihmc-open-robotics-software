@@ -113,7 +113,7 @@ public class GroundPlaneEstimator
    public void getPlanePoint(FramePoint3D point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlane.getPoint(point.getPoint());
+      groundPlane.getPoint(point);
    }
 
    /**
@@ -148,7 +148,7 @@ public class GroundPlaneEstimator
    public void projectOrthogonal(FramePoint3D point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlane.orthogonalProjection(point.getPoint());
+      groundPlane.orthogonalProjection(point);
    }
 
    /**
@@ -200,7 +200,7 @@ public class GroundPlaneEstimator
       for (int i = 0; i < nPoints; i++)
       {
          contactPoints.get(i).changeFrame(ReferenceFrame.getWorldFrame());
-         groundPlanePoints.add(contactPoints.get(i).getPoint());
+         groundPlanePoints.add(contactPoints.get(i));
       }
       compute();
    }
@@ -215,7 +215,7 @@ public class GroundPlaneEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactPoints.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         groundPlanePoints.add(contactPoints.get(robotQuadrant).getPoint());
+         groundPlanePoints.add(contactPoints.get(robotQuadrant));
       }
       compute();
    }

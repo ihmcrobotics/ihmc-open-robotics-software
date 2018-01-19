@@ -2,6 +2,8 @@ package us.ihmc.quadrupedRobotics.planning;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.commons.MathTools;
 
 public class SoleWaypoint
@@ -54,7 +56,7 @@ public class SoleWaypoint
       return time;
    }
 
-   public void set(Point3D position, Vector3D velocity, Double time)
+   public void set(Point3DReadOnly position, Vector3DReadOnly velocity, Double time)
    {
       this.position.set(position);
       this.velocity.set(velocity);

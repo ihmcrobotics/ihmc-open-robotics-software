@@ -149,7 +149,7 @@ public class FramePoseTest
          double rotation = Math.abs(axisAngle.getAngle());
 
          assertEquals(rotation, rotationDistance, 1e-7);
-         assertEquals(positionDistance, framePose2.getFramePointCopy().getPoint().distance(new Point3D()), 1e-7);
+         assertEquals(positionDistance, framePose2.getFramePointCopy().distance(new Point3D()), 1e-7);
       }
 
    }

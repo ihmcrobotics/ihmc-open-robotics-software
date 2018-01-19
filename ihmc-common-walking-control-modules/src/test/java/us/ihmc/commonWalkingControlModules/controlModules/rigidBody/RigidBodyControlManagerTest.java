@@ -201,7 +201,7 @@ public class RigidBodyControlManagerTest
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
-         EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), desiredPosition.getPoint(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(initialPosition, desiredPosition, epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialOrientation, desiredOrientation, epsilon);
       }
@@ -219,7 +219,7 @@ public class RigidBodyControlManagerTest
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
-         EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition.getPoint(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition, epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientation, desiredOrientation, epsilon);
 
@@ -443,14 +443,14 @@ public class RigidBodyControlManagerTest
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
-         EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), desiredPosition.getPoint(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(initialPosition, desiredPosition, epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialOrientation, desiredOrientation, 1e-10);
 
          taskspaceCommand.getControlFramePoseIncludingFrame(actualControlFramePosition, actualControlFrameOrientation);
          actualControlFramePosition.checkReferenceFrameMatch(bodyFrame);
          actualControlFrameOrientation.checkReferenceFrameMatch(bodyFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(controlFramePosition, actualControlFramePosition.getPoint(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(controlFramePosition, actualControlFramePosition, epsilon);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(controlFrameOrientation, actualControlFrameOrientation, epsilon);
       }
 
@@ -467,7 +467,7 @@ public class RigidBodyControlManagerTest
          taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
-         EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition.getPoint(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition, epsilon);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientation, desiredOrientation, epsilon);
 

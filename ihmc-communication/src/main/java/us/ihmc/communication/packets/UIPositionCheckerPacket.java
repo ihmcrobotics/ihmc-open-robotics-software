@@ -1,6 +1,7 @@
 package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket> implements VisualizablePacket
@@ -13,14 +14,14 @@ public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket> imp
 
    }
 
-   public UIPositionCheckerPacket(Point3D position)
+   public UIPositionCheckerPacket(Point3DReadOnly position)
    {
       this(position, null);
    }
 
-   public UIPositionCheckerPacket(Point3D position, Quaternion orientation)
+   public UIPositionCheckerPacket(Point3DReadOnly position, Quaternion orientation)
    {
-      this.position = position;
+      this.position = new Point3D(position);
       this.orientation = orientation;
    }
 

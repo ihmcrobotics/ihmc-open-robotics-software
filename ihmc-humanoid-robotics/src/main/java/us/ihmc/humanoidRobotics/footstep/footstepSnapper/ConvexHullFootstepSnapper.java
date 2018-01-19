@@ -193,7 +193,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position.getPoint());
+      originalFootstep.setLocation(position);
       originalFootstep.setOrientation(orientation);
 
       //get the footstep
@@ -247,7 +247,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position.getPoint());
+      originalFootstep.setLocation(position);
       originalFootstep.setOrientation(orientation);
 
       //get the footstep
