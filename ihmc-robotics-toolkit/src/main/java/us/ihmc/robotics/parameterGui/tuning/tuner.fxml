@@ -7,7 +7,8 @@
 <?import javafx.scene.text.*?>
 
 <fx:root type="VBox" spacing="10.0" maxHeight="-Infinity"
-	maxWidth="-Infinity" prefWidth="800" xmlns:fx="http://javafx.com/fxml">
+	maxWidth="-Infinity" prefWidth="700" xmlns:fx="http://javafx.com/fxml">
+	<padding><Insets top="0" right="0" bottom="20" left="0"/></padding>
 	<children>
 		<HBox spacing="10.0" alignment="CENTER_LEFT">
 			<children>
