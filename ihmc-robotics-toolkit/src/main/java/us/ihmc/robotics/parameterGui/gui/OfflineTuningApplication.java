@@ -22,7 +22,7 @@ public class OfflineTuningApplication extends Application
       primaryStage.setTitle("Parameter Tuner");
       primaryStage.setScene(mainScene);
       primaryStage.setHeight(800.0);
-      primaryStage.setWidth(600.0);
+      primaryStage.setWidth(1400.0);
       primaryStage.show();
    }
 

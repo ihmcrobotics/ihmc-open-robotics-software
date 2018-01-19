@@ -1,3 +1,11 @@
 .tree-cell:is-registry {
 	-fx-font-weight: bold ;
 }
+
+.label {
+	-fx-font-weight: bold ;
+}
+
+.scroll-pane {
+    -fx-background-color:transparent;
+}

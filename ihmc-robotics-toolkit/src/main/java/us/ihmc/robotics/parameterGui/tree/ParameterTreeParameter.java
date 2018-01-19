@@ -28,4 +28,9 @@ public class ParameterTreeParameter extends ParameterTreeValue
    {
       return parameter.getName();
    }
+
+   public Parameter getParameter()
+   {
+      return parameter;
+   }
 }

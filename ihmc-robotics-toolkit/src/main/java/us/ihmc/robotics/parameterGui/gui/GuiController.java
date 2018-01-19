@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -13,10 +14,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import us.ihmc.robotics.parameterGui.ParameterTuningTools;
 import us.ihmc.robotics.parameterGui.tree.ParameterTree;
+import us.ihmc.robotics.parameterGui.tree.ParameterTreeParameter;
+import us.ihmc.robotics.parameterGui.tree.ParameterTreeValue;
+import us.ihmc.robotics.parameterGui.tuning.TuningBoxManager;
+import us.ihmc.yoVariables.parameters.xml.Parameter;
 import us.ihmc.yoVariables.parameters.xml.Registry;
 
 public class GuiController
@@ -42,12 +50,32 @@ public class GuiController
    @FXML
    private Text stats;
 
+   @FXML
+   private VBox tuningBox;
+
    private File originalFile;
    private List<Registry> registries;
+   private TuningBoxManager tuningBoxManager;
 
    public void initialize()
    {
       searchField.textProperty().addListener(observable -> updateTree());
+      tuningBoxManager = new TuningBoxManager(tuningBox);
+
+      tree.setOnMouseClicked(new EventHandler<MouseEvent>()
+      {
+         @Override
+         public void handle(MouseEvent mouseEvent)
+         {
+            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
+            if (selectedItem == null || selectedItem.getValue().isRegistry() || mouseEvent.getClickCount() < 2)
+            {
+               return;
+            }
+            Parameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
+            tuningBoxManager.handleNewParameter(parameter);
+         }
+      });
    }
 
    @FXML
@@ -70,6 +98,7 @@ public class GuiController
          originalFile = file;
          registries = ParameterTuningTools.getParameters(originalFile);
          updateTree();
+         tuningBoxManager.clearAllParameters();
       }
    }
 
