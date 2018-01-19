@@ -877,7 +877,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getLastTrajectoryPoint();
       SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-      expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
+      expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, new Vector3D(), fromMessage.angularVelocity);
       expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
       SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(pelvisName, scs);
 
