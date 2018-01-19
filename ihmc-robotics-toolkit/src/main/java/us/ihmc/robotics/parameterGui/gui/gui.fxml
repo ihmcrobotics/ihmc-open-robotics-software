@@ -16,7 +16,7 @@
 			AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0"
 			AnchorPane.rightAnchor="10.0">
 			<children>
-				<Label text="Offline Parameter Tuner">
+				<Label text="Parameter Tuner">
 					<font>
 						<Font size="20.0" />
 					</font>
@@ -31,6 +31,7 @@
 						<Button text="Connect" disable="true"/>
 						<Button text="Save" fx:id="save" onAction="#handleSave" />
 						<Button text="Save as..." fx:id="saveAs" onAction="#handleSaveAs" />
+						<Button text="Create" fx:id="create" onAction="#handleCreate" />
 					</children>
 				</HBox>
 			</children>

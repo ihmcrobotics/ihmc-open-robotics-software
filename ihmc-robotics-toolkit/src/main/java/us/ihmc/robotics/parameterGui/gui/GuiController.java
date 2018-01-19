@@ -2,6 +2,7 @@ package us.ihmc.robotics.parameterGui.gui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import us.ihmc.robotics.parameterGui.ParameterTuningTools;
 import us.ihmc.robotics.parameterGui.tree.ParameterTree;
@@ -39,6 +41,9 @@ public class GuiController
    @FXML
    private Button open;
 
+   @FXML
+   private Button create;
+
    private File originalFile;
    private List<Registry> registries;
 
@@ -51,6 +56,24 @@ public class GuiController
    protected void handleNamespaceButton(ActionEvent event)
    {
       tree.setRegistries(registries, hideNamespaces.isSelected(), searchField.getText());
+   }
+
+   @FXML
+   protected void handleCreate(ActionEvent event) throws IOException
+   {
+      TextInputDialog dialog = new TextInputDialog("NewRootRegistry");
+      dialog.setTitle("Input Dialog");
+      dialog.setHeaderText("Root Registry Name");
+      dialog.setContentText("Provide the name of the new root registry.");
+
+      Optional<String> result = dialog.showAndWait();
+      if (result.isPresent())
+      {
+         originalFile = null;
+         registries = new ArrayList<>();
+         registries.add(new Registry(result.get()));
+         tree.setRegistries(registries, hideNamespaces.isSelected(), searchField.getText());
+      }
    }
 
    @FXML
@@ -73,6 +96,11 @@ public class GuiController
    @FXML
    protected void handleSaveAs(ActionEvent event) throws IOException
    {
+      if (registries == null)
+      {
+         return;
+      }
+
       FileChooser fileChooser = new FileChooser();
       FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
       fileChooser.getExtensionFilters().add(extFilter);
@@ -88,6 +116,16 @@ public class GuiController
    @FXML
    protected void handleSave(ActionEvent event) throws IOException
    {
+      if (originalFile == null)
+      {
+         handleSaveAs(event);
+         return;
+      }
+      if (registries == null)
+      {
+         return;
+      }
+
       Alert alert = new Alert(AlertType.CONFIRMATION);
       alert.setTitle("Confirmation Dialog");
       alert.setHeaderText("Confirm Save");
