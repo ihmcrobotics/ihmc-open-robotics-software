@@ -55,7 +55,7 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
 
    public void setOrientation(FrameQuaternion orientation)
    {
-      geometryObject.setOrientation(orientation.getQuaternion());
+      geometryObject.setOrientation(orientation);
    }
 
    @Override
@@ -99,7 +99,7 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       checkReferenceFrameMatch(orientation);
       checkReferenceFrameMatch(linearVelocity);
       checkReferenceFrameMatch(angularVelocity);
-      geometryObject.set(position.getPoint(), orientation.getQuaternion(), linearVelocity.getVector(), angularVelocity.getVector());
+      geometryObject.set(position.getPoint(), orientation, linearVelocity.getVector(), angularVelocity.getVector());
    }
 
    public void setIncludingFrame(FramePoint3D position, FrameQuaternion orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
@@ -108,7 +108,7 @@ public class FrameSE3Waypoint extends FrameGeometryObject<FrameSE3Waypoint, SE3W
       position.checkReferenceFrameMatch(linearVelocity);
       position.checkReferenceFrameMatch(angularVelocity);
       setToZero(position.getReferenceFrame());
-      geometryObject.set(position.getPoint(), orientation.getQuaternion(), linearVelocity.getVector(), angularVelocity.getVector());
+      geometryObject.set(position.getPoint(), orientation, linearVelocity.getVector(), angularVelocity.getVector());
    }
 
    public void set(SE3WaypointInterface<?> se3Waypoint)

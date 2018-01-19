@@ -58,7 +58,7 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    public void setDesiredConfiguration(FrameQuaternion orientation, FramePoint3D position)
    {
       desiredConfiguration.reshape(7, 1);
-      orientation.getQuaternion().get(0, desiredConfiguration);
+      orientation.get(0, desiredConfiguration);
       position.getPoint().get(4, desiredConfiguration);
    }
 

@@ -287,7 +287,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
 
       FramePose pose = offsetPointFromFrameInWorldFrame(frame, location, orientation);
-      FootstepDataMessage message = new FootstepDataMessage(side, pose.getFramePointCopy().getPoint(), pose.getFrameOrientationCopy().getQuaternion());
+      FootstepDataMessage message = new FootstepDataMessage(side, pose.getFramePointCopy().getPoint(), pose.getFrameOrientationCopy());
       return message;
    }
 

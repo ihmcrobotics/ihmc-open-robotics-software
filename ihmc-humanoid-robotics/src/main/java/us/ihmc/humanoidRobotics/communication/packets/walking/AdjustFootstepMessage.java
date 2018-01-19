@@ -118,7 +118,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.location = location.getPoint();
-      this.orientation = new Quaternion(orientation.getQuaternion());
+      this.orientation = new Quaternion(orientation);
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)

@@ -112,7 +112,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setRobotSide(futureSwingLegSide);
       predictedFootstep.setLocation(footstepPosition.getPoint());
-      predictedFootstep.setOrientation(footOrientation.getQuaternion());
+      predictedFootstep.setOrientation(footOrientation);
       return predictedFootstep;
    }
 

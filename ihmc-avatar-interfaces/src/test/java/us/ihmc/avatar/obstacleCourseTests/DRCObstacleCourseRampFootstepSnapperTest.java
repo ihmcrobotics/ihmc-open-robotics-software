@@ -191,7 +191,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FramePoint3D position = new FramePoint3D();
          FrameQuaternion orientation = new FrameQuaternion();
          footstep.getPose(position, orientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation.getQuaternion());
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation);
          snappedFootstepDataList.add(footstepData);
       }
 

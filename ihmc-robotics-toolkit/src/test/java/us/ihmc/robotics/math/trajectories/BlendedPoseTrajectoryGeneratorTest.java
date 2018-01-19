@@ -32,7 +32,7 @@ public class BlendedPoseTrajectoryGeneratorTest
 
    private boolean geometricEquals(FrameQuaternion orientationA, FrameQuaternion orientationB, double epsilon)
    {
-      return RotationTools.quaternionEpsilonEquals(orientationA.getQuaternion(), orientationB.getQuaternion(), epsilon);
+      return RotationTools.quaternionEpsilonEquals(orientationA, orientationB, epsilon);
    }
 
    private class PoseTrajectoryState

@@ -633,7 +633,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       lastPoint.changeFrame(worldFrame);
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), desiredPosition, 0.001);
-      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), desiredOrientation, 0.001);
+      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), desiredOrientation, 0.001);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }

@@ -42,14 +42,14 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
    {
       checkReferenceFrameMatch(orientation);
       checkReferenceFrameMatch(angularVelocity);
-      geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
+      geometryObject.set(orientation, angularVelocity.getVector());
    }
 
    public void setIncludingFrame(FrameQuaternion orientation, FrameVector3D angularVelocity)
    {
       orientation.checkReferenceFrameMatch(angularVelocity);
       setToZero(orientation.getReferenceFrame());
-      geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
+      geometryObject.set(orientation, angularVelocity.getVector());
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, SO3WaypointInterface<?> so3Waypoint)
@@ -67,7 +67,7 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
    public void setOrientation(FrameQuaternion orientation)
    {
       checkReferenceFrameMatch(orientation);
-      geometryObject.setOrientation(orientation.getQuaternion());
+      geometryObject.setOrientation(orientation);
    }
 
    @Override

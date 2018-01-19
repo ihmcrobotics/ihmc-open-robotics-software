@@ -167,7 +167,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       initialConstraintAngularVelocityOffset.applyTransform(tempTransform);
       initialConstraintAngularAccelerationOffset.changeFrame(trajectoryFrame);
       initialConstraintAngularAccelerationOffset.applyTransform(tempTransform);
-      orientation.multiply(initialConstraintOrientationOffset.getQuaternion());
+      orientation.multiply(initialConstraintOrientationOffset);
       angularVelocity.add(initialConstraintAngularVelocityOffset);
       angularAcceleration.add(initialConstraintAngularAccelerationOffset);
 
@@ -178,7 +178,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       finalConstraintAngularVelocityOffset.applyTransform(tempTransform);
       finalConstraintAngularAccelerationOffset.changeFrame(trajectoryFrame);
       finalConstraintAngularAccelerationOffset.applyTransform(tempTransform);
-      orientation.multiply(finalConstraintOrientationOffset.getQuaternion());
+      orientation.multiply(finalConstraintOrientationOffset);
       angularVelocity.add(finalConstraintAngularVelocityOffset);
       angularAcceleration.add(finalConstraintAngularAccelerationOffset);
    }
@@ -196,7 +196,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 
       trajectory.getOrientation(tempOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
-      initialConstraintOrientationError.difference(tempOrientation.getQuaternion(), initialOrientation.getQuaternion());
+      initialConstraintOrientationError.difference(tempOrientation, initialOrientation);
    }
 
    private void computeInitialConstraintError(FrameQuaternion initialOrientation, FrameVector3D initialAngularVelocity, double initialTime)
@@ -217,7 +217,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 
       trajectory.getOrientation(tempOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
-      finalConstraintOrientationError.difference(tempOrientation.getQuaternion(), finalOrientation.getQuaternion());
+      finalConstraintOrientationError.difference(tempOrientation, finalOrientation);
    }
 
    private void computeFinalConstraintError(FrameQuaternion finalOrientation, FrameVector3D finalAngularVelocity, double finalTime)
