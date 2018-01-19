@@ -16,7 +16,7 @@
 			AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0"
 			AnchorPane.rightAnchor="10.0">
 			<children>
-				<VBox prefWidth="600.0" spacing="10.0">
+				<VBox prefWidth="600.0" spacing="10.0" HBox.hgrow="ALWAYS">
 					<children>
 						<Label text="Parameters">
 							<font>
