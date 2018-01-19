@@ -28,7 +28,7 @@
 				<HBox spacing="10.0">
 					<children>
 						<Button text="Open" fx:id="open" onAction="#handleOpen" />
-						<Button text="Connect" disable="true"/>
+						<Button text="Connect" disable="true" />
 						<Button text="Save" fx:id="save" onAction="#handleSave" />
 						<Button text="Save as..." fx:id="saveAs" onAction="#handleSaveAs" />
 						<Button text="Create" fx:id="create" onAction="#handleCreate" />
