@@ -1871,7 +1871,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 //         tempFrameVector.scale(velocitySign.getDoubleValue());
          tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
 
-         comTargetToPack.add(tempFrameVector.getVector());
+         comTargetToPack.add(tempFrameVector);
          circleCenter.set(comTargetToPack, 0.0);
       }
 
