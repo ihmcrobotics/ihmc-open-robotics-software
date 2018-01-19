@@ -264,7 +264,7 @@ public class DynamicReachabilityCalculator
       };
 
       predictedPelvisFrame = new TranslationReferenceFrame("Predicted Pelvis Frame", predictedCoMFrame);
-      predictedPelvisFrame.updateTranslation(translationToCoM.getVector());
+      predictedPelvisFrame.updateTranslation(translationToCoM);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -276,7 +276,7 @@ public class DynamicReachabilityCalculator
          translationToPelvis.sub(pelvisCenter);
          TranslationReferenceFrame predictedHipFrame = new TranslationReferenceFrame(robotSide.getShortLowerCaseName() + " Predicted Hip Frame",
                predictedPelvisFrame);
-         predictedHipFrame.updateTranslation(translationToPelvis.getVector());
+         predictedHipFrame.updateTranslation(translationToPelvis);
          predictedHipFrames.put(robotSide, predictedHipFrame);
 
          Vector2dZUpFrame stepDirectionFrame = new Vector2dZUpFrame(robotSide.getShortLowerCaseName() + "Step Direction Frame", worldFrame);

@@ -45,7 +45,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
       closestPointToPack.setToZero(referenceFrame);
       normalToPack.setToZero(referenceFrame);
       
-      getGeometryObject().checkIfInside(pointInWorldToCheck.getPoint(), closestPointToPack.getPoint(), normalToPack.getVector());
+      getGeometryObject().checkIfInside(pointInWorldToCheck.getPoint(), closestPointToPack.getPoint(), normalToPack);
    }
    
    /**

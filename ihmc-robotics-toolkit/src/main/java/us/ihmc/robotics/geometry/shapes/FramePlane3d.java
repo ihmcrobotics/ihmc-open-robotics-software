@@ -49,7 +49,7 @@ public class FramePlane3d implements ReferenceFrameHolder
    {
       normal.checkReferenceFrameMatch(point);
       this.referenceFrame = normal.getReferenceFrame();
-      this.plane3d = new Plane3D(point.getPoint(), normal.getVector());
+      this.plane3d = new Plane3D(point.getPoint(), normal);
    }
 
    public FramePlane3d(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly normal)

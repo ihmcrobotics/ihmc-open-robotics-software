@@ -452,7 +452,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          FramePoint3D tempPoint = new FramePoint3D(hand.getParentJoint().getFrameAfterJoint());
          tempPoint.changeFrame(armJoints[1].getFrameAfterJoint());
          FrameVector3D tempVector = new FrameVector3D(tempPoint);
-         EuclidCoreMissingTools.floorToGivenPrecision(tempVector.getVector(), 1.0e-2);
+         EuclidCoreMissingTools.floorToGivenPrecision(tempVector, 1.0e-2);
          tempVector.normalize();
 
          Vector3D expectedArmZeroConfiguration = new Vector3D(0.0, robotSide.negateIfRightSide(1.0), 0.0);
@@ -464,7 +464,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          else
          {
             AxisAngle rotation = new AxisAngle();
-            EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(expectedArmZeroConfiguration, tempVector.getVector(), rotation);
+            EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(expectedArmZeroConfiguration, tempVector, rotation);
             armZeroJointAngleConfigurationOffset.setRotation(rotation);
          }
 

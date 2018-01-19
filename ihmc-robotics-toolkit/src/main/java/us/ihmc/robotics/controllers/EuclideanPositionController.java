@@ -126,7 +126,7 @@ public class EuclideanPositionController implements PositionController
       desiredTwist.getLinearPart(desiredVelocity);
       desiredTwist.getLinearPart(feedForwardLinearAction);
       compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
-      twistToPack.setLinearPart(actionFromPositionController.getVector());
+      twistToPack.setLinearPart(actionFromPositionController);
    }
 
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
@@ -161,7 +161,7 @@ public class EuclideanPositionController implements PositionController
       }
 
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(proportionalTerm.getVector());
+      tempGainMatrix.transform(proportionalTerm);
    }
 
    private void computeDerivativeTerm(FrameVector3D desiredVelocity, FrameVector3D currentVelocity)
@@ -181,7 +181,7 @@ public class EuclideanPositionController implements PositionController
 
       velocityError.set(derivativeTerm);
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(derivativeTerm.getVector());
+      tempGainMatrix.transform(derivativeTerm);
    }
 
    private void computeIntegralTerm()
@@ -205,7 +205,7 @@ public class EuclideanPositionController implements PositionController
 
       integralTerm.set(positionErrorCumulated);
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(integralTerm.getVector());
+      tempGainMatrix.transform(integralTerm);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)

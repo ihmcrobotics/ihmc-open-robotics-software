@@ -87,7 +87,7 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    {
       checkReferenceFrameMatch(firstEndpoint);
       checkReferenceFrameMatch(fromFirstToSecondEndpoint);
-      lineSegment3d.set(firstEndpoint.getPoint(), fromFirstToSecondEndpoint.getVector());
+      lineSegment3d.set(firstEndpoint.getPoint(), fromFirstToSecondEndpoint);
    }
 
    public void setIncludingFrame(FramePoint3D firstEndpoint, FrameVector3D fromFirstToSecondEndpoint)
@@ -136,7 +136,7 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
    public void getDirection(boolean normalize, FrameVector3D directionToPack)
    {
       checkReferenceFrameMatch(directionToPack);
-      lineSegment3d.getDirection(normalize, directionToPack.getVector());
+      lineSegment3d.getDirection(normalize, directionToPack);
    }
 
    public boolean firstEndpointContainsNaN()

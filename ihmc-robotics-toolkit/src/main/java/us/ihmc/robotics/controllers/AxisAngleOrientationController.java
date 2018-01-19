@@ -134,7 +134,7 @@ public class AxisAngleOrientationController
       desiredTwist.getAngularPart(desiredAngularVelocity);
       desiredTwist.getAngularPart(feedForwardAngularAction);
       compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
-      twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
+      twistToPack.setAngularPart(angularActionFromOrientationController);
    }
 
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
@@ -173,7 +173,7 @@ public class AxisAngleOrientationController
       rotationErrorInBody.set(proportionalTerm);
 
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(proportionalTerm.getVector());
+      tempGainMatrix.transform(proportionalTerm);
    }
 
    private void computeDerivativeTerm(FrameVector3D desiredAngularVelocity, FrameVector3D currentAngularVelocity)
@@ -193,7 +193,7 @@ public class AxisAngleOrientationController
 
       velocityError.set(derivativeTerm);
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(derivativeTerm.getVector());
+      tempGainMatrix.transform(derivativeTerm);
    }
 
    private void computeIntegralTerm()
@@ -218,7 +218,7 @@ public class AxisAngleOrientationController
 
       integralTerm.set(rotationErrorCumulated);
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(integralTerm.getVector());
+      tempGainMatrix.transform(integralTerm);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)

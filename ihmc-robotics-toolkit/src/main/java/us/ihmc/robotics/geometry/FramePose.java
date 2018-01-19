@@ -318,7 +318,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
    {
       frameRotationVectorToPack.setToZero(getReferenceFrame());
-      pose.getRotationVector(frameRotationVectorToPack.getVector());
+      pose.getRotationVector(frameRotationVectorToPack);
    }
 
    public void getPose2dIncludingFrame(FramePose2d framePose2dToPack)
@@ -625,7 +625,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       }
       else
       {
-         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPosition(), otherPose.pose.getPosition(), rotationAxis.getVector(), rotationAngle,
+         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPosition(), otherPose.pose.getPosition(), rotationAxis, rotationAngle,
                                                               originToPack.getPoint());
       }
    }

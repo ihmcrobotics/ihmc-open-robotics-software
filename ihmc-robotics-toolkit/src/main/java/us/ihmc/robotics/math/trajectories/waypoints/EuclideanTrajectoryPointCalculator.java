@@ -267,7 +267,7 @@ public class EuclideanTrajectoryPointCalculator
       for (Axis axis : Axis.values)
       {
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
-         firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
+         firstTrajectoryPoint.getLinearVelocity(tempFrameVector);
          double t0 = firstTrajectoryPoint.getTime();
          double z0 = tempFramePoint.getElement(axis.ordinal());
          double zd0 = tempFrameVector.getElement(axis.ordinal());
@@ -277,7 +277,7 @@ public class EuclideanTrajectoryPointCalculator
          double zIntermediate = tempFramePoint.getElement(axis.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
-         thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
+         thirdTrajectoryPoint.getLinearVelocity(tempFrameVector);
          double tf = thirdTrajectoryPoint.getTime();
          double zf = tempFramePoint.getElement(axis.ordinal());
          double zdf = tempFrameVector.getElement(axis.ordinal());
@@ -301,7 +301,7 @@ public class EuclideanTrajectoryPointCalculator
       for (Axis axis : Axis.values)
       {
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
-         firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
+         firstTrajectoryPoint.getLinearVelocity(tempFrameVector);
          double t0 = firstTrajectoryPoint.getTime();
          double z0 = tempFramePoint.getElement(axis.ordinal());
 
@@ -310,7 +310,7 @@ public class EuclideanTrajectoryPointCalculator
          double zIntermediate = tempFramePoint.getElement(axis.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
-         thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
+         thirdTrajectoryPoint.getLinearVelocity(tempFrameVector);
          double tf = thirdTrajectoryPoint.getTime();
          double zf = tempFramePoint.getElement(axis.ordinal());
 

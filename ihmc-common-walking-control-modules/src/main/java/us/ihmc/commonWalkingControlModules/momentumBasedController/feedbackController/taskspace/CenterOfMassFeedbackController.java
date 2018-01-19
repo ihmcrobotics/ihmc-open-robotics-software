@@ -284,7 +284,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
    }
 
    /**
@@ -316,7 +316,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
    }
 
    /**
@@ -351,7 +351,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
    }
 
    @Override

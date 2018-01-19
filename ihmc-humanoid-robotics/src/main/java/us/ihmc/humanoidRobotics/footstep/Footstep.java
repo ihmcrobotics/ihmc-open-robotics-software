@@ -481,7 +481,7 @@ public class Footstep implements Settable<Footstep>
 
    public void addOffset(FrameVector3D offset)
    {
-      footstepPose.prependTranslation(offset.getVector());
+      footstepPose.prependTranslation(offset);
 
       for (int pointIdx = 0; pointIdx < customPositionWaypoints.size(); pointIdx++)
       {
@@ -492,7 +492,7 @@ public class Footstep implements Settable<Footstep>
       {
          FrameSE3TrajectoryPoint trajectoryPoint = swingTrajectory.get(pointIdx);
          trajectoryPoint.getPoseIncludingFrame(tempPose);
-         tempPose.prependTranslation(offset.getVector());
+         tempPose.prependTranslation(offset);
          trajectoryPoint.setPosition(tempPose.getPosition());
       }
    }

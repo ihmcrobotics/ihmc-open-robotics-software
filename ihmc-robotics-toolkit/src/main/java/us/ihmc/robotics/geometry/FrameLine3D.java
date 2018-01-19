@@ -142,7 +142,7 @@ public class FrameLine3D extends FrameGeometryObject<FrameLine3D, Line3D>
    public void setDirection(FrameVector3D lineDirection)
    {
       checkReferenceFrameMatch(lineDirection);
-      line3D.setDirection(lineDirection.getVector());
+      line3D.setDirection(lineDirection);
    }
 
    public void projectOntoXYPlane(Line2D lineToPack)
