@@ -206,8 +206,8 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 
       trajectory.getAngularVelocity(tempAngularVelocity);
       tempAngularVelocity.changeFrame(trajectoryFrame);
-      initialConstraintAngularVelocityError.set(initialAngularVelocity.getVector());
-      initialConstraintAngularVelocityError.sub(tempAngularVelocity.getVector());
+      initialConstraintAngularVelocityError.set(initialAngularVelocity);
+      initialConstraintAngularVelocityError.sub(tempAngularVelocity);
    }
 
    private void computeFinalConstraintError(FrameQuaternion finalOrientation, double finalTime)
@@ -227,8 +227,8 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 
       trajectory.getAngularVelocity(tempAngularVelocity);
       tempAngularVelocity.changeFrame(trajectoryFrame);
-      finalConstraintAngularVelocityError.set(finalAngularVelocity.getVector());
-      finalConstraintAngularVelocityError.sub(tempAngularVelocity.getVector());
+      finalConstraintAngularVelocityError.set(finalAngularVelocity);
+      finalConstraintAngularVelocityError.sub(tempAngularVelocity);
    }
 
    private void computeInitialConstraintTrajectory(double initialTime, double blendDuration)
@@ -243,7 +243,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 
       tempOrientation.set(initialConstraintOrientationError);
       tempAngularVelocity.set(initialConstraintAngularVelocityError);
-      tempTransform.inverseTransform(tempAngularVelocity.getVector());
+      tempTransform.inverseTransform(tempAngularVelocity);
       initialConstraintTrajectory.setInitialConditions(tempOrientation, tempAngularVelocity);
 
       tempOrientation.setToZero();
@@ -264,7 +264,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
 
       tempOrientation.set(finalConstraintOrientationError);
       tempAngularVelocity.set(finalConstraintAngularVelocityError);
-      tempTransform.inverseTransform(tempAngularVelocity.getVector());
+      tempTransform.inverseTransform(tempAngularVelocity);
       finalConstraintTrajectory.setFinalConditions(tempOrientation, tempAngularVelocity);
 
       tempOrientation.setToZero();

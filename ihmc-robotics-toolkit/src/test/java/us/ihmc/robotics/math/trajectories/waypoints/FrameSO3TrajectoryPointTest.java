@@ -133,7 +133,7 @@ public class FrameSO3TrajectoryPointTest
       SimpleSO3TrajectoryPoint expectedSO3TrajectoryPoint = new SimpleSO3TrajectoryPoint();
       expectedSO3TrajectoryPoint.setTime(expectedFinalTime);
       expectedSO3TrajectoryPoint.setOrientation(expectedFinalOrientation);
-      expectedSO3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity.getVector());
+      expectedSO3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity);
 
       testedFrameSO3TrajectoryPoint = new FrameSO3TrajectoryPoint(expectedFinalFrame, expectedSO3TrajectoryPoint);
 
@@ -176,7 +176,7 @@ public class FrameSO3TrajectoryPointTest
       expectedOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, expectedFrame);
       expectedAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFrame);
 
-      testedFrameSO3TrajectoryPoint.set(expectedTime, expectedOrientation, expectedAngularVelocity.getVector());
+      testedFrameSO3TrajectoryPoint.set(expectedTime, expectedOrientation, expectedAngularVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedFrame, expectedTime, expectedOrientation, expectedAngularVelocity, testedFrameSO3TrajectoryPoint,
                                                 epsilon);
@@ -221,7 +221,7 @@ public class FrameSO3TrajectoryPointTest
       SimpleSO3TrajectoryPoint expectedSO3TrajectoryPoint = new SimpleSO3TrajectoryPoint();
       expectedSO3TrajectoryPoint.setTime(expectedFinalTime);
       expectedSO3TrajectoryPoint.setOrientation(expectedFinalOrientation);
-      expectedSO3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity.getVector());
+      expectedSO3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity);
 
       testedFrameSO3TrajectoryPoint.setIncludingFrame(expectedFinalFrame, expectedSO3TrajectoryPoint);
 
@@ -390,7 +390,7 @@ public class FrameSO3TrajectoryPointTest
 
       assertEquals(time, FrameSO3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(quaternionForVerification.epsilonEquals(orientation, 1e-10));
-      assertTrue(angularVelocityForVerification.getVector().epsilonEquals(angularVelocity, 1e-10));
+      assertTrue(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-10));
 
       // Check NaN calls:
       assertFalse(FrameSO3TrajectoryPoint.containsNaN());
@@ -417,7 +417,7 @@ public class FrameSO3TrajectoryPointTest
 
       assertFalse(Math.abs(FrameSO3TrajectoryPoint.getTime() - time) < 1e-7);
       assertFalse(quaternionForVerification.epsilonEquals(orientation, 1e-7));
-      assertFalse(angularVelocityForVerification.getVector().epsilonEquals(angularVelocity, 1e-7));
+      assertFalse(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-7));
 
       FrameSO3TrajectoryPoint.set(time, quaternionForVerification, angularVelocityForVerification);
 
@@ -426,7 +426,7 @@ public class FrameSO3TrajectoryPointTest
 
       assertEquals(time, FrameSO3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(quaternionForVerification.epsilonEquals(orientation, 1e-10));
-      assertTrue(angularVelocityForVerification.getVector().epsilonEquals(angularVelocity, 1e-10));
+      assertTrue(angularVelocityForVerification.epsilonEquals(angularVelocity, 1e-10));
 
       FrameSO3TrajectoryPoint frameSO3TrajectoryPointTwo = new FrameSO3TrajectoryPoint(worldFrame);
       assertFalse(FrameSO3TrajectoryPoint.epsilonEquals(frameSO3TrajectoryPointTwo, 1e-7));

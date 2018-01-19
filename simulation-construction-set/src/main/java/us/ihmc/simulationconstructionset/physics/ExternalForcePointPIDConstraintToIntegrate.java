@@ -42,7 +42,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
       integralForce.setAndScale(integralStiffness.getDoubleValue(), yoConnectionPositionIntegratedError);
 
       connectionPointA.getForce(tempForce);
-      tempForce.add(integralForce.getVector());
+      tempForce.add(integralForce);
 
       connectionPointA.setForce(tempForce);
       tempForce.scale(-1.0);

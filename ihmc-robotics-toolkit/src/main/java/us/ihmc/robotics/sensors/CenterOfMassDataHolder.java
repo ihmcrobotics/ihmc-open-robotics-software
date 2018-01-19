@@ -26,7 +26,7 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
 
    public void calculateChecksum(GenericCRC32 checksum)
    {
-      checksum.update(centerOfMassVelocity.getVector());
+      checksum.update(centerOfMassVelocity);
    }
 
 }

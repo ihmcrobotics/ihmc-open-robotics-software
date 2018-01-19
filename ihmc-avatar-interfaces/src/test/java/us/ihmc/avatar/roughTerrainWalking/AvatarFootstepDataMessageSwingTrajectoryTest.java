@@ -138,7 +138,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          SE3TrajectoryPointMessage waypoint = new SE3TrajectoryPointMessage();
          waypoint.setTime(percentInSwing * swingTime);
          waypoint.setPosition(waypointPosition.getPoint());
-         waypoint.setLinearVelocity(waypointLinearVelocity.getVector());
+         waypoint.setLinearVelocity(waypointLinearVelocity);
          waypoint.setOrientation(waypointOrientation);
 
          Graphics3DObject sphere = new Graphics3DObject();

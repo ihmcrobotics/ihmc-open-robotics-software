@@ -191,7 +191,7 @@ public class FlatGroundContactForceOptimizer
          }
          indexOffset += contactPointsInPlane;
 
-         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultForce.getVector(), resultTorque.getVector());
+         Wrench wrench = new Wrench(planeFrame, ReferenceFrame.getWorldFrame(), resultForce, resultTorque);
          wrenches.add(wrench);
       }
 
@@ -256,7 +256,7 @@ public class FlatGroundContactForceOptimizer
 
          for (int vectorIdx = 0; vectorIdx < vectorsPerPoint; vectorIdx++)
          {
-            unitForce.set(forceVectors.get(contactIdx).get(vectorIdx).getVector());
+            unitForce.set(forceVectors.get(contactIdx).get(vectorIdx));
             unitTorque.cross(unitForce, offset);
 
             J.set(0, contactIdx * vectorsPerPoint + vectorIdx, unitTorque.getX());
@@ -318,7 +318,7 @@ public class FlatGroundContactForceOptimizer
          contactForce.setToZero();
          for (int vectorIdx = 0; vectorIdx < vectorsPerPoint; vectorIdx++)
          {
-            forceVector.set(forceVectors.get(contactIdx).get(vectorIdx).getVector());
+            forceVector.set(forceVectors.get(contactIdx).get(vectorIdx));
             forceVector.scale(x.get(contactIdx * vectorsPerPoint + vectorIdx));
             yoGRFVectors.get(contactIdx).get(vectorIdx).set(forceVector);
 

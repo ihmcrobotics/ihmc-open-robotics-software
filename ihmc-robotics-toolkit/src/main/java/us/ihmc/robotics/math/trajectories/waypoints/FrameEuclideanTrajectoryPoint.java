@@ -218,7 +218,7 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
    public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       checkReferenceFrameMatch(linearVelocityToPack);
-      geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
+      geometryObject.getLinearVelocity(linearVelocityToPack);
    }
 
    public FrameVector3D getLinearVelocityCopy()
@@ -231,7 +231,7 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
    public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
       linearVelocityToPack.setToZero(getReferenceFrame());
-      geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
+      geometryObject.getLinearVelocity(linearVelocityToPack);
    }
 
    public double get(Point3D positionToPack, Vector3D linearVelocityToPack)
