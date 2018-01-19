@@ -15,6 +15,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -69,6 +71,20 @@ public class GuiController
          {
             TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
             if (selectedItem == null || selectedItem.getValue().isRegistry() || mouseEvent.getClickCount() < 2)
+            {
+               return;
+            }
+            Parameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
+            tuningBoxManager.handleNewParameter(parameter);
+         }
+      });
+      tree.setOnKeyPressed(new EventHandler<KeyEvent>()
+      {
+         @Override
+         public void handle(KeyEvent event)
+         {
+            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
+            if (selectedItem == null || selectedItem.getValue().isRegistry() || event.getCode() != KeyCode.ENTER)
             {
                return;
             }
