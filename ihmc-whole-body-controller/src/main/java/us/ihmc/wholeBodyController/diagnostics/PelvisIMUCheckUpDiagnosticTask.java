@@ -330,7 +330,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       double referenceSignalCurrentPosition = meanOfJointVelocities.get(currentAxis).getDoubleValue();
-      double delayedSignalCurrentPosition = imuAngularVelocityInPelvis.get(currentAxis);
+      double delayedSignalCurrentPosition = imuAngularVelocityInPelvis.getElement(currentAxis.ordinal());
       delayEstimator.update(referenceSignalCurrentPosition, delayedSignalCurrentPosition);
 
       if (delayEstimator.isEstimatingDelay())

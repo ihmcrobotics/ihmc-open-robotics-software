@@ -219,7 +219,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
       yoDesiredPose.setAndMatchFrame(desiredPosition, desiredOrientation);
-      yoDesiredRotationVector.setAsRotationVector(yoDesiredPose.getOrientation());
+      yoDesiredPose.getOrientation().get(yoDesiredRotationVector);
       yoDesiredVelocity.setAndMatchFrame(desiredLinearVelocity, desiredAngularVelocity);
 
       if (yoFeedForwardVelocity != null)
@@ -369,7 +369,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentPose.setToZero(controlFrame);
       currentPose.changeFrame(worldFrame);
       yoCurrentPose.set(currentPose);
-      yoCurrentRotationVector.setAsRotationVector(yoCurrentPose.getOrientation());
+      yoCurrentPose.getOrientation().get(yoCurrentRotationVector);
 
       yoDesiredPose.getFramePoseIncludingFrame(desiredPose);
       desiredPose.changeFrame(controlFrame);
