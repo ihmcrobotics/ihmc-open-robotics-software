@@ -223,8 +223,8 @@ public class RigidBodyControlManagerTest
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientation, desiredOrientation, epsilon);
 
-         EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity.getVector(), epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity.getVector(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity, epsilon);
 
          SpatialAccelerationCommand spatialAccelerationCommand = taskspaceCommand.getSpatialAccelerationCommand();
 
@@ -471,8 +471,8 @@ public class RigidBodyControlManagerTest
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientation, desiredOrientation, epsilon);
 
-         EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity.getVector(), epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity.getVector(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity, epsilon);
       }
    }
 

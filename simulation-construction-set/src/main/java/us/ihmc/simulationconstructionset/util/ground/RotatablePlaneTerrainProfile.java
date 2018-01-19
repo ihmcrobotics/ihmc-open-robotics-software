@@ -170,7 +170,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       v1.changeFrame(WORLD_FRAME);
       previousPlane.getNormal(v2);
       
-      v3.add(v1.getVector(), v2.getVector());
+      v3.add(v1, v2);
       v3.scale(-0.5);
 //      
       v3.scale(currentZ - prevZ);
@@ -260,7 +260,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       normalVector.changeFrame(plane.getReferenceFrame());
       plane.getNormal(normalVector);
       normalVector.changeFrame(WORLD_FRAME);
-      previousPlane.setNormal(normalVector.getVector());
+      previousPlane.setNormal(normalVector);
       
       testPoint.changeFrame(plane.getReferenceFrame());
       plane.getPoint(testPoint);

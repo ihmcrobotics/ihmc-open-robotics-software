@@ -229,8 +229,8 @@ public class LegJointLimitAvoidanceControlModule
       }
 
       // calculate the adjusted joint velocities using the alphas, then calculate the adjusted velocities
-      desiredAngularVelocity.getVector().get(0, originalDesiredVelocity);
-      desiredLinearVelocityOfOrigin.getVector().get(3, originalDesiredVelocity);
+      desiredAngularVelocity.get(0, originalDesiredVelocity);
+      desiredLinearVelocityOfOrigin.get(3, originalDesiredVelocity);
       calculateAdjustedVelocities();
       double[] adjustedVelocities = adjustedDesiredVelocity.getData();
 

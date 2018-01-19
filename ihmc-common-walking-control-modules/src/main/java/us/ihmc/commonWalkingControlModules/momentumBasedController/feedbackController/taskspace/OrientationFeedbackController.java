@@ -331,7 +331,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }
@@ -371,7 +371,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }
@@ -419,7 +419,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }

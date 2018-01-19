@@ -131,8 +131,8 @@ public class RobotTools
             rootJointTwist.getAngularPart(angularVelocity);
             linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
             angularVelocity.changeFrame(rootBodyFrame);
-            scsFloatingJoint.setVelocity(linearVelocity.getVector());
-            scsFloatingJoint.setAngularVelocityInBody(angularVelocity.getVector());
+            scsFloatingJoint.setVelocity(linearVelocity);
+            scsFloatingJoint.setAngularVelocityInBody(angularVelocity);
          }
 
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
@@ -167,7 +167,7 @@ public class RobotTools
             scsFloatingJoint.getVelocity(linearVelocity);
             linearVelocity.changeFrame(rootBodyFrame);
             scsFloatingJoint.getAngularVelocity(angularVelocity, rootBodyFrame);
-            rootJointTwist.set(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity.getVector(), angularVelocity.getVector());
+            rootJointTwist.set(rootBodyFrame, elevatorFrame, rootBodyFrame, linearVelocity, angularVelocity);
             idFloatingJoint.setJointTwist(rootJointTwist);
          }
 

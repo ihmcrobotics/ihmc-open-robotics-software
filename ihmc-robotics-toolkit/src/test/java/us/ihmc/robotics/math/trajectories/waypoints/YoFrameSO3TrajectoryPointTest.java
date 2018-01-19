@@ -139,7 +139,7 @@ public class YoFrameSO3TrajectoryPointTest
       expectedOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, expectedFrame);
       expectedAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expectedFrame);
 
-      testedYoFrameSO3TrajectoryPoint.set(expectedTime, expectedOrientation, expectedAngularVelocity.getVector());
+      testedYoFrameSO3TrajectoryPoint.set(expectedTime, expectedOrientation, expectedAngularVelocity);
 
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedOrientation, expectedAngularVelocity,
                                          testedYoFrameSO3TrajectoryPoint, epsilon);

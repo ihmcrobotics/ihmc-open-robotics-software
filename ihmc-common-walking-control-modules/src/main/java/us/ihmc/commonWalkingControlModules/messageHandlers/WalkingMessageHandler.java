@@ -890,6 +890,6 @@ public class WalkingMessageHandler
       comTrajectoryHandler.setPositionOffset(this.planOffsetInWorld);
 
       updateVisualization();
-      statusOutputManager.reportStatusMessage(new PlanOffsetStatus(planOffsetInWorld.getVector()));
+      statusOutputManager.reportStatusMessage(new PlanOffsetStatus(planOffsetInWorld));
    }
 }

@@ -204,7 +204,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
             floatingJoint.getAngularVelocity(angularVelocity, pelvisFrame);
 
-            Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
+            Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity, angularVelocity);
             sixDoFJoint.setJointTwist(bodyTwist);
             sixDoFJoint.updateFramesRecursively();
 
@@ -214,8 +214,8 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             originAcceleration.setToZero(sixDoFJoint.getFrameBeforeJoint());
             angularAcceleration.setToZero(sixDoFJoint.getFrameAfterJoint());
             
-            floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
-            floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+            floatingJoint.getLinearAccelerationInWorld(originAcceleration);
+            floatingJoint.getAngularAccelerationInBody(angularAcceleration);
             originAcceleration.changeFrame(sixDoFJoint.getFrameBeforeJoint());
 
             spatialAccelerationVector.setToZero(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());

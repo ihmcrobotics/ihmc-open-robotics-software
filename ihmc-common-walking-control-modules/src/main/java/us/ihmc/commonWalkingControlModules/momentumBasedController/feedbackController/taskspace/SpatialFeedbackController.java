@@ -398,10 +398,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.changeFrame(controlFrame);
 
       positionGains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(linearFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(linearFeedbackTermToPack);
 
       orientationGains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(angularFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(angularFeedbackTermToPack);
 
       linearFeedbackTermToPack.changeFrame(controlFrame);
       angularFeedbackTermToPack.changeFrame(controlFrame);
@@ -460,10 +460,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.changeFrame(controlFrame);
 
       positionGains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(linearFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(linearFeedbackTermToPack);
 
       orientationGains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(angularFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(angularFeedbackTermToPack);
 
       linearFeedbackTermToPack.changeFrame(controlFrame);
       angularFeedbackTermToPack.changeFrame(controlFrame);
@@ -513,7 +513,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             linearFeedbackTermToPack.changeFrame(controlFrame);
 
          positionGains.getIntegralGainMatrix(tempGainMatrix);
-         tempGainMatrix.transform(linearFeedbackTermToPack.getVector());
+         tempGainMatrix.transform(linearFeedbackTermToPack);
 
          linearFeedbackTermToPack.changeFrame(controlFrame);
       }
@@ -545,7 +545,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             angularFeedbackTermToPack.changeFrame(controlFrame);
 
          orientationGains.getIntegralGainMatrix(tempGainMatrix);
-         tempGainMatrix.transform(angularFeedbackTermToPack.getVector());
+         tempGainMatrix.transform(angularFeedbackTermToPack);
 
          angularFeedbackTermToPack.changeFrame(controlFrame);
       }

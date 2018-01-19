@@ -142,7 +142,7 @@ public class Twist extends SpatialMotionVector
    public void getAngularVelocityInBaseFrame(FrameVector3D vectorToPack)
    {
       vectorToPack.setToZero(baseFrame);
-      getAngularVelocityInBaseFrame(vectorToPack.getVector());
+      getAngularVelocityInBaseFrame(vectorToPack);
    }
 
    /**
@@ -180,7 +180,7 @@ public class Twist extends SpatialMotionVector
    public void getBodyOriginLinearPartInBaseFrame(FrameVector3D linearVelocityAtBodyOriginToPack)
    {
       linearVelocityAtBodyOriginToPack.setToZero(baseFrame);
-      getBodyOriginLinearPartInBaseFrame(linearVelocityAtBodyOriginToPack.getVector());
+      getBodyOriginLinearPartInBaseFrame(linearVelocityAtBodyOriginToPack);
    }
 
    /**

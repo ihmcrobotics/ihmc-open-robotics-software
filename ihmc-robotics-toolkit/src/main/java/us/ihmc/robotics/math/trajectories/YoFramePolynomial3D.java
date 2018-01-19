@@ -153,7 +153,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubic(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      super.setCubic(t0, tFinal, z0.getPoint(), zd0, zFinal.getPoint(), zdFinal);
    }
 
    public void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, FramePoint3D z0, FramePoint3D zFinal, FrameVector3D zdFinal, FrameVector3D zddFinal)
@@ -163,7 +163,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdFinal.checkReferenceFrameMatch(referenceFrame);
       zddFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0.getPoint(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
+      super.setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0.getPoint(), zFinal.getPoint(), zdFinal, zddFinal);
    }
 
    public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zFinal)
@@ -173,7 +173,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdd0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubicThreeInitialConditionsFinalPosition(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zFinal.getPoint());
+      super.setCubicThreeInitialConditionsFinalPosition(t0, tFinal, z0.getPoint(), zd0, zdd0, zFinal.getPoint());
    }
 
    public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdFinal, FrameVector3D zddFinal)
@@ -183,7 +183,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdFinal.checkReferenceFrameMatch(referenceFrame);
       zddFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubicUsingFinalAccelerationButNotFinalPosition(t0, tFinal, z0.getPoint(), zd0.getVector(), zdFinal.getVector(), zddFinal.getVector());
+      super.setCubicUsingFinalAccelerationButNotFinalPosition(t0, tFinal, z0.getPoint(), zd0, zdFinal, zddFinal);
    }
 
    public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate1,
@@ -194,7 +194,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zIntermediate2.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubicUsingIntermediatePoints(t0, tIntermediate1, tIntermediate2, tFinal, z0.getPoint(), zIntermediate1.getPoint(), zIntermediate2.getPoint(), zFinal.getPoint());
+      super.setCubicUsingIntermediatePoints(t0, tIntermediate1, tIntermediate2, tFinal, z0.getPoint(), zIntermediate1.getPoint(), zIntermediate2.getPoint(), zFinal.getPoint());
    }
 
    public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate1, FramePoint3D zFinal)
@@ -203,7 +203,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zIntermediate1.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubicUsingIntermediatePoint(t0, tIntermediate1, tFinal, z0.getPoint(), zIntermediate1.getPoint(), zFinal.getPoint());
+      super.setCubicUsingIntermediatePoint(t0, tIntermediate1, tFinal, z0.getPoint(), zIntermediate1.getPoint(), zFinal.getPoint());
    }
 
    public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, FramePoint3D z0,
@@ -214,7 +214,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubicWithIntermediatePositionAndFinalVelocityConstraint(t0, tIntermediate, tFinal, z0.getPoint(), zIntermediate.getPoint(), zFinal.getPoint(), zdFinal.getVector());
+      super.setCubicWithIntermediatePositionAndFinalVelocityConstraint(t0, tIntermediate, tFinal, z0.getPoint(), zIntermediate.getPoint(), zFinal.getPoint(), zdFinal);
    }
 
    public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0,
@@ -225,7 +225,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zIntermediate.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setCubicWithIntermediatePositionAndInitialVelocityConstraint(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zIntermediate.getPoint(), zFinal.getPoint());
+      super.setCubicWithIntermediatePositionAndInitialVelocityConstraint(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zIntermediate.getPoint(), zFinal.getPoint());
    }
 
    public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal)
@@ -235,7 +235,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setInitialPositionVelocityZeroFinalHighOrderDerivatives(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      super.setInitialPositionVelocityZeroFinalHighOrderDerivatives(t0, tFinal, z0.getPoint(), zd0, zFinal.getPoint(), zdFinal);
    }
 
    public void setLinear(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
@@ -243,7 +243,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       z0.checkReferenceFrameMatch(referenceFrame);
       zf.checkReferenceFrameMatch(referenceFrame);
 
-      setLinear(t0, tFinal, z0.getPoint(), zf.getPoint());
+      super.setLinear(t0, tFinal, z0.getPoint(), zf.getPoint());
    }
 
    public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate0,
@@ -258,8 +258,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zf.checkReferenceFrameMatch(referenceFrame);
       zdf.checkReferenceFrameMatch(referenceFrame);
 
-      setNonic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0.getVector(), zIntermediate0.getPoint(), zdIntermediate0.getVector(),
-               zIntermediate1.getPoint(), zdIntermediate1.getVector(), zf.getPoint(), zdf.getVector());
+      super.setNonic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0, zIntermediate0.getPoint(), zdIntermediate0,
+               zIntermediate1.getPoint(), zdIntermediate1, zf.getPoint(), zdf);
    }
 
    public void setQuadratic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal)
@@ -268,7 +268,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zd0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuadratic(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint());
+      super.setQuadratic(t0, tFinal, z0.getPoint(), zd0, zFinal.getPoint());
    }
 
    public void setQuadraticUsingInitialAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0)
@@ -277,7 +277,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zd0.checkReferenceFrameMatch(referenceFrame);
       zdd0.checkReferenceFrameMatch(referenceFrame);
 
-      setQuadraticUsingInitialAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector());
+      super.setQuadraticUsingInitialAcceleration(t0, tFinal, z0.getPoint(), zd0, zdd0);
    }
 
    public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate, FramePoint3D zFinal)
@@ -286,7 +286,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zIntermediate.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuadraticUsingIntermediatePoint(t0, tIntermediate, tFinal, z0.getPoint(), zIntermediate.getPoint(), zFinal.getPoint());
+      super.setQuadraticUsingIntermediatePoint(t0, tIntermediate, tFinal, z0.getPoint(), zIntermediate.getPoint(), zFinal.getPoint());
    }
 
    public void setQuadraticWithFinalVelocityConstraint(double t0, double tFinal, FramePoint3D z0, FramePoint3D zFinal, FrameVector3D zdFinal)
@@ -295,7 +295,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuadraticWithFinalVelocityConstraint(t0, tFinal, z0.getPoint(), zFinal.getPoint(), zdFinal.getVector());
+      super.setQuadraticWithFinalVelocityConstraint(t0, tFinal, z0.getPoint(), zFinal.getPoint(), zdFinal);
    }
 
    public void setQuartic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zFinal, FrameVector3D zdFinal)
@@ -306,7 +306,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuartic(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      super.setQuartic(t0, tFinal, z0.getPoint(), zd0, zdd0, zFinal.getPoint(), zdFinal);
    }
 
    public void setQuarticUsingFinalAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal, FrameVector3D zddFinal)
@@ -317,7 +317,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdFinal.checkReferenceFrameMatch(referenceFrame);
       zddFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuarticUsingFinalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
+      super.setQuarticUsingFinalAcceleration(t0, tFinal, z0.getPoint(), zd0, zFinal.getPoint(), zdFinal, zddFinal);
    }
 
    public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdIntermediate,
@@ -329,7 +329,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuarticUsingIntermediateVelocity(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      super.setQuarticUsingIntermediateVelocity(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zdIntermediate, zFinal.getPoint(), zdFinal);
    }
 
    public void setQuarticUsingMidPoint(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zMid, FramePoint3D zFinal, FrameVector3D zdFinal)
@@ -340,7 +340,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuarticUsingMidPoint(t0, tFinal, z0.getPoint(), zd0.getVector(), zMid.getPoint(), zFinal.getPoint(), zdFinal.getVector());
+      super.setQuarticUsingMidPoint(t0, tFinal, z0.getPoint(), zd0, zMid.getPoint(), zFinal.getPoint(), zdFinal);
    }
 
    public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0,
@@ -352,8 +352,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdIntermediate1.checkReferenceFrameMatch(referenceFrame);
 
-      setQuarticUsingOneIntermediateVelocity(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zIntermediate0.getPoint(), zIntermediate1.getPoint(),
-                                             zFinal.getPoint(), zdIntermediate1.getVector());
+      super.setQuarticUsingOneIntermediateVelocity(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zIntermediate0.getPoint(), zIntermediate1.getPoint(),
+                                             zFinal.getPoint(), zdIntermediate1);
    }
 
    public void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate, FramePoint3D zf,
@@ -365,7 +365,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zf.checkReferenceFrameMatch(referenceFrame);
       zdf.checkReferenceFrameMatch(referenceFrame);
 
-      setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zIntermediate.getPoint(), zf.getPoint(), zdf.getVector());
+      super.setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zIntermediate.getPoint(), zf.getPoint(), zdf);
    }
 
    public void setQuintic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zf, FrameVector3D zdf, FrameVector3D zddf)
@@ -377,7 +377,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdf.checkReferenceFrameMatch(referenceFrame);
       zddf.checkReferenceFrameMatch(referenceFrame);
 
-      setQuintic(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zf.getPoint(), zdf.getVector(), zddf.getVector());
+      super.setQuintic(t0, tFinal, z0.getPoint(), zd0, zdd0, zf.getPoint(), zdf, zddf);
    }
 
    public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0,
@@ -390,8 +390,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zf.checkReferenceFrameMatch(referenceFrame);
       zdf.checkReferenceFrameMatch(referenceFrame);
 
-      setQuinticTwoWaypoints(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0.getVector(), zIntermediate0.getPoint(), zIntermediate1.getPoint(),
-                             zf.getPoint(), zdf.getVector());
+      super.setQuinticTwoWaypoints(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0, zIntermediate0.getPoint(), zIntermediate1.getPoint(),
+                             zf.getPoint(), zdf);
    }
 
    public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0,
@@ -405,8 +405,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setQuinticUsingIntermediateVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdIntermediate.getVector(),
-                                                         zddIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      super.setQuinticUsingIntermediateVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zdIntermediate,
+                                                         zddIntermediate, zFinal.getPoint(), zdFinal);
    }
 
    public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
@@ -419,7 +419,7 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zf.checkReferenceFrameMatch(referenceFrame);
       zdf.checkReferenceFrameMatch(referenceFrame);
 
-      setQuinticUsingWayPoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zIntermediate.getPoint(), zf.getPoint(), zdf.getVector());
+      super.setQuinticUsingWayPoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zdd0, zIntermediate.getPoint(), zf.getPoint(), zdf);
    }
 
    public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
@@ -432,8 +432,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdIntermediate.checkReferenceFrameMatch(referenceFrame);
       zf.checkReferenceFrameMatch(referenceFrame);
 
-      setQuinticUsingWayPoint2(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zIntermediate.getPoint(),
-                               zdIntermediate.getVector(), zf.getPoint());
+      super.setQuinticUsingWayPoint2(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zdd0, zIntermediate.getPoint(),
+                               zdIntermediate, zf.getPoint());
    }
 
    public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate0,
@@ -448,8 +448,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zf.checkReferenceFrameMatch(referenceFrame);
       zdf.checkReferenceFrameMatch(referenceFrame);
 
-      setSeptic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0.getVector(), zIntermediate0.getPoint(), zdIntermediate0.getVector(),
-                zIntermediate1.getPoint(), zdIntermediate1.getVector(), zf.getPoint(), zdf.getVector());
+      super.setSeptic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0, zIntermediate0.getPoint(), zdIntermediate0,
+                zIntermediate1.getPoint(), zdIntermediate1, zf.getPoint(), zdf);
    }
 
    public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0,
@@ -465,8 +465,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdf.checkReferenceFrameMatch(referenceFrame);
       zddf.checkReferenceFrameMatch(referenceFrame);
 
-      setSepticInitialAndFinalAcceleration(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(),
-                                           zIntermediate0.getPoint(), zIntermediate1.getPoint(), zf.getPoint(), zdf.getVector(), zddf.getVector());
+      super.setSepticInitialAndFinalAcceleration(t0, tIntermediate0, tIntermediate1, tFinal, z0.getPoint(), zd0, zdd0,
+                                           zIntermediate0.getPoint(), zIntermediate1.getPoint(), zf.getPoint(), zdf, zddf);
    }
 
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
@@ -480,8 +480,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zdf.checkReferenceFrameMatch(referenceFrame);
       zddf.checkReferenceFrameMatch(referenceFrame);
 
-      setSexticUsingWaypoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zIntermediate.getPoint(), zf.getPoint(),
-                             zdf.getVector(), zddf.getVector());
+      super.setSexticUsingWaypoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zdd0, zIntermediate.getPoint(), zf.getPoint(),
+                             zdf, zddf);
    }
 
    public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
@@ -495,8 +495,8 @@ public class YoFramePolynomial3D extends YoPolynomial3D
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zdIntermediate.getVector(),
-                                                    zddIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      super.setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getPoint(), zd0, zdd0, zdIntermediate,
+                                                    zddIntermediate, zFinal.getPoint(), zdFinal);
    }
 
 

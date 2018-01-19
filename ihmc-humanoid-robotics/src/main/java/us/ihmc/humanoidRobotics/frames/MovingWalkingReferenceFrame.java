@@ -78,7 +78,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
       linearVelocity.add(linearPelvisVelocity.getX(), 0.0, 0.0);
 
       offset.set(pelvisPosition.getX(), 0.0, 0.0);
-      linearVelocityOffset.cross(angularVelocity.getVector(), offset);
+      linearVelocityOffset.cross(angularVelocity, offset);
 
       linearVelocity.add(linearVelocityOffset);
 
