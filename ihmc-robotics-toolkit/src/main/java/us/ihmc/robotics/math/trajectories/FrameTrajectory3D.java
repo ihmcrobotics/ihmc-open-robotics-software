@@ -7,10 +7,10 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 
 public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHolder
@@ -604,7 +604,7 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
       return Math.max(Math.max(xTrajectory.getNumberOfCoefficients(), yTrajectory.getNumberOfCoefficients()), zTrajectory.getNumberOfCoefficients());
    }
 
-   public void getDerivative(int order, double x, FrameTuple3D<?, ?> dQuantity)
+   public void getDerivative(int order, double x, FrameTuple3DBasics dQuantity)
    {
       dQuantity.setIncludingFrame(referenceFrame, xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x),
                                   zTrajectory.getDerivative(order, x));

@@ -3,13 +3,13 @@ package us.ihmc.robotics.lists;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
-public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends RecyclingArrayList<T>
+public class FrameTuple2dArrayList<T extends FrameTuple2DBasics> extends RecyclingArrayList<T>
 {
    private FrameTuple2dArrayList(Class<T> clazz)
    {

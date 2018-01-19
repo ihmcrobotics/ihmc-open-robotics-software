@@ -2,40 +2,36 @@ package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
-//since they contain YoVariables.
-public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint3D> implements FramePoint3DReadOnly
+public class YoFramePoint extends YoFrameTuple implements FixedFramePoint3DBasics
 {
-   public YoFramePoint(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
+   /** Only for some garbage-free operations and reducing number of operations on the YoDoubles. */
+   private final FramePoint3D framePoint3D = new FramePoint3D();
+
+   public YoFramePoint(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame referenceFrame)
    {
-      this(namePrefix, "", frame, registry);
-   }
-   
-   public YoFramePoint(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
-   {
-      super(namePrefix, nameSuffix, frame, registry);
+      super(xVariable, yVariable, zVariable, referenceFrame);
    }
 
-   public YoFramePoint(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame frame)
+   public YoFramePoint(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super(xVariable, yVariable, zVariable, frame);
+      super(namePrefix, "", referenceFrame, registry);
    }
 
-   protected FramePoint3D createEmptyFrameTuple()
+   public YoFramePoint(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      return new FramePoint3D();
+      super(namePrefix, nameSuffix, referenceFrame, registry);
    }
 
-   /**
-    * Sets this point to the location of the origin of passed in referenceFrame.
-    */
    @Override
-   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   public void setAndMatchFrame(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
-      super.setFromReferenceFrame(referenceFrame);
+      framePoint3D.setIncludingFrame(frameTuple3DReadOnly);
+      framePoint3D.changeFrame(getReferenceFrame());
+      set(framePoint3D);
    }
 }

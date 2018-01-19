@@ -1,70 +1,37 @@
 package us.ihmc.robotics.math.frames;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-// Note: You should only make these once at the initialization of a controller. You shouldn't make
-// any on the fly
-// since they contain YoVariables.
-public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> implements FrameVector3DReadOnly
+public class YoFrameVector extends YoFrameTuple implements FixedFrameVector3DBasics
 {
-   public YoFrameVector(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
+   /** Only for some garbage-free operations and reducing number of operations on the YoDoubles. */
+   private final FrameVector3D frameVector3D = new FrameVector3D();
+
+   public YoFrameVector(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame referenceFrame)
    {
-      this(namePrefix, "", frame, registry);
+      super(xVariable, yVariable, zVariable, referenceFrame);
    }
 
-   public YoFrameVector(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
+   public YoFrameVector(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super(namePrefix, nameSuffix, frame, registry);
+      super(namePrefix, "", referenceFrame, registry);
    }
 
-   public YoFrameVector(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame frame)
+   public YoFrameVector(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super(xVariable, yVariable, zVariable, frame);
+      super(namePrefix, nameSuffix, referenceFrame, registry);
    }
 
-   protected FrameVector3D createEmptyFrameTuple()
+   @Override
+   public void setAndMatchFrame(FrameTuple3DReadOnly frameTuple3DReadOnly)
    {
-      return new FrameVector3D();
-   }
-
-   public void cross(FrameVector3DReadOnly vector1, FrameVector3DReadOnly vector2)
-   {
-      getFrameTuple().cross(vector1, vector2);
-      getYoValuesFromFrameTuple();
-   }
-
-   public void normalize()
-   {
-      getFrameTuple().normalize();
-      getYoValuesFromFrameTuple();
-   }
-
-   private final Vector3D tempVector = new Vector3D();
-
-   public void setAsRotationVector(QuaternionReadOnly quaternion)
-   {
-      quaternion.get(tempVector);
-      set(tempVector);
-   }
-
-   public void setAsRotationVector(FrameQuaternion frameOrientation)
-   {
-      frameOrientation.get(getFrameTuple());
-      getYoValuesFromFrameTuple();
-   }
-
-   public void setAsRotationVector(YoFrameQuaternion yoFrameQuaternion)
-   {
-      FrameVector3D frameTuple = getFrameTuple();
-      yoFrameQuaternion.get(frameTuple);
-      checkReferenceFrameMatch(frameTuple);
-      getYoValuesFromFrameTuple();
+      frameVector3D.setIncludingFrame(frameTuple3DReadOnly);
+      frameVector3D.changeFrame(getReferenceFrame());
+      set(frameVector3D);
    }
 }

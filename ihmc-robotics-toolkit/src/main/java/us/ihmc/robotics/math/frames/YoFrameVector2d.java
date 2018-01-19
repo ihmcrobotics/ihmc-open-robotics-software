@@ -1,57 +1,37 @@
 package us.ihmc.robotics.math.frames;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
-//since they contain YoVariables.
-public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector2D> implements FrameVector2DReadOnly
+public class YoFrameVector2d extends YoFrameTuple2d implements FixedFrameVector2DBasics
 {
-   public YoFrameVector2d(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
+   /** Only for some garbage-free operations and reducing number of operations on the YoDoubles. */
+   private final FrameVector2D frameVector2D = new FrameVector2D();
+
+   public YoFrameVector2d(YoDouble xVariable, YoDouble yVariable, ReferenceFrame referenceFrame)
    {
-      this(namePrefix, "", frame, registry);
+      super(xVariable, yVariable, referenceFrame);
    }
 
-   public YoFrameVector2d(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
+   public YoFrameVector2d(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super(namePrefix, nameSuffix, frame, registry);
+      super(namePrefix, "", referenceFrame, registry);
    }
 
-   public YoFrameVector2d(String namePrefix, String nameSuffix, String description, ReferenceFrame frame, YoVariableRegistry registry)
+   public YoFrameVector2d(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super(namePrefix, nameSuffix, description, frame, registry);
+      super(namePrefix, nameSuffix, referenceFrame, registry);
    }
 
-   public YoFrameVector2d(YoDouble xVariable, YoDouble yVariable, ReferenceFrame frame)
+   @Override
+   public void setAndMatchFrame(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
-      super(xVariable, yVariable, frame);
-   }
-
-   protected FrameVector2D createEmptyFrameTuple2d()
-   {
-      return new FrameVector2D();
-   }
-
-   public double cross(FrameVector2D frameVector)
-   {
-      checkReferenceFrameMatch(frameVector);
-
-      return getFrameTuple2d().cross(frameVector);
-   }
-
-   public double cross(YoFrameVector2d yoFrameVector)
-   {
-      checkReferenceFrameMatch(yoFrameVector);
-
-      return cross(yoFrameVector.getFrameTuple2d());
-   }
-
-   public void normalize()
-   {
-      getFrameTuple2d().normalize();
-      getYoValuesFromFrameTuple2d();
+      frameVector2D.setIncludingFrame(frameTuple2DReadOnly);
+      frameVector2D.changeFrame(getReferenceFrame());
+      set(frameVector2D);
    }
 }
