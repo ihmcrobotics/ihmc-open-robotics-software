@@ -23,7 +23,39 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       root.setExpanded(true);
       setShowRoot(false);
       setRoot(root);
-      registries.stream().forEach(registry -> recursiveAddRegistry(registry, root, hideNamespaces, regex));
+      boolean searching = regex != null && !regex.isEmpty();
+      registries.stream().forEach(registry -> {
+         ParameterTreeValue registryValue = new ParameterTreeRegistry(registry);
+         TreeItem<ParameterTreeValue> registryItem = new TreeItem<>(registryValue);
+         boolean noParameters = registry.getParameters() == null || registry.getParameters().isEmpty();
+         if (!searching && noParameters)
+         {
+            registryItem.setExpanded(true);
+         }
+
+         if (!searching)
+         {
+            if (hideNamespaces)
+            {
+               recursiveAddRegistry(registry, root, hideNamespaces, regex);
+            }
+            else
+            {
+               root.getChildren().add(registryItem);
+               recursiveAddRegistry(registry, registryItem, hideNamespaces, regex);
+            }
+         }
+         else
+         {
+            if (!hideNamespaces && RegularExpression.check(registry.getName(), regex))
+            {
+               root.getChildren().add(registryItem);
+               recursiveAddRegistry(registry, registryItem, hideNamespaces, null);
+            }
+            recursiveAddRegistry(registry, root, hideNamespaces, regex);
+         }
+//         recursiveAddRegistry(registry, root, hideNamespaces, regex);
+      });
 
       root.getChildren().sort(new Comparator<TreeItem<ParameterTreeValue>>()
       {
@@ -87,7 +119,6 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
                }
                recursiveAddRegistry(child, root, hideNamespaces, regex);
             }
-
          }
       }
 
