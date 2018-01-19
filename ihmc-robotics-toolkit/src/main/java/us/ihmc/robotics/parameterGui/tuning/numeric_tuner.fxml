@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import us.ihmc.robotics.parameterGui.tuning.NumericTextField?>
+
+<fx:root type="HBox" spacing="10.0" alignment="CENTER_LEFT"
+	maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="800"
+	xmlns:fx="http://javafx.com/fxml">
+	<children>
+		<Text text="Value" />
+		<NumericTextField fx:id="value" prefWidth="80" />
+		<Text text="Min" />
+		<NumericTextField fx:id="min" prefWidth="80" />
+		<Text text="Max" />
+		<NumericTextField fx:id="max" prefWidth="80" />
+	</children>
+</fx:root>
