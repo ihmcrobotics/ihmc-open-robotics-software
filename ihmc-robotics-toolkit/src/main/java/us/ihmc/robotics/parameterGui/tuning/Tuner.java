@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 
 public class Tuner extends VBox
@@ -42,6 +43,15 @@ public class Tuner extends VBox
       name.setText(parameter.getName());
       description.setText(parameter.getDescription());
       description.textProperty().addListener(observable -> parameter.setDescription(description.getText()));
+
+      switch (parameter.getType())
+      {
+      case "DoubleParameter":
+         getChildren().add(new NumericTuner(parameter));
+         break;
+      default:
+         PrintTools.info("Implement me.");
+      }
    }
 
    public void setCloseHandler(EventHandler<ActionEvent> closeHandler)
