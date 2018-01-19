@@ -498,17 +498,17 @@ public class SkippyController implements RobotController
       /*
        * Foot to hip position vector
        */
-      robot.getHipJoint().getTranslationToWorld(hipToFootInWorld.getVector());
+      robot.getHipJoint().getTranslationToWorld(hipToFootInWorld);
       hipJointPosition.set(hipToFootInWorld);
-      hipToFootPositionVector.sub(footLocation, hipToFootInWorld.getVector());
+      hipToFootPositionVector.sub(footLocation, hipToFootInWorld);
       hipToFootUnitVector.set(hipToFootPositionVector);
       hipToFootUnitVector.normalize();
       /*
        * Shoulder to Foot position vector
        */
-      robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld.getVector());
+      robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld);
       shoulderJointPosition.set(shoulderToFootInWorld);
-      shoulderToFootPositionVector.sub(footLocation, shoulderToFootInWorld.getVector());
+      shoulderToFootPositionVector.sub(footLocation, shoulderToFootInWorld);
       shoulderToFootUnitVector.set(shoulderToFootPositionVector);
       shoulderToFootUnitVector.normalize();
    }

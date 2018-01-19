@@ -349,14 +349,14 @@ public class TwistCalculatorTest
             FrameVector3D expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
 
             expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 1.0e-5);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 1.0e-5);
 
             FrameVector3D expectedAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
             FrameVector3D actualAngularVelocity = new FrameVector3D();
             twistCalculator.getAngularVelocityOfBody(body, actualAngularVelocity);
 
             expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity.getVector(), actualAngularVelocity.getVector(), 1.0e-5);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
          }
       }
    }
@@ -440,7 +440,7 @@ public class TwistCalculatorTest
                                                                                                     baseFrameInFuture, bodyFixedPoint);
 
                expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
-               EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 2.0e-5);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, 2.0e-5);
 
                FrameVector3D expectedAngularVelocity = new FrameVector3D();
                expectedRelativeTwist.getAngularPart(expectedAngularVelocity);
@@ -448,7 +448,7 @@ public class TwistCalculatorTest
                twistCalculator.getRelativeAngularVelocity(base, body, actualAngularVelocity);
 
                expectedAngularVelocity.checkReferenceFrameMatch(actualAngularVelocity);
-               EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity.getVector(), actualAngularVelocity.getVector(), 1.0e-5);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-5);
             }
          }
       }
@@ -535,7 +535,7 @@ public class TwistCalculatorTest
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Vector4D qDot = new Vector4D();
       quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation, bodyOrientationInFuture, 0.5 * dt, qDot);
-      quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation, qDot, bodyAngularVelocity.getVector());
+      quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation, qDot, bodyAngularVelocity);
 
       bodyAngularVelocity.changeFrame(bodyFrame);
       return bodyAngularVelocity;

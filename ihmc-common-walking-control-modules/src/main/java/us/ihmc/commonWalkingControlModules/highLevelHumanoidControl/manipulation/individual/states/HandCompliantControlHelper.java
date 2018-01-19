@@ -150,8 +150,8 @@ public class HandCompliantControlHelper
       linearCorrection.setToZero(controlFrame);
       angularCorrection.setToZero(controlFrame);
 
-      measuredForceAtControlFrame.set(measuredForce.getVector());
-      measuredTorqueAtControlFrame.set(measuredTorque.getVector());
+      measuredForceAtControlFrame.set(measuredForce);
+      measuredTorqueAtControlFrame.set(measuredTorque);
 
       errorForce.setIncludingFrame(controlFrame, desiredForce.getX(), desiredForce.getY(), desiredForce.getZ());
       errorForce.sub(measuredForce);
@@ -280,7 +280,7 @@ public class HandCompliantControlHelper
       desiredPosition.sub(totalLinearCorrection);
 
       totalAngularCorrection.negate();
-      angularDisplacementAsAxisAngle.set(totalAngularCorrection.getVector());
+      angularDisplacementAsAxisAngle.set(totalAngularCorrection);
       angularDisplacementAsMatrix.set(angularDisplacementAsAxisAngle);
       correctedRotationMatrix.set(desiredOrientation);
       correctedRotationMatrix.set(angularDisplacementAsMatrix);

@@ -197,7 +197,7 @@ public class YoParabolicTrajectoryGeneratorTest
 
       double delta = 0.0;
       EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), initialPositionBack.getPoint(), delta);
-      EuclidCoreTestTools.assertTuple3DEquals(initialVelocity.getVector(), initialVelocityBack.getVector(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(initialVelocity, initialVelocityBack, delta);
       EuclidCoreTestTools.assertTuple3DEquals(finalPosition.getPoint(), finalPositionBack.getPoint(), delta);
    }
 }

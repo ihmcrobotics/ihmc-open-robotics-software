@@ -161,7 +161,7 @@ public abstract class SpatialMotionVector implements Clearable
    public void setAngularPart(FrameVector3D newAngularVelocity)
    {
       expressedInFrame.checkReferenceFrameMatch(newAngularVelocity.getReferenceFrame());
-      angularPart.set(newAngularVelocity.getVector());
+      angularPart.set(newAngularVelocity);
    }
 
    /**
@@ -234,7 +234,7 @@ public abstract class SpatialMotionVector implements Clearable
    public void setLinearPart(FrameVector3D newLinearVelocity)
    {
       expressedInFrame.checkReferenceFrameMatch(newLinearVelocity.getReferenceFrame());
-      linearPart.set(newLinearVelocity.getVector());
+      linearPart.set(newLinearVelocity);
    }
 
    /**

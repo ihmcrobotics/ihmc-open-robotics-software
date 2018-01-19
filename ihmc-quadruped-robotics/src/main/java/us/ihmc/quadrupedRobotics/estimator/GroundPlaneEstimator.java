@@ -122,7 +122,7 @@ public class GroundPlaneEstimator
    public void getPlaneNormal(FrameVector3D normal)
    {
       normal.changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlane.getNormal(normal.getVector());
+      groundPlane.getNormal(normal);
    }
 
    /**

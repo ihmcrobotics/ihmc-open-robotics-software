@@ -122,7 +122,7 @@ public class PelvisIMUBasedLinearStateCalculator
       imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput, accelerationBias);
 
       linearAccelerationMeasurement.setToZero(measurementFrame);
-      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
+      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement);
       linearAccelerationMeasurement.sub(accelerationBias);
 
       // Update acceleration in world (minus gravity)
@@ -137,7 +137,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
       // Update acceleration in local frame (minus gravity)
       linearAccelerationMeasurement.setToZero(measurementFrame);
-      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
+      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement);
       linearAccelerationMeasurement.sub(accelerationBias);
 
       if (cancelGravityFromAccelerationMeasurement.getBooleanValue())

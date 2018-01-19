@@ -86,13 +86,13 @@ public class SE3PIDController
       desiredTwist.getAngularPart(desiredAngularVelocity);
       desiredTwist.getAngularPart(feedForwardAngularAction);
       orientationController.compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
-      twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
+      twistToPack.setAngularPart(angularActionFromOrientationController);
 
       desiredPose.getPositionIncludingFrame(desiredPosition);
       desiredTwist.getLinearPart(desiredVelocity);
       desiredTwist.getLinearPart(feedForwardLinearAction);
       positionController.compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
-      twistToPack.setLinearPart(actionFromPositionController.getVector());
+      twistToPack.setLinearPart(actionFromPositionController);
    }
 
    /**
@@ -117,14 +117,14 @@ public class SE3PIDController
       feedForwardAcceleration.getAngularPart(feedForwardAngularAction);
       currentTwist.getAngularPart(currentAngularVelocity);
       orientationController.compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAction);
-      spatialAccelerationToPack.setAngularPart(angularActionFromOrientationController.getVector());
+      spatialAccelerationToPack.setAngularPart(angularActionFromOrientationController);
 
       desiredPose.getPositionIncludingFrame(desiredPosition);
       desiredTwist.getLinearPart(desiredVelocity);
       feedForwardAcceleration.getLinearPart(feedForwardLinearAction);
       currentTwist.getLinearPart(currentVelocity);
       positionController.compute(actionFromPositionController, desiredPosition, desiredVelocity, currentVelocity, feedForwardLinearAction);
-      spatialAccelerationToPack.setLinearPart(actionFromPositionController.getVector());
+      spatialAccelerationToPack.setLinearPart(actionFromPositionController);
    }
 
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)

@@ -314,7 +314,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          feedbackTermToPack.changeFrame(controlFrame);
 
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(controlFrame);
    }
@@ -353,7 +353,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          feedbackTermToPack.changeFrame(controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(controlFrame);
    }
@@ -395,7 +395,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          feedbackTermToPack.changeFrame(controlFrame);
 
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(controlFrame);
    }

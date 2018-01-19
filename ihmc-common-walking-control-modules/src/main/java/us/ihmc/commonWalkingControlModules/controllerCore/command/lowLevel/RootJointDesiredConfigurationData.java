@@ -65,15 +65,15 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    public void setDesiredVelocity(FrameVector3D angularVelocity, FrameVector3D linearVelocity)
    {
       desiredVelocity.reshape(6, 1);
-      angularVelocity.getVector().get(0, desiredVelocity);
-      linearVelocity.getVector().get(3, desiredVelocity);
+      angularVelocity.get(0, desiredVelocity);
+      linearVelocity.get(3, desiredVelocity);
    }
 
    public void setDesiredAcceleration(FrameVector3D angularAcceleration, FrameVector3D linearAcceleration)
    {
       desiredAcceleration.reshape(6, 1);
-      angularAcceleration.getVector().get(0, desiredAcceleration);
-      linearAcceleration.getVector().get(3, desiredAcceleration);
+      angularAcceleration.get(0, desiredAcceleration);
+      linearAcceleration.get(3, desiredAcceleration);
    }
 
    public void setDesiredConfiguration(DenseMatrix64F q)

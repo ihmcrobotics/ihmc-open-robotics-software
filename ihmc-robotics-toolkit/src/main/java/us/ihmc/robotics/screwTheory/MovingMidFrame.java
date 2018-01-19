@@ -123,8 +123,8 @@ public class MovingMidFrame extends MovingReferenceFrame
       angularVelocityOne.scale(integrationDT);
       angularVelocityTwo.scale(integrationDT);
 
-      quaternionFutureOne.set(angularVelocityOne.getVector());
-      quaternionFutureTwo.set(angularVelocityTwo.getVector());
+      quaternionFutureOne.set(angularVelocityOne);
+      quaternionFutureTwo.set(angularVelocityTwo);
 
       quaternionFutureOne.preMultiply(poseOne.getOrientation());
       quaternionFutureTwo.preMultiply(poseTwo.getOrientation());
@@ -132,7 +132,7 @@ public class MovingMidFrame extends MovingReferenceFrame
       quaternionFuture.interpolate(quaternionFutureOne, quaternionFutureTwo, 0.5);
       difference.difference(pose.getOrientation(), quaternionFuture);
       angularVelocity.setToZero(this);
-      difference.get(angularVelocity.getVector());
+      difference.get(angularVelocity);
       angularVelocity.scale(1.0 / integrationDT);
    }
 }

@@ -296,7 +296,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       FrameVector3D tempAngularVelocity = new FrameVector3D(imuSensor.getMeasurementFrame());
-      imuSensor.getAngularVelocityMeasurement(tempAngularVelocity.getVector());
+      imuSensor.getAngularVelocityMeasurement(tempAngularVelocity);
       imuAngularVelocityInPelvis.setAndMatchFrame(tempAngularVelocity);
 
       // Really hackish, but it should work.
