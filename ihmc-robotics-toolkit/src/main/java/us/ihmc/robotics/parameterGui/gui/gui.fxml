@@ -39,7 +39,7 @@
 				</VBox>
 				<ScrollPane>
 					<content>
-						<VBox fx:id="tuningBox" prefWidth="750.0" spacing="10.0" HBox.hgrow="ALWAYS"/>
+						<VBox fx:id="tuningBox" prefWidth="730.0" spacing="10.0" HBox.hgrow="ALWAYS"/>
 					</content>
 				</ScrollPane>
 			</children>
