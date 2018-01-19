@@ -242,7 +242,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
    {
       double footHeading = yaw;
       FramePoint2D footstepPosition = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
-      FramePose2d footstepPose2d = new FramePose2d(WORLD_FRAME, footstepPosition.getPoint(), yaw);
+      FramePose2d footstepPose2d = new FramePose2d(WORLD_FRAME, footstepPosition, yaw);
 
       return createFootstep(currentFootstepSide, footstepPose2d);
    }

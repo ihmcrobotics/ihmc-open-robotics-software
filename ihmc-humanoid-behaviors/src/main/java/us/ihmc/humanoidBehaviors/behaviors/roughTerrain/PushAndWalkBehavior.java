@@ -139,7 +139,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
          if (doubleSupport && shouldWalk && !walking.getBooleanValue())
          {
             Vector2D direction = new Vector2D();
-            direction.sub(capturePoint.getPoint(), desiredCapturePoint.getPoint());
+            direction.sub(capturePoint, desiredCapturePoint);
             direction.normalize();
             takeSteps(direction);
          }

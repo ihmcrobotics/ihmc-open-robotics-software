@@ -381,7 +381,7 @@ public class CapturePointToolsTest
             p2.set(capturePointsToPack.get(i));
             Line2D line = new Line2D(p1, p2);
             p1.set(capturePointsToPack.get(i + 1));
-            boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
+            boolean isPointOnLine = line.isPointOnLine(p1);
             assertTrue(isPointOnLine);
          }
       }
@@ -446,7 +446,7 @@ public class CapturePointToolsTest
             p2.set(capturePointsToPack.get(i));
             Line2D line = new Line2D(p1, p2);
             p1.set(desiredICP);
-            boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
+            boolean isPointOnLine = line.isPointOnLine(p1);
             assertTrue(isPointOnLine);
          }
       }
@@ -543,7 +543,7 @@ public class CapturePointToolsTest
          p2.set(finalDesiredICP);
          Line2D line = new Line2D(p1, p2);
          p1.set(constantCenterOfPressure);
-         boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
+         boolean isPointOnLine = line.isPointOnLine(p1);
          assertTrue(isPointOnLine);
       }
    }

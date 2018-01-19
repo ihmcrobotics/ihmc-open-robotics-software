@@ -197,7 +197,7 @@ public class OneStepCaptureRegionCalculatorTest
       {
          FramePoint2D closestVertex = captureRegion.getClosestVertexCopy(expectedPointsOnBorder.get(i));
          closestVertex.checkReferenceFrameMatch(expectedPointsOnBorder.get(i));
-         EuclidCoreTestTools.assertTuple2DEquals(closestVertex.getPoint(), expectedPointsOnBorder.get(i).getPoint(), 1.0e-6);
+         EuclidCoreTestTools.assertTuple2DEquals(closestVertex, expectedPointsOnBorder.get(i), 1.0e-6);
          assertTrue(closestVertex.epsilonEquals(expectedPointsOnBorder.get(i), 10e-7));
       }
 

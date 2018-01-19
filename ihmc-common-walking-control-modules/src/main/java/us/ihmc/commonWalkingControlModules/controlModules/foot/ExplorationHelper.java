@@ -97,7 +97,7 @@ public class ExplorationHelper
       if (yoDesiredCop != null)
          yoDesiredCop.set(desiredCopInWorld);
 
-      centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
+      centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure);
       commandWeight.set(copCommandWeight.getDoubleValue(), copCommandWeight.getDoubleValue());
       centerOfPressureCommand.setWeight(commandWeight);
    }
