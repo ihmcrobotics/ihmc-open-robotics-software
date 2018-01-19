@@ -56,7 +56,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
       FootstepDataMessage footstep = new FootstepDataMessage();
       footstep.setRobotSide(swingLegSide);
       footstep.setLocation(framePosition.getPoint());
-      footstep.setOrientation(frameOrientation.getQuaternion());
+      footstep.setOrientation(frameOrientation);
 
       return footstep;
    }

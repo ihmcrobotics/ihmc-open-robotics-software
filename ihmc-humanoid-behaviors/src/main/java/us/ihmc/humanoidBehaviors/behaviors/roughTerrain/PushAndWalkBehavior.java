@@ -209,7 +209,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      FootstepDataMessage footstep = new FootstepDataMessage(swingSide, location.getPoint(), orientation.getQuaternion());
+      FootstepDataMessage footstep = new FootstepDataMessage(swingSide, location.getPoint(), orientation);
       footsteps.add(footstep);
       sendPacketToController(footsteps);
    }

@@ -110,7 +110,7 @@ public class WholeBodyTrajectoryToolboxHelper
       FrameQuaternion orientationError = new FrameQuaternion(ReferenceFrame.getWorldFrame(), expected.getOrientation());
       orientationError.changeFrame(solutionRigidBodyFrame);
       Vector3D rotationError = new Vector3D();
-      RotationVectorConversion.convertQuaternionToRotationVector(orientationError.getQuaternion(), rotationError);
+      RotationVectorConversion.convertQuaternionToRotationVector(orientationError, rotationError);
       DenseMatrix64F rotationErrorQ = new DenseMatrix64F(3, 1);
       rotationError.get(rotationErrorQ);
 
@@ -152,7 +152,7 @@ public class WholeBodyTrajectoryToolboxHelper
       FrameQuaternion orientationError = new FrameQuaternion(ReferenceFrame.getWorldFrame(), expected.getOrientation());
       orientationError.changeFrame(solutionRigidBodyFrame);
       Vector3D rotationError = new Vector3D();
-      RotationVectorConversion.convertQuaternionToRotationVector(orientationError.getQuaternion(), rotationError);
+      RotationVectorConversion.convertQuaternionToRotationVector(orientationError, rotationError);
       DenseMatrix64F rotationErrorQ = new DenseMatrix64F(3, 1);
       rotationError.get(rotationErrorQ);
 

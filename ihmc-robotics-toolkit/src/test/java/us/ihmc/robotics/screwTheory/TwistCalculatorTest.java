@@ -534,8 +534,8 @@ public class TwistCalculatorTest
       FrameVector3D bodyAngularVelocity = new FrameVector3D(worldFrame);
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Vector4D qDot = new Vector4D();
-      quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation.getQuaternion(), bodyOrientationInFuture.getQuaternion(), 0.5 * dt, qDot);
-      quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation.getQuaternion(), qDot, bodyAngularVelocity.getVector());
+      quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation, bodyOrientationInFuture, 0.5 * dt, qDot);
+      quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation, qDot, bodyAngularVelocity.getVector());
 
       bodyAngularVelocity.changeFrame(bodyFrame);
       return bodyAngularVelocity;

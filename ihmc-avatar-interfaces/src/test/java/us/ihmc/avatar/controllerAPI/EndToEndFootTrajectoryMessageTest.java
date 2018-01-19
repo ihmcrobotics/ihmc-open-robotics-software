@@ -471,7 +471,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       Quaternion currentDesiredOrientation = findQuat4d(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
 
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), currentDesiredPosition, 0.001);
-      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), currentDesiredOrientation, 0.001);
+      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), currentDesiredOrientation, 0.001);
       
       drcSimulationTestHelper.createVideo(robotModel.getSimpleRobotName(), 2);
    }

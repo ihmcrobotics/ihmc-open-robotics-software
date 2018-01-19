@@ -137,7 +137,7 @@ public class JMEDataTypeUtils
    public static void packFrameOrientationInJMEQuaternion(FrameQuaternion original, Quaternion target)
    {
       us.ihmc.euclid.tuple4D.Quaternion quat4d = new us.ihmc.euclid.tuple4D.Quaternion();
-      packVectMathQuat4dInJMEQuaternion(original.getQuaternion(), target);
+      packVectMathQuat4dInJMEQuaternion(original, target);
    }
 
    public static void packFramePoseInJMEQuaternion(FramePose original, Quaternion target)

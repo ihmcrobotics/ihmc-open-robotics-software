@@ -2032,7 +2032,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       FrameQuaternion desiredPelvisOrientation = new FrameQuaternion(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      Quaternion desiredQuaternion = new Quaternion(desiredPelvisOrientation.getQuaternion());
+      Quaternion desiredQuaternion = new Quaternion(desiredPelvisOrientation);
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
       PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, pelvisOrientationTrajectoryBehavior);
 

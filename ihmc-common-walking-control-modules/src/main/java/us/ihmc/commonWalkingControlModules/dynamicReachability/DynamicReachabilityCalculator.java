@@ -259,7 +259,7 @@ public class DynamicReachabilityCalculator
             predictedCoMPosition.changeFrame(worldFrame);
             predictedPelvisOrientation.changeFrame(worldFrame);
             transformToParent.setTranslation(predictedCoMPosition.getPoint());
-            transformToParent.setRotation(predictedPelvisOrientation.getQuaternion());
+            transformToParent.setRotation(predictedPelvisOrientation);
          }
       };
 

@@ -139,7 +139,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          waypoint.setTime(percentInSwing * swingTime);
          waypoint.setPosition(waypointPosition.getPoint());
          waypoint.setLinearVelocity(waypointLinearVelocity.getVector());
-         waypoint.setOrientation(waypointOrientation.getQuaternion());
+         waypoint.setOrientation(waypointOrientation);
 
          Graphics3DObject sphere = new Graphics3DObject();
          sphere.translate(waypointPosition.getPoint());
@@ -152,7 +152,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       footPosition.changeFrame(worldFrame);
       footOrientation.changeFrame(worldFrame);
       footstep.setLocation(footPosition.getPoint());
-      footstep.setOrientation(footOrientation.getQuaternion());
+      footstep.setOrientation(footOrientation);
       footstep.setSwingTrajectory(waypoints);
 
       footstepDataList.add(footstep);

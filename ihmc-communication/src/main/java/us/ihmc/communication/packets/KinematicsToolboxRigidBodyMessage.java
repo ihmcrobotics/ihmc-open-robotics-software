@@ -252,7 +252,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void setDesiredOrientation(FrameQuaternion desiredOrientation)
    {
       desiredOrientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredOrientation(desiredOrientation.getQuaternion());
+      setDesiredOrientation(desiredOrientation);
    }
 
    /**
