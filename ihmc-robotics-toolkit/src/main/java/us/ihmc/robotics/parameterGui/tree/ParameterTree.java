@@ -39,9 +39,8 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       else
       {
          addRecursive(registries, root);
+         root.expandChildrenIfEmpty();
       }
-
-      root.expandChildrenIfEmpty();
    }
 
    private static void sortChildren(ParameterTreeItem item)
