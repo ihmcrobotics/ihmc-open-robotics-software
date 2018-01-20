@@ -5,6 +5,8 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -183,7 +185,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final Vector3D tempVector = new Vector3D();
    private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   public void setInitialLeadOut(FramePoint3D initialPosition, FrameVector3D initialDirection, double leaveDistance)
+   public void setInitialLeadOut(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialDirection, double leaveDistance)
    {
       this.initialPosition.set(initialPosition);
       this.initialDirection.set(initialDirection);
@@ -198,7 +200,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.leaveDistance.set(leaveDistance);
    }
 
-   public void setFinalLeadIn(FramePoint3D finalPosition, FrameVector3D finalDirection, double approachDistance)
+   public void setFinalLeadIn(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalDirection, double approachDistance)
    {
       this.finalPosition.set(finalPosition);
       this.finalDirection.set(finalDirection);

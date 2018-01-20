@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -76,12 +77,12 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
       parentRegistry.addChild(registry);
    }
 
-   public void setInitialOrientation(FrameQuaternion initialOrientation)
+   public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
       this.initialOrientation.setAndMatchFrame(initialOrientation);
    }
 
-   public void setFinalOrientation(FrameQuaternion finalOrientation)
+   public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
       this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
