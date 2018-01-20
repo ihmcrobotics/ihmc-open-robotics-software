@@ -24,7 +24,7 @@ public class ChangeableConfigurationProvider implements SE3ConfigurationProvider
 
    public void get(FramePose framePose)
    {
-      framePose.setPoseIncludingFrame(configuration);
+      framePose.setIncludingFrame(configuration);
    }
 
    public void getPosition(FramePoint3D positionToPack)
@@ -39,7 +39,7 @@ public class ChangeableConfigurationProvider implements SE3ConfigurationProvider
 
    public void set(FramePose newPose)
    {
-      configuration.setPoseIncludingFrame(newPose);
+      configuration.setIncludingFrame(newPose);
    }
 
 }

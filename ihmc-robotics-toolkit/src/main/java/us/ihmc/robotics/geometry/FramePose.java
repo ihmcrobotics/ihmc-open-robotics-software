@@ -133,12 +133,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.set(transform);
    }
 
-   public void setPoseIncludingFrame(FramePose framePose)
-   {
-      pose.set(framePose.pose);
-      referenceFrame = framePose.referenceFrame;
-   }
-
    public void setPoseIncludingFrame(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       position.checkReferenceFrameMatch(orientation);

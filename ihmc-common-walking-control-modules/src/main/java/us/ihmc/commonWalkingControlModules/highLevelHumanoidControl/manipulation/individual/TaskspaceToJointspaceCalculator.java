@@ -407,7 +407,7 @@ public class TaskspaceToJointspaceCalculator
    {
       jacobian.compute();
 
-      desiredControlFramePose.setPoseIncludingFrame(desiredPose);
+      desiredControlFramePose.setIncludingFrame(desiredPose);
       desiredControlFrameTwist.set(desiredTwist);
       computeJointAnglesAndVelocities(desiredControlFramePose, desiredControlFrameTwist);
    }
