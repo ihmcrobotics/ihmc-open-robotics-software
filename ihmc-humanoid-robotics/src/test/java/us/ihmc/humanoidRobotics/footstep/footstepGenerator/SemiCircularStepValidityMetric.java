@@ -118,10 +118,8 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       stance.getPose(stancePose);
       FramePose swingEndPose = new FramePose();
       swingEnd.getPose(swingEndPose);
-      FrameOrientation2D stanceOrientation = new FrameOrientation2D();
-      FrameOrientation2D swingOrientation = new FrameOrientation2D();
-      stancePose.getOrientation(stanceOrientation);
-      swingEndPose.getOrientation(swingOrientation);
+      FrameOrientation2D stanceOrientation = new FrameOrientation2D(stancePose.getOrientation());
+      FrameOrientation2D swingOrientation = new FrameOrientation2D(swingEndPose.getOrientation());
       double yawDifference = swingOrientation.difference(stanceOrientation);
       double allowedDifference = (Math.abs(yawDifference) - footTwistLimitInRadians) - 3e-16;
       if (allowedDifference > 0)
