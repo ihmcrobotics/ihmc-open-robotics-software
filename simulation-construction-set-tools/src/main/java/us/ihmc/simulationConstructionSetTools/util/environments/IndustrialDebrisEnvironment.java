@@ -86,7 +86,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisPose.getPose(debrisTransform );
       TransformTools.appendRotation(debrisTransform, -debrisRoll, Axis.X);
-      debrisPose.setPose(debrisTransform);
+      debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
 
@@ -130,7 +130,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisPose.getPose(debrisTransform );
       TransformTools.appendRotation(debrisTransform, -debrisPitch, Axis.Y);
-      debrisPose.setPose(debrisTransform);
+      debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
       

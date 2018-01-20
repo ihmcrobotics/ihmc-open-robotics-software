@@ -308,7 +308,7 @@ public abstract class DRCWalkToGoalWithPlanningBehaviorTest implements MultiRobo
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
       FramePose ret = new FramePose();
-      ret.setPose(ankleTransformToWorld);
+      ret.set(ankleTransformToWorld);
 
       return ret;
    }

@@ -285,7 +285,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisCorrector.doControl(timeStamp);
          pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
 
-         correctedPelvisverify.setPose(pelvisAfterCorrection);
+         correctedPelvisverify.set(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
 
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
@@ -364,7 +364,7 @@ public class NewPelvisPoseHistoryCorrectionTest
             checkPacketHasBeenSentNextLoopIteration = true;
          }
 
-         correctedPelvisverify.setPose(pelvisAfterCorrection);
+         correctedPelvisverify.set(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
 
          simulationConstructionSet.tickAndUpdate();

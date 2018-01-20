@@ -334,7 +334,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       //Translation
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
       stateEstimatorTransform_Translation.setRotationToZero();
-      stateEstimatorPose_Translation.setPose(stateEstimatorTransform_Translation);
+      stateEstimatorPose_Translation.set(stateEstimatorTransform_Translation);
       stateEstimatorReferenceFrame_Translation.setPoseAndUpdate(stateEstimatorPose_Translation);
       
       startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Translation);
@@ -365,7 +365,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       //Rotation  
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
       stateEstimatorTransform_Rotation.setTranslationToZero();
-      stateEstimatorPose_Rotation.setPose(stateEstimatorTransform_Rotation);
+      stateEstimatorPose_Rotation.set(stateEstimatorTransform_Rotation);
       stateEstimatorReferenceFrame_Rotation.setPoseAndUpdate(stateEstimatorPose_Rotation);
 
       startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);

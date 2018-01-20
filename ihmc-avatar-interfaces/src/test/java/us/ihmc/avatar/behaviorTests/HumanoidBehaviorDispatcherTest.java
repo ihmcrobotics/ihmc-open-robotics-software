@@ -528,7 +528,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
       FramePose ret = new FramePose();
-      ret.setPose(ankleTransformToWorld);
+      ret.set(ankleTransformToWorld);
 
       return ret;
    }

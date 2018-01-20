@@ -81,7 +81,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       originalButtonTransform = new RigidBodyTransform(rootJointTransform); 
       
       // Initialize original button pose to rootJointTransform
-      buttonPoseInWorld.setPose(originalButtonTransform);
+      buttonPoseInWorld.set(originalButtonTransform);
       
       // Create a new reference frame attached to the button
       buttonFrame =  new PoseReferenceFrame("buttonFrame", buttonPoseInWorld);

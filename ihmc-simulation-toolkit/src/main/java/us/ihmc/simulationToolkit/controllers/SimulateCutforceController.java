@@ -148,12 +148,12 @@ public class SimulateCutforceController implements RobotController
    public void doControl()
    {
       wristJoint.getTransformToWorld(transform);
-      wristJointPose.setPose(transform);
+      wristJointPose.set(transform);
       yoWristJointPose.set(wristJointPose);
 
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
-      handControlFramePose.setPose(transform);
+      handControlFramePose.set(transform);
       handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose.set(handControlFramePose);
       handControlFramePose.getPosition(handControlFramePositionInWorld);

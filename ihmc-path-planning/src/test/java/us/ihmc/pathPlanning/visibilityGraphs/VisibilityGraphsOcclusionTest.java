@@ -284,7 +284,7 @@ public class VisibilityGraphsOcclusionTest
                   throw new RuntimeException("Increase max number of vertices for visualization.");
                }
                planarRegion.getTransformToWorld(transformToWorld);
-               pose.setPose(transformToWorld);
+               pose.set(transformToWorld);
                visiblePolygonPoses.get(polygonIdx).set(pose);
                visiblePolygons.get(polygonIdx).setConvexPolygon2d(planarRegion.getConvexHull());
             }

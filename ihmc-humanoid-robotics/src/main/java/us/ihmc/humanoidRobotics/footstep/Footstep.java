@@ -301,7 +301,7 @@ public class Footstep implements Settable<Footstep>
    public void setPose(RigidBodyTransform transformFromSoleToWorldFrame)
    {
       footstepPose.setToNaN(ReferenceFrame.getWorldFrame());
-      footstepPose.setPose(transformFromSoleToWorldFrame);
+      footstepPose.set(transformFromSoleToWorldFrame);
    }
 
    public void setPose(FramePose footstepPose)
