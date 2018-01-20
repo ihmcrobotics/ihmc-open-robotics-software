@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -145,9 +144,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private void setOrientationFromPoseToPose(YoFrameOrientation frameOrientationToPack, FramePose fromPose, FramePose toPose)
    {
-      FrameQuaternion toOrientation = toPose.getFrameOrientationCopy();
-      FrameQuaternion fromOrientation = fromPose.getFrameOrientationCopy();
-      frameOrientationToPack.getFrameOrientation().difference(toOrientation, fromOrientation);
+      frameOrientationToPack.getFrameOrientation().difference(toPose.getOrientation(), fromPose.getOrientation());
    }
 
    private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose fromPose, FramePose toPose)

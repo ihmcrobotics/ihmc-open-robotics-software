@@ -50,7 +50,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       initialFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       stanceFootPositionInWorld = new Point3D32(initialFramePoint);
 
-      FrameQuaternion initialFrameOrientation = initialStanceFootPose.getFrameOrientationCopy();
+      FrameQuaternion initialFrameOrientation = new FrameQuaternion(initialStanceFootPose.getOrientation());
       initialFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       stanceFootOrientationInWorld = new Quaternion32(initialFrameOrientation);
 
@@ -58,7 +58,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goalFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       goalPositionInWorld = new Point3D32(goalFramePoint);
 
-      FrameQuaternion goalFrameOrientation = goalPose.getFrameOrientationCopy();
+      FrameQuaternion goalFrameOrientation = new FrameQuaternion(goalPose.getOrientation());
       goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       goalOrientationInWorld = new Quaternion32(goalFrameOrientation);
 
