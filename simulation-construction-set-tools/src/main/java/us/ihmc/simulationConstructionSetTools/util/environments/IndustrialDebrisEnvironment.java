@@ -84,7 +84,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       debrisRobots.add(createDebrisRobot(debrisPose));
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
-      debrisPose.getPose(debrisTransform );
+      debrisPose.get(debrisTransform );
       TransformTools.appendRotation(debrisTransform, -debrisRoll, Axis.X);
       debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
@@ -100,7 +100,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       firstSupportPose.setPosition(x, y, z);
       firstSupportPose.changeFrame(constructionWorldFrame);
       RigidBodyTransform firstSupportTransform = new RigidBodyTransform();
-      firstSupportPose.getPose(firstSupportTransform);
+      firstSupportPose.get(firstSupportTransform);
       combinedTerrainObject.addRotatableBox(firstSupportTransform, supportLength, supportWidth, supportHeight, YoAppearance.AliceBlue());
 
       //add second support
@@ -113,7 +113,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       secondSupportPose.setPosition(x, y, z);
       secondSupportPose.changeFrame(constructionWorldFrame);
       RigidBodyTransform secondSupportTransform = new RigidBodyTransform();
-      secondSupportPose.getPose(secondSupportTransform);
+      secondSupportPose.get(secondSupportTransform);
       combinedTerrainObject.addRotatableBox(secondSupportTransform, supportLength, supportWidth, supportHeight, YoAppearance.AliceBlue());
    }
 
@@ -128,7 +128,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       double supportHeight = 1.05*debrisLength;
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
-      debrisPose.getPose(debrisTransform );
+      debrisPose.get(debrisTransform );
       TransformTools.appendRotation(debrisTransform, -debrisPitch, Axis.Y);
       debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
@@ -144,7 +144,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       supportPose.changeFrame(constructionWorldFrame);
     
       RigidBodyTransform supportTransform = new RigidBodyTransform();
-      supportPose.getPose(supportTransform);
+      supportPose.get(supportTransform);
       combinedTerrainObject.addRotatableBox(supportTransform, supportWidth, supportLength, supportHeight, YoAppearance.AliceBlue());
    }
 

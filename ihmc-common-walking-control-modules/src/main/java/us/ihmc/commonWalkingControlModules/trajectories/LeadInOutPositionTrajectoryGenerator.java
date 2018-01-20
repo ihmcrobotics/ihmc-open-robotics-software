@@ -107,7 +107,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             currentDistortionPose.changeFrame(parentFrame);
-            currentDistortionPose.getPose(transformToParent);
+            currentDistortionPose.get(transformToParent);
          }
       };
 

@@ -123,7 +123,7 @@ public class FootSpoof implements ContactablePlaneBody
       newSolePoseInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       RigidBodyTransform transformFromSoleToWorld = new RigidBodyTransform();
-      newSolePoseInWorldFrame.getPose(transformFromSoleToWorld);
+      newSolePoseInWorldFrame.get(transformFromSoleToWorld);
 
       RigidBodyTransform transformFromShinToWorld = new RigidBodyTransform();
       transformFromShinToWorld.set(transformFromSoleToWorld);

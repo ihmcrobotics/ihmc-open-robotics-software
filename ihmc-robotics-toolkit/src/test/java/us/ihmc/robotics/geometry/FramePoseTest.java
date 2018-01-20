@@ -116,11 +116,11 @@ public class FramePoseTest
          double radiusForRotation =  random.nextDouble();
          
          RigidBodyTransform transformFromWorldToA1 = new RigidBodyTransform();
-         framePose1.getPose(transformFromWorldToA1);
+         framePose1.get(transformFromWorldToA1);
          transformFromWorldToA1.invert();
          
          RigidBodyTransform transformFromWorldToA2 = new RigidBodyTransform();
-         framePose2.getPose(transformFromWorldToA2);
+         framePose2.get(transformFromWorldToA2);
          transformFromWorldToA2.invert();
          
          //RigidBodyTransform transformA2toA1 = TransformTools.getTransformFromA2toA1(transformFromWorldToA1, transformFromWorldToA2);
@@ -136,14 +136,14 @@ public class FramePoseTest
          ReferenceFrame framePose1Frame ;
          {
             RigidBodyTransform transform = new RigidBodyTransform();
-            framePose1.getPose(transform);
+            framePose1.get(transform);
             transform.invert();
             framePose1Frame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("frame1", ReferenceFrame.getWorldFrame(), transform);
          }
                
          framePose2.changeFrame(framePose1Frame);
          RigidBodyTransform transform = new RigidBodyTransform();
-         framePose2.getPose(transform);
+         framePose2.get(transform);
          AxisAngle axisAngle = new AxisAngle();
          transform.getRotation(axisAngle);
          double rotation = Math.abs(axisAngle.getAngle());

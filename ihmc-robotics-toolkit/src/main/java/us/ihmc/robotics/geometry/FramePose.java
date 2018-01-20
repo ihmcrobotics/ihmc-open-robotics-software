@@ -221,7 +221,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       getOrientation(axisAngleToPack);
    }
 
-   public void getPose(RigidBodyTransform transformToPack)
+   public void get(RigidBodyTransform transformToPack)
    {
       pose.get(transformToPack);
    }
@@ -573,10 +573,10 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       checkReferenceFrameMatch(thatPose);
 
       RigidBodyTransform transformToThis = new RigidBodyTransform();
-      this.getPose(transformToThis);
+      this.get(transformToThis);
 
       RigidBodyTransform transformToThat = new RigidBodyTransform();
-      thatPose.getPose(transformToThat);
+      thatPose.get(transformToThat);
 
       return TransformTools.getTransformFromA2toA1(transformToThat, transformToThis);
    }
@@ -643,11 +643,11 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       checkReferenceFrameMatch(framePose);
 
       RigidBodyTransform transformThis = new RigidBodyTransform();
-      this.getPose(transformThis);
+      this.get(transformThis);
       transformThis.invert();
 
       RigidBodyTransform transformThat = new RigidBodyTransform();
-      framePose.getPose(transformThat);
+      framePose.get(transformThat);
       transformThat.invert();
 
       return TransformTools.getSizeOfTransformBetweenTwoWithRotationScaled(transformThis, transformThat, radiusOfRotation);

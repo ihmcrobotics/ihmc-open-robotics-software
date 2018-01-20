@@ -259,7 +259,7 @@ public class PoseReferenceFrame extends ReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       originPose.checkReferenceFrameMatch(parentFrame);
-      originPose.getPose(transformToParent);
+      originPose.get(transformToParent);
    }
 
    @Override

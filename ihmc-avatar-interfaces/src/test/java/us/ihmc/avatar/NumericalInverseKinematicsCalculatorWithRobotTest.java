@@ -322,7 +322,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       RigidBodyTransform transform = new RigidBodyTransform();
 
-      handPose.getPose(transform);
+      handPose.get(transform);
 
       createInitialGuess(random, initialGuessForTests);
 

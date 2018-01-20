@@ -49,7 +49,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
       pose.setToZero(midFootZUpGroundFrame);
       pose.setX(pelvisPosition.getX());
       pose.changeFrame(parentFrame);
-      pose.getPose(transformToParent);
+      pose.get(transformToParent);
    }
 
    private final FrameVector3D linearPelvisVelocity = new FrameVector3D();

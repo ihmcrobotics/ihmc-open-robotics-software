@@ -360,7 +360,7 @@ public class TaskspaceHandControlState extends HandControlState
       if (oldControlFrame == newControlFrame)
          return;
 
-      framePoseToModify.getPose(oldTrackingFrameDesiredTransform);
+      framePoseToModify.get(oldTrackingFrameDesiredTransform);
       newControlFrame.getTransformToDesiredFrame(transformFromNewTrackingFrameToOldTrackingFrame, oldControlFrame);
       newTrackingFrameDesiredTransform.set(oldTrackingFrameDesiredTransform);
       newTrackingFrameDesiredTransform.multiply(transformFromNewTrackingFrameToOldTrackingFrame);

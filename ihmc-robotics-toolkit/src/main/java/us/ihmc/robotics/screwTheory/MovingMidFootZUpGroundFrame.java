@@ -39,7 +39,7 @@ public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
       pose.setToZero(parentFrame);
       pose.interpolate(poseOne, poseTwo, 0.5);
       pose.setZ(Math.min(poseOne.getZ(), poseTwo.getZ()));
-      pose.getPose(transformToParent);
+      pose.get(transformToParent);
    }
 
    @Override

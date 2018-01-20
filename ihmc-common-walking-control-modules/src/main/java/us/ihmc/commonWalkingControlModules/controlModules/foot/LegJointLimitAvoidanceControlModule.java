@@ -188,7 +188,7 @@ public class LegJointLimitAvoidanceControlModule
       originalDesiredPose.changeFrame(jacobian.getBaseFrame());
 
       //    originalDesiredPose.translate(linearRootJointVelocity.getX(), linearRootJointVelocity.getY(), linearRootJointVelocity.getZ());
-      originalDesiredPose.getPose(desiredTransform);
+      originalDesiredPose.get(desiredTransform);
       originalDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       //    if (translationFixOnly){
