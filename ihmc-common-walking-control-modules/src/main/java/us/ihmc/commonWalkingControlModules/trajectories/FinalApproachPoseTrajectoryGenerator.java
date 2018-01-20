@@ -72,7 +72,7 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
 
    public void setInitialPose(FramePose initialPose)
    {
-      initialPose.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(initialPose.getPosition());
       initialPose.getOrientation(tempOrientation);
       positionTrajectoryGenerator.setInitialPosition(tempPosition);
       orientationTrajectoryGenerator.setInitialOrientation(tempOrientation);
@@ -80,7 +80,7 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
 
    public void setFinalPose(FramePose finalPose)
    {
-      finalPose.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(finalPose.getPosition());
       finalPose.getOrientation(tempOrientation);
       positionTrajectoryGenerator.setFinalPosition(tempPosition);
       orientationTrajectoryGenerator.setFinalOrientation(tempOrientation);

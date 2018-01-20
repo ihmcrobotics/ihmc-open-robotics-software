@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -311,18 +310,13 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void get(FramePoint3DBasics framePointToPack, FrameQuaternionBasics orientationToPack)
    {
-      getPosition(framePointToPack);
+      framePointToPack.setIncludingFrame(positionPart);
       getOrientation(orientationToPack);
    }
 
    public FixedFramePoint3DBasics getPosition()
    {
       return positionPart;
-   }
-
-   public void getPosition(FrameTuple3DBasics frameTupleToPack)
-   {
-      frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPosition());
    }
 
    public FixedFrameQuaternionBasics getOrientation()

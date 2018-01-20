@@ -207,7 +207,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getPositionIncludingFrame(FramePoint3D framePointToPack)
    {
-      originPose.getPosition(framePointToPack);
+      framePointToPack.setIncludingFrame(originPose.getPosition());
    }
    
    public QuaternionReadOnly getOrientation()

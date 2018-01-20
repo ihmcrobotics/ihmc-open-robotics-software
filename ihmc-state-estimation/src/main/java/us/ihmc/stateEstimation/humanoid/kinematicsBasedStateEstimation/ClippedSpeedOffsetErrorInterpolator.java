@@ -269,7 +269,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       correctedPelvisPoseReferenceFrame.setPoseAndUpdate(correctedPelvisPoseInWorldFrame);
       
       iterativeClosestPointInWorldFramePose.getOrientation(iterativeClosestPointOrientation);
-      iterativeClosestPointInWorldFramePose.getPosition(iterativeClosestPointTranslation);
+      iterativeClosestPointTranslation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getPosition());
       
       iterativeClosestPointOrientation.changeFrame(correctedPelvisPoseReferenceFrame);
       iterativeClosestPointTranslation.changeFrame(correctedPelvisPoseReferenceFrame);

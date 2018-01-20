@@ -576,7 +576,7 @@ public class SwingState extends AbstractUnconstrainedState
       // change pose
       desiredPose.setToZero(desiredControlFrame);
       desiredPose.changeFrame(worldFrame);
-      desiredPose.getPosition(desiredPosition);
+      desiredPosition.setIncludingFrame(desiredPose.getPosition());
       desiredPose.getOrientation(desiredOrientation);
 
       // change twist
