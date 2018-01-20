@@ -411,8 +411,8 @@ public class TransformInterpolationCalculatorTest
          transform1.set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          transform2.set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
-         framePose1.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform1);
-         framePose2.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform2);
+         framePose1.setIncludingFrame(ReferenceFrame.getWorldFrame(), transform1);
+         framePose2.setIncludingFrame(ReferenceFrame.getWorldFrame(), transform2);
 
          double alpha = RandomNumbers.nextDouble(random, 0.0, 1.0);
          transformInterpolationCalculator.computeInterpolation(transform1, transform2, toTestTransform, alpha);

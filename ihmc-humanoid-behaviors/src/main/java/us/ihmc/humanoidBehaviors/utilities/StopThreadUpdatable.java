@@ -90,7 +90,7 @@ public abstract class StopThreadUpdatable implements Updatable
 
    public void getCurrentTestFramePose(FramePose poseToPack)
    {
-      poseToPack.setPoseIncludingFrame(worldFrame, getCurrentTestFrameTransformToWorld());
+      poseToPack.setIncludingFrame(worldFrame, getCurrentTestFrameTransformToWorld());
    }
 
    public FramePose2d getTestFramePose2dAtTransition(BehaviorControlModeEnum controlMode)

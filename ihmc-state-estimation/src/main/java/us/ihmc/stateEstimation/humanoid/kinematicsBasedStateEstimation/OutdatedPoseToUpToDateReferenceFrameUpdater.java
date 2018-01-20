@@ -143,11 +143,11 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    {
       //update the stateEstimator reference frame in the past
       stateEstimatorTimeStampedTransformBuffer.findTransform(localizationTimeStampedTransformInWorld.getTimeStamp(), stateEstimatorTimeStampedTransformInPast);
-      stateEstimatorPoseInThePast.setPoseIncludingFrame(worldFrame, stateEstimatorTimeStampedTransformInPast.getTransform3D());
+      stateEstimatorPoseInThePast.setIncludingFrame(worldFrame, stateEstimatorTimeStampedTransformInPast.getTransform3D());
       stateEstimatorReferenceFrameInThePast.setPoseAndUpdate(stateEstimatorPoseInThePast);
 
       //update the localization Pose
-      localizationPoseInThePast.setPoseIncludingFrame(worldFrame, localizationTimeStampedTransformInWorld.getTransform3D());
+      localizationPoseInThePast.setIncludingFrame(worldFrame, localizationTimeStampedTransformInWorld.getTransform3D());
       localizationReferenceFrameInThePast.setPoseAndUpdate(localizationPoseInThePast);
 
       stateEstimatorPositionInThePastInWorldFrame.setToZero(stateEstimatorReferenceFrameInThePast);

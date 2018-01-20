@@ -454,7 +454,7 @@ public class TaskspaceToJointspaceCalculator
       if (localControlledWithRespectToFrame != null)
       {
          desiredControlFramePose.getPose(desiredControlFrameTransform);
-         desiredControlFramePose.setPoseIncludingFrame(localControlledWithRespectToFrame, desiredControlFrameTransform);
+         desiredControlFramePose.setIncludingFrame(localControlledWithRespectToFrame, desiredControlFrameTransform);
       }
 
       desiredControlFramePose.changeFrame(localControlFrame);
