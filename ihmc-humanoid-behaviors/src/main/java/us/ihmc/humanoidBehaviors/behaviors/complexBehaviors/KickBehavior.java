@@ -143,7 +143,7 @@ public class KickBehavior extends AbstractBehavior
       desiredFootPose.changeFrame(worldFrame);
       Point3D desiredFootPosition = new Point3D();
       Quaternion desiredFootOrientation = new Quaternion();
-      desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
+      desiredFootPose.get(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryTask task = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, footTrajectoryBehavior,
             trajectoryTime.getDoubleValue());
       pipeLine.submitSingleTaskStage(task);

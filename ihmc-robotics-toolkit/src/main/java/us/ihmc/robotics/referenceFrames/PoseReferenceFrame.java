@@ -173,7 +173,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getPose(Point3D pointToPack, Quaternion quaternionToPack)
    {
-      originPose.getPose(pointToPack, quaternionToPack);
+      originPose.get(pointToPack, quaternionToPack);
    }
 
    /**

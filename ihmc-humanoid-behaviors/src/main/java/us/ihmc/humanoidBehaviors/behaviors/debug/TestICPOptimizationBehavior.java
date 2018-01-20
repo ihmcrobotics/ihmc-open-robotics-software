@@ -78,7 +78,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       Point3D location = new Point3D();
       Quaternion orientation = new Quaternion();
-      stepPose.getPose(location, orientation);
+      stepPose.get(location, orientation);
 
       FootstepDataMessage footstepData = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footsteps.add(footstepData);

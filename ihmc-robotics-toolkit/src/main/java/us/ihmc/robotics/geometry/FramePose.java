@@ -209,7 +209,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.setPosition(position2d);
    }
 
-   public void getPose(Tuple3DBasics tupleToPack, QuaternionBasics quaternionToPack)
+   public void get(Tuple3DBasics tupleToPack, QuaternionBasics quaternionToPack)
    {
       getPosition(tupleToPack);
       getOrientation(quaternionToPack);

@@ -287,7 +287,7 @@ public abstract class DRCPushRecoveryTest
       footPose.prependTranslation(0.0, 0.0, 0.2);
       Point3D desiredFootPosition = new Point3D();
       Quaternion desiredFootOrientation = new Quaternion();
-      footPose.getPose(desiredFootPosition, desiredFootOrientation);
+      footPose.get(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryMessage footPosePacket = new FootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
       drcSimulationTestHelper.send(footPosePacket);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));

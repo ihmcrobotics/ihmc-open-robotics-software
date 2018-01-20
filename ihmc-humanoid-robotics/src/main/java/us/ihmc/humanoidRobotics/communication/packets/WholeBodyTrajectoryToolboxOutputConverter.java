@@ -98,7 +98,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          ReferenceFrame controlFrame = converter.getFullRobotModel().getHandControlFrame(robotSide);
          FramePose desiredHandPose = new FramePose(controlFrame);
          desiredHandPose.changeFrame(worldFrame);
-         desiredHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredHandPose.get(desiredPosition, desiredOrientation);
 
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);
@@ -207,7 +207,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          ReferenceFrame controlFrame = converter.getFullRobotModel().getPelvis().getBodyFixedFrame();
          FramePose desiredHandPose = new FramePose(controlFrame);
          desiredHandPose.changeFrame(worldFrame);
-         desiredHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredHandPose.get(desiredPosition, desiredOrientation);
 
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);

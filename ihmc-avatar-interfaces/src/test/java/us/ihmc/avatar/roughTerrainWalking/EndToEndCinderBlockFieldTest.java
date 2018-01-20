@@ -112,7 +112,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
             FramePose cinderBlockPose = columns.get(robotSide).get(row);
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
-            cinderBlockPose.getPose(location, orientation);
+            cinderBlockPose.get(location, orientation);
             location.setZ(location.getZ() + zOffset);
             FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);

@@ -55,7 +55,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
+         footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
