@@ -237,7 +237,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getPosition2dIncludingFrame(FramePoint2D framePoint2dToPack)
    {
-      originPose.getPosition2dIncludingFrame(framePoint2dToPack);
+      originPose.getPosition(framePoint2dToPack);
    }
 
    public void interpolate(FramePose framePose1, FramePose framePose2, double alpha)

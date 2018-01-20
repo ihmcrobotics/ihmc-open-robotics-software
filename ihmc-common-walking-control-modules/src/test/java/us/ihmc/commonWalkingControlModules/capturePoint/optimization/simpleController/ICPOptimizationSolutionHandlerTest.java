@@ -59,7 +59,7 @@ public class ICPOptimizationSolutionHandlerTest
          upcomingFootsteps.add(new Footstep(robotSide, footstepPose, false));
 
          FramePoint2D referenceFootstepPosition = new FramePoint2D();
-         footstepPose.getPosition2dIncludingFrame(referenceFootstepPosition);
+         footstepPose.getPosition(referenceFootstepPosition);
 
          robotSide = robotSide.getOppositeSide();
       }

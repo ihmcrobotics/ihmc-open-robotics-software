@@ -1861,8 +1861,8 @@ public class FootstepGeneratorsTest
          nextFootstep.getPose(nextFootstepPose);
          FramePoint2D firstFootstepPosition2d = new FramePoint2D();
          FramePoint2D nextFootstepPosition2d = new FramePoint2D();
-         firstFootstepPose.getPosition2dIncludingFrame(firstFootstepPosition2d);
-         nextFootstepPose.getPosition2dIncludingFrame(nextFootstepPosition2d);
+         firstFootstepPose.getPosition(firstFootstepPosition2d);
+         nextFootstepPose.getPosition(nextFootstepPosition2d);
          double testeps = eps;
 
          String message2 = message + "course restep test " + i + "to" + (i + 2);
@@ -2343,8 +2343,8 @@ public class FootstepGeneratorsTest
          compareToLastFootstep.getPose(compareToLastFootstepPose);
          FramePoint2D lastFootstepPosition2d = new FramePoint2D();
          FramePoint2D compareToLastFootstepPosition2d = new FramePoint2D();
-         lastFootstepPose.getPosition2dIncludingFrame(lastFootstepPosition2d);
-         compareToLastFootstepPose.getPosition2dIncludingFrame(compareToLastFootstepPosition2d);
+         lastFootstepPose.getPosition(lastFootstepPosition2d);
+         compareToLastFootstepPose.getPosition(compareToLastFootstepPosition2d);
          double eps = 1e-14;
          assertTrue(
                message + " step " + i + " and " + (i - 2),
