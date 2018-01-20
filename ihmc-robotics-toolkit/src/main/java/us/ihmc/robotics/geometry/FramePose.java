@@ -112,7 +112,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       set(pose);
    }
 
-   public void setPose(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
+   public void set(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       setPosition(position);
       setOrientation(orientation);

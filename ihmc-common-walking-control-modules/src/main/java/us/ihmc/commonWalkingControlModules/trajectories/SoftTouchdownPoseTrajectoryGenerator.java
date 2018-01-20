@@ -128,7 +128,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    public void getPose(FramePose framePoseToPack)
    {
       getPosition(desiredPosition);
-      framePoseToPack.setPose(desiredPosition, constantOrientation);
+      framePoseToPack.set(desiredPosition, constantOrientation);
    }
    
    @Override

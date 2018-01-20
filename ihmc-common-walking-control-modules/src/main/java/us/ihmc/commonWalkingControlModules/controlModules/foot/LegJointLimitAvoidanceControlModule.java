@@ -183,7 +183,7 @@ public class LegJointLimitAvoidanceControlModule
 
       linearRootJointVelocity.scale(0.004);
 
-      originalDesiredPose.setPose(desiredPosition, desiredOrientation);
+      originalDesiredPose.set(desiredPosition, desiredOrientation);
       originalDesiredYoPose.set(originalDesiredPose);
       originalDesiredPose.changeFrame(jacobian.getBaseFrame());
 
