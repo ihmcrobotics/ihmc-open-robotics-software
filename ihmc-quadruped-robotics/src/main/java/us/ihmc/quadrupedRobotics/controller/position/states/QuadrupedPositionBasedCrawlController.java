@@ -574,7 +574,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       filteredDesiredCoMHeight.update();
       centerOfMassPose.setZ(filteredDesiredCoMHeight.getDoubleValue());
       desiredCoMPose.set(centerOfMassPose);
-      desiredCoM.set(centerOfMassPose.getFramePointCopy());
+      desiredCoM.set(centerOfMassPose.getPosition());
       desiredCoMPoseReferenceFrame.setPoseAndUpdate(centerOfMassPose);
       updateFeedForwardModelAndFrames();
 

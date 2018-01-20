@@ -260,7 +260,7 @@ public class FixedBaseRobotArmController implements RobotController
       trajectory.getAngularData(orientation, angularVelocity, angularAcceleration);
       trajectory.getLinearData(position, linearVelocity, linearAcceleration);
 
-      handPointCommand.setBodyFixedPointToControl(controlFramePose.getFramePointCopy());
+      handPointCommand.setBodyFixedPointToControl(controlFramePose.getPosition());
       handPointCommand.setWeightForSolver(handWeight.getDoubleValue());
       handPointCommand.setGains(handPositionGains);
       handPointCommand.setSelectionMatrix(computeLinearSelectionMatrix());

@@ -152,9 +152,9 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose fromPose, FramePose toPose)
    {
-      frameVectorToPack.set(toPose.getFramePointCopy());
+      frameVectorToPack.set(toPose.getPosition());
       FrameVector3D frameTuple = new FrameVector3D(frameVectorToPack);
-      frameTuple.sub(fromPose.getFramePointCopy());
+      frameTuple.sub(fromPose.getPosition());
       frameVectorToPack.set(frameTuple);
    }
 
@@ -167,7 +167,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       else
       {
          FrameVector2D frameTuple2d = new FrameVector2D(vectorToPack);
-         frameTuple2d.set(toPose.getFramePointCopy());
+         frameTuple2d.set(toPose.getPosition());
          fromPose.checkReferenceFrameMatch(vectorToPack);
          frameTuple2d.sub(fromPose.getX(), fromPose.getY());
          frameTuple2d.normalize();

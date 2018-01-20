@@ -183,7 +183,7 @@ public class PlanningTestTools
    public static void addGoalViz(FramePose goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       YoFramePoint yoGoal = new YoFramePoint("GoalPosition", worldFrame, registry);
-      yoGoal.set(goalPose.getFramePointCopy());
+      yoGoal.set(goalPose.getPosition());
       graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("GoalViz", yoGoal, 0.05, YoAppearance.Yellow()));
       YoFramePoint yoStart = new YoFramePoint("StartPosition", worldFrame, registry);
       graphicsListRegistry.registerYoGraphic("viz", new YoGraphicPosition("StartViz", yoStart, 0.05, YoAppearance.Blue()));
