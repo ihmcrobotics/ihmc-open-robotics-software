@@ -19,9 +19,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -226,7 +229,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.get(transformToPack);
    }
 
-   public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameQuaternion orientationToPack)
+   public void getPoseIncludingFrame(FramePoint3DBasics framePointToPack, FrameQuaternionBasics orientationToPack)
    {
       getPositionIncludingFrame(framePointToPack);
       getOrientationIncludingFrame(orientationToPack);
@@ -277,7 +280,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       axisAngleToPack.set(pose.getOrientation());
    }
 
-   public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
+   public void getOrientationIncludingFrame(FrameQuaternionBasics orientationToPack)
    {
       orientationToPack.setIncludingFrame(referenceFrame, pose.getOrientation());
    }
@@ -310,7 +313,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame of this pose are stored. Modified.
     */
-   public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
+   public void getRotationVectorIncludingFrame(FrameVector3DBasics frameRotationVectorToPack)
    {
       frameRotationVectorToPack.setToZero(getReferenceFrame());
       pose.getRotationVector(frameRotationVectorToPack);
