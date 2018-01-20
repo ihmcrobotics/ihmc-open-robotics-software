@@ -223,11 +223,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
                updatable.update(time);
             }
 
-            FramePoint2D transferFromFootPosition = new FramePoint2D();
-            FramePoint2D transferToFootPosition = new FramePoint2D();
-
-            transferFromFootstep.getFootstepPose().getPosition(transferFromFootPosition);
-            transferToFootstep.getFootstepPose().getPosition(transferToFootPosition);
+            FramePoint2D transferFromFootPosition = new FramePoint2D(transferFromFootstep.getFootstepPose().getPosition());
+            FramePoint2D transferToFootPosition = new FramePoint2D(transferToFootstep.getFootstepPose().getPosition());
 
             FramePoint2D queryPosition = new FramePoint2D();
 
