@@ -376,7 +376,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       desiredPose.normalizeQuaternionAndLimitToPi();
       desiredPose.getPosition(linearFeedbackTermToPack);
-      desiredPose.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
+      desiredPose.getRotationVector(angularFeedbackTermToPack);
 
       selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
       selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);

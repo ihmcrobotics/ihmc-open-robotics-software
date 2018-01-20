@@ -308,7 +308,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame of this pose are stored. Modified.
     */
-   public void getRotationVectorIncludingFrame(FrameVector3DBasics frameRotationVectorToPack)
+   public void getRotationVector(FrameVector3DBasics frameRotationVectorToPack)
    {
       frameRotationVectorToPack.setToZero(getReferenceFrame());
       pose.getRotationVector(frameRotationVectorToPack);
