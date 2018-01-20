@@ -268,7 +268,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    {
       correctedPelvisPoseReferenceFrame.setPoseAndUpdate(correctedPelvisPoseInWorldFrame);
       
-      iterativeClosestPointInWorldFramePose.getOrientation(iterativeClosestPointOrientation);
+      iterativeClosestPointOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
       iterativeClosestPointTranslation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getPosition());
       
       iterativeClosestPointOrientation.changeFrame(correctedPelvisPoseReferenceFrame);
@@ -371,12 +371,12 @@ public class ClippedSpeedOffsetErrorInterpolator
       startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
       updatedStartOffset_Rotation_quat.set(startOffsetErrorPose.getOrientation());
       startOffsetErrorPose.changeFrame(worldFrame);
-      startOffsetErrorPose.getOrientation(updatedStartOffset_Rotation);
+      updatedStartOffset_Rotation.setIncludingFrame(startOffsetErrorPose.getOrientation());
       
       goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
       updatedGoalOffset_Rotation_quat.set(goalOffsetErrorPose.getOrientation());
       goalOffsetErrorPose.changeFrame(worldFrame);
-      goalOffsetErrorPose.getOrientation(updatedGoalOffset_Rotation);
+      updatedGoalOffset_Rotation.setIncludingFrame(goalOffsetErrorPose.getOrientation());
       
       startOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedStartOffset_Rotation_quat);
       

@@ -19,8 +19,6 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
    private final YoFramePoint position;
    private final YoFrameQuaternion orientation;
 
-   private final FrameQuaternion tempOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
-
    public YoSE3ConfigurationProvider(String name, ReferenceFrame frame, YoVariableRegistry registry)
    {
       position = new YoFramePoint(name, frame, registry);
@@ -40,9 +38,6 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
    public void setPose(FramePose pose)
    {
       this.position.setAndMatchFrame(pose.getPosition());
-
-      pose.getOrientation(tempOrientation);
-      tempOrientation.changeFrame(this.orientation.getReferenceFrame());
-      this.orientation.set(tempOrientation);
+      this.orientation.setAndMatchFrame(pose.getOrientation());
    }
 }

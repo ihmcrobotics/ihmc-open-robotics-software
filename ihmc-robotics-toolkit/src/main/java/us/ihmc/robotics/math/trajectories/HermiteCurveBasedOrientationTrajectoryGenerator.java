@@ -168,8 +168,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       trajectoryTime.set(duration);
    }
 
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
-
    public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
       this.initialOrientation.setAndMatchFrame(initialOrientation);
@@ -182,9 +180,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
    public void setFinalOrientation(FramePose finalPose)
    {
-      finalPose.getOrientation(tempOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      finalOrientation.set(tempOrientation);
+      finalOrientation.setAndMatchFrame(finalPose.getOrientation());
    }
 
    public void setInitialAngularVelocity(FrameVector3DReadOnly initialAngularVelocity)

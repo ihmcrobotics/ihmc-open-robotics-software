@@ -227,7 +227,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getOrientationIncludingFrame(FrameQuaternion frameOrientationToPack)
    {
-      originPose.getOrientation(frameOrientationToPack);
+      frameOrientationToPack.setIncludingFrame(originPose.getOrientation());
    }
 
    public void getPose2dIncludingFrame(FramePose2d framePose2dToPack)

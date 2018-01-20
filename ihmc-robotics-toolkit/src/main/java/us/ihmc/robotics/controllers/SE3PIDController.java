@@ -82,7 +82,7 @@ public class SE3PIDController
 
       twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
 
-      desiredPose.getOrientation(desiredOrientation);
+      desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
       desiredTwist.getAngularPart(desiredAngularVelocity);
       desiredTwist.getAngularPart(feedForwardAngularAction);
       orientationController.compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
@@ -112,7 +112,7 @@ public class SE3PIDController
 
       spatialAccelerationToPack.setToZero(bodyFrame, feedForwardAcceleration.getBaseFrame(), bodyFrame);
 
-      desiredPose.getOrientation(desiredOrientation);
+      desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
       desiredTwist.getAngularPart(desiredAngularVelocity);
       feedForwardAcceleration.getAngularPart(feedForwardAngularAction);
       currentTwist.getAngularPart(currentAngularVelocity);

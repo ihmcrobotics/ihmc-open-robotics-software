@@ -929,8 +929,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          taskspaceToJointspaceCalculator.compute(desiredPose, desiredTwist);
       taskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredPose, ReferenceFrame.getWorldFrame());
 
-      FrameQuaternion tempOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
-      desiredPose.getOrientation(tempOrientation);
+      FrameQuaternion tempOrientation = new FrameQuaternion(desiredPose.getOrientation());
       return tempOrientation;
    }
 
