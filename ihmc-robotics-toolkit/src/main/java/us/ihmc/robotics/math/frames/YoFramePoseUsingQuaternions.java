@@ -83,7 +83,7 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
       framePose.checkReferenceFrameMatch(getReferenceFrame());
 
       framePose.getPosition(tempFramePoint);
-      framePose.getOrientationIncludingFrame(tempFrameOrientation);
+      framePose.getOrientation(tempFrameOrientation);
       position.set(tempFramePoint);
       orientation.set(tempFrameOrientation);
    }
@@ -91,7 +91,7 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
    public void setAndMatchFrame(FramePose framePose)
    {
       framePose.getPosition(tempFramePoint);
-      framePose.getOrientationIncludingFrame(tempFrameOrientation);
+      framePose.getOrientation(tempFrameOrientation);
       tempFramePoint.changeFrame(getReferenceFrame());
       tempFrameOrientation.changeFrame(getReferenceFrame());
       position.set(tempFramePoint);

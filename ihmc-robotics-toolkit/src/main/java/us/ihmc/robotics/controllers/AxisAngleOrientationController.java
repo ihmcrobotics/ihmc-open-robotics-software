@@ -130,7 +130,7 @@ public class AxisAngleOrientationController
 
       twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
 
-      desiredPose.getOrientationIncludingFrame(desiredOrientation);
+      desiredPose.getOrientation(desiredOrientation);
       desiredTwist.getAngularPart(desiredAngularVelocity);
       desiredTwist.getAngularPart(feedForwardAngularAction);
       compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);

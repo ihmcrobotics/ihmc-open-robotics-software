@@ -182,7 +182,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
    public void setFinalOrientation(FramePose finalPose)
    {
-      finalPose.getOrientationIncludingFrame(tempOrientation);
+      finalPose.getOrientation(tempOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
       finalOrientation.set(tempOrientation);
    }

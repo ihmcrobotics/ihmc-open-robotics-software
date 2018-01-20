@@ -232,7 +232,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void get(FramePoint3DBasics framePointToPack, FrameQuaternionBasics orientationToPack)
    {
       getPosition(framePointToPack);
-      getOrientationIncludingFrame(orientationToPack);
+      getOrientation(orientationToPack);
    }
 
    public Point3DReadOnly getPosition()
@@ -275,7 +275,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       axisAngleToPack.set(pose.getOrientation());
    }
 
-   public void getOrientationIncludingFrame(FrameQuaternionBasics orientationToPack)
+   public void getOrientation(FrameQuaternionBasics orientationToPack)
    {
       orientationToPack.setIncludingFrame(referenceFrame, pose.getOrientation());
    }

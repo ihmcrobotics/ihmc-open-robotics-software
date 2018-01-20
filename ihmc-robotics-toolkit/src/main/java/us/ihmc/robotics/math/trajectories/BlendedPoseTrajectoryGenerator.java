@@ -45,7 +45,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void blendInitialConstraint(FramePose initialPose, double initialTime, double blendDuration)
    {
       initialPose.getPosition(tempPosition);
-      initialPose.getOrientationIncludingFrame(tempOrientation);
+      initialPose.getOrientation(tempOrientation);
       blendedPositionTrajectory.blendInitialConstraint(tempPosition, initialTime, blendDuration);
       blendedOrientationTrajectory.blendInitialConstraint(tempOrientation, initialTime, blendDuration);
    }
@@ -53,7 +53,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void blendInitialConstraint(FramePose initialPose, Twist initialTwist, double initialTime, double blendDuration)
    {
       initialPose.getPosition(tempPosition);
-      initialPose.getOrientationIncludingFrame(tempOrientation);
+      initialPose.getOrientation(tempOrientation);
       initialTwist.getLinearPart(tempVelocity);
       initialTwist.getAngularPart(tempAngularVelocity);
       blendedPositionTrajectory.blendInitialConstraint(tempPosition, tempVelocity, initialTime, blendDuration);
@@ -63,7 +63,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void blendFinalConstraint(FramePose finalPose, double finalTime, double blendDuration)
    {
       finalPose.getPosition(tempPosition);
-      finalPose.getOrientationIncludingFrame(tempOrientation);
+      finalPose.getOrientation(tempOrientation);
       blendedPositionTrajectory.blendFinalConstraint(tempPosition, finalTime, blendDuration);
       blendedOrientationTrajectory.blendFinalConstraint(tempOrientation, finalTime, blendDuration);
    }
@@ -71,7 +71,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void blendFinalConstraint(FramePose finalPose, Twist finalTwist, double finalTime, double blendDuration)
    {
       finalPose.getPosition(tempPosition);
-      finalPose.getOrientationIncludingFrame(tempOrientation);
+      finalPose.getOrientation(tempOrientation);
       finalTwist.getLinearPart(tempVelocity);
       finalTwist.getAngularPart(tempAngularVelocity);
       blendedPositionTrajectory.blendFinalConstraint(tempPosition, tempVelocity, finalTime, blendDuration);

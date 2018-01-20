@@ -424,7 +424,7 @@ public class TaskspaceToJointspaceCalculator
          tempPoint.changeFrame(localControlFrame);
          double translationDistance = tempPoint.distanceFromOrigin();
          
-         desiredPose.getOrientationIncludingFrame(tempOrientation);
+         desiredPose.getOrientation(tempOrientation);
          tempOrientation.changeFrame(localControlFrame);
          tempAxisAngle.set(tempOrientation);
          double angle = Math.abs(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));

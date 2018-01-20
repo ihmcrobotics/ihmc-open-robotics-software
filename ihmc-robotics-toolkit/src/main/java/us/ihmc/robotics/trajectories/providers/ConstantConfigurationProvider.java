@@ -31,6 +31,6 @@ public class ConstantConfigurationProvider implements SE3ConfigurationProvider
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      configuration.getOrientationIncludingFrame(orientationToPack);
+      configuration.getOrientation(orientationToPack);
    }
 }

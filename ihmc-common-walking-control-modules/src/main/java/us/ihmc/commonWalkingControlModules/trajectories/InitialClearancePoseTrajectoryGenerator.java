@@ -74,7 +74,7 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
    public void setInitialPose(FramePose initialPose)
    {
       initialPose.getPosition(tempPosition);
-      initialPose.getOrientationIncludingFrame(tempOrientation);
+      initialPose.getOrientation(tempOrientation);
       positionTrajectoryGenerator.setInitialPosition(tempPosition);
       orientationTrajectoryGenerator.setInitialOrientation(tempOrientation);
    }
@@ -82,7 +82,7 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
    public void setFinalPose(FramePose finalPose)
    {
       finalPose.getPosition(tempPosition);
-      finalPose.getOrientationIncludingFrame(tempOrientation);
+      finalPose.getOrientation(tempOrientation);
       positionTrajectoryGenerator.setFinalPosition(tempPosition);
       orientationTrajectoryGenerator.setFinalOrientation(tempOrientation);
    }

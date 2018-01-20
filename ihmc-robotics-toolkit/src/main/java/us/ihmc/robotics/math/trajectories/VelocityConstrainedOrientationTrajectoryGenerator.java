@@ -186,7 +186,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    public void setFinalOrientation(FramePose finalPose)
    {
-      finalPose.getOrientationIncludingFrame(tempOrientation);
+      finalPose.getOrientation(tempOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
       this.finalOrientation.set(tempOrientation);
    }
