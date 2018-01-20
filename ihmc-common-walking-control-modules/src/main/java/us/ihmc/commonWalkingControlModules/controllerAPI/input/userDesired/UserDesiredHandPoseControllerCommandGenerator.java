@@ -80,7 +80,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
                userDesiredHandPose.getFramePoseIncludingFrame(framePose);
 
                ReferenceFrame referenceFrameToUse = getReferenceFrameToUse();
-               framePose.setIncludingFrame(referenceFrameToUse, framePose.getGeometryObject());
+               framePose.setIncludingFrame(referenceFrameToUse, framePose);
 
 //               framePose.changeFrame(ReferenceFrame.getWorldFrame());
 //               System.out.println("framePose " + framePose);

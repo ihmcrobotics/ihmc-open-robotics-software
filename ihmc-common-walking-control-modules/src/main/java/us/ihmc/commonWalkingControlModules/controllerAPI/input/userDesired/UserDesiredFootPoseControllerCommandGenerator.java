@@ -53,7 +53,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
                userDesiredFootPose.getFramePose(framePose);
                ReferenceFrame soleZUpFrame = ankleZUpFrames.get(userFootPoseSide.getEnumValue());
                soleZUpFrame.update();
-               framePose.setIncludingFrame(soleZUpFrame, framePose.getGeometryObject());
+               framePose.setIncludingFrame(soleZUpFrame, framePose);
 
                framePose.changeFrame(ReferenceFrame.getWorldFrame());
                System.out.println("framePose " + framePose);

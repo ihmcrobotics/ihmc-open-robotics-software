@@ -66,7 +66,7 @@ public class ConstrainedRigidBodyTrajectory
 
          FramePose controlFramePose = new FramePose(trajectoryCommand.getControlFramePose());
          controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
-         this.controlFramePose.set(controlFramePose.getGeometryObject());
+         this.controlFramePose.set(controlFramePose);
          this.hasTrajectoryCommand = true;
          if (Double.isNaN(trajectoryCommand.getWeight()))
             weight = DEFAULT_WEIGHT;

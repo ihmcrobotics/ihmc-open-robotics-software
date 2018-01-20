@@ -113,7 +113,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
    {
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
-      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
       nodeChecker.addStartNode(startNode, startNodeSnapTransform);
    }

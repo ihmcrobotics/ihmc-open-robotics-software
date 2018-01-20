@@ -1,6 +1,7 @@
 package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -276,7 +277,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * 
     * @param desiredPose the pose the control frame should reach. Not modified.
     */
-   public void setDesiredPose(Pose3D pose)
+   public void setDesiredPose(Pose3DReadOnly pose)
    {
       setDesiredPosition(pose.getPosition());
       setDesiredOrientation(pose.getOrientation());
@@ -309,7 +310,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void setDesiredPose(FramePose desiredPose)
    {
       desiredPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPose(desiredPose.getGeometryObject());
+      setDesiredPose((Pose3DReadOnly) desiredPose);
    }
 
    /** Ensures that the weight matrix's are initialized. */
