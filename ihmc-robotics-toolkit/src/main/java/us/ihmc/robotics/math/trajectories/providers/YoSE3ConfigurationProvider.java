@@ -40,7 +40,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
 
    public void setPose(FramePose pose)
    {
-      pose.getPositionIncludingFrame(tempPoint);
+      pose.getPosition(tempPoint);
       tempPoint.changeFrame(this.position.getReferenceFrame());
       this.position.set(tempPoint);
 

@@ -231,7 +231,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void get(FramePoint3DBasics framePointToPack, FrameQuaternionBasics orientationToPack)
    {
-      getPositionIncludingFrame(framePointToPack);
+      getPosition(framePointToPack);
       getOrientationIncludingFrame(orientationToPack);
    }
 
@@ -245,7 +245,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       tupleToPack.set(pose.getPosition());
    }
 
-   public void getPositionIncludingFrame(FrameTuple3DBasics frameTupleToPack)
+   public void getPosition(FrameTuple3DBasics frameTupleToPack)
    {
       frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPosition());
    }

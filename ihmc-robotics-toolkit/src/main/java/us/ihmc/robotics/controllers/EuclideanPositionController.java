@@ -122,7 +122,7 @@ public class EuclideanPositionController implements PositionController
 
       twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
 
-      desiredPose.getPositionIncludingFrame(desiredPosition);
+      desiredPose.getPosition(desiredPosition);
       desiredTwist.getLinearPart(desiredVelocity);
       desiredTwist.getLinearPart(feedForwardLinearAction);
       compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);

@@ -420,7 +420,7 @@ public class TaskspaceToJointspaceCalculator
       {
          compute(desiredPose, desiredTwist);
          
-         desiredPose.getPositionIncludingFrame(tempPoint);
+         desiredPose.getPosition(tempPoint);
          tempPoint.changeFrame(localControlFrame);
          double translationDistance = tempPoint.distanceFromOrigin();
          

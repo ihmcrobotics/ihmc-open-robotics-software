@@ -189,13 +189,13 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-         desiredPose.getPositionIncludingFrame(desiredAnklePosition);
+         desiredPose.getPosition(desiredAnklePosition);
 
          legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
 
          desiredPose.setPosition(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-         desiredPose.getPositionIncludingFrame(desiredPosition);
+         desiredPose.getPosition(desiredPosition);
       }
 
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);

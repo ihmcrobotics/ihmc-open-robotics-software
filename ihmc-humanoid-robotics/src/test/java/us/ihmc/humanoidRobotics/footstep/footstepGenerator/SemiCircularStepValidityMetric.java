@@ -236,7 +236,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
             Math.sin(offsetDirAngle) * sideOffset, 0 });
 
       FramePoint3D stanceFramePosition = new FramePoint3D();
-      stanceFramePose.getPositionIncludingFrame(stanceFramePosition);
+      stanceFramePose.getPosition(stanceFramePosition);
       FrameVector3D offsetStart = new FrameVector3D(stanceFramePosition);
       offsetStart.add(offset);
 

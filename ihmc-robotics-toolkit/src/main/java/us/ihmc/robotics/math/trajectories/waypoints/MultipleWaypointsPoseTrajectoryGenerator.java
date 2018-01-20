@@ -64,7 +64,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
       linearVelocity.changeFrame(activeFrame);
       angularVelocity.changeFrame(activeFrame);
       
-      pose.getPositionIncludingFrame(desiredPosition);
+      pose.getPosition(desiredPosition);
       pose.getOrientationIncludingFrame(desiredOrientation);
       
       positionTrajectory.appendWaypoint(timeAtWaypoint, desiredPosition, linearVelocity);
