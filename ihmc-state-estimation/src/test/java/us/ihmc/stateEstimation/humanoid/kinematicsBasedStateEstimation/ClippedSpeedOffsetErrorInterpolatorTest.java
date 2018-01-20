@@ -391,7 +391,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
 
-            interpolatedPoseOneSecondEarlier.setPose(interpolatedPose);
+            interpolatedPoseOneSecondEarlier.set(interpolatedPose);
          }
       }
    }
@@ -474,7 +474,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
 
-            interpolatedPoseOneSecondEarlier.setPose(interpolatedPose);
+            interpolatedPoseOneSecondEarlier.set(interpolatedPose);
          }
       }
    }
@@ -558,7 +558,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
 
-            interpolatedPoseOneSecondEarlier.setPose(interpolatedPose);
+            interpolatedPoseOneSecondEarlier.set(interpolatedPose);
          }
       }
 
@@ -621,7 +621,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
 
-            interpolatedPoseOneSecondEarlier.setPose(interpolatedPose);
+            interpolatedPoseOneSecondEarlier.set(interpolatedPose);
          }
       }
    }
