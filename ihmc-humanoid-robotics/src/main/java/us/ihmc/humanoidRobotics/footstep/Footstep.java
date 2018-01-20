@@ -133,7 +133,7 @@ public class Footstep implements Settable<Footstep>
       this.swingHeight = command.getSwingHeight();
       this.trustHeight = trustHeight;
 
-      this.footstepPose.setPoseIncludingFrame(command.getPosition(), command.getOrientation());
+      this.footstepPose.setIncludingFrame(command.getPosition(), command.getOrientation());
 
       this.predictedContactPoints.clear();
       RecyclingArrayList<Point2D> commandPredictedContactPoints = command.getPredictedContactPoints();
@@ -311,7 +311,7 @@ public class Footstep implements Settable<Footstep>
 
    public void setPose(FramePoint3D position, FrameQuaternion orientation)
    {
-      footstepPose.setPoseIncludingFrame(position, orientation);
+      footstepPose.setIncludingFrame(position, orientation);
    }
 
    public void setPositionChangeOnlyXY(FramePoint2D position2d)

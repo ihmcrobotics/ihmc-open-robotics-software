@@ -233,7 +233,7 @@ public class TaskspaceHandControlState extends HandControlState
 
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
-      desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+      desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
       yoDesiredPose.setAndMatchFrame(desiredPose);
 
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
@@ -340,7 +340,7 @@ public class TaskspaceHandControlState extends HandControlState
       {
          positionTrajectoryGenerator.getPosition(tempFramePoint);
          orientationTrajectoryGenerator.getOrientation(tempFrameOrientation);
-         desiredPose.setPoseIncludingFrame(tempFramePoint, tempFrameOrientation);
+         desiredPose.setIncludingFrame(tempFramePoint, tempFrameOrientation);
          changeControlFrame(controlFrame, newControlFrame, desiredPose);
          desiredPose.getPoseIncludingFrame(tempFramePoint, tempFrameOrientation);
          trajectoryPointToPack.setToZero(desiredPose.getReferenceFrame());

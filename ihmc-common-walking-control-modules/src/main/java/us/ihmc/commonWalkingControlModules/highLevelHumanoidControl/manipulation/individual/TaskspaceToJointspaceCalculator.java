@@ -397,7 +397,7 @@ public class TaskspaceToJointspaceCalculator
 
    public void compute(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
-      desiredControlFramePose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+      desiredControlFramePose.setIncludingFrame(desiredPosition, desiredOrientation);
       desiredControlFrameTwist.set(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredLinearVelocity, desiredAngularVelocity);
 
       compute(desiredControlFramePose, desiredControlFrameTwist);

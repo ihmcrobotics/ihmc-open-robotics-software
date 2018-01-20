@@ -83,7 +83,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       blendedPositionTrajectory.getPosition(tempPosition);
       blendedOrientationTrajectory.getOrientation(tempOrientation);
-      framePoseToPack.setPoseIncludingFrame(tempPosition, tempOrientation);
+      framePoseToPack.setIncludingFrame(tempPosition, tempOrientation);
    }
 
    @Override
