@@ -2,11 +2,9 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
@@ -530,61 +528,10 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       return TransformTools.getTransformFromA2toA1(transformToThat, transformToThis);
    }
 
-   public double getSpatialAxisOfRotationAndAngleToOtherPose(FramePose otherPose, FrameVector3D rotationAxisToPack, FramePoint3D rotationAxisOriginToPack)
-   {
-      double rotationAngle = getAxisAngleRotationToOtherPose(otherPose, rotationAxisToPack);
-
-      getOriginOfSpatialAxisOfRotationToOtherPose(otherPose, rotationAxisToPack, rotationAngle, rotationAxisOriginToPack);
-
-      return rotationAngle;
-   }
-
-   private void getOriginOfSpatialAxisOfRotationToOtherPose(FramePose otherPose, FrameVector3D rotationAxis, double rotationAngle, FramePoint3D originToPack)
-   {
-      otherPose.checkReferenceFrameMatch(rotationAxis);
-      otherPose.checkReferenceFrameMatch(originToPack);
-
-      double epsilon = 1e-7;
-      boolean rotationAngleEpsilonEqualsZero = Math.abs(rotationAngle) < epsilon;
-      boolean rotationAngleEpsilonEqualsPlusOrMinusPi = Math.abs(Math.abs(rotationAngle) - Math.PI) < epsilon;
-
-      if (rotationAngleEpsilonEqualsZero)
-      {
-         originToPack.setToZero(referenceFrame);
-      }
-      else if (rotationAngleEpsilonEqualsPlusOrMinusPi)
-      {
-         originToPack.setToZero(referenceFrame);
-         originToPack.interpolate(pose.getPosition(), otherPose.pose.getPosition(), 0.5);
-      }
-      else
-      {
-         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPosition(), otherPose.pose.getPosition(), rotationAxis, rotationAngle,
-                                                              originToPack);
-      }
-   }
-
-   public double getAxisAngleRotationToOtherPose(FramePose otherPose, FrameVector3D rotationAxisToPack)
-   {
-      AxisAngle rotationAxisAngle = new AxisAngle();
-      getAxisAngleRotationToOtherPose(otherPose, rotationAxisAngle);
-
-      rotationAxisToPack.setIncludingFrame(referenceFrame, rotationAxisAngle.getX(), rotationAxisAngle.getY(), rotationAxisAngle.getZ());
-
-      return rotationAxisAngle.getAngle();
-   }
-
-   public void getAxisAngleRotationToOtherPose(FramePose otherPose, AxisAngle rotationToPack)
-   {
-      getTransformFromThisToThat(otherPose).getRotation(rotationToPack); //FIXME: this returns nonsense when angle = Math.PI
-   }
-
    public double getOrientationDistance(FramePose framePose)
    {
-      AxisAngle rotationFromThatToThis = new AxisAngle();
-      getAxisAngleRotationToOtherPose(framePose, rotationFromThatToThis);
-
-      return Math.abs(rotationFromThatToThis.getAngle());
+      checkReferenceFrameMatch(framePose);
+      return pose.getOrientationDistance(framePose.getOrientation());
    }
 
    public double getEffectiveDistanceToFramePose(FramePose framePose, double radiusOfRotation)
