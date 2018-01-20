@@ -156,7 +156,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       framePose.changeFrame(worldFrame);
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();
-      framePose.getOrientation(orientation);
+      orientation.set(framePose.getOrientation());
       orientationCommand.clear(worldFrame);
       orientationCommand.setTrajectoryFrame(worldFrame);
       orientationCommand.addTrajectoryPoint(time, orientation, zeroVelocity);

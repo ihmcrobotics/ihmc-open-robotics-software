@@ -564,10 +564,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          FramePose outdatedPoseUpdatedInWorldFrame = new FramePose(outdatedReferenceFrame_ToBeUpdated);
          outdatedPoseUpdatedInWorldFrame.changeFrame(worldFrame);
 
-         Vector3D upToDateReferenceFrameInPresent_Translation = new Vector3D();
-         upToDatePoseInPresent.getPosition(upToDateReferenceFrameInPresent_Translation);
-         Vector3D outdatedPoseUpdatedInWorldFrame_Translation = new Vector3D();
-         outdatedPoseUpdatedInWorldFrame.getPosition(outdatedPoseUpdatedInWorldFrame_Translation);
+         Vector3D upToDateReferenceFrameInPresent_Translation = new Vector3D(upToDatePoseInPresent.getPosition());
+         Vector3D outdatedPoseUpdatedInWorldFrame_Translation = new Vector3D(outdatedPoseUpdatedInWorldFrame.getPosition());
          
          FramePose testedPose = new FramePose(worldFrame);
          testedPose.setPose(outdatedPoseUpdatedInWorldFrame);
@@ -575,8 +573,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 
          Vector3D testedTranslation = new Vector3D();
          testedTranslation.sub(outdatedPoseUpdatedInWorldFrame_Translation, upToDateReferenceFrameInPresent_Translation);
-         Quaternion testedOrientation = new Quaternion();
-         testedPose.getOrientation(testedOrientation);
+         Quaternion testedOrientation = new Quaternion(testedPose.getOrientation());
 
          if (timeStamp < (int) (firstTimeStamp * 1.2 + numberOfTicksOfDelay))
          {

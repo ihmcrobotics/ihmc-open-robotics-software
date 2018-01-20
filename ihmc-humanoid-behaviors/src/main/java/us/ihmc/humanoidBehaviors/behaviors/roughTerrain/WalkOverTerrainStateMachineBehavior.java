@@ -174,8 +174,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          {
             FramePose goalPose = new FramePose();
             lookForGoalBehavior.getGoalPose(goalPose);
-            Tuple3DBasics goalPosition = new Point3D();
-            goalPose.getPosition(goalPosition);
+            Tuple3DBasics goalPosition = new Point3D(goalPose.getPosition());
 
             String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
             String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);

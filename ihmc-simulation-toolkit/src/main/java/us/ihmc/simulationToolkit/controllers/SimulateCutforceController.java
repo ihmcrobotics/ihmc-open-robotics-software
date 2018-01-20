@@ -156,7 +156,7 @@ public class SimulateCutforceController implements RobotController
       handControlFramePose.set(transform);
       handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose.set(handControlFramePose);
-      handControlFramePose.getPosition(handControlFramePositionInWorld);
+      handControlFramePositionInWorld.set(handControlFramePose.getPosition());
 
       efpHandControlFrame.setPosition(handControlFramePositionInWorld);
 

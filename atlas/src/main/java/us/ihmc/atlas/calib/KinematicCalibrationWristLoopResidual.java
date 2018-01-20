@@ -94,10 +94,8 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             double scaleRadToCM = 0.01 / (Math.PI / 8); //30deg -> 1cm
             if (QUAT_DIFF)
             {
-               Quaternion leftEEQuat = new Quaternion();
-               Quaternion rightEEQuat = new Quaternion();
-               leftEE.getOrientation(leftEEQuat);
-               rightEE.getOrientation(rightEEQuat);
+               Quaternion leftEEQuat = new Quaternion(leftEE.getOrientation());
+               Quaternion rightEEQuat = new Quaternion(rightEE.getOrientation());
                Quaternion qErr = new Quaternion(leftEEQuat);
                qErr.inverse();
                qErr.multiply(rightEEQuat);
@@ -111,10 +109,8 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             else
             {
                assert (leftEE.getReferenceFrame() == rightEE.getReferenceFrame());
-               RotationMatrix mLeft = new RotationMatrix();
-               RotationMatrix mRight = new RotationMatrix();
-               leftEE.getOrientation(mLeft);
-               rightEE.getOrientation(mRight);
+               RotationMatrix mLeft = new RotationMatrix(leftEE.getOrientation());
+               RotationMatrix mRight = new RotationMatrix(rightEE.getOrientation());
                Vector3D vDiff = CalibUtil.rotationDiff(mLeft, mRight);
                output[outputCounter++] = scaleRadToCM * vDiff.getX();
                output[outputCounter++] = scaleRadToCM * vDiff.getY();

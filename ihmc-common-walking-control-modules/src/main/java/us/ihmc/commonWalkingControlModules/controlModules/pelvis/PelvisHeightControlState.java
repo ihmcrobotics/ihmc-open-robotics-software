@@ -159,7 +159,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(pelvisFrame);
       tempPose.changeFrame(controlFrame);
-      tempPose.getPosition(tempPoint);
+      tempPoint.set(tempPose.getPosition());
 
       initialPose.prependTranslation(tempPoint);
 
@@ -236,7 +236,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(pelvisFrame);
       tempPose.changeFrame(controlFrame);
-      tempPose.getPosition(tempPoint);
+      tempPoint.set(tempPose.getPosition());
 
       initialPose.prependTranslation(tempPoint);
 
@@ -269,7 +269,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(controlFrame);
       tempPose.changeFrame(pelvisFrame);
-      tempPose.getPosition(tempPoint);
+      tempPoint.set(tempPose.getPosition());
 
       positionToPack.add(tempPoint);
    }

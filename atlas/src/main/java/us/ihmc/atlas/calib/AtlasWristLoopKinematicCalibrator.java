@@ -49,10 +49,8 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       leftEE.changeFrame(ReferenceFrame.getWorldFrame());
       rightEE.changeFrame(ReferenceFrame.getWorldFrame());
       {
-         RotationMatrix leftEEOrientation = new RotationMatrix();
-         RotationMatrix rightEEOrientation = new RotationMatrix();
-         leftEE.getOrientation(leftEEOrientation);
-         rightEE.getOrientation(rightEEOrientation);
+         RotationMatrix leftEEOrientation = new RotationMatrix(leftEE.getOrientation());
+         RotationMatrix rightEEOrientation = new RotationMatrix(rightEE.getOrientation());
          System.out.println("r_axLeft: " + CalibUtil.matrix3dToAxisAngle3d(leftEEOrientation));
          System.out.println("r_axRight: " + CalibUtil.matrix3dToAxisAngle3d(rightEEOrientation));
          System.out.println("r_axDiff: " + CalibUtil.rotationDiff(leftEEOrientation, rightEEOrientation));

@@ -459,11 +459,11 @@ public class TaskspaceToJointspaceCalculator
 
       desiredControlFramePose.changeFrame(localControlFrame);
 
-      desiredControlFramePose.getOrientation(errorAxisAngle);
+      errorAxisAngle.set(desiredControlFramePose.getOrientation());
       errorRotationVector.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotationVector.scale(errorAxisAngle.getAngle());
 
-      desiredControlFramePose.getPosition(errorTranslationVector);
+      errorTranslationVector.set(desiredControlFramePose.getPosition());
 
       yoErrorRotation.set(errorRotationVector);
       yoErrorTranslation.set(errorTranslationVector);

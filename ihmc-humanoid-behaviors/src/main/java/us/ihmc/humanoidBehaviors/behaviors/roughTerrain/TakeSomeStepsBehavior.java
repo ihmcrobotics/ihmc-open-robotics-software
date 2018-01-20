@@ -224,8 +224,8 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
       {
          SimpleFootstep footstep = plan.getFootstep(i);
          footstep.getSoleFramePose(tempFirstFootstepPose);
-         tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
-         tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
+         tempFootstepPosePosition.set(tempFirstFootstepPose.getPosition());
+         tempFirstFootstepPoseOrientation.set(tempFirstFootstepPose.getOrientation());
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 

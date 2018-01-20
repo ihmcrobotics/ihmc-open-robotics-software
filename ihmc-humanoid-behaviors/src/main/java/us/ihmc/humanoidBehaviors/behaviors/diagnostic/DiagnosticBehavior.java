@@ -1686,11 +1686,8 @@ public class DiagnosticBehavior extends AbstractBehavior
             footstepPose.setToZero(fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG));
             footstepPose.changeFrame(worldFrame);
 
-            Point3D footLocation = new Point3D();
-            Quaternion footOrientation = new Quaternion();
-
-            footstepPose.getPosition(footLocation);
-            footstepPose.getOrientation(footOrientation);
+            Point3D footLocation = new Point3D(footstepPose.getPosition());
+            Quaternion footOrientation = new Quaternion(footstepPose.getOrientation());
 
             FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 
@@ -1715,11 +1712,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          footstepPose.setY(robotSide.getOppositeSide().negateIfLeftSide(walkingControllerParameters.getSteppingParameters().getInPlaceWidth()));
          footstepPose.changeFrame(worldFrame);
 
-         Point3D footLocation = new Point3D();
-         Quaternion footOrientation = new Quaternion();
-
-         footstepPose.getPosition(footLocation);
-         footstepPose.getOrientation(footOrientation);
+         Point3D footLocation = new Point3D(footstepPose.getPosition());
+         Quaternion footOrientation = new Quaternion(footstepPose.getOrientation());
 
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 

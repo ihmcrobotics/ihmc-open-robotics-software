@@ -110,11 +110,8 @@ public class IHMCMocapClient extends MocapDataClient
             FramePose rigidBodyPoseInZUp = new FramePose(mocapRBZUp, new Point3D(0, 0, 0), new Quaternion());
             rigidBodyPoseInZUp.changeFrame(ReferenceFrame.getWorldFrame());
 
-            final Vector3D position = new Vector3D();
-            rigidBodyPoseInZUp.getPosition(position);
-
-            final Quaternion rotation = new Quaternion();
-            rigidBodyPoseInZUp.getOrientation(rotation);
+            final Vector3D position = new Vector3D(rigidBodyPoseInZUp.getPosition());
+            final Quaternion rotation = new Quaternion(rigidBodyPoseInZUp.getOrientation());
 
             listOfConvertedRigidBodies.add(new MocapRigidBody(rb.getId(), position, rotation, null, true));
 //         }
