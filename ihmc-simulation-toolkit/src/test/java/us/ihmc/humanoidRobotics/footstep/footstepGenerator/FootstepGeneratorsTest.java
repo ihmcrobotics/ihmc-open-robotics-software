@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -27,7 +28,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -854,14 +854,14 @@ public class FootstepGeneratorsTest
 
             // initial yaw chosen so that there is no initial rotation: correct orientation of 3rd and 4th steps should be the same if path yaw correct
             double expectedStartYaw = startYaw;
-            FrameOrientation2d expectedStartOrientation = new FrameOrientation2d(WORLD_FRAME, expectedStartYaw);
+            FrameOrientation2D expectedStartOrientation = new FrameOrientation2D(WORLD_FRAME, expectedStartYaw);
             assertStepIsPointingCorrectly("Path yaw test on third step: " + testMessage, footsteps.get(2), expectedStartOrientation);
             assertStepIsPointingCorrectly("Path yaw test on fourth step: " + testMessage, footsteps.get(3), expectedStartOrientation);
 
             // no rotation at end, so correct yaw achieved by correct path orientation
             // Note that this is a redundant test to ensure testTwoSegmentFootstepGenerator test is correct as well...
             double expectedEndYaw = pathOrientation2.getOrientationRadians();
-            FrameOrientation2d expectedEndOrientation = new FrameOrientation2d(WORLD_FRAME, expectedEndYaw);
+            FrameOrientation2D expectedEndOrientation = new FrameOrientation2D(WORLD_FRAME, expectedEndYaw);
             assertLastTwoStepsPointingCorrectly("Path yaw test on last two steps: " + testMessage, footsteps, expectedEndOrientation);
 
          }
@@ -1746,7 +1746,7 @@ public class FootstepGeneratorsTest
       footsteps = testRotateTranslateRotateFootstepGenerator(testDescription, startX, startY, startYaw, pathYaw, endX, endY, endYaw, vis);
       assertNoCourseRepeatedSquareUpSteps(testDescription, footsteps, startX, startY, startYaw, eps, 1);
       String plusTest = testDescription + " check correct footstep orientation if no overstep";
-      FrameOrientation2d expectedStepOrientation = new FrameOrientation2d(WORLD_FRAME, pathYaw);
+      FrameOrientation2D expectedStepOrientation = new FrameOrientation2D(WORLD_FRAME, pathYaw);
       assertStepIsPointingCorrectly(plusTest, footsteps.get(0), expectedStepOrientation);
 
       // test that angular displacement in direction of translational displacement backwards doesn't create square up steps
@@ -1769,7 +1769,7 @@ public class FootstepGeneratorsTest
       footsteps = testRotateTranslateRotateFootstepGenerator(testDescription, startX, startY, startYaw, pathYaw, endX, endY, endYaw, vis);
       assertNoCourseRepeatedSquareUpSteps(testDescription, footsteps, startX, startY, startYaw, eps, 1);
       plusTest = testDescription + " check correct footstep orientation if no overstep";
-      expectedStepOrientation = new FrameOrientation2d(WORLD_FRAME, pathYaw);
+      expectedStepOrientation = new FrameOrientation2D(WORLD_FRAME, pathYaw);
       assertStepIsPointingCorrectly(plusTest, footsteps.get(0), expectedStepOrientation);
 
       // test that angular displacement in opposite direction of translational displacement going backward doesn't cross toe across other foot or create step in place step
@@ -1879,7 +1879,7 @@ public class FootstepGeneratorsTest
       FramePose footPose = new FramePose();
       footstep.getPose(footPose);
 
-      FrameOrientation2d footOrientation = new FrameOrientation2d();
+      FrameOrientation2D footOrientation = new FrameOrientation2D();
       footPose.getOrientation2dIncludingFrame(footOrientation);
       footOrientation.changeFrame(WORLD_FRAME);
       double footYaw = footOrientation.getYaw();
@@ -1972,7 +1972,7 @@ public class FootstepGeneratorsTest
       /////////////////////////////////////
       // Validate footsteps
 
-      FrameOrientation2d expectedEndOrientation = new FrameOrientation2d(WORLD_FRAME, startWorldYaw);
+      FrameOrientation2D expectedEndOrientation = new FrameOrientation2D(WORLD_FRAME, startWorldYaw);
       assertFootstepsValid(testDescription, visualize, startWorldPoint, startYaw, endWorldPoint, startFeet, footsteps);
       assertLastTwoStepsPointingCorrectly(testDescription, footsteps, expectedEndOrientation);
 
@@ -2013,11 +2013,11 @@ public class FootstepGeneratorsTest
    {
       Point2D startWorldPoint = new Point2D(startX, startY);
 
-      FrameOrientation2d pathOrientation = new FrameOrientation2d(WORLD_FRAME, pathYaw);
+      FrameOrientation2D pathOrientation = new FrameOrientation2D(WORLD_FRAME, pathYaw);
 
       Point2D endWorldPoint = new Point2D(endX, endY);
       FramePoint2D endPoint = new FramePoint2D(WORLD_FRAME, endWorldPoint);
-      FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
+      FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
       FramePose2d endPose = new FramePose2d(endPoint, endOrientation);
 
       SideDependentList<Footstep> startFeet = updatedStartFeet(startX, startY, startYaw);
@@ -2032,7 +2032,7 @@ public class FootstepGeneratorsTest
       /////////////////////////////////////
       // Validate footsteps
 
-      FrameOrientation2d expectedEndOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
+      FrameOrientation2D expectedEndOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
       assertFootstepsValid(testDescription, visualize, startWorldPoint, startYaw, endWorldPoint, startFeet, footsteps);
       assertLastTwoStepsPointingCorrectly(testDescription, footsteps, expectedEndOrientation);
 
@@ -2095,7 +2095,7 @@ public class FootstepGeneratorsTest
       Point2D startWorldPoint = new Point2D(startX, startY);
       Point2D endWorldPoint = new Point2D(endX, endY);
       FramePoint2D endPoint = new FramePoint2D(WORLD_FRAME, endWorldPoint);
-      FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
+      FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
 
       FramePose2d endPose = new FramePose2d(endPoint, endOrientation);
 
@@ -2136,11 +2136,11 @@ public class FootstepGeneratorsTest
       FramePoint2D midPoint = new FramePoint2D(WORLD_FRAME, midWorldPoint);
       FramePoint2D endPoint = new FramePoint2D(WORLD_FRAME, endWorldPoint);
 
-      FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
+      FrameOrientation2D startOrientation = new FrameOrientation2D(WORLD_FRAME, startYaw);
       FramePose2d startPose = new FramePose2d(startPoint, startOrientation);
       double midYaw = AngleTools.calculateHeading(startPose, midPoint, 0.0, 1e-14);
 
-      FrameOrientation2d midOrientation = new FrameOrientation2d(WORLD_FRAME, midYaw);
+      FrameOrientation2D midOrientation = new FrameOrientation2D(WORLD_FRAME, midYaw);
       FramePose2d midPose = new FramePose2d(midPoint, midOrientation);
 
       double pathYaw1 = pathDirection1.getOrientationRadians();
@@ -2294,21 +2294,21 @@ public class FootstepGeneratorsTest
    private static void assertStepIsPathAlignedWithOffset(String message, Footstep footstep, Point2D destinationVector, double startWorldYaw,
          double pathRelativeYaw)
    {
-      FrameOrientation2d endOrientation;
+      FrameOrientation2D endOrientation;
       if (destinationVector.distance(new Point2D(0, 0)) < 1e-14)
       {
-         endOrientation = new FrameOrientation2d(WORLD_FRAME, startWorldYaw);
+         endOrientation = new FrameOrientation2D(WORLD_FRAME, startWorldYaw);
       }
       else
       {
          double destinationVectorYaw = Math.atan2(destinationVector.getY(), destinationVector.getX());
-         endOrientation = new FrameOrientation2d(WORLD_FRAME, destinationVectorYaw + pathRelativeYaw);
+         endOrientation = new FrameOrientation2D(WORLD_FRAME, destinationVectorYaw + pathRelativeYaw);
       }
 
       assertStepIsPointingCorrectly(message, footstep, endOrientation);
    }
 
-   private static void assertLastTwoStepsPointingCorrectly(String testDescription, ArrayList<Footstep> footsteps, FrameOrientation2d endOrientation)
+   private static void assertLastTwoStepsPointingCorrectly(String testDescription, ArrayList<Footstep> footsteps, FrameOrientation2D endOrientation)
    {
       assertTrue(testDescription + " should have at least two footsteps", footsteps.size() >= 2);
       assertStepIsPointingCorrectly(testDescription + " Second to last footstep.", footsteps.get(footsteps.size() - 2), endOrientation);
@@ -2317,7 +2317,7 @@ public class FootstepGeneratorsTest
 
    private static void assertMiddleStepsPointingCorrectly(String testDescription, ArrayList<Footstep> footsteps, double expectedFootYaw)
    {
-      FrameOrientation2d midOrientation = new FrameOrientation2d(WORLD_FRAME, expectedFootYaw);
+      FrameOrientation2D midOrientation = new FrameOrientation2D(WORLD_FRAME, expectedFootYaw);
 
       int midStep1 = footsteps.size() / 2;
       int midStep2 = footsteps.size() / 2 + 1;
@@ -2353,7 +2353,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-   private static void assertStepIsPointingCorrectly(String message, Footstep footstep, FrameOrientation2d endOrientation)
+   private static void assertStepIsPointingCorrectly(String message, Footstep footstep, FrameOrientation2D endOrientation)
    {
       FramePose footPose = new FramePose();
       footstep.getPose(footPose);
@@ -2362,7 +2362,7 @@ public class FootstepGeneratorsTest
       // System.out.println(Math.toDegrees(footPose.getRoll()) + "?=" + Math.toDegrees(footPose.getPitch()) + "?=" + 0.0);
       assertEquals(message + " Foot roll should be 0.", 0.0, footPose.getRoll(), 1e-10);
       assertEquals(message + " Foot pitch should be 0.", 0.0, footPose.getPitch(), 1e-10);
-      FrameOrientation2d footOrientation = new FrameOrientation2d();
+      FrameOrientation2D footOrientation = new FrameOrientation2D();
       footPose.getOrientation2dIncludingFrame(footOrientation);
       double yawDiff = endOrientation.difference(footOrientation);
       assertEquals(message + " Foot yaw and desired yaw difference should be 0.", 0.0, yawDiff, 1e-10);

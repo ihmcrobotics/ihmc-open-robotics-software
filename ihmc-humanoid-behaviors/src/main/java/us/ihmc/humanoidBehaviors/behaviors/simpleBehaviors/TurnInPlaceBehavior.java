@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -14,7 +15,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGe
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -40,7 +40,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
 
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
-   private FrameOrientation2d targetOrientationInWorldFrame;
+   private FrameOrientation2D targetOrientationInWorldFrame;
 
    public TurnInPlaceBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
@@ -66,7 +66,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
 
    public void setTarget(double desiredYaw)
    {
-      targetOrientationInWorldFrame = new FrameOrientation2d(referenceFrames.getMidFeetZUpFrame());
+      targetOrientationInWorldFrame = new FrameOrientation2D(referenceFrames.getMidFeetZUpFrame());
       targetOrientationInWorldFrame.setYaw(desiredYaw);
       targetOrientationInWorldFrame.changeFrame(worldFrame);
 

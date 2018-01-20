@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -331,7 +332,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       framePoint2dToPack.setIncludingFrame(referenceFrame, pose.getPosition().getX(), pose.getPosition().getY());
    }
 
-   public void getOrientation2dIncludingFrame(FrameOrientation2d frameOrientation2dToPack)
+   public void getOrientation2dIncludingFrame(FrameOrientation2D frameOrientation2dToPack)
    {
       frameOrientation2dToPack.setIncludingFrame(referenceFrame, pose.getYaw());
    }

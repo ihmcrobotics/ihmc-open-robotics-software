@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
@@ -34,12 +34,12 @@ public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
       FramePoint2D endPosition = new FramePoint2D();
       endPose.getPositionIncludingFrame(endPosition);
       double heading = AngleTools.calculateHeading(startPose, endPosition, headingOffset, noTranslationTolerance);
-      FrameOrientation2d intermediateOrientation = new FrameOrientation2d(startPose.getReferenceFrame(), heading);
+      FrameOrientation2D intermediateOrientation = new FrameOrientation2D(startPose.getReferenceFrame(), heading);
       TurningOverheadPath turningPath = new TurningOverheadPath(startPose, intermediateOrientation);
       FramePose2d intermediatePose = turningPath.getPoseAtS(1.0);
       StraightLineOverheadPath straightPath = new StraightLineOverheadPath(intermediatePose, endPosition);
       intermediatePose = straightPath.getPoseAtS(1.0);
-      FrameOrientation2d endOrientation = new FrameOrientation2d();
+      FrameOrientation2D endOrientation = new FrameOrientation2D();
       endPose.getOrientationIncludingFrame(endOrientation);
       TurningOverheadPath endTurningPath = new TurningOverheadPath(intermediatePose, endOrientation);
 

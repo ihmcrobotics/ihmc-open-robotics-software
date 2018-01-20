@@ -1,16 +1,16 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 public class StraightLineOverheadPath extends OverheadPath
 {
    private final FramePoint2D startPoint;
    private final FramePoint2D endPoint;
-   private final FrameOrientation2d orientation;
+   private final FrameOrientation2D orientation;
    private final double distance;
 
    public StraightLineOverheadPath(FramePose2d startPose, FramePoint2D endPosition)
@@ -19,7 +19,7 @@ public class StraightLineOverheadPath extends OverheadPath
       this.startPoint = new FramePoint2D();
       startPose.getPositionIncludingFrame(startPoint);
       this.endPoint = new FramePoint2D(endPosition);
-      this.orientation = new FrameOrientation2d();
+      this.orientation = new FrameOrientation2D();
       startPose.getOrientationIncludingFrame(orientation);
       this.distance = endPoint.distance(startPoint);
    }
@@ -54,7 +54,7 @@ public class StraightLineOverheadPath extends OverheadPath
    {
       FramePoint2D newStartPoint = new FramePoint2D(startPoint);
       newStartPoint.changeFrame(desiredFrame);
-      FrameOrientation2d newStartOrientation = new FrameOrientation2d(orientation);
+      FrameOrientation2D newStartOrientation = new FrameOrientation2D(orientation);
       newStartOrientation.changeFrame(desiredFrame);
       FramePose2d newStartPose = new FramePose2d(newStartPoint, newStartOrientation);
       FramePoint2D newEndPoint = new FramePoint2D(endPoint);
