@@ -32,8 +32,7 @@ public class TurnTranslateTurnFootstepGenerator implements FootstepGenerator
       this.soleFrames = soleFrames;
       this.pathType = pathType;
       firstTurn = new TurnInPlaceFootstepGenerator(feet, soleFrames, pathYaw, pathType);
-      FramePoint2D endPosition = new FramePoint2D();
-      endPose.getPositionIncludingFrame(endPosition);
+      FramePoint2D endPosition = new FramePoint2D(endPose.getPosition());
       translate = new TranslationFootstepGenerator(feet, soleFrames, endPosition, translationalPathType);
       endOrientation = new FrameOrientation2D();
       endPose.getOrientationIncludingFrame(endOrientation);

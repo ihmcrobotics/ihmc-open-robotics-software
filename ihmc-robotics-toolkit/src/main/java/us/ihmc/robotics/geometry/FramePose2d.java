@@ -5,12 +5,93 @@ import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameOrientation2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
 {
    private final Pose2D pose;
+
+   private final FixedFrameOrientation2DBasics orientationPart = new FixedFrameOrientation2DBasics()
+   {
+      @Override
+      public void setYaw(double yaw)
+      {
+         pose.setYaw(yaw);
+      }
+
+      @Override
+      public ReferenceFrame getReferenceFrame()
+      {
+         return referenceFrame;
+      }
+
+      @Override
+      public double getYaw()
+      {
+         return pose.getYaw();
+      }
+
+      @Override
+      public void applyTransform(Transform transform)
+      {
+         pose.getOrientation().applyTransform(transform);
+      }
+
+      @Override
+      public void applyInverseTransform(Transform transform)
+      {
+         pose.getOrientation().applyInverseTransform(transform);
+      }
+   };
+
+   private final FixedFramePoint2DBasics positionPart = new FixedFramePoint2DBasics()
+   {
+      @Override
+      public void setX(double x)
+      {
+         pose.setX(x);
+      }
+
+      @Override
+      public void setY(double y)
+      {
+         pose.setY(y);
+      }
+
+      @Override
+      public ReferenceFrame getReferenceFrame()
+      {
+         return referenceFrame;
+      }
+
+      @Override
+      public double getX()
+      {
+         return pose.getX();
+      }
+
+      @Override
+      public double getY()
+      {
+         return pose.getY();
+      }
+
+      @Override
+      public void applyTransform(Transform transform, boolean checkIfTransformInXYplane)
+      {
+         pose.getPosition().applyTransform(transform, checkIfTransformInXYplane);
+      }
+
+      @Override
+      public void applyInverseTransform(Transform transform, boolean checkIfTransformInXYplane)
+      {
+         pose.getPosition().applyInverseTransform(transform, checkIfTransformInXYplane);
+      }
+   };
 
    public FramePose2d()
    {
@@ -52,6 +133,16 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
    public void getPose(RigidBodyTransform rigidBodyTransformToPack)
    {
       pose.get(rigidBodyTransformToPack);
+   }
+
+   public FixedFramePoint2DBasics getPosition()
+   {
+      return positionPart;
+   }
+
+   public FixedFrameOrientation2DBasics getOrientation()
+   {
+      return orientationPart;
    }
 
    public void setOrientation(FrameOrientation2D orientation)
@@ -117,12 +208,6 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
    public double getY()
    {
       return pose.getY();
-   }
-
-   public void getPositionIncludingFrame(FramePoint2D positionToPack)
-   {
-      positionToPack.setToZero(referenceFrame);
-      positionToPack.set(pose.getPosition());
    }
 
    public void getOrientationIncludingFrame(FrameOrientation2D orientationToPack)
