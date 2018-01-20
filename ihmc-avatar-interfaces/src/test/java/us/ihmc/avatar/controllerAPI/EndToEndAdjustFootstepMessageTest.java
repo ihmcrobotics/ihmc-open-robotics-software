@@ -176,8 +176,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       String namePrefix = sidePrefix + "Footstep0Pose";
       FramePose framePose = new FramePose();
       findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs).getFramePose(framePose);
-      Pose3D pose = new Pose3D();
-      framePose.get(pose);
+      Pose3D pose = new Pose3D(framePose);
       return pose;
    }
 
