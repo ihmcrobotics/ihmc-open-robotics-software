@@ -140,7 +140,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setDesiredHandPose(RobotSide robotSide, FramePose desiredHandPose)
    {
-      desiredHandPose.getPoseIncludingFrame(desiredPosition, desiredOrientation);
+      desiredHandPose.get(desiredPosition, desiredOrientation);
       setDesiredHandPose(robotSide, desiredPosition, desiredOrientation);
    }
 

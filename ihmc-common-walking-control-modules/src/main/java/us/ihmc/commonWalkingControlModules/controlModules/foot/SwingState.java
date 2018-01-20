@@ -335,7 +335,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
-      footstepPose.getPoseIncludingFrame(finalPosition, finalOrientation);
+      footstepPose.get(finalPosition, finalOrientation);
       finalLinearVelocity.setIncludingFrame(yoTouchdownVelocity);
       finalAngularVelocity.setToZero(worldFrame);
 

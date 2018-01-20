@@ -342,7 +342,7 @@ public class TaskspaceHandControlState extends HandControlState
          orientationTrajectoryGenerator.getOrientation(tempFrameOrientation);
          desiredPose.setIncludingFrame(tempFramePoint, tempFrameOrientation);
          changeControlFrame(controlFrame, newControlFrame, desiredPose);
-         desiredPose.getPoseIncludingFrame(tempFramePoint, tempFrameOrientation);
+         desiredPose.get(tempFramePoint, tempFrameOrientation);
          trajectoryPointToPack.setToZero(desiredPose.getReferenceFrame());
          trajectoryPointToPack.setPosition(tempFramePoint);
          trajectoryPointToPack.setOrientation(tempFrameOrientation);

@@ -223,7 +223,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void setInitialPose(FramePose initialPose)
    {
-      initialPose.getPoseIncludingFrame(tempPosition, tempOrientation);
+      initialPose.get(tempPosition, tempOrientation);
 
       initialPosition.setAndMatchFrame(tempPosition);
       initialOrientation.setAndMatchFrame(tempOrientation);
@@ -241,7 +241,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void setFinalPose(FramePose finalPose)
    {
-      finalPose.getPoseIncludingFrame(tempPosition, tempOrientation);
+      finalPose.get(tempPosition, tempOrientation);
 
       finalPosition.setAndMatchFrame(tempPosition);
       finalOrientation.setAndMatchFrame(tempOrientation);

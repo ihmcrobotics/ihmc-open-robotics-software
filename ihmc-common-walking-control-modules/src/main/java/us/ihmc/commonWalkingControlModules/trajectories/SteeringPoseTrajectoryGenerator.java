@@ -294,7 +294,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void setInitialPose(FramePose initialPose)
    {
-      initialPose.getPoseIncludingFrame(initialPosition, initialOrientation);
+      initialPose.get(initialPosition, initialOrientation);
       initialPosition.changeFrame(trajectoryFrame);
       initialOrientation.changeFrame(trajectoryFrame);
       yoInitialPosition.set(initialPosition);

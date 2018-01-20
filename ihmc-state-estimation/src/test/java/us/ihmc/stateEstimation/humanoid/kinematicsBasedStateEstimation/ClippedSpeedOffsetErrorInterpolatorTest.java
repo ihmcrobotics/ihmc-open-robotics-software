@@ -374,11 +374,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
-            interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
+            interpolatedPose.get(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
-            interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
@@ -457,11 +457,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
-            interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
+            interpolatedPose.get(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
-            interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
@@ -541,11 +541,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
-            interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
+            interpolatedPose.get(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
-            interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
@@ -604,11 +604,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
-            interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
+            interpolatedPose.get(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
-            interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),

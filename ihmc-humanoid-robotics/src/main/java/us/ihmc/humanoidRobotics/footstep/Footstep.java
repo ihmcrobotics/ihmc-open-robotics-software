@@ -348,7 +348,7 @@ public class Footstep implements Settable<Footstep>
 
    public void getPose(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
    {
-      footstepPose.getPoseIncludingFrame(positionToPack, orientationToPack);
+      footstepPose.get(positionToPack, orientationToPack);
    }
 
    public void getPosition(FramePoint3D positionToPack)
