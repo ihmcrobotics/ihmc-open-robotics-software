@@ -150,7 +150,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
       Quaternion orientation = new Quaternion();
 
       orientation.setYawPitchRoll(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
-      valvePose.setPose(position, orientation);
+      valvePose.set(position, orientation);
 
       ContactableValveRobot valve = new ContactableValveRobot(valveRobotName, valveType, 0.5, valvePose);
 

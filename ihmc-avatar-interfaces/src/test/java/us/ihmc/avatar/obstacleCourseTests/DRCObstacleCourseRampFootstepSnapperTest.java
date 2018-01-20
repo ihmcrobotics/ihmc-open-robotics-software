@@ -141,7 +141,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          RobotSide robotSide = footstepData.getRobotSide();
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
-         pose.setPose(footstepData.getLocation(), footstepData.getOrientation());
+         pose.set(footstepData.getLocation(), footstepData.getOrientation());
          corruptedFootstepList.add(new Footstep(robotSide, pose));
       }
 

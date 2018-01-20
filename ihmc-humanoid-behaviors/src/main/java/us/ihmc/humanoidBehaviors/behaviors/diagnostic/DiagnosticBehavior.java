@@ -1380,7 +1380,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.12), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.set(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPose(true, robotSide, desiredFootstepPosition);
       pipeLine.requestNewStage();
@@ -1416,7 +1416,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.12), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.set(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPose(true, robotSide, desiredFootstepPosition);
       pipeLine.requestNewStage();
@@ -1504,7 +1504,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.25), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.set(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPose(true, robotSide, desiredFootstepPosition);
 
@@ -1567,7 +1567,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       desiredFootstepPosition = new FramePose(soleZUpFrame);
       position = new Point3D(0., robotSide.negateIfRightSide(0.25), 0.0);
       orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.set(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPose(false, robotSide, desiredFootstepPosition);
       pipeLine.requestNewStage();

@@ -321,7 +321,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
    public void setPoseInWorld(Point3D position, Quaternion orientation)
    {
-      this.valvePoseInWorld.setPose(position, orientation);
+      this.valvePoseInWorld.set(position, orientation);
    }
 
    public void setDamping(double dampingValue)
