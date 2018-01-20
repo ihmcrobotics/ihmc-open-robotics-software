@@ -314,7 +314,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
    public void setPoseInWorld(FramePose valvePoseInWorld)
    {
-      this.valvePoseInWorld.setPose(valvePoseInWorld);
+      this.valvePoseInWorld.set(valvePoseInWorld);
    }
 
    public void setPoseInWorld(Point3D position, Quaternion orientation)

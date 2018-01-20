@@ -56,13 +56,13 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setPoseAndUpdate(FramePose pose)
    {
-      originPose.setPose(pose);
+      originPose.set(pose);
       this.update();
    }
 
    public void setPoseAndUpdate(PoseReferenceFrame poseReferenceFrame)
    {
-      originPose.setPose(poseReferenceFrame.originPose);
+      originPose.set(poseReferenceFrame.originPose);
       this.update();
    }
 

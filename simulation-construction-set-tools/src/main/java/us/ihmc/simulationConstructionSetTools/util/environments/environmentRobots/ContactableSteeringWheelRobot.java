@@ -368,7 +368,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
    public void setPoseInWorld(FramePose poseInWorld)
    {
-      this.steeringWheelPoseInWorld.setPose(poseInWorld);
+      this.steeringWheelPoseInWorld.set(poseInWorld);
    }
 
    public void setDamping(double dampingValue)

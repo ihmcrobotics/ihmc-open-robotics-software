@@ -568,7 +568,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          Vector3D outdatedPoseUpdatedInWorldFrame_Translation = new Vector3D(outdatedPoseUpdatedInWorldFrame.getPosition());
          
          FramePose testedPose = new FramePose(worldFrame);
-         testedPose.setPose(outdatedPoseUpdatedInWorldFrame);
+         testedPose.set(outdatedPoseUpdatedInWorldFrame);
          testedPose.changeFrame(upToDateReferenceFrameInPresent);
 
          Vector3D testedTranslation = new Vector3D();

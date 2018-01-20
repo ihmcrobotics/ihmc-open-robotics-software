@@ -189,11 +189,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D> implements
       pose.setZ(z);
    }
 
-   public void setPose(FramePose pose)
-   {
-      set(pose);
-   }
-
    public void set(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       setPosition(position);

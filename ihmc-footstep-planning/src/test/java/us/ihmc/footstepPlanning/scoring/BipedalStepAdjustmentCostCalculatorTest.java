@@ -84,7 +84,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
          idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
 
          FramePose candidateFootstep = new FramePose(worldFrame);
-         candidateFootstep.setPose(idealFootstep);
+         candidateFootstep.set(idealFootstep);
 
          double idealFootstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
          assertEquals(stepAdjustmentCostCalculator.getStepBaseCost(), idealFootstepCost, 1e-7);
