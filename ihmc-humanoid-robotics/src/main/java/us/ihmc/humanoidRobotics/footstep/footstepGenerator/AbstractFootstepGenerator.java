@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -21,7 +22,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappin
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -199,8 +199,8 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 
       leftPose.changeFrame(startFramePose);
       rightPose.changeFrame(startFramePose);
-      FrameOrientation2d leftOrientation = new FrameOrientation2d();
-      FrameOrientation2d rightOrientation = new FrameOrientation2d();
+      FrameOrientation2D leftOrientation = new FrameOrientation2D();
+      FrameOrientation2D rightOrientation = new FrameOrientation2D();
       leftPose.getOrientation2dIncludingFrame(leftOrientation);
       rightPose.getOrientation2dIncludingFrame(rightOrientation);
       initialDeltaFeetYaw = leftOrientation.difference(rightOrientation);

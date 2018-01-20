@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,7 +14,6 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLinkLength
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -52,7 +52,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint3D tempFootPositionSameSideOppositeEnd = new FramePoint3D();
    private final FramePoint3D tempFootPositionOppositeSideSameEnd = new FramePoint3D();
    
-   private final FrameOrientation2d tempOppositeSideOrientation = new FrameOrientation2d();
+   private final FrameOrientation2D tempOppositeSideOrientation = new FrameOrientation2D();
    
    private final ExecutionTimer getSwingTargetTimer = new ExecutionTimer("getSwingTargetTimer", registry);
 

@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,7 +14,7 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
 
    public FramePose2d()
    {
-      this(new FramePoint2D(), new FrameOrientation2d());
+      this(new FramePoint2D(), new FrameOrientation2D());
    }
 
    public FramePose2d(ReferenceFrame referenceFrame)
@@ -27,9 +28,9 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
       this.pose = getGeometryObject();
    }
 
-   public FramePose2d(FramePoint2D position, FrameOrientation2d orientation)
+   public FramePose2d(FramePoint2D position, FrameOrientation2D orientation)
    {
-      this(position.getReferenceFrame(), new Pose2D(position, orientation.getGeometryObject()));
+      this(position.getReferenceFrame(), new Pose2D(position, orientation));
       position.checkReferenceFrameMatch(orientation);
    }
 
@@ -48,10 +49,10 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
       pose.get(rigidBodyTransformToPack);
    }
 
-   public void setOrientation(FrameOrientation2d orientation)
+   public void setOrientation(FrameOrientation2D orientation)
    {
       checkReferenceFrameMatch(orientation);
-      pose.setOrientation(orientation.getGeometryObject());
+      pose.setOrientation(orientation);
    }
 
    public void setPosition(FramePoint2D position)
@@ -113,10 +114,10 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
       positionToPack.set(pose.getPosition());
    }
 
-   public void getOrientationIncludingFrame(FrameOrientation2d orientationToPack)
+   public void getOrientationIncludingFrame(FrameOrientation2D orientationToPack)
    {
       orientationToPack.setToZero(referenceFrame);
-      orientationToPack.setYaw(pose.getYaw());
+      pose.getOrientation(orientationToPack);
    }
 
    public void interpolate(FramePose2d framePose1, FramePose2d framePose2, double alpha)

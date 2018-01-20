@@ -1,10 +1,10 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 public class PlanarJointReferenceFrame extends ReferenceFrame
@@ -30,7 +30,7 @@ public class PlanarJointReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setOrientationAndUpdate(FrameOrientation2d orientation)
+   public void setOrientationAndUpdate(FrameOrientation2D orientation)
    {
       orientation.checkReferenceFrameMatch(parentFrame);
       this.rotation = orientation.getYaw();

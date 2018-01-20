@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import static org.junit.Assert.assertTrue;
 
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -9,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -118,8 +118,8 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       stance.getPose(stancePose);
       FramePose swingEndPose = new FramePose();
       swingEnd.getPose(swingEndPose);
-      FrameOrientation2d stanceOrientation = new FrameOrientation2d();
-      FrameOrientation2d swingOrientation = new FrameOrientation2d();
+      FrameOrientation2D stanceOrientation = new FrameOrientation2D();
+      FrameOrientation2D swingOrientation = new FrameOrientation2D();
       stancePose.getOrientation2dIncludingFrame(stanceOrientation);
       swingEndPose.getOrientation2dIncludingFrame(swingOrientation);
       double yawDifference = swingOrientation.difference(stanceOrientation);

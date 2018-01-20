@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -20,7 +21,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFoots
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -221,7 +221,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       footsteps.clear();
       FramePose2d endPose = new FramePose2d(worldFrame);
       endPose.setPosition(new FramePoint2D(worldFrame, targetLocation.getX(), targetLocation.getY()));
-      endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
+      endPose.setOrientation(new FrameOrientation2D(worldFrame, targetOrientation.getYaw().getDoubleValue()));
 
       boolean computeFootstepsWithFlippedInitialTurnDirection = pathType.getAngle() != 0.0;
 
