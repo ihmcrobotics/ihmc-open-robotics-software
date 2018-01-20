@@ -325,7 +325,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D> implements
       return orientationPart;
    }
 
-   public void getOrientation(double[] yawPitchRoll)
+   public void getOrientationYawPitchRoll(double[] yawPitchRoll)
    {
       pose.getOrientationYawPitchRoll(yawPitchRoll);
    }
