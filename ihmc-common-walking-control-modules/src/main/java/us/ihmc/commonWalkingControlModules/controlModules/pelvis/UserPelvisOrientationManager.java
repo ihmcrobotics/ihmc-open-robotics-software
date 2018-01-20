@@ -90,7 +90,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    public void getCurrentDesiredOrientation(FrameQuaternion desiredOrientation)
    {
       taskspaceControlState.getDesiredPose(tempPose);
-      tempPose.getOrientation(desiredOrientation);
+      desiredOrientation.setIncludingFrame(tempPose.getOrientation());
    }
 
    @Override

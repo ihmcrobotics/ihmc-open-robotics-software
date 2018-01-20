@@ -168,27 +168,19 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       trajectoryTime.set(duration);
    }
 
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
-
    public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
-      tempOrientation.setIncludingFrame(initialOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.initialOrientation.set(tempOrientation);
+      this.initialOrientation.setAndMatchFrame(initialOrientation);
    }
 
    public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
-      tempOrientation.setIncludingFrame(finalOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.finalOrientation.set(tempOrientation);
+      this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
 
    public void setFinalOrientation(FramePose finalPose)
    {
-      finalPose.getOrientation(tempOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.finalOrientation.set(tempOrientation);
+      this.finalOrientation.setAndMatchFrame(finalPose.getOrientation());
    }
 
    public void setInitialAngularVelocity(FrameVector3DReadOnly initialAngularVelocity)

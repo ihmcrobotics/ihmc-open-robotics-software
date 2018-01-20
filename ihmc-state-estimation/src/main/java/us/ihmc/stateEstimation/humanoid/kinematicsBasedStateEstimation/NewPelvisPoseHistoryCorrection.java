@@ -218,7 +218,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       correctedPelvisTransformInWorldFrame.getTranslation(correctedPelvisTranslation);
       localizationTranslation.set(iterativeClosestPointInWorldFramePose.getPosition());
       
-      iterativeClosestPointInWorldFramePose.getOrientation(localizationOrientation);
+      localizationOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
       correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame.getRotationMatrix());
       
       errorBetweenCorrectedAndLocalizationTransform_Rotation.difference(correctedPelvisOrientation, localizationOrientation);

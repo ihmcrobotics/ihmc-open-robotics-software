@@ -311,7 +311,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void get(FramePoint3DBasics framePointToPack, FrameQuaternionBasics orientationToPack)
    {
       framePointToPack.setIncludingFrame(positionPart);
-      getOrientation(orientationToPack);
+      orientationToPack.setIncludingFrame(orientationPart);
    }
 
    public FixedFramePoint3DBasics getPosition()
@@ -327,11 +327,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void getOrientation(double[] yawPitchRoll)
    {
       pose.getOrientationYawPitchRoll(yawPitchRoll);
-   }
-
-   public void getOrientation(FrameQuaternionBasics orientationToPack)
-   {
-      orientationToPack.setIncludingFrame(referenceFrame, pose.getOrientation());
    }
 
    /**
