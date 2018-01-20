@@ -197,10 +197,8 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 
       leftPose.changeFrame(startFramePose);
       rightPose.changeFrame(startFramePose);
-      FrameOrientation2D leftOrientation = new FrameOrientation2D();
-      FrameOrientation2D rightOrientation = new FrameOrientation2D();
-      leftPose.getOrientation(leftOrientation);
-      rightPose.getOrientation(rightOrientation);
+      FrameOrientation2D leftOrientation = new FrameOrientation2D(leftPose.getOrientation());
+      FrameOrientation2D rightOrientation = new FrameOrientation2D(rightPose.getOrientation());
       initialDeltaFeetYaw = leftOrientation.difference(rightOrientation);
       initialDeltaFeetY = leftPose.getY() - rightPose.getY();
       initialDeltaFeetX = leftPose.getX() - rightPose.getX();

@@ -1877,8 +1877,7 @@ public class FootstepGeneratorsTest
       FramePose footPose = new FramePose();
       footstep.getPose(footPose);
 
-      FrameOrientation2D footOrientation = new FrameOrientation2D();
-      footPose.getOrientation(footOrientation);
+      FrameOrientation2D footOrientation = new FrameOrientation2D(footPose.getOrientation());
       footOrientation.changeFrame(WORLD_FRAME);
       double footYaw = footOrientation.getYaw();
 
@@ -2358,8 +2357,7 @@ public class FootstepGeneratorsTest
       // System.out.println(Math.toDegrees(footPose.getRoll()) + "?=" + Math.toDegrees(footPose.getPitch()) + "?=" + 0.0);
       assertEquals(message + " Foot roll should be 0.", 0.0, footPose.getRoll(), 1e-10);
       assertEquals(message + " Foot pitch should be 0.", 0.0, footPose.getPitch(), 1e-10);
-      FrameOrientation2D footOrientation = new FrameOrientation2D();
-      footPose.getOrientation(footOrientation);
+      FrameOrientation2D footOrientation = new FrameOrientation2D(footPose.getOrientation());
       double yawDiff = endOrientation.difference(footOrientation);
       assertEquals(message + " Foot yaw and desired yaw difference should be 0.", 0.0, yawDiff, 1e-10);
    }
