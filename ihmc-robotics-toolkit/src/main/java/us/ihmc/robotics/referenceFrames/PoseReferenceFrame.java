@@ -131,7 +131,7 @@ public class PoseReferenceFrame extends ReferenceFrame
    public void setXYFromPosition2dAndUpdate(FramePoint2DReadOnly position2d)
    {
       position2d.checkReferenceFrameMatch(parentFrame);
-      originPose.setXYFromPosition2d(position2d);
+      originPose.setPosition(position2d);
       this.update();
    }
 
