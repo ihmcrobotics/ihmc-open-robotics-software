@@ -428,7 +428,7 @@ public class TransformInterpolationCalculatorTest
          expectedFramePose.interpolate(framePose1, framePose2, alpha);
          expectedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         expectedFramePose.getPose(expectedTransform);
+         expectedFramePose.get(expectedTransform);
          
          assertTrue(expectedTransform.epsilonEquals(toTestTransform, 1.0e-10));
       }

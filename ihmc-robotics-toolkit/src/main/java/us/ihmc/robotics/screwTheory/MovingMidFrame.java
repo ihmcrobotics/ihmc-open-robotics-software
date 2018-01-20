@@ -39,7 +39,7 @@ public class MovingMidFrame extends MovingReferenceFrame
 
       pose.setToZero(parentFrame);
       pose.interpolate(poseOne, poseTwo, 0.5);
-      pose.getPose(transformToParent);
+      pose.get(transformToParent);
    }
 
    private final FrameVector3D linearVelocity = new FrameVector3D();

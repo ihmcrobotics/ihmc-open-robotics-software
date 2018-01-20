@@ -162,7 +162,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
       localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Translation.setTranslationAndIdentityRotation(translationOffsetVector);
 
       localizationPoseInThePast.changeFrame(stateEstimatorReferenceFrameInThePast);
-      localizationPoseInThePast.getPose(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
+      localizationPoseInThePast.get(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
       localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation.setTranslationToZero();
 
       totalErrorTransform.set(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);

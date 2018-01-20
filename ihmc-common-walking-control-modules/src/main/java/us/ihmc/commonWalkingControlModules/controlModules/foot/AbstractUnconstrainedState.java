@@ -210,7 +210,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       if (oldBodyFrame == newBodyFrame)
          return;
 
-      framePoseToModify.getPose(oldBodyFrameDesiredTransform);
+      framePoseToModify.get(oldBodyFrameDesiredTransform);
       newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
       newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
       newBodyFrameDesiredTransform.multiply(transformFromNewBodyFrameToOldBodyFrame);

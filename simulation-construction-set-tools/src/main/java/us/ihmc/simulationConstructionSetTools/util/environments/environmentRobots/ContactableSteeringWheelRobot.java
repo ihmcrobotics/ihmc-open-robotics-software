@@ -148,7 +148,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       crossBar.setPosition(new Vector3D(-height/2.0, 0.0, heightAboveWheel));
       
       RigidBodyTransform transform = new RigidBodyTransform();
-      crossBar.getPose(transform);
+      crossBar.get(transform);
       
       FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, transform, height, radius);
       spokesCylinders.add(spinnerHandleCylinder);

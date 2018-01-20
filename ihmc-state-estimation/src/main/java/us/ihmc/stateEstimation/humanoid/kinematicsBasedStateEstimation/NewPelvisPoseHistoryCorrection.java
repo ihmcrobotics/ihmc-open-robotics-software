@@ -213,7 +213,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       if(!hasOneIcpPacketEverBeenReceived.getBooleanValue())
          correctedPelvisPoseInWorldFrame.set(stateEstimatorPelvisTransformInWorld);
       
-      correctedPelvisPoseInWorldFrame.getPose(correctedPelvisTransformInWorldFrame);
+      correctedPelvisPoseInWorldFrame.get(correctedPelvisTransformInWorldFrame);
       
       correctedPelvisTransformInWorldFrame.getTranslation(correctedPelvisTranslation);
       iterativeClosestPointInWorldFramePose.getPosition(localizationTranslation);
@@ -306,7 +306,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointReferenceFrame.update();
       iterativeClosestPointInWorldFramePose.setToZero(iterativeClosestPointReferenceFrame);
       iterativeClosestPointInWorldFramePose.changeFrame(worldFrame);
-      iterativeClosestPointInWorldFramePose.getPose(localizationTransformInWorld);
+      iterativeClosestPointInWorldFramePose.get(localizationTransformInWorld);
 
       //for feedback in the UI
       outdatedPoseUpdater.getTotalErrorTransform(totalErrorBetweenPelvisAndLocalizationTransform);
