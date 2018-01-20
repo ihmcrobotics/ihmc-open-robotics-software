@@ -501,7 +501,7 @@ public class ClippedSpeedOffsetErrorInterpolator
          stateEstimatorTransform_Rotation.getRotation(interpolatedRotation);
       }
 
-      offsetPoseToPack.setPose(interpolatedTranslation, interpolatedRotation);
+      offsetPoseToPack.set(interpolatedTranslation, interpolatedRotation);
 
       //scs feedback only
       yoStartOffsetErrorPose_InWorldFrame.setPosition(updatedStartOffset_Translation);

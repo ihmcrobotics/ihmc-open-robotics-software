@@ -255,7 +255,7 @@ public class ContactableValveRobotTest
       Quaternion orientation = new Quaternion();
 
       orientation.setYawPitchRoll(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
-      framePose.setPose(position, orientation);
+      framePose.set(position, orientation);
 
       return framePose;
    }

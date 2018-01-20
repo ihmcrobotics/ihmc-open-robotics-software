@@ -153,7 +153,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       FramePose debrisPose = new FramePose(robotInitialPoseReferenceFrame);
       Quaternion orientation = new Quaternion();
       orientation.setYawPitchRoll(debrisYaw, debrisPitch, debrisRoll);
-      debrisPose.setPose(positionWithRespectToRobot, orientation);
+      debrisPose.set(positionWithRespectToRobot, orientation);
       debrisPose.changeFrame(constructionWorldFrame);
       return debrisPose;
    }

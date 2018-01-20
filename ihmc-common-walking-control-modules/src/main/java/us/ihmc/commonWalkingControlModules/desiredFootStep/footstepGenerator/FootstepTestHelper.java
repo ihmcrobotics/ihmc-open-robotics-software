@@ -60,7 +60,7 @@ public class FootstepTestHelper
    public Footstep createFootstep(RobotSide robotSide, Point3D position, Quaternion orientation)
    {
       FramePose footstepPose = new FramePose();
-      footstepPose.setPose(position, orientation);
+      footstepPose.set(position, orientation);
 
       return createFootstep(robotSide, footstepPose);
    }

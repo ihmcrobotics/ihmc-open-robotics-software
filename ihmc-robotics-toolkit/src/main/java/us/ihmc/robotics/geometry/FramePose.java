@@ -67,7 +67,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public FramePose(ReferenceFrame referenceFrame, Tuple3DReadOnly position, QuaternionReadOnly orientation)
    {
       this(referenceFrame, new Pose3D());
-      setPose(position, orientation);
+      set(position, orientation);
    }
 
    public FramePose(FramePose framePose)
@@ -118,7 +118,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       setOrientation(orientation);
    }
 
-   public void setPose(Tuple3DReadOnly position, QuaternionReadOnly orientation)
+   public void set(Tuple3DReadOnly position, QuaternionReadOnly orientation)
    {
       pose.set(position, orientation);
    }
@@ -148,7 +148,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, QuaternionReadOnly orientation)
    {
-      setPose(position, orientation);
+      set(position, orientation);
       this.referenceFrame = referenceFrame;
    }
 

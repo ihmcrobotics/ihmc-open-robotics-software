@@ -200,7 +200,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
       position.setZ(height);
 
-      footstepPose.setPose(new Point3D(position), orientation);
+      footstepPose.set(new Point3D(position), orientation);
       footstep.setPose(footstepPose);
    }
 
