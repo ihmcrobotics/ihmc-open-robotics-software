@@ -123,7 +123,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
 
    public void getLidarPose(FramePose poseToPack)
    {
-      poseToPack.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), lidarPosition, lidarOrientation);
+      poseToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), lidarPosition, lidarOrientation);
    }
 
    public int getNumberOfScanPoints()

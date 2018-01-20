@@ -140,7 +140,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.set(position, orientation);
    }
 
-   public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, QuaternionReadOnly orientation)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       set(position, orientation);
       this.referenceFrame = referenceFrame;
