@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
@@ -26,12 +25,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -327,52 +324,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void getOrientation(FrameOrientation2D frameOrientation2dToPack)
    {
       frameOrientation2dToPack.setIncludingFrame(referenceFrame, pose.getYaw());
-   }
-
-   public void rotatePoseAboutAxis(FrameVector3D rotatationAxis, FramePoint3D rotationAxisOrigin, double angle)
-   {
-      ReferenceFrame frameWhoseZAxisIsRotationAxis = GeometryTools.constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
-                                                                                                             rotatationAxis);
-
-      rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle);
-   }
-
-   public FramePose getRotatedAboutAxisCopy(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle)
-   {
-      FramePose ret = new FramePose(this);
-      ret.rotatePoseAboutAxis(rotationAxisFrame, rotationAxis, angle);
-      return ret;
-   }
-
-   public void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle)
-   {
-      rotatePoseAboutAxis(rotationAxisFrame, rotationAxis, angle, false, false);
-   }
-
-   public void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, boolean lockPosition, boolean lockOrientation)
-   {
-      ReferenceFrame initialFrame = referenceFrame;
-
-      changeFrame(rotationAxisFrame);
-
-      AxisAngle axisAngle = new AxisAngle(0.0, 0.0, 0.0, angle);
-      axisAngle.setElement(rotationAxis.ordinal(), 1.0);
-
-      if (!lockPosition)
-      {
-         Point3D newPosition = new Point3D(pose.getPosition());
-         axisAngle.transform(newPosition);
-         setPosition(newPosition);
-      }
-
-      if (!lockOrientation)
-      {
-         Quaternion newOrientation = new Quaternion(pose.getOrientation());
-         axisAngle.transform(newOrientation);
-         setOrientation(newOrientation);
-      }
-
-      changeFrame(initialFrame);
    }
 
    /**

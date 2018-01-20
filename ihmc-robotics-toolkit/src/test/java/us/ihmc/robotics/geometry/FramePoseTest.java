@@ -7,9 +7,10 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -25,7 +26,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -183,7 +183,7 @@ public class FramePoseTest
 
       FrameVector3D rotationAxis = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
       FramePoint3D rotationAxisOrigin = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
-      framePose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, angleToRotate);
+      GeometryTools.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, angleToRotate, framePose);
 
       Point3D actualPosePositionAfterRotation = new Point3D();
       framePose.getPosition(actualPosePositionAfterRotation);
@@ -212,7 +212,7 @@ public class FramePoseTest
       framePose.setPosition(1.0, 0.0, 1.0);
       framePose.setOrientation(RandomGeometry.nextQuaternion(random));
 
-      framePose.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, angleToRotate);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, angleToRotate, framePose);
 
       Point3D actualPosePositionAfterRotation = new Point3D();
       framePose.getPosition(actualPosePositionAfterRotation);
@@ -247,7 +247,7 @@ public class FramePoseTest
          rotatedPose.setIncludingFrame(initialPose);
 
          desiredRotationAxisAngle.setAngle(angleToRotate);
-         rotatedPose.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate);
+         GeometryTools.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate, rotatedPose);
 
          PoseReferenceFrame initialPoseFrame = new PoseReferenceFrame("initialPoseFrame", initialPose);
          rotatedPose.changeFrame(initialPoseFrame);
@@ -275,8 +275,8 @@ public class FramePoseTest
       framePose.setPosition(0.0, 0.0, 1.0);
       FramePose framePoseCopy = new FramePose(framePose);
 
-      framePose.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate);
-      framePose.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate, framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate, framePose);
 
       double positionDistance = framePose.getPositionDistance(framePoseCopy);
       double orientationDistance = framePose.getOrientationDistance(framePoseCopy);
@@ -301,8 +301,8 @@ public class FramePoseTest
       framePose.setPosition(0.0, 0.0, 1.0);
       FramePose framePoseCopy = new FramePose(framePose);
 
-      framePose.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate);
-      framePose.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, -0.5 * angleToRotate);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate , framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, -0.5 * angleToRotate, framePose);
 
       double positionDistance = framePose.getPositionDistance(framePoseCopy);
       double orientationDistance = framePose.getOrientationDistance(framePoseCopy);
@@ -337,7 +337,7 @@ public class FramePoseTest
          initialPose.setOrientation(RandomGeometry.nextQuaternion(random));
          rotatedPose.setIncludingFrame(initialPose);
          
-         rotatedPose.rotatePoseAboutAxis(worldFrame, Axis.Z, angleToRotate, lockPosition, lockOrientation);
+         GeometryTools.rotatePoseAboutAxis(worldFrame, Axis.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
          rotatedPose.getPosition(actualPosition);
 
          desiredPosition.set(Math.cos(angleToRotate), Math.sin(angleToRotate), 1.0);
@@ -380,7 +380,7 @@ public class FramePoseTest
          Point3D actualpositionBeforeRotation = new Point3D();
          rotatedPose.getPosition(actualpositionBeforeRotation);
 
-         rotatedPose.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate, lockPosition, lockOrientation);
+         GeometryTools.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
 
          Point3D actualPosePositionAfterRotation = new Point3D();
          rotatedPose.getPosition(actualPosePositionAfterRotation);
@@ -416,7 +416,7 @@ public class FramePoseTest
       for (double theta : thetaToTest)
       {
          thatPose.setIncludingFrame(thisPose);
-         thatPose.rotatePoseAboutAxis(thisPose.getReferenceFrame(), Axis.Z, theta);
+         GeometryTools.rotatePoseAboutAxis(thisPose.getReferenceFrame(), Axis.Z, theta, thatPose);
 
          Vector3D randomTranslation = RandomGeometry.nextVector3D(random);
          actualTranslationNOTfromRotation.setIncludingFrame(testFrame, randomTranslation);
@@ -478,7 +478,7 @@ public class FramePoseTest
       for (double rotationAngle : AngleTools.generateArrayOfTestAngles(1000, 1e-3, true, false))
       {
          rotatedPose.setPose(initialPose);
-         rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
+         GeometryTools.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle, rotatedPose);
 
          double computedRotationAngle = initialPose.getAxisAngleRotationToOtherPose(rotatedPose, computedAxis);
          double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(rotationAngle, computedRotationAngle);
@@ -523,7 +523,7 @@ public class FramePoseTest
          String rotationAngleMsg = "\n  Tested rotation angle = " + Math.toDegrees(rotationAngle) + " degrees \n";
 
          rotatedPose.setPose(initialPose);
-         rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
+         GeometryTools.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle, rotatedPose);
 
          initialPose.getAxisAngleRotationToOtherPose(rotatedPose, rotationAxisComputed);
          initialPose.getSpatialAxisOfRotationAndAngleToOtherPose(rotatedPose, rotationAxisComputed, rotationAxisOriginComputed);
@@ -563,7 +563,7 @@ public class FramePoseTest
          initialPose.setOrientationYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
          rotatedPose.setPose(initialPose);
-         rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
+         GeometryTools.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle, rotatedPose);
 
          initialPose.getSpatialAxisOfRotationAndAngleToOtherPose(rotatedPose, rotationAxisComputed, rotationAxisOriginComputed);
 
@@ -605,12 +605,12 @@ public class FramePoseTest
          initialPose.setOrientationYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
          rotatedPose.setPose(initialPose);
-         rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
+         GeometryTools.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle, rotatedPose);
 
          double rotationAngleComputed = initialPose.getSpatialAxisOfRotationAndAngleToOtherPose(rotatedPose, rotationAxisComputed, rotationAxisOriginComputed);
 
          rotatedPoseComputed.setIncludingFrame(initialPose);
-         rotatedPoseComputed.rotatePoseAboutAxis(rotationAxisComputed, rotationAxisOriginComputed, rotationAngleComputed);
+         GeometryTools.rotatePoseAboutAxis(rotationAxisComputed, rotationAxisOriginComputed, rotationAngleComputed, rotatedPoseComputed);
 
          double orientationError = rotatedPoseComputed.getOrientationDistance(rotatedPose);
          assertEquals("FramePose Orientation after rotation is wrong.  Orientation error = " + orientationError + rotationAngleMsg, 0.0, orientationError, 1e-6);

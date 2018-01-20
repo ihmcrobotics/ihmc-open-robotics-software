@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
@@ -143,8 +144,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       double heightAboveWheel = 0.1;
       
       FramePose crossBar = new FramePose(steeringWheelFrame);
-      crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0);
-      crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0);
+      GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0, crossBar);
+      GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0, crossBar);
       crossBar.setPosition(new Vector3D(-height/2.0, 0.0, heightAboveWheel));
       
       RigidBodyTransform transform = new RigidBodyTransform();
