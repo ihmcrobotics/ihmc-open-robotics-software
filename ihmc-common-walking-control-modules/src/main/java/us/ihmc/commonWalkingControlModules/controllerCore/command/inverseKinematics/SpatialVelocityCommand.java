@@ -782,7 +782,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
    {
       controlFramePose.getPosition(positionToPack);
-      controlFramePose.getOrientationIncludingFrame(orientationToPack);
+      controlFramePose.getOrientation(orientationToPack);
    }
 
    /**

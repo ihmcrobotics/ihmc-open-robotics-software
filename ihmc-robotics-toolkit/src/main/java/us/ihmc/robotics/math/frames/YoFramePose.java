@@ -77,7 +77,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       framePose.checkReferenceFrameMatch(getReferenceFrame());
 
       framePose.getPosition(tempFramePoint);
-      framePose.getOrientationIncludingFrame(tempFrameOrientation);
+      framePose.getOrientation(tempFrameOrientation);
       position.set(tempFramePoint);
       orientation.set(tempFrameOrientation);
    }
@@ -85,7 +85,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
    public void setAndMatchFrame(FramePose framePose)
    {
       framePose.getPosition(tempFramePoint);
-      framePose.getOrientationIncludingFrame(tempFrameOrientation);
+      framePose.getOrientation(tempFrameOrientation);
       tempFramePoint.changeFrame(getReferenceFrame());
       tempFrameOrientation.changeFrame(getReferenceFrame());
       position.set(tempFramePoint);

@@ -44,7 +44,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
       tempPoint.changeFrame(this.position.getReferenceFrame());
       this.position.set(tempPoint);
 
-      pose.getOrientationIncludingFrame(tempOrientation);
+      pose.getOrientation(tempOrientation);
       tempOrientation.changeFrame(this.orientation.getReferenceFrame());
       this.orientation.set(tempOrientation);
    }

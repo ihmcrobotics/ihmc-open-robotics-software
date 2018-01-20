@@ -46,7 +46,7 @@ public class CirclePoseTrajectoryGeneratorTest
 
       FramePose initialPose = FramePose.generateRandomFramePose(random, worldFrame, 1.0, 1.0, 1.0);
       FrameQuaternion initialOrientation = new FrameQuaternion();
-      initialPose.getOrientationIncludingFrame(initialOrientation);
+      initialPose.getOrientation(initialOrientation);
       initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
 
       trajectoryTimeProvider = new ConstantDoubleProvider(1.0);

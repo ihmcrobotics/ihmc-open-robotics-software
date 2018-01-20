@@ -363,7 +363,7 @@ public class Footstep implements Settable<Footstep>
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      footstepPose.getOrientationIncludingFrame(orientationToPack);
+      footstepPose.getOrientation(orientationToPack);
    }
 
    public void setFootstepType(FootstepType footstepType)
