@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -32,6 +34,91 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 {
    private final Pose3D pose;
+
+   private final FixedFramePoint3DBasics positionPart = new FixedFramePoint3DBasics()
+   {
+      @Override
+      public void setX(double x)
+      {
+         pose.setX(x);
+      }
+
+      @Override
+      public void setY(double y)
+      {
+         pose.setY(y);
+      }
+
+      @Override
+      public void setZ(double z)
+      {
+         pose.setZ(z);
+      }
+
+      @Override
+      public ReferenceFrame getReferenceFrame()
+      {
+         return referenceFrame;
+      }
+
+      @Override
+      public double getX()
+      {
+         return pose.getX();
+      }
+
+      @Override
+      public double getY()
+      {
+         return pose.getY();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return pose.getZ();
+      }
+   };
+
+   private final FixedFrameQuaternionBasics orientationPart = new FixedFrameQuaternionBasics()
+   {
+
+      @Override
+      public void setUnsafe(double qx, double qy, double qz, double qs)
+      {
+         pose.getOrientation().setUnsafe(qx, qy, qz, qs);
+      }
+
+      @Override
+      public ReferenceFrame getReferenceFrame()
+      {
+         return referenceFrame;
+      }
+
+      @Override
+      public double getX()
+      {
+         return pose.getOrientation().getX();
+      }
+
+      @Override
+      public double getY()
+      {
+         return pose.getOrientation().getY();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return pose.getOrientation().getZ();
+      }
+
+      @Override
+      public double getS()
+      {
+         return pose.getOrientation().getS();
+      }
+   };
 
    public FramePose()
    {
@@ -228,9 +315,9 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       getOrientation(orientationToPack);
    }
 
-   public Point3DReadOnly getPosition()
+   public FixedFramePoint3DBasics getPosition()
    {
-      return pose.getPosition();
+      return positionPart;
    }
 
    public void getPosition(FrameTuple3DBasics frameTupleToPack)
@@ -238,9 +325,9 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPosition());
    }
 
-   public QuaternionReadOnly getOrientation()
+   public FixedFrameQuaternionBasics getOrientation()
    {
-      return pose.getOrientation();
+      return orientationPart;
    }
 
    public void getOrientation(double[] yawPitchRoll)
