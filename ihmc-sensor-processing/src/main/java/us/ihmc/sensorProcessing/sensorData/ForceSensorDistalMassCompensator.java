@@ -167,7 +167,7 @@ public class ForceSensorDistalMassCompensator
       sensorFrame.update();
 
       sensorPose.set(sensorFrame.getTransformToDesiredFrame(world));
-      sensorPose.getPositionIncludingFrame(temp);
+      sensorPose.getPosition(temp);
       yoSensorPositionInWorld.set(temp.getReferenceFrame(), temp.getX(), temp.getY(), temp.getZ());
    }
 

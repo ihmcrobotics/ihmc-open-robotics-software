@@ -79,7 +79,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void setInitialLeadOut(FramePose initialPose, FrameVector3D initialDirection, double leaveDistance)
    {
-      initialPose.getPositionIncludingFrame(tempPosition);
+      initialPose.getPosition(tempPosition);
       initialPose.getOrientationIncludingFrame(tempOrientation);
       positionTrajectoryGenerator.setInitialLeadOut(tempPosition, initialDirection, leaveDistance);
       orientationTrajectoryGenerator.setInitialOrientation(tempOrientation);
@@ -87,7 +87,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void setFinalLeadIn(FramePose finalPose, FrameVector3D finalDirection, double approachDistance)
    {
-      finalPose.getPositionIncludingFrame(tempPosition);
+      finalPose.getPosition(tempPosition);
       finalPose.getOrientationIncludingFrame(tempOrientation);
       positionTrajectoryGenerator.setFinalLeadIn(tempPosition, finalDirection, approachDistance);
       orientationTrajectoryGenerator.setFinalOrientation(tempOrientation);

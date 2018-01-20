@@ -161,7 +161,7 @@ public class FootStepPlanner
          turnRadiusVisual.setPosition(centerOfTurn.getX(), centerOfTurn.getY());
          
          bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
-         bodyPoseProjectedInFuture.getPositionIncludingFrame(bodyPositionProjectedInFuture);
+         bodyPoseProjectedInFuture.getPosition(bodyPositionProjectedInFuture);
          centerOfTurn.changeFrame(bodyZUpFrame);
          GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
          bodyPoseProjectedInFuture.setPosition(bodyPositionProjectedInFuture);

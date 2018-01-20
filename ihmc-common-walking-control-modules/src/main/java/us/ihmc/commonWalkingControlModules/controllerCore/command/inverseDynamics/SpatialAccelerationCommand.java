@@ -757,7 +757,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
    {
-      controlFramePose.getPositionIncludingFrame(positionToPack);
+      controlFramePose.getPosition(positionToPack);
       controlFramePose.getOrientationIncludingFrame(orientationToPack);
    }
 
