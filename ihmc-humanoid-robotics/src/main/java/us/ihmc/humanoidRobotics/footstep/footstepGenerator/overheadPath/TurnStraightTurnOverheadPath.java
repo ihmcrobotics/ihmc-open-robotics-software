@@ -38,8 +38,7 @@ public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
       FramePose2d intermediatePose = turningPath.getPoseAtS(1.0);
       StraightLineOverheadPath straightPath = new StraightLineOverheadPath(intermediatePose, endPosition);
       intermediatePose = straightPath.getPoseAtS(1.0);
-      FrameOrientation2D endOrientation = new FrameOrientation2D();
-      endPose.getOrientationIncludingFrame(endOrientation);
+      FrameOrientation2D endOrientation = new FrameOrientation2D(endPose.getOrientation());
       TurningOverheadPath endTurningPath = new TurningOverheadPath(intermediatePose, endOrientation);
 
       List<OverheadPath> paths = new ArrayList<OverheadPath>();

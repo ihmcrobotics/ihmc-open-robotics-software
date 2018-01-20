@@ -33,8 +33,7 @@ public class TurnInPlaceFootstepGenerator extends AbstractSimpleParametersFootst
    protected double getSignedInitialTurnDirection()
    {
       startPose.checkReferenceFrameMatch(endOrientation);
-      FrameOrientation2D startOrientation = new FrameOrientation2D();
-      startPose.getOrientationIncludingFrame(startOrientation);
+      FrameOrientation2D startOrientation = new FrameOrientation2D(startPose.getOrientation());
       double deltaYaw = endOrientation.difference(startOrientation);
 
       return deltaYaw;
