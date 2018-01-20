@@ -130,7 +130,7 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
       this(pose.getReferenceFrame(), new Pose2D(pose.getGeometryObject()));
    }
 
-   public void getPose(RigidBodyTransform rigidBodyTransformToPack)
+   public void get(RigidBodyTransform rigidBodyTransformToPack)
    {
       pose.get(rigidBodyTransformToPack);
    }

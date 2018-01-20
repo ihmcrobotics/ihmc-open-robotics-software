@@ -39,7 +39,7 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       this(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent, new FramePose(), frameToKeepTrackOf);
 
       RigidBodyTransform transformToWorldAtTrajectoryEnd = new RigidBodyTransform();
-      pose2dAtTrajectoryEnd.getPose(transformToWorldAtTrajectoryEnd);
+      pose2dAtTrajectoryEnd.get(transformToWorldAtTrajectoryEnd);
       poseAtTrajectoryEnd.setIncludingFrame(worldFrame, transformToWorldAtTrajectoryEnd);
    }
 
