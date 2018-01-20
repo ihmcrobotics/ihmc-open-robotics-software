@@ -214,7 +214,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
       newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
       newBodyFrameDesiredTransform.multiply(transformFromNewBodyFrameToOldBodyFrame);
-      framePoseToModify.setPose(newBodyFrameDesiredTransform);
+      framePoseToModify.set(newBodyFrameDesiredTransform);
    }
 
    @Override

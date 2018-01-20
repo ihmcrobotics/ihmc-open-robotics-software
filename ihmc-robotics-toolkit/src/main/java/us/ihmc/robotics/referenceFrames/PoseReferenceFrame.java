@@ -80,7 +80,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setPoseAndUpdate(RigidBodyTransform transformToParent)
    {
-      originPose.setPose(transformToParent);
+      originPose.set(transformToParent);
       this.update();
    }
 

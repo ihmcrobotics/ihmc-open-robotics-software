@@ -544,7 +544,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          //////////////////  update the upToDate referenceFrame
          TimeStampedTransform3D upToDateTimeStampedTransform = new TimeStampedTransform3D();
          upToDateTimeStampedTransformPoseBuffer.findTransform(timeStamp, upToDateTimeStampedTransform);
-         upToDatePoseInPresent.setPose(upToDateTimeStampedTransform.getTransform3D());
+         upToDatePoseInPresent.set(upToDateTimeStampedTransform.getTransform3D());
          upToDateReferenceFrameInPresent.setPoseAndUpdate(upToDatePoseInPresent);
          //////////////////
          if (outdatedTimeStamps[0] == timeStamp - numberOfTicksOfDelay)

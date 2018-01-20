@@ -215,7 +215,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
       newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
       newBodyFrameDesiredTransform.multiply(transformFromNewBodyFrameToOldBodyFrame);
-      framePoseToModify.setPose(newBodyFrameDesiredTransform);
+      framePoseToModify.set(newBodyFrameDesiredTransform);
    }
 
    public void requestStopTrajectory()

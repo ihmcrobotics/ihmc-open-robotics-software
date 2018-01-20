@@ -78,7 +78,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public FramePose(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
       this(referenceFrame);
-      setPose(transform);
+      set(transform);
    }
 
    public FramePose(ReferenceFrame referenceFrame, Tuple3DReadOnly point3d, AxisAngleReadOnly axisAngle4d)
@@ -128,7 +128,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.set(position, orientation);
    }
 
-   public void setPose(RigidBodyTransform transform)
+   public void set(RigidBodyTransform transform)
    {
       pose.set(transform);
    }

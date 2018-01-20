@@ -198,7 +198,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
          
          offsetErrorInterpolator.interpolateError(correctedPelvisPoseInWorldFrame);
          /////for SCS feedback
-         stateEstimatorInWorldFramePose.setPose(stateEstimatorPelvisTransformInWorld);
+         stateEstimatorInWorldFramePose.set(stateEstimatorPelvisTransformInWorld);
          yoStateEstimatorInWorldFramePose.set(stateEstimatorInWorldFramePose);
          /////
          
@@ -211,7 +211,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private void updateCorrectedPelvis()
    {
       if(!hasOneIcpPacketEverBeenReceived.getBooleanValue())
-         correctedPelvisPoseInWorldFrame.setPose(stateEstimatorPelvisTransformInWorld);
+         correctedPelvisPoseInWorldFrame.set(stateEstimatorPelvisTransformInWorld);
       
       correctedPelvisPoseInWorldFrame.getPose(correctedPelvisTransformInWorldFrame);
       

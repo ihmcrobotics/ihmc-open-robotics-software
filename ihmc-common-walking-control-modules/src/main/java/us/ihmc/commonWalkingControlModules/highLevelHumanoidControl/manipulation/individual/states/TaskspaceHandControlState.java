@@ -364,7 +364,7 @@ public class TaskspaceHandControlState extends HandControlState
       newControlFrame.getTransformToDesiredFrame(transformFromNewTrackingFrameToOldTrackingFrame, oldControlFrame);
       newTrackingFrameDesiredTransform.set(oldTrackingFrameDesiredTransform);
       newTrackingFrameDesiredTransform.multiply(transformFromNewTrackingFrameToOldTrackingFrame);
-      framePoseToModify.setPose(newTrackingFrameDesiredTransform);
+      framePoseToModify.set(newTrackingFrameDesiredTransform);
    }
 
    private void setControlFrameFixedInEndEffector(ReferenceFrame controlFrame)
