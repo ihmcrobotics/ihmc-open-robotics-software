@@ -189,10 +189,8 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       left.getPose(leftPose);
       right.getPose(rightPose);
 
-      FramePose2d leftPose2d = new FramePose2d();
-      FramePose2d rightPose2d = new FramePose2d();
-      leftPose.get(leftPose2d);
-      rightPose.get(rightPose2d);
+      FramePose2d leftPose2d = new FramePose2d(leftPose);
+      FramePose2d rightPose2d = new FramePose2d(rightPose);
 
       startPose.interpolate(leftPose2d, rightPose2d, 0.5);
       Pose2dReferenceFrame startFramePose = new Pose2dReferenceFrame("StartPoseFrame", startPose);
