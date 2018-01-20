@@ -515,9 +515,4 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       checkReferenceFrameMatch(framePose);
       return pose.getOrientationDistance(framePose.getOrientation());
    }
-
-   public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)
-   {
-      return pose.getOrientation().epsilonEquals(other.pose.getOrientation(), orientationErrorMargin) && pose.getPosition().epsilonEquals(other.pose.getPosition(), positionErrorMargin);
-   }
 }
