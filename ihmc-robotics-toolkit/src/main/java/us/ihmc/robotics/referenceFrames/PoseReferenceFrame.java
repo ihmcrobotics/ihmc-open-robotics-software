@@ -68,7 +68,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setPoseAndUpdate(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
-      originPose.setPose(position, orientation);
+      originPose.set(position, orientation);
       this.update();
    }
 

@@ -164,7 +164,7 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements PoseTrajectoryG
    {
       getPosition(desiredPosition);
       getOrientation(desiredOrientation);
-      framePoseToPack.setPose(desiredPosition, desiredOrientation);
+      framePoseToPack.set(desiredPosition, desiredOrientation);
    }
 
    @Override

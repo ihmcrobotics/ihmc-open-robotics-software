@@ -32,7 +32,7 @@ public class GroundTruthinatorTest
 
       FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       FrameQuaternion orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
-      objectPose.setPose(position, orientation);
+      objectPose.set(position, orientation);
 
       double[] sensedCableLengths = new double[12];
       for (int i=0; i<sensedCableLengths.length; i++)
@@ -58,7 +58,7 @@ public class GroundTruthinatorTest
 
       position = new FramePoint3D(worldFrame, 0.1, 0.0, 0.0);
       orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
-      objectPose.setPose(position, orientation);
+      objectPose.set(position, orientation);
 
       groundTruthinator.computeEstimatedCableLengthsFromObjectPose(objectPose);
       sensedCableLengths = groundTruthinator.getEstimatedCableLengths();
@@ -75,7 +75,7 @@ public class GroundTruthinatorTest
       {
          position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
-         objectPose.setPose(position, orientation);
+         objectPose.set(position, orientation);
 
          groundTruthinator.computeEstimatedCableLengthsFromObjectPose(objectPose);
          sensedCableLengths = groundTruthinator.getEstimatedCableLengths();
@@ -102,7 +102,7 @@ public class GroundTruthinatorTest
 
       FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       FrameQuaternion orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
-      objectPose.setPose(position, orientation);
+      objectPose.set(position, orientation);
 
       double[] sensedCableLengths = new double[12];
       for (int i=0; i<sensedCableLengths.length; i++)
@@ -129,7 +129,7 @@ public class GroundTruthinatorTest
       position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
       orientation.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
-      objectPose.setPose(position, orientation);
+      objectPose.set(position, orientation);
 
       groundTruthinator.computeEstimatedCableLengthsFromObjectPose(objectPose);
       sensedCableLengths = groundTruthinator.getEstimatedCableLengths();
@@ -146,7 +146,7 @@ public class GroundTruthinatorTest
       {
          position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
-         objectPose.setPose(position, orientation);
+         objectPose.set(position, orientation);
 
          groundTruthinator.computeEstimatedCableLengthsFromObjectPose(objectPose);
          sensedCableLengths = groundTruthinator.getEstimatedCableLengths();
