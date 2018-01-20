@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -164,7 +165,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       initialPosition.set(x, y, z);
    }
 
-   public void setInitialPosition(FramePoint3D initialPosition)
+   public void setInitialPosition(FramePoint3DReadOnly initialPosition)
    {
       this.initialPosition.set(initialPosition);
    }
@@ -174,7 +175,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       finalPosition.set(x, y, z);
    }
 
-   public void setFinalPosition(FramePoint3D finalPosition)
+   public void setFinalPosition(FramePoint3DReadOnly finalPosition)
    {
       this.finalPosition.set(finalPosition);
    }
