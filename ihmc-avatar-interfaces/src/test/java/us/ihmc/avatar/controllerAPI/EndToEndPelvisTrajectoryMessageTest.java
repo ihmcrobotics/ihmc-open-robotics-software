@@ -766,7 +766,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
          RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocity);
 
-         desiredPose.setPoseIncludingFrame(pelvisZUp, position, orientation);
+         desiredPose.setIncludingFrame(pelvisZUp, position, orientation);
          desiredPose.changeFrame(worldFrame);
          desiredPose.getPose(position, orientation);
 

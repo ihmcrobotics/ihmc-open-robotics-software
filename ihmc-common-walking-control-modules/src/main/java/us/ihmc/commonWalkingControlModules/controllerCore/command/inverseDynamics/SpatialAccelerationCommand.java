@@ -132,7 +132,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
 
-      controlFramePose.setPoseIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
+      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularAcceleration.set(other.desiredAngularAcceleration);
       desiredLinearAcceleration.set(other.desiredLinearAcceleration);
    }
