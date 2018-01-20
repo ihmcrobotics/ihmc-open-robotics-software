@@ -204,7 +204,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.setOrientation((QuaternionReadOnly) frameOrientation);
    }
 
-   public void setXYFromPosition2d(FramePoint2DReadOnly position2d)
+   public void setPosition(FramePoint2DReadOnly position2d)
    {
       pose.setPosition(position2d);
    }

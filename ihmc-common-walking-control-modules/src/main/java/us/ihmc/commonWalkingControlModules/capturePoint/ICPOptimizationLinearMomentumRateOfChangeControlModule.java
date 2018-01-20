@@ -142,7 +142,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       {
          footstepToPack.getPose(footstepPose);
          icpOptimizationController.getFootstepSolution(footstepPositionSolution);
-         footstepPose.setXYFromPosition2d(footstepPositionSolution);
+         footstepPose.setPosition(footstepPositionSolution);
          footstepToPack.setPose(footstepPose);
       }
 
