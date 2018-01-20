@@ -192,7 +192,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public void setPose(FramePose pose)
    {
-      pose.getOrientation(tempYawPitchRoll);
+      pose.getOrientationYawPitchRoll(tempYawPitchRoll);
       setYawPitchRoll(tempYawPitchRoll);
 
       x.set(pose.getX());
