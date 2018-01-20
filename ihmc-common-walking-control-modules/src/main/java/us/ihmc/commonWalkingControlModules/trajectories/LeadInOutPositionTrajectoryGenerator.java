@@ -246,7 +246,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       //      xyPolynomial.setCubic(t1, t2, 0.0, 0.0, 1.0, 0.0);
       xyPolynomial.setQuintic(t1, t2, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
-      currentDistortionPose.setPoseIncludingFrame(initialDistortionPose);
+      currentDistortionPose.setIncludingFrame(initialDistortionPose);
       distortedPlane.update();
       changeFrame(distortedPlane, false);
 
@@ -254,7 +254,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       double z1 = initialPosition.getZ() + leaveDistance.getDoubleValue();
 
       changeFrame(currentTrajectoryFrame, false);
-      currentDistortionPose.setPoseIncludingFrame(finalDistortionPose);
+      currentDistortionPose.setIncludingFrame(finalDistortionPose);
       distortedPlane.update();
       changeFrame(distortedPlane, false);
 

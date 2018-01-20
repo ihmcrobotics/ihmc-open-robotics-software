@@ -87,7 +87,7 @@ public class FindGoalBehavior extends AbstractBehavior
 
    public void getFiducialPose(FramePose framePoseToPack)
    {
-      framePoseToPack.setPoseIncludingFrame(foundFiducialPose);
+      framePoseToPack.setIncludingFrame(foundFiducialPose);
    }
 
    public void getGoalPose(FramePose framePoseToPack)

@@ -244,7 +244,7 @@ public class FramePoseTest
       while (angleToRotate < Math.toRadians(720.0))
       {
          initialPose.setPosition(0.0, 0.0, RandomNumbers.nextDouble(random, 10.0));
-         rotatedPose.setPoseIncludingFrame(initialPose);
+         rotatedPose.setIncludingFrame(initialPose);
 
          desiredRotationAxisAngle.setAngle(angleToRotate);
          rotatedPose.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate);
@@ -335,7 +335,7 @@ public class FramePoseTest
       {
          initialPose.setPosition(1.0, 0.0, 1.0);
          initialPose.setOrientation(RandomGeometry.nextQuaternion(random));
-         rotatedPose.setPoseIncludingFrame(initialPose);
+         rotatedPose.setIncludingFrame(initialPose);
          
          rotatedPose.rotatePoseAboutAxis(worldFrame, Axis.Z, angleToRotate, lockPosition, lockOrientation);
          rotatedPose.getPosition(actualPosition);
@@ -375,7 +375,7 @@ public class FramePoseTest
          rotatedPose.setPosition(1.0, 0.0, 1.0);
          rotatedPose.setOrientation(RandomGeometry.nextQuaternion(random));
 
-         initialPose.setPoseIncludingFrame(rotatedPose);
+         initialPose.setIncludingFrame(rotatedPose);
 
          Point3D actualpositionBeforeRotation = new Point3D();
          rotatedPose.getPosition(actualpositionBeforeRotation);
@@ -415,7 +415,7 @@ public class FramePoseTest
 
       for (double theta : thetaToTest)
       {
-         thatPose.setPoseIncludingFrame(thisPose);
+         thatPose.setIncludingFrame(thisPose);
          thatPose.rotatePoseAboutAxis(thisPose.getReferenceFrame(), Axis.Z, theta);
 
          Vector3D randomTranslation = RandomGeometry.nextVector3D(random);
@@ -609,7 +609,7 @@ public class FramePoseTest
 
          double rotationAngleComputed = initialPose.getSpatialAxisOfRotationAndAngleToOtherPose(rotatedPose, rotationAxisComputed, rotationAxisOriginComputed);
 
-         rotatedPoseComputed.setPoseIncludingFrame(initialPose);
+         rotatedPoseComputed.setIncludingFrame(initialPose);
          rotatedPoseComputed.rotatePoseAboutAxis(rotationAxisComputed, rotationAxisOriginComputed, rotationAngleComputed);
 
          double orientationError = rotatedPoseComputed.getOrientationDistance(rotatedPose);

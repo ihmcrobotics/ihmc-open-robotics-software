@@ -296,8 +296,8 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    public void setInterpolatorInputs(FramePose startOffsetError, FramePose goalOffsetError, double alphaFilterPosition)
    {
-      startOffsetErrorPose.setPoseIncludingFrame(startOffsetError);
-      goalOffsetErrorPose.setPoseIncludingFrame(goalOffsetError);
+      startOffsetErrorPose.setIncludingFrame(startOffsetError);
+      goalOffsetErrorPose.setIncludingFrame(goalOffsetError);
       if (!isRotationCorrectionEnabled.getBooleanValue())
       {
          startOffsetErrorPose.setYawPitchRoll(0.0, 0.0, 0.0);

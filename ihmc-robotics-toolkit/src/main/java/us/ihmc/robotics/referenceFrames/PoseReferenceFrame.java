@@ -192,7 +192,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getPoseIncludingFrame(FramePose framePoseToPack)
    {
-      framePoseToPack.setPoseIncludingFrame(originPose);
+      framePoseToPack.setIncludingFrame(originPose);
    }
    
    public Point3DReadOnly getPosition()
