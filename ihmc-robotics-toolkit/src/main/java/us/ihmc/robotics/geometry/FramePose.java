@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -478,36 +477,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       return ret;
    }
 
-   public FrameVector3D getTranslationToOtherPoseTotal(FramePose otherPose)
-   {
-      checkReferenceFrameMatch(otherPose);
-
-      FrameVector3D ret = new FrameVector3D(referenceFrame);
-      ret.sub(otherPose.pose.getPosition(), pose.getPosition());
-
-      return ret;
-   }
-
-   public FrameVector3D getTranslationNOTDueToRotationAboutFrame(FramePose otherPose)
-   {
-      checkReferenceFrameMatch(otherPose);
-
-      RigidBodyTransform transformToOtherPose = getTransformFromThisToThat(otherPose);
-      FrameVector3D ret = new FrameVector3D(referenceFrame);
-      transformToOtherPose.getTranslation(ret);
-
-      return ret;
-   }
-
-   public FrameVector3D getTranslationDueToRotationAboutFrame(FramePose otherPose)
-   {
-      checkReferenceFrameMatch(otherPose);
-
-      FrameVector3D ret = getTranslationToOtherPoseTotal(otherPose);
-      ret.sub(getTranslationNOTDueToRotationAboutFrame(otherPose));
-      return ret;
-   }
-
    public double getPositionDistance(FramePose framePose)
    {
       checkReferenceFrameMatch(framePose);
@@ -515,38 +484,10 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       return pose.getPosition().distance(framePose.pose.getPosition());
    }
 
-   public RigidBodyTransform getTransformFromThisToThat(FramePose thatPose)
-   {
-      checkReferenceFrameMatch(thatPose);
-
-      RigidBodyTransform transformToThis = new RigidBodyTransform();
-      this.get(transformToThis);
-
-      RigidBodyTransform transformToThat = new RigidBodyTransform();
-      thatPose.get(transformToThat);
-
-      return TransformTools.getTransformFromA2toA1(transformToThat, transformToThis);
-   }
-
    public double getOrientationDistance(FramePose framePose)
    {
       checkReferenceFrameMatch(framePose);
       return pose.getOrientationDistance(framePose.getOrientation());
-   }
-
-   public double getEffectiveDistanceToFramePose(FramePose framePose, double radiusOfRotation)
-   {
-      checkReferenceFrameMatch(framePose);
-
-      RigidBodyTransform transformThis = new RigidBodyTransform();
-      this.get(transformThis);
-      transformThis.invert();
-
-      RigidBodyTransform transformThat = new RigidBodyTransform();
-      framePose.get(transformThat);
-      transformThat.invert();
-
-      return TransformTools.getSizeOfTransformBetweenTwoWithRotationScaled(transformThis, transformThat, radiusOfRotation);
    }
 
    public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)

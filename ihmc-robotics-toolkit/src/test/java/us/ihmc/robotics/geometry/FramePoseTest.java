@@ -16,14 +16,11 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -31,22 +28,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FramePoseTest
 {
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
-   public void testFrameMismatch()
-   {
-      RigidBodyTransform transform1 = new RigidBodyTransform();
-      transform1.setIdentity();
-      FramePose framePose1 = new FramePose(ReferenceFrame.getWorldFrame(), transform1);
-
-      // Test frame mismatch
-      FramePose framePose2 = new FramePose(ReferenceFrame.constructARootFrame("junk"), transform1);
-
-      double distance = framePose1.getOrientationDistance(framePose2);
-
-      distance = framePose1.getEffectiveDistanceToFramePose(framePose2, 10.0);
-   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -62,94 +43,6 @@ public class FramePoseTest
 
       double distance = framePose1.getOrientationDistance(framePose2);
       assertEquals(0.0, distance, 1e-9);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetDistance()
-   {
-      FramePose framePose1 = new FramePose(ReferenceFrame.getWorldFrame());
-      FramePose framePose2 = new FramePose(ReferenceFrame.getWorldFrame());
-
-      Random random = new Random(100L);
-
-      int numberOfTests = 1000;
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         {
-            double angle = -Math.PI + 2 * Math.PI * random.nextDouble();
-            Vector3D vector3d = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-            vector3d.normalize();
-
-            AxisAngle axisAngle = new AxisAngle(vector3d, angle);
-
-            double vectorScale = 10.0;
-            Vector3D vector3dTranlation = new Vector3D(-vectorScale + 2.0 * vectorScale * random.nextDouble(),
-                                             -vectorScale + 2.0 * vectorScale * random.nextDouble(), -vectorScale + 2.0 * vectorScale * random.nextDouble());
-            RigidBodyTransform transform = new RigidBodyTransform();
-
-            transform.set(axisAngle, vector3dTranlation);
-            framePose1 = new FramePose(ReferenceFrame.getWorldFrame(), transform);
-         }
-
-         {
-            double angle = -Math.PI + 2 * Math.PI * random.nextDouble();
-            Vector3D vector3d = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-            vector3d.normalize();
-
-            AxisAngle axisAngle = new AxisAngle(vector3d, angle);
-
-            double vectorScale = 10.0;
-            Vector3D vector3dTranlation = new Vector3D(-vectorScale + 2.0 * vectorScale * random.nextDouble(),
-                                             -vectorScale + 2.0 * vectorScale * random.nextDouble(), -vectorScale + 2.0 * vectorScale * random.nextDouble());
-            RigidBodyTransform transform = new RigidBodyTransform();
-
-            transform.set(axisAngle, vector3dTranlation);
-            framePose2 = new FramePose(ReferenceFrame.getWorldFrame(), transform);
-         }
-
-         double rotationDistance = framePose1.getOrientationDistance(framePose2);
-         double positionDistance = framePose1.getPositionDistance(framePose2);
-         
-         double radiusForRotation =  random.nextDouble();
-         
-         RigidBodyTransform transformFromWorldToA1 = new RigidBodyTransform();
-         framePose1.get(transformFromWorldToA1);
-         transformFromWorldToA1.invert();
-         
-         RigidBodyTransform transformFromWorldToA2 = new RigidBodyTransform();
-         framePose2.get(transformFromWorldToA2);
-         transformFromWorldToA2.invert();
-         
-         //RigidBodyTransform transformA2toA1 = TransformTools.getTransformFromA2toA1(transformFromWorldToA1, transformFromWorldToA2);
-         double distanceFromTansformTools = TransformTools.getSizeOfTransformBetweenTwoWithRotationScaled(transformFromWorldToA1, transformFromWorldToA2, radiusForRotation);
-         
-         double combinedDistance = framePose1.getEffectiveDistanceToFramePose(framePose2, radiusForRotation);
-         
-         double handCalculatedDistance = positionDistance + rotationDistance * radiusForRotation;
-         assertEquals(combinedDistance, distanceFromTansformTools, 1e-9);
-         
-         assertEquals(combinedDistance, handCalculatedDistance, 1e-7);
-         
-         ReferenceFrame framePose1Frame ;
-         {
-            RigidBodyTransform transform = new RigidBodyTransform();
-            framePose1.get(transform);
-            transform.invert();
-            framePose1Frame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("frame1", ReferenceFrame.getWorldFrame(), transform);
-         }
-               
-         framePose2.changeFrame(framePose1Frame);
-         RigidBodyTransform transform = new RigidBodyTransform();
-         framePose2.get(transform);
-         AxisAngle axisAngle = new AxisAngle();
-         transform.getRotation(axisAngle);
-         double rotation = Math.abs(axisAngle.getAngle());
-
-         assertEquals(rotation, rotationDistance, 1e-7);
-         assertEquals(positionDistance, framePose2.getFramePointCopy().distance(new Point3D()), 1e-7);
-      }
-
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -394,61 +287,5 @@ public class FramePoseTest
 
          angleToRotate += Math.toRadians(5.0);
       }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetTranslationBetweenPoses()
-   {
-      Random random = new Random(100L);
-
-      ReferenceFrame testFrame = ReferenceFrame.getWorldFrame();
-
-      FramePose thisPose = new FramePose(testFrame);
-      FramePose thatPose = new FramePose(testFrame);
-      FrameVector3D actualTranslationNOTfromRotation = new FrameVector3D(testFrame);
-      FrameVector3D shouldEqualTotalTranslation = new FrameVector3D(testFrame);
-
-      double[] thetaToTest = new double[] { Math.toRadians(-90.0), Math.toRadians(-45.0), Math.toRadians(45.0), Math.toRadians(90.0) };
-
-      for (double theta : thetaToTest)
-      {
-         thatPose.setIncludingFrame(thisPose);
-         GeometryTools.rotatePoseAboutAxis(thisPose.getReferenceFrame(), Axis.Z, theta, thatPose);
-
-         Vector3D randomTranslation = RandomGeometry.nextVector3D(random);
-         actualTranslationNOTfromRotation.setIncludingFrame(testFrame, randomTranslation);
-
-         thatPose.prependTranslation(actualTranslationNOTfromRotation);
-
-         FrameVector3D translationNOTfromRotation = thisPose.getTranslationNOTDueToRotationAboutFrame(thatPose);
-         FrameVector3D translationDueToRotation = thisPose.getTranslationDueToRotationAboutFrame(thatPose);
-         FrameVector3D totalTranslation = thisPose.getTranslationToOtherPoseTotal(thatPose);
-
-         shouldEqualTotalTranslation.add(translationDueToRotation, translationNOTfromRotation);
-
-         EuclidFrameTestTools.assertFrameTuple3DEquals(actualTranslationNOTfromRotation, translationNOTfromRotation, 1e-15);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(totalTranslation, shouldEqualTotalTranslation, 1e-15);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetOrientationTransformBetweenPoses()
-   {
-      Random random = new Random(100L);
-
-      FramePose thisPose = new FramePose();
-      FramePose thatPose = new FramePose(thisPose);
-
-      Quaternion actualRotationFromThisToThat = RandomGeometry.nextQuaternion(random);
-      thatPose.setOrientation(actualRotationFromThisToThat);
-
-      RigidBodyTransform transfromFromThisToThat = thisPose.getTransformFromThisToThat(thatPose);
-
-      Quaternion rotationFromThisToThat = new Quaternion();
-      transfromFromThisToThat.getRotation(rotationFromThisToThat);
-
-      EuclidCoreTestTools.assertQuaternionEquals(actualRotationFromThisToThat, rotationFromThisToThat, 1e-15);
    }
 }
