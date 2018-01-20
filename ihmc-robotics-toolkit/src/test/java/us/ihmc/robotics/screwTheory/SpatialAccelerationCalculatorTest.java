@@ -652,7 +652,7 @@ public class SpatialAccelerationCalculatorTest
       twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(baseInFuture, bodyInFuture, pointInFuture, pointLinearVelocityInFuture);
 
       FrameVector3D pointLinearAcceleration = new FrameVector3D(base.getBodyFixedFrame());
-      pointLinearAcceleration.sub(pointLinearVelocityInFuture, pointLinearVelocity);
+      pointLinearAcceleration.sub((Vector3DReadOnly) pointLinearVelocityInFuture, pointLinearVelocity);
       pointLinearAcceleration.scale(1.0 / dt);
 
       return pointLinearAcceleration;
