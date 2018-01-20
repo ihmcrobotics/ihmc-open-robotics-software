@@ -340,7 +340,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
    public void setInitialPoseWithInitialVelocity(FramePose initialPose, FrameVector3D initialVelocity, FrameVector3D initialAngularVelocity)
    {
-      initialPose.getPoseIncludingFrame(tempPosition, tempOrientation);
+      initialPose.get(tempPosition, tempOrientation);
       this.initialPosition.set(tempPosition);
       this.initialVelocity.set(initialVelocity);
 
@@ -350,7 +350,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
    public void setInitialPoseWithoutInitialVelocity(FramePose initialPose)
    {
-      initialPose.getPoseIncludingFrame(tempPosition, tempOrientation);
+      initialPose.get(tempPosition, tempOrientation);
       this.initialPosition.set(tempPosition);
       this.initialVelocity.setToZero();
       ;
@@ -397,7 +397,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
     */
    public void setFinalPoseWithoutFinalVelocity(FramePose finalPose)
    {
-      finalPose.getPoseIncludingFrame(tempPosition, tempOrientation);
+      finalPose.get(tempPosition, tempOrientation);
       setFinalPoseWithoutFinalVelocity(tempPosition, tempOrientation);
    }
 

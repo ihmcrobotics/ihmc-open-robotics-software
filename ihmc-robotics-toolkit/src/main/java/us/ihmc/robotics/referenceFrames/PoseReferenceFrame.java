@@ -187,7 +187,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameQuaternion frameOrientationToPack)
    {
-      originPose.getPoseIncludingFrame(framePointToPack, frameOrientationToPack);
+      originPose.get(framePointToPack, frameOrientationToPack);
    }
 
    public void getPoseIncludingFrame(FramePose framePoseToPack)

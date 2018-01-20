@@ -284,7 +284,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void setInitialPose(FramePose initialPose)
    {
       initialPose.changeFrame(trajectoryFrame);
-      initialPose.getPoseIncludingFrame(initialPosition, initialOrientation);
+      initialPose.get(initialPosition, initialOrientation);
       yoInitialPosition.set(initialPosition);
       yoInitialOrientation.set(initialOrientation);
    }
