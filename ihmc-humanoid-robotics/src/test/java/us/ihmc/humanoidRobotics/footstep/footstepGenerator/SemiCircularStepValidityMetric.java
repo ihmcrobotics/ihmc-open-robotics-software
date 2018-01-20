@@ -186,11 +186,11 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       swingEnd.getPose(endingFramePose);
 
       FramePoint2D initialPoint = new FramePoint2D();
-      initialFramePose.getPosition2dIncludingFrame(initialPoint);
+      initialFramePose.getPosition(initialPoint);
       FramePoint2D stancePoint = new FramePoint2D();
-      stanceFramePose.getPosition2dIncludingFrame(stancePoint);
+      stanceFramePose.getPosition(stancePoint);
       FramePoint2D endPoint = new FramePoint2D();
-      endingFramePose.getPosition2dIncludingFrame(endPoint);
+      endingFramePose.getPosition(endPoint);
       boolean swingsThroughStanceLeg;
       if (initialPoint.epsilonEquals(endPoint, 1.0e-12))
       {
