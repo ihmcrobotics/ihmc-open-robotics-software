@@ -197,8 +197,8 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
       robotYoPose.set(robotPose);
 
-      robotPose.getPosition(robotLocation);
-      robotPose.getOrientation(robotOrientation);
+      robotLocation.set(robotPose.getPosition());
+      robotOrientation.set(robotPose.getOrientation());
 
       this.targetLocation.set(robotLocation);
       this.targetOrientation.set(robotOrientation);

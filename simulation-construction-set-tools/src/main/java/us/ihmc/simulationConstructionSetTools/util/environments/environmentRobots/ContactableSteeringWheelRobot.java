@@ -174,15 +174,13 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       steeringWheelFrame.getTransformToDesiredFrame(steeringWheelTransformToWorld, worldFrame);
       steeringWheelTransformToWorld.transform(jointAxisVector);
 
-      Vector3D steeringWheelPositionInWorld = new Vector3D();
-      steeringWheelPoseInWorld.getPosition(steeringWheelPositionInWorld);
+      Vector3D steeringWheelPositionInWorld = new Vector3D(steeringWheelPoseInWorld.getPosition());
       steeringWheelPinJoint = new PinJoint("steeringWheelPinJoint", steeringWheelPositionInWorld, this, jointAxisVector);
       steeringWheelPinJoint.setLimitStops(-totalNumberOfPossibleTurns * Math.PI, totalNumberOfPossibleTurns * Math.PI, 1000, 100);
       steeringWheelPinJoint.setDamping(steeringDamping.getDoubleValue());
 
       //put the graphics frame in the proper orientation
-      RotationMatrix rotationMatrix = new RotationMatrix();
-      steeringWheelPoseInWorld.getOrientation(rotationMatrix);
+      RotationMatrix rotationMatrix = new RotationMatrix(steeringWheelPoseInWorld.getOrientation());
       steeringWheelLinkGraphics.rotate(rotationMatrix);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
       rotationTransform.setRotation(rotationMatrix);

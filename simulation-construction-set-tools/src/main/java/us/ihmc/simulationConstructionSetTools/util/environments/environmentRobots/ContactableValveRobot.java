@@ -118,15 +118,13 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       valveFrame.getTransformToDesiredFrame(valveTransformToWorld, ReferenceFrame.getWorldFrame());
       valveTransformToWorld.transform(jointAxisVector);
             
-      Vector3D valvePositionInWorld = new Vector3D();
-      valvePoseInWorld.getPosition(valvePositionInWorld);
+      Vector3D valvePositionInWorld = new Vector3D(valvePoseInWorld.getPosition());
       valvePinJoint = new PinJoint("valvePinJoint", valvePositionInWorld, this, jointAxisVector);
       valvePinJoint.setLimitStops(0.0, valveNumberOfPossibleTurns * 2 * Math.PI, 1000, 100);
       valvePinJoint.setDamping(valveDamping.getDoubleValue());
       
       //put the graphics frame in the proper orientation
-      RotationMatrix rotationMatrix = new RotationMatrix();
-      valvePoseInWorld.getOrientation(rotationMatrix);
+      RotationMatrix rotationMatrix = new RotationMatrix(valvePoseInWorld.getOrientation());
       valveLinkGraphics.rotate(rotationMatrix);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
       rotationTransform.setRotation(rotationMatrix);

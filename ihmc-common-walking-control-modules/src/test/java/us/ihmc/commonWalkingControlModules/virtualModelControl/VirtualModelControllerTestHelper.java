@@ -2401,8 +2401,8 @@ public class VirtualModelControllerTestHelper
          this.forcePoint = forcePoint;
          this.handFrame = handFrame;
          this.currentPose.setToZero(handFrame);
-         desiredPose.getPosition(desiredPosition);
-         desiredPose.getOrientation(desiredOrientation);
+         desiredPosition.set(desiredPose.getPosition());
+         desiredOrientation.set(desiredPose.getOrientation());
 
          registry = new YoVariableRegistry("forcePointController" + suffix);
 
@@ -2501,8 +2501,8 @@ public class VirtualModelControllerTestHelper
       {
          currentPose.setToZero(handFrame);
          currentPose.changeFrame(worldFrame);
-         currentPose.getPosition(currentPosition);
-         currentPose.getOrientation(currentOrientation);
+         currentPosition.set(currentPose.getPosition());
+         currentOrientation.set(currentPose.getOrientation());
 
          desiredLinearX.set(desiredPosition.getX());
          desiredLinearY.set(desiredPosition.getY());

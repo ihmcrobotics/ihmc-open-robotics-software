@@ -5,7 +5,6 @@ import java.util.Random;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
@@ -208,14 +207,14 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void get(Tuple3DBasics tupleToPack, QuaternionBasics quaternionToPack)
    {
-      getPosition(tupleToPack);
-      getOrientation(quaternionToPack);
+      tupleToPack.set(getPosition());
+      quaternionToPack.set(getOrientation());
    }
 
    public void get(Tuple3DBasics tupleToPack, AxisAngleBasics axisAngleToPack)
    {
-      getPosition(tupleToPack);
-      getOrientation(axisAngleToPack);
+      tupleToPack.set(getPosition());
+      axisAngleToPack.set(getOrientation());
    }
 
    public void get(RigidBodyTransform transformToPack)
@@ -234,11 +233,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       return pose.getPosition();
    }
 
-   public void getPosition(Tuple3DBasics tupleToPack)
-   {
-      tupleToPack.set(pose.getPosition());
-   }
-
    public void getPosition(FrameTuple3DBasics frameTupleToPack)
    {
       frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPosition());
@@ -249,24 +243,9 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       return pose.getOrientation();
    }
 
-   public void getOrientation(RotationMatrix matrixToPack)
-   {
-      matrixToPack.set(pose.getOrientation());
-   }
-
-   public void getOrientation(QuaternionBasics quaternionToPack)
-   {
-      quaternionToPack.set(pose.getOrientation());
-   }
-
    public void getOrientation(double[] yawPitchRoll)
    {
       pose.getOrientationYawPitchRoll(yawPitchRoll);
-   }
-
-   public void getOrientation(AxisAngleBasics axisAngleToPack)
-   {
-      axisAngleToPack.set(pose.getOrientation());
    }
 
    public void getOrientation(FrameQuaternionBasics orientationToPack)

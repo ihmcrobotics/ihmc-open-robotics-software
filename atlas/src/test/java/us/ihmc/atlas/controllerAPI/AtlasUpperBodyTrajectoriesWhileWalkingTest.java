@@ -120,10 +120,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          FramePose handPosition = new FramePose();
          handPosition.setToZero(handFrame);
          handPosition.changeFrame(worldFrame);
-         Point3D position = new Point3D();
-         handPosition.getPosition(position);
-         Quaternion orientation = new Quaternion();
-         handPosition.getOrientation(orientation);
+         Point3D position = new Point3D(handPosition.getPosition());
+         Quaternion orientation = new Quaternion(handPosition.getOrientation());
 
          HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage(robotSide, 1);
          handHoldMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));

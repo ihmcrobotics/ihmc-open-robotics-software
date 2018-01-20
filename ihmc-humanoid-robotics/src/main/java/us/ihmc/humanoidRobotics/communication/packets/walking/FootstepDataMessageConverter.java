@@ -30,10 +30,8 @@ public class FootstepDataMessageConverter
 
          FramePose footstepPose = new FramePose();
          footstep.getSoleFramePose(footstepPose);
-         Point3D location = new Point3D();
-         Quaternion orientation = new Quaternion();
-         footstepPose.getPosition(location);
-         footstepPose.getOrientation(orientation);
+         Point3D location = new Point3D(footstepPose.getPosition());
+         Quaternion orientation = new Quaternion(footstepPose.getOrientation());
 
          FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
 
@@ -66,10 +64,8 @@ public class FootstepDataMessageConverter
 
          FramePose footstepPose = new FramePose();
          footstep.getSoleFramePose(footstepPose);
-         Point3D location = new Point3D();
-         Quaternion orientation = new Quaternion();
-         footstepPose.getPosition(location);
-         footstepPose.getOrientation(orientation);
+         Point3D location = new Point3D(footstepPose.getPosition());
+         Quaternion orientation = new Quaternion(footstepPose.getOrientation());
 
          FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
 

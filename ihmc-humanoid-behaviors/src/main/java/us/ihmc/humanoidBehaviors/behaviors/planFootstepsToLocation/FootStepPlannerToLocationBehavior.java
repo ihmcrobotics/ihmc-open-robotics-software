@@ -149,13 +149,13 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       us.ihmc.euclid.tuple3D.Point3D pointBetweenFeet = new us.ihmc.euclid.tuple3D.Point3D();
       us.ihmc.euclid.tuple3D.Vector3D vectorFromFeetToGoal = new us.ihmc.euclid.tuple3D.Vector3D();
 
-      tempLeftFootPose.getPosition(temp);
+      temp.set(tempLeftFootPose.getPosition());
       pointBetweenFeet.set(temp);
-      tempLeftFootPose.getPosition(temp);
+      temp.set(tempLeftFootPose.getPosition());
       pointBetweenFeet.add(temp);
       pointBetweenFeet.scale(0.5);
 
-      goalPose.getPosition(vectorFromFeetToGoal);
+      vectorFromFeetToGoal.set(goalPose.getPosition());
       vectorFromFeetToGoal.sub(pointBetweenFeet);
 
       double headingFromFeetToGoal = Math.atan2(vectorFromFeetToGoal.getY(), vectorFromFeetToGoal.getX());
@@ -282,8 +282,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       {
          SimpleFootstep footstep = plan.getFootstep(i);
          footstep.getSoleFramePose(tempFirstFootstepPose);
-         tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
-         tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
+         tempFootstepPosePosition.set(tempFirstFootstepPose.getPosition());
+         tempFirstFootstepPoseOrientation.set(tempFirstFootstepPose.getOrientation());
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 

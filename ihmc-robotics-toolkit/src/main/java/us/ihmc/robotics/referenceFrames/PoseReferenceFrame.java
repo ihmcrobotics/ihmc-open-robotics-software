@@ -202,7 +202,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getPosition(Point3D pointToPack)
    {
-      originPose.getPosition(pointToPack);
+      pointToPack.set(originPose.getPosition());
    }
 
    public void getPositionIncludingFrame(FramePoint3D framePointToPack)
@@ -217,12 +217,12 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getOrientation(Quaternion quaternionToPack)
    {
-      originPose.getOrientation(quaternionToPack);
+      quaternionToPack.set(originPose.getOrientation());
    }
 
    public void getOrientation(RotationMatrix matrixToPack)
    {
-      originPose.getOrientation(matrixToPack);
+      matrixToPack.set(originPose.getOrientation());
    }
 
    public void getOrientationIncludingFrame(FrameQuaternion frameOrientationToPack)

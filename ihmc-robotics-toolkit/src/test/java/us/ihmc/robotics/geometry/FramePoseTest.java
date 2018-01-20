@@ -76,8 +76,7 @@ public class FramePoseTest
       FramePoint3D rotationAxisOrigin = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       GeometryTools.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, angleToRotate, framePose);
 
-      Point3D actualPosePositionAfterRotation = new Point3D();
-      framePose.getPosition(actualPosePositionAfterRotation);
+      Point3D actualPosePositionAfterRotation = new Point3D(framePose.getPosition());
 
       Point3D desiredPosition = new Point3D(Math.cos(angleToRotate), Math.sin(angleToRotate), 1.0);
 
@@ -105,8 +104,7 @@ public class FramePoseTest
 
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, angleToRotate, framePose);
 
-      Point3D actualPosePositionAfterRotation = new Point3D();
-      framePose.getPosition(actualPosePositionAfterRotation);
+      Point3D actualPosePositionAfterRotation = new Point3D(framePose.getPosition());
 
       Point3D desiredPosition = new Point3D(Math.cos(angleToRotate), Math.sin(angleToRotate), 1.0);
 
@@ -143,8 +141,7 @@ public class FramePoseTest
          PoseReferenceFrame initialPoseFrame = new PoseReferenceFrame("initialPoseFrame", initialPose);
          rotatedPose.changeFrame(initialPoseFrame);
 
-         AxisAngle actualRotationAxisAngle = new AxisAngle();
-         rotatedPose.getOrientation(actualRotationAxisAngle);
+         AxisAngle actualRotationAxisAngle = new AxisAngle(rotatedPose.getOrientation());
 
          assertTrue("Actual rotation: " + actualRotationAxisAngle + " does not match desired: " + desiredRotationAxisAngle,
                RotationTools.axisAngleEpsilonEquals(desiredRotationAxisAngle, actualRotationAxisAngle, 1e-5,
@@ -229,7 +226,7 @@ public class FramePoseTest
          rotatedPose.setIncludingFrame(initialPose);
          
          GeometryTools.rotatePoseAboutAxis(worldFrame, Axis.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
-         rotatedPose.getPosition(actualPosition);
+         actualPosition.set(rotatedPose.getPosition());
 
          desiredPosition.set(Math.cos(angleToRotate), Math.sin(angleToRotate), 1.0);
          positionError.sub(desiredPosition, actualPosition);
@@ -268,13 +265,11 @@ public class FramePoseTest
 
          initialPose.setIncludingFrame(rotatedPose);
 
-         Point3D actualpositionBeforeRotation = new Point3D();
-         rotatedPose.getPosition(actualpositionBeforeRotation);
+         Point3D actualpositionBeforeRotation = new Point3D(rotatedPose.getPosition());
 
          GeometryTools.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
 
-         Point3D actualPosePositionAfterRotation = new Point3D();
-         rotatedPose.getPosition(actualPosePositionAfterRotation);
+         Point3D actualPosePositionAfterRotation = new Point3D(rotatedPose.getPosition());
 
          Vector3D changeInPosition = new Vector3D();
          changeInPosition.sub(actualPosePositionAfterRotation, actualpositionBeforeRotation);

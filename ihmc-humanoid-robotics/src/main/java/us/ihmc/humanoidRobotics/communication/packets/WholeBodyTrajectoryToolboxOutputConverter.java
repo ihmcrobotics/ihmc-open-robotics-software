@@ -150,11 +150,10 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       {
          converter.updateFullRobotModel(solution.getRobotConfigurations()[i]);
 
-         Quaternion desiredOrientation = new Quaternion();
          ReferenceFrame controlFrame = converter.getFullRobotModel().getChest().getBodyFixedFrame();
          FramePose desiredHandPose = new FramePose(controlFrame);
          desiredHandPose.changeFrame(worldFrame);
-         desiredHandPose.getOrientation(desiredOrientation);
+         Quaternion desiredOrientation = new Quaternion(desiredHandPose.getOrientation());
 
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 

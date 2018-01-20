@@ -266,8 +266,7 @@ public class PlanningTestTools
       soleToWorld.transform(goalOffset);
 
       FramePose achievedGoal = new FramePose(stepPose);
-      Point3D goalPosition = new Point3D();
-      achievedGoal.getPosition(goalPosition);
+      Point3D goalPosition = new Point3D(achievedGoal.getPosition());
       goalPosition.add(goalOffset);
       achievedGoal.setPosition(goalPosition);
 

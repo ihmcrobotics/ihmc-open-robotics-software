@@ -350,13 +350,13 @@ public class FollowFiducialBehavior extends AbstractBehavior
       Point3D shorterGoalPosition = new Point3D();
       Vector3D vectorFromFeetToGoal = new Vector3D();
 
-      leftFootPose.getPosition(temp);
+      temp.set(leftFootPose.getPosition());
       pointBetweenFeet.set(temp);
-      rightFootPose.getPosition(temp);
+      temp.set(rightFootPose.getPosition());
       pointBetweenFeet.add(temp);
       pointBetweenFeet.scale(0.5);
 
-      goalPose.getPosition(goalPosition);
+      goalPosition.set(goalPose.getPosition());
       vectorFromFeetToGoal.sub(goalPosition, pointBetweenFeet);
 
       double shorterGoalLength = 2.0;
@@ -441,8 +441,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
       {
          SimpleFootstep footstep = plan.getFootstep(i);
          footstep.getSoleFramePose(tempFirstFootstepPose);
-         tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
-         tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
+         tempFootstepPosePosition.set(tempFirstFootstepPose.getPosition());
+         tempFirstFootstepPoseOrientation.set(tempFirstFootstepPose.getOrientation());
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 

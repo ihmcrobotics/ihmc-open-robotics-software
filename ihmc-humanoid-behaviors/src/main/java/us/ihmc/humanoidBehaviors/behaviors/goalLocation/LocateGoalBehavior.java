@@ -30,8 +30,7 @@ public class LocateGoalBehavior extends AbstractBehavior
       if (detectorBehaviorService.getGoalHasBeenLocated())
       {
          detectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
-         Point3D position = new Point3D();
-         foundFiducialPose.getPosition(position);
+         Point3D position = new Point3D(foundFiducialPose.getPosition());
 
          double x = position.getX(), y = position.getY(), z = position.getZ();
          double yaw = Math.toDegrees(foundFiducialPose.getYaw()), pitch = Math.toDegrees(foundFiducialPose.getPitch()), roll = Math.toDegrees(foundFiducialPose.getRoll());

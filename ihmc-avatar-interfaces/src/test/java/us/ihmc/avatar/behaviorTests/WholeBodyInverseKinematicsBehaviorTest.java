@@ -168,8 +168,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       String handName = fullRobotModel.getHand(robotSide).getName();
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
 
-      Point3D handPosition = new Point3D();
-      desiredHandPose.getPosition(handPosition);
+      Point3D handPosition = new Point3D(desiredHandPose.getPosition());
 
       double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
@@ -235,11 +234,9 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       String leftHandName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(RobotSide.LEFT).getName();
 
       Quaternion controllerDesiredHandOrientationR = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(rightHandName, scs);
-      Quaternion desiredHandOrientationR = new Quaternion();
-      desiredHandPoseR.getOrientation(desiredHandOrientationR);
+      Quaternion desiredHandOrientationR = new Quaternion(desiredHandPoseR.getOrientation());
       Quaternion controllerDesiredHandOrientationL = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(leftHandName, scs);
-      Quaternion desiredHandOrientationL = new Quaternion();
-      desiredHandPoseL.getOrientation(desiredHandOrientationL);
+      Quaternion desiredHandOrientationL = new Quaternion(desiredHandPoseL.getOrientation());
 
       double handAngleEpsilon = Math.toRadians(1.0);
 
@@ -248,10 +245,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       Point3D controllerDesiredHandPositionR = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(rightHandName, scs);
       Point3D controllerDesiredHandPositionL = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(leftHandName, scs);
-      Point3D rightPosition = new Point3D();
-      desiredHandPoseR.getPosition(rightPosition);
-      Point3D leftPosition = new Point3D();
-      desiredHandPoseL.getPosition(leftPosition);
+      Point3D rightPosition = new Point3D(desiredHandPoseR.getPosition());
+      Point3D leftPosition = new Point3D(desiredHandPoseL.getPosition());
       double rightDifference = rightPosition.distance(controllerDesiredHandPositionR);
       double leftDifference = leftPosition.distance(controllerDesiredHandPositionL);
 
@@ -320,8 +315,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       String handName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
       Quaternion controllerDesiredHandOrientation = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(handName, scs);
-      Quaternion desiredHandOrientation = new Quaternion();
-      desiredHandPose.getOrientation(desiredHandOrientation);
+      Quaternion desiredHandOrientation = new Quaternion(desiredHandPose.getOrientation());
 
       double handAngleEpsilon = Math.toRadians(1);
 
@@ -335,8 +329,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
 
-      Point3D handPosition = new Point3D();
-      desiredHandPose.getPosition(handPosition);
+      Point3D handPosition = new Point3D(desiredHandPose.getPosition());
 
       double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
@@ -370,8 +363,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FramePose desiredHandPoseR = new FramePose(handControlFrameR);
       desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Quaternion handQuatRight = new Quaternion();
-      desiredHandPoseR.getOrientation(handQuatRight);
+      Quaternion handQuatRight = new Quaternion(desiredHandPoseR.getOrientation());
       handQuatRight.multiply(handQuatRight, offsetOrientationRight);
       desiredHandPoseR.setOrientation(handQuatRight);
       desiredHandPoseR.prependTranslation(0.20, 0.0, 0.0);
@@ -385,8 +377,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FramePose desiredHandPoseL = new FramePose(handControlFrameL);
       desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Quaternion handQuatLeft = new Quaternion();
-      desiredHandPoseL.getOrientation(handQuatLeft);
+      Quaternion handQuatLeft = new Quaternion(desiredHandPoseL.getOrientation());
       handQuatLeft.multiply(handQuatLeft, offsetOrientationLeft);
       desiredHandPoseL.setOrientation(handQuatLeft);
       desiredHandPoseL.prependTranslation(0.20, 0.0, 0.0);
@@ -436,10 +427,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       Point3D controllerDesiredHandPositionR = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(rightHandName, scs);
       Point3D controllerDesiredHandPositionL = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(leftHandName, scs);
-      Point3D rightPosition = new Point3D();
-      desiredHandPoseR.getPosition(rightPosition);
-      Point3D leftPosition = new Point3D();
-      desiredHandPoseL.getPosition(leftPosition);
+      Point3D rightPosition = new Point3D(desiredHandPoseR.getPosition());
+      Point3D leftPosition = new Point3D(desiredHandPoseL.getPosition());
       double rightDifference = rightPosition.distance(controllerDesiredHandPositionR);
       double leftDifference = leftPosition.distance(controllerDesiredHandPositionL);
 
@@ -473,8 +462,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Quaternion handQuat = new Quaternion();
-      desiredHandPose.getOrientation(handQuat);
+      Quaternion handQuat = new Quaternion(desiredHandPose.getOrientation());
       handQuat.multiply(handQuat, offsetOrientation);
       desiredHandPose.setOrientation(handQuat);
       desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
@@ -516,8 +504,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       assertNotEquals("Current roll " + currentRoll, currentRoll, desiredHandPose.getRoll(), angleEpsilon);
 
-      Point3D handPosition = new Point3D();
-      desiredHandPose.getPosition(handPosition);
+      Point3D handPosition = new Point3D(desiredHandPose.getPosition());
 
       double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);

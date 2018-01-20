@@ -282,8 +282,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       desiredPose.checkReferenceFrameMatch(worldFrame);
 
-      desiredPose.getPosition(desiredPositionInWorld);
-      desiredPose.getOrientation(desiredOrientationInWorld);
+      desiredPositionInWorld.set(desiredPose.getPosition());
+      desiredOrientationInWorld.set(desiredPose.getOrientation());
       desiredLinearVelocityInWorld.setToZero();
       desiredAngularVelocityInWorld.setToZero();
       feedForwardLinearAccelerationInWorld.setToZero();

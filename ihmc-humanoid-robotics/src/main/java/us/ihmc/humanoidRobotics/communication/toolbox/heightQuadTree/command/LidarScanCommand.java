@@ -76,12 +76,12 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
 
    public void getLidarPosition(Point3D positionToPack)
    {
-      lidarPose.getPosition(positionToPack);
+      positionToPack.set(lidarPose.getPosition());
    }
    
    public void getLidarOrientation(Quaternion orientationToPack)
    {
-      lidarPose.getOrientation(orientationToPack);
+      orientationToPack.set(lidarPose.getOrientation());
    }
 
    @Override
