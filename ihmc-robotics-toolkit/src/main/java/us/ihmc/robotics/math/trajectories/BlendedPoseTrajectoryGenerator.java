@@ -44,7 +44,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void blendInitialConstraint(FramePose initialPose, double initialTime, double blendDuration)
    {
-      initialPose.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(initialPose.getPosition());
       initialPose.getOrientation(tempOrientation);
       blendedPositionTrajectory.blendInitialConstraint(tempPosition, initialTime, blendDuration);
       blendedOrientationTrajectory.blendInitialConstraint(tempOrientation, initialTime, blendDuration);
@@ -52,7 +52,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void blendInitialConstraint(FramePose initialPose, Twist initialTwist, double initialTime, double blendDuration)
    {
-      initialPose.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(initialPose.getPosition());
       initialPose.getOrientation(tempOrientation);
       initialTwist.getLinearPart(tempVelocity);
       initialTwist.getAngularPart(tempAngularVelocity);
@@ -62,7 +62,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void blendFinalConstraint(FramePose finalPose, double finalTime, double blendDuration)
    {
-      finalPose.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(finalPose.getPosition());
       finalPose.getOrientation(tempOrientation);
       blendedPositionTrajectory.blendFinalConstraint(tempPosition, finalTime, blendDuration);
       blendedOrientationTrajectory.blendFinalConstraint(tempOrientation, finalTime, blendDuration);
@@ -70,7 +70,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void blendFinalConstraint(FramePose finalPose, Twist finalTwist, double finalTime, double blendDuration)
    {
-      finalPose.getPosition(tempPosition);
+      tempPosition.setIncludingFrame(finalPose.getPosition());
       finalPose.getOrientation(tempOrientation);
       finalTwist.getLinearPart(tempVelocity);
       finalTwist.getAngularPart(tempAngularVelocity);

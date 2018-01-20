@@ -73,18 +73,14 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
 
    public void setInitialPose(FramePose initialPose)
    {
-      initialPose.getPosition(tempPosition);
-      initialPose.getOrientation(tempOrientation);
-      positionTrajectoryGenerator.setInitialPosition(tempPosition);
-      orientationTrajectoryGenerator.setInitialOrientation(tempOrientation);
+      positionTrajectoryGenerator.setInitialPosition(initialPose.getPosition());
+      orientationTrajectoryGenerator.setInitialOrientation(initialPose.getOrientation());
    }
 
    public void setFinalPose(FramePose finalPose)
    {
-      finalPose.getPosition(tempPosition);
-      finalPose.getOrientation(tempOrientation);
-      positionTrajectoryGenerator.setFinalPosition(tempPosition);
-      orientationTrajectoryGenerator.setFinalOrientation(tempOrientation);
+      positionTrajectoryGenerator.setFinalPosition(finalPose.getPosition());
+      orientationTrajectoryGenerator.setFinalOrientation(finalPose.getOrientation());
    }
 
    public void setInitialClearance(FrameVector3D initialDirection, double leaveDistance)

@@ -29,7 +29,7 @@ public class ChangeableConfigurationProvider implements SE3ConfigurationProvider
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      configuration.getPosition(positionToPack);
+      positionToPack.setIncludingFrame(configuration.getPosition());
    }
 
    public void getOrientation(FrameQuaternion orientationToPack)

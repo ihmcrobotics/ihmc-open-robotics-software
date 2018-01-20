@@ -170,13 +170,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       {
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-         desiredPose.getPosition(desiredAnklePosition);
+         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
          legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
 
          desiredPose.setPosition(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-         desiredPose.getPosition(desiredPosition);
+         desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
 
       if (yoSetDesiredVelocityToZero.getBooleanValue())

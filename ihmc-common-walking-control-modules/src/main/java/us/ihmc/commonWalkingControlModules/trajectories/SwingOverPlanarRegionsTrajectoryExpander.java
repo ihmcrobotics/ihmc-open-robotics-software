@@ -163,15 +163,15 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    public double expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose,
                                                  FramePose swingEndPose, PlanarRegionsList planarRegionsList)
    {
-      stanceFootPose.getPosition(stanceFootPosition);
+      stanceFootPosition.setIncludingFrame(stanceFootPose.getPosition());
       stanceFootPosition.changeFrame(WORLD);
       twoWaypointSwingGenerator.setStanceFootPosition(stanceFootPosition);
 
-      swingStartPose.getPosition(swingStartPosition);
+      swingStartPosition.setIncludingFrame(swingStartPose.getPosition());
       swingStartPosition.changeFrame(WORLD);
       twoWaypointSwingGenerator.setInitialConditions(swingStartPosition, initialVelocity);
 
-      swingEndPose.getPosition(swingEndPosition);
+      swingEndPosition.setIncludingFrame(swingEndPose.getPosition());
       swingEndPosition.changeFrame(WORLD);
       twoWaypointSwingGenerator.setFinalConditions(swingEndPosition, touchdownVelocity);
       twoWaypointSwingGenerator.setStepTime(1.0);

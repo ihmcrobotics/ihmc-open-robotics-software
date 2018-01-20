@@ -20,7 +20,6 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
    private final YoFramePoint position;
    private final YoFrameOrientation orientation;
 
-   private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameQuaternion tempFrameOrientation = new FrameQuaternion();
 
    public YoFramePose(YoFramePoint position, YoFrameOrientation orientation)
@@ -76,19 +75,16 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
    {
       framePose.checkReferenceFrameMatch(getReferenceFrame());
 
-      framePose.getPosition(tempFramePoint);
       framePose.getOrientation(tempFrameOrientation);
-      position.set(tempFramePoint);
+      position.set(framePose.getPosition());
       orientation.set(tempFrameOrientation);
    }
 
    public void setAndMatchFrame(FramePose framePose)
    {
-      framePose.getPosition(tempFramePoint);
       framePose.getOrientation(tempFrameOrientation);
-      tempFramePoint.changeFrame(getReferenceFrame());
       tempFrameOrientation.changeFrame(getReferenceFrame());
-      position.set(tempFramePoint);
+      position.setAndMatchFrame(framePose.getPosition());
       orientation.set(tempFrameOrientation);
    }
 

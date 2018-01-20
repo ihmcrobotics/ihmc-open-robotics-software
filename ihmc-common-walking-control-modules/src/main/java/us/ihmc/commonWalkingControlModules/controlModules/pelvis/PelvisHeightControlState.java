@@ -264,7 +264,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
       taskspaceControlState.getDesiredPose(tempPose);
-      tempPose.getPosition(positionToPack);
+      positionToPack.setIncludingFrame(tempPose.getPosition());
 
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(controlFrame);
