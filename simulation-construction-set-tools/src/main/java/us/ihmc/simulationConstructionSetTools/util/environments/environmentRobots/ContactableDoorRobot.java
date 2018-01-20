@@ -8,6 +8,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,7 +23,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -111,14 +111,14 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       
       // set up reference frames
       originalDoorPose = new RigidBodyTransform(new AxisAngle(), new Vector3D(positionInWorld)); 
-      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle()));
+      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle()));
       doorBox = new FrameBox3d(doorFrame, widthX, depthY, heightZ);
       
       for(RobotSide robotSide : RobotSide.values())
       {
          Vector3D offset = new Vector3D(handleOffset.getX(), 0.5*depthY + robotSide.negateIfLeftSide(0.5*depthY + handleDoorSeparation), handleOffset.getY());
          handlePoses.put(robotSide, new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "HandleFrame",
-               new FramePose(doorFrame, new Point3D(offset), new AxisAngle())));
+               new FramePose3D(doorFrame, new Point3D(offset), new AxisAngle())));
       }
       
       internalMultiJointArticulatedContactable = new InternalMultiJointArticulatedContactable(getName(), this);

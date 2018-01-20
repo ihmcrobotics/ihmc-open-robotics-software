@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,7 +16,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
@@ -35,7 +35,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
    private final ReferenceFrame midFeetZUpFrame, pelvisFrame;
 
-   private final FramePose framePose = new FramePose(worldFrame);
+   private final FramePose3D framePose = new FramePose3D(worldFrame);
 
    private final CommandInputManager controllerCommandInputManager;
 

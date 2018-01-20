@@ -11,13 +11,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -44,7 +44,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
    /** Defines the reference frame of interest. It is attached to the end-effector. */
-   private final FramePose controlFramePose = new FramePose();
+   private final FramePose3D controlFramePose = new FramePose3D();
 
    /**
     * It defines the desired linear velocity of the origin of the control frame, with respect to the
@@ -767,7 +767,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * 
     * @param controlFramePoseToPack the pose of the control frame. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePose controlFramePoseToPack)
+   public void getControlFramePoseIncludingFrame(FramePose3D controlFramePoseToPack)
    {
       controlFramePoseToPack.setIncludingFrame(controlFramePose);
    }

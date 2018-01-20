@@ -5,6 +5,7 @@ import static us.ihmc.robotics.geometry.AngleTools.*;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,7 +24,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -109,7 +109,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final ReferenceFrame trajectoryFrame;
    private ReferenceFrame controlledFrame;
    private final PoseReferenceFrame tangentialCircleFrame;
-   private final FramePose tangentialCircleFramePose = new FramePose();
+   private final FramePose3D tangentialCircleFramePose = new FramePose3D();
    private final YoFramePose yoTangentialCircleFramePose;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
@@ -281,7 +281,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoInitialOrientation.set(initialOrientation);
    }
 
-   public void setInitialPose(FramePose initialPose)
+   public void setInitialPose(FramePose3D initialPose)
    {
       initialPose.changeFrame(trajectoryFrame);
       initialPose.get(initialPosition, initialOrientation);
@@ -569,7 +569,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    }
 
    @Override
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.setIncludingFrame(yoCurrentAdjustedPositionWorld, yoCurrentOrientation);
    }

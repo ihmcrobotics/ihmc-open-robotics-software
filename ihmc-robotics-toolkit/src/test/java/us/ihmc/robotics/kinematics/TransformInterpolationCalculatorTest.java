@@ -12,12 +12,12 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 ;
@@ -397,9 +397,9 @@ public class TransformInterpolationCalculatorTest
       RigidBodyTransform toTestTransform = new RigidBodyTransform();
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
 
-      FramePose framePose1 = new FramePose();
-      FramePose framePose2 = new FramePose();
-      FramePose expectedFramePose = new FramePose();
+      FramePose3D framePose1 = new FramePose3D();
+      FramePose3D framePose2 = new FramePose3D();
+      FramePose3D expectedFramePose = new FramePose3D();
 
       PoseReferenceFrame frame1 = new PoseReferenceFrame("frame1", framePose1);
       PoseReferenceFrame frame2 = new PoseReferenceFrame("frame2", framePose2);

@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import static us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPositionTrajectoryGenerator.defaultClearanceTimeInPercentOfTrajectoryTime;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 
@@ -77,13 +77,13 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientationTrajectoryGenerator.switchTrajectoryFrame(referenceFrame);
    }
 
-   public void setInitialLeadOut(FramePose initialPose, FrameVector3D initialDirection, double leaveDistance)
+   public void setInitialLeadOut(FramePose3D initialPose, FrameVector3D initialDirection, double leaveDistance)
    {
       positionTrajectoryGenerator.setInitialLeadOut(initialPose.getPosition(), initialDirection, leaveDistance);
       orientationTrajectoryGenerator.setInitialOrientation(initialPose.getOrientation());
    }
 
-   public void setFinalLeadIn(FramePose finalPose, FrameVector3D finalDirection, double approachDistance)
+   public void setFinalLeadIn(FramePose3D finalPose, FrameVector3D finalDirection, double approachDistance)
    {
       positionTrajectoryGenerator.setFinalLeadIn(finalPose.getPosition(), finalDirection, approachDistance);
       orientationTrajectoryGenerator.setFinalOrientation(finalPose.getOrientation());
@@ -169,7 +169,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());

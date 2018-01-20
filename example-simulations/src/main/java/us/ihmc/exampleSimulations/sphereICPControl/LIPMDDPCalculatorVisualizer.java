@@ -1,6 +1,18 @@
 package us.ihmc.exampleSimulations.sphereICPControl;
 
+import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footLengthForControl;
+import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footWidthForControl;
+import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.toeWidthForControl;
+import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultLeftColor;
+import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultRightColor;
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
@@ -9,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDDPCalculato
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -25,7 +38,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -43,15 +55,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.*;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultLeftColor;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultRightColor;
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class LIPMDDPCalculatorVisualizer
 {
@@ -123,7 +126,7 @@ public class LIPMDDPCalculatorVisualizer
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, footWidthForControl / 2.0));
          FootSpoof contactableFoot = new FootSpoof(sidePrefix + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInSoleFrame, 0.0);
-         FramePose startingPose = new FramePose(worldFrame);
+         FramePose3D startingPose = new FramePose3D(worldFrame);
          startingPose.setY(robotSide.negateIfRightSide(0.15));
          contactableFoot.setSoleFrame(startingPose);
          contactableFeet.put(robotSide, contactableFoot);
@@ -326,7 +329,7 @@ public class LIPMDDPCalculatorVisualizer
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose footPose = new FramePose(contactableFeet.get(robotSide).getSoleFrame());
+         FramePose3D footPose = new FramePose3D(contactableFeet.get(robotSide).getSoleFrame());
          footPose.changeFrame(worldFrame);
          currentFootPoses.get(robotSide).set(footPose);
       }
@@ -353,7 +356,7 @@ public class LIPMDDPCalculatorVisualizer
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       convexPolygon2d.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextNextNextFootstepPose = new FramePose(footstep.getSoleReferenceFrame());
+      FramePose3D nextNextNextFootstepPose = new FramePose3D(footstep.getSoleReferenceFrame());
       framePose.setAndMatchFrame(nextNextNextFootstepPose);
 
    }

@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.robotics.geometry.FramePose;
 
 /**
 * @author twan
@@ -10,19 +10,19 @@ import us.ihmc.robotics.geometry.FramePose;
 */
 public class ChangeableConfigurationProvider implements SE3ConfigurationProvider
 {
-   private final FramePose configuration;
+   private final FramePose3D configuration;
 
    public ChangeableConfigurationProvider()
    {
-      configuration = new FramePose();
+      configuration = new FramePose3D();
    }
 
-   public ChangeableConfigurationProvider(FramePose initialConfiguration)
+   public ChangeableConfigurationProvider(FramePose3D initialConfiguration)
    {
-      configuration = new FramePose(initialConfiguration);
+      configuration = new FramePose3D(initialConfiguration);
    }
 
-   public void get(FramePose framePose)
+   public void get(FramePose3D framePose)
    {
       framePose.setIncludingFrame(configuration);
    }
@@ -37,7 +37,7 @@ public class ChangeableConfigurationProvider implements SE3ConfigurationProvider
       orientationToPack.setIncludingFrame(configuration.getOrientation());
    }
 
-   public void set(FramePose newPose)
+   public void set(FramePose3D newPose)
    {
       configuration.setIncludingFrame(newPose);
    }

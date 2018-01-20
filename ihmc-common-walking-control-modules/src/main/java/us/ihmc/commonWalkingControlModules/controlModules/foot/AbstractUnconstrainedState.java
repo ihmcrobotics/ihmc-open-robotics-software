@@ -9,12 +9,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -94,12 +94,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       spatialFeedbackControlCommand.setGains(gains);
       ReferenceFrame linearGainsFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getPelvisZUpFrame();
       spatialFeedbackControlCommand.setGainsFrames(null, linearGainsFrame);
-      FramePose anklePoseInFoot = new FramePose(ankleFrame);
+      FramePose3D anklePoseInFoot = new FramePose3D(ankleFrame);
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
    }
 
-   protected void changeControlFrame(FramePose controlFramePoseInEndEffector)
+   protected void changeControlFrame(FramePose3D controlFramePoseInEndEffector)
    {
       controlFramePoseInEndEffector.checkReferenceFrameMatch(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePoseInEndEffector);
@@ -153,7 +153,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final Vector3D tempAngularWeightVector = new Vector3D();
    private final Vector3D tempLinearWeightVector = new Vector3D();
    private final FramePoint3D desiredAnklePosition = new FramePoint3D();
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D desiredPose = new FramePose3D();
 
    @Override
    public void doSpecificAction()
@@ -205,7 +205,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final RigidBodyTransform newBodyFrameDesiredTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformFromNewBodyFrameToOldBodyFrame = new RigidBodyTransform();
 
-   private void changeDesiredPoseBodyFrame(ReferenceFrame oldBodyFrame, ReferenceFrame newBodyFrame, FramePose framePoseToModify)
+   private void changeDesiredPoseBodyFrame(ReferenceFrame oldBodyFrame, ReferenceFrame newBodyFrame, FramePose3D framePoseToModify)
    {
       if (oldBodyFrame == newBodyFrame)
          return;

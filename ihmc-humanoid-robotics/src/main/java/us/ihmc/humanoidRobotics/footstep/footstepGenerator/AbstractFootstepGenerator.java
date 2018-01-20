@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -22,8 +24,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappin
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -61,7 +61,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected double initialDeltaFeetYaw;
    protected double initialDeltaFeetY;
    protected double initialDeltaFeetX;
-   protected final FramePose2d startPose = new FramePose2d();
+   protected final FramePose2D startPose = new FramePose2D();
 
    public AbstractFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames)
    {
@@ -91,11 +91,11 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       initialize(startPose);
    }
 
-   protected abstract void initialize(FramePose2d startPose);
+   protected abstract void initialize(FramePose2D startPose);
 
    abstract protected void generateFootsteps(ArrayList<Footstep> ret);
 
-   protected Footstep createFootstep(RobotSide currentFootstepSide, FramePose2d solePose)
+   protected Footstep createFootstep(RobotSide currentFootstepSide, FramePose2D solePose)
    {
       RigidBody foot = feet.get(currentFootstepSide);
       ReferenceFrame soleFrame = soleFrames.get(currentFootstepSide);
@@ -137,7 +137,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       soleFrame.getTransformToWorldFrame().getTranslation(translation);
       soleFrame.getTransformToWorldFrame().getRotation(rotation);
 
-      FramePose2d solePose2d = new FramePose2d(soleFrame, new Point2D(translation.getX(), translation.getY()), rotation.getYaw());
+      FramePose2D solePose2d = new FramePose2D(soleFrame, new Point2D(translation.getX(), translation.getY()), rotation.getYaw());
       Footstep foot = createFootstep(side, solePose2d);
 
       return foot;
@@ -184,13 +184,13 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       Footstep left = currentFootsteps.get(RobotSide.LEFT);
       Footstep right = currentFootsteps.get(RobotSide.RIGHT);
 
-      FramePose leftPose = new FramePose();
-      FramePose rightPose = new FramePose();
+      FramePose3D leftPose = new FramePose3D();
+      FramePose3D rightPose = new FramePose3D();
       left.getPose(leftPose);
       right.getPose(rightPose);
 
-      FramePose2d leftPose2d = new FramePose2d(leftPose);
-      FramePose2d rightPose2d = new FramePose2d(rightPose);
+      FramePose2D leftPose2d = new FramePose2D(leftPose);
+      FramePose2D rightPose2d = new FramePose2D(rightPose);
 
       startPose.interpolate(leftPose2d, rightPose2d, 0.5);
       Pose2dReferenceFrame startFramePose = new Pose2dReferenceFrame("StartPoseFrame", startPose);
@@ -221,7 +221,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 
    protected RobotSide determineClosestFootSideToEnd(SideDependentList<Footstep> lastFootsteps)
    {
-      FramePose2d endPose = getPath().getPoseAtS(1);
+      FramePose2D endPose = getPath().getPoseAtS(1);
       Point3D endPoint = new Point3D(endPose.getX(), endPose.getY(), 0.0);
       RobotSide closestSideToEnd = FootstepUtils.getFrontFootRobotSideFromFootsteps(lastFootsteps, new FramePoint3D(ReferenceFrame.getWorldFrame(), endPoint));
 

@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -42,13 +42,13 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedOrientationTrajectory.clearFinalConstraint();
    }
 
-   public void blendInitialConstraint(FramePose initialPose, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePose3D initialPose, double initialTime, double blendDuration)
    {
       blendedPositionTrajectory.blendInitialConstraint(initialPose.getPosition(), initialTime, blendDuration);
       blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), initialTime, blendDuration);
    }
 
-   public void blendInitialConstraint(FramePose initialPose, Twist initialTwist, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePose3D initialPose, Twist initialTwist, double initialTime, double blendDuration)
    {
       initialTwist.getLinearPart(tempVelocity);
       initialTwist.getAngularPart(tempAngularVelocity);
@@ -56,13 +56,13 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), tempAngularVelocity, initialTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePose finalPose, double finalTime, double blendDuration)
+   public void blendFinalConstraint(FramePose3D finalPose, double finalTime, double blendDuration)
    {
       blendedPositionTrajectory.blendFinalConstraint(finalPose.getPosition(), finalTime, blendDuration);
       blendedOrientationTrajectory.blendFinalConstraint(finalPose.getOrientation(), finalTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePose finalPose, Twist finalTwist, double finalTime, double blendDuration)
+   public void blendFinalConstraint(FramePose3D finalPose, Twist finalTwist, double finalTime, double blendDuration)
    {
       finalTwist.getLinearPart(tempVelocity);
       finalTwist.getAngularPart(tempAngularVelocity);
@@ -71,7 +71,7 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    }
 
    @Override
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       blendedPositionTrajectory.getPosition(tempPosition);
       blendedOrientationTrajectory.getOrientation(tempOrientation);

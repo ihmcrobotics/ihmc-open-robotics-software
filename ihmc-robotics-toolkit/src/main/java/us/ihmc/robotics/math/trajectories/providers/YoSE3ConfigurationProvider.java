@@ -2,9 +2,9 @@ package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.trajectories.providers.SE3ConfigurationProvider;
@@ -35,7 +35,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
       positionToPack.setIncludingFrame(position);
    }
 
-   public void setPose(FramePose pose)
+   public void setPose(FramePose3D pose)
    {
       this.position.setAndMatchFrame(pose.getPosition());
       this.orientation.setAndMatchFrame(pose.getOrientation());

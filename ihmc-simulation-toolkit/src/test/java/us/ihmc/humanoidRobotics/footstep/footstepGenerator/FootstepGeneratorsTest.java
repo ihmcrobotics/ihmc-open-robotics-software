@@ -16,6 +16,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -28,8 +30,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -1855,9 +1855,9 @@ public class FootstepGeneratorsTest
       {
          Footstep firstFootstep = footsteps.get(i);
          Footstep nextFootstep = footsteps.get(i + 2);
-         FramePose firstFootstepPose = new FramePose();
+         FramePose3D firstFootstepPose = new FramePose3D();
          firstFootstep.getPose(firstFootstepPose);
-         FramePose nextFootstepPose = new FramePose();
+         FramePose3D nextFootstepPose = new FramePose3D();
          nextFootstep.getPose(nextFootstepPose);
          FramePoint2D firstFootstepPosition2d = new FramePoint2D(firstFootstepPose.getPosition());
          FramePoint2D nextFootstepPosition2d = new FramePoint2D(nextFootstepPose.getPosition());
@@ -1874,7 +1874,7 @@ public class FootstepGeneratorsTest
 
    private void assertFootstepInAngleRange(String testDescription, Footstep footstep, double startYaw, double endYaw)
    {
-      FramePose footPose = new FramePose();
+      FramePose3D footPose = new FramePose3D();
       footstep.getPose(footPose);
 
       FrameOrientation2D footOrientation = new FrameOrientation2D(footPose.getOrientation());
@@ -2015,7 +2015,7 @@ public class FootstepGeneratorsTest
       Point2D endWorldPoint = new Point2D(endX, endY);
       FramePoint2D endPoint = new FramePoint2D(WORLD_FRAME, endWorldPoint);
       FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
-      FramePose2d endPose = new FramePose2d(endPoint, endOrientation);
+      FramePose2D endPose = new FramePose2D(endPoint, endOrientation);
 
       SideDependentList<Footstep> startFeet = updatedStartFeet(startX, startY, startYaw);
 
@@ -2094,7 +2094,7 @@ public class FootstepGeneratorsTest
       FramePoint2D endPoint = new FramePoint2D(WORLD_FRAME, endWorldPoint);
       FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
 
-      FramePose2d endPose = new FramePose2d(endPoint, endOrientation);
+      FramePose2D endPose = new FramePose2D(endPoint, endOrientation);
 
       double pathYaw = pathDirection.getOrientationRadians();
       pathType.setAngle(pathYaw);
@@ -2134,11 +2134,11 @@ public class FootstepGeneratorsTest
       FramePoint2D endPoint = new FramePoint2D(WORLD_FRAME, endWorldPoint);
 
       FrameOrientation2D startOrientation = new FrameOrientation2D(WORLD_FRAME, startYaw);
-      FramePose2d startPose = new FramePose2d(startPoint, startOrientation);
+      FramePose2D startPose = new FramePose2D(startPoint, startOrientation);
       double midYaw = AngleTools.calculateHeading(startPose, midPoint, 0.0, 1e-14);
 
       FrameOrientation2D midOrientation = new FrameOrientation2D(WORLD_FRAME, midYaw);
-      FramePose2d midPose = new FramePose2d(midPoint, midOrientation);
+      FramePose2D midPose = new FramePose2D(midPoint, midOrientation);
 
       double pathYaw1 = pathDirection1.getOrientationRadians();
       pathType.setAngle(pathYaw1);
@@ -2176,9 +2176,9 @@ public class FootstepGeneratorsTest
       QuadTreeFootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
       Point2D leftFootStartPoint = new Point2D(startX + leftXFactor, startY + leftYFactor);
-      FramePose2d leftFootPose2d = new FramePose2d(WORLD_FRAME, leftFootStartPoint, startYaw + initialDeltaFeetYaw / 2);
+      FramePose2D leftFootPose2d = new FramePose2D(WORLD_FRAME, leftFootStartPoint, startYaw + initialDeltaFeetYaw / 2);
       Point2D rightFootStartPoint = new Point2D(startX - leftXFactor, startY - leftYFactor);
-      FramePose2d rightFootPose2d = new FramePose2d(WORLD_FRAME, rightFootStartPoint, startYaw - initialDeltaFeetYaw / 2);
+      FramePose2D rightFootPose2d = new FramePose2D(WORLD_FRAME, rightFootStartPoint, startYaw - initialDeltaFeetYaw / 2);
 
       FramePoint3D leftPosition = new FramePoint3D(WORLD_FRAME, leftFootStartPoint.getX(), leftFootStartPoint.getY(), 0);
       FramePoint3D rightPosition = new FramePoint3D(WORLD_FRAME, rightFootStartPoint.getX(), rightFootStartPoint.getY(), 0);
@@ -2334,9 +2334,9 @@ public class FootstepGeneratorsTest
       {
          Footstep lastFootstep = footsteps.get(i);
          Footstep compareToLastFootstep = footsteps.get(i - 2);
-         FramePose lastFootstepPose = new FramePose();
+         FramePose3D lastFootstepPose = new FramePose3D();
          lastFootstep.getPose(lastFootstepPose);
-         FramePose compareToLastFootstepPose = new FramePose();
+         FramePose3D compareToLastFootstepPose = new FramePose3D();
          compareToLastFootstep.getPose(compareToLastFootstepPose);
          FramePoint2D lastFootstepPosition2d = new FramePoint2D(lastFootstepPose.getPosition());
          FramePoint2D compareToLastFootstepPosition2d = new FramePoint2D(compareToLastFootstepPose.getPosition());
@@ -2350,7 +2350,7 @@ public class FootstepGeneratorsTest
 
    private static void assertStepIsPointingCorrectly(String message, Footstep footstep, FrameOrientation2D endOrientation)
    {
-      FramePose footPose = new FramePose();
+      FramePose3D footPose = new FramePose3D();
       footstep.getPose(footPose);
 
       // System.out.println(Math.toDegrees(endOrientation.getYaw()) + "?=" + Math.toDegrees(footPose.getYaw()));

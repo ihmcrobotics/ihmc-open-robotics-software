@@ -14,12 +14,12 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -42,7 +42,7 @@ public class CapturePointToolsTest
       int nFootsteps = 2;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -51,7 +51,7 @@ public class CapturePointToolsTest
       }
       for (int i = 0; i < nFootsteps; i++)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          poseReferenceFrame.setPoseAndUpdate(pose);
@@ -87,7 +87,7 @@ public class CapturePointToolsTest
       int nFootsteps = 2;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -96,7 +96,7 @@ public class CapturePointToolsTest
       }
       for (int i = 0; i < nFootsteps; i++)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          poseReferenceFrame.setPoseAndUpdate(pose);
@@ -134,7 +134,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -146,7 +146,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -175,7 +175,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -187,7 +187,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -224,7 +224,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -236,7 +236,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -273,7 +273,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -285,7 +285,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -330,7 +330,7 @@ public class CapturePointToolsTest
       ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
       YoFramePoint icpToCheck = new YoFramePoint("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
       FramePoint2D p1 = new FramePoint2D();
       FramePoint2D p2 = new FramePoint2D();
 
@@ -349,7 +349,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < numberFootstepsToConsider; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -395,7 +395,7 @@ public class CapturePointToolsTest
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
       FramePoint2D p1 = new FramePoint2D();
       FramePoint2D p2 = new FramePoint2D();
       YoFramePoint desiredICP = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
@@ -414,7 +414,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);

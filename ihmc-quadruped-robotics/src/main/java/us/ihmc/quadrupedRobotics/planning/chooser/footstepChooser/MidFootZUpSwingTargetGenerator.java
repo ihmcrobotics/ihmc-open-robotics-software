@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +15,6 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLinkLength
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -109,7 +109,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private PoseReferenceFrame projectedFrameBeforeLegPitch = new PoseReferenceFrame("projectedFrameBeforeLegPitch", ReferenceFrame.getWorldFrame());
    private MidFrameZUpFrame midFeetZUpFrame = new MidFrameZUpFrame("MidFeetZUpFrame", ReferenceFrame.getWorldFrame(), hindFoot, frontFoot);
    
-   private final FramePose projectedLegPitchPose = new FramePose();
+   private final FramePose3D projectedLegPitchPose = new FramePose3D();
    private final FramePoint3D projectedLegPitchPosition = new FramePoint3D();
    private final FrameVector3D scaledVelocityVector = new FrameVector3D();
    

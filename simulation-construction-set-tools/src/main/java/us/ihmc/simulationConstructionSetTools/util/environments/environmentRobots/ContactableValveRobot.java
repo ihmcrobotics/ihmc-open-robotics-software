@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,7 +18,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
@@ -43,7 +43,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    private int numberOfSpokes;
    protected double spokesThickness;
 
-   private FramePose valvePoseInWorld = new FramePose();
+   private FramePose3D valvePoseInWorld = new FramePose3D();
 
    private double valveNumberOfPossibleTurns;
 
@@ -65,7 +65,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    private final RigidBodyTransform originalValvePose = new RigidBodyTransform();
 
    public ContactableValveRobot(String name, double valveRadius, double valveOffsetFromWall, double valveThickness, int numberOfSpokes, double spokesThickness,
-         FramePose valvePoseInWorld, double valveNumberOfPossibleTurns, double valveMass)
+         FramePose3D valvePoseInWorld, double valveNumberOfPossibleTurns, double valveMass)
    {
       super(name);
       setValveProperties(valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, valveNumberOfPossibleTurns, valveMass);
@@ -80,11 +80,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    public ContactableValveRobot(String name, double valveRadius, double valveOffsetFromWall, double valveThickness, int numberOfSpokes, double spokesThickness,
          Point3D valvePosition, Quaternion valveOrientation, double valveNumberOfPossibleTurns, double valveMass)
    {
-      this(name, valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, new FramePose(ReferenceFrame.getWorldFrame(),
+      this(name, valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, new FramePose3D(ReferenceFrame.getWorldFrame(),
             valvePosition, valveOrientation), valveNumberOfPossibleTurns, valveMass);
    }
 
-   public ContactableValveRobot(String name, ValveType valveType, double valveNumberOfPossibleTurns, FramePose valvePoseInWorld)
+   public ContactableValveRobot(String name, ValveType valveType, double valveNumberOfPossibleTurns, FramePose3D valvePoseInWorld)
    {
       this(name, valveType.getValveRadius(), valveType.getValveOffsetFromWall(), valveType.getValveThickness(), valveType.getNumberOfSpokes(), valveType
             .getSpokesThickness(), valvePoseInWorld, valveNumberOfPossibleTurns, valveType.getValveMass());
@@ -312,7 +312,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       inertiaMatrix.setM22(Izz);
    }
 
-   public void setPoseInWorld(FramePose valvePoseInWorld)
+   public void setPoseInWorld(FramePose3D valvePoseInWorld)
    {
       this.valvePoseInWorld.set(valvePoseInWorld);
    }

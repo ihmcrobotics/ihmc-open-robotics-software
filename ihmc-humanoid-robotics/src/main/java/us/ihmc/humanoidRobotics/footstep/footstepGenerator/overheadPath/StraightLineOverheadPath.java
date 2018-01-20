@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public class StraightLineOverheadPath extends OverheadPath
 {
@@ -13,7 +13,7 @@ public class StraightLineOverheadPath extends OverheadPath
    private final FrameOrientation2D orientation;
    private final double distance;
 
-   public StraightLineOverheadPath(FramePose2d startPose, FramePoint2D endPosition)
+   public StraightLineOverheadPath(FramePose2D startPose, FramePoint2D endPosition)
    {
       startPose.checkReferenceFrameMatch(endPosition);
       this.startPoint = new FramePoint2D(startPose.getPosition());
@@ -25,20 +25,20 @@ public class StraightLineOverheadPath extends OverheadPath
    private FramePoint2D tempPosition;
 
    @Override
-   public FramePose2d getPoseAtS(double pathVariableS)
+   public FramePose2D getPoseAtS(double pathVariableS)
    {
       pathVariableS = MathTools.clamp(pathVariableS, 0.0, 1.0);
       return getExtrapolatedPoseAtS(pathVariableS);
    }
 
    @Override
-   public FramePose2d getExtrapolatedPoseAtS(double pathVariableS)
+   public FramePose2D getExtrapolatedPoseAtS(double pathVariableS)
    {
       if (tempPosition == null)
          tempPosition = new FramePoint2D(orientation.getReferenceFrame());
       tempPosition.interpolate(startPoint, endPoint, pathVariableS);
 
-      return new FramePose2d(tempPosition, orientation);
+      return new FramePose2D(tempPosition, orientation);
    }
 
    @Override
@@ -54,7 +54,7 @@ public class StraightLineOverheadPath extends OverheadPath
       newStartPoint.changeFrame(desiredFrame);
       FrameOrientation2D newStartOrientation = new FrameOrientation2D(orientation);
       newStartOrientation.changeFrame(desiredFrame);
-      FramePose2d newStartPose = new FramePose2d(newStartPoint, newStartOrientation);
+      FramePose2D newStartPose = new FramePose2D(newStartPoint, newStartOrientation);
       FramePoint2D newEndPoint = new FramePoint2D(endPoint);
       newEndPoint.changeFrame(desiredFrame);
 

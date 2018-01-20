@@ -1,33 +1,33 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.InterpolatedFootstepOverheadPath;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 /**
  * Created by agrabertilton on 3/6/15.
  */
 public class TurnInPlaceFootstepOverheadPath extends FootstepOverheadPath
 {
-   FramePose2d startPose;
-   FramePose2d endPose;
+   FramePose2D startPose;
+   FramePose2D endPose;
    double turnToStraightEquivalence;
    double distance;
    double angleChange;
 
-   public TurnInPlaceFootstepOverheadPath(FramePose2d startPose, FramePose2d endPose){
+   public TurnInPlaceFootstepOverheadPath(FramePose2D startPose, FramePose2D endPose){
       this(startPose, endPose, 1.0);
    }
 
-   public TurnInPlaceFootstepOverheadPath(FramePose2d startPose, FramePose2d endPose, double turnToStraightEquivalence)
+   public TurnInPlaceFootstepOverheadPath(FramePose2D startPose, FramePose2D endPose, double turnToStraightEquivalence)
    {
       this.turnToStraightEquivalence = turnToStraightEquivalence;
       startPose.checkReferenceFrameMatch(endPose);
-      this.startPose = new FramePose2d(startPose);
-      this.endPose = new FramePose2d(endPose);
+      this.startPose = new FramePose2D(startPose);
+      this.endPose = new FramePose2D(endPose);
       double deltaX = endPose.getX() - startPose.getX();
       double deltaY = endPose.getY() - startPose.getY();
       double straightDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
@@ -39,7 +39,7 @@ public class TurnInPlaceFootstepOverheadPath extends FootstepOverheadPath
    }
 
    @Override
-   public FramePose2d getPoseAtDistance(double distanceAlongPath)
+   public FramePose2D getPoseAtDistance(double distanceAlongPath)
    {
       double interpolationValue = distanceAlongPath / distance;
       interpolationValue = Math.max(interpolationValue, 0.0);
@@ -47,7 +47,7 @@ public class TurnInPlaceFootstepOverheadPath extends FootstepOverheadPath
       double x = (1-interpolationValue) * startPose.getX() + (interpolationValue) * endPose.getX();
       double y = (1-interpolationValue) * startPose.getY() + (interpolationValue) * endPose.getY();
       double yaw = AngleTools.trimAngleMinusPiToPi(startPose.getYaw() + (interpolationValue) * angleChange);
-      return new FramePose2d(startPose.getReferenceFrame(), new Point2D(x,y), yaw);
+      return new FramePose2D(startPose.getReferenceFrame(), new Point2D(x,y), yaw);
    }
 
    @Override
@@ -59,9 +59,9 @@ public class TurnInPlaceFootstepOverheadPath extends FootstepOverheadPath
    @Override
    public FootstepOverheadPath changeFrameCopy(ReferenceFrame desiredFrame)
    {
-      FramePose2d newStartPose = new FramePose2d(startPose);
+      FramePose2D newStartPose = new FramePose2D(startPose);
       newStartPose.changeFrame(desiredFrame);
-      FramePose2d newEndPose = new FramePose2d(endPose);
+      FramePose2D newEndPose = new FramePose2D(endPose);
       newEndPose.changeFrame(desiredFrame);
       return new InterpolatedFootstepOverheadPath(newStartPose, newEndPose);
    }

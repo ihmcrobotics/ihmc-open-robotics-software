@@ -6,6 +6,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
@@ -41,7 +41,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
    protected double spokesThickness;
 
-   private FramePose steeringWheelPoseInWorld = new FramePose();
+   private FramePose3D steeringWheelPoseInWorld = new FramePose3D();
 
    private double totalNumberOfPossibleTurns;
 
@@ -64,7 +64,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
    public static ContactableSteeringWheelRobot createPolarisSteeringWheel(double x, double y, double z, double yaw, double pitch)
    {
-      FramePose steeringWheelPoseInWorld = new FramePose(worldFrame);
+      FramePose3D steeringWheelPoseInWorld = new FramePose3D(worldFrame);
       steeringWheelPoseInWorld.setPosition(x, y, z);
       steeringWheelPoseInWorld.setOrientationYawPitchRoll(yaw, pitch, 0.0);
       double steeringWheelRadius = 0.175;
@@ -77,7 +77,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    }
 
    public ContactableSteeringWheelRobot(String name, double steeringWheelRadius, double steerigColunmLength, double steeringWheelThickness, double spokesThickness,
-         FramePose steeringWheelPoseInWorld, double totalNumberOfPossibleTurns, double mass)
+         FramePose3D steeringWheelPoseInWorld, double totalNumberOfPossibleTurns, double mass)
    {
       super(name);
       this.name = name;
@@ -143,7 +143,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       double radius = 0.015;
       double heightAboveWheel = 0.1;
       
-      FramePose crossBar = new FramePose(steeringWheelFrame);
+      FramePose3D crossBar = new FramePose3D(steeringWheelFrame);
       GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0, crossBar);
       GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0, crossBar);
       crossBar.setPosition(new Vector3D(-height/2.0, 0.0, heightAboveWheel));
@@ -366,7 +366,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       inertiaMatrix.setM22(Izz);
    }
 
-   public void setPoseInWorld(FramePose poseInWorld)
+   public void setPoseInWorld(FramePose3D poseInWorld)
    {
       this.steeringWheelPoseInWorld.set(poseInWorld);
    }

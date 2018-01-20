@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -25,7 +25,7 @@ public class TurnTranslateTurnFootstepGenerator implements FootstepGenerator
    private FrameOrientation2D endOrientation;
    private PathTypeStepParameters pathType;
 
-   public TurnTranslateTurnFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2D pathYaw, FramePose2d endPose,
+   public TurnTranslateTurnFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FrameOrientation2D pathYaw, FramePose2D endPose,
          PathTypeStepParameters pathType, TranslationalPathParameters translationalPathType)
    {
       this.feet = feet;

@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -37,7 +38,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -76,7 +76,7 @@ public class FootstepSnapperSimulationTest
       FootstepPointsDataReader dataReader = new FootstepPointsDataReader(resourceAsStream);
       FootstepDataMessage footstepData = new FootstepDataMessage();
       FootSpoof spoof = new FootSpoof("basicSpoof");
-      FramePose2d desiredPose = new FramePose2d(ReferenceFrame.getWorldFrame());
+      FramePose2D desiredPose = new FramePose2D(ReferenceFrame.getWorldFrame());
 
       List<Point3D> listOfPoints = new ArrayList<>();
       while (dataReader.hasAnotherFootstepAndPoints())

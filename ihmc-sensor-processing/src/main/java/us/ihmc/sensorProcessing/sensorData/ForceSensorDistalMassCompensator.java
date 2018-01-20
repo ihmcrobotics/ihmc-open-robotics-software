@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.sensorData;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -25,7 +25,7 @@ public class ForceSensorDistalMassCompensator
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame sensorFrame;
 
-   private final FramePose sensorPose;
+   private final FramePose3D sensorPose;
    private final YoFramePoint yoSensorPositionInWorld;
 
    private final CenterOfMassCalculator distalMassCalc;
@@ -55,7 +55,7 @@ public class ForceSensorDistalMassCompensator
       InverseDynamicsJoint parentJointOfSensorBody = forceSensorDefinition.getRigidBody().getParentJoint();
       sensorFrame = forceSensorDefinition.getSensorFrame();
 
-      sensorPose = new FramePose(world);
+      sensorPose = new FramePose3D(world);
       yoSensorPositionInWorld = new YoFramePoint(sensorName + "Position", world, registry);
 
       distalMassCalc = new CenterOfMassCalculator(ScrewTools.computeRigidBodiesAfterThisJoint(parentJointOfSensorBody), world);

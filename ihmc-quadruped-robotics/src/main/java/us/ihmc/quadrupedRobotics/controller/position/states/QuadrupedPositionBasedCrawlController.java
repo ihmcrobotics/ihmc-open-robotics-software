@@ -6,6 +6,7 @@ import java.util.Random;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -51,7 +52,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
@@ -158,7 +158,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final OneDoFJoint[] oneDoFJointsActual;
 
    private final FramePoint3D desiredCoMFramePosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
+   private final FramePose3D desiredCoMFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
    private final FrameVector3D tempComTrajComputedVelocity = new FrameVector3D();
    private final FrameVector3D tempDesiredVelocityVector = new FrameVector3D();
@@ -568,7 +568,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       referenceFrames.updateFrames();
       updateFeetLocations();
 
-      FramePose centerOfMassPose = new FramePose(referenceFrames.getCenterOfFourHipsFrame());
+      FramePose3D centerOfMassPose = new FramePose3D(referenceFrames.getCenterOfFourHipsFrame());
       centerOfMassPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredCoMHeight.set(quadrupedControllerParameters.getInitalCoMHeight());
       filteredDesiredCoMHeight.update();

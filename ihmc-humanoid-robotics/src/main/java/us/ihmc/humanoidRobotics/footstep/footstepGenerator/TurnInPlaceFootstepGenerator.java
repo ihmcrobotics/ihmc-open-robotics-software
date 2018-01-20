@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurningOverheadPath;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -18,7 +18,7 @@ public class TurnInPlaceFootstepGenerator extends AbstractSimpleParametersFootst
       this.endOrientation = pathYaw;
    }
 
-   protected void initialize(FramePose2d startPose)
+   protected void initialize(FramePose2D startPose)
    {
       setFootstepPath(new TurningOverheadPath(startPose, endOrientation));
       footstepCounter = new FootstepCounterForSingleTurnPath();

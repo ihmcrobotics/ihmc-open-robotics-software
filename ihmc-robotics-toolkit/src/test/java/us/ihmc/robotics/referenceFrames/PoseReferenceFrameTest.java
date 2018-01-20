@@ -9,11 +9,11 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class PoseReferenceFrameTest
 {
@@ -145,7 +145,7 @@ public class PoseReferenceFrameTest
    private void doRandomPoseChangeAndUpdate(PoseReferenceFrame poseReferenceFrame, Random random)
    {
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      FramePose framePose = new FramePose(poseReferenceFrame.getParent(), transform);
+      FramePose3D framePose = new FramePose3D(poseReferenceFrame.getParent(), transform);
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }
    

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,7 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -65,7 +65,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final SideDependentList<YoPlaneContactState> contactStates;
    private final SideDependentList<FootSpoof> contactableFeet;
-   private final SideDependentList<FramePose> footPosesAtTouchdown;
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown;
 
    private final YoFramePoint icp;
    private final YoFramePoint desiredICP;
@@ -228,7 +228,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       {
          RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
          FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
-         FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
+         FramePose3D nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
          nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
          nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
          footSpoof.setSoleFrame(nextSupportPose);
@@ -280,7 +280,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final FootstepTiming timing = new FootstepTiming();
    private class SingleSupportState extends State<SupportState>
    {
-      private final FramePose footstepPose = new FramePose();
+      private final FramePose3D footstepPose = new FramePose3D();
       private final FramePoint2D footstepPositionSolution = new FramePoint2D();
       private final FramePoint2D desiredCMP = new FramePoint2D();
 
@@ -343,7 +343,7 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
 
          FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
-         FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
+         FramePose3D nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
          nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
          nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
          footSpoof.setSoleFrame(nextSupportPose);
@@ -364,7 +364,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private class DoubleSupportState extends State<SupportState>
    {
-      private final FramePose footstepPose = new FramePose();
+      private final FramePose3D footstepPose = new FramePose3D();
       private final FramePoint2D footstepPositionSolution = new FramePoint2D();
       private final FramePoint2D desiredCMP = new FramePoint2D();
 

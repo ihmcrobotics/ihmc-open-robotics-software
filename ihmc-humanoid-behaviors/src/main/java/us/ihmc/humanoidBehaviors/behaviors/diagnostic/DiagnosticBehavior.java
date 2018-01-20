@@ -12,6 +12,8 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -65,8 +67,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -1286,7 +1286,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          desiredUpperArmOrientation.setYawPitchRoll(0.7800, 1.4300, -0.0000); // Running man for Atlas  //FIXME check values for atlas
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
 
-      FramePose footPose = new FramePose(ankleZUpFrame);
+      FramePose3D footPose = new FramePose3D(ankleZUpFrame);
       footPose.setPosition(-0.40, robotSide.negateIfRightSide(0.25), 0.40);
       footPose.setOrientationYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
       submitFootPose(true, robotSide, footPose);
@@ -1377,7 +1377,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       ReferenceFrame soleZUpFrame = soleZUpFrames.get(robotSide);
 
       //put the left foot forward
-      FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
+      FramePose3D desiredFootstepPosition = new FramePose3D(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.12), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.set(position, orientation);
@@ -1413,7 +1413,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       ReferenceFrame soleZUpFrame = soleZUpFrames.get(robotSide);
 
       //put the left foot forward
-      FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
+      FramePose3D desiredFootstepPosition = new FramePose3D(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.12), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.set(position, orientation);
@@ -1501,7 +1501,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       boolean mirrorOrientationForRightSide = true;
 
       //put the foot forward and prepare the arms
-      FramePose desiredFootstepPosition = new FramePose(soleZUpFrame);
+      FramePose3D desiredFootstepPosition = new FramePose3D(soleZUpFrame);
       Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.25), 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.set(position, orientation);
@@ -1564,7 +1564,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       pipeLine.requestNewStage();
 
       //square up the feet
-      desiredFootstepPosition = new FramePose(soleZUpFrame);
+      desiredFootstepPosition = new FramePose3D(soleZUpFrame);
       position = new Point3D(0., robotSide.negateIfRightSide(0.25), 0.0);
       orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.set(position, orientation);
@@ -1653,7 +1653,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw, double angleRelativeToPath, double percentOfMaxFootstepLength)
    {
-      FramePose2d targetPoseInWorld = new FramePose2d();
+      FramePose2D targetPoseInWorld = new FramePose2D();
       targetPoseInWorld.setIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
       targetPoseInWorld.changeFrame(worldFrame);
 
@@ -1677,7 +1677,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void sequenceStepsInPlace()
    {
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
-      FramePose footstepPose = new FramePose();
+      FramePose3D footstepPose = new FramePose3D();
 
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
       {
@@ -1700,7 +1700,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void sequenceSquareUp()
    {
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
-      FramePose footstepPose = new FramePose();
+      FramePose3D footstepPose = new FramePose3D();
 
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
 
@@ -1739,7 +1739,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       // Go back to stand prep but don't put the foot on the ground yet
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
 
-      FramePose footPose = new FramePose();
+      FramePose3D footPose = new FramePose3D();
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
       footPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
@@ -1841,7 +1841,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitSymmetricHandPose(desiredUpperArmOrientation, -1.40, null);
 
       // Supa powerful front kick!!!!!
-      FramePose footPose = new FramePose();
+      FramePose3D footPose = new FramePose3D();
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
       footPose.setOrientationYawPitchRoll(0.0, -halfPi / 2.0, 0.0);
@@ -2052,7 +2052,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitDesiredPelvisPositionOffsetAndOrientation(boolean parallelize, double dx, double dy, double dz, double yaw, double pitch, double roll)
    {
       ReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
-      FramePose desiredPelvisPose = new FramePose(frameAfterRootJoint);
+      FramePose3D desiredPelvisPose = new FramePose3D(frameAfterRootJoint);
       desiredPelvisPose.setPosition(dx, dy, dz);
       desiredPelvisPose.setOrientationYawPitchRoll(yaw, pitch, roll);
       desiredPelvisPose.changeFrame(worldFrame);
@@ -2300,9 +2300,9 @@ public class DiagnosticBehavior extends AbstractBehavior
       return desiredLowerArmJointAngles;
    }
 
-   private void submitFootstepPose(boolean parallelize, RobotSide robotSide, FramePose desiredFootstepPose)
+   private void submitFootstepPose(boolean parallelize, RobotSide robotSide, FramePose3D desiredFootstepPose)
    {
-      FramePose footPose = new FramePose(desiredFootstepPose);
+      FramePose3D footPose = new FramePose3D(desiredFootstepPose);
 
       FootstepTask footstepTask = new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose);
       if (parallelize)
@@ -2314,11 +2314,11 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitFootPosition(boolean parallelize, RobotSide robotSide, FramePoint3D desiredFootPosition)
    {
       FrameQuaternion desiredFootOrientation = new FrameQuaternion(desiredFootPosition.getReferenceFrame());
-      FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);
+      FramePose3D desiredFootPose = new FramePose3D(desiredFootPosition, desiredFootOrientation);
       submitFootPose(parallelize, robotSide, desiredFootPose);
    }
 
-   private void submitFootPose(boolean parallelize, RobotSide robotSide, FramePose desiredFootPose)
+   private void submitFootPose(boolean parallelize, RobotSide robotSide, FramePose3D desiredFootPose)
    {
       desiredFootPose.changeFrame(worldFrame);
       Point3D desiredFootPosition = new Point3D();
@@ -2345,7 +2345,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       FramePoint3D framePosition = new FramePoint3D(referenceFrame, x, y, z);
       FrameQuaternion frameOrientation = new FrameQuaternion(referenceFrame, yaw, pitch, roll);
-      FramePose desiredFootPose = new FramePose(framePosition, frameOrientation);
+      FramePose3D desiredFootPose = new FramePose3D(framePosition, frameOrientation);
       submitFootPose(parallelize, robotSide, desiredFootPose);
    }
 

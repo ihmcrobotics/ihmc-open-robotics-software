@@ -2,13 +2,13 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -114,7 +114,7 @@ public class EuclideanPositionController implements PositionController
    /**
     * Computes linear portion of twist to pack
     */
-   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   public void compute(Twist twistToPack, FramePose3D desiredPose, Twist desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
       checkBaseFrames(desiredTwist, twistToPack);

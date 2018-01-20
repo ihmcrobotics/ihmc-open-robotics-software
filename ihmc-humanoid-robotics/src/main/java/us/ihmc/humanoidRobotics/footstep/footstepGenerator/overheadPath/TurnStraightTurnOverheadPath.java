@@ -5,8 +5,8 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
 {
@@ -15,12 +15,12 @@ public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
    private TurningOverheadPath endTurningPath;
    private final static double defaultNoTranslationTolerance = 1e-14;
 
-   public TurnStraightTurnOverheadPath(FramePose2d startPose, FramePose2d endPose, double headingOffset)
+   public TurnStraightTurnOverheadPath(FramePose2D startPose, FramePose2D endPose, double headingOffset)
    {
       this(startPose, endPose, headingOffset, defaultNoTranslationTolerance);
    }
 
-   public TurnStraightTurnOverheadPath(FramePose2d startPose, FramePose2d endPose, double headingOffset, double noTranslationTolerance)
+   public TurnStraightTurnOverheadPath(FramePose2D startPose, FramePose2D endPose, double headingOffset, double noTranslationTolerance)
    {
       super(calculatePaths(startPose, endPose, headingOffset, noTranslationTolerance));
       turningPath = (TurningOverheadPath) this.paths.get(0);
@@ -28,14 +28,14 @@ public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
       endTurningPath = (TurningOverheadPath) this.paths.get(2);
    }
 
-   private static List<OverheadPath> calculatePaths(FramePose2d startPose, FramePose2d endPose, double headingOffset, double noTranslationTolerance)
+   private static List<OverheadPath> calculatePaths(FramePose2D startPose, FramePose2D endPose, double headingOffset, double noTranslationTolerance)
    {
       startPose.checkReferenceFrameMatch(endPose);
       FramePoint2D endPosition = new FramePoint2D(endPose.getPosition());
       double heading = AngleTools.calculateHeading(startPose, endPosition, headingOffset, noTranslationTolerance);
       FrameOrientation2D intermediateOrientation = new FrameOrientation2D(startPose.getReferenceFrame(), heading);
       TurningOverheadPath turningPath = new TurningOverheadPath(startPose, intermediateOrientation);
-      FramePose2d intermediatePose = turningPath.getPoseAtS(1.0);
+      FramePose2D intermediatePose = turningPath.getPoseAtS(1.0);
       StraightLineOverheadPath straightPath = new StraightLineOverheadPath(intermediatePose, endPosition);
       intermediatePose = straightPath.getPoseAtS(1.0);
       FrameOrientation2D endOrientation = new FrameOrientation2D(endPose.getOrientation());

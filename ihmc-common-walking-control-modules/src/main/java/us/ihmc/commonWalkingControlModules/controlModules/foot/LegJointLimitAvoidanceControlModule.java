@@ -7,6 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +18,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -61,7 +61,7 @@ public class LegJointLimitAvoidanceControlModule
    private YoDouble[] lowerLimits;
    private YoDouble[] upperLimits;
    private YoFramePose originalDesiredYoPose;
-   private FramePose originalDesiredPose;
+   private FramePose3D originalDesiredPose;
    private FramePoint3D adjustedDesiredPosition;
    private FrameQuaternion adjustedDesiredOrientation;
    private YoFramePose adjustedDesiredPose;
@@ -116,7 +116,7 @@ public class LegJointLimitAvoidanceControlModule
             upperLimits[i] = new YoDouble(prefix + "upperLimits" + i, registry);
          }
 
-         originalDesiredPose = new FramePose();
+         originalDesiredPose = new FramePose3D();
          originalDesiredYoPose = new YoFramePose(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
          adjustedDesiredPose = new YoFramePose(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
          desiredTransform = new RigidBodyTransform();

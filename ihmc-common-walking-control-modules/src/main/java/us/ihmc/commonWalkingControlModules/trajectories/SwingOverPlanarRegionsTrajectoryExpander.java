@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,7 +19,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
@@ -160,8 +160,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
    }
 
-   public double expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose,
-                                                 FramePose swingEndPose, PlanarRegionsList planarRegionsList)
+   public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose,
+                                                 FramePose3D swingEndPose, PlanarRegionsList planarRegionsList)
    {
       stanceFootPosition.setIncludingFrame(stanceFootPose.getPosition());
       stanceFootPosition.changeFrame(WORLD);

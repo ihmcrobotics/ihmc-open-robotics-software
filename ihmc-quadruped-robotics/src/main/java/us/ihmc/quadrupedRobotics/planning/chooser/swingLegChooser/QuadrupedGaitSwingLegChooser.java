@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -8,7 +9,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -23,7 +23,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
    private final QuadrantDependentList<TranslationReferenceFrame> feetFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<FramePoint3D> feet = new QuadrantDependentList<>();
    private final FramePoint3D feetCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   private final FramePose feetCentroidPose = new FramePose(ReferenceFrame.getWorldFrame());
+   private final FramePose3D feetCentroidPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame centroidFrame = new PoseReferenceFrame("", feetCentroidPose);
    private final YoGraphicReferenceFrame centroidFrameViz;
    
