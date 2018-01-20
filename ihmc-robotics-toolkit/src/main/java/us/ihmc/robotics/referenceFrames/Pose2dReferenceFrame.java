@@ -26,7 +26,7 @@ public class Pose2dReferenceFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      originPose.getPose(transformToParent);
+      originPose.get(transformToParent);
    }
 
    public void setPositionAndUpdate(FramePoint2D framePoint)
