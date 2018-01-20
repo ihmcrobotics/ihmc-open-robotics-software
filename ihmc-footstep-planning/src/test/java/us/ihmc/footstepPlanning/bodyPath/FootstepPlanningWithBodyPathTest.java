@@ -117,7 +117,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose initialMidFootPose = new FramePose();
       initialMidFootPose.setX(startPos.getX());
       initialMidFootPose.setY(startPos.getY());
-      initialMidFootPose.setYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
+      initialMidFootPose.setOrientationYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
       PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
       RobotSide initialStanceFootSide = RobotSide.RIGHT;
@@ -128,7 +128,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose goalPose = new FramePose();
       goalPose.setX(finalPose.getX());
       goalPose.setY(finalPose.getY());
-      goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+      goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
       AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);

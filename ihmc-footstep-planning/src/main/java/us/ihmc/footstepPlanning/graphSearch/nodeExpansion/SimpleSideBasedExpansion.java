@@ -32,7 +32,7 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
       HashSet<FootstepNode> neighbors = new HashSet<>();
 
       FramePose stanceFootPose = new FramePose(worldFrame);
-      stanceFootPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      stanceFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
       stanceFootPose.setX(node.getX());
       stanceFootPose.setY(node.getY());
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);

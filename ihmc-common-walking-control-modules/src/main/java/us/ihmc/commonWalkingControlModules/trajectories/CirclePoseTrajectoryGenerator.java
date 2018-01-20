@@ -441,7 +441,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double y = tangentialCircleFramePose.getY();
 
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
-      tangentialCircleFramePose.setYawPitchRoll(yaw, 0.0, 0.0);
+      tangentialCircleFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       tangentialCircleFrame.setPoseAndUpdate(tangentialCircleFramePose);
       yoTangentialCircleFramePose.setAndMatchFrame(tangentialCircleFramePose);
    }

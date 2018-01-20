@@ -56,7 +56,7 @@ public class QuadrupedXGaitPlanner
       ReferenceFrame supportCentroidFrame = supportCentroidAtSoS.getReferenceFrame();
       supportCentroidAtSoS.changeFrame(worldFrame);
       xGaitRectanglePoseAtSoS.setPosition(supportCentroidAtSoS);
-      xGaitRectanglePoseAtSoS.setYawPitchRoll(yawAtSoS, 0, 0);
+      xGaitRectanglePoseAtSoS.setOrientationYawPitchRoll(yawAtSoS, 0, 0);
       supportCentroidAtSoS.changeFrame(supportCentroidFrame);
 
       // plan steps
@@ -127,7 +127,7 @@ public class QuadrupedXGaitPlanner
          xGaitRectangle.get(robotQuadrant).setZ(0);
       }
       xGaitRectanglePoseAtSoS.setPosition(0, 0, 0);
-      xGaitRectanglePoseAtSoS.setYawPitchRoll(currentYaw, 0, 0);
+      xGaitRectanglePoseAtSoS.setOrientationYawPitchRoll(currentYaw, 0, 0);
 
       // compute step quadrants and time intervals
       {
@@ -231,7 +231,7 @@ public class QuadrupedXGaitPlanner
       finalPose.setX(x);
       finalPose.setY(y);
       finalPose.setZ(initialPose.getZ());
-      finalPose.setYawPitchRoll(a, initialPose.getPitch(), initialPose.getRoll());
+      finalPose.setOrientationYawPitchRoll(a, initialPose.getPitch(), initialPose.getRoll());
    }
 
    private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd,

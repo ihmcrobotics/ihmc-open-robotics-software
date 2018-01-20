@@ -219,7 +219,7 @@ public class ControllerBasedBodyPathTest
             FramePose initialMidFootPose = new FramePose();
             initialMidFootPose.setX(startPose.getX());
             initialMidFootPose.setY(startPose.getY());
-            initialMidFootPose.setYawPitchRoll(0.0, 0.0, 0.0);
+            initialMidFootPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
             PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
             RobotSide initialStanceFootSide = newY > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
@@ -230,7 +230,7 @@ public class ControllerBasedBodyPathTest
             FramePose goalPose = new FramePose();
             goalPose.setX(finalPose.getX());
             goalPose.setY(finalPose.getY());
-            goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+            goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
             FootstepPlannerGoal goal = new FootstepPlannerGoal();
             goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);

@@ -432,7 +432,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double y = tangentialSteeringFramePose.getY();
 
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
-      tangentialSteeringFramePose.setYawPitchRoll(yaw, 0.0, 0.0);
+      tangentialSteeringFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       tangentialSteeringFrame.setPoseAndUpdate(tangentialSteeringFramePose);
       yoTangentialSteeringFramePose.setAndMatchFrame(tangentialSteeringFramePose);
    }

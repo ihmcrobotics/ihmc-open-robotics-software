@@ -79,7 +79,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
          yaw += Math.PI;
       }
       yaw -= desiredYawRate;
-      feetCentroidPose.setYawPitchRoll(yaw, 0.0, 0.0);
+      feetCentroidPose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       
       supportPolygon.getCentroid(feetCentroid);
       feetCentroidPose.setPosition(feetCentroid);

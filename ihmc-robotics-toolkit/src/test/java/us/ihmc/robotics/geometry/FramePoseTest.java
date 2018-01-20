@@ -463,7 +463,7 @@ public class FramePoseTest
 
       FramePose initialPose = new FramePose();
       initialPose.setPosition(RandomGeometry.nextVector3D(random));
-      initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+      initialPose.setOrientationYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
       FramePose rotatedPose = new FramePose();
 
@@ -505,7 +505,7 @@ public class FramePoseTest
 
       FramePose initialPose = new FramePose();
       initialPose.setPosition(RandomGeometry.nextVector3D(random));
-      initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+      initialPose.setOrientationYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
       FramePose rotatedPose = new FramePose();
 
@@ -560,7 +560,7 @@ public class FramePoseTest
          String rotationAngleMsg = "\n  Tested rotation angle = " + Math.toDegrees(rotationAngle) + " degrees \n";
 
          initialPose.setPosition(RandomGeometry.nextVector3D(random));
-         initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+         initialPose.setOrientationYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
          rotatedPose.setPose(initialPose);
          rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
@@ -602,7 +602,7 @@ public class FramePoseTest
          String rotationAngleMsg = "\n Tested rotation angle = " + Math.toDegrees(rotationAngle) + " degrees \n";
 
          initialPose.setPosition(RandomGeometry.nextVector3D(random));
-         initialPose.setYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
+         initialPose.setOrientationYawPitchRoll(AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random), AngleTools.generateRandomAngle(random));
 
          rotatedPose.setPose(initialPose);
          rotatedPose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, rotationAngle);
