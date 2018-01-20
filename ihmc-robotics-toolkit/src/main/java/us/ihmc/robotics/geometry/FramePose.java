@@ -524,16 +524,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.interpolate(framePose1.pose, framePose2.pose, alpha);
    }
 
-   public String printOutPosition()
-   {
-      return pose.getPosition().toString();
-   }
-
-   public String printOutOrientation()
-   {
-      return pose.getOrientation().toString();
-   }
-
    public FramePoint3D getFramePointCopy()
    {
       FramePoint3D ret = new FramePoint3D(getReferenceFrame(), pose.getPosition());
