@@ -250,11 +250,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       frameTupleToPack.setIncludingFrame(referenceFrame, pose.getPosition());
    }
 
-   public void getRigidBodyTransform(RigidBodyTransform transformToPack)
-   {
-      pose.get(transformToPack);
-   }
-
    public QuaternionReadOnly getOrientation()
    {
       return pose.getOrientation();

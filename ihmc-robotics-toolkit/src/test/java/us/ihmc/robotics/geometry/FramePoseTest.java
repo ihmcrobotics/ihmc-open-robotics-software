@@ -164,7 +164,7 @@ public class FramePoseTest
 
       RigidBodyTransform transformCheck = new RigidBodyTransform();
 
-      framePose.getRigidBodyTransform(transformCheck);
+      framePose.get(transformCheck);
       EuclidCoreTestTools.assertRigidBodyTransformEquals(transform, transformCheck, 1e-10);
    }
 

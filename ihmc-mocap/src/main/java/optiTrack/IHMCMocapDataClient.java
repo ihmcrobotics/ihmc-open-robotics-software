@@ -73,7 +73,7 @@ public class IHMCMocapDataClient extends MocapDataClient
          pose.changeFrame(ReferenceFrame.getWorldFrame());
 
          RigidBodyTransform r = new RigidBodyTransform();
-         pose.getRigidBodyTransform(r);
+         pose.get(r);
 
          Vector3D position = new Vector3D();
          r.getTranslation(position);

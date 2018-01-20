@@ -113,7 +113,7 @@ public class GroundTruthinator
       estimatedCableVectors.clear();
 
       estimatedObjectPoseInWorld.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      estimatedObjectPoseInWorld.getRigidBodyTransform(transform);
+      estimatedObjectPoseInWorld.get(transform);
 
       int numberOfSensors = getNumberOfSensors();
 
