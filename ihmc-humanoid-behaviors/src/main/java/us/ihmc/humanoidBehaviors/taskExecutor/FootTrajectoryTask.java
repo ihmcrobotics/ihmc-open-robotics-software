@@ -44,7 +44,7 @@ public class FootTrajectoryTask<E extends Enum<E>> extends BehaviorAction<E>
       pose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       Point3D position = new Point3D();
       Quaternion orientation = new Quaternion();
-      pose.getPose(position, orientation);   
+      pose.get(position, orientation);   
       footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
    }
 

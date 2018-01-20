@@ -551,7 +551,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       pose.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      pose.getPose(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+      pose.get(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
    }
 
    /**
@@ -569,7 +569,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       pose.changeFrame(endEffector.getBodyFixedFrame());
-      pose.getPose(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+      pose.get(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
    }
 
    /**

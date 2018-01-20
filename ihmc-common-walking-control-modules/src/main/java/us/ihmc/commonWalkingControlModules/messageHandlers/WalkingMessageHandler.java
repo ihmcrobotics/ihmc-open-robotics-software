@@ -501,8 +501,8 @@ public class WalkingMessageHandler
 
    public void reportFootstepStarted(RobotSide robotSide, FramePose desiredFootPoseInWorld, FramePose actualFootPoseInWorld)
    {
-      desiredFootPoseInWorld.getPose(desiredFootPositionInWorld, desiredFootOrientationInWorld);
-      actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
+      desiredFootPoseInWorld.get(desiredFootPositionInWorld, desiredFootOrientationInWorld);
+      actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
 
       footstepStatus.setStatus(FootstepStatus.Status.STARTED);
       footstepStatus.setRobotSide(robotSide);
@@ -521,7 +521,7 @@ public class WalkingMessageHandler
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)
    {
-      actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
+      actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
       desiredFootOrientationInWorld.setToNaN();
       desiredFootPositionInWorld.setToNaN();
 

@@ -114,7 +114,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
       footPoseCloseToActual.setPosition(0.0, 0.0, getLiftOffHeight());
       footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-      footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
+      footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, timeToPickupFoot, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -131,7 +131,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       
       desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredPose.setZ(getDesiredTouchDownHeightInWorld());
-      desiredPose.getPose(desiredPosition, desiredOrientation);
+      desiredPose.get(desiredPosition, desiredOrientation);
       
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -153,7 +153,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       desiredRandomFootPose.setPosition(getRandomPositionInSphere(random, robotSide));
       desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomFootPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomFootPose.get(desiredPosition, desiredOrientation);
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
 
       drcSimulationTestHelper.send(footTrajectoryMessage);

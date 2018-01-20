@@ -116,7 +116,7 @@ public class KinematicsToolboxOutputConverter
       ReferenceFrame handControlFrame = fullRobotModelToUseForConversion.getHandControlFrame(robotSide);
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(worldFrame);
-      desiredHandPose.getPose(desiredPosition, desiredOrientation);
+      desiredHandPose.get(desiredPosition, desiredOrientation);
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, trajectoryFrame);
       handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
       output.setHandTrajectoryMessage(handTrajectoryMessage);
@@ -145,7 +145,7 @@ public class KinematicsToolboxOutputConverter
       ReferenceFrame pelvisFrame = fullRobotModelToUseForConversion.getRootJoint().getFrameAfterJoint();
       FramePose desiredPelvisPose = new FramePose(pelvisFrame);
       desiredPelvisPose.changeFrame(worldFrame);
-      desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredPelvisPose.get(desiredPosition, desiredOrientation);
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
       output.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
    }
@@ -165,7 +165,7 @@ public class KinematicsToolboxOutputConverter
       ReferenceFrame footFrame = fullRobotModelToUseForConversion.getEndEffectorFrame(robotSide, LimbName.LEG);
       FramePose desiredFootPose = new FramePose(footFrame);
       desiredFootPose.changeFrame(worldFrame);
-      desiredFootPose.getPose(desiredPosition, desiredOrientation);
+      desiredFootPose.get(desiredPosition, desiredOrientation);
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
       output.setFootTrajectoryMessage(footTrajectoryMessage);
    }

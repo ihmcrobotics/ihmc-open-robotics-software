@@ -134,8 +134,8 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       Quaternion waypointOrientation0 = new Quaternion();
       Point3D waypointPosition1 = new Point3D();
       Quaternion waypointOrientation1 = new Quaternion();
-      waypoint0.getPose(waypointPosition0, waypointOrientation0);
-      waypoint1.getPose(waypointPosition1, waypointOrientation1);
+      waypoint0.get(waypointPosition0, waypointOrientation0);
+      waypoint1.get(waypointPosition1, waypointOrientation1);
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
       handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(chest.getBodyFixedFrame());
       handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);

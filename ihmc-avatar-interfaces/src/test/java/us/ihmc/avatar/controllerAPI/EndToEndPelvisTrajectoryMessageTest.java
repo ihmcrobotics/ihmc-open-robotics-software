@@ -117,7 +117,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
-      desiredRandomPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomPelvisPose.get(desiredPosition, desiredOrientation);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -126,7 +126,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       desiredRandomPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomPelvisPose.get(desiredPosition, desiredOrientation);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -206,7 +206,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
-      desiredRandomPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomPelvisPose.get(desiredPosition, desiredOrientation);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -215,7 +215,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       desiredRandomPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomPelvisPose.get(desiredPosition, desiredOrientation);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -768,7 +768,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
          desiredPose.setIncludingFrame(pelvisZUp, position, orientation);
          desiredPose.changeFrame(worldFrame);
-         desiredPose.getPose(position, orientation);
+         desiredPose.get(position, orientation);
 
          desiredLinearVelocity.setIncludingFrame(pelvisZUp, linearVelocity);
          desiredLinearVelocity.changeFrame(worldFrame);
@@ -1053,7 +1053,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
-      desiredRandomPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomPelvisPose.get(desiredPosition, desiredOrientation);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -1062,7 +1062,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       desiredRandomPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomPelvisPose.get(desiredPosition, desiredOrientation);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -1149,7 +1149,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          Quaternion desiredOrientation = new Quaternion();
          desiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
          desiredPelvisPose.setZ(desiredHeight);
-         desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
+         desiredPelvisPose.get(desiredPosition, desiredOrientation);
          PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(0.5, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(pelvisTrajectoryMessage);
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));

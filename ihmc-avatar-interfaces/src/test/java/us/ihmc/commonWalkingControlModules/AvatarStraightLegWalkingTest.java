@@ -548,7 +548,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
             FramePose cinderBlockPose = columns.get(robotSide).get(row);
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
-            cinderBlockPose.getPose(location, orientation);
+            cinderBlockPose.get(location, orientation);
             location.setZ(location.getZ() + 0.02);
             FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);
@@ -579,7 +579,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
-            stepPose.getPose(location, orientation);
+            stepPose.get(location, orientation);
             FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);
 
@@ -595,7 +595,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       Point3D location = new Point3D();
       Quaternion orientation = new Quaternion();
-      stepPose.getPose(location, orientation);
+      stepPose.get(location, orientation);
       FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
       footsteps.add(footstep);
 
@@ -611,7 +611,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
             Point3D stairLocation = new Point3D();
             Quaternion stairOrientation = new Quaternion();
-            stairPose.getPose(stairLocation, stairOrientation);
+            stairPose.get(stairLocation, stairOrientation);
 
             FootstepDataMessage stepFootstep = new FootstepDataMessage(stepSide, stairLocation, stairOrientation);
             footsteps.add(stepFootstep);
@@ -639,7 +639,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
          Point3D stepLocation = new Point3D();
          Quaternion stepOrientation = new Quaternion();
-         landingPose.getPose(stepLocation, stepOrientation);
+         landingPose.get(stepLocation, stepOrientation);
          FootstepDataMessage stepMessage = new FootstepDataMessage(robotSide, stepLocation, stepOrientation);
          footsteps.add(stepMessage);
 
@@ -658,7 +658,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       Point3D stepLocation = new Point3D();
       Quaternion stepOrientation = new Quaternion();
-      landingPose.getPose(stepLocation, stepOrientation);
+      landingPose.get(stepLocation, stepOrientation);
       FootstepDataMessage landingMessage = new FootstepDataMessage(robotSide, stepLocation, stepOrientation);
       footsteps.add(landingMessage);
 
@@ -674,7 +674,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
             Point3D stairLocation = new Point3D();
             Quaternion stairOrientation = new Quaternion();
-            stairPose.getPose(stairLocation, stairOrientation);
+            stairPose.get(stairLocation, stairOrientation);
 
             FootstepDataMessage stepFootstep = new FootstepDataMessage(stepSide, stairLocation, stairOrientation);
             footsteps.add(stepFootstep);
@@ -699,7 +699,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
          Point3D exitLocation = new Point3D();
          Quaternion exitOrientation = new Quaternion();
-         exitPose.getPose(exitLocation, exitOrientation);
+         exitPose.get(exitLocation, exitOrientation);
          FootstepDataMessage exitFootstep = new FootstepDataMessage(robotSide, exitLocation, exitOrientation);
          footsteps.add(exitFootstep);
 
@@ -716,7 +716,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       Point3D exitPosition = new Point3D();
       Quaternion exitOrientation = new Quaternion();
-      exitPose.getPose(exitPosition, exitOrientation);
+      exitPose.get(exitPosition, exitOrientation);
       FootstepDataMessage exitFootstep = new FootstepDataMessage(robotSide, exitPosition, exitOrientation);
       footsteps.add(exitFootstep);
 

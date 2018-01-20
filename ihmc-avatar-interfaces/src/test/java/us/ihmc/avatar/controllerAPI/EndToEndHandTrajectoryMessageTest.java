@@ -144,7 +144,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
@@ -162,7 +162,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          humanoidReferenceFrames.updateFrames();
          desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
 
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertSingleWaypointExecuted(handName, desiredPosition, desiredOrientation, scs);
@@ -874,7 +874,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         desiredHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredHandPose.get(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
 
@@ -983,7 +983,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);

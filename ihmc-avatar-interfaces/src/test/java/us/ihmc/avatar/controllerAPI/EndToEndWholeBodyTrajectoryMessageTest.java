@@ -70,7 +70,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       footPoseCloseToActual.changeFrame(worldFrame);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
-      footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
+      footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -85,7 +85,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
       desiredFootPose.setPosition(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
       desiredFootPose.changeFrame(worldFrame);
-      desiredFootPose.getPose(desiredPosition, desiredOrientation);
+      desiredFootPose.get(desiredPosition, desiredOrientation);
       wholeBodyTrajectoryMessage.setFootTrajectoryMessage(new FootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
 
       SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
@@ -107,7 +107,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredHandPoses.put(robotSide, desiredRandomHandPose);
          desiredPosition = new Point3D();
          desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame));
       }
 
@@ -122,7 +122,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPosition = new Point3D();
       desiredOrientation = new Quaternion();
       desiredPelvisPose.changeFrame(worldFrame);
-      desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredPelvisPose.get(desiredPosition, desiredOrientation);
       wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
       FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
@@ -190,7 +190,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       footPoseCloseToActual.changeFrame(worldFrame);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
-      footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
+      footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -205,7 +205,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
       desiredFootPose.setPosition(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
       desiredFootPose.changeFrame(worldFrame);
-      desiredFootPose.getPose(desiredPosition, desiredOrientation);
+      desiredFootPose.get(desiredPosition, desiredOrientation);
       messageOfMessages.addPacket(new FootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
 
       SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
@@ -227,7 +227,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredHandPoses.put(robotSide, desiredRandomHandPose);
          desiredPosition = new Point3D();
          desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          messageOfMessages.addPacket(new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame));
       }
 
@@ -242,7 +242,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPosition = new Point3D();
       desiredOrientation = new Quaternion();
       desiredPelvisPose.changeFrame(worldFrame);
-      desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredPelvisPose.get(desiredPosition, desiredOrientation);
       messageOfMessages.addPacket(new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
       FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
@@ -310,7 +310,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       footPoseCloseToActual.changeFrame(worldFrame);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
-      footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
+      footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -324,7 +324,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
       desiredFootPose.setPosition(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
       desiredFootPose.changeFrame(worldFrame);
-      desiredFootPose.getPose(desiredPosition, desiredOrientation);
+      desiredFootPose.get(desiredPosition, desiredOrientation);
       messageOfMessages.addPacket(new FootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
 
       SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
@@ -346,7 +346,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredHandPoses.put(robotSide, desiredRandomHandPose);
          desiredPosition = new Point3D();
          desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame);
          handTrajectoryMessage.setExecutionDelayTime(5.0);
          messageOfMessages.addPacket(handTrajectoryMessage);
@@ -363,7 +363,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPosition = new Point3D();
       desiredOrientation = new Quaternion();
       desiredPelvisPose.changeFrame(worldFrame);
-      desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
+      desiredPelvisPose.get(desiredPosition, desiredOrientation);
       messageOfMessages.addPacket(new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
       FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
