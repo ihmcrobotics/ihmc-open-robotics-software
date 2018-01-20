@@ -63,7 +63,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
                currentPose.changeFrame(referenceFrame);
 
-               userDesiredHandPose.setPosition(new Point3D(currentPose.getFramePointCopy()));
+               userDesiredHandPose.setPosition(new Point3D(currentPose.getPosition()));
                userDesiredHandPose.setOrientation(currentPose.getFrameOrientationCopy());
 
                userDesiredSetHandPoseToActual.set(false);
@@ -89,7 +89,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(referenceFrameToUse);
                trajectoryPoint.setTime(userDesiredHandPoseTrajectoryTime.getDoubleValue());
-               trajectoryPoint.setPosition(framePose.getFramePointCopy());
+               trajectoryPoint.setPosition(framePose.getPosition());
                trajectoryPoint.setOrientation(framePose.getFrameOrientationCopy());
                trajectoryPoint.setLinearVelocity(new Vector3D());
                trajectoryPoint.setAngularVelocity(new Vector3D());

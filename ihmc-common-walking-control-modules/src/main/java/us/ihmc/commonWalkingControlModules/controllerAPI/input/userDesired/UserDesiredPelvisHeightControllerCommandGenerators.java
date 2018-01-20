@@ -39,7 +39,7 @@ public class UserDesiredPelvisHeightControllerCommandGenerators
                FramePose currentPose = new FramePose(pelvisFrame);
                currentPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-               userDesiredPelvisHeight.set(currentPose.getFramePointCopy().getZ());
+               userDesiredPelvisHeight.set(currentPose.getZ());
 
                userDesiredSetPelvisHeightToActual.set(false);
             }

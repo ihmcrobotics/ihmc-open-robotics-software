@@ -62,7 +62,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
                
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
                trajectoryPoint.setTime(userDesiredFootPoseTrajectoryTime.getDoubleValue());
-               trajectoryPoint.setPosition(framePose.getFramePointCopy());
+               trajectoryPoint.setPosition(framePose.getPosition());
                trajectoryPoint.setOrientation(framePose.getFrameOrientationCopy());
                trajectoryPoint.setLinearVelocity(new Vector3D());
                trajectoryPoint.setAngularVelocity(new Vector3D());
