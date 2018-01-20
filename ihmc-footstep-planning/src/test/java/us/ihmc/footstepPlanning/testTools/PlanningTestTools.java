@@ -262,7 +262,7 @@ public class PlanningTestTools
       double midFeetOffset = stepSide.negateIfLeftSide(0.125);
       Vector3D goalOffset = new Vector3D(0.0, midFeetOffset, 0.0);
       RigidBodyTransform soleToWorld = new RigidBodyTransform();
-      stepPose.getRigidBodyTransform(soleToWorld);
+      stepPose.get(soleToWorld);
       soleToWorld.transform(goalOffset);
 
       FramePose achievedGoal = new FramePose(stepPose);

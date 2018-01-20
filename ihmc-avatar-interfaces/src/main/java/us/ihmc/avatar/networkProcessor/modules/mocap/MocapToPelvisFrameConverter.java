@@ -61,7 +61,7 @@ public class MocapToPelvisFrameConverter
 
       FramePose pelvisPose = new FramePose(mocapFrame, pelvisToMocapTransform);
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      pelvisPose.getRigidBodyTransform(pelvisToWorldTransformToPack);
+      pelvisPose.get(pelvisToWorldTransformToPack);
    }
    
    public ReferenceFrame getMocapFrame()

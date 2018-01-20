@@ -416,14 +416,14 @@ public class SimpleOcclusionTests
       RigidBodyTransform tempTransform = new RigidBodyTransform();
 
       graphics3DObject.identity();
-      startPose.getRigidBodyTransform(tempTransform);
+      startPose.get(tempTransform);
       graphics3DObject.transform(tempTransform);
       graphics3DObject.translate(0.0, 0.0, 0.05);
       graphics3DObject.rotate(Math.PI / 2.0, new Vector3D(0.0, 1.0, 0.0));
       graphics3DObject.addArrow(0.8, YoAppearance.Green(), YoAppearance.Green());
 
       graphics3DObject.identity();
-      goalPose.getRigidBodyTransform(tempTransform);
+      goalPose.get(tempTransform);
       graphics3DObject.transform(tempTransform);
       graphics3DObject.translate(0.0, 0.0, 0.05);
       graphics3DObject.rotate(Math.PI / 2.0, new Vector3D(0.0, 1.0, 0.0));

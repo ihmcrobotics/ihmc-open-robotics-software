@@ -52,7 +52,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          regionColor = Color.hsb(regionColor.getHue(), 0.9, 1.0);
 
          footstep.getSoleFramePose(footPose);
-         footPose.getRigidBodyTransform(transformToWorld);
+         footPose.get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
          if(footstep.hasFoothold())
