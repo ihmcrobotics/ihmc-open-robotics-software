@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.commons.MathTools;
 
 public class GeometryTools
@@ -954,5 +955,44 @@ public class GeometryTools
    
       resultToPack.setIncludingFrame(pointToYawAbout);
       resultToPack.add(tempX, tempY);
+   }
+
+   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, FramePose framePoseToPack)
+   {
+      GeometryTools.rotatePoseAboutAxis(rotationAxisFrame, rotationAxis, angle, false, false, framePoseToPack);
+   }
+
+   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, boolean lockPosition, boolean lockOrientation, FramePose framePoseToPack)
+   {
+      ReferenceFrame initialFrame = framePoseToPack.getReferenceFrame();
+   
+      framePoseToPack.changeFrame(rotationAxisFrame);
+   
+      AxisAngle axisAngle = new AxisAngle(0.0, 0.0, 0.0, angle);
+      axisAngle.setElement(rotationAxis.ordinal(), 1.0);
+   
+      if (!lockPosition)
+      {
+         Point3D newPosition = new Point3D(framePoseToPack.getPosition());
+         axisAngle.transform(newPosition);
+         framePoseToPack.setPosition(newPosition);
+      }
+   
+      if (!lockOrientation)
+      {
+         Quaternion newOrientation = new Quaternion(framePoseToPack.getOrientation());
+         axisAngle.transform(newOrientation);
+         framePoseToPack.setOrientation(newOrientation);
+      }
+   
+      framePoseToPack.changeFrame(initialFrame);
+   }
+
+   public static void rotatePoseAboutAxis(FrameVector3D rotatationAxis, FramePoint3D rotationAxisOrigin, double angle, FramePose framePoseToPack)
+   {
+      ReferenceFrame frameWhoseZAxisIsRotationAxis = constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
+                                                                                                             rotatationAxis);
+   
+      rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
    }
 }
