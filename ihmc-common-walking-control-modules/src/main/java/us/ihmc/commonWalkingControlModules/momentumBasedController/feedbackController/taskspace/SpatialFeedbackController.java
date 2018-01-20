@@ -20,12 +20,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -76,8 +76,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
-   private final FramePose currentPose = new FramePose();
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D currentPose = new FramePose3D();
+   private final FramePose3D desiredPose = new FramePose3D();
 
    private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
 

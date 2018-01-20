@@ -2,6 +2,7 @@ package us.ihmc.avatar.testTools;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,7 +13,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -80,7 +80,7 @@ public class ScriptedFootstepGenerator
       RigidBodyTransform anklePose = new RigidBodyTransform();
       anklePose.setRotation(orientation);
       anklePose.setTranslation(position);
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), anklePose);
+      FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), anklePose);
 
       footstep.setFromAnklePose(pose, transformsFromAnkleToSole.get(robotSide));
 

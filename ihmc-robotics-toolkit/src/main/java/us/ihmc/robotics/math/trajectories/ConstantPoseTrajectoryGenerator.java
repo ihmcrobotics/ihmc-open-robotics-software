@@ -3,10 +3,10 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -108,7 +108,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
          throw new RuntimeException("Must set allowMultipleFrames to true in the constructor if you ever want to register a new frame.");
    }
 
-   public void setConstantPose(FramePose constantPose)
+   public void setConstantPose(FramePose3D constantPose)
    {
       position.checkReferenceFrameMatch(constantPose);
       position.set(constantPose.getX(), constantPose.getY(), constantPose.getZ());
@@ -180,7 +180,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(position.getReferenceFrame());
       framePoseToPack.setPosition(position);

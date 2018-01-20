@@ -1,13 +1,13 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -74,7 +74,7 @@ public class SE3PIDController
     * @param desiredPose desired pose that we want to achieve.
     * @param desiredTwist feed forward twist from a reference trajectory
     */
-   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   public void compute(Twist twistToPack, FramePose3D desiredPose, Twist desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
       checkBaseFrames(desiredTwist, twistToPack);
@@ -103,7 +103,7 @@ public class SE3PIDController
     * @param feedForwardAcceleration feed forward acceleration from a reference trajectory.
     * @param currentTwist current twist of the rigid body.
     */
-   public void compute(SpatialAccelerationVector spatialAccelerationToPack, FramePose desiredPose, Twist desiredTwist,
+   public void compute(SpatialAccelerationVector spatialAccelerationToPack, FramePose3D desiredPose, Twist desiredTwist,
          SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
       checkBodyFrames(desiredTwist, feedForwardAcceleration, currentTwist);

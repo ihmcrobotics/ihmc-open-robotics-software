@@ -14,6 +14,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -35,11 +36,11 @@ public class FramePoseTest
    {
       RigidBodyTransform transform1 = new RigidBodyTransform();
       transform1.setIdentity();
-      FramePose framePose1 = new FramePose(ReferenceFrame.getWorldFrame(), transform1);
+      FramePose3D framePose1 = new FramePose3D(ReferenceFrame.getWorldFrame(), transform1);
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
       transform2.setIdentity();
-      FramePose framePose2 = new FramePose(ReferenceFrame.getWorldFrame(), transform2);
+      FramePose3D framePose2 = new FramePose3D(ReferenceFrame.getWorldFrame(), transform2);
 
       double distance = framePose1.getOrientationDistance(framePose2);
       assertEquals(0.0, distance, 1e-9);
@@ -51,7 +52,7 @@ public class FramePoseTest
    {
       Random random = new Random(1179L);
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform);
+      FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame(), transform);
 
       RigidBodyTransform transformCheck = new RigidBodyTransform();
 
@@ -68,7 +69,7 @@ public class FramePoseTest
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      FramePose framePose = new FramePose(worldFrame);
+      FramePose3D framePose = new FramePose3D(worldFrame);
       framePose.setPosition(1.0, 0.0, 1.0);
       framePose.setOrientation(RandomGeometry.nextQuaternion(random));
 
@@ -98,7 +99,7 @@ public class FramePoseTest
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      FramePose framePose = new FramePose(worldFrame);
+      FramePose3D framePose = new FramePose3D(worldFrame);
       framePose.setPosition(1.0, 0.0, 1.0);
       framePose.setOrientation(RandomGeometry.nextQuaternion(random));
 
@@ -124,8 +125,8 @@ public class FramePoseTest
       Random random = new Random(1179L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      FramePose initialPose = new FramePose(worldFrame);
-      FramePose rotatedPose = new FramePose(worldFrame);
+      FramePose3D initialPose = new FramePose3D(worldFrame);
+      FramePose3D rotatedPose = new FramePose3D(worldFrame);
 
       double angleToRotate = Math.toRadians(-720.01);
       AxisAngle desiredRotationAxisAngle = new AxisAngle(0.0, 0.0, 1.0, angleToRotate);
@@ -159,9 +160,9 @@ public class FramePoseTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double angleToRotate = RandomNumbers.nextDouble(random, Math.toRadians(720.0));
 
-      FramePose framePose = new FramePose(worldFrame);
+      FramePose3D framePose = new FramePose3D(worldFrame);
       framePose.setPosition(0.0, 0.0, 1.0);
-      FramePose framePoseCopy = new FramePose(framePose);
+      FramePose3D framePoseCopy = new FramePose3D(framePose);
 
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate, framePose);
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate, framePose);
@@ -184,9 +185,9 @@ public class FramePoseTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double angleToRotate = Math.toRadians(90.0);
 
-      FramePose framePose = new FramePose(worldFrame);
+      FramePose3D framePose = new FramePose3D(worldFrame);
       framePose.setPosition(0.0, 0.0, 1.0);
-      FramePose framePoseCopy = new FramePose(framePose);
+      FramePose3D framePoseCopy = new FramePose3D(framePose);
 
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate , framePose);
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, -0.5 * angleToRotate, framePose);
@@ -211,8 +212,8 @@ public class FramePoseTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double angleToRotate = Math.toRadians(-720.0);
 
-      FramePose initialPose = new FramePose(worldFrame);
-      FramePose rotatedPose = new FramePose(worldFrame);
+      FramePose3D initialPose = new FramePose3D(worldFrame);
+      FramePose3D rotatedPose = new FramePose3D(worldFrame);
       
       Point3D actualPosition = new Point3D();
       Point3D desiredPosition = new Point3D();
@@ -254,8 +255,8 @@ public class FramePoseTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double angleToRotate = RandomNumbers.nextDouble(random, 0.0);
 
-      FramePose rotatedPose = new FramePose(worldFrame);
-      FramePose initialPose = new FramePose(worldFrame);
+      FramePose3D rotatedPose = new FramePose3D(worldFrame);
+      FramePose3D initialPose = new FramePose3D(worldFrame);
 
       while (angleToRotate < Math.toRadians(180.0))
       {

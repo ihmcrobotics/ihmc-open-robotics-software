@@ -21,13 +21,13 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -44,7 +44,7 @@ public class ICPOptimizationControllerTest
    private static final double footLength = 0.25;
    private static final double stanceWidth = 0.35;
 
-   private final SideDependentList<FramePose> footPosesAtTouchdown = new SideDependentList<>(new FramePose(), new FramePose());
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -373,7 +373,7 @@ public class ICPOptimizationControllerTest
          contactPointsInSoleFrame.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
 
          FootSpoof contactableFoot = new FootSpoof(sidePrefix + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInSoleFrame, 0.0);
-         FramePose startingPose = footPosesAtTouchdown.get(robotSide);
+         FramePose3D startingPose = footPosesAtTouchdown.get(robotSide);
          startingPose.setToZero(worldFrame);
          startingPose.setY(robotSide.negateIfRightSide(0.5 * (totalWidth - footWidth)));
          contactableFoot.setSoleFrame(startingPose);

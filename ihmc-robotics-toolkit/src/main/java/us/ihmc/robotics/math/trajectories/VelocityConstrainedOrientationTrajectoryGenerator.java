@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,7 +13,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -178,7 +178,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
 
-   public void setFinalOrientation(FramePose finalPose)
+   public void setFinalOrientation(FramePose3D finalPose)
    {
       this.finalOrientation.setAndMatchFrame(finalPose.getOrientation());
    }

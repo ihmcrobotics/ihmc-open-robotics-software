@@ -17,13 +17,13 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -531,7 +531,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       return footstepData;
    }
 
-   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose>> cinderBlockPoses)
+   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose3D>> cinderBlockPoses)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
@@ -539,13 +539,13 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       int indexForLeftSide = (numberOfColumns - 1) / 2;
       int indexForRightSide = indexForLeftSide + 1;
-      SideDependentList<List<FramePose>> columns = extractColumns(cinderBlockPoses, indexForLeftSide, indexForRightSide);
+      SideDependentList<List<FramePose3D>> columns = extractColumns(cinderBlockPoses, indexForLeftSide, indexForRightSide);
 
       for (int row = 0; row < cinderBlockPoses.size(); row++)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePose cinderBlockPose = columns.get(robotSide).get(row);
+            FramePose3D cinderBlockPose = columns.get(robotSide).get(row);
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
             cinderBlockPose.get(location, orientation);
@@ -558,7 +558,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       return footsteps;
    }
 
-   private static FootstepDataListMessage generateFootstepsForStairs(List<List<FramePose>> stepPoses)
+   private static FootstepDataListMessage generateFootstepsForStairs(List<List<FramePose3D>> stepPoses)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
@@ -573,7 +573,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       {
             double yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-            FramePose stepPose = new FramePose();
+            FramePose3D stepPose = new FramePose3D();
             stepPose.setX(startingLength * (stepIndex + 1));
             stepPose.setY(yPosition);
 
@@ -589,7 +589,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       // closing step
       double yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-      FramePose stepPose = new FramePose();
+      FramePose3D stepPose = new FramePose3D();
       stepPose.setX(startingLength * numberOfStartingSteps);
       stepPose.setY(yPosition);
 
@@ -600,13 +600,13 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       footsteps.add(footstep);
 
       // ascend the stairs
-      List<FramePose> stepUpPoses = stepPoses.get(0);
+      List<FramePose3D> stepUpPoses = stepPoses.get(0);
       for (int row = 0; row < stepUpPoses.size(); row++)
       {
          for (RobotSide stepSide : RobotSide.values)
          {
             yPosition = stepSide.negateIfRightSide(stepWidth / 2.0);
-            FramePose stairPose = stepUpPoses.get(row);
+            FramePose3D stairPose = stepUpPoses.get(row);
             stairPose.setY(yPosition);
 
             Point3D stairLocation = new Point3D();
@@ -618,7 +618,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          }
       }
 
-      FramePose lastStepGoingUpStairs = stepPoses.get(0).get(stepPoses.get(0).size() - 1);
+      FramePose3D lastStepGoingUpStairs = stepPoses.get(0).get(stepPoses.get(0).size() - 1);
       double topOfStairs = lastStepGoingUpStairs.getX();
       double startOfAscent = stepPoses.get(1).get(0).getX() - 0.35;
       double platformWidth = startOfAscent - topOfStairs;
@@ -632,7 +632,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       {
          yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-         FramePose landingPose = new FramePose();
+         FramePose3D landingPose = new FramePose3D();
          landingPose.setX(platformStepLength * (stepIndex + 1) + topOfStairs);
          landingPose.setY(yPosition);
          landingPose.setZ(lastStepGoingUpStairs.getZ());
@@ -650,7 +650,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       // closing step
       yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-      FramePose landingPose = new FramePose();
+      FramePose3D landingPose = new FramePose3D();
       double forwardLocation = footsteps.get(footsteps.size() - 1).getLocation().getX();
       landingPose.setX(forwardLocation);
       landingPose.setY(yPosition);
@@ -663,13 +663,13 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       footsteps.add(landingMessage);
 
       // descend the stairs
-      List<FramePose> stepDownPoses = stepPoses.get(1);
+      List<FramePose3D> stepDownPoses = stepPoses.get(1);
       for (int row = 0; row < stepDownPoses.size(); row++)
       {
          for (RobotSide stepSide : RobotSide.values)
          {
             yPosition = stepSide.negateIfRightSide(stepWidth / 2.0);
-            FramePose stairPose = stepDownPoses.get(row);
+            FramePose3D stairPose = stepDownPoses.get(row);
             stairPose.setY(yPosition);
 
             Point3D stairLocation = new Point3D();
@@ -692,7 +692,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          stepPosition += stepLength;
          yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-         FramePose exitPose = new FramePose();
+         FramePose3D exitPose = new FramePose3D();
          exitPose.setX(stepPosition);
          exitPose.setY(yPosition);
          exitPose.setZ(0.0);
@@ -709,7 +709,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       // closing footstep
       yPosition = robotSide.negateIfRightSide(stepWidth / 2.0);
 
-      FramePose exitPose = new FramePose();
+      FramePose3D exitPose = new FramePose3D();
       double exitLocation = footsteps.get(footsteps.size() - 1).getLocation().getX();
       exitPose.setX(exitLocation);
       exitPose.setY(yPosition);
@@ -723,10 +723,10 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       return footsteps;
    }
 
-   private static SideDependentList<List<FramePose>> extractColumns(List<List<FramePose>> cinderBlockPoses, int indexForLeftSide, int indexForRightSide)
+   private static SideDependentList<List<FramePose3D>> extractColumns(List<List<FramePose3D>> cinderBlockPoses, int indexForLeftSide, int indexForRightSide)
    {
       SideDependentList<Integer> columnIndices = new SideDependentList<Integer>(indexForLeftSide, indexForRightSide);
-      SideDependentList<List<FramePose>> sideDependentColumns = new SideDependentList<List<FramePose>>(new ArrayList<FramePose>(), new ArrayList<FramePose>());
+      SideDependentList<List<FramePose3D>> sideDependentColumns = new SideDependentList<List<FramePose3D>>(new ArrayList<FramePose3D>(), new ArrayList<FramePose3D>());
 
       for (RobotSide robotSide : RobotSide.values)
       {

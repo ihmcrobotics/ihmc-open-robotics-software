@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -22,7 +23,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -60,9 +60,9 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
     * The trajectory is first created in 2D in the distortedPlane. The plane is then distorted to obtain the desired 3D trajectory.
     */
    private final ReferenceFrame distortedPlane;
-   private final FramePose currentDistortionPose = new FramePose();
-   private final FramePose initialDistortionPose = new FramePose();
-   private final FramePose finalDistortionPose = new FramePose();
+   private final FramePose3D currentDistortionPose = new FramePose3D();
+   private final FramePose3D initialDistortionPose = new FramePose3D();
+   private final FramePose3D finalDistortionPose = new FramePose3D();
 
    // For viz
    private final boolean visualize;

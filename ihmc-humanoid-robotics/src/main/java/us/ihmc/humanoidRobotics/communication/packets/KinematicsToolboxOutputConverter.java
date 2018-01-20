@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,7 +20,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -114,7 +114,7 @@ public class KinematicsToolboxOutputConverter
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame handControlFrame = fullRobotModelToUseForConversion.getHandControlFrame(robotSide);
-      FramePose desiredHandPose = new FramePose(handControlFrame);
+      FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
       desiredHandPose.changeFrame(worldFrame);
       desiredHandPose.get(desiredPosition, desiredOrientation);
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, trajectoryFrame);
@@ -143,7 +143,7 @@ public class KinematicsToolboxOutputConverter
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame pelvisFrame = fullRobotModelToUseForConversion.getRootJoint().getFrameAfterJoint();
-      FramePose desiredPelvisPose = new FramePose(pelvisFrame);
+      FramePose3D desiredPelvisPose = new FramePose3D(pelvisFrame);
       desiredPelvisPose.changeFrame(worldFrame);
       desiredPelvisPose.get(desiredPosition, desiredOrientation);
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
@@ -163,7 +163,7 @@ public class KinematicsToolboxOutputConverter
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame footFrame = fullRobotModelToUseForConversion.getEndEffectorFrame(robotSide, LimbName.LEG);
-      FramePose desiredFootPose = new FramePose(footFrame);
+      FramePose3D desiredFootPose = new FramePose3D(footFrame);
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);

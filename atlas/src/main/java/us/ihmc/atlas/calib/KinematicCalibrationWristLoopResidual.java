@@ -8,12 +8,12 @@ import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -78,8 +78,8 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
 //         FramePoint 
 //            leftEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,+0.01, 0.13,0),
 //            rightEE=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM),+0.01,-0.13,0);
-         FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3D(+0.01, +0.13, 0), CalibUtil.quat0);
-         FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3D(+0.01, -0.13, 0), CalibUtil.quat0);
+         FramePose3D leftEE = new FramePose3D(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3D(+0.01, +0.13, 0), CalibUtil.quat0);
+         FramePose3D rightEE = new FramePose3D(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3D(+0.01, -0.13, 0), CalibUtil.quat0);
          leftEE.prependTranslation(constantOffset);
 
          leftEE.changeFrame(ReferenceFrame.getWorldFrame());

@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +20,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -338,7 +338,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       trajectoryTime.set(newTrajectoryTime);
    }
 
-   public void setInitialPoseWithInitialVelocity(FramePose initialPose, FrameVector3D initialVelocity, FrameVector3D initialAngularVelocity)
+   public void setInitialPoseWithInitialVelocity(FramePose3D initialPose, FrameVector3D initialVelocity, FrameVector3D initialAngularVelocity)
    {
       initialPose.get(tempPosition, tempOrientation);
       this.initialPosition.set(tempPosition);
@@ -348,7 +348,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.initialAngularVelocity.set(initialAngularVelocity);
    }
 
-   public void setInitialPoseWithoutInitialVelocity(FramePose initialPose)
+   public void setInitialPoseWithoutInitialVelocity(FramePose3D initialPose)
    {
       initialPose.get(tempPosition, tempOrientation);
       this.initialPosition.set(tempPosition);
@@ -395,7 +395,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
     * this.finalVelocity.set(finalVelocity);
     * this.finalAngularVelocity.set(finalAngularVelocity); }
     */
-   public void setFinalPoseWithoutFinalVelocity(FramePose finalPose)
+   public void setFinalPoseWithoutFinalVelocity(FramePose3D finalPose)
    {
       finalPose.get(tempPosition, tempOrientation);
       setFinalPoseWithoutFinalVelocity(tempPosition, tempOrientation);
@@ -680,7 +680,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
       framePoseToPack.setPosition(currentPosition);

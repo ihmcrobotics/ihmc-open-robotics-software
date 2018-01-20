@@ -2,6 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -122,7 +122,7 @@ public class AxisAngleOrientationController
    /**
     * Computes using Twists, ignores linear part
     */
-   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   public void compute(Twist twistToPack, FramePose3D desiredPose, Twist desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
       checkBaseFrames(desiredTwist, twistToPack);

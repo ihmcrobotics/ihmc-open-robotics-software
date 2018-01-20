@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public class TurningOverheadPath extends OverheadPath
 {
@@ -13,7 +13,7 @@ public class TurningOverheadPath extends OverheadPath
    private final double deltaYaw;
    private final FramePoint2D point;
 
-   public TurningOverheadPath(FramePose2d startPose, FrameOrientation2D endOrientation)
+   public TurningOverheadPath(FramePose2D startPose, FrameOrientation2D endOrientation)
    {
       startPose.checkReferenceFrameMatch(endOrientation);
       this.startOrientation = new FrameOrientation2D(startPose.getOrientation());
@@ -30,19 +30,19 @@ public class TurningOverheadPath extends OverheadPath
    }
 
    @Override
-   public FramePose2d getPoseAtS(double pathVariableS)
+   public FramePose2D getPoseAtS(double pathVariableS)
    {
       pathVariableS = MathTools.clamp(pathVariableS, 0.0, 1.0);
       return getExtrapolatedPoseAtS(pathVariableS);
    }
 
    @Override
-   public FramePose2d getExtrapolatedPoseAtS(double pathVariableS)
+   public FramePose2D getExtrapolatedPoseAtS(double pathVariableS)
    {
       if (tempOrientation == null)
          tempOrientation = new FrameOrientation2D(point.getReferenceFrame());
       tempOrientation.interpolate(startOrientation, endOrientation, pathVariableS);
-      return new FramePose2d(point, tempOrientation);
+      return new FramePose2D(point, tempOrientation);
    }
 
    @Override
@@ -58,7 +58,7 @@ public class TurningOverheadPath extends OverheadPath
       newStartPoint.changeFrame(desiredFrame);
       FrameOrientation2D newStartOrientation = new FrameOrientation2D(startOrientation);
       newStartOrientation.changeFrame(desiredFrame);
-      FramePose2d newStartPose = new FramePose2d(newStartPoint, newStartOrientation);
+      FramePose2D newStartPose = new FramePose2D(newStartPoint, newStartOrientation);
       FrameOrientation2D newEndOrientation = new FrameOrientation2D(endOrientation);
       newEndOrientation.changeFrame(desiredFrame);
       return new TurningOverheadPath(newStartPose, newEndOrientation);

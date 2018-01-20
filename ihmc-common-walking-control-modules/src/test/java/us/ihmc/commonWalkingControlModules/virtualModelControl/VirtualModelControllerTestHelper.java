@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -34,7 +35,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
@@ -131,7 +131,7 @@ public class VirtualModelControllerTestHelper
             registry, yoGraphicsListRegistry);
 
       List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
-      List<FramePose> desiredEndEffectorPoses = new ArrayList<>();
+      List<FramePose3D> desiredEndEffectorPoses = new ArrayList<>();
 
       List<YoWrench> desiredWrenches = new ArrayList<>();
       List<ForcePointController> forcePointControllers = new ArrayList<>();
@@ -141,7 +141,7 @@ public class VirtualModelControllerTestHelper
          RigidBody endEffector = endEffectors.get(i);
          ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
 
-         FramePose desiredEndEffectorPose = new FramePose(endEffectorFrame);
+         FramePose3D desiredEndEffectorPose = new FramePose3D(endEffectorFrame);
          desiredEndEffectorPose.setToZero();
          desiredEndEffectorPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -2375,7 +2375,7 @@ public class VirtualModelControllerTestHelper
       private final YoDouble currentAngularZ;
 
       private final ReferenceFrame handFrame;
-      private final FramePose currentPose = new FramePose();
+      private final FramePose3D currentPose = new FramePose3D();
       private final Vector3D desiredPosition = new Vector3D();
       private final Vector3D currentPosition = new Vector3D();
       private final Quaternion desiredOrientation = new Quaternion();
@@ -2391,12 +2391,12 @@ public class VirtualModelControllerTestHelper
 
       private boolean hasInitialForce = false;
 
-      public ForcePointController(ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose desiredPose)
+      public ForcePointController(ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose3D desiredPose)
       {
          this("", forcePoint, handFrame, desiredPose);
       }
 
-      public ForcePointController(String suffix, ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose desiredPose)
+      public ForcePointController(String suffix, ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose3D desiredPose)
       {
          this.forcePoint = forcePoint;
          this.handFrame = handFrame;

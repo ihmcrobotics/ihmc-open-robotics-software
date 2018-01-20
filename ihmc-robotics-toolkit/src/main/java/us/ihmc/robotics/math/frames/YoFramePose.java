@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,7 +50,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       return orientation;
    }
 
-   public void getFramePose(FramePose framePoseToPack)
+   public void getFramePose(FramePose3D framePoseToPack)
    {
       orientation.getFrameOrientationIncludingFrame(tempFrameOrientation);
 
@@ -58,7 +58,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       framePoseToPack.setOrientation(tempFrameOrientation);
    }
 
-   public void getFramePoseIncludingFrame(FramePose framePoseToPack)
+   public void getFramePoseIncludingFrame(FramePose3D framePoseToPack)
    {
       framePoseToPack.setToZero(getReferenceFrame());
       getFramePose(framePoseToPack);
@@ -71,7 +71,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       rigidBodyTransformToPack.setTranslation(position);
    }
 
-   public void set(FramePose framePose)
+   public void set(FramePose3D framePose)
    {
       framePose.checkReferenceFrameMatch(getReferenceFrame());
 
@@ -79,7 +79,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       orientation.set(framePose.getOrientation());
    }
 
-   public void setAndMatchFrame(FramePose framePose)
+   public void setAndMatchFrame(FramePose3D framePose)
    {
       position.setAndMatchFrame(framePose.getPosition());
       orientation.setAndMatchFrame(framePose.getOrientation());

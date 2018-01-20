@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -174,7 +174,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    {
       String sidePrefix = findUpcomingFootstepSide(0, scs).getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Footstep0Pose";
-      FramePose framePose = new FramePose();
+      FramePose3D framePose = new FramePose3D();
       findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs).getFramePose(framePose);
       Pose3D pose = new Pose3D(framePose);
       return pose;

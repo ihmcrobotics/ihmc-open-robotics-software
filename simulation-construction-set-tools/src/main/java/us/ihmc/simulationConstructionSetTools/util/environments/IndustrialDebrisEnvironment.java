@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,7 +13,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSelectableBoxRobot;
@@ -58,7 +58,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       Quaternion robotInitialOrientation = new Quaternion();
       robotInitialOrientation.setYawPitchRoll(robotInitialYaw, 0.0, 0.0);
       Point3D robotPosition = new Point3D(robotInitialPosition);
-      FramePose robotInitialPose = new FramePose(constructionWorldFrame, robotPosition, robotInitialOrientation);
+      FramePose3D robotInitialPose = new FramePose3D(constructionWorldFrame, robotPosition, robotInitialOrientation);
 
       this.robotInitialPoseReferenceFrame = new PoseReferenceFrame("robotInitialPoseReferenceFrame", robotInitialPose);
    }
@@ -66,7 +66,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
    public void addStandingDebris(double xRelativeToRobot, double yRelativeToRobot, double debrisYaw)
    {
       Point3D tempPosition = new Point3D(xRelativeToRobot, yRelativeToRobot, debrisLength / 2.0);
-      FramePose debrisPose = generateDebrisPose(tempPosition, debrisYaw, 0.0, 0.0);
+      FramePose3D debrisPose = generateDebrisPose(tempPosition, debrisYaw, 0.0, 0.0);
       debrisRobots.add(createDebrisRobot(debrisPose));
    }
 
@@ -80,7 +80,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       double y;
       double z;
 
-      FramePose debrisPose = generateDebrisPose(positionOfCenterOfDebrisWithRespectToRobot, debrisYaw, 0.0, debrisRoll);
+      FramePose3D debrisPose = generateDebrisPose(positionOfCenterOfDebrisWithRespectToRobot, debrisYaw, 0.0, debrisRoll);
       debrisRobots.add(createDebrisRobot(debrisPose));
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
@@ -91,7 +91,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
 
       //add first support
-      FramePose firstSupportPose = new FramePose(debrisReferenceFrame);
+      FramePose3D firstSupportPose = new FramePose3D(debrisReferenceFrame);
       supportHeight = positionOfCenterOfDebrisWithRespectToRobot.getZ() - debrisWidth / 2.0 + debrisLength / 2.0 * Math.cos(debrisRoll);
 
       x = 0.0;
@@ -104,7 +104,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject.addRotatableBox(firstSupportTransform, supportLength, supportWidth, supportHeight, YoAppearance.AliceBlue());
 
       //add second support
-      FramePose secondSupportPose = new FramePose(debrisReferenceFrame);
+      FramePose3D secondSupportPose = new FramePose3D(debrisReferenceFrame);
       supportHeight = positionOfCenterOfDebrisWithRespectToRobot.getZ() - debrisWidth / 2.0 - debrisLength / 2.0 * Math.cos(debrisRoll);
 
       x = 0.0;
@@ -120,7 +120,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
    public void addVerticalDebrisLeaningAgainstAWall(double xRelativeToRobot, double yRelativeToRobot, double debrisYaw, double debrisPitch)
    {
       Point3D tempPosition = new Point3D(xRelativeToRobot, yRelativeToRobot, debrisLength / 2.0 * Math.cos(debrisPitch));
-      FramePose debrisPose = generateDebrisPose(tempPosition, debrisYaw, debrisPitch, 0.0);
+      FramePose3D debrisPose = generateDebrisPose(tempPosition, debrisYaw, debrisPitch, 0.0);
       debrisRobots.add(createDebrisRobot(debrisPose));
 
       double supportWidth = 0.1;
@@ -134,7 +134,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
       
-      FramePose supportPose = new FramePose(debrisReferenceFrame);
+      FramePose3D supportPose = new FramePose3D(debrisReferenceFrame);
       
       double x = supportWidth / 2.0 + debrisLength/2.0 * Math.sin(debrisPitch);
       double y = 0.0;
@@ -148,9 +148,9 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject.addRotatableBox(supportTransform, supportWidth, supportLength, supportHeight, YoAppearance.AliceBlue());
    }
 
-   private FramePose generateDebrisPose(Point3D positionWithRespectToRobot, double debrisYaw, double debrisPitch, double debrisRoll)
+   private FramePose3D generateDebrisPose(Point3D positionWithRespectToRobot, double debrisYaw, double debrisPitch, double debrisRoll)
    {
-      FramePose debrisPose = new FramePose(robotInitialPoseReferenceFrame);
+      FramePose3D debrisPose = new FramePose3D(robotInitialPoseReferenceFrame);
       Quaternion orientation = new Quaternion();
       orientation.setYawPitchRoll(debrisYaw, debrisPitch, debrisRoll);
       debrisPose.set(positionWithRespectToRobot, orientation);
@@ -169,7 +169,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       }
    }
 
-   private ContactableSelectableBoxRobot createDebrisRobot(FramePose debrisPose)
+   private ContactableSelectableBoxRobot createDebrisRobot(FramePose3D debrisPose)
    {
 
       debrisPose.checkReferenceFrameMatch(constructionWorldFrame);

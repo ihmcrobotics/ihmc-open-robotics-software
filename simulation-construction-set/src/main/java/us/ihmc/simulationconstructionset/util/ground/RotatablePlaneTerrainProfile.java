@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,7 +19,6 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -35,7 +35,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
 {
    private static final ReferenceFrame WORLD_FRAME = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry("rotatablePlaneTerrainProfile");
-   private final FramePose planePose = new FramePose(WORLD_FRAME);
+   private final FramePose3D planePose = new FramePose3D(WORLD_FRAME);
    private final PoseReferenceFrame planeFrame = new PoseReferenceFrame("planeFrame", planePose);
    private final FramePlane3d plane = new FramePlane3d(planeFrame);
    private final FramePlane3d previousPlane = new FramePlane3d(WORLD_FRAME);

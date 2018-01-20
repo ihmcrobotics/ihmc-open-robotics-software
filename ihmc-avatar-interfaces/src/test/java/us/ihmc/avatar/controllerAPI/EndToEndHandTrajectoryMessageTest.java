@@ -28,6 +28,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -49,7 +50,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -138,7 +138,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
 
          RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
-         FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
+         FramePose3D desiredRandomHandPose = new FramePose3D(handClone.getBodyFixedFrame());
          humanoidReferenceFrames.updateFrames();
          desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
 
@@ -861,7 +861,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       double overrideTrajectoryTime = 1.0;
-      SideDependentList<FramePose> overridingPoses = new SideDependentList<>();
+      SideDependentList<FramePose3D> overridingPoses = new SideDependentList<>();
       fullRobotModel.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -869,7 +869,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          fullRobotModel.updateFrames();
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         FramePose desiredHandPose = new FramePose(handControlFrame);
+         FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
          desiredHandPose.changeFrame(worldFrame);
 
          Point3D desiredPosition = new Point3D();
@@ -899,7 +899,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose desiredPose = overridingPoses.get(robotSide);
+         FramePose3D desiredPose = overridingPoses.get(robotSide);
          desiredPose.changeFrame(worldFrame);
 
          String handName = fullRobotModel.getHand(robotSide).getName();
@@ -922,7 +922,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       ReferenceFrame handFrame = hand.getBodyFixedFrame();
       Twist desiredTwist = new Twist(handFrame, chestFrame, handControlFrame);
-      FramePose desiredPose = new FramePose(desiredPosition.getReferenceFrame());
+      FramePose3D desiredPose = new FramePose3D(desiredPosition.getReferenceFrame());
       desiredPose.setPosition(desiredPosition);
       desiredPose.changeFrame(chestFrame);
       for (int i = 0; i < numberOfIterations; i++)
@@ -975,7 +975,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
 
-         FramePose desiredRandomHandPose = new FramePose(fullRobotModel.getHandControlFrame(robotSide));
+         FramePose3D desiredRandomHandPose = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          desiredRandomHandPose.changeFrame(worldFrame);
          desiredRandomHandPose.prependTranslation(RandomGeometry.nextVector3D(random, 0.2));

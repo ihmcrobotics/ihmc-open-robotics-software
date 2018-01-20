@@ -10,10 +10,10 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class GroundTruthinatorTest
@@ -28,7 +28,7 @@ public class GroundTruthinatorTest
       double attachCoord = 0.1;
 
       GroundTruthinator groundTruthinator = createdExtendedObject12GroundTruthinator(sensorCoord, attachCoord);
-      FramePose objectPose = new FramePose(worldFrame);
+      FramePose3D objectPose = new FramePose3D(worldFrame);
 
       FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       FrameQuaternion orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
@@ -52,7 +52,7 @@ public class GroundTruthinatorTest
          assertEquals(sensedCableLengths[i], groundTruthinator.getSensor(i).getEstimatedCableLength(), epsilon);
       }
 
-      FramePose estimatedPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D estimatedPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
       assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
 
@@ -98,7 +98,7 @@ public class GroundTruthinatorTest
       double attachCoord = 0.1;
 
       GroundTruthinator groundTruthinator = createdExtendedObject12GroundTruthinator(sensorCoord, attachCoord);
-      FramePose objectPose = new FramePose(worldFrame);
+      FramePose3D objectPose = new FramePose3D(worldFrame);
 
       FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       FrameQuaternion orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
@@ -122,7 +122,7 @@ public class GroundTruthinatorTest
          assertEquals(sensedCableLengths[i], groundTruthinator.getSensor(i).getEstimatedCableLength(), epsilon);
       }
 
-      FramePose estimatedPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D estimatedPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
       assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
 

@@ -6,6 +6,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,7 +20,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -138,7 +138,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
 
-   public void setDesiredHandPose(RobotSide robotSide, FramePose desiredHandPose)
+   public void setDesiredHandPose(RobotSide robotSide, FramePose3D desiredHandPose)
    {
       desiredHandPose.get(desiredPosition, desiredOrientation);
       setDesiredHandPose(robotSide, desiredPosition, desiredOrientation);

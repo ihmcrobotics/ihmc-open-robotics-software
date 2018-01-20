@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -84,7 +84,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    }
 
    @Override
-   public double calculateCost(FramePose stanceFoot, FramePose swingStartFoot, FramePose idealFootstep, FramePose candidateFootstep, double percentageOfFoothold)
+   public double calculateCost(FramePose3D stanceFoot, FramePose3D swingStartFoot, FramePose3D idealFootstep, FramePose3D candidateFootstep, double percentageOfFoothold)
    {
       double cost = footstepBaseCost.getDoubleValue();
 
@@ -142,12 +142,12 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       return vector3d.dot(tempFrameVectorForDot);
    }
 
-   private void setOrientationFromPoseToPose(YoFrameOrientation frameOrientationToPack, FramePose fromPose, FramePose toPose)
+   private void setOrientationFromPoseToPose(YoFrameOrientation frameOrientationToPack, FramePose3D fromPose, FramePose3D toPose)
    {
       frameOrientationToPack.getFrameOrientation().difference(toPose.getOrientation(), fromPose.getOrientation());
    }
 
-   private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose fromPose, FramePose toPose)
+   private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose3D fromPose, FramePose3D toPose)
    {
       frameVectorToPack.set(toPose.getPosition());
       FrameVector3D frameTuple = new FrameVector3D(frameVectorToPack);
@@ -155,7 +155,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       frameVectorToPack.set(frameTuple);
    }
 
-   private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose fromPose, FramePose toPose)
+   private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose3D fromPose, FramePose3D toPose)
    {
       if (fromPose.getPosition().epsilonEquals(toPose.getPosition(), 1e-7))
       {

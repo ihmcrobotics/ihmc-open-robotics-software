@@ -4,6 +4,8 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -14,21 +16,19 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public class PoseReferenceFrame extends ReferenceFrame
 {
-   private final FramePose originPose;
+   private final FramePose3D originPose;
 
    public PoseReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
       super(frameName, parentFrame, parentFrame.isAStationaryFrame(), false);
 
-      originPose = new FramePose(parentFrame);
+      originPose = new FramePose3D(parentFrame);
    }
 
-   public PoseReferenceFrame(String frameName, FramePose pose)
+   public PoseReferenceFrame(String frameName, FramePose3D pose)
    {
       this(frameName, pose.getReferenceFrame());
       setPoseAndUpdate(pose);
@@ -54,7 +54,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       originPose.setZ(z);
    }
 
-   public void setPoseAndUpdate(FramePose pose)
+   public void setPoseAndUpdate(FramePose3D pose)
    {
       originPose.set(pose);
       this.update();
@@ -190,7 +190,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       originPose.get(framePointToPack, frameOrientationToPack);
    }
 
-   public void getPoseIncludingFrame(FramePose framePoseToPack)
+   public void getPoseIncludingFrame(FramePose3D framePoseToPack)
    {
       framePoseToPack.setIncludingFrame(originPose);
    }
@@ -230,7 +230,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       frameOrientationToPack.setIncludingFrame(originPose.getOrientation());
    }
 
-   public void getPose2dIncludingFrame(FramePose2d framePose2dToPack)
+   public void getPose2dIncludingFrame(FramePose2D framePose2dToPack)
    {
       framePose2dToPack.setIncludingFrame(originPose);
    }
@@ -240,7 +240,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       framePoint2dToPack.setIncludingFrame(originPose.getPosition());
    }
 
-   public void interpolate(FramePose framePose1, FramePose framePose2, double alpha)
+   public void interpolate(FramePose3D framePose1, FramePose3D framePose2, double alpha)
    {
       originPose.interpolate(framePose1, framePose2, alpha);
    }

@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -10,7 +11,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class FootstepDataMessageConverter
 {
@@ -28,7 +28,7 @@ public class FootstepDataMessageConverter
       {
          SimpleFootstep footstep = footstepPlan.getFootstep(i);
 
-         FramePose footstepPose = new FramePose();
+         FramePose3D footstepPose = new FramePose3D();
          footstep.getSoleFramePose(footstepPose);
          Point3D location = new Point3D(footstepPose.getPosition());
          Quaternion orientation = new Quaternion(footstepPose.getOrientation());
@@ -62,7 +62,7 @@ public class FootstepDataMessageConverter
       {
          SimpleFootstep footstep = footstepPlan.getFootstep(i);
 
-         FramePose footstepPose = new FramePose();
+         FramePose3D footstepPose = new FramePose3D();
          footstep.getSoleFramePose(footstepPose);
          Point3D location = new Point3D(footstepPose.getPosition());
          Quaternion orientation = new Quaternion(footstepPose.getOrientation());

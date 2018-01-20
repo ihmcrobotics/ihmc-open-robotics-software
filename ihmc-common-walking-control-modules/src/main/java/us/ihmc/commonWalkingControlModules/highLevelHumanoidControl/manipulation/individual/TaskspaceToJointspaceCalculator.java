@@ -10,13 +10,13 @@ import org.ejml.ops.NormOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
@@ -48,7 +48,7 @@ public class TaskspaceToJointspaceCalculator
    };
 
    private final RigidBodyTransform desiredControlFrameTransform = new RigidBodyTransform();
-   private final FramePose desiredControlFramePose = new FramePose();
+   private final FramePose3D desiredControlFramePose = new FramePose3D();
    private final Twist desiredControlFrameTwist = new Twist();
 
    private final OneDoFJoint[] originalJoints;
@@ -123,7 +123,7 @@ public class TaskspaceToJointspaceCalculator
    private final DenseMatrix64F desiredJointVelocities;
    private final DenseMatrix64F desiredJointAccelerations;
 
-   private final FramePose originalBasePose = new FramePose();
+   private final FramePose3D originalBasePose = new FramePose3D();
 
    private final double controlDT;
 
@@ -403,7 +403,7 @@ public class TaskspaceToJointspaceCalculator
       compute(desiredControlFramePose, desiredControlFrameTwist);
    }
 
-   public void compute(FramePose desiredPose, Twist desiredTwist)
+   public void compute(FramePose3D desiredPose, Twist desiredTwist)
    {
       jacobian.compute();
 
@@ -414,7 +414,7 @@ public class TaskspaceToJointspaceCalculator
    
    private final AxisAngle tempAxisAngle = new AxisAngle();
    
-   public boolean computeIteratively(FramePose desiredPose, Twist desiredTwist, double maxIterations, double epsilon)
+   public boolean computeIteratively(FramePose3D desiredPose, Twist desiredTwist, double maxIterations, double epsilon)
    {
       for(int i = 0; i < maxIterations; i++)
       {
@@ -438,7 +438,7 @@ public class TaskspaceToJointspaceCalculator
       return false;
    }
 
-   private void computeJointAnglesAndVelocities(FramePose desiredControlFramePose, Twist desiredControlFrameTwist)
+   private void computeJointAnglesAndVelocities(FramePose3D desiredControlFramePose, Twist desiredControlFrameTwist)
    {
       if (enableFeedbackControl.getBooleanValue())
          setLocalJointAnglesToCurrentJointAngles();
@@ -790,7 +790,7 @@ public class TaskspaceToJointspaceCalculator
       return inverseJacobianSolver.getLastComputedDeterminant();
    }
 
-   public void getDesiredEndEffectorPoseFromQDesireds(FramePose desiredPose, ReferenceFrame desiredFrame)
+   public void getDesiredEndEffectorPoseFromQDesireds(FramePose3D desiredPose, ReferenceFrame desiredFrame)
    {
       desiredPose.setToZero(localControlFrame);
       desiredPose.changeFrame(desiredFrame);

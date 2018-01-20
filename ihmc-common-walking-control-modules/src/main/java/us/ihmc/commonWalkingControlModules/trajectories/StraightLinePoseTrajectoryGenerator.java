@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,7 +14,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
@@ -221,7 +221,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       trajectoryTime.set(newTrajectoryTime);
    }
 
-   public void setInitialPose(FramePose initialPose)
+   public void setInitialPose(FramePose3D initialPose)
    {
       initialPose.get(tempPosition, tempOrientation);
 
@@ -239,7 +239,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       initialOrientationForViz.setAndMatchFrame(initialOrientation);
    }
 
-   public void setFinalPose(FramePose finalPose)
+   public void setFinalPose(FramePose3D finalPose)
    {
       finalPose.get(tempPosition, tempOrientation);
 
@@ -394,7 +394,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
       framePoseToPack.setPosition(currentPosition);

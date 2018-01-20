@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -7,7 +8,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -118,7 +118,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    {
       FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
 
-      FramePose footstepPose = new FramePose();
+      FramePose3D footstepPose = new FramePose3D();
       footstepPose.setToZero(frame);
       footstepPose.setPosition(xOffset, yOffset, 0.0);
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());

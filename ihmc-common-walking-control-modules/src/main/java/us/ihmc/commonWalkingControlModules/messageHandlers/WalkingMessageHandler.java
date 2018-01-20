@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -28,7 +29,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerF
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -499,7 +499,7 @@ public class WalkingMessageHandler
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
    private final FootstepStatus footstepStatus = new FootstepStatus();
 
-   public void reportFootstepStarted(RobotSide robotSide, FramePose desiredFootPoseInWorld, FramePose actualFootPoseInWorld)
+   public void reportFootstepStarted(RobotSide robotSide, FramePose3D desiredFootPoseInWorld, FramePose3D actualFootPoseInWorld)
    {
       desiredFootPoseInWorld.get(desiredFootPositionInWorld, desiredFootOrientationInWorld);
       actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
@@ -519,7 +519,7 @@ public class WalkingMessageHandler
          timeElapsedWhenFootstepExecuted.set(yoTime.getDoubleValue() - footstepDataListReceivedTime.getDoubleValue());
    }
 
-   public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)
+   public void reportFootstepCompleted(RobotSide robotSide, FramePose3D actualFootPoseInWorld)
    {
       actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
       desiredFootOrientationInWorld.setToNaN();
@@ -590,7 +590,7 @@ public class WalkingMessageHandler
       return lastDesiredFootsteps.get(footstepSide);
    }
 
-   private final FramePose tempPose = new FramePose();
+   private final FramePose3D tempPose = new FramePose3D();
 
    public Footstep getFootstepAtCurrentLocation(RobotSide robotSide)
    {

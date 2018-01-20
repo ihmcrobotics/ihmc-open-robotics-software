@@ -13,6 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
@@ -34,7 +35,6 @@ import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanBasedCost;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -190,11 +190,11 @@ public class AStarPlanarRegionsPlannerTest
       // make goal and initial conditions
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       Point3D goalPosition = new Point3D(1.0, 0.0, 0.0);
       goalPose.setPosition(goalPosition);
       goal.setGoalPoseBetweenFeet(goalPose);
-      FramePose startPose = new FramePose();
+      FramePose3D startPose = new FramePose3D();
       RobotSide startSide = RobotSide.LEFT;
 
       // create planner
@@ -227,7 +227,7 @@ public class AStarPlanarRegionsPlannerTest
          assertEquals(FootstepPlanningResult.OPTIMAL_SOLUTION, planner.plan());
          FootstepPlan plan = planner.getPlan();
          SimpleFootstep lastStep = plan.getFootstep(plan.getNumberOfSteps() - 1);
-         FramePose achievedGoalPose = new FramePose();
+         FramePose3D achievedGoalPose = new FramePose3D();
          lastStep.getSoleFramePose(achievedGoalPose);
 
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);

@@ -16,6 +16,7 @@ import georegression.struct.EulerType;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -32,7 +33,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 
@@ -43,7 +43,7 @@ public class FiducialDetectorFromCameraImages
    private final Se3_F64 fiducialToCamera = new Se3_F64();
    private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
    private final Quaternion tempFiducialRotationQuat = new Quaternion();
-   private final FramePose tempFiducialDetectorFrame = new FramePose();
+   private final FramePose3D tempFiducialDetectorFrame = new FramePose3D();
    private final Vector3D cameraRigidPosition = new Vector3D();
    private final double[] eulerAngles = new double[3];
    private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
@@ -291,7 +291,7 @@ public class FiducialDetectorFromCameraImages
       return targetIDHasBeenLocated.getBooleanValue();
    }
 
-   public void getReportedFiducialPoseWorldFrame(FramePose framePoseToPack)
+   public void getReportedFiducialPoseWorldFrame(FramePose3D framePoseToPack)
    {
       reportedFiducialPoseInWorldFrame.getFramePoseIncludingFrame(framePoseToPack);
    }

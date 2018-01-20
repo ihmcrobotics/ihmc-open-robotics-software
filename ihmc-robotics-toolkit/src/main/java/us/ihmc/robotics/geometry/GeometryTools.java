@@ -9,6 +9,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -957,12 +958,12 @@ public class GeometryTools
       resultToPack.add(tempX, tempY);
    }
 
-   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, FramePose framePoseToPack)
+   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, FramePose3D framePoseToPack)
    {
       GeometryTools.rotatePoseAboutAxis(rotationAxisFrame, rotationAxis, angle, false, false, framePoseToPack);
    }
 
-   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, boolean lockPosition, boolean lockOrientation, FramePose framePoseToPack)
+   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, boolean lockPosition, boolean lockOrientation, FramePose3D framePoseToPack)
    {
       ReferenceFrame initialFrame = framePoseToPack.getReferenceFrame();
    
@@ -988,7 +989,7 @@ public class GeometryTools
       framePoseToPack.changeFrame(initialFrame);
    }
 
-   public static void rotatePoseAboutAxis(FrameVector3D rotatationAxis, FramePoint3D rotationAxisOrigin, double angle, FramePose framePoseToPack)
+   public static void rotatePoseAboutAxis(FrameVector3D rotatationAxis, FramePoint3D rotationAxisOrigin, double angle, FramePose3D framePoseToPack)
    {
       ReferenceFrame frameWhoseZAxisIsRotationAxis = constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
                                                                                                              rotatationAxis);

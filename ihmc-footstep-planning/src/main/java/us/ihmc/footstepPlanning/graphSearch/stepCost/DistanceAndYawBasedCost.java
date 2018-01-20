@@ -1,12 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class DistanceAndYawBasedCost implements FootstepCost
@@ -30,7 +30,7 @@ public class DistanceAndYawBasedCost implements FootstepCost
 
    public static Point2D computeMidFootPoint(FootstepNode node, double idealStepWidth)
    {
-      FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D stanceFootPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       stanceFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
       stanceFootPose.setX(node.getX());
       stanceFootPose.setY(node.getY());

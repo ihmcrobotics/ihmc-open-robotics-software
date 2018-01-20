@@ -3,12 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -32,17 +32,17 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       // empty constructor for serialization
    }
 
-   public FootstepPlanningRequestPacket(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose)
+   public FootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose)
    {
       this(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
    }
 
-   public FootstepPlanningRequestPacket(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, FootstepPlannerType requestedPlannerType)
+   public FootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
    {
       set(initialStanceFootPose, initialStanceSide, goalPose, requestedPlannerType);
    }
 
-   public void set(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, FootstepPlannerType requestedPlannerType)
+   public void set(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
    {
       this.initialStanceSide = initialStanceSide;
 

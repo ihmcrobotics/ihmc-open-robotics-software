@@ -4,12 +4,12 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.tools.ArrayTools;
@@ -325,7 +325,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return waypoints.length;
    }
 
-   public void getControlFramePose(RigidBody endEffector, FramePose controlFramePoseToPack)
+   public void getControlFramePose(RigidBody endEffector, FramePose3D controlFramePoseToPack)
    {
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
       controlFramePoseToPack.setToZero(referenceFrame);

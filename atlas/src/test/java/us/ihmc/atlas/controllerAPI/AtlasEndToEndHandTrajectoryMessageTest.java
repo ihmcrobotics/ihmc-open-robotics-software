@@ -14,13 +14,13 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -119,10 +119,10 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       double trajectoryTime = 1.0;
       RigidBody chest = fullRobotModel.getChest();
 
-      FramePose waypoint0 = new FramePose(chest.getBodyFixedFrame());
+      FramePose3D waypoint0 = new FramePose3D(chest.getBodyFixedFrame());
       waypoint0.setPosition(0.85602, -0.33869, -0.01085);
       waypoint0.setOrientation(0.99766, 0.01831, 0.06483, 0.01143);
-      FramePose waypoint1 = new FramePose(chest.getBodyFixedFrame());
+      FramePose3D waypoint1 = new FramePose3D(chest.getBodyFixedFrame());
       waypoint1.setPosition(0.97144, -0.38298, -0.02078);
       waypoint1.setOrientation(-0.98753, -0.00886, -0.06093, 0.14487);
 

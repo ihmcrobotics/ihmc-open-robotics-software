@@ -7,6 +7,7 @@ import java.io.Serializable;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -17,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -701,7 +701,7 @@ public class QuadrupedSupportPolygon implements Serializable
    }
    
    private final FramePoint3D tempFramePointForCentroids = new FramePoint3D();
-   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose framePose)
+   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();
@@ -712,7 +712,7 @@ public class QuadrupedSupportPolygon implements Serializable
       framePose.setPosition(tempFramePointForCentroids);
    }
    
-   public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose framePose)
+   public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();

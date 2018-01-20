@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,7 +22,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -55,7 +55,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final YoFramePose yoDesiredPose;
 
    // temp stuff:
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D desiredPose = new FramePose3D();
    private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame);
@@ -68,7 +68,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
 
-   private final FramePose controlFramePose = new FramePose();
+   private final FramePose3D controlFramePose = new FramePose3D();
    private final PoseReferenceFrame controlFrame;
    private final ReferenceFrame endEffectorFrame;
    private final ReferenceFrame chestFrame;
@@ -355,7 +355,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final RigidBodyTransform newTrackingFrameDesiredTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformFromNewTrackingFrameToOldTrackingFrame = new RigidBodyTransform();
 
-   private void changeControlFrame(ReferenceFrame oldControlFrame, ReferenceFrame newControlFrame, FramePose framePoseToModify)
+   private void changeControlFrame(ReferenceFrame oldControlFrame, ReferenceFrame newControlFrame, FramePose3D framePoseToModify)
    {
       if (oldControlFrame == newControlFrame)
          return;

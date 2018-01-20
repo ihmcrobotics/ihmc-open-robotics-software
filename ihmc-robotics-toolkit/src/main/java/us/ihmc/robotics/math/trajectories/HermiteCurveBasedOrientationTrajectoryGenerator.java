@@ -4,6 +4,7 @@ import static us.ihmc.commons.MathTools.square;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,7 +19,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -178,7 +178,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
 
-   public void setFinalOrientation(FramePose finalPose)
+   public void setFinalOrientation(FramePose3D finalPose)
    {
       finalOrientation.setAndMatchFrame(finalPose.getOrientation());
    }

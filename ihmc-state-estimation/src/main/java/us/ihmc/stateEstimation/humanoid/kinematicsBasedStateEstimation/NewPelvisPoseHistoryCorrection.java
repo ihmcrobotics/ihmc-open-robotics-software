@@ -1,5 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
@@ -18,7 +19,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -83,14 +83,14 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private final YoInteger pelvisBufferSize;
    
-   private final FramePose stateEstimatorInWorldFramePose = new FramePose(worldFrame);
+   private final FramePose3D stateEstimatorInWorldFramePose = new FramePose3D(worldFrame);
    private final YoFramePose yoStateEstimatorInWorldFramePose;
    private final YoFramePose yoCorrectedPelvisPoseInWorldFrame;
-   private final FramePose iterativeClosestPointInWorldFramePose = new FramePose(worldFrame);
+   private final FramePose3D iterativeClosestPointInWorldFramePose = new FramePose3D(worldFrame);
    private final YoFramePose yoIterativeClosestPointPoseInWorldFrame;
    
    private final ReferenceFrame iterativeClosestPointReferenceFrame;
-   private final FramePose correctedPelvisPoseInWorldFrame = new FramePose(worldFrame);
+   private final FramePose3D correctedPelvisPoseInWorldFrame = new FramePose3D(worldFrame);
    
    private final YoBoolean hasOneIcpPacketEverBeenReceived;
    

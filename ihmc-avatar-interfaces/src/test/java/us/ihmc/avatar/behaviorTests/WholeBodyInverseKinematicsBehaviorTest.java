@@ -20,6 +20,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -29,7 +30,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -129,7 +129,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FrameQuaternion initialPelvisOrientation = new FrameQuaternion(pelvisControlFrame);
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose desiredHandPose = new FramePose(handControlFrame);
+      FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
@@ -139,7 +139,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ik.holdCurrentPelvisHeight();
 
       drcBehaviorTestHelper.updateRobotModel();
-      FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);
+      FramePose3D desiredHandPoseCopy = new FramePose3D(desiredHandPose);
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       desiredHandPoseCopy.changeFrame(chestFrame);
 
@@ -197,12 +197,12 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ReferenceFrame handControlFrameR = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
       ReferenceFrame handControlFrameL = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.LEFT);
 
-      FramePose desiredHandPoseR = new FramePose(handControlFrameR);
+      FramePose3D desiredHandPoseR = new FramePose3D(handControlFrameR);
       desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPoseR.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
-      FramePose desiredHandPoseL = new FramePose(handControlFrameL);
+      FramePose3D desiredHandPoseL = new FramePose3D(handControlFrameL);
       desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPoseL.prependTranslation(0.20, 0.0, 0.0);
       ik.setTrajectoryTime(0.5);
@@ -211,8 +211,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ik.holdCurrentPelvisOrientation();
 
       drcBehaviorTestHelper.updateRobotModel();
-      FramePose desiredHandPoseLCopy = new FramePose(desiredHandPoseL);
-      FramePose desiredHandPoseRCopy = new FramePose(desiredHandPoseR);
+      FramePose3D desiredHandPoseLCopy = new FramePose3D(desiredHandPoseL);
+      FramePose3D desiredHandPoseRCopy = new FramePose3D(desiredHandPoseR);
       ReferenceFrame chestFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
       desiredHandPoseLCopy.changeFrame(chestFrame);
       desiredHandPoseRCopy.changeFrame(chestFrame);
@@ -286,7 +286,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       Quaternion offsetOrientation = new Quaternion();
       offsetOrientation.setYawPitchRoll(0.0, 0.0, 0.1);
-      FramePose desiredHandPose = new FramePose(handControlFrame);
+      FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
       desiredHandPose.setOrientation(offsetOrientation);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPose.prependTranslation(0.20, 0.0, 0.0);
@@ -296,7 +296,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ik.holdCurrentPelvisOrientation();
 
       drcBehaviorTestHelper.updateRobotModel();
-      FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);
+      FramePose3D desiredHandPoseCopy = new FramePose3D(desiredHandPose);
       ReferenceFrame chestFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
       desiredHandPoseCopy.changeFrame(chestFrame);
 
@@ -360,7 +360,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       Quaternion offsetOrientationRight = new Quaternion();
       offsetOrientationRight.setYawPitchRoll(0.0, 0.0, 1.0);
-      FramePose desiredHandPoseR = new FramePose(handControlFrameR);
+      FramePose3D desiredHandPoseR = new FramePose3D(handControlFrameR);
       desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion handQuatRight = new Quaternion(desiredHandPoseR.getOrientation());
@@ -374,7 +374,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       Quaternion offsetOrientationLeft = new Quaternion();
       offsetOrientationLeft.setYawPitchRoll(1.0, 1.0, 0.0);
-      FramePose desiredHandPoseL = new FramePose(handControlFrameL);
+      FramePose3D desiredHandPoseL = new FramePose3D(handControlFrameL);
       desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion handQuatLeft = new Quaternion(desiredHandPoseL.getOrientation());
@@ -389,8 +389,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ik.holdCurrentPelvisOrientation();
 
       drcBehaviorTestHelper.updateRobotModel();
-      FramePose desiredHandPoseLCopy = new FramePose(desiredHandPoseL);
-      FramePose desiredHandPoseRCopy = new FramePose(desiredHandPoseR);
+      FramePose3D desiredHandPoseLCopy = new FramePose3D(desiredHandPoseL);
+      FramePose3D desiredHandPoseRCopy = new FramePose3D(desiredHandPoseR);
       ReferenceFrame chestFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
       desiredHandPoseLCopy.changeFrame(chestFrame);
       desiredHandPoseRCopy.changeFrame(chestFrame);
@@ -408,10 +408,10 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      FramePose currentHandPoseR = new FramePose(handControlFrameR);
+      FramePose3D currentHandPoseR = new FramePose3D(handControlFrameR);
       currentHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
       double currentRollR = currentHandPoseR.getRoll();
-      FramePose currentHandPoseL = new FramePose(handControlFrameL);
+      FramePose3D currentHandPoseL = new FramePose3D(handControlFrameL);
       currentHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
       double currentYawL = currentHandPoseL.getYaw();
       double currentPitchL = currentHandPoseL.getPitch();
@@ -459,7 +459,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       Quaternion offsetOrientation = new Quaternion();
       offsetOrientation.setYawPitchRoll(0.0, 0.0, 1.0);
-      FramePose desiredHandPose = new FramePose(handControlFrame);
+      FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion handQuat = new Quaternion(desiredHandPose.getOrientation());
@@ -474,7 +474,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ik.holdCurrentPelvisOrientation();
 
       drcBehaviorTestHelper.updateRobotModel();
-      FramePose desiredHandPoseCopy = new FramePose(desiredHandPose);
+      FramePose3D desiredHandPoseCopy = new FramePose3D(desiredHandPose);
       ReferenceFrame chestFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
       desiredHandPoseCopy.changeFrame(chestFrame);
 
@@ -496,7 +496,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       String handName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(RobotSide.RIGHT).getName();
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
 
-      FramePose currentHandPose = new FramePose(handControlFrame);
+      FramePose3D currentHandPose = new FramePose3D(handControlFrame);
       currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       double currentRoll = currentHandPose.getRoll();
 

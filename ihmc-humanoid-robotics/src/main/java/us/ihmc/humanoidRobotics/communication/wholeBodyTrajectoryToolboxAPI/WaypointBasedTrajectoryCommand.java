@@ -5,10 +5,10 @@ import java.util.Map;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -26,7 +26,7 @@ public class WaypointBasedTrajectoryCommand
    private final RecyclingArrayList<Pose3D> waypoints = new RecyclingArrayList<>(Pose3D.class);
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private final FramePose controlFramePose = new FramePose();
+   private final FramePose3D controlFramePose = new FramePose3D();
    
    private double weight;
 
@@ -123,7 +123,7 @@ public class WaypointBasedTrajectoryCommand
       return waypoints.size();
    }
 
-   public FramePose getControlFramePose()
+   public FramePose3D getControlFramePose()
    {
       return controlFramePose;
    }

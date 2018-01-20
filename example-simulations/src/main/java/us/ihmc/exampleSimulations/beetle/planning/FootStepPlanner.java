@@ -5,6 +5,7 @@ import java.awt.Color;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +18,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -59,7 +59,7 @@ public class FootStepPlanner
    private final PoseReferenceFrame bodyFrameProjectedInFuture;
    private final PoseReferenceFrame bodyFrameEndRotationProjectedInFuture;
    private final YoGraphicReferenceFrame bodyFrameProjectedInFutureViz;
-   private final FramePose bodyPoseProjectedInFuture = new FramePose();
+   private final FramePose3D bodyPoseProjectedInFuture = new FramePose3D();
    private final CircleArtifact bodyFrameProjectedInFutureCircleArtifact = new CircleArtifact("bodyFrameProjectedInFutureArtifact", 0.0, 0.0, 0.03, false);
    private final LineArtifact bodyFrameProjectedInFutureLineArtifact = new LineArtifact("bodyFrameProjectedInFutureLineArtifact");
 
