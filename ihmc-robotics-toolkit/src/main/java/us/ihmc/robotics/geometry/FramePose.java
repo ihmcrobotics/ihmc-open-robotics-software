@@ -215,7 +215,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       getOrientation(quaternionToPack);
    }
 
-   public void getPose(Tuple3DBasics tupleToPack, AxisAngleBasics axisAngleToPack)
+   public void get(Tuple3DBasics tupleToPack, AxisAngleBasics axisAngleToPack)
    {
       getPosition(tupleToPack);
       getOrientation(axisAngleToPack);
