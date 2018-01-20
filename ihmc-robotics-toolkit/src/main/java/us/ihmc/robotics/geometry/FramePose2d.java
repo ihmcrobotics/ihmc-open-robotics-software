@@ -44,6 +44,11 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
       this(pose.getReferenceFrame(), new Pose2D(pose.getGeometryObject()));
    }
 
+   public FramePose2d(FramePose pose)
+   {
+      this(pose.getReferenceFrame(), new Pose2D(pose.getGeometryObject()));
+   }
+
    public void getPose(RigidBodyTransform rigidBodyTransformToPack)
    {
       pose.get(rigidBodyTransformToPack);
@@ -59,6 +64,12 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
    {
       checkReferenceFrameMatch(position);
       pose.setPosition(position);
+   }
+   
+   public void setIncludingFrame(FramePose framePose)
+   {
+      referenceFrame = framePose.getReferenceFrame();
+      pose.set(framePose.getGeometryObject());
    }
    
    public void setIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform rigidBodyTransform)

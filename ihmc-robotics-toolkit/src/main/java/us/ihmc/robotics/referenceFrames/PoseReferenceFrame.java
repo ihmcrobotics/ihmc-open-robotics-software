@@ -232,7 +232,7 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void getPose2dIncludingFrame(FramePose2d framePose2dToPack)
    {
-      originPose.get(framePose2dToPack);
+      framePose2dToPack.setIncludingFrame(originPose);
    }
 
    public void getPosition2dIncludingFrame(FramePoint2D framePoint2dToPack)

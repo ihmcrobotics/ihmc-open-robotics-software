@@ -179,10 +179,9 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.START_ORIENTATION);
-      FramePose2d currentFootstepPose = new FramePose2d();
       for (Footstep footstep : walkToLocationBehavior.getFootSteps())
       {
-         footstep.getFootstepPose().get(currentFootstepPose);
+         FramePose2d currentFootstepPose = new FramePose2d(footstep.getFootstepPose());
          assertEquals("Current footstep orientation does not match start orientation.", 0.0, currentFootstepPose.getOrientationDistance(startMidFeetPose2d),
                       ORIENTATION_THRESHOLD);
       }
@@ -215,10 +214,9 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
       int numberOfFootsteps = footsteps.size();
-      FramePose2d currentFootstepPose = new FramePose2d();
       for (int numberOfStepsFromTarget = 0; numberOfStepsFromTarget <= numberOfFootstepsBetweenStartAndTarget; numberOfStepsFromTarget++)
       {
-         footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getFootstepPose().get(currentFootstepPose);
+         FramePose2d currentFootstepPose = new FramePose2d(footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getFootstepPose());
          assertEquals("Current footstep orientation does not match end orientation.", 0.0, currentFootstepPose.getOrientationDistance(targetMidFeetPose2d),
                ORIENTATION_THRESHOLD);
       }
@@ -254,11 +252,10 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
       int numberOfFootsteps = footsteps.size();
-      FramePose2d currentFootstepPose = new FramePose2d();
       int numberOfStepsAlignedWithMeanOrientation = 0;
       for (Footstep footstep : footsteps)
       {
-         footstep.getFootstepPose().get(currentFootstepPose);
+         FramePose2d currentFootstepPose = new FramePose2d(footstep.getFootstepPose());
          if (currentFootstepPose.getOrientationDistance(startTargetMidPose2dMean) < ORIENTATION_THRESHOLD)
             numberOfStepsAlignedWithMeanOrientation++;
       }

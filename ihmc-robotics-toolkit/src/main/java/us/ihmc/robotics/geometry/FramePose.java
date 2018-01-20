@@ -363,11 +363,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.getRotationVector(frameRotationVectorToPack);
    }
 
-   public void get(FramePose2d framePose2dToPack)
-   {
-      framePose2dToPack.setIncludingFrame(referenceFrame, getX(), getY(), getYaw());
-   }
-
    public void getPosition(FramePoint2D framePoint2dToPack)
    {
       framePoint2dToPack.setIncludingFrame(referenceFrame, pose.getPosition().getX(), pose.getPosition().getY());
