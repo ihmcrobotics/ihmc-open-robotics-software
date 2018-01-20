@@ -84,7 +84,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public FramePose(ReferenceFrame referenceFrame, Tuple3DReadOnly point3d, AxisAngleReadOnly axisAngle4d)
    {
       this(referenceFrame);
-      setPose(point3d, axisAngle4d);
+      set(point3d, axisAngle4d);
    }
 
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double maxAbsoluteX, double maxAbsoluteY, double maxAbsoluteZ)
@@ -123,7 +123,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.set(position, orientation);
    }
 
-   private void setPose(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
+   private void set(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
    {
       pose.set(position, orientation);
    }
