@@ -9,8 +9,9 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.MathTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -22,7 +23,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -138,7 +138,7 @@ public class FrameBox3dTest
       FramePose expectedBoxPose = new FramePose(worldFrame, randomTransform);
       FramePose actualBoxPose = new FramePose();
       FrameBox3d frameBox = new FrameBox3d(worldFrame, expectedBox);
-      frameBox.setPose(expectedBoxPose.getGeometryObject());
+      frameBox.setPose(expectedBoxPose);
       frameBox.getFramePose(actualBoxPose);
 
       expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);

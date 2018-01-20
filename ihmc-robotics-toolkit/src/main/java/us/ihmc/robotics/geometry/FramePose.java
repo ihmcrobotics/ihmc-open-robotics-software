@@ -5,6 +5,7 @@ import java.util.Random;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
@@ -28,7 +30,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
+public class FramePose extends FrameGeometryObject<FramePose, Pose3D> implements FramePose3DReadOnly
 {
    private final Pose3D pose;
 
@@ -127,9 +129,9 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       this(referenceFrame, new Pose3D());
    }
 
-   public FramePose(ReferenceFrame referenceFrame, Pose3D pose)
+   public FramePose(ReferenceFrame referenceFrame, Pose3DReadOnly pose)
    {
-      super(referenceFrame, pose);
+      super(referenceFrame, new Pose3D(pose));
       this.pose = getGeometryObject();
    }
 
@@ -229,6 +231,12 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
    public void setIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
       pose.set(transform);
+      this.referenceFrame = referenceFrame;
+   }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, Pose3DReadOnly pose)
+   {
+      this.pose.set(pose);
       this.referenceFrame = referenceFrame;
    }
 

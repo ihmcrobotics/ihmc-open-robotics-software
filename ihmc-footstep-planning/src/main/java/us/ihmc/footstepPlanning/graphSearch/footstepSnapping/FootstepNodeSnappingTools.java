@@ -1,16 +1,15 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import java.util.ArrayList;
+
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-
-import java.util.ArrayList;
 
 public class FootstepNodeSnappingTools
 {
@@ -96,7 +95,7 @@ public class FootstepNodeSnappingTools
     * @param footstepPose
     * @return
     */
-   public static RigidBodyTransform computeSnapTransform(FootstepNode node, Pose3D footstepPose)
+   public static RigidBodyTransform computeSnapTransform(FootstepNode node, Pose3DReadOnly footstepPose)
    {
       RigidBodyTransform snapTransform = new RigidBodyTransform();
       RigidBodyTransform stepTransform = new RigidBodyTransform();
