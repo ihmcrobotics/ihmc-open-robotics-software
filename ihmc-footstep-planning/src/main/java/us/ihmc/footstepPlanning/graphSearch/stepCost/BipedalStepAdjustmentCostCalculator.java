@@ -157,7 +157,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose fromPose, FramePose toPose)
    {
-      if (fromPose.epsilonEquals(toPose, 1e-7, Double.MAX_VALUE))
+      if (fromPose.getPosition().epsilonEquals(toPose.getPosition(), 1e-7))
       {
          vectorToPack.set(fromPose.getReferenceFrame(), 0.0, 0.0);
       }
