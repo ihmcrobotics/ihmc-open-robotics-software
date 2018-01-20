@@ -199,7 +199,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
    {
       FramePose stepPose = new FramePose();
       getRelativeFootstepInWorldFrame(stepReferenceFrame, stepLocation, stepOrientation, stepPose);
-      FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPose.getPosition(), stepPose.getFrameOrientationCopy());
+      FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPose.getPosition(), stepPose.getOrientation());
 
       footstepMessage.add(footstepData);
    }

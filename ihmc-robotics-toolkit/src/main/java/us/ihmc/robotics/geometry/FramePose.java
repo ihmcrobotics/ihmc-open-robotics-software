@@ -503,12 +503,6 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.interpolate(framePose1.pose, framePose2.pose, alpha);
    }
 
-   public FrameQuaternion getFrameOrientationCopy()
-   {
-      FrameQuaternion ret = new FrameQuaternion(getReferenceFrame(), pose.getOrientation());
-      return ret;
-   }
-
    public double getPositionDistance(FramePose framePose)
    {
       checkReferenceFrameMatch(framePose);
