@@ -193,7 +193,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       pose.setOrientationYawPitchRoll(yawPitchRoll);
    }
 
-   public void setYawPitchRoll(double yaw, double pitch, double roll)
+   public void setOrientationYawPitchRoll(double yaw, double pitch, double roll)
    {
       pose.setOrientationYawPitchRoll(yaw, pitch, roll);
    }

@@ -82,7 +82,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       bodyStart.setToZero(ReferenceFrame.getWorldFrame());
       bodyStart.setPosition(bodyStartPoint.getX(), bodyStartPoint.getY(), 0.0);
-      bodyStart.setYawPitchRoll(stanceFootPose.getYaw(), 0.0, 0.0);
+      bodyStart.setOrientationYawPitchRoll(stanceFootPose.getYaw(), 0.0, 0.0);
 
       footstepPlanner.setInitialStanceFoot(stanceFootPose, side);
    }
@@ -134,7 +134,7 @@ public class BodyPathBasedFootstepPlanner implements FootstepPlanner
 
       FramePose footstepPlannerGoal = new FramePose();
       footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
-      footstepPlannerGoal.setYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+      footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);

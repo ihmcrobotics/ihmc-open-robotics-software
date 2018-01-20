@@ -614,12 +614,12 @@ public class SimpleOcclusionTests
       generator.addRectangle(1.0, 4.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      startPoseToPack.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      startPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
       startPoseToPack.setPosition(-2.0, -2.0, 0.0);
       startPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       goalPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      goalPoseToPack.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      goalPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
       goalPoseToPack.setPosition(2.0, 2.0, 0.0);
       goalPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
@@ -657,12 +657,12 @@ public class SimpleOcclusionTests
       generator.addRectangle(2.0, 1.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      startPoseToPack.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      startPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
       startPoseToPack.setPosition(-2.0, -5.0, 0.0);
       startPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       goalPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      goalPoseToPack.setYawPitchRoll(-Math.PI / 2.0, 0.0, 0.0);
+      goalPoseToPack.setOrientationYawPitchRoll(-Math.PI / 2.0, 0.0, 0.0);
       goalPoseToPack.setPosition(0.0, -5.0, 0.0);
       goalPoseToPack.prependRollRotation(Math.toRadians(10.0));
 

@@ -30,7 +30,7 @@ public abstract class ReachableFootstepsBasedExpansion implements FootstepNodeEx
 
       /** Get reference frame of stance leg */
       FramePose stanceFootPose = new FramePose(worldFrame);
-      stanceFootPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      stanceFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
       stanceFootPose.setX(node.getX());
       stanceFootPose.setY(node.getY());
       yawStanceFoot = node.getYaw();

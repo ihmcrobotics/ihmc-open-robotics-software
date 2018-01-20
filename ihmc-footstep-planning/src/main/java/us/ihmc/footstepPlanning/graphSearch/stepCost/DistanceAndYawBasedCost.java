@@ -31,7 +31,7 @@ public class DistanceAndYawBasedCost implements FootstepCost
    public static Point2D computeMidFootPoint(FootstepNode node, double idealStepWidth)
    {
       FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame());
-      stanceFootPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      stanceFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
       stanceFootPose.setX(node.getX());
       stanceFootPose.setY(node.getY());
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);

@@ -708,7 +708,7 @@ public class QuadrupedSupportPolygon implements Serializable
       double nominalYaw = getNominalYaw();
       
       getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
-      framePose.setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
    }
    
@@ -719,7 +719,7 @@ public class QuadrupedSupportPolygon implements Serializable
       double nominalYaw = getNominalYaw();
       
       getCentroidWithEqualWeightedEndsAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
-      framePose.setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
    }
 

@@ -154,7 +154,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       createStaticFootstep("swingStart", swingStartFramePose, YoAppearance.Blue(), registry, yoGraphicsListRegistry);
       FramePose stanceFramePose = new FramePose(ReferenceFrame.getWorldFrame());
       stanceFramePose.setPosition(0.2, 0.26, 0.31);
-      stanceFramePose.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
+      stanceFramePose.setOrientationYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
       YoGraphicPolygon stanceFootPolygon = createStaticFootstep("stance", stanceFramePose, YoAppearance.DarkGreen(), registry, yoGraphicsListRegistry);
 
       for (int candidateFootstepIndex = 0; candidateFootstepIndex < numInX * numInY; candidateFootstepIndex++)
@@ -168,7 +168,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
          public void doControl()
          {
             stanceFootPolygon.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
-            stanceFramePose.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
+            stanceFramePose.setOrientationYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
 
             FramePose candidateFramePose = new FramePose(ReferenceFrame.getWorldFrame());
 
