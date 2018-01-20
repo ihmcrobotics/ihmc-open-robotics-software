@@ -292,7 +292,7 @@ public class VehicleModelObjects
       FramePose framePose = new FramePose(vehicleReferenceFrame);
       RigidBodyTransform transform3D = getTransform(vehicleObject);
 
-      framePose.setPoseIncludingFrame(vehicleReferenceFrame, transform3D);
+      framePose.setIncludingFrame(vehicleReferenceFrame, transform3D);
 
       return framePose;
    }

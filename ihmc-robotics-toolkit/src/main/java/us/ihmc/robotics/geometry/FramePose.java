@@ -146,7 +146,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
       this.referenceFrame = referenceFrame;
    }
 
-   public void setPoseIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
       pose.set(transform);
       this.referenceFrame = referenceFrame;

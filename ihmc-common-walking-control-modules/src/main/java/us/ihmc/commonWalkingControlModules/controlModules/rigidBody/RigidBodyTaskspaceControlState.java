@@ -427,7 +427,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void setControlFramePose(RigidBodyTransform controlFrameTransform)
    {
-      controlFramePose.setPoseIncludingFrame(bodyFrame, controlFrameTransform);
+      controlFramePose.setIncludingFrame(bodyFrame, controlFrameTransform);
       this.controlFrame.setPoseAndUpdate(controlFramePose);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
    }
