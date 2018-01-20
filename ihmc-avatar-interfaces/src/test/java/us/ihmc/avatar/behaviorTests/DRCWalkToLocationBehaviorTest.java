@@ -182,7 +182,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       FramePose2d currentFootstepPose = new FramePose2d();
       for (Footstep footstep : walkToLocationBehavior.getFootSteps())
       {
-         footstep.getFootstepPose().getPose2dIncludingFrame(currentFootstepPose);
+         footstep.getFootstepPose().get(currentFootstepPose);
          assertEquals("Current footstep orientation does not match start orientation.", 0.0, currentFootstepPose.getOrientationDistance(startMidFeetPose2d),
                       ORIENTATION_THRESHOLD);
       }
@@ -218,7 +218,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       FramePose2d currentFootstepPose = new FramePose2d();
       for (int numberOfStepsFromTarget = 0; numberOfStepsFromTarget <= numberOfFootstepsBetweenStartAndTarget; numberOfStepsFromTarget++)
       {
-         footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getFootstepPose().getPose2dIncludingFrame(currentFootstepPose);
+         footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getFootstepPose().get(currentFootstepPose);
          assertEquals("Current footstep orientation does not match end orientation.", 0.0, currentFootstepPose.getOrientationDistance(targetMidFeetPose2d),
                ORIENTATION_THRESHOLD);
       }
@@ -258,7 +258,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       int numberOfStepsAlignedWithMeanOrientation = 0;
       for (Footstep footstep : footsteps)
       {
-         footstep.getFootstepPose().getPose2dIncludingFrame(currentFootstepPose);
+         footstep.getFootstepPose().get(currentFootstepPose);
          if (currentFootstepPose.getOrientationDistance(startTargetMidPose2dMean) < ORIENTATION_THRESHOLD)
             numberOfStepsAlignedWithMeanOrientation++;
       }
