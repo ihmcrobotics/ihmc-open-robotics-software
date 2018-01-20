@@ -16,8 +16,7 @@ public class TurningOverheadPath extends OverheadPath
    public TurningOverheadPath(FramePose2d startPose, FrameOrientation2D endOrientation)
    {
       startPose.checkReferenceFrameMatch(endOrientation);
-      this.startOrientation = new FrameOrientation2D();
-      startPose.getOrientationIncludingFrame(startOrientation);
+      this.startOrientation = new FrameOrientation2D(startPose.getOrientation());
       this.endOrientation = new FrameOrientation2D(endOrientation);
       this.point = new FramePoint2D(startPose.getPosition());
       this.deltaYaw = endOrientation.difference(startOrientation);

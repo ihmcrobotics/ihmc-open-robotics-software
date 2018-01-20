@@ -18,8 +18,7 @@ public class StraightLineOverheadPath extends OverheadPath
       startPose.checkReferenceFrameMatch(endPosition);
       this.startPoint = new FramePoint2D(startPose.getPosition());
       this.endPoint = new FramePoint2D(endPosition);
-      this.orientation = new FrameOrientation2D();
-      startPose.getOrientationIncludingFrame(orientation);
+      this.orientation = new FrameOrientation2D(startPose.getOrientation());
       this.distance = endPoint.distance(startPoint);
    }
 
