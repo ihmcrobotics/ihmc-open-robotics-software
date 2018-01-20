@@ -168,7 +168,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
-         desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredPose.getPositionIncludingFrame(desiredAnklePosition);
 

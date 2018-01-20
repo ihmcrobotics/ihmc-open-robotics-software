@@ -739,7 +739,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       orientationTrajectoryGenerator.getOrientation(desiredOrientation);
       positionTrajectoryGenerator.getPosition(desiredPosition);
-      desiredPoseToPack.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+      desiredPoseToPack.setIncludingFrame(desiredPosition, desiredOrientation);
    }
 
    public void getDesiredOrientation(FrameQuaternion desiredOrientationToPack)

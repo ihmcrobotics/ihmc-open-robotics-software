@@ -211,7 +211,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
       FrameQuaternion orientation = new FrameQuaternion(frame, quat4d);
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
             
-      framePoseToPack.setPoseIncludingFrame(position, orientation);
+      framePoseToPack.setIncludingFrame(position, orientation);
    }
 
    @Override

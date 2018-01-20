@@ -187,7 +187,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
          spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
-         desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredPose.getPositionIncludingFrame(desiredAnklePosition);
 
