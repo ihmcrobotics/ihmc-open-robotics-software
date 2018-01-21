@@ -132,5 +132,4 @@ public abstract class YoFrameTuple implements FixedFrameTuple3DBasics
    {
       return EuclidCoreIOTools.getTuple3DString(this) + "-" + referenceFrame;
    }
-
 }
