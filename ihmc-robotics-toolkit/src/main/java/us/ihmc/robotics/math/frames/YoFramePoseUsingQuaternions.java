@@ -51,29 +51,10 @@ public class YoFramePoseUsingQuaternions implements FixedFramePose3DBasics
       return orientation;
    }
 
-   public void set(FramePose3D framePose)
-   {
-      framePose.checkReferenceFrameMatch(getReferenceFrame());
-
-      position.set(framePose.getPosition());
-      orientation.set(framePose.getOrientation());
-   }
-
    public void setAndMatchFrame(FramePose3D framePose)
    {
       position.setAndMatchFrame(framePose.getPosition());
       orientation.setAndMatchFrame(framePose.getOrientation());
-   }
-
-   /**
-    * Sets this frame pose to the origin of the passed in reference frame.
-    *
-    * @param referenceFrame
-    */
-   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      position.setFromReferenceFrame(referenceFrame);
-      orientation.setFromReferenceFrame(referenceFrame);
    }
 
    public void setPose(RigidBodyTransform rigidBodyTransform)
