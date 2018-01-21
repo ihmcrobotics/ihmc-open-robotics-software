@@ -17,6 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -493,7 +494,7 @@ public class TwistCalculatorTest
       pointInFuture.changeFrame(baseFrameInFuture);
 
       FrameVector3D pointLinearVelocity = new FrameVector3D(baseFrame);
-      pointLinearVelocity.sub(pointInFuture, point);
+      pointLinearVelocity.sub((Point3DReadOnly) pointInFuture, point);
       pointLinearVelocity.scale(1.0 / dt);
       return pointLinearVelocity;
    }
