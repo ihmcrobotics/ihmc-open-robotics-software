@@ -21,10 +21,10 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
 
    public void testCostStateGradientNumerically()
    {
-      double epsilon = 1e-9;
+      double epsilon = 1e-7;
       LQTrackingCostFunction<E> costFunction = getCostFunction();
 
-      for (int hybridStateIndex = 1; hybridStateIndex < getNumberOfStates(); hybridStateIndex++)
+      for (int hybridStateIndex = 0; hybridStateIndex < getNumberOfStates(); hybridStateIndex++)
       {
          E hybridState = getHybridState(hybridStateIndex);
 
