@@ -293,7 +293,7 @@ public class FiducialDetectorFromCameraImages
 
    public void getReportedFiducialPoseWorldFrame(FramePose3D framePoseToPack)
    {
-      reportedFiducialPoseInWorldFrame.getFramePoseIncludingFrame(framePoseToPack);
+      framePoseToPack.setIncludingFrame(reportedFiducialPoseInWorldFrame);
    }
 
    public void setFieldOfView(double fieldOfViewXinRadians, double fieldOfViewYinRadians)
