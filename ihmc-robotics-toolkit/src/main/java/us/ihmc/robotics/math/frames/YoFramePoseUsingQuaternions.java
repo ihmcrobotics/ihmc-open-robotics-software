@@ -2,12 +2,10 @@ package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -19,9 +17,6 @@ public class YoFramePoseUsingQuaternions implements FixedFramePose3DBasics
 {
    private final YoFramePoint position;
    private final YoFrameQuaternion orientation;
-
-   private final FramePoint3D tempFramePoint = new FramePoint3D();
-   private final FrameQuaternion tempFrameOrientation = new FrameQuaternion();
 
    public YoFramePoseUsingQuaternions(YoFramePoint position, YoFrameQuaternion orientation)
    {
@@ -55,14 +50,6 @@ public class YoFramePoseUsingQuaternions implements FixedFramePose3DBasics
    {
       position.setAndMatchFrame(framePose.getPosition());
       orientation.setAndMatchFrame(framePose.getOrientation());
-   }
-
-   public void set(RigidBodyTransform rigidBodyTransform)
-   {
-      rigidBodyTransform.getTranslation(tempFramePoint);
-      rigidBodyTransform.getRotation(tempFrameOrientation);
-      position.set(tempFramePoint);
-      orientation.set(tempFrameOrientation);
    }
 
    public void setPosition(YoFramePoint yoFramePoint)
