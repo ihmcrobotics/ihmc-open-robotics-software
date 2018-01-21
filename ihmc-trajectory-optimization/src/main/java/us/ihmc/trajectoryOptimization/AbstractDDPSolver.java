@@ -85,7 +85,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       constantsSequence = new DiscreteSequence(constantSize, 1);
 
       feedBackGainSequence = new DiscreteSequence(controlSize, stateSize);
-      feedForwardSequence = new DiscreteSequence(constantSize, 1);
+      feedForwardSequence = new DiscreteSequence(controlSize, 1);
 
       valueStateGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, 1));
       valueStateHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
@@ -239,7 +239,8 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    private final DenseMatrix64F W = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F V = new DenseMatrix64F(0, 0);
    boolean computeFeedbackGainAndFeedForwardTerms(DenseMatrix64F hamiltonianControlGradient, DenseMatrix64F hamiltonianControlHessian,
-                                                  DenseMatrix64F hamiltonianControlStateHessian, DenseMatrix64F feedbackGainToPack, DenseMatrix64F feedForwardControlToPack)
+                                                  DenseMatrix64F hamiltonianControlStateHessian, DenseMatrix64F feedbackGainToPack,
+                                                  DenseMatrix64F feedForwardControlToPack)
    {
       // insure that the hessian is positive definite
       int controlSize = hamiltonianControlHessian.numCols;

@@ -89,8 +89,8 @@ public class SLIPJumpingDDPCalculator
       int numberOfFlightTimeSteps = (int) Math.floor(flightDuration / deltaT);
       int numberOfFinalTimeSteps = (int) Math.floor(secondStanceDuration / deltaT);
 
-      double nominalFirstLength = nominalHeight + mass * gravityZ * nominalInitialStiffness;
-      double nominalSecondLength = nominalHeight + mass * gravityZ * nominalFinalStiffness;
+      double nominalFirstLength = nominalHeight + mass * gravityZ / nominalInitialStiffness;
+      double nominalSecondLength = nominalHeight + mass * gravityZ / nominalFinalStiffness;
 
       double modifiedDeltaT = firstStanceDuration / numberOfInitialTimeSteps;
       dynamics.setTimeStepSize(modifiedDeltaT);
@@ -134,6 +134,7 @@ public class SLIPJumpingDDPCalculator
          DenseMatrix64F constants = constantSequence.get(i);
          constants.set(zF, firstSupport.getZ());
          constants.set(nominalLength, nominalFirstLength);
+         //constants.set(nominalLength, nominalHeight);
       }
 
       for (int i = numberOfInitialTimeSteps; i < numberOfInitialTimeSteps + numberOfFlightTimeSteps; i++)
@@ -148,6 +149,11 @@ public class SLIPJumpingDDPCalculator
          desiredControl.set(xF, firstSupport.getX());
          desiredControl.set(yF, firstSupport.getY());
          desiredControl.set(k, 0.0);
+
+         DenseMatrix64F constants = constantSequence.get(i);
+         constants.set(zF, firstSupport.getZ());
+         //constants.set(nominalLength, nominalFirstLength);
+         //constants.set(nominalLength, nominalHeight);
       }
 
       for (int i = numberOfInitialTimeSteps + numberOfFlightTimeSteps; i < totalSize; i++)
@@ -166,6 +172,7 @@ public class SLIPJumpingDDPCalculator
          DenseMatrix64F constants = constantSequence.get(i);
          constants.set(zF, secondSupport.getZ());
          constants.set(nominalLength, nominalSecondLength);
+         //constants.set(nominalLength, nominalHeight);
       }
 
       ddpSolver.initializeSequencesFromDesireds(currentState, desiredSequence, constantSequence);

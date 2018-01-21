@@ -120,7 +120,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
          yoGraphicsListRegistry.registerYoGraphic("FootViz", new YoGraphicShape(sidePrefix + "FootViz", footGraphics, currentFootPose, 1.0));
       }
 
-      updatesPerRequest.set(10);
+      updatesPerRequest.set(1);
       trajectoryDT.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
