@@ -414,7 +414,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       Vector3D32[] vertexNormals = new Vector3D32[numberOfVertices];
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      currentRegionPose.getPose(transform);
+      currentRegionPose.get(transform);
 
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {

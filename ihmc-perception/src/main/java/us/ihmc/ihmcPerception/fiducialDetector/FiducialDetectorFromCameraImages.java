@@ -124,7 +124,7 @@ public class FiducialDetectorFromCameraImages
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            locatedFiducialPoseInWorldFrame.getPose(transformToParent);
+            locatedFiducialPoseInWorldFrame.get(transformToParent);
          }
       };
 
