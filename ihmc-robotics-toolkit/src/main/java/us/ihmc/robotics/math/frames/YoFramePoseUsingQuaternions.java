@@ -51,18 +51,6 @@ public class YoFramePoseUsingQuaternions implements FixedFramePose3DBasics
       return orientation;
    }
 
-   public void getFramePose(FramePose3D framePoseToPack)
-   {
-      framePoseToPack.setPosition(position);
-      framePoseToPack.setOrientation(orientation);
-   }
-
-   public void getFramePoseIncludingFrame(FramePose3D framePoseToPack)
-   {
-      framePoseToPack.setToZero(getReferenceFrame());
-      getFramePose(framePoseToPack);
-   }
-
    public void getPose(RigidBodyTransform rigidBodyTransformToPack)
    {
       rigidBodyTransformToPack.setRotation(orientation);

@@ -19,6 +19,7 @@ import georegression.struct.EulerType;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -40,12 +41,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
 {
@@ -335,7 +335,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 
    public void getReportedFiducialPoseWorldFrame(FramePose3D framePoseToPack)
    {
-      reportedFiducialPoseInWorldFrame.getFramePoseIncludingFrame(framePoseToPack);
+      framePoseToPack.setIncludingFrame(reportedFiducialPoseInWorldFrame);
    }
 
    public void setFieldOfView(double fieldOfViewXinRadians, double fieldOfViewYinRadians)

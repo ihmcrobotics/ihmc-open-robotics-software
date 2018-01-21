@@ -254,8 +254,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (isUserControllingRigidBody(foot))
             continue;
 
-         FramePose3D poseToHold = new FramePose3D();
-         initialFootPoses.get(robotSide).getFramePoseIncludingFrame(poseToHold);
+         FramePose3D poseToHold = new FramePose3D(initialFootPoses.get(robotSide));
 
          SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
