@@ -110,13 +110,13 @@ public class FramePose2d extends FrameGeometryObject<FramePose2d, Pose2D>
    public void getPositionIncludingFrame(FramePoint2D positionToPack)
    {
       positionToPack.setToZero(referenceFrame);
-      pose.getPosition(positionToPack);
+      positionToPack.set(pose.getPosition());
    }
 
    public void getOrientationIncludingFrame(FrameOrientation2d orientationToPack)
    {
       orientationToPack.setToZero(referenceFrame);
-      pose.getOrientation(orientationToPack.getGeometryObject());
+      orientationToPack.setYaw(pose.getYaw());
    }
 
    public void interpolate(FramePose2d framePose1, FramePose2d framePose2, double alpha)

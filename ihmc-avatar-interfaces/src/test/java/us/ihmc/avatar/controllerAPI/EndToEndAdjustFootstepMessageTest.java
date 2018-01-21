@@ -97,8 +97,8 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                   {
                      Quaternion orientation = new Quaternion();
                      Pose3D nextFootstepPose = findNextFootstepPose(scs);
-                     nextFootstepPose.getPosition(adjustedLocation);
-                     nextFootstepPose.getOrientation(orientation);
+                     adjustedLocation.set(nextFootstepPose.getPosition());
+                     orientation.set(nextFootstepPose.getOrientation());
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
                      adjustedLocation.setY(adjustedLocation.getY() - 0.15);
                      AdjustFootstepMessage adjustFootstepMessage = new AdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);

@@ -244,7 +244,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void getPosition(Tuple3DBasics tupleToPack)
    {
-      pose.getPosition(tupleToPack);
+      tupleToPack.set(pose.getPosition());
    }
 
    public void getPositionIncludingFrame(FrameTuple3DBasics frameTupleToPack)
@@ -264,12 +264,12 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void getOrientation(RotationMatrix matrixToPack)
    {
-      pose.getOrientation(matrixToPack);
+      matrixToPack.set(pose.getOrientation());
    }
 
    public void getOrientation(QuaternionBasics quaternionToPack)
    {
-      pose.getOrientation(quaternionToPack);
+      quaternionToPack.set(pose.getOrientation());
    }
 
    public void getOrientation(double[] yawPitchRoll)
@@ -279,7 +279,7 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public void getOrientation(AxisAngleBasics axisAngleToPack)
    {
-      pose.getOrientation(axisAngleToPack);
+      axisAngleToPack.set(pose.getOrientation());
    }
 
    public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
@@ -526,12 +526,12 @@ public class FramePose extends FrameGeometryObject<FramePose, Pose3D>
 
    public String printOutPosition()
    {
-      return pose.printOutPosition();
+      return pose.getPosition().toString();
    }
 
    public String printOutOrientation()
    {
-      return pose.printOutOrientation();
+      return pose.getOrientation().toString();
    }
 
    public FramePoint3D getFramePointCopy()
