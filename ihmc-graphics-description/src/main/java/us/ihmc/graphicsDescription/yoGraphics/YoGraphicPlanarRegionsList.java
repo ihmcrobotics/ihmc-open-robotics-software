@@ -650,7 +650,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       currentIndex++;
       currentMeshIndex.set(currentIndex);
       planarRegionToProcess.getTransformToWorld(regionTransform);
-      currentRegionPose.setPose(regionTransform);
+      currentRegionPose.set(regionTransform);
       currentRegionId.set(planarRegionToProcess.getRegionId());
 
       boolean isDonePackingPolygons = false;
