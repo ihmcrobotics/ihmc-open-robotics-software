@@ -11,8 +11,9 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
    private final DiscreteOptimizationSequence optimalSequence;
    private final DiscreteOptimizationSequence desiredSequence;
 
-   private final RecyclingArrayList<DenseMatrix64F> feedbackGainSequence;
-   private final RecyclingArrayList<DenseMatrix64F> feedforwardSequence;
+   private final DiscreteSequence feedbackGainSequence;
+   private final DiscreteSequence feedforwardSequence;
+   private final DiscreteSequence constantsSequence;
 
    private final RecyclingArrayList<DenseMatrix64F> s1Sequence;
    private final RecyclingArrayList<DenseMatrix64F> s2Sequence;
@@ -53,6 +54,7 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       Q = new DenseMatrix64F(stateSize, stateSize);
       Qf = new DenseMatrix64F(stateSize, stateSize);
@@ -64,14 +66,12 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       B = new DenseMatrix64F(stateSize, controlSize);
       H = new DenseMatrix64F(stateSize, stateSize);
 
-      VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize, 1);
-      VariableVectorBuilder gainBuilder = new VariableVectorBuilder(controlSize, stateSize);
-
       optimalSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
       desiredSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
 
-      feedbackGainSequence = new RecyclingArrayList<>(1000, gainBuilder);
-      feedforwardSequence = new RecyclingArrayList<>(1000, controlBuilder);
+      feedbackGainSequence = new DiscreteSequence(controlSize, stateSize);
+      feedforwardSequence = new DiscreteSequence(controlSize);
+      constantsSequence = new DiscreteSequence(constantSize);
 
       s1Sequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
       s2Sequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(1, stateSize));
@@ -84,7 +84,7 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
    }
 
    @Override
-   public void setDesiredSequence(DiscreteOptimizationData desiredSequence, DenseMatrix64F initialState)
+   public void setDesiredSequence(DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence, DenseMatrix64F initialState)
    {
       this.desiredSequence.set(desiredSequence);
       this.optimalSequence.setZero(desiredSequence);
@@ -118,12 +118,12 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       DenseMatrix64F initialDesiredState = desiredSequence.getState(startIndex);
       DenseMatrix64F initialDesiredControl = desiredSequence.getControl(startIndex);
 
-      costFunction.getCostStateHessian(dynamicState, initialDesiredState, initialDesiredControl, Q);
-      costFunction.getCostControlHessian(dynamicState, initialDesiredState, initialDesiredControl, R);
-      terminalCostFunction.getCostStateHessian(dynamicState, initialDesiredState, initialDesiredControl, Qf);
+      costFunction.getCostStateHessian(dynamicState, initialDesiredState, initialDesiredControl, constantsSequence.get(startIndex), Q);
+      costFunction.getCostControlHessian(dynamicState, initialDesiredState, initialDesiredControl, constantsSequence.get(startIndex), R);
+      terminalCostFunction.getCostStateHessian(dynamicState, initialDesiredState, initialDesiredControl, constantsSequence.get(startIndex), Qf);
 
-      dynamics.getDynamicsStateGradient(dynamicState, initialDesiredState, initialDesiredControl, A);
-      dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, B);
+      dynamics.getDynamicsStateGradient(dynamicState, initialDesiredState, initialDesiredControl, constantsSequence.get(startIndex), A);
+      dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, constantsSequence.get(startIndex), B);
 
       if (debug)
       {
@@ -218,8 +218,8 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
       DenseMatrix64F initialDesiredState = desiredSequence.getState(startIndex);
       DenseMatrix64F initialDesiredControl = desiredSequence.getControl(startIndex);
 
-      dynamics.getDynamicsStateGradient(dynamicState, initialDesiredState, initialDesiredControl, A);
-      dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, B);
+      dynamics.getDynamicsStateGradient(dynamicState, initialDesiredState, initialDesiredControl, constantsSequence.get(startIndex), A);
+      dynamics.getDynamicsControlGradient(dynamicState, initialDesiredState, initialDesiredControl, constantsSequence.get(startIndex), B);
 
       // the first index is the initial state
       for (int i = startIndex; i < endIndex; i++)
@@ -275,13 +275,13 @@ public class DiscreteTrackingLQRSolver<E extends Enum> implements LQRSolverInter
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainSequence()
+   public DiscreteSequence getOptimalFeedbackGainSequence()
    {
       return feedbackGainSequence;
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlSequence()
+   public DiscreteSequence getOptimalFeedForwardControlSequence()
    {
       return feedforwardSequence;
    }

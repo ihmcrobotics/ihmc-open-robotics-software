@@ -117,7 +117,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
 
    @Override
    public double getCost(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                         DenseMatrix64F desiredStateVector)
+                         DenseMatrix64F desiredStateVector, DenseMatrix64F constants)
    {
       CommonOps.subtract(controlVector, desiredControlVector, tempControlMatrix);
       CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
@@ -140,7 +140,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
    /** L_x(X_k, U_k) */
    @Override
    public void getCostStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                                    DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+                                    DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
       switch (state)
@@ -158,7 +158,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
    /** L_u(X_k, U_k) */
    @Override
    public void getCostControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVecotr,
-                                      DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+                                      DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       CommonOps.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
       switch (state)
@@ -175,7 +175,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
 
    /** L_xx(X_k, U_k) */
    @Override
-   public void getCostStateHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       switch (state)
       {
@@ -190,7 +190,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
 
    /** L_uu(X_k, U_k) */
    @Override
-   public void getCostControlHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       switch (state)
       {
@@ -205,7 +205,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
 
    /** L_ux(X_k, U_k) */
    @Override
-   public void getCostStateGradientOfControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
+   public void getCostStateGradientOfControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
                                                      DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
@@ -213,7 +213,7 @@ public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState
 
    /** L_xu(X_k, U_k) */
    @Override
-   public void getCostControlGradientOfStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
+   public void getCostControlGradientOfStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
                                                      DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(stateVectorSize, controlVectorSize);

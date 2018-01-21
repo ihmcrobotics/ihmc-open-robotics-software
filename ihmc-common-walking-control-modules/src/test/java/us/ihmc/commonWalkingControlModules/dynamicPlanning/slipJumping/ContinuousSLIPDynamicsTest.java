@@ -24,7 +24,7 @@ public class ContinuousSLIPDynamicsTest
       double nominalLength = 1.0;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
-      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, nominalLength, gravity);
+      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -36,6 +36,7 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       Vector3D relativePosition = new Vector3D();
       relativePosition.setX(currentState.get(x));
@@ -67,7 +68,7 @@ public class ContinuousSLIPDynamicsTest
       DenseMatrix64F function = new DenseMatrix64F(currentState);
       DenseMatrix64F functionExpected = new DenseMatrix64F(currentState);
 
-      dynamics.getDynamics(STANCE, currentState, currentControl, function);
+      dynamics.getDynamics(STANCE, currentState, currentControl, constants, function);
 
       functionExpected.set(x, linearAcceleration.getX());
       functionExpected.set(y, linearAcceleration.getY());
@@ -78,7 +79,7 @@ public class ContinuousSLIPDynamicsTest
 
       JUnitTools.assertMatrixEquals(functionExpected, function, 1e-7);
 
-      dynamics.getDynamics(FLIGHT, currentState, currentControl, function);
+      dynamics.getDynamics(FLIGHT, currentState, currentControl, constants, function);
 
       functionExpected.zero();
       functionExpected.set(z, 0, -gravity);
@@ -94,7 +95,7 @@ public class ContinuousSLIPDynamicsTest
       double nominalLength = 1.2;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
-      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, nominalLength, gravity);
+      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -105,11 +106,12 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
 
-      dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, gradient);
+      dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, constants, gradient);
 
       double x_k = currentState.get(x, 0);
       double y_k = currentState.get(y, 0);
@@ -177,7 +179,7 @@ public class ContinuousSLIPDynamicsTest
 
 
 
-      dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, gradient);
+      dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, constants, gradient);
       gradientExpected.zero();
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
@@ -192,7 +194,7 @@ public class ContinuousSLIPDynamicsTest
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
-      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, nominalLength, gravity);
+      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -203,55 +205,56 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
 
-      dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, gradient);
+      dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, constants, gradient);
 
       DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
-      dynamics.getDynamics(STANCE, currentState, currentControl, dynamicState);
+      dynamics.getDynamics(STANCE, currentState, currentControl, constants, dynamicState);
 
       DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
 
       DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
       currentStateModified.add(x, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, x, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(y, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, y, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(z, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, z, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(3, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, 3, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(4, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, 4, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(5, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -270,7 +273,7 @@ public class ContinuousSLIPDynamicsTest
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
-      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, nominalLength, gravity);
+      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -281,55 +284,56 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
 
-      dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, gradient);
+      dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, constants, gradient);
 
       DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
-      dynamics.getDynamics(FLIGHT, currentState, currentControl, dynamicState);
+      dynamics.getDynamics(FLIGHT, currentState, currentControl, constants, dynamicState);
 
       DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
 
       DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
       currentStateModified.add(x, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, x, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(y, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, y, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(z, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, z, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(3, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, 3, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(4, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, 4, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
       currentStateModified.set(currentState);
       currentStateModified.add(5, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentStateModified, currentControl, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -347,7 +351,7 @@ public class ContinuousSLIPDynamicsTest
       double nominalLength = 1.2;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
-      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, nominalLength, gravity);
+      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -358,11 +362,12 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
 
-      dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, gradient);
+      dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, constants, gradient);
 
       double x_k = currentState.get(x, 0);
       double y_k = currentState.get(y, 0);
@@ -422,7 +427,7 @@ public class ContinuousSLIPDynamicsTest
 
 
 
-      dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, gradient);
+      dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, constants, gradient);
       gradientExpected.zero();
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
@@ -437,7 +442,7 @@ public class ContinuousSLIPDynamicsTest
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
-      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, nominalLength, gravity);
+      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -448,20 +453,21 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
 
-      dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, gradient);
+      dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, constants, gradient);
 
       DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
-      dynamics.getDynamics(STANCE, currentState, currentControl, dynamicState);
+      dynamics.getDynamics(STANCE, currentState, currentControl, constants, dynamicState);
 
       DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
 
       DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
       currentControlModified.add(fx, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, fx, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -469,7 +475,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(fy, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, fy, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -477,7 +483,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(fz, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, fz, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -485,7 +491,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(tauX, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, tauX, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -493,7 +499,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(tauY, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, tauY, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -501,7 +507,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(tauZ, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, tauZ, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -509,7 +515,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(xF, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, xF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -517,7 +523,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(yF, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, yF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -525,7 +531,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(k, 0, epsilon);
-      dynamics.getDynamics(STANCE, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(STANCE, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -544,7 +550,7 @@ public class ContinuousSLIPDynamicsTest
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
-      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, nominalLength, gravity);
+      ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
 
       Vector3D inertia = new Vector3D();
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
@@ -555,20 +561,21 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
 
-      dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, gradient);
+      dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, constants, gradient);
 
       DenseMatrix64F dynamicState = new DenseMatrix64F(stateVectorSize / 2, 1);
-      dynamics.getDynamics(FLIGHT, currentState, currentControl, dynamicState);
+      dynamics.getDynamics(FLIGHT, currentState, currentControl, constants, dynamicState);
 
       DenseMatrix64F dynamicStateModified = new DenseMatrix64F(stateVectorSize / 2, 1);
 
       DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
       currentControlModified.add(fx, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, fx, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -576,7 +583,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(fy, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, fy, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -584,7 +591,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(fz, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, fz, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -592,7 +599,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(tauX, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, tauX, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -600,7 +607,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(tauY, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, tauY, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -608,7 +615,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(tauZ, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, tauZ, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -616,7 +623,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(xF, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, xF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -624,7 +631,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(yF, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, yF, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
@@ -632,7 +639,7 @@ public class ContinuousSLIPDynamicsTest
 
       currentControlModified.set(currentControl);
       currentControlModified.add(k, 0, epsilon);
-      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, dynamicStateModified);
+      dynamics.getDynamics(FLIGHT, currentState, currentControlModified, constants, dynamicStateModified);
 
       CommonOps.subtractEquals(dynamicStateModified, dynamicState);
       MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);

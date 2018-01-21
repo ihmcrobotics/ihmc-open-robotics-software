@@ -6,6 +6,7 @@ public enum SLIPState
 
    public final static int stateVectorSize = 12;
    public final static int controlVectorSize = 9;
+   public final static int constantVectorSize = 2;
 
    public final static int x = 0;
    public final static int y = 1;
@@ -29,4 +30,7 @@ public enum SLIPState
    public final static int xF = 6;
    public final static int yF = 7;
    public final static int k = 8;
+
+   public final static int zF = 0;
+   public final static int nominalLength = 1;
 }

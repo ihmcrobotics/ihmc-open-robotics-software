@@ -10,15 +10,13 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
 {
    private final double pendulumMass;
    private final double gravityZ;
-   private double nominalPendulumLength;
    private static final Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
    private final Vector3D inertia = new Vector3D();
 
-   public ContinuousSLIPDynamics(double pendulumMass, double nominalPendulumLength, double gravityZ)
+   public ContinuousSLIPDynamics(double pendulumMass, double gravityZ)
    {
       this.pendulumMass = pendulumMass;
       this.gravityZ = gravityZ;
-      this.nominalPendulumLength = nominalPendulumLength;
 
       inertia.setX(boxSize.getY() * boxSize.getY() + boxSize.getZ() * boxSize.getZ());
       inertia.setY(boxSize.getX() * boxSize.getX() + boxSize.getZ() * boxSize.getZ());
@@ -36,8 +34,8 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
       return controlVectorSize;
    }
 
-   // FIXME include zF
-   public void getDynamics(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamics(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -65,22 +63,30 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
          double xF_k = currentControl.get(xF, 0);
          double yF_k = currentControl.get(yF, 0);
 
+         double zF_k = constants.get(zF, 0);
+         double nominalPendulumLength = constants.get(nominalLength, 0);
+
          double K = currentControl.get(k, 0);
 
-         double pendulumLength = Math.sqrt((x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + z_k * z_k);
+         double relativeX = x_k - xF_k;
+         double relativeY = y_k - yF_k;
+         double relativeZ = z_k - zF_k;
 
-         matrixToPack.set(x, 0, K / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * (x_k - xF_k));
-         matrixToPack.set(y, 0, K / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * (y_k - yF_k));
-         matrixToPack.set(z, 0, K / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * z_k - gravityZ);
-         matrixToPack.set(thetaX, 0, 1.0 / inertia.getX() * (-z_k * fY_k + (y_k - yF_k) * fZ_k));
-         matrixToPack.set(thetaY, 0, 1.0 / inertia.getY() * (z_k * fX_k - (x_k - xF_k) * fZ_k));
-         matrixToPack.set(thetaZ, 0, 1.0 / inertia.getZ() * (-(y_k - yF_k) * fX_k + (x_k - xF_k) * fY_k));
+         double pendulumLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
+
+         matrixToPack.set(x, 0, K / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * relativeX);
+         matrixToPack.set(y, 0, K / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * relativeY);
+         matrixToPack.set(z, 0, K / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * relativeZ - gravityZ);
+         matrixToPack.set(thetaX, 0, 1.0 / inertia.getX() * (-relativeZ * fY_k + relativeY * fZ_k));
+         matrixToPack.set(thetaY, 0, 1.0 / inertia.getY() * (relativeZ * fX_k - relativeX * fZ_k));
+         matrixToPack.set(thetaZ, 0, 1.0 / inertia.getZ() * (-relativeY * fX_k + relativeX * fY_k));
 
          break;
       }
    }
 
-   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+   @Override
+   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
                                         DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
@@ -106,21 +112,29 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
 
          double K = currentControl.get(k, 0);
 
-         double pendulumLength = Math.sqrt((x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + z_k * z_k);
+         double zF_k = constants.get(zF, 0);
+         double nominalPendulumLength = constants.get(nominalLength, 0);
 
-         matrixToPack.set(x, x, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * Math.pow(x_k - xF_k, 2.0)
+         double relativeX = x_k - xF_k;
+         double relativeY = y_k - yF_k;
+         double relativeZ = z_k - zF_k;
+
+         double pendulumLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
+
+
+         matrixToPack.set(x, x, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeX
                + nominalPendulumLength / pendulumLength - 1.0));
-         matrixToPack.set(x, y, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (x_k - xF_k) * (y_k - yF_k)));
-         matrixToPack.set(x, z, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (x_k - xF_k) * z_k));
+         matrixToPack.set(x, y, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeY));
+         matrixToPack.set(x, z, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeZ));
 
-         matrixToPack.set(y, x, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (x_k - xF_k) * (y_k - yF_k)));
-         matrixToPack.set(y, y, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * Math.pow(y_k - yF_k, 2.0)
+         matrixToPack.set(y, x, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeY));
+         matrixToPack.set(y, y, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeY * relativeY
                + nominalPendulumLength / pendulumLength - 1.0));
-         matrixToPack.set(y, z, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (y_k - yF_k) * z_k));
+         matrixToPack.set(y, z, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeY * relativeZ));
 
-         matrixToPack.set(z, x, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (x_k - xF_k) * z_k));
-         matrixToPack.set(z, y, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (y_k - yF_k) * z_k));
-         matrixToPack.set(z, z, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * Math.pow(z_k, 2.0)
+         matrixToPack.set(z, x, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeZ));
+         matrixToPack.set(z, y, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeY * relativeZ));
+         matrixToPack.set(z, z, K / pendulumMass * (-nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeZ * relativeZ
                + nominalPendulumLength / pendulumLength - 1.0));
 
          matrixToPack.set(thetaX, y, 1.0 / inertia.getX() * fZ_k);
@@ -134,7 +148,8 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
       }
    }
 
-   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+   @Override
+   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
                                           DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
@@ -159,32 +174,40 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
          double fz_k = currentControl.get(fz, 0);
 
          double K = currentControl.get(k, 0);
-         double pendulumLength = Math.sqrt((x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + z_k * z_k);
 
-         matrixToPack.set(x, xF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * Math.pow(x_k - xF_k, 2.0)
+         double zF_k = constants.get(zF, 0);
+         double nominalPendulumLength = constants.get(nominalLength);
+
+         double relativeX = x_k - xF_k;
+         double relativeY = y_k - yF_k;
+         double relativeZ = z_k - zF_k;
+
+         double pendulumLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
+
+         matrixToPack.set(x, xF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeX
                - nominalPendulumLength / pendulumLength + 1.0));
-         matrixToPack.set(x, yF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (x_k - xF_k) * (y_k - yF_k)));
-         matrixToPack.set(x, k, 1.0 / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * (x_k - xF_k));
+         matrixToPack.set(x, yF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeY));
+         matrixToPack.set(x, k, 1.0 / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * relativeX);
 
-         matrixToPack.set(y, xF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (x_k - xF_k) * (y_k - yF_k)));
-         matrixToPack.set(y, yF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * Math.pow(y_k - yF_k, 2.0)
+         matrixToPack.set(y, xF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeY));
+         matrixToPack.set(y, yF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeY * relativeY
                - nominalPendulumLength / pendulumLength + 1.0));
-         matrixToPack.set(y, k, 1.0 / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * (y_k - yF_k));
+         matrixToPack.set(y, k, 1.0 / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * relativeY);
 
-         matrixToPack.set(z, xF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (x_k - xF_k) * z_k));
-         matrixToPack.set(z, yF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * (y_k - yF_k) * z_k));
-         matrixToPack.set(z, k, 1.0 / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * z_k);
+         matrixToPack.set(z, xF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeX * relativeZ));
+         matrixToPack.set(z, yF, K / pendulumMass * (nominalPendulumLength / Math.pow(pendulumLength, 3.0) * relativeY * relativeZ));
+         matrixToPack.set(z, k, 1.0 / pendulumMass * (nominalPendulumLength / pendulumLength - 1.0) * relativeZ);
 
-         matrixToPack.set(thetaX, fy, 1.0 / inertia.getX() * -z_k);
-         matrixToPack.set(thetaX, fz, 1.0 / inertia.getX() * (y_k - yF_k));
+         matrixToPack.set(thetaX, fy, 1.0 / inertia.getX() * -relativeZ);
+         matrixToPack.set(thetaX, fz, 1.0 / inertia.getX() * relativeY);
          matrixToPack.set(thetaX, yF, 1.0 / inertia.getX() * -fz_k);
 
-         matrixToPack.set(thetaY, fx, 1.0 / inertia.getY() * z_k);
-         matrixToPack.set(thetaY, fz, 1.0 / inertia.getY() * -(x_k - xF_k));
+         matrixToPack.set(thetaY, fx, 1.0 / inertia.getY() * relativeZ);
+         matrixToPack.set(thetaY, fz, 1.0 / inertia.getY() * -relativeX);
          matrixToPack.set(thetaY, xF, 1.0 / inertia.getY() * fz_k);
 
-         matrixToPack.set(thetaZ, fx, 1.0 / inertia.getZ() * -(y_k - yF_k));
-         matrixToPack.set(thetaZ, fy, 1.0 / inertia.getZ() * (x_k - xF_k));
+         matrixToPack.set(thetaZ, fx, 1.0 / inertia.getZ() * -relativeY);
+         matrixToPack.set(thetaZ, fy, 1.0 / inertia.getZ() * relativeX);
          matrixToPack.set(thetaZ, xF, 1.0 / inertia.getZ() * -fy_k);
          matrixToPack.set(thetaZ, yF, 1.0 / inertia.getZ() * fx_k);
       }

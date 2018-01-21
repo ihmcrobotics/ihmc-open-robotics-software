@@ -15,6 +15,7 @@ public class SimpleLIPMDDPCalculator
    private double modifiedDeltaT;
 
    private final DiscreteOptimizationTrajectory desiredTrajectory;
+   private final DiscreteSequence constants;
 
    private int numberOfTimeSteps;
 
@@ -33,8 +34,10 @@ public class SimpleLIPMDDPCalculator
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       desiredTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      constants = new DiscreteSequence(constantSize);
    }
 
    public void setDeltaT(double deltaT)
@@ -52,6 +55,7 @@ public class SimpleLIPMDDPCalculator
       modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
       dynamics.setTimeStepSize(modifiedDeltaT);
       desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
+      constants.setLength(desiredTrajectory.size());
 
       double time = 0.0;
       copDesiredPlan.update(time, tempPoint, tempVector);
@@ -86,7 +90,7 @@ public class SimpleLIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      ddpSolver.initializeSequencesFromDesireds(currentState, desiredTrajectory);
+      ddpSolver.initializeSequencesFromDesireds(currentState, desiredTrajectory, constants);
       //ddpSolver.solveBackwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
       //ddpSolver.solveForwardLQRPass(LIPMState.NORMAL, 0, desiredStateVector.size() - 1);
       //ddpSolver.initializeDDPWithLQRSolution();

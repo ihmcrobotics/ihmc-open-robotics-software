@@ -43,14 +43,11 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    private static final Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
    private final Vector3D inertia = new Vector3D();
 
-   private final double nominalPendulumLength;
-
-   public SLIPModelForceTrackingCost(double pendulumMass, double nominalPendulumLength, double gravityZ)
+   public SLIPModelForceTrackingCost(double pendulumMass, double gravityZ)
    {
       this.pendulumMass = pendulumMass;
-      this.nominalPendulumLength = nominalPendulumLength;
       simpleReactionDynamics = new ContinuousSimpleReactionDynamics(pendulumMass, gravityZ);
-      slipDynamics = new ContinuousSLIPDynamics(pendulumMass, nominalPendulumLength, gravityZ);
+      slipDynamics = new ContinuousSLIPDynamics(pendulumMass, gravityZ);
 
       Q.set(x, x, qFX);
       Q.set(y, y, qFY);
@@ -67,10 +64,10 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
 
    @Override
-   public double getCost(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector)
+   public double getCost(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants)
    {
-      simpleReactionDynamics.getDynamics(hybridState, stateVector, controlVector, simpleReactionFunction);
-      slipDynamics.getDynamics(hybridState, stateVector, controlVector, slipFunction);
+      simpleReactionDynamics.getDynamics(hybridState, stateVector, controlVector, constants, simpleReactionFunction);
+      slipDynamics.getDynamics(hybridState, stateVector, controlVector, constants, slipFunction);
 
       CommonOps.subtract(simpleReactionFunction, slipFunction, dynamicsError);
       MatrixTools.scaleRow(pendulumMass, x, dynamicsError);
@@ -86,16 +83,16 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostStateGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.getNumRows() != stateVectorSize && matrixToPack.getNumCols() != 1)
          throw new RuntimeException("Matrix control gradient is the improper size.");
 
-      simpleReactionDynamics.getDynamics(hybridState, stateVector, controlVector, simpleReactionFunction);
-      slipDynamics.getDynamics(hybridState, stateVector, controlVector, slipFunction);
+      simpleReactionDynamics.getDynamics(hybridState, stateVector, controlVector, constants, simpleReactionFunction);
+      slipDynamics.getDynamics(hybridState, stateVector, controlVector, constants, slipFunction);
 
-      simpleReactionDynamics.getDynamicsStateGradient(hybridState, stateVector, controlVector, simpleStateGradient);
-      slipDynamics.getDynamicsStateGradient(hybridState, stateVector, controlVector, slipStateGradient);
+      simpleReactionDynamics.getDynamicsStateGradient(hybridState, stateVector, controlVector, constants, simpleStateGradient);
+      slipDynamics.getDynamicsStateGradient(hybridState, stateVector, controlVector, constants, slipStateGradient);
 
       CommonOps.subtract(simpleReactionFunction, slipFunction, dynamicsError);
       CommonOps.subtract(simpleStateGradient, slipStateGradient, stateGradientError);
@@ -118,16 +115,17 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostControlGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                      DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.getNumRows() != controlVectorSize && matrixToPack.getNumCols() != 1)
          throw new RuntimeException("Matrix control gradient is the improper size.");
 
-      simpleReactionDynamics.getDynamics(hybridState, stateVector, controlVector, simpleReactionFunction);
-      slipDynamics.getDynamics(hybridState, stateVector, controlVector, slipFunction);
+      simpleReactionDynamics.getDynamics(hybridState, stateVector, controlVector, constants, simpleReactionFunction);
+      slipDynamics.getDynamics(hybridState, stateVector, controlVector, constants, slipFunction);
 
-      simpleReactionDynamics.getDynamicsControlGradient(hybridState, stateVector, controlVector, simpleControlGradient);
-      slipDynamics.getDynamicsControlGradient(hybridState, stateVector, controlVector, slipControlGradient);
+      simpleReactionDynamics.getDynamicsControlGradient(hybridState, stateVector, controlVector, constants, simpleControlGradient);
+      slipDynamics.getDynamicsControlGradient(hybridState, stateVector, controlVector, constants, slipControlGradient);
 
       CommonOps.subtract(simpleReactionFunction, slipFunction, dynamicsError);
       CommonOps.subtract(simpleControlGradient, slipControlGradient, controlGradientError);
@@ -150,7 +148,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostStateHessian(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateHessian(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                   DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.getNumRows() != stateVectorSize)
          throw new RuntimeException("Matrix state hessian has improper number of rows.");
@@ -168,7 +167,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
          double xF_k = controlVector.get(xF);
          double yF_k = controlVector.get(yF);
-         double zF_k = 0.0;
+
+         double zF_k = constants.get(zF);
 
          double relativeX = x_k - xF_k;
          double relativeY = y_k - yF_k;
@@ -184,6 +184,7 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
          double l3 = Math.pow(currentLength, -3.0);
          double l5 = Math.pow(currentLength, -5.0);
 
+         double nominalPendulumLength = constants.get(nominalLength);
          double normalizedSpringCompression = nominalPendulumLength / currentLength - 1.0;
          double normalizedSpringForce = K_k * normalizedSpringCompression;
 
@@ -291,7 +292,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostControlHessian(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlHessian(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                     DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.getNumRows() != controlVectorSize)
          throw new RuntimeException("Matrix state hessian has improper number of rows.");
@@ -309,7 +311,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
          double xF_k = controlVector.get(xF);
          double yF_k = controlVector.get(yF);
-         double zF_k = 0.0;
+
+         double zF_k = constants.get(zF);
 
          double relativeX = x_k - xF_k;
          double relativeY = y_k - yF_k;
@@ -327,6 +330,7 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
          double currentLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
 
+         double nominalPendulumLength = constants.get(nominalLength);
          double normalizedSpringCompression = nominalPendulumLength / currentLength - 1;
          double normalizedSpringForce = K_k * normalizedSpringCompression;
 
@@ -546,13 +550,15 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
    }
 
    @Override
-   public void getCostStateGradientOfControlGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateGradientOfControlGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                                     DenseMatrix64F matrixToPack)
    {
 
    }
 
    @Override
-   public void getCostControlGradientOfStateGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlGradientOfStateGradient(SLIPState hybridState, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                                     DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.getNumRows() != stateVectorSize)
          throw new RuntimeException("The hessian has the wrong number of rows.");
@@ -570,7 +576,8 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
          double xF_k = controlVector.get(xF);
          double yF_k = controlVector.get(yF);
-         double zF_k = 0.0;
+
+         double zF_k = constants.get(zF);
 
          double relativeX = x_k - xF_k;
          double relativeY = y_k - yF_k;
@@ -588,6 +595,7 @@ public class SLIPModelForceTrackingCost implements LQCostFunction<SLIPState>
 
          double currentLength = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
 
+         double nominalPendulumLength = constants.get(nominalLength);
          double normalizedSpringCompression = nominalPendulumLength / currentLength - 1;
          double normalizedSpringForce = K_k * normalizedSpringCompression;
 

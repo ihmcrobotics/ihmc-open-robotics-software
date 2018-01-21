@@ -23,6 +23,7 @@ public class SLIPJumpingDDPCalculator
 
    private final DiscreteOptimizationSequence optimalSequence;
    private final DiscreteOptimizationSequence desiredSequence;
+   private final DiscreteSequence constantSequence;
 
    private final SimpleDDPSolver<SLIPState> ddpSolver;
 
@@ -51,7 +52,7 @@ public class SLIPJumpingDDPCalculator
 
       ddpSolver = new SimpleDDPSolver<>(dynamics, true);
 
-      LQCostFunction<SLIPState> slipModelTrackingCost = new SLIPModelForceTrackingCost(mass, nominalHeight, gravityZ);
+      LQCostFunction<SLIPState> slipModelTrackingCost = new SLIPModelForceTrackingCost(mass, gravityZ);
       LQCostFunction<SLIPState> slipRegularizationCost = new SLIPRegularizationCost();
 
       LQTrackingCostFunction<SLIPState> slipDesiredTrackingCost = new SLIPDesiredTrackingCost();
@@ -62,11 +63,13 @@ public class SLIPJumpingDDPCalculator
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       initialState = new DenseMatrix64F(stateSize, 1);
 
       optimalSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
       desiredSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
+      constantSequence = new DiscreteSequence(constantSize);
    }
 
    public void setDeltaT(double deltaT)
@@ -80,12 +83,14 @@ public class SLIPJumpingDDPCalculator
                           double firstStanceDuration, double flightDuration, double secondStanceDuration, double nominalInitialStiffness,
                           double nominalFinalStiffness)
    {
-      // TODO do something with the current state
       initialState.set(currentState);
 
       int numberOfInitialTimeSteps = (int) Math.floor(firstStanceDuration / deltaT);
       int numberOfFlightTimeSteps = (int) Math.floor(flightDuration / deltaT);
       int numberOfFinalTimeSteps = (int) Math.floor(secondStanceDuration / deltaT);
+
+      double nominalFirstLength = nominalHeight + mass * gravityZ * nominalInitialStiffness;
+      double nominalSecondLength = nominalHeight + mass * gravityZ * nominalFinalStiffness;
 
       double modifiedDeltaT = firstStanceDuration / numberOfInitialTimeSteps;
       dynamics.setTimeStepSize(modifiedDeltaT);
@@ -111,6 +116,7 @@ public class SLIPJumpingDDPCalculator
       int totalSize = numberOfInitialTimeSteps + numberOfFlightTimeSteps + numberOfFinalTimeSteps;
       desiredSequence.setLength(totalSize);
       optimalSequence.setLength(totalSize);
+      constantSequence.setLength(totalSize);
 
       for (int i = 0; i < numberOfInitialTimeSteps; i++)
       {
@@ -124,6 +130,10 @@ public class SLIPJumpingDDPCalculator
          desiredControl.set(xF, firstSupport.getX());
          desiredControl.set(yF, firstSupport.getY());
          desiredControl.set(k, nominalInitialStiffness);
+
+         DenseMatrix64F constants = constantSequence.get(i);
+         constants.set(zF, firstSupport.getZ());
+         constants.set(nominalLength, nominalFirstLength);
       }
 
       for (int i = numberOfInitialTimeSteps; i < numberOfInitialTimeSteps + numberOfFlightTimeSteps; i++)
@@ -152,9 +162,13 @@ public class SLIPJumpingDDPCalculator
          desiredControl.set(xF, secondSupport.getX());
          desiredControl.set(yF, secondSupport.getY());
          desiredControl.set(k, nominalFinalStiffness);
+
+         DenseMatrix64F constants = constantSequence.get(i);
+         constants.set(zF, secondSupport.getZ());
+         constants.set(nominalLength, nominalSecondLength);
       }
 
-      ddpSolver.initializeSequencesFromDesireds(currentState, desiredSequence);
+      ddpSolver.initializeSequencesFromDesireds(currentState, desiredSequence, constantSequence);
       optimalSequence.set(desiredSequence);
    }
 

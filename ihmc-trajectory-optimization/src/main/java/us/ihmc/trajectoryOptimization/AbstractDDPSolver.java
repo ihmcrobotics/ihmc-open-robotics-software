@@ -23,8 +23,10 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    protected final DiscreteOptimizationData desiredSequence;
    protected final DiscreteOptimizationData updatedSequence;
 
-   protected final RecyclingArrayList<DenseMatrix64F> feedBackGainSequence;
-   protected final RecyclingArrayList<DenseMatrix64F> feedForwardSequence;
+   protected final DiscreteSequence constantsSequence;
+
+   protected final DiscreteSequence feedBackGainSequence;
+   protected final DiscreteSequence feedForwardSequence;
 
    protected final RecyclingArrayList<DenseMatrix64F> costStateGradientSequence;
    protected final RecyclingArrayList<DenseMatrix64F> costControlGradientSequence;
@@ -74,16 +76,16 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
-
-      VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize, 1);
-      VariableVectorBuilder gainBuilder = new VariableVectorBuilder(controlSize, stateSize);
+      int constantSize = dynamics.getConstantVectorSize();
 
       optimalSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
       desiredSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
       updatedSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
 
-      feedBackGainSequence = new RecyclingArrayList<>(1000, gainBuilder);
-      feedForwardSequence = new RecyclingArrayList<>(1000, controlBuilder);
+      constantsSequence = new DiscreteSequence(constantSize, 1);
+
+      feedBackGainSequence = new DiscreteSequence(controlSize, stateSize);
+      feedForwardSequence = new DiscreteSequence(constantSize, 1);
 
       valueStateGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, 1));
       valueStateHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
@@ -120,8 +122,9 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData trajectory, DiscreteOptimizationData desiredSequence,
-                                         RecyclingArrayList<DenseMatrix64F> feedBackGainSequence, RecyclingArrayList<DenseMatrix64F> feedForwardSequence)
+   public void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData trajectory,
+                                         DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence,
+                                         DiscreteSequence feedBackGainSequence, DiscreteSequence feedForwardSequence)
    {
       this.feedBackGainSequence.clear();
       this.feedForwardSequence.clear();
@@ -141,12 +144,12 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       this.optimalSequence.set(trajectory);
       this.desiredSequence.set(desiredSequence);
       this.updatedSequence.setZero(trajectory);
+      this.feedBackGainSequence.set(feedBackGainSequence);
+      this.feedForwardSequence.set(feedForwardSequence);
+      this.constantsSequence.set(constantsSequence);
 
       for (int i = 0; i < trajectory.size(); i++)
       {
-         this.feedBackGainSequence.add().set(feedBackGainSequence.get(i));
-         this.feedForwardSequence.add().set(feedForwardSequence.get(i));
-
          valueStateHessianSequence.add().zero();
          valueStateGradientSequence.add().zero();
 
@@ -167,7 +170,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence)
+   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence)
    {
       this.feedBackGainSequence.clear();
       this.feedForwardSequence.clear();
@@ -187,12 +190,13 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       this.optimalSequence.set(desiredSequence);
       this.desiredSequence.set(desiredSequence);
       this.updatedSequence.setZero(desiredSequence);
+      this.constantsSequence.set(constantsSequence);
 
+      this.feedBackGainSequence.setLength(desiredSequence.size());
+      this.feedForwardSequence.setLength(desiredSequence.size());
 
       for (int i = 0; i < desiredSequence.size(); i++)
       {
-         this.feedBackGainSequence.add().zero();
-         this.feedForwardSequence.add().zero();
          valueStateHessianSequence.add().zero();
          valueStateGradientSequence.add().zero();
 
@@ -217,15 +221,16 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
          DenseMatrix64F currentControl = optimalSequence.getControl(t);
          DenseMatrix64F desiredState = desiredSequence.getState(t);
          DenseMatrix64F desiredControl = desiredSequence.getControl(t);
+         DenseMatrix64F constants = constantsSequence.get(t);
 
-         dynamics.getDynamicsStateGradient(dynamicsState, currentState, currentControl, dynamicsStateGradientSequence.get(t));
-         dynamics.getDynamicsControlGradient(dynamicsState, currentState, currentControl, dynamicsControlGradientSequence.get(t));
+         dynamics.getDynamicsStateGradient(dynamicsState, currentState, currentControl, constants, dynamicsStateGradientSequence.get(t));
+         dynamics.getDynamicsControlGradient(dynamicsState, currentState, currentControl, constants, dynamicsControlGradientSequence.get(t));
 
-         costFunction.getCostStateGradient(dynamicsState, currentControl, currentState, desiredControl, desiredState, costStateGradientSequence.get(t));
-         costFunction.getCostControlGradient(dynamicsState, currentControl, currentState, desiredControl, desiredState, costControlGradientSequence.get(t));
-         costFunction.getCostStateHessian(dynamicsState, currentControl, currentState, costStateHessianSequence.get(t));
-         costFunction.getCostControlHessian(dynamicsState, currentControl, currentState, costControlHessianSequence.get(t));
-         costFunction.getCostControlGradientOfStateGradient(dynamicsState, currentControl, currentState, costStateControlHessianSequence.get(t));
+         costFunction.getCostStateGradient(dynamicsState, currentControl, currentState, desiredControl, desiredState, constants, costStateGradientSequence.get(t));
+         costFunction.getCostControlGradient(dynamicsState, currentControl, currentState, desiredControl, desiredState, constants, costControlGradientSequence.get(t));
+         costFunction.getCostStateHessian(dynamicsState, currentControl, currentState, constants, costStateHessianSequence.get(t));
+         costFunction.getCostControlHessian(dynamicsState, currentControl, currentState, constants, costControlHessianSequence.get(t));
+         costFunction.getCostControlGradientOfStateGradient(dynamicsState, currentControl, currentState, constants, costStateControlHessianSequence.get(t));
       }
    }
 
@@ -304,11 +309,12 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       {
          DenseMatrix64F currentState = optimalSequence.getState(t);
          DenseMatrix64F currentControl = optimalSequence.getControl(t);
+         DenseMatrix64F constants = constantsSequence.get(t);
 
          for (int stateIndex = 0; stateIndex < dynamics.getStateVectorSize(); stateIndex++)
          {
-            dynamics.getDynamicsStateHessian(dynamicsState, stateIndex, currentState, currentControl, dynamicsStateHessian);
-            dynamics.getDynamicsStateGradientOfControlGradient(dynamicsState, stateIndex, currentState, currentControl, dynamicsControlStateHessian);
+            dynamics.getDynamicsStateHessian(dynamicsState, stateIndex, currentState, currentControl, constants, dynamicsStateHessian);
+            dynamics.getDynamicsStateGradientOfControlGradient(dynamicsState, stateIndex, currentState, currentControl, constants, dynamicsControlStateHessian);
 
             CommonOps.multTransA(dynamicsStateHessian, valueStateGradient, Q_XX_col);
             MatrixTools.addMatrixBlock(hamiltonianStateHessianToPack, 0, stateIndex, Q_XX_col, 0, 0, dynamics.getStateVectorSize(), 1, 1.0);
@@ -319,7 +325,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
          for (int controlIndex = 0; controlIndex < dynamics.getControlVectorSize(); controlIndex++)
          {
-            dynamics.getDynamicsControlHessian(dynamicsState, controlIndex, currentState, currentControl, dynamicsControlHessian);
+            dynamics.getDynamicsControlHessian(dynamicsState, controlIndex, currentState, currentControl, constants, dynamicsControlHessian);
 
             CommonOps.multTransA(dynamicsControlHessian, valueStateGradient, Q_UU_col);
             MatrixTools.addMatrixBlock(hamiltonianControlHessianToPack, 0, controlIndex, Q_UU_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);

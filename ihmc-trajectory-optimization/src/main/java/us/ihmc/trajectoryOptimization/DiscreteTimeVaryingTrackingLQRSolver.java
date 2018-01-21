@@ -11,8 +11,10 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
    private final DiscreteOptimizationData optimalSequence;
    private final DiscreteOptimizationData desiredSequence;
 
-   private final RecyclingArrayList<DenseMatrix64F> feedbackGainSequence;
-   private final RecyclingArrayList<DenseMatrix64F> feedforwardSequence;
+   private final DiscreteSequence feedbackGainSequence;
+   private final DiscreteSequence feedforwardSequence;
+
+   private final DiscreteSequence constantsSequence;
 
    private final RecyclingArrayList<DenseMatrix64F> s1Sequence;
    private final RecyclingArrayList<DenseMatrix64F> s2Sequence;
@@ -56,6 +58,7 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       Q = new DenseMatrix64F(stateSize, stateSize);
       Qf = new DenseMatrix64F(stateSize, stateSize);
@@ -67,14 +70,13 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
       B = new DenseMatrix64F(stateSize, controlSize);
       H = new DenseMatrix64F(stateSize, stateSize);
 
-      VariableVectorBuilder controlBuilder = new VariableVectorBuilder(controlSize, 1);
-      VariableVectorBuilder gainBuilder = new VariableVectorBuilder(controlSize, stateSize);
-
       optimalSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
       desiredSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
 
-      feedbackGainSequence = new RecyclingArrayList<>(1000, gainBuilder);
-      feedforwardSequence = new RecyclingArrayList<>(1000, controlBuilder);
+      feedbackGainSequence = new DiscreteSequence(controlSize, stateSize);
+      feedforwardSequence = new DiscreteSequence(controlSize);
+
+      constantsSequence = new DiscreteSequence(constantSize);
 
       s1Sequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
       s2Sequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(1, stateSize));
@@ -87,22 +89,21 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
    }
 
    @Override
-   public void setDesiredSequence(DiscreteOptimizationData desiredSequence, DenseMatrix64F initialState)
+   public void setDesiredSequence(DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence, DenseMatrix64F initialState)
    {
       this.desiredSequence.set(desiredSequence);
       this.optimalSequence.setZero(desiredSequence);
 
-      this.feedbackGainSequence.clear();
-      this.feedforwardSequence.clear();
-
       this.s1Sequence.clear();
       this.s2Sequence.clear();
 
+      this.constantsSequence.set(constantsSequence);
+
+      feedbackGainSequence.setLength(desiredSequence.size());
+      feedforwardSequence.setLength(desiredSequence.size());
+
       for (int i = 0; i < desiredSequence.size(); i++)
       {
-         feedbackGainSequence.add();
-         feedforwardSequence.add();
-
          s1Sequence.add();
          s2Sequence.add();
       }
@@ -120,8 +121,9 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
 
       DenseMatrix64F currentDesiredControl = desiredSequence.getControl(i);
       DenseMatrix64F currentDesiredState = desiredSequence.getState(i);
+      DenseMatrix64F currentConstants = constantsSequence.get(i);
 
-      terminalCostFunction.getCostStateHessian(dynamicState, currentDesiredState, currentDesiredControl, Qf);
+      terminalCostFunction.getCostStateHessian(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, Qf);
 
       DenseMatrix64F initialS1 = s1Sequence.get(i);
       DenseMatrix64F initialS2 = s2Sequence.get(i);
@@ -134,10 +136,11 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
       {
          currentDesiredControl = desiredSequence.getControl(i);
          currentDesiredState = desiredSequence.getState(i);
-         dynamics.getDynamicsStateGradient(dynamicState, currentDesiredState, currentDesiredControl, A);
-         dynamics.getDynamicsControlGradient(dynamicState, currentDesiredState, currentDesiredControl, B);
-         costFunction.getCostStateHessian(dynamicState, currentDesiredState, currentDesiredControl, Q);
-         costFunction.getCostControlHessian(dynamicState, currentDesiredState, currentDesiredControl, R);
+         currentConstants = constantsSequence.get(i);
+         dynamics.getDynamicsStateGradient(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, A);
+         dynamics.getDynamicsControlGradient(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, B);
+         costFunction.getCostStateHessian(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, Q);
+         costFunction.getCostControlHessian(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, R);
 
          if (debug)
          {
@@ -161,8 +164,8 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
          DenseMatrix64F nextS1Matrix = s1Sequence.get(i + 1);
          DenseMatrix64F nextS2Matrix = s2Sequence.get(i + 1);
 
-         dynamics.getDynamicsStateGradient(dynamicState, currentDesiredState, currentDesiredControl, A);
-         dynamics.getDynamicsControlGradient(dynamicState, currentDesiredState, currentDesiredControl, B);
+         dynamics.getDynamicsStateGradient(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, A);
+         dynamics.getDynamicsControlGradient(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, B);
 
          // G = R + B^T S1 B
          G.set(R);
@@ -224,9 +227,10 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
       {
          DenseMatrix64F currentDesiredState = desiredSequence.getState(i);
          DenseMatrix64F currentDesiredControl = desiredSequence.getControl(i);
+         DenseMatrix64F currentConstants = constantsSequence.get(i);
 
-         dynamics.getDynamicsStateGradient(dynamicState, currentDesiredState, currentDesiredControl, A);
-         dynamics.getDynamicsControlGradient(dynamicState, currentDesiredState, currentDesiredControl, B);
+         dynamics.getDynamicsStateGradient(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, A);
+         dynamics.getDynamicsControlGradient(dynamicState, currentDesiredState, currentDesiredControl, currentConstants, B);
 
          DenseMatrix64F optimalControl = optimalSequence.getControl(i);
 
@@ -279,13 +283,13 @@ public class DiscreteTimeVaryingTrackingLQRSolver<E extends Enum> implements LQR
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainSequence()
+   public DiscreteSequence getOptimalFeedbackGainSequence()
    {
       return feedbackGainSequence;
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlSequence()
+   public DiscreteSequence getOptimalFeedForwardControlSequence()
    {
       return feedforwardSequence;
    }

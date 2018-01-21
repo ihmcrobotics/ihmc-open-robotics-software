@@ -5,14 +5,14 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public interface LQRSolverInterface<E extends Enum>
 {
-   void setDesiredSequence(DiscreteOptimizationData desiredSequence, DenseMatrix64F initialState);
+   void setDesiredSequence(DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence, DenseMatrix64F initialState);
    void getOptimalSequence(DiscreteOptimizationData optimalSequenceToPack);
 
    DiscreteOptimizationData getOptimalSequence();
    DiscreteData getOptimalStateSequence();
    DiscreteData getOptimalControlSequence();
-   RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainSequence();
-   RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlSequence();
+   DiscreteSequence getOptimalFeedbackGainSequence();
+   DiscreteSequence getOptimalFeedForwardControlSequence();
 
    DenseMatrix64F getValueHessian();
 

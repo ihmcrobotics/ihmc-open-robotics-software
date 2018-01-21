@@ -13,6 +13,7 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
 {
    static final int stateVectorSize = 4;
    static final int controlVectorSize = 2;
+   static final int constantVectorSize = 0;
 
    private double deltaT;
    private double deltaT2;
@@ -34,14 +35,22 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
       deltaT2 = deltaT * deltaT;
    }
 
+   @Override
    public int getStateVectorSize()
    {
       return stateVectorSize;
    }
 
+   @Override
    public int getControlVectorSize()
    {
       return controlVectorSize;
+   }
+
+   @Override
+   public int getConstantVectorSize()
+   {
+      return constantVectorSize;
    }
 
    /** Returns the current dynamics, of the form
@@ -51,7 +60,8 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
     * @param currentControl U_k in the above equation
     * @param matrixToPack f(X_k, U_k) in the above equation
     */
-   public void getNextState(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getNextState(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constant, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -78,7 +88,9 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
       matrixToPack.set(3, 0, ydot_k1);
    }
 
-   public void getDynamicsStateGradient(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamicsStateGradient(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
+                                        DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -103,7 +115,9 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
       matrixToPack.set(3, 3, 1.0);
    }
 
-   public void getDynamicsControlGradient(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamicsControlGradient(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
+                                          DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -121,7 +135,9 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
       matrixToPack.set(3, 1, value1);
    }
 
-   public void getDynamicsStateHessian(DefaultDiscreteState state, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamicsStateHessian(DefaultDiscreteState state, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+                                       DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -133,7 +149,9 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
       matrixToPack.zero();
    }
 
-   public void getDynamicsControlHessian(DefaultDiscreteState state, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamicsControlHessian(DefaultDiscreteState state, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+                                         DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -146,7 +164,9 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
    }
 
    /** f_ux */
-   public void getDynamicsStateGradientOfControlGradient(DefaultDiscreteState state, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamicsStateGradientOfControlGradient(DefaultDiscreteState state, int stateVariable, DenseMatrix64F currentState,
+                                                         DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -159,7 +179,9 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
    }
 
    /** f_xu */
-   public void getDynamicsControlGradientOfStateGradient(DefaultDiscreteState state, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamicsControlGradientOfStateGradient(DefaultDiscreteState state, int controlVariable, DenseMatrix64F currentState,
+                                                         DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");

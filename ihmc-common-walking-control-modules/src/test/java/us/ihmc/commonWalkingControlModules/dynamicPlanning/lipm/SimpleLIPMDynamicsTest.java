@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.SimpleLIPMDynamics;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -46,9 +45,11 @@ public class SimpleLIPMDynamicsTest
       currentControl.set(0, pX);
       currentControl.set(1, pY);
 
+      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+
       DenseMatrix64F nextState = new DenseMatrix64F(4, 1);
 
-      dynamics.getNextState(DefaultDiscreteState.DEFAULT, currentState, currentControl, nextState);
+      dynamics.getNextState(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, nextState);
 
       assertEquals(4, dynamics.getStateVectorSize());
       assertEquals(2, dynamics.getControlVectorSize());
@@ -95,9 +96,11 @@ public class SimpleLIPMDynamicsTest
          currentControl.set(0, pX);
          currentControl.set(1, pY);
 
+         constants = new DenseMatrix64F(0, 1);
+
          nextState = new DenseMatrix64F(4, 1);
 
-         dynamics.getNextState(DefaultDiscreteState.DEFAULT, currentState, currentControl, nextState);
+         dynamics.getNextState(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, nextState);
 
          assertEquals(4, dynamics.getStateVectorSize());
          assertEquals(2, dynamics.getControlVectorSize());
@@ -149,9 +152,11 @@ public class SimpleLIPMDynamicsTest
       currentControl.set(0, pX);
       currentControl.set(1, pY);
 
+      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+
       DenseMatrix64F dynamicsStateGradient = new DenseMatrix64F(4, 4);
 
-      dynamics.getDynamicsStateGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, dynamicsStateGradient);
+      dynamics.getDynamicsStateGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsStateGradient);
 
       assertEquals(4, dynamics.getStateVectorSize());
       assertEquals(2, dynamics.getControlVectorSize());
@@ -206,9 +211,11 @@ public class SimpleLIPMDynamicsTest
          currentControl.set(0, pX);
          currentControl.set(1, pY);
 
+         constants = new DenseMatrix64F(0, 1);
+
          dynamicsStateGradient = new DenseMatrix64F(4, 4);
 
-         dynamics.getDynamicsStateGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, dynamicsStateGradient);
+         dynamics.getDynamicsStateGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsStateGradient);
 
          assertEquals(4, dynamics.getStateVectorSize());
          assertEquals(2, dynamics.getControlVectorSize());
@@ -267,9 +274,11 @@ public class SimpleLIPMDynamicsTest
       currentControl.set(0, pX);
       currentControl.set(1, pY);
 
+      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+
       DenseMatrix64F dynamicsControlGradient = new DenseMatrix64F(4, 2);
 
-      dynamics.getDynamicsControlGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, dynamicsControlGradient);
+      dynamics.getDynamicsControlGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsControlGradient);
 
       assertEquals(4, dynamics.getStateVectorSize());
       assertEquals(2, dynamics.getControlVectorSize());
@@ -316,9 +325,11 @@ public class SimpleLIPMDynamicsTest
          currentControl.set(0, pX);
          currentControl.set(1, pY);
 
+         constants = new DenseMatrix64F(0, 1);
+
          dynamicsControlGradient = new DenseMatrix64F(4, 2);
 
-         dynamics.getDynamicsControlGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, dynamicsControlGradient);
+         dynamics.getDynamicsControlGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsControlGradient);
 
          assertEquals(4, dynamics.getStateVectorSize());
          assertEquals(2, dynamics.getControlVectorSize());
