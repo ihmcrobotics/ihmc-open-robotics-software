@@ -1,14 +1,12 @@
 package us.ihmc.robotics.math.frames;
 
-import us.ihmc.euclid.interfaces.Clearable;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -17,7 +15,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settable<YoFramePoseUsingQuaternions>, Clearable
+public class YoFramePoseUsingQuaternions implements FixedFramePose3DBasics
 {
    private final YoFramePoint position;
    private final YoFrameQuaternion orientation;
@@ -69,13 +67,6 @@ public class YoFramePoseUsingQuaternions implements ReferenceFrameHolder, Settab
    {
       rigidBodyTransformToPack.setRotation(orientation);
       rigidBodyTransformToPack.setTranslation(position);
-   }
-
-   @Override
-   public void set(YoFramePoseUsingQuaternions other)
-   {
-      setPosition(other.position);
-      setOrientation(other.orientation);
    }
 
    public void set(FramePose3D framePose)
