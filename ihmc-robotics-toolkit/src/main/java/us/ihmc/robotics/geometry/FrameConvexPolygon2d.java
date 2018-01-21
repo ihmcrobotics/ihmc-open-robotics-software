@@ -710,7 +710,7 @@ public class FrameConvexPolygon2d extends FrameGeometryObject<FrameConvexPolygon
    public void scale(FramePoint2D pointToScaleAbout, double scaleFactor)
    {
       checkReferenceFrameMatch(pointToScaleAbout);
-      scale(pointToScaleAbout, scaleFactor);
+      scale((Point2DReadOnly) pointToScaleAbout, scaleFactor);
    }
 
    /**
