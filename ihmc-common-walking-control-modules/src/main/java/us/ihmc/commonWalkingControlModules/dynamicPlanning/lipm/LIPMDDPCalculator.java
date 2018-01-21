@@ -1,10 +1,13 @@
-package us.ihmc.commonWalkingControlModules.dynamicPlanning;
+package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.trajectoryOptimization.*;
+import us.ihmc.trajectoryOptimization.SimpleDDPSolver;
+import us.ihmc.trajectoryOptimization.DiscreteTimeVaryingTrackingLQRSolver;
+import us.ihmc.trajectoryOptimization.LQRSolverInterface;
 
 public class LIPMDDPCalculator
 {
@@ -15,11 +18,15 @@ public class LIPMDDPCalculator
 
    private final DiscreteOptimizationTrajectory desiredTrajectory;
    private final DiscreteOptimizationTrajectory optimalTrajectory;
+   private final DiscreteSequence constantSequence;
 
    private int numberOfTimeSteps;
 
    private final SimpleDDPSolver<DefaultDiscreteState> ddpSolver;
    private final LQRSolverInterface<DefaultDiscreteState> lqrSolver;
+
+   private final LQTrackingCostFunction<DefaultDiscreteState> costFunction = new LIPMSimpleCostFunction();
+   private final LQTrackingCostFunction<DefaultDiscreteState> terminalCostFunction = new LIPMTerminalCostFunction();
 
    private double mass;
    private double gravityZ;
@@ -31,16 +38,16 @@ public class LIPMDDPCalculator
       this.mass = mass;
       this.gravityZ = gravityZ;
 
-      LQCostFunction costFunction = new LIPMSimpleCostFunction();
-      LQCostFunction terminalCostFunction = new LIPMTerminalCostFunction();
-      ddpSolver = new SimpleDDPSolver<>(dynamics, costFunction, terminalCostFunction, true);
+      ddpSolver = new SimpleDDPSolver<>(dynamics, true);
       lqrSolver = new DiscreteTimeVaryingTrackingLQRSolver<>(dynamics, costFunction, terminalCostFunction);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       desiredTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
       optimalTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      constantSequence = new DiscreteSequence(constantSize);
    }
 
    public void setDeltaT(double deltaT)
@@ -59,6 +66,7 @@ public class LIPMDDPCalculator
       dynamics.setTimeStepSize(modifiedDeltaT);
       desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
       optimalTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
+      constantSequence.setLength(desiredTrajectory.size());
 
       double height = currentState.get(2);
 
@@ -101,19 +109,19 @@ public class LIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      lqrSolver.setDesiredTrajectory(desiredTrajectory, currentState);
+      lqrSolver.setDesiredSequence(desiredTrajectory, constantSequence, currentState);
       lqrSolver.solveRiccatiEquation(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
-      lqrSolver.computeOptimalTrajectories(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
-      lqrSolver.getOptimalTrajectory(optimalTrajectory);
+      lqrSolver.computeOptimalSequences(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
+      lqrSolver.getOptimalSequence(optimalTrajectory);
 
-      ddpSolver.initializeFromLQRSolution(DefaultDiscreteState.DEFAULT, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainTrajectory(),
-                                          lqrSolver.getOptimalFeedForwardControlTrajectory());
+      ddpSolver.initializeFromLQRSolution(DefaultDiscreteState.DEFAULT, costFunction, optimalTrajectory, desiredTrajectory, constantSequence,
+                                          lqrSolver.getOptimalFeedbackGainSequence(), lqrSolver.getOptimalFeedForwardControlSequence());
    }
 
    public int solve()
    {
-      int iterations = ddpSolver.computeTrajectory(DefaultDiscreteState.DEFAULT);
-      optimalTrajectory.set(ddpSolver.getOptimalTrajectory());
+      int iterations = ddpSolver.computeSequence(DefaultDiscreteState.DEFAULT, costFunction, terminalCostFunction);
+      optimalTrajectory.set(ddpSolver.getOptimalSequence());
       return iterations;
    }
 
