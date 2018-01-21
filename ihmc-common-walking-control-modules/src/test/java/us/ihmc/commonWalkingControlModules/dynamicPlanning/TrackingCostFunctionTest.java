@@ -24,7 +24,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
       double epsilon = 1e-9;
       LQTrackingCostFunction<E> costFunction = getCostFunction();
 
-      for (int hybridStateIndex = 0; hybridStateIndex < getNumberOfStates(); hybridStateIndex++)
+      for (int hybridStateIndex = 1; hybridStateIndex < getNumberOfStates(); hybridStateIndex++)
       {
          E hybridState = getHybridState(hybridStateIndex);
 

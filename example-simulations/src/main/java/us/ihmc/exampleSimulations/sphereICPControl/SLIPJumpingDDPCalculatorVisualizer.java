@@ -45,7 +45,7 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class SLIPJumpingDDPCalculatorVisualizer
 {
-   private static final int BUFFER_SIZE = 16000;
+   private static final int BUFFER_SIZE = 160000;
    private final double dt = 0.01;
 
    private static final double maxSupportForExtension = 0.3;
@@ -77,7 +77,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private final YoInteger iterations = new YoInteger("iterations", registry);
 
    private final int simulatedTicksPerGraphicUpdate = 1;
-   private final int numberOfBalls = (int) (2.0 / dt / simulatedTicksPerGraphicUpdate);
+   private final int numberOfBalls = (int) (3.0 / dt / simulatedTicksPerGraphicUpdate);
 
    private final BagOfBalls modifiedCopTrack;
    private final BagOfBalls comTrack;
