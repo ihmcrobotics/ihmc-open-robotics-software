@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPDesiredTrackingCost;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
@@ -29,6 +28,11 @@ public class SLIPDesiredTrackingCostTest extends TrackingCostFunctionTest<SLIPSt
    public int getControlVectorSize()
    {
       return SLIPState.controlVectorSize;
+   }
+
+   public int getConstantVectorSize()
+   {
+      return SLIPState.constantVectorSize;
    }
 
    public SLIPState getHybridState(int hybridStateIndex)
@@ -59,8 +63,9 @@ public class SLIPDesiredTrackingCostTest extends TrackingCostFunctionTest<SLIPSt
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
       DenseMatrix64F desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
-      double cost = costFunction.getCost(SLIPState.FLIGHT, currentControl, currentState, desiredControl, desiredState);
+      double cost = costFunction.getCost(SLIPState.FLIGHT, currentControl, currentState, desiredControl, desiredState, constants);
 
       double expectedCost = SLIPDesiredTrackingCost.qXFlight * (currentState.get(x) - desiredState.get(x)) * (currentState.get(x) - desiredState.get(x));
       expectedCost += SLIPDesiredTrackingCost.qYFlight * (currentState.get(y) - desiredState.get(y)) * (currentState.get(y) - desiredState.get(y));
@@ -96,7 +101,7 @@ public class SLIPDesiredTrackingCostTest extends TrackingCostFunctionTest<SLIPSt
 
 
 
-      cost = costFunction.getCost(SLIPState.STANCE, currentControl, currentState, desiredControl, desiredState);
+      cost = costFunction.getCost(SLIPState.STANCE, currentControl, currentState, desiredControl, desiredState, constants);
 
       expectedCost = SLIPDesiredTrackingCost.qXStance * (currentState.get(x) - desiredState.get(x)) * (currentState.get(x) - desiredState.get(x));
       expectedCost += SLIPDesiredTrackingCost.qYStance * (currentState.get(y) - desiredState.get(y)) * (currentState.get(y) - desiredState.get(y));

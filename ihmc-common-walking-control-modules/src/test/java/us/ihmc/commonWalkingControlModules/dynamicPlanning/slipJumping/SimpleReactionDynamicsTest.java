@@ -40,6 +40,7 @@ public class SimpleReactionDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       currentControl.set(x, 0, desiredLinearAcceleration.getX() * mass);
       currentControl.set(y, 0, desiredLinearAcceleration.getY() * mass);
@@ -51,7 +52,7 @@ public class SimpleReactionDynamicsTest
       DenseMatrix64F nextState = new DenseMatrix64F(currentState);
       DenseMatrix64F nextStateExpected = new DenseMatrix64F(currentState);
 
-      dynamics.getNextState(STANCE, currentState, currentControl, nextState);
+      dynamics.getNextState(STANCE, currentState, currentControl, constants, nextState);
 
       nextStateExpected.set(x, currentState.get(x) + deltaT * currentState.get(xDot) + 0.5 * deltaT * deltaT * desiredLinearAcceleration.getX());
       nextStateExpected.set(y, currentState.get(y) + deltaT * currentState.get(yDot) + 0.5 * deltaT * deltaT * desiredLinearAcceleration.getY());
@@ -68,7 +69,7 @@ public class SimpleReactionDynamicsTest
 
       JUnitTools.assertMatrixEquals(nextStateExpected, nextState, 1e-7);
 
-      dynamics.getNextState(FLIGHT, currentState, currentControl, nextState);
+      dynamics.getNextState(FLIGHT, currentState, currentControl, constants, nextState);
 
       nextStateExpected.zero();
 
@@ -111,12 +112,13 @@ public class SimpleReactionDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, stateVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize, stateVectorSize);
 
-      continuousDynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, continuousDynamicsStateGradient);
-      dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, gradient);
+      continuousDynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, constants, continuousDynamicsStateGradient);
+      dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, constants, gradient);
 
       gradientExpected.zero();
       CommonOps.setIdentity(gradientExpected);
@@ -132,8 +134,8 @@ public class SimpleReactionDynamicsTest
 
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
 
-      continuousDynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, continuousDynamicsStateGradient);
-      dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, gradient);
+      continuousDynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, constants, continuousDynamicsStateGradient);
+      dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, constants, gradient);
 
       gradientExpected.zero();
       CommonOps.setIdentity(gradientExpected);
@@ -174,12 +176,13 @@ public class SimpleReactionDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, controlVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize, controlVectorSize);
 
-      continuousDynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, continuousDynamicsControlGradient);
-      dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, gradient);
+      continuousDynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, constants, continuousDynamicsControlGradient);
+      dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, constants, gradient);
 
       gradientExpected.zero();
       MatrixTools.addMatrixBlock(gradientExpected, x, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, 0.5 * deltaT * deltaT);
@@ -187,8 +190,8 @@ public class SimpleReactionDynamicsTest
 
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
 
-      continuousDynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, continuousDynamicsControlGradient);
-      dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, gradient);
+      continuousDynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, constants, continuousDynamicsControlGradient);
+      dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, constants, gradient);
 
       gradientExpected.zero();
       MatrixTools.addMatrixBlock(gradientExpected, x, 0, continuousDynamicsControlGradient, x, 0, stateVectorSize / 2, controlVectorSize, 0.5 * deltaT * deltaT);

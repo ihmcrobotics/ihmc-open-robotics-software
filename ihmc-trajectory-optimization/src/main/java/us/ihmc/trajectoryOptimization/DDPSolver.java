@@ -29,18 +29,19 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData optimalSequence, DiscreteOptimizationData desiredSequence,
-                                         RecyclingArrayList<DenseMatrix64F> feedbackGainSequence, RecyclingArrayList<DenseMatrix64F> feedForwardSequence)
+   public void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData optimalSequence,
+                                         DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence,
+                                         DiscreteSequence feedbackGainSequence, DiscreteSequence feedForwardSequence)
    {
-      super.initializeFromLQRSolution(dynamicsState, costFunction, optimalSequence, desiredSequence, feedBackGainSequence, feedForwardSequence);
+      super.initializeFromLQRSolution(dynamicsState, costFunction, optimalSequence, desiredSequence, constantsSequence, feedBackGainSequence, feedForwardSequence);
 
       previousSequence.setZero(optimalSequence);
    }
 
    @Override
-   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence)
+   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence)
    {
-      super.initializeSequencesFromDesireds(initialState, desiredSequence);
+      super.initializeSequencesFromDesireds(initialState, desiredSequence, constantsSequence);
 
       previousSequence.setZero(desiredSequence);
    }
@@ -60,9 +61,10 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
 
       if (terminalCostFunction != null)
       {
-         terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), valueStateHessianSequence.get(endIndex));
+         terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), constantsSequence.get(endIndex),
+                                                  valueStateHessianSequence.get(endIndex));
          terminalCostFunction.getCostStateGradient(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), desiredControlSequence.get(endIndex),
-                                                   desiredStateSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
+                                                   desiredStateSequence.get(endIndex), constantsSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
       }
 
       for (int t = endIndex; t >= startIndex; t--)
@@ -145,6 +147,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
          DenseMatrix64F state = optimalSequence.getState(t);
          DenseMatrix64F updatedState = updatedSequence.getState(t);
          DenseMatrix64F updatedControl = updatedSequence.getControl(t);
+         DenseMatrix64F constants = constantsSequence.get(t);
 
          if (isStateDiverging(updatedState, state))
             return Double.POSITIVE_INFINITY;
@@ -152,10 +155,10 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
          computeUpdatedControl(state, updatedState, feedBackGainSequence.get(t), feedForwardSequence.get(t), optimalSequence.getControl(t), updatedControl);
 
          if (t < desiredSequence.size() - 1)
-            dynamics.getNextState(dynamicsState, updatedState, updatedControl, updatedSequence.getState(t + 1));
+            dynamics.getNextState(dynamicsState, updatedState, updatedControl, constants, updatedSequence.getState(t + 1));
 
          // compute cost
-         cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredSequence.getControl(t), desiredSequence.getState(t));
+         cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredSequence.getControl(t), desiredSequence.getState(t), constants);
       }
 
       return cost;

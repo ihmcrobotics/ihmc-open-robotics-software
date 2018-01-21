@@ -10,7 +10,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    private final DiscreteOptimizationData optimalSequence;
    private final DiscreteOptimizationData desiredSequence;
 
-   private final RecyclingArrayList<DenseMatrix64F> feedbackGainSequence;
+   private final DiscreteSequence feedbackGainSequence;
+   private final DiscreteSequence constantsSequence;
 
    private final RecyclingArrayList<DenseMatrix64F> S2Sequence;
    private final RecyclingArrayList<DenseMatrix64F> S1Sequence;
@@ -53,6 +54,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       Q = new DenseMatrix64F(stateSize, stateSize);
       Qf = new DenseMatrix64F(stateSize, stateSize);
@@ -74,7 +76,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       optimalSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
       desiredSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
 
-      feedbackGainSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(controlSize, stateSize));
+      constantsSequence = new DiscreteSequence(constantSize, 1);
+      feedbackGainSequence = new DiscreteSequence(controlSize, stateSize);
 
       S2Sequence = new RecyclingArrayList<>(1000, hessianBuilder);
       S1Sequence = new RecyclingArrayList<>(1000, stateBuilder);
@@ -86,21 +89,21 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    }
 
    @Override
-   public void setDesiredSequence(DiscreteOptimizationData desiredSequence, DenseMatrix64F initialState)
+   public void setDesiredSequence(DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence, DenseMatrix64F initialState)
    {
       this.desiredSequence.set(desiredSequence);
       this.optimalSequence.setZero(desiredSequence);
 
       this.S2Sequence.clear();
       this.S1Sequence.clear();
-      this.feedbackGainSequence.clear();
+
+      this.feedbackGainSequence.setLength(desiredSequence.size());
+      this.constantsSequence.set(constantsSequence);
 
       for (int i = 0; i < desiredSequence.size(); i++)
       {
          S2Sequence.add();
          S1Sequence.add();
-
-         feedbackGainSequence.add();
       }
 
       optimalSequence.setState(0, initialState);
@@ -116,11 +119,12 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       DenseMatrix64F state = optimalSequence.getState(i);
       DenseMatrix64F control = optimalSequence.getControl(i);
       DenseMatrix64F desiredState = desiredSequence.getState(i);
+      DenseMatrix64F constants = constantsSequence.get(i);
       DenseMatrix64F desiredControl;
 
-      costFunction.getCostStateHessian(dynamicState, state, control, Q);
-      costFunction.getCostControlHessian(dynamicState, state, control, R);
-      terminalCostFunction.getCostStateHessian(dynamicState, state, control, Qf);
+      costFunction.getCostStateHessian(dynamicState, state, control, constants, Q);
+      costFunction.getCostControlHessian(dynamicState, state, control, constants, R);
+      terminalCostFunction.getCostStateHessian(dynamicState, state, control, constants, Qf);
 
       dynamics.getContinuousAMatrix(A);
       dynamics.getContinuousBMatrix(B);
@@ -243,7 +247,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainSequence()
+   public DiscreteSequence getOptimalFeedbackGainSequence()
    {
       throw new RuntimeException("this isn't implemented correctly.");
    }
@@ -255,7 +259,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlSequence()
+   public DiscreteSequence getOptimalFeedForwardControlSequence()
    {
       throw new RuntimeException("this isn't implemented correctly.");
    }

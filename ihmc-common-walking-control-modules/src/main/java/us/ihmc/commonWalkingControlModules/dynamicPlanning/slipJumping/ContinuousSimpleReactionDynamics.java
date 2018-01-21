@@ -34,7 +34,8 @@ public class ContinuousSimpleReactionDynamics implements ContinuousHybridDynamic
       return controlVectorSize;
    }
 
-   public void getDynamics(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   @Override
+   public void getDynamics(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -69,7 +70,8 @@ public class ContinuousSimpleReactionDynamics implements ContinuousHybridDynamic
       }
    }
 
-   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+   @Override
+   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
                                         DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
@@ -80,7 +82,8 @@ public class ContinuousSimpleReactionDynamics implements ContinuousHybridDynamic
       matrixToPack.zero();
    }
 
-   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+   @Override
+   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
                                           DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)

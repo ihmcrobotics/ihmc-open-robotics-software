@@ -2,17 +2,15 @@ package us.ihmc.trajectoryOptimization;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.trajectoryOptimization.DiscreteOptimizationData;
 
 import java.util.List;
 
 public interface DDPSolverInterface<E extends Enum>
 {
    void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData optimalSequence,
-                                  DiscreteOptimizationData desiredSequence, RecyclingArrayList<DenseMatrix64F> feedbackGainSequence,
-                                  RecyclingArrayList<DenseMatrix64F> feedForwardSequence);
-   void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence);
+                                  DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence,
+                                  DiscreteSequence feedbackGainSequence, DiscreteSequence feedForwardSequence);
+   void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence);
 
    DiscreteOptimizationData getOptimalSequence();
 

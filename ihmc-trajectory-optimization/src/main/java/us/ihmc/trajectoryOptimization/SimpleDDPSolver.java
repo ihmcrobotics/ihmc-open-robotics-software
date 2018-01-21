@@ -33,15 +33,16 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
          DenseMatrix64F currentState = optimalSequence.getState(t);
          DenseMatrix64F currentControl = optimalSequence.getControl(t);
 
-         computeUpdatedControl(currentState, updatedState, feedBackGainSequence.get(t), feedForwardSequence.get(t),
-                               currentControl, updatedControl);
+         DenseMatrix64F constants = constantsSequence.get(t);
+
+         computeUpdatedControl(currentState, updatedState, feedBackGainSequence.get(t), feedForwardSequence.get(t), currentControl, updatedControl);
 
          // compute cost
-         cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredControl, desiredState);
+         cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredControl, desiredState, constants);
 
          // integrate // FIXME this is wrong
          if (t < desiredSequence.size() - 1)
-            dynamics.getNextState(dynamicsState, updatedState, updatedControl, updatedSequence.getState(t + 1));
+            dynamics.getNextState(dynamicsState, updatedState, updatedControl, constants, updatedSequence.getState(t + 1));
       }
 
       return cost;
@@ -59,9 +60,10 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
 
       if (terminalCostFunction != null)
       {
-         terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), valueStateHessianSequence.get(endIndex));
+         terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), constantsSequence.get(endIndex),
+                                                  valueStateHessianSequence.get(endIndex));
          terminalCostFunction.getCostStateGradient(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), desiredControlSequence.get(endIndex),
-                                                   desiredStateSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
+                                                   desiredStateSequence.get(endIndex), constantsSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
       }
 
       for (int t = endIndex; t >= startIndex; t--)

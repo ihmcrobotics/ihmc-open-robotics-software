@@ -18,6 +18,7 @@ public class LIPMDDPCalculator
 
    private final DiscreteOptimizationTrajectory desiredTrajectory;
    private final DiscreteOptimizationTrajectory optimalTrajectory;
+   private final DiscreteSequence constantSequence;
 
    private int numberOfTimeSteps;
 
@@ -42,9 +43,11 @@ public class LIPMDDPCalculator
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       desiredTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
       optimalTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      constantSequence = new DiscreteSequence(constantSize);
    }
 
    public void setDeltaT(double deltaT)
@@ -63,6 +66,7 @@ public class LIPMDDPCalculator
       dynamics.setTimeStepSize(modifiedDeltaT);
       desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
       optimalTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
+      constantSequence.setLength(desiredTrajectory.size());
 
       double height = currentState.get(2);
 
@@ -105,13 +109,13 @@ public class LIPMDDPCalculator
          time += modifiedDeltaT;
       }
 
-      lqrSolver.setDesiredSequence(desiredTrajectory, currentState);
+      lqrSolver.setDesiredSequence(desiredTrajectory, constantSequence, currentState);
       lqrSolver.solveRiccatiEquation(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
       lqrSolver.computeOptimalSequences(DefaultDiscreteState.DEFAULT, 0, desiredTrajectory.size() - 1);
       lqrSolver.getOptimalSequence(optimalTrajectory);
 
-      ddpSolver.initializeFromLQRSolution(DefaultDiscreteState.DEFAULT, costFunction, optimalTrajectory, desiredTrajectory, lqrSolver.getOptimalFeedbackGainSequence(),
-                                          lqrSolver.getOptimalFeedForwardControlSequence());
+      ddpSolver.initializeFromLQRSolution(DefaultDiscreteState.DEFAULT, costFunction, optimalTrajectory, desiredTrajectory, constantSequence,
+                                          lqrSolver.getOptimalFeedbackGainSequence(), lqrSolver.getOptimalFeedForwardControlSequence());
    }
 
    public int solve()

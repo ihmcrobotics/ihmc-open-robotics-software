@@ -66,7 +66,7 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
    private DenseMatrix64F tempWU = new DenseMatrix64F(controlVectorSize, 1);
 
    @Override
-   public double getCost(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector)
+   public double getCost(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants)
    {
       DiagonalMatrixTools.preMult(Q, stateVector, tempWX);
       DiagonalMatrixTools.preMult(R, controlVector, tempWU);
@@ -76,7 +76,7 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
 
    /** L_x(X_k, U_k) */
    @Override
-   public void getCostStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       DiagonalMatrixTools.preMult(Q, stateVector, matrixToPack);
       CommonOps.scale(2.0, matrixToPack);
@@ -84,7 +84,7 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
 
    /** L_u(X_k, U_k) */
    @Override
-   public void getCostControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       DiagonalMatrixTools.preMult(R, controlVector, matrixToPack);
       CommonOps.scale(2.0, matrixToPack);
@@ -92,21 +92,21 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
 
    /** L_xx(X_k, U_k) */
    @Override
-   public void getCostStateHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       CommonOps.scale(2.0, Q, matrixToPack);
    }
 
    /** L_uu(X_k, U_k) */
    @Override
-   public void getCostControlHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       CommonOps.scale(2.0, R, matrixToPack);
    }
 
    /** L_ux(X_k, U_k) */
    @Override
-   public void getCostStateGradientOfControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
+   public void getCostStateGradientOfControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
                                                      DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
@@ -115,7 +115,7 @@ public class SLIPRegularizationCost implements LQCostFunction<SLIPState>
 
    /** L_xu(X_k, U_k) */
    @Override
-   public void getCostControlGradientOfStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
+   public void getCostControlGradientOfStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
                                                      DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(stateVectorSize, controlVectorSize);

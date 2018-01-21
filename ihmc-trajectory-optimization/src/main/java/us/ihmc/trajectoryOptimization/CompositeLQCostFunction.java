@@ -24,129 +24,131 @@ public class CompositeLQCostFunction<E extends Enum> implements LQTrackingCostFu
    }
 
    @Override
-   public double getCost(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector, DenseMatrix64F desiredStateVector)
+   public double getCost(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                         DenseMatrix64F desiredStateVector, DenseMatrix64F constants)
    {
       double cost = 0.0;
       for (int i = 0; i < lqCostFunctions.size(); i++)
-         cost += lqCostFunctions.get(i).getCost(state, controlVector, stateVector);
+         cost += lqCostFunctions.get(i).getCost(state, controlVector, stateVector, constants);
       for (int i = 0; i < lqTrackingCostFunctions.size(); i++)
-         cost += lqTrackingCostFunctions.get(i).getCost(state, controlVector, stateVector, desiredControlVector, desiredStateVector);
+         cost += lqTrackingCostFunctions.get(i).getCost(state, controlVector, stateVector, desiredControlVector, desiredStateVector, constants);
 
       return cost;
    }
 
    @Override
    public void getCostStateGradient(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                             DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+                                    DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.zero();
       tempMatrix.reshape(matrixToPack.getNumRows(), matrixToPack.getNumCols());
 
       for (int i = 0; i < lqCostFunctions.size(); i++)
       {
-         lqCostFunctions.get(i).getCostStateGradient(state, controlVector, stateVector, tempMatrix);
+         lqCostFunctions.get(i).getCostStateGradient(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
 
       for (int i = 0; i < lqTrackingCostFunctions.size(); i++)
       {
-         lqTrackingCostFunctions.get(i).getCostStateGradient(state, controlVector, stateVector, desiredControlVector, desiredStateVector, tempMatrix);
+         lqTrackingCostFunctions.get(i).getCostStateGradient(state, controlVector, stateVector, desiredControlVector, desiredStateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
    }
 
    @Override
    public void getCostControlGradient(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                               DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+                                      DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.zero();
       tempMatrix.reshape(matrixToPack.getNumRows(), matrixToPack.getNumCols());
 
       for (int i = 0; i < lqCostFunctions.size(); i++)
       {
-         lqCostFunctions.get(i).getCostControlGradient(state, controlVector, stateVector, tempMatrix);
+         lqCostFunctions.get(i).getCostControlGradient(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
 
       for (int i = 0; i < lqTrackingCostFunctions.size(); i++)
       {
-         lqTrackingCostFunctions.get(i).getCostControlGradient(state, controlVector, stateVector, desiredControlVector, desiredStateVector, tempMatrix);
+         lqTrackingCostFunctions.get(i).getCostControlGradient(state, controlVector, stateVector, desiredControlVector, desiredStateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
    }
 
    @Override
-   public void getCostStateHessian(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateHessian(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.zero();
       tempMatrix.reshape(matrixToPack.getNumRows(), matrixToPack.getNumCols());
 
       for (int i = 0; i < lqCostFunctions.size(); i++)
       {
-         lqCostFunctions.get(i).getCostStateHessian(state, controlVector, stateVector, tempMatrix);
+         lqCostFunctions.get(i).getCostStateHessian(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
 
       for (int i = 0; i < lqTrackingCostFunctions.size(); i++)
       {
-         lqTrackingCostFunctions.get(i).getCostStateHessian(state, controlVector, stateVector, tempMatrix);
+         lqTrackingCostFunctions.get(i).getCostStateHessian(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
    }
 
    @Override
-   public void getCostControlHessian(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlHessian(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.zero();
       tempMatrix.reshape(matrixToPack.getNumRows(), matrixToPack.getNumCols());
 
       for (int i = 0; i < lqCostFunctions.size(); i++)
       {
-         lqCostFunctions.get(i).getCostControlHessian(state, controlVector, stateVector, tempMatrix);
+         lqCostFunctions.get(i).getCostControlHessian(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
 
       for (int i = 0; i < lqTrackingCostFunctions.size(); i++)
       {
-         lqTrackingCostFunctions.get(i).getCostControlHessian(state, controlVector, stateVector, tempMatrix);
+         lqTrackingCostFunctions.get(i).getCostControlHessian(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
    }
 
    @Override
-   public void getCostStateGradientOfControlGradient(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateGradientOfControlGradient(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                                     DenseMatrix64F matrixToPack)
    {
       matrixToPack.zero();
       tempMatrix.reshape(matrixToPack.getNumRows(), matrixToPack.getNumCols());
 
       for (int i = 0; i < lqCostFunctions.size(); i++)
       {
-         lqCostFunctions.get(i).getCostStateGradientOfControlGradient(state, controlVector, stateVector, tempMatrix);
+         lqCostFunctions.get(i).getCostStateGradientOfControlGradient(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
 
       for (int i = 0; i < lqTrackingCostFunctions.size(); i++)
       {
-         lqTrackingCostFunctions.get(i).getCostStateGradientOfControlGradient(state, controlVector, stateVector, tempMatrix);
+         lqTrackingCostFunctions.get(i).getCostStateGradientOfControlGradient(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
    }
 
    @Override
-   public void getCostControlGradientOfStateGradient(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlGradientOfStateGradient(E state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.zero();
       tempMatrix.reshape(matrixToPack.getNumRows(), matrixToPack.getNumCols());
 
       for (int i = 0; i < lqCostFunctions.size(); i++)
       {
-         lqCostFunctions.get(i).getCostControlGradientOfStateGradient(state, controlVector, stateVector, tempMatrix);
+         lqCostFunctions.get(i).getCostControlGradientOfStateGradient(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
 
       for (int i = 0; i < lqTrackingCostFunctions.size(); i++)
       {
-         lqTrackingCostFunctions.get(i).getCostControlGradientOfStateGradient(state, controlVector, stateVector, tempMatrix);
+         lqTrackingCostFunctions.get(i).getCostControlGradientOfStateGradient(state, controlVector, stateVector, constants, tempMatrix);
          CommonOps.addEquals(matrixToPack, tempMatrix);
       }
    }

@@ -35,7 +35,7 @@ public class LIPMTerminalCostFunction implements LQTrackingCostFunction<DefaultD
 
    @Override
    public double getCost(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                         DenseMatrix64F desiredStateVector)
+                         DenseMatrix64F desiredStateVector, DenseMatrix64F constants)
    {
       CommonOps.subtract(controlVector, desiredControlVector, tempControlMatrix);
       CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
@@ -49,7 +49,7 @@ public class LIPMTerminalCostFunction implements LQTrackingCostFunction<DefaultD
    /** L_x(X_k, U_k) */
    @Override
    public void getCostStateGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                                    DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+                                    DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
       DiagonalMatrixTools.preMult(Q, tempStateMatrix, matrixToPack);
@@ -58,7 +58,7 @@ public class LIPMTerminalCostFunction implements LQTrackingCostFunction<DefaultD
    /** L_u(X_k, U_k) */
    @Override
    public void getCostControlGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVecotr,
-                                      DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+                                      DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       CommonOps.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
       DiagonalMatrixTools.preMult(R, tempControlMatrix, matrixToPack);
@@ -66,14 +66,14 @@ public class LIPMTerminalCostFunction implements LQTrackingCostFunction<DefaultD
 
    /** L_xx(X_k, U_k) */
    @Override
-   public void getCostStateHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostStateHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.set(Q);
    }
 
    /** L_uu(X_k, U_k) */
    @Override
-   public void getCostControlHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+   public void getCostControlHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.set(R);
    }
@@ -81,7 +81,7 @@ public class LIPMTerminalCostFunction implements LQTrackingCostFunction<DefaultD
    /** L_ux(X_k, U_k) */
    @Override
    public void getCostStateGradientOfControlGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
-                                                     DenseMatrix64F matrixToPack)
+                                                     DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
    }
@@ -89,7 +89,7 @@ public class LIPMTerminalCostFunction implements LQTrackingCostFunction<DefaultD
    /** L_xu(X_k, U_k) */
    @Override
    public void getCostControlGradientOfStateGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
-                                                     DenseMatrix64F matrixToPack)
+                                                     DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       matrixToPack.reshape(stateVectorSize, controlVectorSize);
    }

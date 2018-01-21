@@ -12,6 +12,7 @@ public abstract class CostFunctionTest<E extends Enum>
    public abstract int getNumberOfStates();
    public abstract int getStateVectorSize();
    public abstract int getControlVectorSize();
+   public abstract int getConstantVectorSize();
    public abstract E getHybridState(int hybridStateIndex);
    public abstract LQCostFunction<E> getCostFunction();
 
@@ -29,19 +30,20 @@ public abstract class CostFunctionTest<E extends Enum>
          Random random = new Random(1738L);
          DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
          DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
          DenseMatrix64F costGradient = new DenseMatrix64F(getStateVectorSize(), 1);
          DenseMatrix64F expectedCostGradient = new DenseMatrix64F(getStateVectorSize(), 1);
 
-         double cost = costFunction.getCost(hybridState, currentControl, currentState);
+         double cost = costFunction.getCost(hybridState, currentControl, currentState, constants);
 
-         costFunction.getCostStateGradient(hybridState, currentControl, currentState, costGradient);
+         costFunction.getCostStateGradient(hybridState, currentControl, currentState, constants, costGradient);
 
          for (int modifiedStateIndex = 0; modifiedStateIndex < getStateVectorSize(); modifiedStateIndex++)
          {
             DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
             currentStateModified.add(modifiedStateIndex, 0, epsilon);
-            double modifiedCost = costFunction.getCost(hybridState, currentControl, currentStateModified);
+            double modifiedCost = costFunction.getCost(hybridState, currentControl, constants, currentStateModified);
             expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / epsilon);
          }
 
@@ -61,19 +63,20 @@ public abstract class CostFunctionTest<E extends Enum>
          Random random = new Random(1738L);
          DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
          DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
          DenseMatrix64F costGradient = new DenseMatrix64F(getControlVectorSize(), 1);
          DenseMatrix64F expectedCostGradient = new DenseMatrix64F(getControlVectorSize(), 1);
 
-         double cost = costFunction.getCost(hybridState, currentControl, currentState);
+         double cost = costFunction.getCost(hybridState, currentControl, currentState, constants);
 
-         costFunction.getCostControlGradient(hybridState, currentControl, currentState, costGradient);
+         costFunction.getCostControlGradient(hybridState, currentControl, currentState, constants, costGradient);
 
          for (int controlModifiedIndex = 0; controlModifiedIndex < getControlVectorSize(); controlModifiedIndex++)
          {
             DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
             currentControlModified.add(controlModifiedIndex, 0, epsilon);
-            double modifiedCost = costFunction.getCost(hybridState, currentControlModified, currentState);
+            double modifiedCost = costFunction.getCost(hybridState, currentControlModified, currentState, constants);
             expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / epsilon);
          }
 
@@ -93,6 +96,7 @@ public abstract class CostFunctionTest<E extends Enum>
          Random random = new Random(1738L);
          DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
          DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
          DenseMatrix64F costHessian = new DenseMatrix64F(getStateVectorSize(), getStateVectorSize());
          DenseMatrix64F expectedCostHessian = new DenseMatrix64F(getStateVectorSize(), getStateVectorSize());
@@ -100,14 +104,14 @@ public abstract class CostFunctionTest<E extends Enum>
          DenseMatrix64F currentGradient = new DenseMatrix64F(getStateVectorSize(), 1);
          DenseMatrix64F modifiedGradient = new DenseMatrix64F(getStateVectorSize(), 1);
 
-         costFunction.getCostStateHessian(hybridState, currentControl, currentState, costHessian);
-         costFunction.getCostStateGradient(hybridState, currentControl, currentState, currentGradient);
+         costFunction.getCostStateHessian(hybridState, currentControl, currentState, constants, costHessian);
+         costFunction.getCostStateGradient(hybridState, currentControl, currentState, constants, currentGradient);
 
          for (int partialState = 0; partialState < getStateVectorSize(); partialState++)
          {
             DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
             currentStateModified.add(partialState, 0, epsilon);
-            costFunction.getCostStateGradient(hybridState, currentControl, currentStateModified, modifiedGradient);
+            costFunction.getCostStateGradient(hybridState, currentControl, currentStateModified, constants, modifiedGradient);
 
             for (int state = 0; state < getStateVectorSize(); state++)
                expectedCostHessian.set(state, partialState, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
@@ -129,6 +133,7 @@ public abstract class CostFunctionTest<E extends Enum>
          Random random = new Random(1738L);
          DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
          DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
          DenseMatrix64F costHessian = new DenseMatrix64F(getControlVectorSize(), getControlVectorSize());
          DenseMatrix64F expectedCostHessian = new DenseMatrix64F(getControlVectorSize(), getControlVectorSize());
@@ -136,14 +141,14 @@ public abstract class CostFunctionTest<E extends Enum>
          DenseMatrix64F currentGradient = new DenseMatrix64F(getControlVectorSize(), 1);
          DenseMatrix64F modifiedGradient = new DenseMatrix64F(getControlVectorSize(), 1);
 
-         costFunction.getCostControlHessian(hybridState, currentControl, currentState, costHessian);
-         costFunction.getCostControlGradient(hybridState, currentControl, currentState, currentGradient);
+         costFunction.getCostControlHessian(hybridState, currentControl, currentState, constants, costHessian);
+         costFunction.getCostControlGradient(hybridState, currentControl, currentState, constants, currentGradient);
 
          for (int partialControl = 0; partialControl < getControlVectorSize(); partialControl++)
          {
             DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
             currentControlModified.add(partialControl, 0, epsilon);
-            costFunction.getCostControlGradient(hybridState, currentControlModified, currentState, modifiedGradient);
+            costFunction.getCostControlGradient(hybridState, currentControlModified, currentState, constants, modifiedGradient);
 
             for (int control = 0; control < getControlVectorSize(); control++)
                expectedCostHessian.set(control, partialControl, (modifiedGradient.get(control) - currentGradient.get(control)) / epsilon);
@@ -165,6 +170,7 @@ public abstract class CostFunctionTest<E extends Enum>
          Random random = new Random(1738L);
          DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
          DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
          DenseMatrix64F costHessian = new DenseMatrix64F(getStateVectorSize(), getControlVectorSize());
          DenseMatrix64F expectedCostHessian = new DenseMatrix64F(getStateVectorSize(), getControlVectorSize());
@@ -172,14 +178,14 @@ public abstract class CostFunctionTest<E extends Enum>
          DenseMatrix64F currentGradient = new DenseMatrix64F(getStateVectorSize(), 1);
          DenseMatrix64F modifiedGradient = new DenseMatrix64F(getStateVectorSize(), 1);
 
-         costFunction.getCostControlGradientOfStateGradient(hybridState, currentControl, currentState, costHessian);
-         costFunction.getCostStateGradient(hybridState, currentControl, currentState, currentGradient);
+         costFunction.getCostControlGradientOfStateGradient(hybridState, currentControl, currentState, constants, costHessian);
+         costFunction.getCostStateGradient(hybridState, currentControl, currentState, constants, currentGradient);
 
          for (int partialControl = 0; partialControl < getControlVectorSize(); partialControl++)
          {
             DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
             currentControlModified.add(partialControl, 0, epsilon);
-            costFunction.getCostStateGradient(hybridState, currentControlModified, currentState, modifiedGradient);
+            costFunction.getCostStateGradient(hybridState, currentControlModified, currentState, constants, modifiedGradient);
 
             for (int state = 0; state < getStateVectorSize(); state++)
                expectedCostHessian.set(state, partialControl, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);

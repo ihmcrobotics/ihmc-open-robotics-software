@@ -53,7 +53,13 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    }
 
    @Override
-   public void getNextState(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   public int getConstantVectorSize()
+   {
+      return constantVectorSize;
+   }
+
+   @Override
+   public void getNextState(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -73,7 +79,7 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
       double thetaYDot_k = currentState.get(thetaYDot, 0);
       double thetaZDot_k = currentState.get(thetaZDot, 0);
 
-      continuousDynamics.getDynamics(hybridState, currentState, currentControl, continuousDynamicsMatrix);
+      continuousDynamics.getDynamics(hybridState, currentState, currentControl, constants, continuousDynamicsMatrix);
 
       matrixToPack.set(x, 0, x_k + deltaT * xDot_k);
       matrixToPack.set(y, 0, y_k + deltaT * yDot_k);
@@ -94,7 +100,7 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    }
 
    @Override
-   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
                                         DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
@@ -114,7 +120,7 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    }
 
    @Override
-   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
+   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
                                           DenseMatrix64F matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
@@ -144,41 +150,29 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
 
    @Override
    public void getDynamicsStateHessian(SLIPState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                       DenseMatrix64F matrixToPack)
-   {
-
-   }
+                                       DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   {}
 
    @Override
    public void getDynamicsControlHessian(SLIPState hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                         DenseMatrix64F matrixToPack)
-   {
-
-   }
+                                         DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   {}
 
    @Override
-   public void getDynamicsStateGradientOfControlGradient(SLIPState hybridState, int stateVariable, DenseMatrix64F currentState,
+   public void getDynamicsStateGradientOfControlGradient(SLIPState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F constants,
                                                          DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
-   {
-
-   }
+   {}
 
    @Override
-   public void getDynamicsControlGradientOfStateGradient(SLIPState hybridState, int controlVariable, DenseMatrix64F currentState,
+   public void getDynamicsControlGradientOfStateGradient(SLIPState hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F constants,
                                                          DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
-   {
-
-   }
+   {}
 
    @Override
    public void getContinuousAMatrix(DenseMatrix64F A)
-   {
-
-   }
+   {}
 
    @Override
    public void getContinuousBMatrix(DenseMatrix64F B)
-   {
-
-   }
+   {}
 }

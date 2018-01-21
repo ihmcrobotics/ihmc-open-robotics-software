@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPModelForceTrackingCost;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -32,6 +31,11 @@ public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>
       return SLIPState.controlVectorSize;
    }
 
+   public int getConstantVectorSize()
+   {
+      return SLIPState.constantVectorSize;
+   }
+
    public SLIPState getHybridState(int hybridStateIndex)
    {
       switch (hybridStateIndex)
@@ -48,7 +52,7 @@ public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      return new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
+      return new SLIPModelForceTrackingCost(mass, gravityZ);
    }
 
    @Override
@@ -62,8 +66,9 @@ public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
-      double cost = costFunction.getCost(SLIPState.STANCE, currentControl, currentState);
+      double cost = costFunction.getCost(SLIPState.STANCE, currentControl, currentState, constants);
 
       double x_k = currentState.get(x);
       double y_k = currentState.get(y);
@@ -159,16 +164,17 @@ public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F expectedGradient = new DenseMatrix64F(stateVectorSize, 1);
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, 1);
 
-      cost.getCostStateGradient(SLIPState.STANCE, currentControl, currentState, gradient);
+      cost.getCostStateGradient(SLIPState.STANCE, currentControl, currentState, constants, gradient);
 
       double x_k = currentState.get(x);
       double y_k = currentState.get(y);
@@ -260,16 +266,17 @@ public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>
       double mass = 15.0;
       double nominalLength = 1.5;
       double gravityZ = 9.81;
-      SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, nominalLength, gravityZ);
+      SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, gravityZ);
 
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
 
       DenseMatrix64F expectedGradient = new DenseMatrix64F(controlVectorSize, 1);
       DenseMatrix64F gradient = new DenseMatrix64F(controlVectorSize, 1);
 
-      cost.getCostControlGradient(SLIPState.STANCE, currentControl, currentState, gradient);
+      cost.getCostControlGradient(SLIPState.STANCE, currentControl, currentState, constants, gradient);
 
       double x_k = currentState.get(x);
       double y_k = currentState.get(y);
