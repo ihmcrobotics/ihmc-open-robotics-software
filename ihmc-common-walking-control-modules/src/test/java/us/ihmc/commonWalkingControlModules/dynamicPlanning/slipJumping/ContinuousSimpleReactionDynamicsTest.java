@@ -573,7 +573,7 @@ public class ContinuousSimpleReactionDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);

@@ -43,7 +43,7 @@ public abstract class CostFunctionTest<E extends Enum>
          {
             DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
             currentStateModified.add(modifiedStateIndex, 0, epsilon);
-            double modifiedCost = costFunction.getCost(hybridState, currentControl, constants, currentStateModified);
+            double modifiedCost = costFunction.getCost(hybridState, currentControl, currentStateModified, constants);
             expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / epsilon);
          }
 

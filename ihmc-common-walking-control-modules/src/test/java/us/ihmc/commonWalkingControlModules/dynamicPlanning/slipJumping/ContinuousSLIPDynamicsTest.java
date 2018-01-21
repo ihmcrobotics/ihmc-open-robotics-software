@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -21,7 +22,6 @@ public class ContinuousSLIPDynamicsTest
    {
       double mass = 10.0;
       double gravity = 9.81;
-      double nominalLength = 1.0;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
@@ -37,6 +37,7 @@ public class ContinuousSLIPDynamicsTest
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       Vector3D relativePosition = new Vector3D();
       relativePosition.setX(currentState.get(x));
@@ -44,6 +45,7 @@ public class ContinuousSLIPDynamicsTest
       relativePosition.setZ(currentState.get(z));
       relativePosition.subX(currentControl.get(xF));
       relativePosition.subY(currentControl.get(yF));
+      relativePosition.subZ(constants.get(zF));
 
       Vector3D reactionForce = new Vector3D();
       reactionForce.setX(currentControl.get(fx));
@@ -53,9 +55,10 @@ public class ContinuousSLIPDynamicsTest
       Vector3D reactionTorque = new Vector3D();
       reactionTorque.cross(relativePosition, reactionForce);
 
+      double nominalPendulumLength = constants.get(nominalLength, 0);
       double pendulumLength = relativePosition.length();
       double stiffness = currentControl.get(k);
-      double springForce = stiffness * (nominalLength - pendulumLength);
+      double springForce = stiffness * (nominalPendulumLength - pendulumLength);
 
       Vector3D force = new Vector3D(relativePosition);
       force.normalize();
@@ -92,7 +95,6 @@ public class ContinuousSLIPDynamicsTest
    {
       double mass = 11.0;
       double gravity = 9.81;
-      double nominalLength = 1.2;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
@@ -107,6 +109,7 @@ public class ContinuousSLIPDynamicsTest
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
@@ -120,21 +123,24 @@ public class ContinuousSLIPDynamicsTest
       double yF_k = currentControl.get(yF, 0);
       double K = currentControl.get(k, 0);
 
-      double length2 = (x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + z_k * z_k;
-      double length = Math.sqrt(length2);
-      double outsideTerm = -K * nominalLength / Math.pow(length2, 1.5);
+      double zF_k = constants.get(zF, 0);
+      double nominalPendulumLength = constants.get(nominalLength, 0);
 
-      double f1x = outsideTerm * (x_k - xF_k) * (x_k - xF_k) + K * nominalLength / length - K;
+      double length2 = (x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + (z_k - zF_k) * (z_k - zF_k);
+      double length = Math.sqrt(length2);
+      double outsideTerm = -K * nominalPendulumLength / Math.pow(length2, 1.5);
+
+      double f1x = outsideTerm * (x_k - xF_k) * (x_k - xF_k) + K * nominalPendulumLength / length - K;
       double f1y = outsideTerm * (x_k - xF_k) * (y_k - yF_k);
-      double f1z = outsideTerm * (x_k - xF_k) * (z_k);
+      double f1z = outsideTerm * (x_k - xF_k) * (z_k - zF_k);
 
       double f2x = outsideTerm * (x_k - xF_k) * (y_k - yF_k);
-      double f2y = outsideTerm * (y_k - yF_k) * (y_k - yF_k) + K * nominalLength / length - K;
-      double f2z = outsideTerm * (y_k - yF_k) * (z_k);
+      double f2y = outsideTerm * (y_k - yF_k) * (y_k - yF_k) + K * nominalPendulumLength / length - K;
+      double f2z = outsideTerm * (y_k - yF_k) * (z_k - zF_k);
 
-      double f3x = outsideTerm * (x_k - xF_k) * (z_k);
-      double f3y = outsideTerm * (y_k - yF_k) * (z_k);
-      double f3z = outsideTerm * z_k * z_k + K * nominalLength / length - K;
+      double f3x = outsideTerm * (x_k - xF_k) * (z_k - zF_k);
+      double f3y = outsideTerm * (y_k - yF_k) * (z_k - zF_k);
+      double f3z = outsideTerm * (z_k - zF_k) * (z_k - zF_k) + K * nominalPendulumLength / length - K;
 
       double tau1x = 0.0;
       double tau1y = currentControl.get(fz);
@@ -190,7 +196,6 @@ public class ContinuousSLIPDynamicsTest
    {
       double mass = 11.0;
       double gravity = 9.81;
-      double nominalLength = 1.2;
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
@@ -269,7 +274,6 @@ public class ContinuousSLIPDynamicsTest
    {
       double mass = 11.0;
       double gravity = 9.81;
-      double nominalLength = 1.2;
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
@@ -348,7 +352,6 @@ public class ContinuousSLIPDynamicsTest
    {
       double mass = 11.0;
       double gravity = 9.81;
-      double nominalLength = 1.2;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       ContinuousSLIPDynamics dynamics = new ContinuousSLIPDynamics(mass, gravity);
@@ -362,7 +365,9 @@ public class ContinuousSLIPDynamicsTest
       Random random = new Random(1738L);
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize / 2, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
@@ -376,24 +381,27 @@ public class ContinuousSLIPDynamicsTest
       double yF_k = currentControl.get(yF, 0);
       double K = currentControl.get(k, 0);
 
+      double zF_k = constants.get(zF, 0);
+      double nominalPendulumLength = constants.get(nominalLength, 0);
+
       double fx_k = currentControl.get(fx, 0);
       double fy_k = currentControl.get(fy, 0);
       double fz_k = currentControl.get(fz, 0);
 
-      double length2 = (x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + z_k * z_k;
-      double outsideTerm = K * nominalLength / Math.pow(length2, 1.5);
+      double length2 = (x_k - xF_k) * (x_k - xF_k) + (y_k - yF_k) * (y_k - yF_k) + (z_k - zF_k) * (z_k - zF_k);
+      double outsideTerm = K * nominalPendulumLength / Math.pow(length2, 1.5);
 
-      double f1x = outsideTerm * (x_k - xF_k) * (x_k - xF_k) - K * nominalLength / Math.sqrt(length2) + K;
+      double f1x = outsideTerm * (x_k - xF_k) * (x_k - xF_k) - K * nominalPendulumLength / Math.sqrt(length2) + K;
       double f1y = outsideTerm * (x_k - xF_k) * (y_k - yF_k);
-      double f1k = (nominalLength / Math.sqrt(length2) - 1.0) * (x_k - xF_k);
+      double f1k = (nominalPendulumLength / Math.sqrt(length2) - 1.0) * (x_k - xF_k);
 
       double f2x = outsideTerm * (x_k - xF_k) * (y_k - yF_k);
-      double f2y = outsideTerm * (y_k - yF_k) * (y_k - yF_k) - K * nominalLength / Math.sqrt(length2) + K;
-      double f2k = (nominalLength / Math.sqrt(length2) - 1.0) * (y_k - yF_k);
+      double f2y = outsideTerm * (y_k - yF_k) * (y_k - yF_k) - K * nominalPendulumLength / Math.sqrt(length2) + K;
+      double f2k = (nominalPendulumLength / Math.sqrt(length2) - 1.0) * (y_k - yF_k);
 
-      double f3x = outsideTerm * (x_k - xF_k) * (z_k);
-      double f3y = outsideTerm * (y_k - yF_k) * (z_k);
-      double f3k = (nominalLength / Math.sqrt(length2) - 1.0) * (z_k);
+      double f3x = outsideTerm * (x_k - xF_k) * (z_k - zF_k);
+      double f3y = outsideTerm * (y_k - yF_k) * (z_k - zF_k);
+      double f3k = (nominalPendulumLength / Math.sqrt(length2) - 1.0) * (z_k - zF_k);
 
       gradientExpected.set(x, xF, f1x);
       gradientExpected.set(x, yF, f1y);
@@ -409,11 +417,11 @@ public class ContinuousSLIPDynamicsTest
 
       CommonOps.scale(1.0 / mass, gradientExpected);
 
-      gradientExpected.set(tauX, fy, 1.0 / inertia.getX() * -z_k);
+      gradientExpected.set(tauX, fy, 1.0 / inertia.getX() * -(z_k - zF_k));
       gradientExpected.set(tauX, fz, 1.0 / inertia.getX() * (y_k - yF_k));
       gradientExpected.set(tauX, yF, 1.0 / inertia.getX() * -fz_k);
 
-      gradientExpected.set(tauY, fx, 1.0 / inertia.getY() * (z_k));
+      gradientExpected.set(tauY, fx, 1.0 / inertia.getY() * (z_k - zF_k));
       gradientExpected.set(tauY, fz, 1.0 / inertia.getY() * (xF_k - x_k));
       gradientExpected.set(tauY, xF, 1.0 / inertia.getY() * fz_k);
 
@@ -438,7 +446,6 @@ public class ContinuousSLIPDynamicsTest
    {
       double mass = 11.0;
       double gravity = 9.81;
-      double nominalLength = 1.2;
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
@@ -546,7 +553,6 @@ public class ContinuousSLIPDynamicsTest
    {
       double mass = 11.0;
       double gravity = 9.81;
-      double nominalLength = 1.2;
       double epsilon = 1e-7;
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
