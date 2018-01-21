@@ -167,10 +167,9 @@ public class FramePoseTest
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate, framePose);
 
       double positionDistance = framePose.getPositionDistance(framePoseCopy);
-      double orientationDistance = framePose.getOrientationDistance(framePoseCopy);
+      double orientationDistance = AngleTools.trimAngleMinusPiToPi(framePose.getOrientationDistance(framePoseCopy));
 
-      double angleToRotate0to2PI = angleToRotate % (2.0 * Math.PI);
-      double desiredOrientationDistance = Math.min(angleToRotate0to2PI, 2.0 * Math.PI - angleToRotate0to2PI);
+      double desiredOrientationDistance = AngleTools.trimAngleMinusPiToPi(angleToRotate);
 
       assertTrue("Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
             + worldFrame.getName(), framePose.getReferenceFrame() == worldFrame);
