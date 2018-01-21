@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
@@ -63,6 +64,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       double cost = costFunction.getCost(SLIPState.FLIGHT, currentControl, currentState, constants);
 
@@ -148,7 +150,6 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    public void testCostStateGradient()
    {
       double mass = 15.0;
-      double nominalLength = 1.5;
       double gravityZ = 9.81;
       SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, gravityZ);
 
@@ -156,6 +157,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DenseMatrix64F expectedGradient = new DenseMatrix64F(stateVectorSize, 1);
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, 1);
@@ -169,6 +171,9 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       double xf_k = currentControl.get(xF);
       double yf_k = currentControl.get(yF);
 
+      double zf_k = constants.get(zF);
+      double nominalPendulumLength = constants.get(nominalLength);
+
       double fx_k = currentControl.get(fx);
       double fy_k = currentControl.get(fy);
       double fz_k = currentControl.get(fz);
@@ -179,23 +184,24 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
 
       double relativeX = x_k - xf_k;
       double relativeY = y_k - yf_k;
+      double relativeZ = z_k - zf_k;
 
 
       double k_k = currentControl.get(k);
 
-      double length = Math.sqrt(relativeX * relativeX + relativeY * relativeY + z_k * z_k);
+      double length = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
 
 
-      double dynamicsXError = fx_k - k_k * (nominalLength / length - 1.0) * relativeX;
-      double dynamicsYError = fy_k - k_k * (nominalLength / length - 1.0) * relativeY;
-      double dynamicsZError = fz_k - k_k * (nominalLength / length - 1.0) * z_k;
-      double dynamicsTauXError = tauX_k + z_k * fy_k - (y_k - yf_k) * fz_k;
-      double dynamicsTauYError = tauY_k - z_k * fx_k - (xf_k - x_k) * fz_k;
+      double dynamicsXError = fx_k - k_k * (nominalPendulumLength / length - 1.0) * relativeX;
+      double dynamicsYError = fy_k - k_k * (nominalPendulumLength / length - 1.0) * relativeY;
+      double dynamicsZError = fz_k - k_k * (nominalPendulumLength / length - 1.0) * relativeZ;
+      double dynamicsTauXError = tauX_k + relativeZ * fy_k - (y_k - yf_k) * fz_k;
+      double dynamicsTauYError = tauY_k - relativeZ * fx_k - (xf_k - x_k) * fz_k;
       double dynamicsTauZError = tauZ_k - (yf_k - y_k) * fx_k - (x_k - xf_k) * fy_k;
 
-      double gradientXXError = k_k * nominalLength * Math.pow(length, -3.0) * relativeX * relativeX - k_k * nominalLength / length + k_k;
-      double gradientXYError = k_k * nominalLength * Math.pow(length, -3.0) * relativeX * relativeY;
-      double gradientXZError = k_k * nominalLength * Math.pow(length, -3.0) * relativeX * z_k;
+      double gradientXXError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeX - k_k * nominalPendulumLength / length + k_k;
+      double gradientXYError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeY;
+      double gradientXZError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeZ;
       double gradientXTauXError = 0.0;
       double gradientXTauYError = fz_k;
       double gradientXTauZError = -fy_k;
@@ -208,9 +214,9 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       double expectedXTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientXTauZError * dynamicsTauZError;
       double expectedX = expectedXX + expectedXY + expectedXZ + expectedXTauX + expectedXTauY + expectedXTauZ;
 
-      double gradientYXError = k_k * nominalLength * Math.pow(length, -3.0) * relativeX * relativeY;
-      double gradientYYError = k_k * nominalLength * Math.pow(length, -3.0) * relativeY * relativeY - k_k * nominalLength / length + k_k;
-      double gradientYZError = k_k * nominalLength * Math.pow(length, -3.0) * relativeY * z_k;
+      double gradientYXError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeY;
+      double gradientYYError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeY * relativeY - k_k * nominalPendulumLength / length + k_k;
+      double gradientYZError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeY * relativeZ;
       double gradientYTauXError = -fz_k;
       double gradientYTauYError = 0.0;
       double gradientYTauZError = fx_k;
@@ -223,9 +229,9 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       double expectedYTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientYTauZError * dynamicsTauZError;
       double expectedY = expectedYX + expectedYY + expectedYZ + expectedYTauX + expectedYTauY + expectedYTauZ;
 
-      double gradientZXError = k_k * nominalLength * Math.pow(length, -3.0) * relativeX * z_k;
-      double gradientZYError = k_k * nominalLength * Math.pow(length, -3.0) * relativeY * z_k;
-      double gradientZZError = k_k * nominalLength * Math.pow(length, -3.0) * z_k * z_k - k_k * nominalLength / length + k_k;
+      double gradientZXError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeZ;
+      double gradientZYError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeY * relativeZ;
+      double gradientZZError = k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeZ * relativeZ - k_k * nominalPendulumLength / length + k_k;
       double gradientZTauXError = fy_k;
       double gradientZTauYError = -fx_k;
       double gradientZTauZError = 0.0;
@@ -250,7 +256,6 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
    public void testCostControlGradient()
    {
       double mass = 15.0;
-      double nominalLength = 1.5;
       double gravityZ = 9.81;
       SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, gravityZ);
 
@@ -258,6 +263,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DenseMatrix64F expectedGradient = new DenseMatrix64F(controlVectorSize, 1);
       DenseMatrix64F gradient = new DenseMatrix64F(controlVectorSize, 1);
@@ -270,7 +276,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
 
       double xf_k = currentControl.get(xF);
       double yf_k = currentControl.get(yF);
-      double zf_k = 0.0;
+      double zf_k = constants.get(zF);
 
       double fx_k = currentControl.get(fx);
       double fy_k = currentControl.get(fy);
@@ -284,14 +290,15 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       double relativeY = y_k - yf_k;
       double relativeZ = z_k - zf_k;
 
+      double nominalPendulumLength = constants.get(nominalLength);
 
       double k_k = currentControl.get(k);
 
       double length = Math.sqrt(relativeX * relativeX + relativeY * relativeY + relativeZ * relativeZ);
 
-      double dynamicsXError = fx_k - k_k * (nominalLength / length - 1.0) * relativeX;
-      double dynamicsYError = fy_k - k_k * (nominalLength / length - 1.0) * relativeY;
-      double dynamicsZError = fz_k - k_k * (nominalLength / length - 1.0) * relativeZ;
+      double dynamicsXError = fx_k - k_k * (nominalPendulumLength / length - 1.0) * relativeX;
+      double dynamicsYError = fy_k - k_k * (nominalPendulumLength / length - 1.0) * relativeY;
+      double dynamicsZError = fz_k - k_k * (nominalPendulumLength / length - 1.0) * relativeZ;
       double dynamicsTauXError = tauX_k - (zf_k - z_k) * fy_k - (y_k - yf_k) * fz_k;
       double dynamicsTauYError = tauY_k - (z_k - zf_k) * fx_k - (xf_k - x_k) * fz_k;
       double dynamicsTauZError = tauZ_k - (yf_k - y_k) * fx_k - (x_k - xf_k) * fy_k;
@@ -345,10 +352,9 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       double expectedTauY = 2.0 * SLIPModelForceTrackingCost.qTauY * dynamicsTauYError;
       double expectedTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * dynamicsTauZError;
 
-      // TODO xf, yf, k
-      double gradientXfXError = -k_k * (relativeX * relativeX * nominalLength * Math.pow(length, -3.0) - nominalLength / length + 1.0);
-      double gradientXfYError = -k_k * nominalLength * Math.pow(length, -3.0) * relativeX * relativeY;
-      double gradientXfZError = -k_k * nominalLength * Math.pow(length, -3.0) * relativeX * z_k;
+      double gradientXfXError = -k_k * (relativeX * relativeX * nominalPendulumLength * Math.pow(length, -3.0) - nominalPendulumLength / length + 1.0);
+      double gradientXfYError = -k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeY;
+      double gradientXfZError = -k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeZ;
       double gradientXfTauXError = 0.0;
       double gradientXfTauYError = -fz_k;
       double gradientXfTauZError = fy_k;
@@ -361,9 +367,9 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       double expectedXfTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientXfTauZError * dynamicsTauZError;
       double expectedXf = expectedXfX + expectedXfY + expectedXfZ + expectedXfTauX + expectedXfTauY + expectedXfTauZ;
 
-      double gradientYfXError = -k_k * nominalLength * Math.pow(length, -3.0) * relativeX * relativeY;
-      double gradientYfYError = -k_k * (nominalLength * Math.pow(length, -3.0) * relativeY * relativeY - nominalLength / length + 1.0);
-      double gradientYfZError = -k_k * nominalLength * Math.pow(length, -3.0) * relativeY * z_k;
+      double gradientYfXError = -k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeX * relativeY;
+      double gradientYfYError = -k_k * (nominalPendulumLength * Math.pow(length, -3.0) * relativeY * relativeY - nominalPendulumLength / length + 1.0);
+      double gradientYfZError = -k_k * nominalPendulumLength * Math.pow(length, -3.0) * relativeY * relativeZ;
       double gradientYfTauXError = fz_k;
       double gradientYfTauYError = 0.0;
       double gradientYfTauZError = -fx_k;
@@ -376,9 +382,9 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       double expectedYfTauZ = 2.0 * SLIPModelForceTrackingCost.qTauZ * gradientYfTauZError * dynamicsTauZError;
       double expectedYf = expectedYfX + expectedYfY + expectedYfZ + expectedYfTauX + expectedYfTauY + expectedYfTauZ;
 
-      double gradientKXError = -(nominalLength / length - 1.0) * relativeX;
-      double gradientKYError = -(nominalLength / length - 1.0) * relativeY;
-      double gradientKZError = -(nominalLength / length - 1.0) * z_k;
+      double gradientKXError = -(nominalPendulumLength / length - 1.0) * relativeX;
+      double gradientKYError = -(nominalPendulumLength / length - 1.0) * relativeY;
+      double gradientKZError = -(nominalPendulumLength / length - 1.0) * relativeZ;
       double gradientKTauXError = 0;
       double gradientKTauYError = 0;
       double gradientKTauZError = 0;

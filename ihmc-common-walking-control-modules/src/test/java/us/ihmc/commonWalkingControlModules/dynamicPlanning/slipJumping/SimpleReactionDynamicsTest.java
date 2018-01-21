@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -41,6 +42,7 @@ public class SimpleReactionDynamicsTest
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       currentControl.set(x, 0, desiredLinearAcceleration.getX() * mass);
       currentControl.set(y, 0, desiredLinearAcceleration.getY() * mass);
@@ -113,6 +115,7 @@ public class SimpleReactionDynamicsTest
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, stateVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize, stateVectorSize);
@@ -177,6 +180,7 @@ public class SimpleReactionDynamicsTest
       DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
       DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
       DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, controlVectorSize);
       DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize, controlVectorSize);
