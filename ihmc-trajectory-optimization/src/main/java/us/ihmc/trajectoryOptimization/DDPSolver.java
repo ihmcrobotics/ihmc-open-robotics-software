@@ -11,69 +11,75 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    private static final double lineSearchStartGain = 1.0;
    private static final double lineSearchGainMinimum = 0.0;
 
-   private final DiscreteOptimizationTrajectory previousTrajectory;
+   private final DiscreteOptimizationData previousSequence;
 
-   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction)
+   public DDPSolver(DiscreteHybridDynamics<E> dynamics)
    {
-      this(dynamics, costFunction, terminalCostFunction, false);
+      this(dynamics, false);
    }
 
-   public DDPSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction, boolean debug)
+   public DDPSolver(DiscreteHybridDynamics<E> dynamics, boolean debug)
    {
-      super(dynamics, costFunction, terminalCostFunction, debug);
+      super(dynamics, debug);
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
 
-      previousTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      previousSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
    }
 
    @Override
-   public void initializeFromLQRSolution(E dynamicsState, DiscreteOptimizationTrajectory optimalTrajectory, DiscreteOptimizationTrajectory desiredTrajectory,
-                                         RecyclingArrayList<DenseMatrix64F> feedbackGainTrajectory, RecyclingArrayList<DenseMatrix64F> feedForwardTrajectory)
+   public void initializeFromLQRSolution(E dynamicsState, LQTrackingCostFunction<E> costFunction, DiscreteOptimizationData optimalSequence,
+                                         DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence,
+                                         DiscreteSequence feedbackGainSequence, DiscreteSequence feedForwardSequence)
    {
-      super.initializeFromLQRSolution(dynamicsState, optimalTrajectory, desiredTrajectory, feedBackGainTrajectory, feedForwardTrajectory);
+      super.initializeFromLQRSolution(dynamicsState, costFunction, optimalSequence, desiredSequence, constantsSequence, feedBackGainSequence, feedForwardSequence);
 
-      previousTrajectory.setZeroTrajectory(optimalTrajectory);
+      previousSequence.setZero(optimalSequence);
    }
 
    @Override
-   public void initializeTrajectoriesFromDesireds(DenseMatrix64F initialCoM, DiscreteOptimizationTrajectory desiredTrajectory)
+   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence)
    {
-      super.initializeTrajectoriesFromDesireds(initialCoM, desiredTrajectory);
+      super.initializeSequencesFromDesireds(initialState, desiredSequence, constantsSequence);
 
-      previousTrajectory.setZeroTrajectory(desiredTrajectory);
+      previousSequence.setZero(desiredSequence);
    }
 
 
 
    @Override
-   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex, DiscreteOptimizationTrajectory trajectory)
+   public boolean backwardPass(E dynamicsState, int startIndex, int endIndex,
+                               LQTrackingCostFunction<E> terminalCostFunction, DiscreteOptimizationData trajectory)
    {
       boolean success = true;
 
-      DiscreteTrajectory stateTrajectory = trajectory.getStateTrajectory();
-      DiscreteTrajectory controlTrajectory = trajectory.getControlTrajectory();
-      DiscreteTrajectory desiredStateTrajectory = desiredTrajectory.getStateTrajectory();
-      DiscreteTrajectory desiredControlTrajectory = desiredTrajectory.getControlTrajectory();
+      DiscreteData stateSequence = trajectory.getStateSequence();
+      DiscreteData controlSequence = trajectory.getControlSequence();
+      DiscreteData desiredStateSequence = desiredSequence.getStateSequence();
+      DiscreteData desiredControlSequence = desiredSequence.getControlSequence();
 
-      terminalCostFunction.getCostStateHessian(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), valueStateHessianTrajectory.get(endIndex));
-      terminalCostFunction.getCostStateGradient(controlTrajectory.get(endIndex), stateTrajectory.get(endIndex), desiredControlTrajectory.get(endIndex),
-                                                desiredStateTrajectory.get(endIndex), valueStateGradientTrajectory.get(endIndex));
+      if (terminalCostFunction != null)
+      {
+         terminalCostFunction.getCostStateHessian(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), constantsSequence.get(endIndex),
+                                                  valueStateHessianSequence.get(endIndex));
+         terminalCostFunction.getCostStateGradient(dynamicsState, controlSequence.get(endIndex), stateSequence.get(endIndex), desiredControlSequence.get(endIndex),
+                                                   desiredStateSequence.get(endIndex), constantsSequence.get(endIndex), valueStateGradientSequence.get(endIndex));
+      }
 
       for (int t = endIndex; t >= startIndex; t--)
       {
-         DenseMatrix64F valueStateHessian = valueStateHessianTrajectory.get(t);
-         DenseMatrix64F valueStateGradient = valueStateGradientTrajectory.get(t);
+         DenseMatrix64F valueStateHessian = valueStateHessianSequence.get(t);
+         DenseMatrix64F valueStateGradient = valueStateGradientSequence.get(t);
 
-         DenseMatrix64F dynamicsStateGradient = dynamicsStateGradientTrajectory.get(t);
-         DenseMatrix64F dynamicsControlGradient = dynamicsControlGradientTrajectory.get(t);
+         DenseMatrix64F dynamicsStateGradient = dynamicsStateGradientSequence.get(t);
+         DenseMatrix64F dynamicsControlGradient = dynamicsControlGradientSequence.get(t);
 
-         DenseMatrix64F costStateGradient = costStateGradientTrajectory.get(t);
-         DenseMatrix64F costControlGradient = costControlGradientTrajectory.get(t);
-         DenseMatrix64F costStateHessian = costStateHessianTrajectory.get(t);
-         DenseMatrix64F costControlHessian = costControlHessianTrajectory.get(t);
-         DenseMatrix64F costStateControlHessian = costStateControlHessianTrajectory.get(t);
+         DenseMatrix64F costStateGradient = costStateGradientSequence.get(t);
+         DenseMatrix64F costControlGradient = costControlGradientSequence.get(t);
+         DenseMatrix64F costStateHessian = costStateHessianSequence.get(t);
+         DenseMatrix64F costControlHessian = costControlHessianSequence.get(t);
+         DenseMatrix64F costStateControlHessian = costStateControlHessianSequence.get(t);
 
          updateHamiltonianApproximations(dynamicsState, t, costStateGradient, costControlGradient, costStateHessian, costControlHessian, costStateControlHessian,
                                          dynamicsStateGradient, dynamicsControlGradient, valueStateGradient, valueStateHessian, hamiltonianStateGradient,
@@ -81,7 +87,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
                                          hamiltonianControlStateHessian);
 
          success = computeFeedbackGainAndFeedForwardTerms(hamiltonianControlGradient, hamiltonianControlHessian, hamiltonianControlStateHessian,
-                                                          feedBackGainTrajectory.get(t), feedForwardTrajectory.get(t));
+                                                          feedBackGainSequence.get(t), feedForwardSequence.get(t));
          if (!success)
             break;
 
@@ -89,7 +95,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
          if (t > 0)
          {
             computePreviousValueApproximation(hamiltonianStateGradient, hamiltonianControlGradient, hamiltonianStateHessian, hamiltonianStateControlHessian,
-                                              feedBackGainTrajectory.get(t), valueStateGradientTrajectory.get(t- 1), valueStateHessianTrajectory.get(t - 1));
+                                              feedBackGainSequence.get(t), valueStateGradientSequence.get(t- 1), valueStateHessianSequence.get(t - 1));
          }
       }
 
@@ -97,7 +103,8 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public double forwardPass(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM, DiscreteOptimizationTrajectory updatedTrajectory)
+   public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
+                             DiscreteOptimizationData updatedSequence)
    {
       lineSearchGain = lineSearchStartGain;
       boolean iterate = true;
@@ -105,7 +112,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       double updatedCost = 0.0;
       while(iterate)
       {
-         updatedCost = solveForwardDDPPassInternal(dynamicsState, startIndex, endIndex, initialCoM, previousTrajectory);
+         updatedCost = solveForwardDDPPassInternal(dynamicsState, startIndex, endIndex, costFunction, initialState, previousSequence);
 
          if (Double.isInfinite(updatedCost))
          {
@@ -117,7 +124,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
          }
          else
          {
-            updatedTrajectory.set(previousTrajectory);
+            updatedSequence.set(previousSequence);
             iterate = false;
          }
 
@@ -128,29 +135,30 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       return updatedCost;
    }
 
-   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, DenseMatrix64F initialCoM,
-                                              DiscreteOptimizationTrajectory updatedTrajectory)
+   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
+                                              DiscreteOptimizationData updatedSequence)
    {
-      updatedTrajectory.setState(startIndex, initialCoM);
+      updatedSequence.setState(startIndex, initialState);
 
       double cost = 0.0;
 
       for (int t = startIndex; t < endIndex; t++)
       {
-         DenseMatrix64F state = optimalTrajectory.getState(t);
-         DenseMatrix64F updatedState = updatedTrajectory.getState(t);
-         DenseMatrix64F updatedControl = updatedTrajectory.getControl(t);
+         DenseMatrix64F state = optimalSequence.getState(t);
+         DenseMatrix64F updatedState = updatedSequence.getState(t);
+         DenseMatrix64F updatedControl = updatedSequence.getControl(t);
+         DenseMatrix64F constants = constantsSequence.get(t);
 
          if (isStateDiverging(updatedState, state))
             return Double.POSITIVE_INFINITY;
 
-         computeUpdatedControl(state, updatedState, feedBackGainTrajectory.get(t), feedForwardTrajectory.get(t), optimalTrajectory.getControl(t), updatedControl);
+         computeUpdatedControl(state, updatedState, feedBackGainSequence.get(t), feedForwardSequence.get(t), optimalSequence.getControl(t), updatedControl);
 
-         if (t < desiredTrajectory.size() - 1)
-            dynamics.getNextState(dynamicsState, updatedState, updatedControl, updatedTrajectory.getState(t + 1));
+         if (t < desiredSequence.size() - 1)
+            dynamics.getNextState(dynamicsState, updatedState, updatedControl, constants, updatedSequence.getState(t + 1));
 
          // compute cost
-         cost += costFunction.getCost(updatedControl, updatedState, desiredTrajectory.getControl(t), desiredTrajectory.getState(t));
+         cost += costFunction.getCost(dynamicsState, updatedControl, updatedState, desiredSequence.getControl(t), desiredSequence.getState(t), constants);
       }
 
       return cost;

@@ -19,9 +19,7 @@ public class DDPSolverTest
    public void testComputeUpdatedControl()
    {
       TestDynamics dynamics = new TestDynamics();
-      LQCostFunction costFunction = new BasicLQCostFunction();
-      LQCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       DenseMatrix64F feedforwardTerm = new DenseMatrix64F(3, 1);
 
@@ -145,9 +143,7 @@ public class DDPSolverTest
       DenseMatrix64F QxuExpected = new DenseMatrix64F(6, 3);
 
       TestDynamics dynamics = new TestDynamics();
-      LQCostFunction costFunction = new BasicLQCostFunction();
-      LQCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       calculator.updateHamiltonianApproximations(DefaultDiscreteState.DEFAULT, 0, L_X, L_U, L_XX, L_UU, L_XU, f_X, f_U, V_X, V_XX, Qx, Qu, Qxx, Quu, Qxu, Qux);
 
@@ -189,9 +185,7 @@ public class DDPSolverTest
    public void testComputePreviousValueApproximation()
    {
       TestDynamics dynamics = new TestDynamics();
-      LQCostFunction costFunction = new BasicLQCostFunction();
-      LQCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
       DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
@@ -321,9 +315,7 @@ public class DDPSolverTest
    public void testComputeFeedbackGainAndFeedForwardTerm()
    {
       TestDynamics dynamics = new TestDynamics();
-      LQCostFunction costFunction = new BasicLQCostFunction();
-      LQCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       DenseMatrix64F Q_UU = new DenseMatrix64F(3, 3);
       DenseMatrix64F Q_UU_inv = new DenseMatrix64F(3, 3);
@@ -454,9 +446,7 @@ public class DDPSolverTest
       DenseMatrix64F d_original = new DenseMatrix64F(d);
 
       TestDynamics dynamics = new TestDynamics();
-      LQCostFunction costFunction = new BasicLQCostFunction();
-      LQCostFunction terminalCostFunction = new BasicLQCostFunction();
-      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics, costFunction, terminalCostFunction);
+      DDPSolver<DefaultDiscreteState> calculator = new DDPSolver<>(dynamics);
 
       calculator.addMultQuad(a, b, c, d);
 
@@ -511,49 +501,56 @@ public class DDPSolverTest
       }
 
       @Override
-      public void getNextState(DefaultDiscreteState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+      public int getConstantVectorSize()
+      {
+         return 0;
+      }
+
+      @Override
+      public void getNextState(DefaultDiscreteState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
+                               DenseMatrix64F matrixToPack)
       {
 
       }
 
       @Override
       public void getDynamicsStateGradient(DefaultDiscreteState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                           DenseMatrix64F matrixToPack)
+                                           DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
 
       }
 
       @Override
       public void getDynamicsControlGradient(DefaultDiscreteState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                             DenseMatrix64F matrixToPack)
+                                             DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
 
       }
 
       @Override
       public void getDynamicsStateHessian(DefaultDiscreteState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                          DenseMatrix64F matrixToPack)
+                                          DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
 
       }
 
       @Override
       public void getDynamicsControlHessian(DefaultDiscreteState hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                            DenseMatrix64F matrixToPack)
+                                            DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
 
       }
 
       @Override
       public void getDynamicsStateGradientOfControlGradient(DefaultDiscreteState hybridState, int stateVariable, DenseMatrix64F currentState,
-                                                            DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+                                                            DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
 
       }
 
       @Override
       public void getDynamicsControlGradientOfStateGradient(DefaultDiscreteState hybridState, int controlVariable, DenseMatrix64F currentState,
-                                                            DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+                                                            DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
 
       }
@@ -571,51 +568,49 @@ public class DDPSolverTest
       }
    }
 
-   private class BasicLQCostFunction implements LQCostFunction
+   private class BasicLQCostFunction implements LQTrackingCostFunction<DefaultDiscreteState>
    {
-
       @Override
-      public double getCost(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector, DenseMatrix64F desiredStateVector)
+      public double getCost(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                            DenseMatrix64F desiredStateVector, DenseMatrix64F constants)
       {
          return 0;
       }
 
       @Override
-      public void getCostStateGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                                       DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+      public void getCostStateGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                                       DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
-
       }
 
       @Override
-      public void getCostControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                                         DenseMatrix64F desiredStateVector, DenseMatrix64F matrixToPack)
+      public void getCostControlGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
+                                         DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
-
       }
 
       @Override
-      public void getCostStateHessian(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+      public void getCostStateHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                      DenseMatrix64F matrixToPack)
       {
-
       }
 
       @Override
-      public void getCostControlHessian(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+      public void getCostControlHessian(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
+                                        DenseMatrix64F matrixToPack)
       {
-
       }
 
       @Override
-      public void getCostStateGradientOfControlGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+      public void getCostStateGradientOfControlGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
+                                                        DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
-
       }
 
       @Override
-      public void getCostControlGradientOfStateGradient(DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F matrixToPack)
+      public void getCostControlGradientOfStateGradient(DefaultDiscreteState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector,
+                                                        DenseMatrix64F constants, DenseMatrix64F matrixToPack)
       {
-
       }
    }
 }

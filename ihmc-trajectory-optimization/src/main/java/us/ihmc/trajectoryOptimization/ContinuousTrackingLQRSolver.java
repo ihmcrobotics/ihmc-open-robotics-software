@@ -7,13 +7,14 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
 {
-   private final DiscreteOptimizationTrajectory optimalTrajectory;
-   private final DiscreteOptimizationTrajectory desiredTrajectory;
+   private final DiscreteOptimizationData optimalSequence;
+   private final DiscreteOptimizationData desiredSequence;
 
-   private final RecyclingArrayList<DenseMatrix64F> feedbackGainTrajectory;
+   private final DiscreteSequence feedbackGainSequence;
+   private final DiscreteSequence constantsSequence;
 
-   private final RecyclingArrayList<DenseMatrix64F> S2Trajectory;
-   private final RecyclingArrayList<DenseMatrix64F> S1Trajectory;
+   private final RecyclingArrayList<DenseMatrix64F> S2Sequence;
+   private final RecyclingArrayList<DenseMatrix64F> S1Sequence;
 
    private final DenseMatrix64F Q;
    private final DenseMatrix64F R;
@@ -30,19 +31,19 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    private final DenseMatrix64F R_invBT;
 
    private final DiscreteHybridDynamics<E> dynamics;
-   private final LQCostFunction costFunction;
-   private final LQCostFunction terminalCostFunction;
+   private final LQTrackingCostFunction<E> costFunction;
+   private final LQTrackingCostFunction<E> terminalCostFunction;
 
    private final double deltaT;
 
    private final boolean debug;
 
-   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
+   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction costFunction, LQTrackingCostFunction terminalCostFunction,
                                       double deltaT)
    {
       this(dynamics, costFunction, terminalCostFunction, deltaT, false);
    }
-   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQCostFunction costFunction, LQCostFunction terminalCostFunction,
+   public ContinuousTrackingLQRSolver(DiscreteHybridDynamics<E> dynamics, LQTrackingCostFunction<E> costFunction, LQTrackingCostFunction<E> terminalCostFunction,
                                       double deltaT, boolean debug)
    {
       this.dynamics = dynamics;
@@ -53,6 +54,7 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
 
       int stateSize = dynamics.getStateVectorSize();
       int controlSize = dynamics.getControlVectorSize();
+      int constantSize = dynamics.getConstantVectorSize();
 
       Q = new DenseMatrix64F(stateSize, stateSize);
       Qf = new DenseMatrix64F(stateSize, stateSize);
@@ -71,39 +73,40 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       VariableVectorBuilder stateBuilder = new VariableVectorBuilder(stateSize, 1);
       VariableVectorBuilder hessianBuilder = new VariableVectorBuilder(stateSize, stateSize);
 
-      optimalTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
-      desiredTrajectory = new DiscreteOptimizationTrajectory(stateSize, controlSize);
+      optimalSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
+      desiredSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
 
-      feedbackGainTrajectory = new RecyclingArrayList<>(1000, new VariableVectorBuilder(controlSize, stateSize));
+      constantsSequence = new DiscreteSequence(constantSize, 1);
+      feedbackGainSequence = new DiscreteSequence(controlSize, stateSize);
 
-      S2Trajectory = new RecyclingArrayList<>(1000, hessianBuilder);
-      S1Trajectory = new RecyclingArrayList<>(1000, stateBuilder);
+      S2Sequence = new RecyclingArrayList<>(1000, hessianBuilder);
+      S1Sequence = new RecyclingArrayList<>(1000, stateBuilder);
 
-      feedbackGainTrajectory.clear();
+      feedbackGainSequence.clear();
 
-      S2Trajectory.clear();
-      S1Trajectory.clear();
+      S2Sequence.clear();
+      S1Sequence.clear();
    }
 
    @Override
-   public void setDesiredTrajectory(DiscreteOptimizationTrajectory desiredTrajectory, DenseMatrix64F initialState)
+   public void setDesiredSequence(DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence, DenseMatrix64F initialState)
    {
-      this.desiredTrajectory.set(desiredTrajectory);
-      this.optimalTrajectory.setZeroTrajectory(desiredTrajectory);
+      this.desiredSequence.set(desiredSequence);
+      this.optimalSequence.setZero(desiredSequence);
 
-      this.S2Trajectory.clear();
-      this.S1Trajectory.clear();
-      this.feedbackGainTrajectory.clear();
+      this.S2Sequence.clear();
+      this.S1Sequence.clear();
 
-      for (int i = 0; i < desiredTrajectory.size(); i++)
+      this.feedbackGainSequence.setLength(desiredSequence.size());
+      this.constantsSequence.set(constantsSequence);
+
+      for (int i = 0; i < desiredSequence.size(); i++)
       {
-         S2Trajectory.add();
-         S1Trajectory.add();
-
-         feedbackGainTrajectory.add();
+         S2Sequence.add();
+         S1Sequence.add();
       }
 
-      optimalTrajectory.setState(0, initialState);
+      optimalSequence.setState(0, initialState);
    }
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
@@ -113,14 +116,15 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       int controlSize = dynamics.getControlVectorSize();
 
       int i = endIndex;
-      DenseMatrix64F state = optimalTrajectory.getState(i);
-      DenseMatrix64F control = optimalTrajectory.getControl(i);
-      DenseMatrix64F desiredState = desiredTrajectory.getState(i);
+      DenseMatrix64F state = optimalSequence.getState(i);
+      DenseMatrix64F control = optimalSequence.getControl(i);
+      DenseMatrix64F desiredState = desiredSequence.getState(i);
+      DenseMatrix64F constants = constantsSequence.get(i);
       DenseMatrix64F desiredControl;
 
-      costFunction.getCostStateHessian(state, control, Q);
-      costFunction.getCostControlHessian(state, control, R);
-      terminalCostFunction.getCostStateHessian(state, control, Qf);
+      costFunction.getCostStateHessian(dynamicState, state, control, constants, Q);
+      costFunction.getCostControlHessian(dynamicState, state, control, constants, R);
+      terminalCostFunction.getCostStateHessian(dynamicState, state, control, constants, Qf);
 
       dynamics.getContinuousAMatrix(A);
       dynamics.getContinuousBMatrix(B);
@@ -129,19 +133,19 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
       CommonOps.multTransB(R_inv, B, R_invBT);
 
 
-      DenseMatrix64F initialS2 = this.S2Trajectory.get(i);
-      DenseMatrix64F initialS1 = this.S1Trajectory.get(i);
+      DenseMatrix64F initialS2 = this.S2Sequence.get(i);
+      DenseMatrix64F initialS1 = this.S1Sequence.get(i);
       initialS2.set(Qf);
       CommonOps.mult(-2.0, Qf, desiredState, initialS1);
 
       // backward pass
       for (; i > startIndex; i--)
       {
-         desiredState = desiredTrajectory.getState(i);
-         desiredControl = desiredTrajectory.getControl(i);
+         desiredState = desiredSequence.getState(i);
+         desiredControl = desiredSequence.getControl(i);
 
-         DenseMatrix64F currentS2 = S2Trajectory.get(i);
-         DenseMatrix64F currentS1 = S1Trajectory.get(i);
+         DenseMatrix64F currentS2 = S2Sequence.get(i);
+         DenseMatrix64F currentS1 = S1Sequence.get(i);
 
          // compute currentS2 dot
          S2Dot.set(Q);
@@ -164,8 +168,8 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
          CommonOps.multAdd(2.0, currentS2, tempMatrix, S1Dot);
 
          // compute previous currentS2 and currentS1
-         DenseMatrix64F previousS2 = S2Trajectory.get(i - 1);
-         DenseMatrix64F previousS1 = S1Trajectory.get(i - 1);
+         DenseMatrix64F previousS2 = S2Sequence.get(i - 1);
+         DenseMatrix64F previousS1 = S1Sequence.get(i - 1);
 
          previousS2.set(currentS2);
          previousS1.set(currentS1);
@@ -180,19 +184,19 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    }
 
    // forward pass
-   public void computeOptimalTrajectories(E dynamicsState, int startIndex, int endIndex) // forward pass
+   public void computeOptimalSequences(E dynamicsState, int startIndex, int endIndex) // forward pass
    {
       int stateSize = dynamics.getStateVectorSize();
       for (int i = startIndex; i < endIndex; i++)
       {
-         DenseMatrix64F desiredControl = desiredTrajectory.getControl(i);
-         DenseMatrix64F state = optimalTrajectory.getState(i);
-         DenseMatrix64F control = optimalTrajectory.getControl(i);
-         DenseMatrix64F gain = feedbackGainTrajectory.get(i);
+         DenseMatrix64F desiredControl = desiredSequence.getControl(i);
+         DenseMatrix64F state = optimalSequence.getState(i);
+         DenseMatrix64F control = optimalSequence.getControl(i);
+         DenseMatrix64F gain = feedbackGainSequence.get(i);
 
-         DenseMatrix64F nextState = optimalTrajectory.getState(i + 1);
-         DenseMatrix64F S2 = S2Trajectory.get(i);
-         DenseMatrix64F S1 = S1Trajectory.get(i);
+         DenseMatrix64F nextState = optimalSequence.getState(i + 1);
+         DenseMatrix64F S2 = S2Sequence.get(i);
+         DenseMatrix64F S1 = S1Sequence.get(i);
 
          control.set(desiredControl);
 
@@ -219,31 +223,31 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    }
 
    @Override
-   public void getOptimalTrajectory(DiscreteOptimizationTrajectory optimalTrajectoryToPack)
+   public void getOptimalSequence(DiscreteOptimizationData optimalSequenceToPack)
    {
-      optimalTrajectoryToPack.set(optimalTrajectory);
+      optimalSequenceToPack.set(optimalSequence);
    }
 
    @Override
-   public DiscreteOptimizationTrajectory getOptimalTrajectory()
+   public DiscreteOptimizationData getOptimalSequence()
    {
-      return optimalTrajectory;
+      return optimalSequence;
    }
 
    @Override
-   public DiscreteTrajectory getOptimalStateTrajectory()
+   public DiscreteData getOptimalStateSequence()
    {
-      return optimalTrajectory.getStateTrajectory();
+      return optimalSequence.getStateSequence();
    }
 
    @Override
-   public DiscreteTrajectory getOptimalControlTrajectory()
+   public DiscreteData getOptimalControlSequence()
    {
-      return optimalTrajectory.getControlTrajectory();
+      return optimalSequence.getControlSequence();
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedbackGainTrajectory()
+   public DiscreteSequence getOptimalFeedbackGainSequence()
    {
       throw new RuntimeException("this isn't implemented correctly.");
    }
@@ -251,11 +255,11 @@ public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInt
    @Override
    public DenseMatrix64F getValueHessian()
    {
-      return S1Trajectory.get(0);
+      return S1Sequence.get(0);
    }
 
    @Override
-   public RecyclingArrayList<DenseMatrix64F> getOptimalFeedForwardControlTrajectory()
+   public DiscreteSequence getOptimalFeedForwardControlSequence()
    {
       throw new RuntimeException("this isn't implemented correctly.");
    }
