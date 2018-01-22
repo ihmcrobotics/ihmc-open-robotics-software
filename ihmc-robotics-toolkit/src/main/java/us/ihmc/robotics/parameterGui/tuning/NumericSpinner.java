@@ -88,9 +88,9 @@ public abstract class NumericSpinner <T extends Number> extends Spinner<T>
       getEditor().setText(getValueFactory().getConverter().toString(getValue()));
    }
 
-   public String getText()
+   public String getValueAsText()
    {
-      return getEditor().getText();
+      return convertNumberToString(getValue());
    }
 
    public void addListener(ChangeListener<T> listener)

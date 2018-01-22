@@ -64,7 +64,7 @@ public abstract class NumericTuner <T extends Number> extends HBox
 
       value.addListener((observable, oldValue, newValue) -> {
          Platform.runLater(() -> {
-            parameter.setValue(value.getText());
+            parameter.setValue(value.getValueAsText());
          });
       });
 
@@ -72,7 +72,7 @@ public abstract class NumericTuner <T extends Number> extends HBox
          Platform.runLater(() -> {
             max.setMinValue(min.getValue());
             value.setMinValue(min.getValue());
-            parameter.setMin(min.getText());
+            parameter.setMin(min.getValueAsText());
          });
       });
 
@@ -80,7 +80,7 @@ public abstract class NumericTuner <T extends Number> extends HBox
          Platform.runLater(() -> {
             min.setMaxValue(max.getValue());
             value.setMaxValue(max.getValue());
-            parameter.setMax(max.getText());
+            parameter.setMax(max.getValueAsText());
          });
       });
 
