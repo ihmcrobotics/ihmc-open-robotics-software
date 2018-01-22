@@ -49,6 +49,9 @@ public class Tuner extends VBox
       case "DoubleParameter":
          getChildren().add(new DoubleTuner(parameter));
          break;
+      case "IntegerParameter":
+         getChildren().add(new IntegerTuner(parameter));
+         break;
       default:
          PrintTools.info("Implement me.");
       }
