@@ -26,11 +26,11 @@ public class SLIPTerminalCost implements LQTrackingCostFunction<SLIPState>
    static double rFx = 0e0;
    static double rFy = 0e0;
    static double rFz = 0e0;
-   static double rTauX = 0e10;
-   static double rTauY = 0e10;
-   static double rTauZ = 0e10;
-   static double rXf = 0e0;
-   static double rYf = 0e0;
+   static double rTauX = 0e0;
+   static double rTauY = 0e0;
+   static double rTauZ = 0e0;
+   static double rXf = 1e5;
+   static double rYf = 1e5;
    static double rK = 0e0;
 
    private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
