@@ -61,10 +61,12 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private static final double nominalComHeight = 1.0;
    private static final double length = 1.5;
    private static final double gravityZ = 9.81;
+   private static final double height = 0.3;
 
    private static final double mass = 150.0;
 
-   private static final int numberOfJumps = 5;
+   private static final int numberOfJumps = 3;
+   private static final int numberOfHeights = 2;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
 
@@ -99,7 +101,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
 
    public SLIPJumpingDDPCalculatorVisualizer()
    {
-      for (int i = 0; i < numberOfJumps; i++)
+      for (int i = 0; i < numberOfJumps * numberOfHeights; i++)
       {
          copTracks.add(new BagOfBalls(numberOfBalls, 0.005, "CoP" + i, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL, registry, yoGraphicsListRegistry));
          comTracks.add(new BagOfBalls(numberOfBalls, 0.005, "CoM" + i, YoAppearance.Black(), YoGraphicPosition.GraphicType.BALL, registry, yoGraphicsListRegistry));
@@ -142,7 +144,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            for (int i = 0; i < numberOfJumps; i++)
+            for (int i = 0; i < numberOfJumps * numberOfHeights; i++)
                ddpSolvers.get(i).setDeltaT(trajectoryDT.getDoubleValue());
          }
       });
@@ -154,7 +156,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
          contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
-      for (int i = 0; i < numberOfJumps; i++)
+      for (int i = 0; i < numberOfJumps * numberOfHeights; i++)
       {
          yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextFootstep" + i, footstepGraphics, yoNextFootstepPoses.get(i), 1.0));
          yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextNextFootstep" + i, footstepGraphics, yoNextNextFootstepPoses.get(i), 1.0));
@@ -181,8 +183,12 @@ public class SLIPJumpingDDPCalculatorVisualizer
       for (int i = 0; i < numberOfJumps; i++)
       {
          double lengthFraction = ((double)(numberOfJumps - i)) / ((double) numberOfJumps);
-         leftFoot.add(new Footstep(RobotSide.LEFT, new FramePose3D(new FramePoint3D(worldFrame, lengthFraction * length, 0.1 - 0.5 * i, 0.0), new FrameQuaternion())));
-         rightFoot.add(new Footstep(RobotSide.RIGHT, new FramePose3D(new FramePoint3D(worldFrame, lengthFraction * length, -0.1 - 0.5 * i, 0.0), new FrameQuaternion())));
+         for (int j = 0; j < numberOfHeights; j++)
+         {
+            double heightFraction = ((double) j) / ((double) numberOfHeights);
+            leftFoot.add(new Footstep(RobotSide.LEFT, new FramePose3D(new FramePoint3D(worldFrame, lengthFraction * length, 0.1 - 0.5 * (numberOfHeights * i + j), heightFraction * height), new FrameQuaternion())));
+            rightFoot.add(new Footstep(RobotSide.RIGHT, new FramePose3D(new FramePoint3D(worldFrame, lengthFraction * length, -0.1 - 0.5 * (numberOfHeights * i + j), heightFraction * height), new FrameQuaternion())));
+         }
       }
 
       simulate();
@@ -198,32 +204,39 @@ public class SLIPJumpingDDPCalculatorVisualizer
    {
       for (int jumpNumber = 0; jumpNumber < numberOfJumps; jumpNumber++)
       {
-         double lengthFraction = ((double)(numberOfJumps - jumpNumber)) / ((double) numberOfJumps);
-         startPoint.set(0, -0.5 * jumpNumber, 0.0);
-         endPoint.set(lengthFraction * length, -0.5 * jumpNumber, 0.0);
+         double lengthFraction = ((double) (numberOfJumps - jumpNumber)) / ((double) numberOfJumps);
+         for (int heightNumber = 0; heightNumber < numberOfHeights; heightNumber++)
+         {
+            int number = jumpNumber * numberOfHeights + heightNumber;
 
-         updateUpcomingFootstepsViz(jumpNumber, leftFoot.get(jumpNumber), rightFoot.get(jumpNumber));
+            double heightFraction = ((double) heightNumber) / ((double) numberOfHeights);
+            startPoint.set(0, -0.5 * number, 0.0);
+            endPoint.set(lengthFraction * length, -0.5 * number, heightFraction * height);
 
-         DenseMatrix64F currentCoMState;
-         currentCoMState = new DenseMatrix64F(SLIPState.stateVectorSize, 1);
-         currentCoMState.set(SLIPState.y, 0, -0.5 * jumpNumber);
-         currentCoMState.set(SLIPState.z, 0, 1.0);
+            updateUpcomingFootstepsViz(number, leftFoot.get(number), rightFoot.get(number));
 
-         double jumpLength = startPoint.distance(endPoint);
-         double heightChange = endPoint.getZ() - startPoint.getZ();
-         double flightDuration = Math.sqrt(2.0 * (heightChange + jumpLength * Math.tan(landingAngle)) / gravityZ);
-         double apexHeight = 0.5 * Math.pow(jumpLength * Math.tan(landingAngle), 2.0) / (flightDuration * flightDuration * gravityZ);
+            DenseMatrix64F currentCoMState;
+            currentCoMState = new DenseMatrix64F(SLIPState.stateVectorSize, 1);
+            currentCoMState.set(SLIPState.y, 0, -0.5 * number);
+            currentCoMState.set(SLIPState.z, 0, 1.0);
 
-         apexPoint.interpolate(startPoint, endPoint, 0.5);
-         apexPoint.setZ(apexHeight + nominalComHeight);
+            double jumpLength = startPoint.distance(endPoint);
+            double heightChange = endPoint.getZ() - startPoint.getZ();
+            double flightDuration = Math.sqrt(2.0 * (heightChange + jumpLength * Math.tan(landingAngle)) / gravityZ);
+            double apexHeight = 0.5 * Math.pow(jumpLength * Math.tan(landingAngle), 2.0) / (flightDuration * flightDuration * gravityZ);
 
-         double nominalInitialStiffness = 4.0 * Math.PI * Math.PI * mass / Math.pow(Math.min(firstTransferDuration, maxSupportForExtension), 2.0);
-         double nominalFinalStiffness = 4.0 * Math.PI * Math.PI * mass / Math.pow(Math.min(secondTransferDuration, maxSupportForExtension), 2.0);
+            apexPoint.interpolate(startPoint, endPoint, 0.5);
+            apexPoint.setZ(apexHeight + nominalComHeight);
 
-         ddpSolvers.get(jumpNumber).initialize(currentCoMState, startPoint, apexPoint, endPoint, firstTransferDuration, flightDuration, secondTransferDuration,
-                                               nominalInitialStiffness, nominalFinalStiffness);
-         plotCoMPlan();
+            double nominalInitialStiffness = 4.0 * Math.PI * Math.PI * mass / Math.pow(Math.min(firstTransferDuration, maxSupportForExtension), 2.0);
+            double nominalFinalStiffness = 4.0 * Math.PI * Math.PI * mass / Math.pow(Math.min(secondTransferDuration, maxSupportForExtension), 2.0);
+
+            ddpSolvers.get(number).initialize(currentCoMState, startPoint, apexPoint, endPoint, firstTransferDuration, flightDuration, secondTransferDuration,
+                                  nominalInitialStiffness, nominalFinalStiffness);
+         }
       }
+
+      plotCoMPlan();
 
       while (true)
       {
@@ -233,8 +246,8 @@ public class SLIPJumpingDDPCalculatorVisualizer
 
             for (int i = 0; i < updatesPerRequest.getIntegerValue(); i++)
             {
-               for (int jumpNumber = 0; jumpNumber < numberOfJumps; jumpNumber++)
-                  ddpSolvers.get(jumpNumber).singleSolve();
+               for (int number = 0; number < numberOfJumps * numberOfHeights; number++)
+                  ddpSolvers.get(number).singleSolve();
             }
 
             plotCoMPlan();
@@ -248,11 +261,11 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private final FramePoint3D tempPoint = new FramePoint3D();
    private void plotCoMPlan()
    {
-      for (int jumpNumber = 0; jumpNumber < numberOfJumps; jumpNumber++)
+      for (int number = 0; number < numberOfJumps * numberOfHeights; number++)
       {
-         DiscreteOptimizationData trajectory = ddpSolvers.get(jumpNumber).getOptimalSequence();
+         DiscreteOptimizationData trajectory = ddpSolvers.get(number).getOptimalSequence();
 
-         comTracks.get(jumpNumber).reset();
+         comTracks.get(number).reset();
 
          for (int i = 0; i < trajectory.size(); i++)
          {
@@ -260,10 +273,10 @@ public class SLIPJumpingDDPCalculatorVisualizer
             DenseMatrix64F state = trajectory.getState(i);
 
             tempPoint.set(control.get(SLIPState.xF), control.get(SLIPState.yF), 0.0);
-            copTracks.get(jumpNumber).setBallLoop(tempPoint);
+            copTracks.get(number).setBallLoop(tempPoint);
 
             tempPoint.set(state.get(SLIPState.x), state.get(SLIPState.y), state.get(SLIPState.z));
-            comTracks.get(jumpNumber).setBallLoop(tempPoint);
+            comTracks.get(number).setBallLoop(tempPoint);
          }
       }
    }
