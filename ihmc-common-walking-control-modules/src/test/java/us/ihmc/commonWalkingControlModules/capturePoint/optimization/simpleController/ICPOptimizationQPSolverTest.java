@@ -641,7 +641,7 @@ public class ICPOptimizationQPSolverTest
          solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 10000.0);
          solver.setMaxCMPDistanceFromEdge(0.06);
          solver.setCopSafeDistanceToEdge(0.002);
-         solver.setFeedbackRegularizationWeight(0.0025);
+         solver.setFeedbackRateWeight(0.0025);
 
          // angular momentum
          solver.resetAngularMomentumConditions();
@@ -651,13 +651,13 @@ public class ICPOptimizationQPSolverTest
          FramePoint2D footstepLocation = new FramePoint2D(worldFrame, 0.29744601815922606, -0.6204387201028974);
          solver.resetFootstepConditions();
          solver.setFootstepAdjustmentConditions(0.27117253504559974, 9.999820184919336, 9.990452153569914, 1.0, footstepLocation);
-         solver.setFootstepRegularizationWeight(0.0);
+         solver.setFootstepRateWeight(0.0);
 
          // set previous solutions
          FramePoint2D previousFootstepSolution = new FramePoint2D(worldFrame, 0.2881204908019306, -0.6381315022331429);
          FramePoint2D previousFeedbackDeltaSolution = new FramePoint2D(worldFrame, -0.141764770527381, -0.04745626887921585);
-         solver.resetFootstepRegularization(previousFootstepSolution);
-         solver.resetFeedbackRegularization(previousFeedbackDeltaSolution);
+         solver.resetFootstepRate(previousFootstepSolution);
+         solver.resetFeedbackRate(previousFeedbackDeltaSolution);
 
          // set constraints
          FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);
@@ -708,7 +708,7 @@ public class ICPOptimizationQPSolverTest
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 100000.0);
       solver.setMaxCMPDistanceFromEdge(0.06);
       solver.setCopSafeDistanceToEdge(0.002);
-      solver.setFeedbackRegularizationWeight(0.0025);
+      solver.setFeedbackRateWeight(0.0025);
 
       // angular momentum
       solver.resetAngularMomentumConditions();
@@ -718,13 +718,13 @@ public class ICPOptimizationQPSolverTest
       FramePoint2D footstepLocation = new FramePoint2D(worldFrame, 0.297, -0.620);
       solver.resetFootstepConditions();
       solver.setFootstepAdjustmentConditions(0.271, 10.0, 10.0, 1.0, footstepLocation);
-      solver.setFootstepRegularizationWeight(0.0);
+      solver.setFootstepRateWeight(0.0);
 
       // set previous solutions
       FramePoint2D previousFootstepSolution = new FramePoint2D(worldFrame, 0.288, -0.638);
       FramePoint2D previousFeedbackDeltaSolution = new FramePoint2D(worldFrame, -0.142, -0.047);
-      solver.resetFootstepRegularization(previousFootstepSolution);
-      solver.resetFeedbackRegularization(previousFeedbackDeltaSolution);
+      solver.resetFootstepRate(previousFootstepSolution);
+      solver.resetFeedbackRate(previousFeedbackDeltaSolution);
 
       // set constraints
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);

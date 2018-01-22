@@ -43,7 +43,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final YoBoolean useAngularMomentum = new YoBoolean(yoNamePrefix + "UseAngularMomentum", registry);
 
-   private final YoBoolean scaleStepRegularizationWeightWithTime = new YoBoolean(yoNamePrefix + "ScaleStepRegularizationWeightWithTime", registry);
+   private final YoBoolean scaleStepRateWeightWithTime = new YoBoolean(yoNamePrefix + "ScaleStepRateWeightWithTime", registry);
    private final YoBoolean scaleFeedbackWeightWithGain = new YoBoolean(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
 
    private final YoBoolean isStanding = new YoBoolean(yoNamePrefix + "IsStanding", registry);
@@ -91,9 +91,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble maxAllowedDistanceCMPSupport = new YoDouble(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry);
    private final YoDouble safeCoPDistanceToEdge = new YoDouble(yoNamePrefix + "SafeCoPDistanceToEdge", registry);
 
-   private final YoDouble footstepRegularizationWeight = new YoDouble(yoNamePrefix + "FootstepRegularizationWeight", registry);
-   private final YoDouble feedbackRegularizationWeight = new YoDouble(yoNamePrefix + "FeedbackRegularizationWeight", registry);
-   private final YoDouble scaledFootstepRegularizationWeight = new YoDouble(yoNamePrefix + "ScaledFootstepRegularizationWeight", registry);
+   private final YoDouble footstepRateWeight = new YoDouble(yoNamePrefix + "FootstepRateWeight", registry);
+   private final YoDouble feedbackRateWeight = new YoDouble(yoNamePrefix + "FeedbackRateWeight", registry);
+   private final YoDouble scaledFootstepRateWeight = new YoDouble(yoNamePrefix + "ScaledFootstepRateWeight", registry);
    private final YoDouble dynamicsObjectiveWeight = new YoDouble(yoNamePrefix + "DynamicsObjectiveWeight", registry);
 
    private final YoDouble angularMomentumMinimizationWeight = new YoDouble(yoNamePrefix + "AngularMomentumMinimizationWeight", registry);
@@ -130,8 +130,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
 
-   private final boolean useFootstepRegularization;
-   private final boolean useFeedbackRegularization;
+   private final boolean useFootstepRate;
+   private final boolean useFeedbackRate;
 
    private boolean localUseStepAdjustment;
 
@@ -166,23 +166,23 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       dynamicsObjectiveDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier();
 
-      useFootstepRegularization = icpOptimizationParameters.useFootstepRegularization();
-      useFeedbackRegularization = icpOptimizationParameters.useFeedbackRegularization();
+      useFootstepRate = icpOptimizationParameters.useFootstepRate();
+      useFeedbackRate = icpOptimizationParameters.useFeedbackRate();
 
       useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
       useAngularMomentum.set(icpOptimizationParameters.useAngularMomentum());
 
-      scaleStepRegularizationWeightWithTime.set(icpOptimizationParameters.scaleStepRegularizationWeightWithTime());
+      scaleStepRateWeightWithTime.set(icpOptimizationParameters.scaleStepRateWeightWithTime());
       scaleFeedbackWeightWithGain.set(icpOptimizationParameters.scaleFeedbackWeightWithGain());
 
       footstepAdjustmentSafetyFactor.set(icpOptimizationParameters.getFootstepAdjustmentSafetyFactor());
       forwardFootstepWeight.set(icpOptimizationParameters.getForwardFootstepWeight());
       lateralFootstepWeight.set(icpOptimizationParameters.getLateralFootstepWeight());
-      footstepRegularizationWeight.set(icpOptimizationParameters.getFootstepRegularizationWeight());
+      footstepRateWeight.set(icpOptimizationParameters.getFootstepRateWeight());
 
       feedbackForwardWeight.set(icpOptimizationParameters.getFeedbackForwardWeight());
       feedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
-      feedbackRegularizationWeight.set(icpOptimizationParameters.getFeedbackRegularizationWeight());
+      feedbackRateWeight.set(icpOptimizationParameters.getFeedbackRateWeight());
       feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
 
@@ -213,8 +213,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       for (RobotSide robotSide : RobotSide.values)
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
 
-      boolean updateRegularizationAutomatically = true;
-      solver = new ICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRegularizationAutomatically);
+      boolean updateRateAutomatically = true;
+      solver = new ICPOptimizationQPSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO, updateRateAutomatically);
       solver.setConsiderAngularMomentumInAdjustment(icpOptimizationParameters.considerAngularMomentumInAdjustment());
       solver.setConsiderFeedbackInAdjustment(icpOptimizationParameters.considerFeedbackInAdjustment());
 
@@ -377,10 +377,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.initialTime.set(initialTime);
 
-      if (useFootstepRegularization)
+      if (useFootstepRate)
       {
          upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
-         solver.resetFootstepRegularization(tempPoint2d);
+         solver.resetFootstepRate(tempPoint2d);
       }
    }
 
@@ -447,7 +447,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       boolean includeFootsteps = computeWhetherToIncludeFootsteps();
 
-      scaleStepRegularizationWeightWithTime();
+      scaleStepRateWeightWithTime();
       scaleFeedbackWeightWithGain();
 
       submitSolverTaskConditions(omega0, includeFootsteps);
@@ -513,8 +513,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getDoubleValue());
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getDoubleValue());
 
-      if (useFeedbackRegularization)
-         solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
+      if (useFeedbackRate)
+         solver.setFeedbackRateWeight(feedbackRateWeight.getDoubleValue() / controlDT);
    }
 
    private void submitAngularMomentumTaskConditionsToSolver()
@@ -547,8 +547,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), tempPoint2d);
       }
 
-      if (useFootstepRegularization)
-         solver.setFootstepRegularizationWeight(scaledFootstepRegularizationWeight.getDoubleValue() / controlDT);
+      if (useFootstepRate)
+         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
    }
 
    private NoConvergenceException solveQP()
@@ -637,16 +637,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
    }
 
-   private void scaleStepRegularizationWeightWithTime()
+   private void scaleStepRateWeightWithTime()
    {
-      if (scaleStepRegularizationWeightWithTime.getBooleanValue())
+      if (scaleStepRateWeightWithTime.getBooleanValue())
       {
          double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getDoubleValue()) / swingDuration.getDoubleValue();
-         scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue() / alpha);
+         scaledFootstepRateWeight.set(footstepRateWeight.getDoubleValue() / alpha);
       }
       else
       {
-         scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue());
+         scaledFootstepRateWeight.set(footstepRateWeight.getDoubleValue());
       }
    }
 

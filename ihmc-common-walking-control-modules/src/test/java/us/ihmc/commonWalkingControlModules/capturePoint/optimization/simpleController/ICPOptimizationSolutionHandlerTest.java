@@ -427,7 +427,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 5.0;
       }
 
-      @Override public double getFootstepRegularizationWeight()
+      @Override public double getFootstepRateWeight()
       {
          return 0.0001;
       }
@@ -442,7 +442,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 2.0;
       }
 
-      @Override public double getFeedbackRegularizationWeight()
+      @Override public double getFeedbackRateWeight()
       {
          return 0.0001;
       }
@@ -472,7 +472,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 0.5;
       }
 
-      @Override public boolean scaleStepRegularizationWeightWithTime()
+      @Override public boolean scaleStepRateWeightWithTime()
       {
          return false;
       }
@@ -482,7 +482,7 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean useFeedbackRegularization()
+      @Override public boolean useFeedbackRate()
       {
          return false;
       }
@@ -497,7 +497,7 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean useFootstepRegularization()
+      @Override public boolean useFootstepRate()
       {
          return false;
       }

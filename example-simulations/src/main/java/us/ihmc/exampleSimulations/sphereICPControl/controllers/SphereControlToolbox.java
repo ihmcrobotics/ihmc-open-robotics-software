@@ -714,7 +714,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFootstepRegularizationWeight()
+         public double getFootstepRateWeight()
          {
             return 0.001;
          }
@@ -732,7 +732,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFeedbackRegularizationWeight()
+         public double getFeedbackRateWeight()
          {
             return 0.0001;
          }
@@ -768,7 +768,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean scaleStepRegularizationWeightWithTime()
+         public boolean scaleStepRateWeightWithTime()
          {
             return false;
          }
@@ -780,7 +780,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean useFeedbackRegularization()
+         public boolean useFeedbackRate()
          {
             return true;
          }
@@ -798,7 +798,7 @@ public class SphereControlToolbox
          }
 
         @Override
-         public boolean useFootstepRegularization()
+         public boolean useFootstepRate()
          {
             return true;
          }
