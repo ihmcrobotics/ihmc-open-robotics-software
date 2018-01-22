@@ -52,6 +52,9 @@ public class Tuner extends VBox
       case "IntegerParameter":
          getChildren().add(new IntegerTuner(parameter));
          break;
+      case "BooleanParameter":
+         getChildren().add(new BooleanTuner(parameter));
+         break;
       default:
          PrintTools.info("Implement me.");
       }

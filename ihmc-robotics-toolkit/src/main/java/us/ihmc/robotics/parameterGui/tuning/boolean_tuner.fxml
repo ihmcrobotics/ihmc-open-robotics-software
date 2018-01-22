@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root type="HBox" spacing="10.0" alignment="CENTER_LEFT"
+	maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="800"
+	xmlns:fx="http://javafx.com/fxml">
+	<children>
+		<CheckBox text="Value" fx:id="value" onAction="#handleButton"/>
+	</children>
+</fx:root>
