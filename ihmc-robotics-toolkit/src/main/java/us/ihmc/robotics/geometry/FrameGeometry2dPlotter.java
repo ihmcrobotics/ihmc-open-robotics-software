@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
@@ -563,9 +564,10 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private void drawLineSegment(FrameLineSegment2d frameLineSegment2d, Graphics graphics)
    {
-      Point2D[] points = frameLineSegment2d.lineSegment.getEndpointsCopy();
+      Point2DBasics firstEndpoint = frameLineSegment2d.lineSegment.getFirstEndpoint();
+      Point2DBasics secondEndpoint = frameLineSegment2d.lineSegment.getSecondEndpoint();
 
-      drawLine(points[0].getX(), points[0].getY(), points[1].getX(), points[1].getY(), graphics);
+      drawLine(firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY(), graphics);
    }
 
    private void drawPoint(FramePoint2D framePoint2d, Graphics graphics)

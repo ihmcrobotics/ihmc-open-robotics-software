@@ -48,7 +48,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public FrameLineSegment2d(ReferenceFrame referenceFrame, Point2DReadOnly[] endpoints)
    {
       this(referenceFrame);
-      this.lineSegment.set(endpoints);
+      this.lineSegment.set(endpoints[0], endpoints[1]);
    }
 
    public FrameLineSegment2d(ReferenceFrame referenceFrame, Point2DReadOnly firstEndpoint, Point2DReadOnly secondEndpoint)
@@ -151,12 +151,12 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
 
    public FramePoint2D getFirstEndpointCopy()
    {
-      return new FramePoint2D(referenceFrame, lineSegment.getFirstEndpointCopy());
+      return new FramePoint2D(referenceFrame, lineSegment.getFirstEndpoint());
    }
 
    public FramePoint2D getSecondEndpointCopy()
    {
-      return new FramePoint2D(referenceFrame, lineSegment.getSecondEndpointCopy());
+      return new FramePoint2D(referenceFrame, lineSegment.getSecondEndpoint());
    }
 
    public void getFirstEndpoint(FramePoint2D firstEndpointToPack)
@@ -281,7 +281,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
 
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
-      lineSegment.applyTransformAndProjectToXYPlane(transform);
+      lineSegment.applyTransform(transform, false);
    }
 
    public FrameLineSegment2d applyTransformCopy(Transform transform)
@@ -338,7 +338,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
-      Point2D projected = lineSegment.orthogonalProjectionCopy(point);
+      Point2DBasics projected = lineSegment.orthogonalProjectionCopy(point);
 
       return new FramePoint2D(point.getReferenceFrame(), projected);
    }
@@ -346,7 +346,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public FramePoint2D intersectionWith(FrameLine2d line)
    {
       checkReferenceFrameMatch(line);
-      Point2D intersection = this.lineSegment.intersectionWith(line.line);
+      Point2DBasics intersection = this.lineSegment.intersectionWith(line.line);
       if (intersection == null)
       {
          return null;
@@ -363,7 +363,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public boolean intersectionWith(FramePoint2D intersectionPointToPack, FrameLine2d line)
    {
       checkReferenceFrameMatch(line);
-      Point2D intersection = this.lineSegment.intersectionWith(line.line);
+      Point2DBasics intersection = this.lineSegment.intersectionWith(line.line);
 
       if (intersection == null)
          return false;
@@ -376,7 +376,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public FramePoint2D intersectionWith(FrameLineSegment2d secondLineSegment)
    {
       checkReferenceFrameMatch(secondLineSegment);
-      Point2D intersection = this.lineSegment.intersectionWith(secondLineSegment.lineSegment);
+      Point2DBasics intersection = this.lineSegment.intersectionWith(secondLineSegment.lineSegment);
       if (intersection == null)
       {
          return null;
@@ -387,7 +387,7 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
    public FramePoint2D[] intersectionWith(FrameConvexPolygon2d convexPolygon)
    {
       checkReferenceFrameMatch(convexPolygon);
-      Point2D[] intersection = this.lineSegment.intersectionWith(convexPolygon.convexPolygon);
+      Point2DBasics[] intersection = this.lineSegment.intersectionWith(convexPolygon.convexPolygon);
       FramePoint2D[] ret = new FramePoint2D[intersection.length];
       for (int i = 0; i < intersection.length; i++)
       {
@@ -416,16 +416,6 @@ public class FrameLineSegment2d extends FrameGeometryObject<FrameLineSegment2d, 
       checkReferenceFrameMatch(point);
 
       return this.lineSegment.isPointOnRightSideOfLineSegment(point);
-   }
-
-   public FrameLineSegment2d shiftToLeftCopy(double distanceToShift)
-   {
-      return new FrameLineSegment2d(referenceFrame, lineSegment.shiftToLeftCopy(distanceToShift));
-   }
-
-   public FrameLineSegment2d shiftToRightCopy(double distanceToShift)
-   {
-      return new FrameLineSegment2d(referenceFrame, lineSegment.shiftToRightCopy(distanceToShift));
    }
 
    public void shiftToLeft(double distanceToShift)

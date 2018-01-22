@@ -704,6 +704,6 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    {
       LineSegment2D closestEdge = new LineSegment2D();
       polygon.getClosestEdge(point2d, closestEdge);
-      return closestEdge.orthogonalProjectionCopy(point2d);
+      return new Point2D(closestEdge.orthogonalProjectionCopy(point2d));
    }
 }
