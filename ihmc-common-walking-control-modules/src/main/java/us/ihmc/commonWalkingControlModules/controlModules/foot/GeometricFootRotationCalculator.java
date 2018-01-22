@@ -196,7 +196,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          {
             lineSegmentOfRotation.setIncludingFrame(frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne(),
                                                     frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo());
-            yoLineOfRotation.setFrameLineSegment2d(lineSegmentOfRotation);
+            yoLineOfRotation.set(lineSegmentOfRotation);
          }
       }
 
