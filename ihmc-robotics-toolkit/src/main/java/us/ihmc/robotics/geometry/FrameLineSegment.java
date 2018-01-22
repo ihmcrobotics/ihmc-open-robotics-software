@@ -151,7 +151,7 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
 
    public Point3D getFirstEndpoint()
    {
-      return lineSegment3d.getFirstEndpoint();
+      return new Point3D(lineSegment3d.getFirstEndpoint());
    }
 
    public void getFirstEndpoint(FramePoint3D firstEndpointToPack)
@@ -167,7 +167,7 @@ public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, Line
 
    public Point3D getSecondEndpoint()
    {
-      return lineSegment3d.getSecondEndpoint();
+      return new Point3D(lineSegment3d.getSecondEndpoint());
    }
 
    public void getSecondEndpoint(FramePoint3D secondEndpointToPack)

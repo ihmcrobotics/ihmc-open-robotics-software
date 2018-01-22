@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -610,7 +611,8 @@ public class ConvexPolygonToolboxTest
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
 
          // getClosestEdge
-         Point2DReadOnly[] closestEdgeEndpoints = polygonWithTwoPoints.getClosestEdgeCopy(arbitraryPoint0).getEndpointsCopy();
+         LineSegment2D closestEdge = polygonWithTwoPoints.getClosestEdgeCopy(arbitraryPoint0);
+         Point2DReadOnly[] closestEdgeEndpoints = {closestEdge.getFirstEndpoint(), closestEdge.getSecondEndpoint()};
          assertEqualsInEitherOrder(closestEdgeEndpoints[0], closestEdgeEndpoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
 
          // getClosestEdgeVertexIndicesInClockwiseOrderedList
@@ -628,7 +630,7 @@ public class ConvexPolygonToolboxTest
          assertEqualsInEitherOrder(lineOfSightPoints[0], lineOfSightPoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
 
          // orthoganolProjectionCopy
-         Point2D expectedProjection = lineSegmentThatDefinesThePolygon.orthogonalProjectionCopy(arbitraryPoint0);
+         Point2DBasics expectedProjection = lineSegmentThatDefinesThePolygon.orthogonalProjectionCopy(arbitraryPoint0);
          Point2D actualProjection = polygonWithTwoPoints.orthogonalProjectionCopy(arbitraryPoint0);
          assertTrue(expectedProjection.epsilonEquals(actualProjection, epsilon));
 
@@ -661,7 +663,7 @@ public class ConvexPolygonToolboxTest
          {
             for (int j : new int[] {0, 1})
             {
-               Point2DReadOnly[] endPoints = intersectingEdges[j].getEndpointsCopy();
+               Point2DReadOnly[] endPoints = {intersectingEdges[j].getFirstEndpoint(), intersectingEdges[j].getSecondEndpoint()};
                assertEqualsInEitherOrder(endPoints[0], endPoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
             }
          }

@@ -3,6 +3,8 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.interfaces.Line2DBasics;
+import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -39,9 +41,9 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       this(referenceFrame, new Line2D(new Point2D(), new Vector2D(1.0, 0.0)));
    }
 
-   public FrameLine2d(ReferenceFrame referenceFrame, Line2D line2d)
+   public FrameLine2d(ReferenceFrame referenceFrame, Line2DReadOnly line2d)
    {
-      super(referenceFrame, line2d);
+      super(referenceFrame, new Line2D(line2d));
       this.line = getGeometryObject();
    }
 
@@ -89,13 +91,13 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
    public void getPoint2d(Point2DBasics origin)
    {
-      line.getPoint(origin);
+      origin.set(line.getPoint());
    }
 
    public void getFramePoint2d(FramePoint2D framePoint2d)
    {
       framePoint2d.setToZero(referenceFrame);
-      line.getPoint(framePoint2d);
+      framePoint2d.set(line.getPoint());
    }
 
    public void getNormalizedFrameVector(Vector2DBasics vector2dToPack)
@@ -133,7 +135,9 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
    public FrameLine2d negateDirectionCopy()
    {
-      FrameLine2d ret = new FrameLine2d(this.referenceFrame, line.negateDirectionCopy());
+      Line2D negated = new Line2D(line);
+      negated.negateDirection();
+      FrameLine2d ret = new FrameLine2d(this.referenceFrame, negated);
 
       return ret;
    }
@@ -227,7 +231,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       this.checkReferenceFrameMatch(secondLine);
       ReferenceFrame referenceFrame = this.referenceFrame;
-      Line2D bisectorLine2d = this.line.interiorBisector(secondLine.line);
+      Line2DBasics bisectorLine2d = this.line.interiorBisector(secondLine.line);
 
       if (bisectorLine2d == null)
       {
@@ -248,14 +252,14 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       line.checkReferenceFrameMatch(point);
       ReferenceFrame referenceFrame = line.referenceFrame;
-      Line2D perpLine2d = line.line.perpendicularLineThroughPoint(point);
+      Line2DBasics perpLine2d = line.line.perpendicularLineThroughPoint(point);
 
       return new FrameLine2d(referenceFrame, perpLine2d);
    }
 
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
-      line.applyTransformAndProjectToXYPlane(temporaryTransformToDesiredFrame);
+      line.applyTransform(temporaryTransformToDesiredFrame, false);
    }
 
    public FrameLine2d applyTransformCopy(Transform transform)
@@ -292,27 +296,6 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       return copy;
    }
 
-   /**
-    * applyTransformCopy
-    * Use of this method is discouraged. Only use it to speed up computation
-    * FrameLine2ds en masse, and only when the desired reference frame is not a
-    * parent or child of the current reference frame.
-    *
-    * @param transform Transform3D
-    * @param newFrame ReferenceFrame
-    * @param requirePlanarTransform boolean
-    * @return FrameConvexPolygon2d
-    */
-   public FrameLine2d applyTransformCopy(Transform transform, ReferenceFrame newFrame)
-   {
-      return new FrameLine2d(newFrame, this.line.applyTransformCopy(transform));
-   }
-
-   public FrameLine2d applyTransformAndProjectToXYPlaneCopy(Transform transform, ReferenceFrame newFrame)
-   {
-      return new FrameLine2d(newFrame, this.line.applyTransformAndProjectToXYPlaneCopy(transform));
-   }
-
    public boolean orthogonalProjection(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
@@ -322,7 +305,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
-      Point2D projected = line.orthogonalProjectionCopy(point);
+      Point2DBasics projected = line.orthogonalProjectionCopy(point);
 
       return new FramePoint2D(point.getReferenceFrame(), projected);
    }
@@ -338,7 +321,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public FramePoint2D intersectionWith(FrameLine2d secondLine)
    {
       checkReferenceFrameMatch(secondLine);
-      Point2D intersection = this.line.intersectionWith(secondLine.line);
+      Point2DBasics intersection = this.line.intersectionWith(secondLine.line);
 
       return new FramePoint2D(secondLine.getReferenceFrame(), intersection);
    }
@@ -346,7 +329,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public FramePoint2D intersectionWith(FrameLineSegment2d lineSegment)
    {
       checkReferenceFrameMatch(lineSegment);
-      Point2D intersection = this.line.intersectionWith(lineSegment.lineSegment);
+      Point2DBasics intersection = this.line.intersectionWith(lineSegment.lineSegment);
 
       return new FramePoint2D(lineSegment.getReferenceFrame(), intersection);
    }
@@ -354,7 +337,7 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    public FramePoint2D[] intersectionWith(FrameConvexPolygon2d convexPolygon)
    {
       checkReferenceFrameMatch(convexPolygon);
-      Point2D[] intersection = this.line.intersectionWith(convexPolygon.convexPolygon);
+      Point2DBasics[] intersection = this.line.intersectionWith(convexPolygon.convexPolygon);
       if (intersection == null)
       {
          return null;
