@@ -19,7 +19,7 @@ public class SetOutPointAction extends AbstractAction
       super("Set Out Point");
       this.executor = executor;
 
-      String iconFilename = "icons/YoSetOutPoint24.gif";
+      String iconFilename = "icons/SetOutPoint.png";
       int shortKey = KeyEvent.VK_U;
       String longDescription = "Set Out Point";
       String shortDescription = "Set Out Point";
