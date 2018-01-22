@@ -2,6 +2,7 @@ package us.ihmc.robotics.parameterGui.tuning;
 
 import java.io.IOException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -9,20 +10,20 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 
-public class NumericTuner extends HBox
+public class DoubleTuner extends HBox
 {
-   private static final String FXML_PATH = "numeric_tuner.fxml";
+   private static final String FXML_PATH = "double_tuner.fxml";
 
    @FXML
-   private NumericTextField value;
+   private DoubleSpinner value;
 
    @FXML
-   private NumericTextField min;
+   private DoubleSpinner min;
 
    @FXML
-   private NumericTextField max;
+   private DoubleSpinner max;
 
-   public NumericTuner(Parameter parameter)
+   public DoubleTuner(Parameter parameter)
    {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
       loader.setRoot(this);
@@ -52,20 +53,28 @@ public class NumericTuner extends HBox
          initialMax = Math.max(initialMax, initialValue);
       }
 
-      value.addListener((observable, oldValue, newValue) -> parameter.setValue(value.getText()));
+      value.addListener((observable, oldValue, newValue) -> {
+         Platform.runLater(() -> {
+            parameter.setValue(value.getText());
+         });
+      });
       min.addListener((observable, oldValue, newValue) -> {
-         value.setMinValue(min.getValue());
-         max.setMinValue(min.getValue());
-         parameter.setMin(min.getText());
+         Platform.runLater(() -> {
+            max.setMinValue(min.getValue());
+            value.setMinValue(min.getValue());
+            parameter.setMin(min.getText());
+         });
       });
       max.addListener((observable, oldValue, newValue) -> {
-         value.setMaxValue(max.getValue());
-         min.setMaxValue(max.getValue());
-         parameter.setMax(max.getText());
+         Platform.runLater(() -> {
+            min.setMaxValue(max.getValue());
+            value.setMaxValue(max.getValue());
+            parameter.setMax(max.getText());
+         });
       });
 
-      value.set(initialValue);
-      min.set(initialMin);
-      max.set(initialMax);
+      value.setValue(initialValue);
+      min.setValue(initialMin);
+      max.setValue(initialMax);
    }
 }
