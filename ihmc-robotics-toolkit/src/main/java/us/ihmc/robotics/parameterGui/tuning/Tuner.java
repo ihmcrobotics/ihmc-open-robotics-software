@@ -55,6 +55,9 @@ public class Tuner extends VBox
       case "BooleanParameter":
          getChildren().add(new BooleanTuner(parameter));
          break;
+      case "EnumParameter":
+         getChildren().add(new EnumTuner(parameter));
+         break;
       default:
          PrintTools.info("Implement me.");
       }

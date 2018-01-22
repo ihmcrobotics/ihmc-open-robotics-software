@@ -11,6 +11,6 @@
 	xmlns:fx="http://javafx.com/fxml">
 	<children>
 		<Text text="Value" />
-		<CheckBox fx:id="value" onAction="#handleButton"/>
+		<TextField fx:id="enumString" />
 	</children>
 </fx:root>
