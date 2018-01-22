@@ -149,11 +149,6 @@ public class SLIPJumpingDDPCalculator
          desiredControl.set(xF, firstSupport.getX());
          desiredControl.set(yF, firstSupport.getY());
          desiredControl.set(k, 0.0);
-
-         DenseMatrix64F constants = constantSequence.get(i);
-         constants.set(zF, firstSupport.getZ());
-         //constants.set(nominalLength, nominalFirstLength);
-         //constants.set(nominalLength, nominalHeight);
       }
 
       for (int i = numberOfInitialTimeSteps + numberOfFlightTimeSteps; i < totalSize; i++)

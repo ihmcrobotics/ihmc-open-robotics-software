@@ -10,18 +10,18 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 public class SLIPDesiredTrackingCost implements LQTrackingCostFunction<SLIPState>
 {
-   static double qXFlight = 1e-1;
-   static double qYFlight = 1e-1;
+   static double qXFlight = 1e-3;
+   static double qYFlight = 1e-3;
    static double qZFlight = 1e-1;
-   static double qThetaXFlight = 1.0;
-   static double qThetaYFlight = 1.0;
-   static double qThetaZFlight = 1.0;
+   static double qThetaXFlight = 1.0e-1;
+   static double qThetaYFlight = 1.0e-1;
+   static double qThetaZFlight = 1.0e-1;
    static double qXDotFlight = 0.0;
    static double qYDotFlight = 0.0;
    static double qZDotFlight = 0.0;
-   static double qThetaDotXFlight = 0.0;
-   static double qThetaDotYFlight = 0.0;
-   static double qThetaDotZFlight = 0.0;
+   static double qThetaDotXFlight = 1e2;
+   static double qThetaDotYFlight = 1e2;
+   static double qThetaDotZFlight = 1e2;
 
    static double rFxFlight = 0.0;
    static double rFyFlight = 0.0;
