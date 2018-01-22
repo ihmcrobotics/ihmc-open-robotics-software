@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.frames;
 
-import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -18,7 +18,7 @@ public class YoFrameLine2d implements ReferenceFrameHolder
 {
    private final YoDouble pointX, pointY, vectorX, vectorY; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;
-   protected FrameLine2d frameLine; // This is only for assistance. The data is stored in the YoVariables, not in here!
+   protected FrameLine2D frameLine; // This is only for assistance. The data is stored in the YoVariables, not in here!
 
    public YoFrameLine2d(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -86,7 +86,7 @@ public class YoFrameLine2d implements ReferenceFrameHolder
       return "(" + pointX.getDoubleValue() + ", " + pointY.getDoubleValue() + "), (" + vectorX.getDoubleValue() + ", " + vectorY.getDoubleValue() + ")-" + referenceFrame;
    }
 
-   public void setFrameLine2d(FrameLine2d frameLine2d)
+   public void setFrameLine2d(FrameLine2D frameLine2d)
    {
       if (frameLine2d == null)
       {
@@ -100,19 +100,17 @@ public class YoFrameLine2d implements ReferenceFrameHolder
 
       frameLine2d.checkReferenceFrameMatch(referenceFrame);
 
-      Line2D line = frameLine2d.getLine2d();
-
-      pointX.set(line.getPoint().getX());
-      pointY.set(line.getPoint().getY());
-      vectorX.set(line.getDirection().getX());
-      vectorY.set(line.getDirection().getY());
+      pointX.set(frameLine2d.getPoint().getX());
+      pointY.set(frameLine2d.getPoint().getY());
+      vectorX.set(frameLine2d.getDirection().getX());
+      vectorY.set(frameLine2d.getDirection().getY());
    }
 
-   public FrameLine2d getFrameLine2d()
+   public FrameLine2D getFrameLine2d()
    {
       putYoValuesIntoFrameLine();
 
-      return new FrameLine2d(frameLine);
+      return new FrameLine2D(frameLine);
    }
 
    @Override
@@ -127,21 +125,21 @@ public class YoFrameLine2d implements ReferenceFrameHolder
       frameLine.orthogonalProjection(point);
    }
 
-   public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
+   public FramePoint2DBasics orthogonalProjectionCopy(FramePoint2D point)
    {
       putYoValuesIntoFrameLine();
 
       return frameLine.orthogonalProjectionCopy(point);
    }
 
-   public FramePoint2D intersectionWith(FrameLine2d line)
+   public FramePoint2DBasics intersectionWith(FrameLine2D line)
    {
       putYoValuesIntoFrameLine();
 
       return frameLine.intersectionWith(line);
    }
 
-   public FramePoint2D intersectionWith(FrameLineSegment2d secondLineSegment)
+   public FramePoint2DBasics intersectionWith(FrameLineSegment2D secondLineSegment)
    {
       putYoValuesIntoFrameLine();
 
@@ -152,7 +150,7 @@ public class YoFrameLine2d implements ReferenceFrameHolder
    {
       putYoValuesIntoFrameLine();
 
-      return frameLine.intersectionWith(convexPolygon);
+      return convexPolygon.intersectionWith(frameLine);
    }
 
    public double distance(FramePoint2D point)
@@ -166,7 +164,7 @@ public class YoFrameLine2d implements ReferenceFrameHolder
    {
       if (frameLine == null)
       {
-         frameLine = new FrameLine2d(referenceFrame, new Point2D(pointX.getDoubleValue(), pointY.getDoubleValue()), new Vector2D(vectorX.getDoubleValue(),
+         frameLine = new FrameLine2D(referenceFrame, new Point2D(pointX.getDoubleValue(), pointY.getDoubleValue()), new Vector2D(vectorX.getDoubleValue(),
                vectorY.getDoubleValue()));
       }
       else

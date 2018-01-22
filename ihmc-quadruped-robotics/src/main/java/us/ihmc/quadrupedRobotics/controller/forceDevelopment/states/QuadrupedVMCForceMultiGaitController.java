@@ -8,12 +8,13 @@ import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -33,8 +34,6 @@ import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -199,13 +198,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final FramePoint3D frontMidpoint = new FramePoint3D();
    private final FramePoint3D hindMidpoint = new FramePoint3D();
    private final FrameVector2D frontDirection = new FrameVector2D();
-   private final FrameLine2d sidewaysMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
-   private final FrameLine2d lengthwiseMidLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
-   private final FrameLine2d lineForFindingClosestLineSegment = new FrameLine2d(ReferenceFrame.getWorldFrame());
-   private final FrameLine2d rightTrotLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
-   private final FrameLine2d leftTrotLine = new FrameLine2d(ReferenceFrame.getWorldFrame());
-   private final FrameLineSegment2d lineSegmentLeftTrot = new FrameLineSegment2d(ReferenceFrame.getWorldFrame());
-   private final FrameLineSegment2d lineSegmentRightTrot = new FrameLineSegment2d(ReferenceFrame.getWorldFrame());
+   private final FrameLine2D sidewaysMidLine = new FrameLine2D(ReferenceFrame.getWorldFrame());
+   private final FrameLine2D lengthwiseMidLine = new FrameLine2D(ReferenceFrame.getWorldFrame());
+   private final FrameLine2D lineForFindingClosestLineSegment = new FrameLine2D(ReferenceFrame.getWorldFrame());
+   private final FrameLine2D rightTrotLine = new FrameLine2D(ReferenceFrame.getWorldFrame());
+   private final FrameLine2D leftTrotLine = new FrameLine2D(ReferenceFrame.getWorldFrame());
+   private final FrameLineSegment2D lineSegmentLeftTrot = new FrameLineSegment2D(ReferenceFrame.getWorldFrame());
+   private final FrameLineSegment2D lineSegmentRightTrot = new FrameLineSegment2D(ReferenceFrame.getWorldFrame());
    private final YoFramePoint2d closestIntersection = new YoFramePoint2d("closestIntersection", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d secondClosestIntersection = new YoFramePoint2d("secondClosestIntersection", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d midPointOfIntersections = new YoFramePoint2d("midPointOfIntersections", ReferenceFrame.getWorldFrame(), registry);
@@ -772,16 +771,16 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       frontDirection.set(frontMidpoint);
       frontDirection.sub(hindMidpoint.getX(), hindMidpoint.getY());
 
-      sidewaysMidLine.setByProjectionOntoXYPlane(leftMidpoint, rightMidpoint);
-      lengthwiseMidLine.setByProjectionOntoXYPlane(frontMidpoint, hindMidpoint);
+      sidewaysMidLine.set(leftMidpoint, rightMidpoint);
+      lengthwiseMidLine.set(frontMidpoint, hindMidpoint);
 
-      lineSegmentLeftTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT), footPositions.get(RobotQuadrant.FRONT_LEFT));
-      lineSegmentRightTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT), footPositions.get(RobotQuadrant.FRONT_RIGHT));
+      lineSegmentLeftTrot.set(footPositions.get(RobotQuadrant.HIND_RIGHT), footPositions.get(RobotQuadrant.FRONT_LEFT));
+      lineSegmentRightTrot.set(footPositions.get(RobotQuadrant.HIND_LEFT), footPositions.get(RobotQuadrant.FRONT_RIGHT));
 
-      leftTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT), footPositions.get(RobotQuadrant.FRONT_LEFT));
-      rightTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT), footPositions.get(RobotQuadrant.FRONT_RIGHT));
+      leftTrotLine.set(footPositions.get(RobotQuadrant.HIND_RIGHT), footPositions.get(RobotQuadrant.FRONT_LEFT));
+      rightTrotLine.set(footPositions.get(RobotQuadrant.HIND_LEFT), footPositions.get(RobotQuadrant.FRONT_RIGHT));
 
-      leftTrotLine.getIntersectionWithLine(rightTrotLine, trotCrossPoint);
+      leftTrotLine.intersectionWith(rightTrotLine, trotCrossPoint);
 
       isInFrontOfLeftTrotLine.set(leftTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure));
       isInFrontOfRightTrotLine.set(rightTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure));
@@ -790,21 +789,21 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       if (isInFrontOfLeftTrotLine.getBooleanValue() == isInFrontOfRightTrotLine.getBooleanValue())
       {
-         lineForFindingClosestLineSegment.getLine2d().setDirection(sidewaysMidLine.getLine2d().getDirection());
+         lineForFindingClosestLineSegment.setDirection(sidewaysMidLine.getDirection());
       }
       else
       {
-         lineForFindingClosestLineSegment.getLine2d().setDirection(lengthwiseMidLine.getLine2d().getDirection());
+         lineForFindingClosestLineSegment.setDirection(lengthwiseMidLine.getDirection());
       }
 
       closestIntersectionFrameTuple.setIncludingFrame(closestIntersectionFrameTuple);
-      leftTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
+      leftTrotLine.intersectionWith(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
       closestIntersection.set((Tuple2DReadOnly) closestIntersectionFrameTuple);
 
       double distanceUpward = closestIntersection.distance(desiredCenterOfPressure);
 
       closestIntersectionFrameTuple.setIncludingFrame(secondClosestIntersection);
-      rightTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
+      rightTrotLine.intersectionWith(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
       secondClosestIntersection.set((Tuple2DReadOnly) closestIntersectionFrameTuple);
 
       double distanceDownward = secondClosestIntersection.distance(desiredCenterOfPressure);

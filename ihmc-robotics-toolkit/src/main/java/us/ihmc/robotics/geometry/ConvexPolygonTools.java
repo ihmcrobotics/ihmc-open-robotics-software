@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.Line2DBasics;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -157,7 +161,7 @@ public class ConvexPolygonTools
     * @return true if succeeded, false if failed
     */
    public static boolean combineDisjointPolygons(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, ConvexPolygon2D combinedPolygonToPack,
-                                                 LineSegment2D connectingEdge1ToPack, LineSegment2D connectingEdge2Topack)
+                                                 LineSegment2DBasics connectingEdge1ToPack, LineSegment2DBasics connectingEdge2Topack)
    {
 
       int[][] verticesIndices = new int[2][2];
@@ -175,8 +179,8 @@ public class ConvexPolygonTools
       return true;
    }
 
-   public static boolean findConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
-                                             LineSegment2D connectingEdge2Topack)
+   public static boolean findConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2DBasics connectingEdge1ToPack,
+                                             LineSegment2DBasics connectingEdge2Topack)
    {
       int[][] verticesIndices = new int[2][2];
       boolean success = findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices);
@@ -187,8 +191,8 @@ public class ConvexPolygonTools
       return true;
    }
 
-   static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
-                                          LineSegment2D connectingEdge2ToPack, int[][] verticesIndices)
+   static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2DBasics connectingEdge1ToPack,
+                                          LineSegment2DBasics connectingEdge2ToPack, int[][] verticesIndices)
    {
       connectingEdge1ToPack.set(polygon1.getVertex(verticesIndices[0][0]), polygon2.getVertex(verticesIndices[1][0]));
       connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
@@ -743,14 +747,14 @@ public class ConvexPolygonTools
    }
 
    public static boolean combineDisjointPolygons(FrameConvexPolygon2d polygon1, FrameConvexPolygon2d polygon2, FrameConvexPolygon2d combinedPolygonToPack,
-                                                 FrameLineSegment2d connectingEdge1ToPack, FrameLineSegment2d connectingEdge2ToPack)
+                                                 FrameLineSegment2D connectingEdge1ToPack, FrameLineSegment2D connectingEdge2ToPack)
    {
       combinedPolygonToPack.clear(polygon1.getReferenceFrame());
       combinedPolygonToPack.checkReferenceFrameMatch(connectingEdge1ToPack);
       combinedPolygonToPack.checkReferenceFrameMatch(connectingEdge2ToPack);
 
       boolean success = combineDisjointPolygons(polygon1.convexPolygon, polygon2.convexPolygon, combinedPolygonToPack.convexPolygon,
-                                                connectingEdge1ToPack.lineSegment, connectingEdge2ToPack.lineSegment);
+                                                connectingEdge1ToPack, connectingEdge2ToPack);
 
       if (!success)
          return false;
@@ -780,8 +784,8 @@ public class ConvexPolygonTools
          return null; // Return null if not disjoint
 
       FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d(referenceFrame, polygonAndEdges.getConvexPolygon2d());
-      FrameLineSegment2d connectingEdge1 = new FrameLineSegment2d(referenceFrame, polygonAndEdges.getConnectingEdge1());
-      FrameLineSegment2d connectingEdge2 = new FrameLineSegment2d(referenceFrame, polygonAndEdges.getConnectingEdge2());
+      FrameLineSegment2D connectingEdge1 = new FrameLineSegment2D(referenceFrame, polygonAndEdges.getConnectingEdge1());
+      FrameLineSegment2D connectingEdge2 = new FrameLineSegment2D(referenceFrame, polygonAndEdges.getConnectingEdge2());
 
       FrameConvexPolygon2dAndConnectingEdges ret = new FrameConvexPolygon2dAndConnectingEdges(polygon1, polygon2, frameConvexPolygon2d, connectingEdge1,
                                                                                               connectingEdge2);
@@ -789,7 +793,7 @@ public class ConvexPolygonTools
       return ret;
    }
 
-   public static int cutPolygonWithLine(FrameLine2d cuttingLine, FrameConvexPolygon2d polygonToCut, FrameConvexPolygonWithLineIntersector2d lineIntersector2d,
+   public static int cutPolygonWithLine(FrameLine2D cuttingLine, FrameConvexPolygon2d polygonToCut, FrameConvexPolygonWithLineIntersector2d lineIntersector2d,
                                         RobotSide sideOfLineToCut)
    {
       lineIntersector2d.intersectWithLine(polygonToCut, cuttingLine);
@@ -806,7 +810,7 @@ public class ConvexPolygonTools
          while (index < polygonToCut.getNumberOfVertices())
          {
             Point2DReadOnly vertex = polygonToCut.getConvexPolygon2d().getVertex(index);
-            if (cuttingLine.getLine2d().isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
+            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
             {
                polygonToCut.removeVertex(index);
                polygonToCut.update();
@@ -824,14 +828,14 @@ public class ConvexPolygonTools
       }
    }
 
-   public static int cutPolygonWithLine(FrameLine2d cuttingLine, FrameConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
+   public static int cutPolygonWithLine(FrameLine2D cuttingLine, FrameConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
    {
       cuttingLine.checkReferenceFrameMatch(polygonToCut);
-      return cutPolygonWithLine(cuttingLine.getLine2d(), polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
+      return cutPolygonWithLine(cuttingLine, polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
    }
 
    // TODO Needs to be extracted to Euclid and improved such that it is garbage free.
-   public static int cutPolygonWithLine(Line2D cuttingLine, ConvexPolygon2D polygonToCut, RobotSide sideOfLineToCut)
+   public static int cutPolygonWithLine(Line2DBasics cuttingLine, ConvexPolygon2D polygonToCut, RobotSide sideOfLineToCut)
    {
       Point2D[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
 

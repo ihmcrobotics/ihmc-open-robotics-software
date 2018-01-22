@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -21,7 +22,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -82,7 +82,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final Map<RigidBody, YoFramePoint2d> copsRawInFootFrame = new LinkedHashMap<RigidBody, YoFramePoint2d>();
 
    private final Map<RigidBody, FrameConvexPolygon2d> footPolygons = new LinkedHashMap<RigidBody, FrameConvexPolygon2d>();
-   private final Map<RigidBody, FrameLineSegment2d> footCenterCoPLineSegments = new LinkedHashMap<RigidBody, FrameLineSegment2d>();
+   private final Map<RigidBody, FrameLineSegment2D> footCenterCoPLineSegments = new LinkedHashMap<RigidBody, FrameLineSegment2D>();
 
    private final YoBoolean kinematicsIsUpToDate = new YoBoolean("kinematicsIsUpToDate", registry);
    private final YoBoolean useControllerDesiredCoP = new YoBoolean("useControllerDesiredCoP", registry);
@@ -136,7 +136,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(feetContactablePlaneBodies.get(foot).getContactPoints2d());
          footPolygons.put(foot, footPolygon);
 
-         FrameLineSegment2d tempLineSegment = new FrameLineSegment2d(new FramePoint2D(soleFrame), new FramePoint2D(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
+         FrameLineSegment2D tempLineSegment = new FrameLineSegment2D(new FramePoint2D(soleFrame), new FramePoint2D(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
          footCenterCoPLineSegments.put(foot, tempLineSegment);
 
          YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(namePrefix + "CoPRawInFootFrame", soleFrames.get(foot), registry);
@@ -330,7 +330,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             {
                if (footSwitches.get(trustedFoot).computeFootLoadPercentage() > 0.2)
                {
-                  FrameLineSegment2d footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedFoot);
+                  FrameLineSegment2D footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedFoot);
                   footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
                   // TODO Garbage
                   FramePoint2D[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
