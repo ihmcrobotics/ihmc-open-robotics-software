@@ -122,7 +122,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFeedbackRate()
    {
-      return false;
+      return !runningOnRealRobot;
    }
 
    /** {@inheritDoc} */
