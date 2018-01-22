@@ -5,17 +5,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<?import us.ihmc.robotics.parameterGui.tuning.DoubleSpinner?>
 
 <fx:root type="HBox" spacing="10.0" alignment="CENTER_LEFT"
 	maxHeight="-Infinity" maxWidth="-Infinity" prefWidth="800"
 	xmlns:fx="http://javafx.com/fxml">
 	<children>
 		<Text text="Value" />
-		<DoubleSpinner fx:id="value" prefWidth="120" />
+		<StackPane fx:id="valuePane" prefWidth="120" />
 		<Text text="Min" />
-		<DoubleSpinner fx:id="min" prefWidth="120" />
+		<StackPane fx:id="minPane" prefWidth="120" />
 		<Text text="Max" />
-		<DoubleSpinner fx:id="max" prefWidth="120" />
+		<StackPane fx:id="maxPane" prefWidth="120" />
 	</children>
 </fx:root>

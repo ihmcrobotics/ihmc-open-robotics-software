@@ -1,80 +1,35 @@
 package us.ihmc.robotics.parameterGui.tuning;
 
-import java.io.IOException;
-
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.HBox;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 
-public class DoubleTuner extends HBox
+public class DoubleTuner extends NumericTuner<Double>
 {
-   private static final String FXML_PATH = "double_tuner.fxml";
-
-   @FXML
-   private DoubleSpinner value;
-
-   @FXML
-   private DoubleSpinner min;
-
-   @FXML
-   private DoubleSpinner max;
-
    public DoubleTuner(Parameter parameter)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      super(parameter);
+   }
 
-      double initialValue = Double.parseDouble(parameter.getValue());
-      double initialMin = Double.parseDouble(parameter.getMin());
-      double initialMax = Double.parseDouble(parameter.getMax());
+   @Override
+   public NumericSpinner<Double> createASpinner()
+   {
+      return new DoubleSpinner();
+   }
 
-      if (initialValue < initialMin || initialValue > initialMax)
-      {
-         Alert alert = new Alert(AlertType.INFORMATION);
-         alert.setTitle("Information Dialog");
-         alert.setHeaderText("Bound Inconsistency");
-         alert.setContentText("Setting the bounds such that value is valid.");
-         alert.showAndWait();
+   @Override
+   public boolean areBoundsConsistent(Double value, Double min, Double max)
+   {
+      return value >= min && value <= max;
+   }
 
-         initialMin = Math.min(initialMin, initialValue);
-         initialMax = Math.max(initialMax, initialValue);
-      }
+   @Override
+   public Double getSmallerNumber(Double a, Double b)
+   {
+      return Math.min(a, b);
+   }
 
-      value.addListener((observable, oldValue, newValue) -> {
-         Platform.runLater(() -> {
-            parameter.setValue(value.getText());
-         });
-      });
-      min.addListener((observable, oldValue, newValue) -> {
-         Platform.runLater(() -> {
-            max.setMinValue(min.getValue());
-            value.setMinValue(min.getValue());
-            parameter.setMin(min.getText());
-         });
-      });
-      max.addListener((observable, oldValue, newValue) -> {
-         Platform.runLater(() -> {
-            min.setMaxValue(max.getValue());
-            value.setMaxValue(max.getValue());
-            parameter.setMax(max.getText());
-         });
-      });
-
-      value.setValue(initialValue);
-      min.setValue(initialMin);
-      max.setValue(initialMax);
+   @Override
+   public Double getLargerNumber(Double a, Double b)
+   {
+      return Math.max(a, b);
    }
 }
