@@ -6,6 +6,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,8 +25,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 {
-   private static final int defaultNumberOfStepsToTake = 5;
-   private static final int defaultNumberOfIterations = 2;
+   private static final int defaultNumberOfStepsToTake = 10;
+   private static final int defaultNumberOfIterations = 8;
+   private static final RobotSide defaultInitialSwingSide = RobotSide.LEFT;
 
    private final YoBoolean walkingForward = new YoBoolean("walkingFotward", registry);
    private final YoDouble footstepLength = new YoDouble("footstepLength", registry);
@@ -35,12 +37,13 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final YoInteger numberOfStepsToTake = new YoInteger("numberOfStepsToTake", registry);
    private final YoInteger iterations = new YoInteger("iterations", registry);
    private final YoInteger iterationCounter = new YoInteger("iterationCounter", registry);
+   private final YoInteger stepsAlongPath = new YoInteger("stepsAlongPath", registry);
    private final YoEnum<RobotSide> initialSwingSide = YoEnum.create("initialSwingSide", RobotSide.class, registry);
 
    private final FootstepDataListMessage forwardFootstepList = new FootstepDataListMessage();
    private final FootstepDataListMessage backwardFootstepList = new FootstepDataListMessage();
 
-   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
+   private final AtomicReference<FootstepStatus> footstepStatusMessage = new AtomicReference<>(null);
    private final SideDependentList<MovingReferenceFrame> soleFrames;
    private final ReferenceFrame midFootZUpFrame;
 
@@ -51,15 +54,15 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       soleFrames = referenceFrames.getSoleFrames();
       midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      communicationBridge.attachListener(WalkingStatusMessage.class, walkingStatusMessage::set);
+      communicationBridge.attachListener(FootstepStatus.class, footstepStatusMessage::set);
 
       walkingForward.set(true);
-      initialSwingSide.set(RobotSide.RIGHT);
+      initialSwingSide.set(defaultInitialSwingSide);
 
       numberOfStepsToTake.set(defaultNumberOfStepsToTake);
       iterations.set(defaultNumberOfIterations);
       swingTime.set(1.5);
-      transferTime.set(0.3);
+      transferTime.set(0.6);
       footstepLength.set(0.3);
       footstepWidth.set(0.25);
 
@@ -74,6 +77,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       sendPacket(forwardFootstepList);
       walkingForward.set(true);
+      stepsAlongPath.set(0);
    }
 
    private void computeForwardFootstepList()
@@ -138,9 +142,16 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
          return;
       }
 
-      WalkingStatusMessage walkingStatusMessage = this.walkingStatusMessage.getAndSet(null);
-      if(walkingStatusMessage != null && walkingStatusMessage.status.equals(WalkingStatusMessage.Status.COMPLETED))
+      FootstepStatus footstepStatus = this.footstepStatusMessage.getAndSet(null);
+      if(footstepStatus != null && footstepStatus.status.equals(FootstepStatus.Status.COMPLETED))
       {
+         stepsAlongPath.increment();
+      }
+
+      if(stepsAlongPath.getIntegerValue() == forwardFootstepList.getDataList().size())
+      {
+         stepsAlongPath.set(0);
+
          if(walkingForward.getBooleanValue())
          {
             sendPacket(backwardFootstepList);
