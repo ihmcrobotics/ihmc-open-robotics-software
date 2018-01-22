@@ -5,6 +5,8 @@ import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 import java.io.Serializable;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -16,8 +18,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -50,10 +50,10 @@ public class QuadrupedSupportPolygon implements Serializable
    private final Point2D[] tempPointsForCornerCircle = new Point2D[] {new Point2D(), new Point2D(), new Point2D(), new Point2D()};
    private final Vector2D tempVectorForCornerCircle = new Vector2D();
    
-   private final FrameLineSegment2d tempLineSegment2d = new FrameLineSegment2d();
+   private final FrameLineSegment2D tempLineSegment2d = new FrameLineSegment2D();
    private final FramePoint2D tempFramePoint2dOne = new FramePoint2D();
    private final FramePoint2D tempFramePoint2dTwo = new FramePoint2D();
-   private final FrameLine2d tempFrameLine2d = new FrameLine2d();
+   private final FrameLine2D tempFrameLine2d = new FrameLine2D();
 
    public QuadrupedSupportPolygon()
    {
@@ -544,7 +544,7 @@ public class QuadrupedSupportPolygon implements Serializable
 
          tempFramePoint2dOne.set(x, y);
          tempFrameConvexPolygon2d.getClosestEdge(tempLineSegment2d, tempFramePoint2dOne);
-         tempLineSegment2d.getClosestPointOnLineSegment(tempFramePoint2dTwo, tempFramePoint2dOne);
+         tempLineSegment2d.orthogonalProjection(tempFramePoint2dOne, tempFramePoint2dTwo);
          
          return tempFramePoint2dTwo;
       }

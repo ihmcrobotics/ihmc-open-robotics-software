@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Random;
 
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -51,7 +52,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
@@ -1564,7 +1564,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          FramePoint2D sameSideFootstep2d = new FramePoint2D(sameSideFootstep);
          FramePoint2D diagonalFootstep2d = new FramePoint2D(diagonalFootstep);
          FramePoint2D acrossBodyFootstep2d = new FramePoint2D(acrossBodyFootstep);
-         FrameLineSegment2d lineSegment = new FrameLineSegment2d(ReferenceFrame.getWorldFrame());
+         FrameLineSegment2D lineSegment = new FrameLineSegment2D(ReferenceFrame.getWorldFrame());
          FramePoint2D comProjectionOnOutsideLegs2d = new FramePoint2D(ReferenceFrame.getWorldFrame());
          FramePoint3D comProjectionOnOutsideLegs = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
@@ -1590,7 +1590,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          case COM_INCIRCLE:
             lineSegment.set(diagonalFootstep2d, acrossBodyFootstep2d);
-            lineSegment.getClosestPointOnLineSegment(comProjectionOnOutsideLegs2d, centerOfMassPoint2d);
+            lineSegment.orthogonalProjection(centerOfMassPoint2d, comProjectionOnOutsideLegs2d);
             comProjectionOnOutsideLegs.set(comProjectionOnOutsideLegs2d, 0.0);
 
             safeToStepSupportPolygon.clear();
@@ -1608,10 +1608,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          case TROTLINE_MIDPOINT:
             lineSegment.set(sameSideFootstep2d, acrossBodyFootstep2d);
 
-            FramePoint2D midpoint = lineSegment.midpoint();
+            FramePoint2D midpoint = new FramePoint2D();
+            lineSegment.midpoint(midpoint);
             double bisectorLengthDesired = 0.1;
             FrameVector2D perpendicularBisector = new FrameVector2D();
-            lineSegment.getPerpendicular(true, perpendicularBisector);
+            lineSegment.perpendicular(true, perpendicularBisector);
             perpendicularBisector.scale(-bisectorLengthDesired);
             circleCenter2d.add(midpoint, perpendicularBisector);
             if(!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))

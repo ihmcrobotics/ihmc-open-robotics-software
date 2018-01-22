@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import java.util.List;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -966,7 +966,7 @@ public class CapturePointTools
     * @param capturePointTrajectoryLine
     * @param projectedCapturePoint
     */
-   public static void computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(FramePoint3DReadOnly actualICP, FrameLine2d capturePointTrajectoryLine,
+   public static void computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(FramePoint3DReadOnly actualICP, FrameLine2D capturePointTrajectoryLine,
                                                                                     FramePoint2D projectedCapturePoint)
    {
       projectedCapturePoint.set(actualICP.getX(), actualICP.getY());

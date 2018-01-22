@@ -1,15 +1,16 @@
 package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,7 +24,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
    private final YoDouble firstEndpointX, firstEndpointY, secondEndpointX, secondEndpointY;
    private final ReferenceFrame referenceFrame;
    /** This is only for assistance. The data is stored in the YoVariables, not in here! */
-   protected FrameLineSegment2d frameLineSegment;
+   protected FrameLineSegment2D frameLineSegment;
 
    public YoFrameLineSegment2d(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -38,7 +39,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       secondEndpointY = new YoDouble(namePrefix + "SecondEndpointY" + nameSuffix, description, registry);
 
       this.referenceFrame = frame;
-      frameLineSegment = new FrameLineSegment2d(referenceFrame);
+      frameLineSegment = new FrameLineSegment2D(referenceFrame);
    }
 
    public YoFrameLineSegment2d(YoDouble firstEndpointX, YoDouble firstEndpointY, YoDouble secondEndpointX, YoDouble secondEndpointY,
@@ -50,7 +51,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       this.secondEndpointY = secondEndpointY;
 
       this.referenceFrame = frame;
-      frameLineSegment = new FrameLineSegment2d(referenceFrame);
+      frameLineSegment = new FrameLineSegment2D(referenceFrame);
    }
 
    @Override
@@ -99,7 +100,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       return secondEndpointY;
    }
 
-   public void setFrameLineSegment2d(FrameLineSegment2d lineSegment)
+   public void setFrameLineSegment2d(FrameLineSegment2D lineSegment)
    {
       if (lineSegment == null)
       {
@@ -139,19 +140,19 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       getYoValuesFromFrameLineSegment();
    }
 
-   public FrameLineSegment2d getFrameLineSegment2d()
+   public FrameLineSegment2D getFrameLineSegment2d()
    {
       putYoValuesIntoFrameLineSegment();
-      return new FrameLineSegment2d(frameLineSegment);
+      return new FrameLineSegment2D(frameLineSegment);
    }
    
-   public void getFrameLineSegment2d(FrameLineSegment2d lineSegmentToPack)
+   public void getFrameLineSegment2d(FrameLineSegment2D lineSegmentToPack)
    {
       putYoValuesIntoFrameLineSegment();
       lineSegmentToPack.setIncludingFrame(frameLineSegment);
    }
 
-   public FramePoint2D midpoint()
+   public FramePoint2DBasics midpoint()
    {
       putYoValuesIntoFrameLineSegment();
 
@@ -168,28 +169,28 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
    {
       putYoValuesIntoFrameLineSegment();
 
-      frameLineSegment.getFirstEndpoint(firstEndpointToPack);
+      firstEndpointToPack.setIncludingFrame(frameLineSegment.getFirstEndpoint());
    }
 
    public void getSecondEndPoint(FramePoint2D secondEndpointToPack)
    {
       putYoValuesIntoFrameLineSegment();
 
-      frameLineSegment.getSecondEndpoint(secondEndpointToPack);
+      secondEndpointToPack.setIncludingFrame(frameLineSegment.getSecondEndpoint());
    }
 
    public void getFirstEndPoint(Point2D firstEndpointToPack)
    {
       putYoValuesIntoFrameLineSegment();
       
-      frameLineSegment.getFirstEndpoint(firstEndpointToPack);
+      firstEndpointToPack.set(frameLineSegment.getFirstEndpoint());
    }
 
    public void getSecondEndPoint(Point2D secondEndpointToPack)
    {
       putYoValuesIntoFrameLineSegment();
 
-      frameLineSegment.getSecondEndpoint(secondEndpointToPack);
+      secondEndpointToPack.set(frameLineSegment.getSecondEndpoint());
    }
 
    public double length()
@@ -225,14 +226,14 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       return frameLineSegment.orthogonalProjectionCopy(point);
    }
 
-   public FramePoint2D intersectionWith(FrameLine2d line)
+   public FramePoint2D intersectionWith(FrameLine2D line)
    {
       putYoValuesIntoFrameLineSegment();
 
       return frameLineSegment.intersectionWith(line);
    }
 
-   public FramePoint2D intersectionWith(FrameLineSegment2d secondLineSegment)
+   public FramePoint2D intersectionWith(FrameLineSegment2D secondLineSegment)
    {
       putYoValuesIntoFrameLineSegment();
 
@@ -243,7 +244,7 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
    {
       putYoValuesIntoFrameLineSegment();
 
-      return frameLineSegment.intersectionWith(convexPolygon);
+      return convexPolygon.intersectionWith(frameLineSegment);
    }
 
    public double distance(FramePoint2D point)
@@ -253,11 +254,11 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
       return frameLineSegment.distance(point);
    }
 
-   public FramePoint2D pointBetweenEndPointsGivenParameter(double parameter)
+   public FramePoint2DBasics pointBetweenEndPointsGivenParameter(double parameter)
    {
       putYoValuesIntoFrameLineSegment();
 
-      return frameLineSegment.pointBetweenEndPointsGivenParameter(parameter);
+      return frameLineSegment.pointBetweenEndpointsGivenPercentage(parameter);
    }
    
    public boolean areEndpointsTheSame()
@@ -285,11 +286,10 @@ public class YoFrameLineSegment2d implements ReferenceFrameHolder
 
    private void getYoValuesFromFrameLineSegment()
    {
-      LineSegment2D lineSegment2d = frameLineSegment.getLineSegment2d();
-      firstEndpointX.set(lineSegment2d.getFirstEndpointX());
-      firstEndpointY.set(lineSegment2d.getFirstEndpointY());
-      secondEndpointX.set(lineSegment2d.getSecondEndpointX());
-      secondEndpointY.set(lineSegment2d.getSecondEndpointY());
+      firstEndpointX.set(frameLineSegment.getFirstEndpointX());
+      firstEndpointY.set(frameLineSegment.getFirstEndpointY());
+      secondEndpointX.set(frameLineSegment.getSecondEndpointX());
+      secondEndpointY.set(frameLineSegment.getSecondEndpointY());
    }
 
    public YoDouble[] getDoubleYoVariables()
