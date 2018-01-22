@@ -9,6 +9,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
+import java.math.BigDecimal;
 import java.util.Random;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
@@ -96,7 +97,9 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
 
       expectedCost += SLIPTerminalCost.rK * (currentControl.get(k) - desiredControl.get(k)) * (currentControl.get(k) - desiredControl.get(k));
 
-      Assert.assertEquals(expectedCost, cost, 1e-7);
+      int length = (int)(Math.log10(expectedCost) + 1);
+      double scale = 1.0 * Math.pow(10, length);
+      Assert.assertEquals(expectedCost, cost, scale * 1e-7);
    }
 
    @Override

@@ -21,7 +21,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
 
    public void testCostStateGradientNumerically()
    {
-      double epsilon = 1e-7;
+      double epsilon = 1e-18;
       LQTrackingCostFunction<E> costFunction = getCostFunction();
 
       for (int hybridStateIndex = 0; hybridStateIndex < getNumberOfStates(); hybridStateIndex++)
@@ -39,15 +39,18 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          DenseMatrix64F expectedCostGradient = new DenseMatrix64F(getStateVectorSize(), 1);
 
          double cost = costFunction.getCost(hybridState, currentControl, currentState, desiredControl, desiredState, constant);
+         int length = (int)(Math.log10(cost) + 1);
+         double scale = 1.0 * Math.pow(10, length);
+         double modifiedEpsilon = Math.max(scale * epsilon, 1e-7);
 
          costFunction.getCostStateGradient(hybridState, currentControl, currentState, desiredControl, desiredState, constant, costGradient);
 
          for (int modifiedStateIndex = 0; modifiedStateIndex < getStateVectorSize(); modifiedStateIndex++)
          {
             DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
-            currentStateModified.add(modifiedStateIndex, 0, epsilon);
+            currentStateModified.add(modifiedStateIndex, 0, modifiedEpsilon);
             double modifiedCost = costFunction.getCost(hybridState, currentControl, currentStateModified, desiredControl, desiredState, constant);
-            expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / epsilon);
+            expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / modifiedEpsilon);
          }
 
          double value = Math.abs(CommonOps.elementSum(expectedCostGradient));
@@ -57,7 +60,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
 
    public void testCostControlGradientNumerically()
    {
-      double epsilon = 1e-9;
+      double epsilon = 1e-18;
       LQTrackingCostFunction<E> costFunction = getCostFunction();
 
       for (int hybridStateIndex = 0; hybridStateIndex < getNumberOfStates(); hybridStateIndex++)
@@ -75,15 +78,19 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          DenseMatrix64F expectedCostGradient = new DenseMatrix64F(getControlVectorSize(), 1);
 
          double cost = costFunction.getCost(hybridState, currentControl, currentState, desiredControl, desiredState, constant);
+         int length = (int)(Math.log10(cost) + 1);
+         double scale = 1.0 * Math.pow(10, length);
+         //double scale = 1.0;
+         double modifiedEpsilon = Math.max(scale * epsilon, 1e-9);
 
          costFunction.getCostControlGradient(hybridState, currentControl, currentState, desiredControl, desiredState, constant, costGradient);
 
          for (int controlModifiedIndex = 0; controlModifiedIndex < getControlVectorSize(); controlModifiedIndex++)
          {
             DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
-            currentControlModified.add(controlModifiedIndex, 0, epsilon);
+            currentControlModified.add(controlModifiedIndex, 0, modifiedEpsilon);
             double modifiedCost = costFunction.getCost(hybridState, currentControlModified, currentState, desiredControl, desiredState, constant);
-            expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / epsilon);
+            expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / (modifiedEpsilon));
          }
 
          double value = Math.abs(CommonOps.elementSum(expectedCostGradient));
