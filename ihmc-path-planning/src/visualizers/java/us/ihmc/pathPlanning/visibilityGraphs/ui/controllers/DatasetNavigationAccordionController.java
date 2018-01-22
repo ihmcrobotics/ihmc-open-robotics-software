@@ -3,6 +3,8 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import com.sun.javafx.scene.control.skin.LabeledText;
 
@@ -34,12 +36,16 @@ public class DatasetNavigationAccordionController
    private SimpleUIMessager messager;
    private Window ownerWindow;
 
-   public DatasetNavigationAccordionController()
+   public DatasetNavigationAccordionController() throws URISyntaxException
    {
-      visualizerDataFolder = new File("..\\visualizers\\resources\\Data");
+      URL visualizerDataFolderURL = Thread.currentThread().getContextClassLoader().getResource("Data");
+      URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.DATA_FOLDER_NAME);
+
+      visualizerDataFolder = new File(visualizerDataFolderURL.toURI());
+      testDataFolder = new File(testDataFolderURL.toURI());
+
       if (!visualizerDataFolder.exists())
          throw new RuntimeException("Wrong path to the visualizer data folder, please update me.");
-      testDataFolder = new File("..\\test\\resources\\" + VisibilityGraphsIOTools.DATA_FOLDER_NAME);
       if (!testDataFolder.exists())
          throw new RuntimeException("Wrong path to the test data folder, please update me.");
    }
