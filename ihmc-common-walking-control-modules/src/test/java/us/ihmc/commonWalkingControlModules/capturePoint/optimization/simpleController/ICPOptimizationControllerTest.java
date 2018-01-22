@@ -430,7 +430,7 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getFootstepRegularizationWeight()
+      public double getFootstepRateWeight()
       {
          return 0.0001;
       }
@@ -448,7 +448,7 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getFeedbackRegularizationWeight()
+      public double getFeedbackRateWeight()
       {
          return 0.0001;
       }
@@ -484,7 +484,7 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public boolean scaleStepRegularizationWeightWithTime()
+      public boolean scaleStepRateWeightWithTime()
       {
          return false;
       }
@@ -496,7 +496,7 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public boolean useFeedbackRegularization()
+      public boolean useFeedbackRate()
       {
          return false;
       }
@@ -514,7 +514,7 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public boolean useFootstepRegularization()
+      public boolean useFootstepRate()
       {
          return false;
       }
