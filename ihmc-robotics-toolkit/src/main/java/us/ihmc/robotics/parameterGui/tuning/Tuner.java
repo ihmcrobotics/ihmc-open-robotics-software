@@ -47,7 +47,7 @@ public class Tuner extends VBox
       switch (parameter.getType())
       {
       case "DoubleParameter":
-         getChildren().add(new NumericTuner(parameter));
+         getChildren().add(new DoubleTuner(parameter));
          break;
       default:
          PrintTools.info("Implement me.");
