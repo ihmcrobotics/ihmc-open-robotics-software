@@ -382,6 +382,9 @@ public class PlanarRegionConstraintProvider
 
    public boolean snapFootPoseToActivePlanarRegion(YoFramePose footPoseToPack)
    {
+      if (activePlanarRegion == null)
+         return false;
+
       footPoseToPack.getFramePose(footstepPose);
       footstepXYPosition.set(footstepPose.getPosition());
 
