@@ -133,6 +133,18 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
                      {
                         return true;
                      }
+
+                     @Override
+                     public boolean usePlanarRegionConstraints()
+                     {
+                        return true;
+                     }
+
+                     @Override
+                     public boolean switchPlanarRegionConstraintsAutomatically()
+                     {
+                        return true;
+                     }
                   };
                }
 
