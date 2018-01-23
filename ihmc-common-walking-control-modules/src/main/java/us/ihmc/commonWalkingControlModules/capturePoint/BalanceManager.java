@@ -41,6 +41,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -768,6 +770,11 @@ public class BalanceManager
       }
 
       return capturabilityBasedStatus;
+   }
+
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
+      linearMomentumRateOfChangeControlModule.submitCurrentPlanarRegions(planarRegions);
    }
 
    public void updateCurrentICPPlan()

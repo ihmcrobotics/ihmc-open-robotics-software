@@ -5,11 +5,15 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -17,6 +21,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -76,8 +82,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
    private final YoFramePoint2d footstepSolution = new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePoint2d footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
    private final YoFramePoint2d upcomingFootstepLocation = new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
-   private final FramePoint2D unclippedFootstepSolution = new FramePoint2D();
+   private final YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
    private final YoDouble footstepAdjustmentSafetyFactor = new YoDouble(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry);
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
@@ -122,10 +129,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
+   private final PlanarRegionConstraintProvider planarRegionConstraintProvider;
    private final ICPOptimizationSolutionHandler solutionHandler;
    private final ICPOptimizationQPSolver solver;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
+   private final ICPControlPlane icpControlPlane;
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
@@ -135,6 +144,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private boolean localUseStepAdjustment;
 
+   private final FramePoint3D tempPoint3d = new FramePoint3D();
+   private final FramePoint3D projectedTempPoint3d = new FramePoint3D();
    private final FramePoint2D tempPoint2d = new FramePoint2D();
    private final FrameVector2D tempVector2d = new FrameVector2D();
 
@@ -163,6 +174,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       this.controlDT = controlDT;
       this.contactableFeet = contactableFeet;
+
+      if (icpControlPolygons != null)
+         this.icpControlPlane = icpControlPolygons.getIcpControlPlane();
+      else
+         this.icpControlPlane = null;
 
       dynamicsObjectiveDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier();
 
@@ -199,7 +215,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       angularMomentumIntegratorGain.set(icpOptimizationParameters.getAngularMomentumIntegratorGain());
       angularMomentumIntegratorLeakRatio.set(icpOptimizationParameters.getAngularMomentumIntegratorLeakRatio());
 
-      useICPControlPolygons.set(icpOptimizationParameters.getUseICPControlPolygons());
+      useICPControlPolygons.set(icpOptimizationParameters.getUseICPControlPolygons() && icpControlPlane != null);
 
       safeCoPDistanceToEdge.set(icpOptimizationParameters.getSafeCoPDistanceToEdge());
       if (walkingControllerParameters != null)
@@ -218,11 +234,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setConsiderAngularMomentumInAdjustment(icpOptimizationParameters.considerAngularMomentumInAdjustment());
       solver.setConsiderFeedbackInAdjustment(icpOptimizationParameters.considerFeedbackInAdjustment());
 
-      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, DEBUG, yoNamePrefix, registry);
+      solutionHandler = new ICPOptimizationSolutionHandler(icpControlPlane, icpOptimizationParameters, useICPControlPolygons, DEBUG, yoNamePrefix, registry);
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, registry);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
+      if (walkingControllerParameters != null)
+         planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
+                                                                             bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+      else
+         planarRegionConstraintProvider = null;
 
 
       if (yoGraphicsListRegistry != null)
@@ -231,15 +252,19 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       parentRegistry.addChild(registry);
    }
 
-   public void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
                                                                        YoGraphicPosition.GraphicType.BALL);
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution, 0.005,
+                                                                        YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.BALL);
       solutionHandler.setupVisualizers(artifactList);
 
       artifactList.add(predictedEndOfStateICP.createArtifact());
+      artifactList.add(clippedFootstepSolution.createArtifact());
+
       artifactList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -312,15 +337,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
    }
 
-   private void updateYoFootsteps()
-   {
-      if (upcomingFootsteps.size() > 0)
-      {
-         upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
-         upcomingFootstepLocation.set(tempPoint2d);
-      }
-   }
-
    @Override
    public void initializeForStanding(double initialTime)
    {
@@ -332,8 +348,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      if (planarRegionConstraintProvider != null)
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
 
       transferDuration.set(finalTransferDuration.getDoubleValue());
+
+      footstepSolution.setToNaN();
+      unclippedFootstepSolution.setToNaN();
 
       speedUpTime.set(0.0);
    }
@@ -349,8 +370,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       initializeOnContactChange(initialTime);
 
+      footstepSolution.setToNaN();
+      unclippedFootstepSolution.setToNaN();
+
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      if (planarRegionConstraintProvider != null)
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
    }
 
    @Override
@@ -367,6 +393,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
+
+      Footstep upcomingFootstep = upcomingFootsteps.get(0);
+
+      if (planarRegionConstraintProvider != null)
+      {
+         planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+      }
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -379,7 +413,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (useFootstepRate)
       {
-         upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
+         upcomingFootsteps.get(0).getPosition(tempPoint3d);
+
+         if (useICPControlPolygons.getBooleanValue())
+            icpControlPlane.projectPointOntoControlPlane(worldFrame, tempPoint3d, projectedTempPoint3d);
+         else
+            projectedTempPoint3d.set(tempPoint3d);
+
+         tempPoint2d.set(projectedTempPoint3d);
          solver.resetFootstepRate(tempPoint2d);
       }
    }
@@ -399,9 +440,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    }
 
    @Override
-   public void getDesiredCMP(FramePoint2D desiredCMP)
+   public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
-      desiredCMP.set(feedbackCMP);
+      desiredCMPToPack.set(feedbackCMP);
    }
 
    @Override
@@ -423,24 +464,27 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    }
 
    @Override
-   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCMP,
+                       FramePoint2DReadOnly currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 
-      desiredICP.changeFrame(worldFrame);
-      desiredICPVelocity.changeFrame(worldFrame);
-      perfectCMP.changeFrame(worldFrame);
-      currentICP.changeFrame(worldFrame);
-
-      this.currentICP.set(currentICP);
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
-      this.yoPerfectCMP.set(perfectCMP);
+      this.perfectCMP.set(perfectCMP);
+      this.currentICP.set(currentICP);
+
+      this.desiredICP.changeFrame(worldFrame);
+      this.desiredICPVelocity.changeFrame(worldFrame);
+      this.perfectCMP.changeFrame(worldFrame);
+      this.currentICP.changeFrame(worldFrame);
+
+      this.yoPerfectCMP.set(this.perfectCMP);
 
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);
 
-      updateYoFootsteps();
+      //updateYoFootsteps();
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
@@ -482,6 +526,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       else
       {
          copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         if (planarRegionConstraintProvider != null)
+            planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
       }
 
       solver.resetFootstepConditions();
@@ -543,7 +589,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
          predictedEndOfStateICP.add(perfectCMP);
 
-         upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
+         tempPoint3d.set(upcomingFootstepLocation);
+         if (useICPControlPolygons.getBooleanValue())
+            icpControlPlane.projectPointOntoControlPlane(worldFrame, tempPoint3d, projectedTempPoint3d);
+         else
+            projectedTempPoint3d.set(tempPoint3d);
+         tempPoint2d.set(projectedTempPoint3d);
+
+         footstepLocationSubmitted.set(tempPoint2d);
          solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), tempPoint2d);
       }
 
@@ -584,7 +637,15 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          numberOfIterations.set(solver.getNumberOfIterations());
 
          if (localUseStepAdjustment && includeFootsteps)
-            solutionHandler.extractFootstepSolutions(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), solver);
+         {
+            PlanarRegion activePlanarRegion;
+            if (planarRegionConstraintProvider != null)
+               activePlanarRegion = planarRegionConstraintProvider.getActivePlanarRegion();
+            else
+               activePlanarRegion = null;
+
+            solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
+         }
 
          if (isInDoubleSupport.getBooleanValue())
             solutionHandler.zeroAdjustment();
@@ -686,6 +747,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaledAngularMomentumMinimizationWeight.set(multiplier * angularMomentumMinimizationWeight);
    }
 
+   @Override
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
+      if (planarRegionConstraintProvider != null)
+         planarRegionConstraintProvider.setPlanarRegions(planarRegions);
+   }
+
+   @Override
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
       this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);

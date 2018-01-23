@@ -3,11 +3,12 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ConstraintToConvexRegion;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ConstraintToConvexRegion;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -79,6 +80,8 @@ public class ICPOptimizationQPSolver
    private final ConstraintToConvexRegion cmpLocationConstraint;
    /** Constraint on the footstep location to the reachable region. */
    private final ConstraintToConvexRegion reachabilityConstraint;
+   /** Constraint on the footstep location to the planar region. */
+   private final ConstraintToConvexRegion planarRegionConstraint;
 
    /** Recursion multipliers for the steps that encode the recursive ICP dynamics. */
    private double footstepRecursionMultiplier;
@@ -161,6 +164,9 @@ public class ICPOptimizationQPSolver
    private double copSafeDistanceToEdge = 0.0001;
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
+   private boolean hasPlanarRegionConstraint = false;
+   private double planarRegionDistanceFromEdge = 0.0;
+
    /**
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPOptimizationQPSolver}.
     *
@@ -213,6 +219,7 @@ public class ICPOptimizationQPSolver
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
+      planarRegionConstraint = new ConstraintToConvexRegion(20);
 
       solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
       solverInput_bineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, 1);
@@ -303,11 +310,27 @@ public class ICPOptimizationQPSolver
       reachabilityConstraint.reset();
    }
 
+   public void resetPlanarRegionConstraint()
+   {
+      planarRegionConstraint.reset();
+      hasPlanarRegionConstraint = false;
+   }
+
    public void addReachabilityPolygon(FrameConvexPolygon2d polygon)
    {
       polygon.changeFrame(worldFrame);
       polygon.update();
       reachabilityConstraint.addPolygon(polygon);
+   }
+
+   public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon, double planarRegionDistanceFromEdge)
+   {
+      hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon, planarRegionDistanceFromEdge);
+   }
+
+   public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon)
+   {
+      hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon);
    }
 
    /**
@@ -348,10 +371,16 @@ public class ICPOptimizationQPSolver
       copLocationConstraint.setPolygon();
       cmpLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
+      if (hasPlanarRegionConstraint)
+         planarRegionConstraint.setPolygon();
 
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize();
       if (indexHandler.useStepAdjustment())
+      {
          numberOfInequalityConstraints += reachabilityConstraint.getInequalityConstraintSize();
+         if (hasPlanarRegionConstraint)
+            numberOfInequalityConstraints += planarRegionConstraint.getInequalityConstraintSize();
+      }
       if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
          numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
@@ -617,8 +646,13 @@ public class ICPOptimizationQPSolver
       if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.useAngularMomentum() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
-      if (indexHandler.useStepAdjustment() && reachabilityConstraint.getInequalityConstraintSize() > 0)
-         addReachabilityConstraint();
+      if (indexHandler.useStepAdjustment())
+      {
+         if (reachabilityConstraint.getInequalityConstraintSize() > 0)
+            addReachabilityConstraint();
+         if (planarRegionConstraint.getInequalityConstraintSize() > 0)
+            addPlanarRegionConstraint();
+      }
 
       NoConvergenceException noConvergenceException = null;
       try
@@ -743,12 +777,31 @@ public class ICPOptimizationQPSolver
     */
    private void addReachabilityConstraint()
    {
-      reachabilityConstraint.setDeltaInside(copSafeDistanceToEdge);
+      reachabilityConstraint.setDeltaInside(0.0);
       reachabilityConstraint.formulateConstraint();
 
       int constraintSize = reachabilityConstraint.getInequalityConstraintSize();
       MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), reachabilityConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
+
+      currentInequalityConstraintIndex += constraintSize;
+   }
+
+   /**
+    * Adds a convex location constraint on the footstep location that requires the footstep to be in a planar region.
+    *
+    * <p>
+    * Takes the form Ax <= b.
+    * </p>
+    */
+   private void addPlanarRegionConstraint()
+   {
+      // todo formulate the distance inside
+      planarRegionConstraint.formulateConstraint();
+
+      int constraintSize = planarRegionConstraint.getInequalityConstraintSize();
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), planarRegionConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, planarRegionConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
    }

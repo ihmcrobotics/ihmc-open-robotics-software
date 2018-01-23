@@ -730,7 +730,138 @@ public class ICPOptimizationControllerTest
       @Override
       public SteppingParameters getSteppingParameters()
       {
-         return null;
+         return new TestSteppingParameters();
       }
    }
+
+   private class TestSteppingParameters implements SteppingParameters
+   {
+
+      @Override
+      public double getMaxStepLength()
+      {
+         return 1.0;
+      }
+
+      @Override
+      public double getDefaultStepLength()
+      {
+         return 0.5;
+      }
+
+      @Override
+      public double getMaxStepWidth()
+      {
+         return 0.5;
+      }
+
+      @Override
+      public double getMinStepWidth()
+      {
+         return 0.05;
+      }
+
+      @Override
+      public double getInPlaceWidth()
+      {
+         return 0.2;
+      }
+
+      @Override
+      public double getDesiredStepForward()
+      {
+         return 0.3;
+      }
+
+      @Override
+      public double getStepPitch()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxStepUp()
+      {
+         return 0.2;
+      }
+
+      @Override
+      public double getMaxStepDown()
+      {
+         return 0.2;
+      }
+
+      @Override
+      public double getMaxSwingHeightFromStanceFoot()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxAngleTurnOutwards()
+      {
+         return 0.3;
+      }
+
+      @Override
+      public double getMaxAngleTurnInwards()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMinAreaPercentForValidFootstep()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getDangerAreaPercentForValidFootstep()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getFootForwardOffset()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getFootBackwardOffset()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getFootWidth()
+      {
+         return 0.1;
+      }
+
+      @Override
+      public double getToeWidth()
+      {
+         return 0.1;
+      }
+
+      @Override
+      public double getFootLength()
+      {
+         return 0.2;
+      }
+
+      @Override
+      public double getActualFootWidth()
+      {
+         return 0.1;
+      }
+
+      @Override
+      public double getActualFootLength()
+      {
+         return 0.2;
+      }
+   }
+
 }

@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -28,6 +29,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class ICPOptimizationReachabilityConstraintHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final SideDependentList<YoFrameConvexPolygon2d> reachabilityPolygons = new SideDependentList<>();
 
    private final YoFrameConvexPolygon2d contractedReachabilityPolygon;
@@ -96,6 +98,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       motionLimitLine.setToNaN();
       adjustmentLineSegment.setToNaN();
       solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
    }
 
    public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationQPSolver solver)
@@ -109,6 +112,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       FrameConvexPolygon2d polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
       polygon2d.update();
       solver.addReachabilityPolygon(polygon2d);
+      solver.resetPlanarRegionConstraint();
    }
 
    private final FramePoint2D adjustedLocation = new FramePoint2D();
@@ -118,7 +122,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public void updateReachabilityBasedOnAdjustment(Footstep upcomingFootstep, FramePoint2D footstepSolution, boolean wasAdjusted)
+   public void updateReachabilityBasedOnAdjustment(Footstep upcomingFootstep, FixedFramePoint2DBasics footstepSolution, boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;
