@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -21,7 +22,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -82,7 +82,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final Map<RigidBody, YoFramePoint2d> copsRawInFootFrame = new LinkedHashMap<RigidBody, YoFramePoint2d>();
 
    private final Map<RigidBody, FrameConvexPolygon2d> footPolygons = new LinkedHashMap<RigidBody, FrameConvexPolygon2d>();
-   private final Map<RigidBody, FrameLineSegment2d> footCenterCoPLineSegments = new LinkedHashMap<RigidBody, FrameLineSegment2d>();
+   private final Map<RigidBody, FrameLineSegment2D> footCenterCoPLineSegments = new LinkedHashMap<RigidBody, FrameLineSegment2D>();
 
    private final YoBoolean kinematicsIsUpToDate = new YoBoolean("kinematicsIsUpToDate", registry);
    private final YoBoolean useControllerDesiredCoP = new YoBoolean("useControllerDesiredCoP", registry);
@@ -136,7 +136,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(feetContactablePlaneBodies.get(foot).getContactPoints2d());
          footPolygons.put(foot, footPolygon);
 
-         FrameLineSegment2d tempLineSegment = new FrameLineSegment2d(new FramePoint2D(soleFrame), new FramePoint2D(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
+         FrameLineSegment2D tempLineSegment = new FrameLineSegment2D(new FramePoint2D(soleFrame), new FramePoint2D(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
          footCenterCoPLineSegments.put(foot, tempLineSegment);
 
          YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(namePrefix + "CoPRawInFootFrame", soleFrames.get(foot), registry);
@@ -161,7 +161,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
                transformToParent.setIdentity();
-               copFilteredInFootFrame.get(copOffset);
+               copOffset.set(copFilteredInFootFrame);
                transformToParent.setTranslation(copOffset);
             }
          };
@@ -248,10 +248,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       double scaleFactor = 1.0 / numberOfTrustedFeet;
 
-      footToRootJointPositions.get(trustedFoot).getFrameTuple(tempPosition);
+      tempPosition.set(footToRootJointPositions.get(trustedFoot));
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
-      footPositionsInWorld.get(trustedFoot).getFrameTuple(tempPosition);
+      tempPosition.set(footPositionsInWorld.get(trustedFoot));
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
 
@@ -259,7 +259,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       rootJointPositionPerFoot.set(footPositionsInWorld.get(trustedFoot));
       rootJointPositionPerFoot.add(footToRootJointPositions.get(trustedFoot));
 
-      footVelocitiesInWorld.get(trustedFoot).getFrameTupleIncludingFrame(tempFrameVector);
+      tempFrameVector.setIncludingFrame(footVelocitiesInWorld.get(trustedFoot));
       tempFrameVector.scale(scaleFactor * alphaRootJointLinearVelocityNewTwist.getDoubleValue());
       rootJointLinearVelocityNewTwist.sub(tempFrameVector);
    }
@@ -288,10 +288,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
-         footToRootJointPosition.getFrameTupleIncludingFrame(tempPosition);
-         rootJointPosition.getFrameTupleIncludingFrame(tempFramePoint);
+         tempPosition.setIncludingFrame(footToRootJointPosition);
+         tempFramePoint.setIncludingFrame(rootJointPosition);
          tempFramePoint.sub(tempPosition); // New foot position
-         footPositionInWorld.getFrameTuple(tempPosition); // Previous foot position
+         tempPosition.set(footPositionInWorld); // Previous foot position
          tempFrameVector.sub(tempFramePoint, tempPosition); // Delta from previous to new foot position
          copPositionsInWorld.get(trustedFoot).add(tempFrameVector); // New CoP position
       }
@@ -330,7 +330,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             {
                if (footSwitches.get(trustedFoot).computeFootLoadPercentage() > 0.2)
                {
-                  FrameLineSegment2d footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedFoot);
+                  FrameLineSegment2D footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedFoot);
                   footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
                   // TODO Garbage
                   FramePoint2D[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
@@ -352,7 +352,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
                }
                else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
                {
-                  copsRawInFootFrame.get(trustedFoot).getFrameTuple2dIncludingFrame(tempCoP2d);
+                  tempCoP2d.setIncludingFrame(copsRawInFootFrame.get(trustedFoot));
                }
             }
          }
@@ -420,7 +420,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       rootJoint.getJointTwist(tempRootBodyTwist);
 
-      rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(tempFrameVector);
+      tempFrameVector.setIncludingFrame(rootJointLinearVelocityNewTwist);
       tempFrameVector.changeFrame(tempRootBodyTwist.getExpressedInFrame());
 
       tempRootBodyTwist.setLinearPart(tempFrameVector);
@@ -437,7 +437,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));
          footTwistInWorld.changeFrame(soleFrames.get(foot));
 
-         this.copsFilteredInFootFrame.get(foot).getFrameTuple2dIncludingFrame(tempCoP2d);
+         tempCoP2d.setIncludingFrame(this.copsFilteredInFootFrame.get(foot));
          tempCoP.setIncludingFrame(tempCoP2d, 0.0);
          footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
          tempCoP.changeFrame(footTwistInWorld.getExpressedInFrame());
@@ -503,16 +503,16 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    public void getPelvisPosition(FramePoint3D positionToPack)
    {
-      rootJointPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(rootJointPosition);
    }
 
    public void getPelvisVelocity(FrameVector3D linearVelocityToPack)
    {
-      rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(rootJointLinearVelocityNewTwist);
    }
 
    public void getFootToPelvisPosition(FramePoint3D positionToPack, RigidBody foot)
    {
-      footToRootJointPositions.get(foot).getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(footToRootJointPositions.get(foot));
    }
 }

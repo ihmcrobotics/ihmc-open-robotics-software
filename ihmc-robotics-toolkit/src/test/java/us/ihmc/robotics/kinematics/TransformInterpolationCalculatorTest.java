@@ -12,12 +12,12 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 ;
@@ -397,9 +397,9 @@ public class TransformInterpolationCalculatorTest
       RigidBodyTransform toTestTransform = new RigidBodyTransform();
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
 
-      FramePose framePose1 = new FramePose();
-      FramePose framePose2 = new FramePose();
-      FramePose expectedFramePose = new FramePose();
+      FramePose3D framePose1 = new FramePose3D();
+      FramePose3D framePose2 = new FramePose3D();
+      FramePose3D expectedFramePose = new FramePose3D();
 
       PoseReferenceFrame frame1 = new PoseReferenceFrame("frame1", framePose1);
       PoseReferenceFrame frame2 = new PoseReferenceFrame("frame2", framePose2);
@@ -411,8 +411,8 @@ public class TransformInterpolationCalculatorTest
          transform1.set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          transform2.set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
-         framePose1.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform1);
-         framePose2.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform2);
+         framePose1.setIncludingFrame(ReferenceFrame.getWorldFrame(), transform1);
+         framePose2.setIncludingFrame(ReferenceFrame.getWorldFrame(), transform2);
 
          double alpha = RandomNumbers.nextDouble(random, 0.0, 1.0);
          transformInterpolationCalculator.computeInterpolation(transform1, transform2, toTestTransform, alpha);
@@ -428,7 +428,7 @@ public class TransformInterpolationCalculatorTest
          expectedFramePose.interpolate(framePose1, framePose2, alpha);
          expectedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         expectedFramePose.getPose(expectedTransform);
+         expectedFramePose.get(expectedTransform);
          
          assertTrue(expectedTransform.epsilonEquals(toTestTransform, 1.0e-10));
       }

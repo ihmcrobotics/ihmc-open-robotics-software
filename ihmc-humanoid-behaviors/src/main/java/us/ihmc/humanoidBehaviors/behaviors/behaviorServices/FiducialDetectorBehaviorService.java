@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
@@ -8,7 +9,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.fiducialDetector.FiducialDetectorFromCameraImages;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
@@ -88,7 +88,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
    }
 
    @Override
-   public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
+   public void getReportedGoalPoseWorldFrame(FramePose3D framePoseToPack)
    {
       synchronized (fiducialDetectorFromCameraImagesConch)
       {

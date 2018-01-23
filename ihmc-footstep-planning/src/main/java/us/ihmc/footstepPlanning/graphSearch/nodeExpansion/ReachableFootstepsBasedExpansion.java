@@ -2,9 +2,9 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
 import java.util.HashSet;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 /**
@@ -29,8 +29,8 @@ public abstract class ReachableFootstepsBasedExpansion implements FootstepNodeEx
       neighbors = new HashSet<>();
 
       /** Get reference frame of stance leg */
-      FramePose stanceFootPose = new FramePose(worldFrame);
-      stanceFootPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      FramePose3D stanceFootPose = new FramePose3D(worldFrame);
+      stanceFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
       stanceFootPose.setX(node.getX());
       stanceFootPose.setY(node.getY());
       yawStanceFoot = node.getYaw();
@@ -55,7 +55,7 @@ public abstract class ReachableFootstepsBasedExpansion implements FootstepNodeEx
       /** Based on stance foot side, step width sign would change*/
       double ySign = stepSide.negateIfRightSide(1.0);
 
-      FramePose step = new FramePose(stanceFrame);
+      FramePose3D step = new FramePose3D(stanceFrame);
       step.setX(xOffset);
       step.setY(ySign * yOffset);
       step.changeFrame(worldFrame);

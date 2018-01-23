@@ -6,6 +6,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,7 +20,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -138,9 +138,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
 
-   public void setDesiredHandPose(RobotSide robotSide, FramePose desiredHandPose)
+   public void setDesiredHandPose(RobotSide robotSide, FramePose3D desiredHandPose)
    {
-      desiredHandPose.getPoseIncludingFrame(desiredPosition, desiredOrientation);
+      desiredHandPose.get(desiredPosition, desiredOrientation);
       setDesiredHandPose(robotSide, desiredPosition, desiredOrientation);
    }
 
@@ -252,10 +252,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          }
          else
          {
-            Point3D desiredHandPosition = new Point3D();
-            Quaternion desiredHandOrientation = new Quaternion();
-            yoDesiredHandPosition.get(desiredHandPosition);
-            yoDesiredHandOrientation.get(desiredHandOrientation);
+            Point3D desiredHandPosition = new Point3D(yoDesiredHandPosition);
+            Quaternion desiredHandOrientation = new Quaternion(yoDesiredHandOrientation);
             RigidBody hand = fullRobotModel.getHand(robotSide);
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             KinematicsToolboxRigidBodyMessage handMessage = new KinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition,
@@ -271,8 +269,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       }
       else
       {
-         Quaternion desiredChestOrientation = new Quaternion();
-         yoDesiredChestOrientation.get(desiredChestOrientation);
+         Quaternion desiredChestOrientation = new Quaternion(yoDesiredChestOrientation);
          RigidBody chest = fullRobotModel.getChest();
          chestMessage = new KinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
          chestMessage.setWeight(0.02);
@@ -287,16 +284,14 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       if (!yoDesiredPelvisOrientation.containsNaN())
       {
-         Quaternion desiredPelvisOrientation = new Quaternion();
-         yoDesiredPelvisOrientation.get(desiredPelvisOrientation);
-         pelvisMessage.setDesiredOrientation(desiredPelvisOrientation);
+         pelvisMessage.setDesiredOrientation(yoDesiredPelvisOrientation);
          pelvisMessage.setWeight(0.02);
       }
 
       if (!yoDesiredPelvisPosition.containsNaN())
       {
          Point3D desiredPelvisPosition = new Point3D();
-         yoDesiredPelvisPosition.get(desiredPelvisPosition);
+         desiredPelvisPosition.set(yoDesiredPelvisPosition);
          pelvisMessage.setDesiredPosition(desiredPelvisPosition);
          pelvisMessage.setWeight(0.02);
       }

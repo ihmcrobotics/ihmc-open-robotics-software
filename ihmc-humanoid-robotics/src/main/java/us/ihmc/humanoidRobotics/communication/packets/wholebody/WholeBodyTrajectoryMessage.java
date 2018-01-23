@@ -14,14 +14,13 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
-      + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.",
-      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
-      topic = "/control/whole_body_trajectory")
+      + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/whole_body_trajectory")
 public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage> implements VisualizablePacket, MultiplePacketHolder
 {
    @RosExportedField(documentation = "Trajectory for the left hand")
@@ -44,7 +43,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    public FootTrajectoryMessage leftFootTrajectoryMessage;
    @RosExportedField(documentation = "Trajectory for the right foot")
    public FootTrajectoryMessage rightFootTrajectoryMessage;
-   
+
+   @RosExportedField(documentation = "Trajectory for the head")
+   public HeadTrajectoryMessage headTrajectoryMessage;
+
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
@@ -55,6 +57,30 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    public WholeBodyTrajectoryMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
+   {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
+      if (other.leftHandTrajectoryMessage != null)
+         leftHandTrajectoryMessage = new HandTrajectoryMessage(other.leftHandTrajectoryMessage);
+      if (other.rightHandTrajectoryMessage != null)
+         rightHandTrajectoryMessage = new HandTrajectoryMessage(other.rightHandTrajectoryMessage);
+      if (other.leftArmTrajectoryMessage != null)
+         leftArmTrajectoryMessage = new ArmTrajectoryMessage(other.leftArmTrajectoryMessage);
+      if (other.rightArmTrajectoryMessage != null)
+         rightArmTrajectoryMessage = new ArmTrajectoryMessage(other.rightArmTrajectoryMessage);
+      if (other.chestTrajectoryMessage != null)
+         chestTrajectoryMessage = new ChestTrajectoryMessage(other.chestTrajectoryMessage);
+      if (other.pelvisTrajectoryMessage != null)
+         pelvisTrajectoryMessage = new PelvisTrajectoryMessage(other.pelvisTrajectoryMessage);
+      if (other.leftFootTrajectoryMessage != null)
+         leftFootTrajectoryMessage = new FootTrajectoryMessage(other.leftFootTrajectoryMessage);
+      if (other.rightFootTrajectoryMessage != null)
+         rightFootTrajectoryMessage = new FootTrajectoryMessage(other.rightFootTrajectoryMessage);
+      if (other.headTrajectoryMessage != null)
+         headTrajectoryMessage = new HeadTrajectoryMessage(other.headTrajectoryMessage);
    }
 
    public WholeBodyTrajectoryMessage(Random random)
@@ -79,6 +105,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
       chestTrajectoryMessage = new ChestTrajectoryMessage(random);
       pelvisTrajectoryMessage = new PelvisTrajectoryMessage(random);
+
+      headTrajectoryMessage = new HeadTrajectoryMessage(random);
    }
 
    public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide)
@@ -128,6 +156,11 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       default:
          throw new RuntimeException("Should not get there.");
       }
+   }
+
+   public HeadTrajectoryMessage getHeadTrajectoryMessage()
+   {
+      return headTrajectoryMessage;
    }
 
    public void setHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
@@ -200,6 +233,14 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       }
    }
 
+   public void setHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
+   {
+      if (headTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
+         headTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
+      this.headTrajectoryMessage = headTrajectoryMessage;
+   }
+
    public boolean checkRobotSideConsistency()
    {
       if (leftHandTrajectoryMessage != null && leftHandTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
@@ -225,6 +266,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       clearChestTrajectoryMessage();
       clearPelvisTrajectoryMessage();
       clearFootTrajectoryMessages();
+      clearHeadTrajectoryMessage();
       executionDelayTime = 0.0;
    }
 
@@ -300,7 +342,12 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
          throw new RuntimeException("Should not get there.");
       }
    }
-   
+
+   public void clearHeadTrajectoryMessage()
+   {
+      headTrajectoryMessage = null;
+   }
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
     * @return the time to delay this command in seconds
@@ -309,7 +356,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
     * @param delayTime the time in seconds to delay after receiving the command before executing
@@ -334,6 +381,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
          return false;
       if (pelvisTrajectoryMessage == null && other.pelvisTrajectoryMessage != null)
          return false;
+      if (headTrajectoryMessage == null && other.headTrajectoryMessage != null)
+         return false;
       if (leftFootTrajectoryMessage == null && other.leftFootTrajectoryMessage != null)
          return false;
       if (rightFootTrajectoryMessage == null && other.rightFootTrajectoryMessage != null)
@@ -351,6 +400,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
          return false;
       if (pelvisTrajectoryMessage != null && other.pelvisTrajectoryMessage == null)
          return false;
+      if (headTrajectoryMessage != null && other.headTrajectoryMessage == null)
+         return false;
       if (leftFootTrajectoryMessage != null && other.leftFootTrajectoryMessage == null)
          return false;
       if (rightFootTrajectoryMessage != null && other.rightFootTrajectoryMessage == null)
@@ -367,6 +418,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (!chestTrajectoryMessage.epsilonEquals(other.chestTrajectoryMessage, epsilon))
          return false;
       if (!pelvisTrajectoryMessage.epsilonEquals(other.pelvisTrajectoryMessage, epsilon))
+         return false;
+      if (!headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
          return false;
       if (!leftFootTrajectoryMessage.epsilonEquals(other.leftFootTrajectoryMessage, epsilon))
          return false;
@@ -400,6 +453,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if ((errorMessage = validateIfNeeded(chestTrajectoryMessage)) != null)
          return errorMessage;
       if ((errorMessage = validateIfNeeded(pelvisTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(headTrajectoryMessage)) != null)
          return errorMessage;
       if ((errorMessage = validateIfNeeded(leftFootTrajectoryMessage)) != null)
          return errorMessage;
@@ -435,6 +490,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
          wholeBodyPackets.add(chestTrajectoryMessage);
       if (pelvisTrajectoryMessage != null)
          wholeBodyPackets.add(pelvisTrajectoryMessage);
+      if (headTrajectoryMessage != null)
+         wholeBodyPackets.add(headTrajectoryMessage);
       if (leftFootTrajectoryMessage != null)
          wholeBodyPackets.add(leftFootTrajectoryMessage);
       if (rightFootTrajectoryMessage != null)

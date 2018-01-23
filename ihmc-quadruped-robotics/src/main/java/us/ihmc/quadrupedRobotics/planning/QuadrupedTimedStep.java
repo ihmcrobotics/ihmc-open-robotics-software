@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.commons.MathTools;
@@ -92,7 +93,7 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
       goalPosition.changeFrame(originalFrame);
    }
 
-   public void setGoalPosition(Point3D goalPosition)
+   public void setGoalPosition(Point3DReadOnly goalPosition)
    {
       this.goalPosition.set(goalPosition);
    }
@@ -101,7 +102,7 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
    {
       ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPosition.get(this.goalPosition);
+      this.goalPosition.set(goalPosition);
       goalPosition.changeFrame(originalFrame);
    }
 

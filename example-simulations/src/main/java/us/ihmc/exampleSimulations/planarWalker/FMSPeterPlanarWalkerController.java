@@ -23,7 +23,6 @@ public class FMSPeterPlanarWalkerController implements RobotController
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override

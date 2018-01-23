@@ -1,19 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
+
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerSegmentedTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CoMIntegrationToolsTest
@@ -74,7 +75,7 @@ public class CoMIntegrationToolsTest
          desiredCoMVelocity.sub(integratedCoMPosition);
          desiredCoMVelocity.scale(omega0.getDoubleValue());
 
-         desiredCoMVelocity.getFrameTuple(dummyPoint);
+         dummyPoint.set(desiredCoMVelocity);
          dummyPoint.scale(integrationDT);
          integratedCoMPosition.add(dummyPoint);
 
@@ -139,7 +140,7 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setCornerPoints(entryCornerPoint, exitCornerPoint);
       icpTrajectoryGenerator.setReferenceCMPs(entryCMP, exitCMP);
       icpTrajectoryGenerator.setReferenceFrames(worldFrame, worldFrame);
-      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM.getFrameTuple(), worldFrame);
+      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
@@ -159,7 +160,7 @@ public class CoMIntegrationToolsTest
          desiredCoMVelocity.sub(integratedCoMPosition);
          desiredCoMVelocity.scale(omega0.getDoubleValue());
 
-         desiredCoMVelocity.getFrameTuple(dummyPoint);
+         dummyPoint.set(desiredCoMVelocity);
          dummyPoint.scale(integrationDT);
          integratedCoMPosition.add(dummyPoint);
 
@@ -226,7 +227,7 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setCornerPoints(entryCornerPoint, exitCornerPoint);
       icpTrajectoryGenerator.setReferenceCMPs(entryCMP, exitCMP);
       icpTrajectoryGenerator.setReferenceFrames(worldFrame, worldFrame);
-      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM.getFrameTuple(), worldFrame);
+      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
@@ -246,7 +247,7 @@ public class CoMIntegrationToolsTest
          desiredCoMVelocity.sub(integratedCoMPosition);
          desiredCoMVelocity.scale(omega0.getDoubleValue());
 
-         desiredCoMVelocity.getFrameTuple(dummyPoint);
+         dummyPoint.set(desiredCoMVelocity);
          dummyPoint.scale(integrationDT);
          integratedCoMPosition.add(dummyPoint);
 

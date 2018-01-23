@@ -3,9 +3,13 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 
 public class ConvexPolygon2dTestHelpers
@@ -171,25 +175,25 @@ public class ConvexPolygon2dTestHelpers
    }
 
    public static final void verifyAroundTheCornerEdges(FrameConvexPolygon2d polygon, FramePoint2D observingPoint, FramePoint2D[] lineOfSightVertices,
-         FrameLineSegment2d[] aroundTheCornerEdges)
+         FrameLineSegment2D[] aroundTheCornerEdges)
    {
       // First make sure that the first points in the edges are the line of sight vertices:
 
       FramePoint2D lineOfSightPoint1 = lineOfSightVertices[0];
       FramePoint2D lineOfSightPoint2 = lineOfSightVertices[1];
 
-      FrameLineSegment2d edge1 = aroundTheCornerEdges[0];
-      FrameLineSegment2d edge2 = aroundTheCornerEdges[1];
+      FrameLineSegment2D edge1 = aroundTheCornerEdges[0];
+      FrameLineSegment2D edge2 = aroundTheCornerEdges[1];
 
-      if (lineOfSightPoint1.distance(edge1.pointBetweenEndPointsGivenParameter(0.0)) > 1e-7)
+      if (lineOfSightPoint1.distance(edge1.pointBetweenEndpointsGivenPercentage(0.0)) > 1e-7)
          throw new RuntimeException("aroundTheCornerEdge[0] does not start with the left line of sight point!");
-      if (lineOfSightPoint2.distance(edge2.pointBetweenEndPointsGivenParameter(0.0)) > 1e-7)
+      if (lineOfSightPoint2.distance(edge2.pointBetweenEndpointsGivenPercentage(0.0)) > 1e-7)
          throw new RuntimeException("aroundTheCornerEdge[1] does not start with the left line of sight point!");
 
       // Now make sure that the second point on the edge is not visible:
 
-      FramePoint2D leftPointAroundEdge = edge1.pointBetweenEndPointsGivenParameter(1.0);
-      FramePoint2D rightPointAroundEdge = edge2.pointBetweenEndPointsGivenParameter(1.0);
+      FramePoint2DBasics leftPointAroundEdge = edge1.pointBetweenEndpointsGivenPercentage(1.0);
+      FramePoint2DBasics rightPointAroundEdge = edge2.pointBetweenEndpointsGivenPercentage(1.0);
 
       double epsilon = 1.0e-5;
 
@@ -270,10 +274,9 @@ public class ConvexPolygon2dTestHelpers
       }
    }
 
-   public static void verifyLineDoesNotIntersectPolygon(FrameLine2d frameLine2d, FrameConvexPolygon2d polygon)
+   public static void verifyLineDoesNotIntersectPolygon(FrameLine2D frameLine2d, FrameConvexPolygon2d polygon)
    {
-      FramePoint2D point = new FramePoint2D();
-      frameLine2d.getFramePoint2d(point);
+      FramePoint2D point = new FramePoint2D(frameLine2d.getPoint());
       FramePoint2D[] lineOfSightVertices = polygon.getLineOfSightVerticesCopy(point);
       if (lineOfSightVertices == null)
       {
@@ -286,9 +289,9 @@ public class ConvexPolygon2dTestHelpers
       }
    }
 
-   public static void verifyLineIntersectsEdge(FrameLine2d frameLine2d, FrameLineSegment2d[] intersectingEdges)
+   public static void verifyLineIntersectsEdge(FrameLine2D frameLine2d, FrameLineSegment2D[] intersectingEdges)
    {
-      FrameLineSegment2d enteringEdge, leavingEdge;
+      FrameLineSegment2D enteringEdge, leavingEdge;
 
       if (intersectingEdges.length == 2)
       {
@@ -303,7 +306,7 @@ public class ConvexPolygon2dTestHelpers
 
       if (enteringEdge != null)
       {
-         FramePoint2D[] enteringVertices = enteringEdge.getEndFramePointsCopy();
+         FramePoint2DReadOnly[] enteringVertices = {enteringEdge.getFirstEndpoint(), enteringEdge.getSecondEndpoint()};
 
          if (!isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[1], enteringVertices[0])
                && !isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[0], enteringVertices[1]))
@@ -312,7 +315,7 @@ public class ConvexPolygon2dTestHelpers
          }
       }
 
-      FramePoint2D[] leavingVertices = leavingEdge.getEndFramePointsCopy();
+      FramePoint2DReadOnly[] leavingVertices = {leavingEdge.getFirstEndpoint(), leavingEdge.getSecondEndpoint()};
 
       if (!isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[0], leavingVertices[1])
             && !isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[1], leavingVertices[0]))
@@ -321,26 +324,24 @@ public class ConvexPolygon2dTestHelpers
       }
    }
 
-   public static boolean isLineBetweenOrIntersectingVertices(FrameLine2d frameLine2d, FramePoint2D leftVertex, FramePoint2D rightVertex)
+   public static boolean isLineBetweenOrIntersectingVertices(FrameLine2D frameLine2d, FramePoint2DReadOnly leftVertex, FramePoint2DReadOnly rightVertex)
    {
       boolean mustBeStrictlyBetween = false;
 
       return isLineBetweenVertices(frameLine2d, leftVertex, rightVertex, mustBeStrictlyBetween);
    }
 
-   public static boolean isLineStrictlyBetweenVertices(FrameLine2d frameLine2d, FramePoint2D leftVertex, FramePoint2D rightVertex)
+   public static boolean isLineStrictlyBetweenVertices(FrameLine2D frameLine2d, FramePoint2D leftVertex, FramePoint2D rightVertex)
    {
       boolean mustBeStrictlyBetween = true;
 
       return isLineBetweenVertices(frameLine2d, leftVertex, rightVertex, mustBeStrictlyBetween);
    }
 
-   public static boolean isLineBetweenVertices(FrameLine2d frameLine2d, FramePoint2D leftVertex, FramePoint2D rightVertex, boolean mustBeStrictlyBetween)
+   public static boolean isLineBetweenVertices(FrameLine2D frameLine2d, FramePoint2DReadOnly leftVertex, FramePoint2DReadOnly rightVertex, boolean mustBeStrictlyBetween)
    {
-      FramePoint2D lineStart = new FramePoint2D();
-      frameLine2d.getFramePoint2d(lineStart);
-      FrameVector2D lineDirection = new FrameVector2D();
-      frameLine2d.getNormalizedFrameVector(lineDirection);
+      FramePoint2D lineStart = new FramePoint2D(frameLine2d.getPoint());
+      FrameVector2D lineDirection = new FrameVector2D(frameLine2d.getDirection());
 
       double startToLeftVertexX = leftVertex.getX() - lineStart.getX();
       double startToLeftVertexY = leftVertex.getY() - lineStart.getY();
@@ -387,39 +388,39 @@ public class ConvexPolygon2dTestHelpers
       }
    }
 
-   public static void verifyLinesIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLine2d> lines)
+   public static void verifyLinesIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLine2D> lines)
    {
-      for (FrameLine2d line : lines)
+      for (FrameLine2D line : lines)
       {
          verifyLineIntersectsPolygon(polygon, line);
       }
    }
 
-   public static void verifyLineSegmentsIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLineSegment2d> lineSegments)
+   public static void verifyLineSegmentsIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLineSegment2D> lineSegments)
    {
-      for (FrameLineSegment2d lineSegment : lineSegments)
+      for (FrameLineSegment2D lineSegment : lineSegments)
       {
          verifyLineSegmentIntersectsPolygon(polygon, lineSegment);
       }
    }
 
-   public static void verifyLinesDoNotIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLine2d> lines)
+   public static void verifyLinesDoNotIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLine2D> lines)
    {
-      for (FrameLine2d line : lines)
+      for (FrameLine2D line : lines)
       {
          verifyLineDoesNotIntersectsPolygon(polygon, line);
       }
    }
 
-   public static void verifyLineSegmentsDoNotIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLineSegment2d> lineSegments)
+   public static void verifyLineSegmentsDoNotIntersectPolygon(FrameConvexPolygon2d polygon, ArrayList<FrameLineSegment2D> lineSegments)
    {
-      for (FrameLineSegment2d lineSegment : lineSegments)
+      for (FrameLineSegment2D lineSegment : lineSegments)
       {
          verifyLineSegmentDoesNotIntersectsPolygon(polygon, lineSegment);
       }
    }
 
-   public static void verifyLineIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLine2d line)
+   public static void verifyLineIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLine2D line)
    {
       FramePoint2D[] intersectingPoints = polygon.intersectionWith(line);
 
@@ -447,7 +448,7 @@ public class ConvexPolygon2dTestHelpers
 
    }
 
-   public static void verifyPointsAreOnLine(FramePoint2D[] intersectingPoints, FrameLine2d line)
+   public static void verifyPointsAreOnLine(FramePoint2D[] intersectingPoints, FrameLine2D line)
    {
       for (FramePoint2D point : intersectingPoints)
       {
@@ -456,7 +457,7 @@ public class ConvexPolygon2dTestHelpers
       }
    }
 
-   public static void verifyPointsAreOnLineSegment(FramePoint2D[] intersectingPoints, FrameLineSegment2d lineSegment)
+   public static void verifyPointsAreOnLineSegment(FramePoint2D[] intersectingPoints, FrameLineSegment2D lineSegment)
    {
       for (FramePoint2D point : intersectingPoints)
       {
@@ -465,7 +466,7 @@ public class ConvexPolygon2dTestHelpers
       }
    }
 
-   public static void verifyLineSegmentIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLineSegment2d lineSegment)
+   public static void verifyLineSegmentIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLineSegment2D lineSegment)
    {
       FramePoint2D[] intersectingPoints = polygon.intersectionWith(lineSegment);
 
@@ -474,7 +475,7 @@ public class ConvexPolygon2dTestHelpers
       verifyPointsAreOnPolygon(intersectingPoints, polygon);
    }
 
-   public static void verifyLineDoesNotIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLine2d line)
+   public static void verifyLineDoesNotIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLine2D line)
    {
       if (doesLineIntersectPolygon(polygon, line))
       {
@@ -482,7 +483,7 @@ public class ConvexPolygon2dTestHelpers
       }
    }
 
-   public static boolean doesLineIntersectPolygon(FrameConvexPolygon2d polygon, FrameLine2d line)
+   public static boolean doesLineIntersectPolygon(FrameConvexPolygon2d polygon, FrameLine2D line)
    {
       boolean onLeft = line.isPointOnLeftSideOfLine(polygon.getFrameVertexCopy(0));
 
@@ -497,9 +498,9 @@ public class ConvexPolygon2dTestHelpers
       return false;
    }
 
-   public static void verifyLineSegmentDoesNotIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLineSegment2d lineSegment)
+   public static void verifyLineSegmentDoesNotIntersectsPolygon(FrameConvexPolygon2d polygon, FrameLineSegment2D lineSegment)
    {
-      FrameLine2d line = new FrameLine2d(lineSegment);
+      FrameLine2D line = new FrameLine2D(lineSegment);
 
       if (!doesLineIntersectPolygon(polygon, line))
          return;

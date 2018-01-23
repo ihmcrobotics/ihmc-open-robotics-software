@@ -19,7 +19,7 @@ public class ImportDataAction extends AbstractAction
       super("Import Data...");
       this.constructor = constructor;
 
-      String iconFilename = "icons/Import24.gif";
+      String iconFilename = "icons/ImportData.png";
       int shortKey = KeyEvent.VK_I;
       String longDescription = "Import simulation data to a file.";
       String shortDescription = "Import Data";

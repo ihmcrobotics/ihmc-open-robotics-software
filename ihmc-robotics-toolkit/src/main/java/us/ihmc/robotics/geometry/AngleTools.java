@@ -2,13 +2,14 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
-import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.commons.MathTools;
 
 public class AngleTools
 {
@@ -32,7 +33,7 @@ public class AngleTools
       return 2.0f * (float) Math.acos(q.getS());
    }
 
-   public static double angleMinusPiToPi(Vector2D startVector, Vector2D endVector)
+   public static double angleMinusPiToPi(Vector2DReadOnly startVector, Vector2DReadOnly endVector)
    {
       double absoluteAngle = Math.acos(startVector.dot(endVector) / startVector.length() / endVector.length());
 
@@ -281,7 +282,7 @@ public class AngleTools
     * @param noTranslationTolerance tolerance for determining if path angle should be determined
     * @return number between -PI and PI
     */
-   public static double calculateHeading(FramePose2d startPose, FramePoint2D endPoint, double headingOffset, double noTranslationTolerance)
+   public static double calculateHeading(FramePose2D startPose, FramePoint2D endPoint, double headingOffset, double noTranslationTolerance)
    {
       double deltaX = endPoint.getX() - startPose.getX();
       double deltaY = endPoint.getY() - startPose.getY();

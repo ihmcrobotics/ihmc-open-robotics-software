@@ -107,6 +107,19 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       this.auxiliaryRobotData = auxiliaryRobotData;
    }
 
+   public void setJointState(OneDoFJoint[] newJointData)
+   {
+      if (newJointData.length != jointAngles.length)
+         throw new RuntimeException("Array size does not match");
+
+      for (int i = 0; i < jointAngles.length; i++)
+      {
+         jointAngles[i] = (float) newJointData[i].getQ();
+         jointVelocities[i] = (float) newJointData[i].getQd();
+         jointTorques[i] = (float) newJointData[i].getTauMeasured();
+      }
+   }
+   
    public void setJointState(List<? extends OneDoFJoint> newJointData)
    {
       if (newJointData.size() != jointAngles.length)

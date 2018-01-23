@@ -54,6 +54,7 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.post.SceneProcessor;
+import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.Renderer;
@@ -63,13 +64,13 @@ import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.FrameBuffer.RenderBuffer;
 import com.jme3.util.BufferUtils;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
-import us.ihmc.commons.thread.ThreadTools;
 
 /**
  * Transfer data from GPU to CPU quickly by using two Pixel Buffer Objects (PBO's).
@@ -260,7 +261,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public void cleanup()
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -466,5 +466,11 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       captureHolder = null;
 
       cameraStreamer = null;
+   }
+
+   @Override
+   public void setProfiler(AppProfiler profiler)
+   {
+      
    }
 }

@@ -48,23 +48,23 @@ public class CenterOfMassTrajectoryHandlerTest
 
       yoTime.set(0.0);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(3.0, 3.0, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(3.0, 3.0, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(1.5);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(0.1);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(1.0);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(-0.1);
       assertFalse(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
@@ -102,23 +102,23 @@ public class CenterOfMassTrajectoryHandlerTest
 
       yoTime.set(0.0 + offset);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(3.0, 3.0, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(3.0, 3.0, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(1.5 + offset);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(0.1 + offset);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(1.0 + offset);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(-0.1 + offset);
       assertFalse(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
@@ -165,23 +165,23 @@ public class CenterOfMassTrajectoryHandlerTest
 
       yoTime.set(0.0);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(3.0, 3.0, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(3.0, 3.0, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(1.5);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(0.1);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(1.0);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(-0.1);
       assertFalse(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
@@ -190,18 +190,18 @@ public class CenterOfMassTrajectoryHandlerTest
 
       yoTime.set(1.5 + 3.0);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.8125, 2.8125, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.375, -0.375, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(0.1 + 3.0);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2995, 0.2995, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(2.985, 2.985, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(1.0 + 3.0);
       assertTrue(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition.getPoint(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity.getVector(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.5, 2.5, 0.0), desiredICPPosition, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), desiredICPVelocity, epsilon);
 
       yoTime.set(6.0);
       assertFalse(handler.packCurrentDesiredICP(omega0, desiredICPPosition, desiredICPVelocity));

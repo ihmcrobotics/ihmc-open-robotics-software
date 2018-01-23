@@ -78,7 +78,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), head.getName(), scs);
+      assertSingleWaypointExecuted(desiredRandomChestOrientation, head.getName(), scs);
       
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -111,15 +111,15 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
-      HeadTrajectoryMessage lookStraightAheadMessage = new HeadTrajectoryMessage(trajectoryTime, lookStraightAhead.getQuaternion(), ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage lookStraightAheadMessage = new HeadTrajectoryMessage(trajectoryTime, lookStraightAhead, ReferenceFrame.getWorldFrame(), chestCoMFrame);
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
-      HeadTrajectoryMessage lookLeftMessage = new HeadTrajectoryMessage(trajectoryTime, lookLeft.getQuaternion(), ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage lookLeftMessage = new HeadTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(), chestCoMFrame);
       drcSimulationTestHelper.send(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 
-      HeadTrajectoryMessage lookRightMessage = new HeadTrajectoryMessage(trajectoryTime, lookRight.getQuaternion(), ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage lookRightMessage = new HeadTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(), chestCoMFrame);
       drcSimulationTestHelper.send(lookRightMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
 

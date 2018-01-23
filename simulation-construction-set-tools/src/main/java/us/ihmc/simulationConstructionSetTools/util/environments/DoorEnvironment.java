@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableDoorRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -19,12 +20,14 @@ public class DoorEnvironment implements CommonAvatarEnvironmentInterface
       
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
+   public static final Point3D DEFAULT_DOOR_LOCATION = new Point3D(3.0, 0.0, 0.0);
+   
    public DoorEnvironment()
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
       
-      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", new Point3D(3.0, 0.0, 0.0));
+      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", DEFAULT_DOOR_LOCATION);
       doorRobots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
    }

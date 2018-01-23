@@ -43,7 +43,6 @@ class GroundContactPointRobotSensor implements SensorInterface
    @Override
    public int getNumberOfVariables()
    {
-      // TODO Auto-generated method stub
       return 7;
    }
 

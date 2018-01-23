@@ -13,11 +13,11 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
@@ -106,15 +106,15 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       double totalSimTime = chestTrajectoryMessage.getTrajectoryTime();
       totalSimTime += 1.0;
 
-      FramePose initialChestPose = getCurrentChestPose();
+      FramePose3D initialChestPose = getCurrentChestPose();
       success = success && drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(chestTrajectoryBehavior, totalSimTime);
-      FramePose finalChestPose = getCurrentChestPose();
+      FramePose3D finalChestPose = getCurrentChestPose();
 
       PrintTools.debug(this, " initial Chest Pose :\n" + initialChestPose);
       PrintTools.debug(this, " final Chest Pose :\n" + finalChestPose);
-      FramePose desiredChestPose = new FramePose();
+      FramePose3D desiredChestPose = new FramePose3D();
 
-      desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestTrajectoryMessage.getLastTrajectoryPoint().orientation);
+      desiredChestPose.set(initialChestPose.getPosition(), chestTrajectoryMessage.getLastTrajectoryPoint().orientation);
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 
       assertTrue(success);
@@ -122,18 +122,18 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       return chestTrajectoryBehavior;
    }
 
-   private FramePose getCurrentChestPose()
+   private FramePose3D getCurrentChestPose()
    {
       drcBehaviorTestHelper.updateRobotModel();
 
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       ret.setToZero(drcBehaviorTestHelper.getSDFFullRobotModel().getChest().getBodyFixedFrame());
       ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose framePose1, FramePose framePose2)
+   private void assertPosesAreWithinThresholds(FramePose3D framePose1, FramePose3D framePose2)
    {
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);

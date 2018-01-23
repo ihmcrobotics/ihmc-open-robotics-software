@@ -1,247 +1,188 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import com.google.common.collect.Lists;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 {
-   enum RepeatedlyWalkFootstepListBehaviorState
-   {
-      WAITING_FOR_FOOTSTEP_LIST, EXECUTING_FOOTSTEP_LIST, REVERSING_FOOTSTEP_ORDER, REPEATING_FOOTSTEP_LIST
-   }
+   private static final int defaultNumberOfStepsToTake = 5;
+   private static final int defaultNumberOfIterations = 2;
 
-   private final StateMachine<RepeatedlyWalkFootstepListBehaviorState> stateMachine;
+   private final YoBoolean walkingForward = new YoBoolean("walkingFotward", registry);
+   private final YoDouble footstepLength = new YoDouble("footstepLength", registry);
+   private final YoDouble footstepWidth = new YoDouble("footstepWidth", registry);
+   private final YoDouble swingTime = new YoDouble("swingTime", registry);
+   private final YoDouble transferTime = new YoDouble("transferTime", registry);
+   private final YoInteger numberOfStepsToTake = new YoInteger("numberOfStepsToTake", registry);
+   private final YoInteger iterations = new YoInteger("iterations", registry);
+   private final YoInteger iterationCounter = new YoInteger("iterationCounter", registry);
+   private final YoEnum<RobotSide> initialSwingSide = YoEnum.create("initialSwingSide", RobotSide.class, registry);
 
-   private final FootstepListBehavior footstepListBehavior;
+   private final FootstepDataListMessage forwardFootstepList = new FootstepDataListMessage();
+   private final FootstepDataListMessage backwardFootstepList = new FootstepDataListMessage();
 
-   private final ConcurrentListeningQueue<FootstepDataListMessage> footstepDataListMessageQueue = new ConcurrentListeningQueue<>(5);
-   private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusMessageQueue = new ConcurrentListeningQueue<>(20);
+   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
+   private final SideDependentList<MovingReferenceFrame> soleFrames;
+   private final ReferenceFrame midFootZUpFrame;
 
-   private final YoBoolean finishedCurrentFootstepList;
-
-   private FootstepDataListMessage footstepListToRepeat;
-
-   public RepeatedlyWalkFootstepListBehavior(CommunicationBridgeInterface communicationBridge, WalkingControllerParameters walkingControllerParameters,
-         YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public RepeatedlyWalkFootstepListBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames,
+                                             YoVariableRegistry parentRegistry)
    {
       super(communicationBridge);
 
-      stateMachine = new StateMachine<>(getName() + "StateMachine", getName() + "StateMachineSwitchTime",
-            RepeatedlyWalkFootstepListBehaviorState.class, yoTime, registry);
+      soleFrames = referenceFrames.getSoleFrames();
+      midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      communicationBridge.attachListener(WalkingStatusMessage.class, walkingStatusMessage::set);
 
-      footstepListBehavior = new FootstepListBehavior(communicationBridge, walkingControllerParameters);
+      walkingForward.set(true);
+      initialSwingSide.set(RobotSide.RIGHT);
 
-      finishedCurrentFootstepList = new YoBoolean("finishedCurrentFootstepList", registry);
-
-      attachNetworkListeningQueue(footstepDataListMessageQueue, FootstepDataListMessage.class);
-      attachNetworkListeningQueue(walkingStatusMessageQueue, WalkingStatusMessage.class);
-
-      setupStateMachine();
+      numberOfStepsToTake.set(defaultNumberOfStepsToTake);
+      iterations.set(defaultNumberOfIterations);
+      swingTime.set(1.5);
+      transferTime.set(0.3);
+      footstepLength.set(0.3);
+      footstepWidth.set(0.25);
 
       parentRegistry.addChild(registry);
-   }
-
-   private void setupStateMachine()
-   {
-      WaitingForFootstepListState waitingForFootstepListState = new WaitingForFootstepListState();
-      waitingForFootstepListState.addStateTransition(RepeatedlyWalkFootstepListBehaviorState.EXECUTING_FOOTSTEP_LIST, footstepDataListMessageQueue::isNewPacketAvailable);
-      stateMachine.addState(waitingForFootstepListState);
-
-      ExecutingFootstepListState executingFootstepListState = new ExecutingFootstepListState();
-      executingFootstepListState.addStateTransition(RepeatedlyWalkFootstepListBehaviorState.REVERSING_FOOTSTEP_ORDER, finishedCurrentFootstepList::getBooleanValue);
-      stateMachine.addState(executingFootstepListState);
-
-      ReversingFootstepOrderState reversingFootstepOrderState = new ReversingFootstepOrderState();
-      reversingFootstepOrderState.addImmediateStateTransition(RepeatedlyWalkFootstepListBehaviorState.REPEATING_FOOTSTEP_LIST);
-      stateMachine.addState(reversingFootstepOrderState);
-
-      RepeatingFootstepListState repeatingFootstepListState = new RepeatingFootstepListState();
-      repeatingFootstepListState.addStateTransition(RepeatedlyWalkFootstepListBehaviorState.REVERSING_FOOTSTEP_ORDER, footstepListBehavior::isDone);
-      stateMachine.addState(repeatingFootstepListState);
-
-      stateMachine.setCurrentState(RepeatedlyWalkFootstepListBehaviorState.WAITING_FOR_FOOTSTEP_LIST);
    }
 
    @Override
    public void onBehaviorEntered()
    {
+      computeForwardFootstepList();
+      computeBackwardFootstepList();
 
+      sendPacket(forwardFootstepList);
+      walkingForward.set(true);
    }
 
-   @Override
-   public void onBehaviorAborted()
+   private void computeForwardFootstepList()
    {
-      stateMachine.setCurrentState(RepeatedlyWalkFootstepListBehaviorState.WAITING_FOR_FOOTSTEP_LIST);
-      finishedCurrentFootstepList.set(true);
-      footstepDataListMessageQueue.clear();
-      walkingStatusMessageQueue.clear();
-      footstepListBehavior.onBehaviorAborted();
+      forwardFootstepList.clear();
+
+      RobotSide swingSide = initialSwingSide.getEnumValue();
+
+      for (int i = 0; i < numberOfStepsToTake.getIntegerValue(); i++)
+      {
+         FootstepDataMessage footstepDataMessage = constructFootstepDataMessage(midFootZUpFrame, footstepLength.getDoubleValue() * (i + 1), 0.5 * swingSide.negateIfRightSide(footstepWidth.getDoubleValue()), swingSide);
+         forwardFootstepList.add(footstepDataMessage);
+
+         swingSide = swingSide.getOppositeSide();
+      }
+
+      forwardFootstepList.setDefaultSwingDuration(swingTime.getDoubleValue());
+      forwardFootstepList.setDefaultTransferDuration(transferTime.getDoubleValue());
    }
 
-   @Override
-   public void onBehaviorPaused()
+   private void computeBackwardFootstepList()
    {
-      if(!stateMachine.getCurrentStateEnum().equals(RepeatedlyWalkFootstepListBehaviorState.WAITING_FOR_FOOTSTEP_LIST))
-         footstepListBehavior.pause();
+      backwardFootstepList.clear();
+
+      ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<>();
+      footstepDataList.addAll(forwardFootstepList.getDataList());
+      footstepDataList.remove(footstepDataList.size() - 1);
+
+      Collections.reverse(footstepDataList);
+
+      RobotSide initialStanceSide = initialSwingSide.getEnumValue().getOppositeSide();
+      FootstepDataMessage initialStanceFoot = constructFootstepDataMessage(soleFrames.get(initialStanceSide), 0.0, 0.0,
+                                                                           initialStanceSide);
+      footstepDataList.add(initialStanceFoot);
+      footstepDataList.forEach(backwardFootstepList::add);
+
+      backwardFootstepList.setDefaultSwingDuration(swingTime.getDoubleValue());
+      backwardFootstepList.setDefaultTransferDuration(transferTime.getDoubleValue());
    }
 
-   @Override
-   public void onBehaviorResumed()
+   private static FootstepDataMessage constructFootstepDataMessage(ReferenceFrame frame, double xOffset, double yOffset, RobotSide side)
    {
-      if(!stateMachine.getCurrentStateEnum().equals(RepeatedlyWalkFootstepListBehaviorState.WAITING_FOR_FOOTSTEP_LIST))
-         footstepListBehavior.resume();
-   }
+      FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
 
-   @Override
-   public void onBehaviorExited()
-   {
+      FramePose3D footstepPose = new FramePose3D();
+      footstepPose.setToZero(frame);
+      footstepPose.setPosition(xOffset, yOffset, 0.0);
+      footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-   }
+      footstepDataMessage.setLocation(footstepPose.getPosition());
+      footstepDataMessage.setOrientation(footstepPose.getOrientation());
+      footstepDataMessage.setRobotSide(side);
 
-   @Override
-   public boolean isDone()
-   {
-      return false;
+      return footstepDataMessage;
    }
 
    @Override
    public void doControl()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
-   }
-
-   class WaitingForFootstepListState extends State
-   {
-      public WaitingForFootstepListState()
+      if(isDone())
       {
-         super(RepeatedlyWalkFootstepListBehaviorState.WAITING_FOR_FOOTSTEP_LIST);
+         return;
       }
 
-      @Override
-      public void doAction()
+      WalkingStatusMessage walkingStatusMessage = this.walkingStatusMessage.getAndSet(null);
+      if(walkingStatusMessage != null && walkingStatusMessage.status.equals(WalkingStatusMessage.Status.COMPLETED))
       {
-
-      }
-
-      @Override
-      public void doTransitionIntoAction()
-      {
-         footstepDataListMessageQueue.clear();
-         finishedCurrentFootstepList.set(true);
-      }
-
-      @Override
-      public void doTransitionOutOfAction()
-      {
-
-      }
-   }
-
-   class ExecutingFootstepListState extends State
-   {
-      public ExecutingFootstepListState()
-      {
-         super(RepeatedlyWalkFootstepListBehaviorState.EXECUTING_FOOTSTEP_LIST);
-      }
-
-      @Override
-      public void doAction()
-      {
-         if(walkingStatusMessageQueue.isNewPacketAvailable())
+         if(walkingForward.getBooleanValue())
          {
-            WalkingStatusMessage latestPacket = walkingStatusMessageQueue.getLatestPacket();
-            WalkingStatusMessage.Status walkingStatus = latestPacket.getWalkingStatus();
-            if(walkingStatus.equals(WalkingStatusMessage.Status.COMPLETED))
+            sendPacket(backwardFootstepList);
+            walkingForward.set(false);
+         }
+         else
+         {
+            iterationCounter.increment();
+            if(isDone())
             {
-               finishedCurrentFootstepList.set(true);
+               return;
             }
+
+            sendPacket(forwardFootstepList);
+            walkingForward.set(true);
          }
       }
-
-      @Override
-      public void doTransitionIntoAction()
-      {
-         finishedCurrentFootstepList.set(false);
-         FootstepDataListMessage latestPacket = footstepDataListMessageQueue.getLatestPacket();
-         footstepListToRepeat = latestPacket;
-      }
-
-      @Override
-      public void doTransitionOutOfAction()
-      {
-
-      }
    }
 
-   class ReversingFootstepOrderState extends State
+   @Override
+   public void onBehaviorAborted()
    {
-      public ReversingFootstepOrderState()
-      {
-         super(RepeatedlyWalkFootstepListBehaviorState.REVERSING_FOOTSTEP_ORDER);
-      }
-
-      @Override
-      public void doAction()
-      {
-
-      }
-
-      @Override
-      public void doTransitionIntoAction()
-      {
-         finishedCurrentFootstepList.set(false);
-         List<FootstepDataMessage> reversedFootstepList = Lists.reverse(footstepListToRepeat.footstepDataList);
-         footstepListToRepeat.footstepDataList = new ArrayList<>();
-         footstepListToRepeat.footstepDataList.addAll(reversedFootstepList);
-      }
-
-      @Override
-      public void doTransitionOutOfAction()
-      {
-
-      }
    }
 
-   class RepeatingFootstepListState extends State
+   @Override
+   public void onBehaviorPaused()
    {
-      public RepeatingFootstepListState()
-      {
-         super(RepeatedlyWalkFootstepListBehaviorState.REPEATING_FOOTSTEP_LIST);
-      }
+   }
 
-      @Override
-      public void doAction()
-      {
-         footstepListBehavior.doControl();
-      }
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
 
-      @Override
-      public void doTransitionIntoAction()
-      {
-         footstepListBehavior.initialize();
-         footstepListBehavior.set(footstepListToRepeat);
-      }
+   @Override
+   public void onBehaviorExited()
+   {
+   }
 
-      @Override
-      public void doTransitionOutOfAction()
-      {
-         footstepListBehavior.doPostBehaviorCleanup();
-      }
+   @Override
+   public boolean isDone()
+   {
+      return iterationCounter.getIntegerValue() == iterations.getIntegerValue();
    }
 }

@@ -279,7 +279,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
    public void get(YoFramePoint positionToPack)
@@ -294,13 +294,13 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void get(Point3D positionToPack)
    {
-      currentPosition.get(positionToPack);
+      positionToPack.set(currentPosition);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
    public void getVelocity(YoFrameVector velocityToPack)
@@ -310,13 +310,13 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void getVelocity(Vector3D velocityToPack)
    {
-      currentVelocity.get(velocityToPack);
+      velocityToPack.set(currentVelocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    public void getAcceleration(YoFrameVector accelerationToPack)
@@ -326,7 +326,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void getAcceleration(Vector3D accelerationToPack)
    {
-      currentAcceleration.get(accelerationToPack);
+      accelerationToPack.set(currentAcceleration);
    }
 
    @Override
@@ -346,7 +346,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void getFinalPosition(FramePoint3D finalPosition)
    {
-      this.finalPosition.getFrameTuple(finalPosition);
+      finalPosition.set(this.finalPosition);
    }
 
    public YoFramePoint getFinalPosition()

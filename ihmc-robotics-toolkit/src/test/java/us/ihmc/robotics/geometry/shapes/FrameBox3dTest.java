@@ -9,10 +9,14 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.MathTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -20,9 +24,8 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameBox3dTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -132,10 +135,10 @@ public class FrameBox3dTest
 
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Box3D expectedBox = new Box3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      FramePose expectedBoxPose = new FramePose(worldFrame, randomTransform);
-      FramePose actualBoxPose = new FramePose();
+      FramePose3D expectedBoxPose = new FramePose3D(worldFrame, randomTransform);
+      FramePose3D actualBoxPose = new FramePose3D();
       FrameBox3d frameBox = new FrameBox3d(worldFrame, expectedBox);
-      frameBox.setPose(expectedBoxPose.getGeometryObject());
+      frameBox.setPose(expectedBoxPose);
       frameBox.getFramePose(actualBoxPose);
 
       expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
@@ -147,7 +150,7 @@ public class FrameBox3dTest
          ReferenceFrame newFrame = frames[random.nextInt(frames.length)];
 
          expectedBoxPose.changeFrame(newFrame);
-         expectedBox.setPose(expectedBoxPose.getGeometryObject());
+         expectedBox.setPose(expectedBoxPose);
          frameBox.changeFrame(newFrame);
          frameBox.getFramePose(actualBoxPose);
 

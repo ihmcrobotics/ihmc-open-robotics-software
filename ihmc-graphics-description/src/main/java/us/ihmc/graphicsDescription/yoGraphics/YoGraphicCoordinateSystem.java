@@ -3,6 +3,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.awt.Color;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
@@ -15,7 +16,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -190,9 +190,9 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       this.roll.set(roll);
    }
 
-   public void setPose(FramePose pose)
+   public void setPose(FramePose3D pose)
    {
-      pose.getOrientation(tempYawPitchRoll);
+      pose.getOrientationYawPitchRoll(tempYawPitchRoll);
       setYawPitchRoll(tempYawPitchRoll);
 
       x.set(pose.getX());

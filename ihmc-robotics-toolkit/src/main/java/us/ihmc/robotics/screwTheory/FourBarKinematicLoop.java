@@ -6,14 +6,14 @@ import java.util.Collections;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
@@ -74,7 +74,7 @@ public class FourBarKinematicLoop
     *
     */
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC,
-         PassiveRevoluteJoint passiveJointD, Vector3D jointDInJointABeforeFrame, boolean recomputeJointLimits)
+         PassiveRevoluteJoint passiveJointD, Vector3DReadOnly jointDInJointABeforeFrame, boolean recomputeJointLimits)
    {
       this.name = name;
       this.masterJointA = masterJointA;
@@ -243,21 +243,11 @@ public class FourBarKinematicLoop
       jointCAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
       jointDAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
 
-      Vector2D tempVectorAB = new Vector2D();
-      Vector2D tempVectorBC = new Vector2D();
-      Vector2D tempVectorCD = new Vector2D();
-      Vector2D tempVectorDA = new Vector2D();
-
-      vectorABProjected.get(tempVectorAB);
-      vectorBCProjected.get(tempVectorBC);
-      vectorCDProjected.get(tempVectorCD);
-      vectorDAProjected.get(tempVectorDA);
-
       if (fourBarIsClockwise)
       {
-         interiorAnglesAtZeroConfiguration[0] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorDA);
-         interiorAnglesAtZeroConfiguration[1] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorAB);
-         interiorAnglesAtZeroConfiguration[2] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorBC);
+         interiorAnglesAtZeroConfiguration[0] = Math.PI - AngleTools.angleMinusPiToPi(vectorABProjected, vectorDAProjected);
+         interiorAnglesAtZeroConfiguration[1] = Math.PI - AngleTools.angleMinusPiToPi(vectorBCProjected, vectorABProjected);
+         interiorAnglesAtZeroConfiguration[2] = Math.PI - AngleTools.angleMinusPiToPi(vectorCDProjected, vectorBCProjected);
          interiorAnglesAtZeroConfiguration[3] = Math.PI;
 
          jointSigns[0] = 1;
@@ -267,9 +257,9 @@ public class FourBarKinematicLoop
       }
       else
       {
-         interiorAnglesAtZeroConfiguration[0] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorDA, tempVectorAB);
-         interiorAnglesAtZeroConfiguration[1] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC);
-         interiorAnglesAtZeroConfiguration[2] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
+         interiorAnglesAtZeroConfiguration[0] = Math.PI - AngleTools.angleMinusPiToPi(vectorDAProjected, vectorABProjected);
+         interiorAnglesAtZeroConfiguration[1] = Math.PI - AngleTools.angleMinusPiToPi(vectorABProjected, vectorBCProjected);
+         interiorAnglesAtZeroConfiguration[2] = Math.PI - AngleTools.angleMinusPiToPi(vectorBCProjected, vectorCDProjected);
          interiorAnglesAtZeroConfiguration[3] = Math.PI;
 
          jointSigns[0] = -1;

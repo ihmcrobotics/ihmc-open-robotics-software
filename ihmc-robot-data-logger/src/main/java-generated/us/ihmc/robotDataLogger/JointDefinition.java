@@ -1,7 +1,4 @@
 package us.ihmc.robotDataLogger;
-import us.ihmc.idl.IDLSequence;
-import java.util.Arrays;
-
 /**
 * 
 * Definition of the class "JointDefinition" defined in Handshake.idl. 
@@ -14,7 +11,7 @@ public class JointDefinition
 {
     public JointDefinition()
     {
-        	name_ = new StringBuilder(255); 
+        	name_ = new java.lang.StringBuilder(255); 
         
         
     }
@@ -33,12 +30,12 @@ public class JointDefinition
         	name_.append(name);
         }
         
-        public String getNameAsString()
+        public java.lang.String getNameAsString()
         {
         	return getName().toString();
         }
 
-    public StringBuilder getName()
+    public java.lang.StringBuilder getName()
     {
         return name_;
     }
@@ -60,7 +57,7 @@ public class JointDefinition
 
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals(java.lang.Object other)
     {
         if(other == null) return false;
         if(other == this) return true;
@@ -78,7 +75,7 @@ public class JointDefinition
     }
     
      @Override
-    public String toString()
+    public java.lang.String toString()
     {
 		StringBuilder builder = new StringBuilder();
 		
@@ -95,7 +92,7 @@ public class JointDefinition
 		return builder.toString();
     }
 
-    private StringBuilder name_; 
+    private java.lang.StringBuilder name_; 
     private us.ihmc.robotDataLogger.JointType type_; 
 
 }

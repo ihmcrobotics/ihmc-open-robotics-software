@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
@@ -14,7 +15,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -206,12 +206,12 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
          WalkToGoalBehaviorPacket walkToGoalBehaviorPacket = walkToGoalPacketQueue.poll();
          referenceFrames.updateFrames();
-         FramePose initialPose = new FramePose(referenceFrames.getSoleFrame(walkToGoalBehaviorPacket.goalSide));
+         FramePose3D initialPose = new FramePose3D(referenceFrames.getSoleFrame(walkToGoalBehaviorPacket.goalSide));
          tempFinalPose.setToZero();
          tempFinalPose.setX(walkToGoalBehaviorPacket.xGoal);
          tempFinalPose.setY(walkToGoalBehaviorPacket.yGoal);
          tempFinalPose.setOrientationYawPitchRoll(walkToGoalBehaviorPacket.thetaGoal, 0.0, 0.0);
-         FramePose finalPose = new FramePose(ReferenceFrame.getWorldFrame(), tempFinalPose);
+         FramePose3D finalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), tempFinalPose);
          FootstepPlanningRequestPacket tempPlanningRequestPacket = new FootstepPlanningRequestPacket(initialPose, walkToGoalBehaviorPacket.goalSide, finalPose);
          tempPlanningRequestPacket.setTimeout(3.0);
          tempPlanningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);

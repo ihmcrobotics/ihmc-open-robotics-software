@@ -5,10 +5,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FrameLine2dTest
 {
    private static final boolean VERBOSE = false;
@@ -37,15 +42,15 @@ public class FrameLine2dTest
       FramePoint2D point1 = new FramePoint2D(zUpFrame, 0.0, 0.0);
       FrameVector2D vector1 = new FrameVector2D(zUpFrame, 1.0, 1.0);
 
-      FrameLine2d line1 = new FrameLine2d(point1, vector1);
+      FrameLine2D line1 = new FrameLine2D(point1, vector1);
 
       FramePoint2D point2 = new FramePoint2D(zUpFrame, 1.0, 0.0);
       FrameVector2D vector2 = new FrameVector2D(zUpFrame, -1.0, 1.0);
 
-      FrameLine2d line2 = new FrameLine2d(point2, vector2);
+      FrameLine2D line2 = new FrameLine2D(point2, vector2);
 
 
-      FramePoint2D intersection = line1.intersectionWith(line2);
+      FramePoint2DBasics intersection = line1.intersectionWith(line2);
 
 //    assertEpsilonEquals(intersection.getX(), 0.5);
 //    assertEpsilonEquals(intersection.getY(), 0.5);

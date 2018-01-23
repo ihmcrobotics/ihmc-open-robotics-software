@@ -1,6 +1,7 @@
 package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,7 +13,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -52,7 +52,7 @@ public class SimulateCutforceController implements RobotController
 
    // Graphicregistry for viz
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final FramePose wristJointPose, handControlFramePose;
+   private final FramePose3D wristJointPose, handControlFramePose;
    private final YoFramePose yoWristJointPose, yoHandControlFramePose;
 
    public SimulateCutforceController(FloatingRootJointRobot robot, FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
@@ -96,14 +96,14 @@ public class SimulateCutforceController implements RobotController
       wristJoint.addExternalForcePoint(efpHandControlFrame);
 
       wristJoint.getTransformToWorld(transform);
-      wristJointPose = new FramePose(HumanoidReferenceFrames.getWorldFrame(), transform);
+      wristJointPose = new FramePose3D(HumanoidReferenceFrames.getWorldFrame(), transform);
       yoWristJointPose = new YoFramePose("wristJointPose", HumanoidReferenceFrames.getWorldFrame(), registry);
       yoWristJointPose.set(wristJointPose);
       YoGraphicCoordinateSystem yoWristCoordinateSystem = new YoGraphicCoordinateSystem("wristCoordinateSystemViz", yoWristJointPose, 0.1, YoAppearance.Red());
 
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
-      handControlFramePose = new FramePose(HumanoidReferenceFrames.getWorldFrame(), transform);
+      handControlFramePose = new FramePose3D(HumanoidReferenceFrames.getWorldFrame(), transform);
       handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose = new YoFramePose("handControlFrame",HumanoidReferenceFrames.getWorldFrame(), registry);
       yoHandControlFramePose.set(handControlFramePose);
@@ -148,15 +148,15 @@ public class SimulateCutforceController implements RobotController
    public void doControl()
    {
       wristJoint.getTransformToWorld(transform);
-      wristJointPose.setPose(transform);
+      wristJointPose.set(transform);
       yoWristJointPose.set(wristJointPose);
 
       wristJoint.getTransformToWorld(transform);
       transform.transform(wristToHandControlFrame, tangentVector);
-      handControlFramePose.setPose(transform);
+      handControlFramePose.set(transform);
       handControlFramePose.prependTranslation(tangentVector);
       yoHandControlFramePose.set(handControlFramePose);
-      handControlFramePose.getPosition(handControlFramePositionInWorld);
+      handControlFramePositionInWorld.set(handControlFramePose.getPosition());
 
       efpHandControlFrame.setPosition(handControlFramePositionInWorld);
 

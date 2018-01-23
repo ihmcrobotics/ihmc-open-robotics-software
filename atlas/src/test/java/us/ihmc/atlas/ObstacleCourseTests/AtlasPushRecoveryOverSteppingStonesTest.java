@@ -4,12 +4,12 @@ import org.junit.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSimpleICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.obstacleCourseTests.DRCPushRecoveryOverSteppingStonesTest;
+import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
@@ -20,7 +20,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
-public class AtlasPushRecoveryOverSteppingStonesTest extends DRCPushRecoveryOverSteppingStonesTest
+public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
 {
    @Override
    public DRCRobotModel getRobotModel()
@@ -41,7 +41,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends DRCPushRecoveryOver
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return new AtlasSimpleICPOptimizationParameters(false)
+                  return new AtlasICPOptimizationParameters(false)
                   {
                      @Override
                      public boolean useAngularMomentum()

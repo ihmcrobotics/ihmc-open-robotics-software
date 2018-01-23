@@ -19,7 +19,7 @@ public class StepBackwardAction extends AbstractAction
       super("Step Backward");
       this.executor = executor;
 
-      String iconFilename = "icons/StepBack24.gif";
+      String iconFilename = "icons/StepBackward.png";
       int shortKey = KeyEvent.VK_B;
       String longDescription = "Step Backward";
       String shortDescription = "Step Backward";

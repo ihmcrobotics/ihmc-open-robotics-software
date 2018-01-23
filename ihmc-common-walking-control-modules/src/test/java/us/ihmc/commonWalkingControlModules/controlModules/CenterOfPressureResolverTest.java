@@ -14,13 +14,13 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -134,8 +134,7 @@ public class CenterOfPressureResolverTest
          double normalTorqueResolvedAtCenterOfPressure = centerOfPressureAndNormalTorque.getRight();
          centerOfPressure.changeFrame(worldFrame);
 
-         Point3D copPoint3d = new Point3D();
-         centerOfPressure.get(copPoint3d);
+         Point3D copPoint3d = new Point3D(centerOfPressure);
          PoseReferenceFrame centerOfPressurePlaneFrame = createPlaneFrame("groundPlaneFrame", copPoint3d, groundNormal);
          spatialForceVector.changeFrame(centerOfPressurePlaneFrame);
 
@@ -198,7 +197,7 @@ public class CenterOfPressureResolverTest
       RotationMatrix rotationFromNormal = computeRotationFromNormal(planeSurfaceNormal);
 
       RigidBodyTransform transform3D = new RigidBodyTransform(rotationFromNormal, new Vector3D(planeReferencePoint));
-      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);
+      FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame(), transform3D);
 
       planeFrame.setPoseAndUpdate(framePose);
       planeFrame.update();
@@ -211,7 +210,7 @@ public class CenterOfPressureResolverTest
       RigidBodyTransform transform3D = new RigidBodyTransform();
       transform3D.setTranslation(new Vector3D(frameCenterPoint));
 
-      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);
+      FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame(), transform3D);
       translatedZUpFrame.setPoseAndUpdate(framePose);
       translatedZUpFrame.update();
       return translatedZUpFrame;

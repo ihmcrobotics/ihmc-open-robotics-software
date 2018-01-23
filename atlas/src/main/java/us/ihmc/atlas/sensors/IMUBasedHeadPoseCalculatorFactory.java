@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
@@ -129,7 +130,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 				Vector3D gravityInducedAcceleration = new Vector3D(0.0, 0.0, +9.82);
 				FrameVector3D accel = new FrameVector3D(headIMUFrameWhenLevel,rawAcceleration);
 				accel.changeFrame(ReferenceFrame.getWorldFrame());
-				double[] eulerAngles = EulerAnglesFromVectors(accel.getVector(), gravityInducedAcceleration);
+				double[] eulerAngles = EulerAnglesFromVectors(accel, gravityInducedAcceleration);
 				headPosePacket.setEulerAngles(eulerAngles);
 				headPosePacket.status = MeasurementStatus.STABLE;
 				headPosePacket.measuredGravityInWorld.set(rawAcceleration);
@@ -141,7 +142,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 
 		packetCommunicator.send(headPosePacket);
 	}
-	private static double[] EulerAnglesFromVectors(Vector3D vectorPreTransform, Vector3D vectorPostTransform)
+	private static double[] EulerAnglesFromVectors(Vector3DReadOnly vectorPreTransform, Vector3DReadOnly vectorPostTransform)
 	{
 		Vector3D rotationAxis = new Vector3D();
 		rotationAxis.cross(vectorPreTransform,vectorPostTransform);

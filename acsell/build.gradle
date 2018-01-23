@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.2"
+      classpath "us.ihmc:ihmc-build:0.12.2"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -32,10 +32,9 @@ mainDependencies {
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.ejml', name: 'core', version: '0.30'
-   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.bidib.jbidib.org.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-state-estimation", version: groupDependencyVersion
@@ -58,8 +57,8 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.1"
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
 }

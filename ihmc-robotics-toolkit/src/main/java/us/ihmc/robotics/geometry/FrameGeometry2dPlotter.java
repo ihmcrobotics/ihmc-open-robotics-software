@@ -13,10 +13,14 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
@@ -37,7 +41,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private class FrameLineGroup
    {
-      private ArrayList<FrameLine2d> frameLines = new ArrayList<FrameLine2d>();
+      private ArrayList<FrameLine2D> frameLines = new ArrayList<FrameLine2D>();
       private final Color color;
 
       public FrameLineGroup(Color color)
@@ -45,19 +49,19 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          this.color = color;
       }
 
-      public void addFrameLine(FrameLine2d frameLine2d)
+      public void addFrameLine(FrameLine2D frameLine2d)
       {
          frameLines.add(frameLine2d);
       }
 
-      public void addFrameLines(ArrayList<FrameLine2d> frameLines2d)
+      public void addFrameLines(ArrayList<FrameLine2D> frameLines2d)
       {
          frameLines.addAll(frameLines2d);
       }
 
-      public void addFrameLines(FrameLine2d[] frameLines2d)
+      public void addFrameLines(FrameLine2D[] frameLines2d)
       {
-         for (FrameLine2d frameLine : frameLines2d)
+         for (FrameLine2D frameLine : frameLines2d)
          {
             frameLines.add(frameLine);
          }
@@ -66,7 +70,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private class FramePointGroup
    {
-      private ArrayList<FramePoint2D> framePoints = new ArrayList<FramePoint2D>();
+      private ArrayList<FramePoint2DReadOnly> framePoints = new ArrayList<>();
       private final Color color;
 
       public FramePointGroup(Color color)
@@ -74,20 +78,20 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          this.color = color;
       }
 
-      public void addFramePoint(FramePoint2D framePoint2d)
+      public void addFramePoint(FramePoint2DReadOnly framePoint2d)
       {
          framePoints.add(framePoint2d);
       }
 
-      public void addFramePoints(ArrayList<FramePoint2D> framePoints2d)
+      public void addFramePoints(ArrayList<? extends FramePoint2DReadOnly> framePoints2d)
       {
          framePoints.addAll(framePoints2d);
       }
 
       @SuppressWarnings("unused")
-      public void addFramePoints(FramePoint2D[] framePoints2d)
+      public void addFramePoints(FramePoint2DReadOnly[] framePoints2d)
       {
-         for (FramePoint2D framePoint : framePoints2d)
+         for (FramePoint2DReadOnly framePoint : framePoints2d)
          {
             framePoints.add(framePoint);
          }
@@ -127,7 +131,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private class FrameLineSegmentGroup
    {
-      private ArrayList<FrameLineSegment2d> frameLineSegments = new ArrayList<FrameLineSegment2d>();
+      private ArrayList<FrameLineSegment2D> frameLineSegments = new ArrayList<FrameLineSegment2D>();
       private final Color color;
 
       public FrameLineSegmentGroup(Color color)
@@ -135,12 +139,12 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          this.color = color;
       }
 
-      public void addFrameLineSegment(FrameLineSegment2d frameLineSegment2d)
+      public void addFrameLineSegment(FrameLineSegment2D frameLineSegment2d)
       {
          frameLineSegments.add(frameLineSegment2d);
       }
 
-      public void addFrameLineSegments(ArrayList<FrameLineSegment2d> frameLineSegments2d)
+      public void addFrameLineSegments(ArrayList<FrameLineSegment2D> frameLineSegments2d)
       {
          frameLineSegments.addAll(frameLineSegments2d);
       }
@@ -171,17 +175,17 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       this.pointPixels = pointPixels;
    }
 
-   public synchronized void addFrameLine2d(FrameLine2d frameLine2d)
+   public synchronized void addFrameLine2d(FrameLine2D frameLine2d)
    {
       addFrameLine2d(frameLine2d, Color.black);
    }
 
-   public synchronized void addFrameLines2d(ArrayList<FrameLine2d> frameLines2d)
+   public synchronized void addFrameLines2d(ArrayList<FrameLine2D> frameLines2d)
    {
       addFrameLines2d(frameLines2d, Color.black);
    }
 
-   public synchronized void addFrameLine2d(FrameLine2d frameLine2d, Color color)
+   public synchronized void addFrameLine2d(FrameLine2D frameLine2d, Color color)
    {
       FrameLineGroup frameLineGroup = frameLineGroups.get(color);
       if (frameLineGroup == null)
@@ -205,7 +209,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       framePointGroup.addFramePoints(framePoints);
    }
 
-   public synchronized void addFramePoint2d(FramePoint2D framePoint, Color color)
+   public synchronized void addFramePoint2d(FramePoint2DReadOnly framePoint, Color color)
    {
       FramePointGroup framePointGroup = framePointGroups.get(color);
       if (framePointGroup == null)
@@ -217,7 +221,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       framePointGroup.addFramePoint(framePoint);
    }
 
-   public synchronized void addFrameLines2d(ArrayList<FrameLine2d> frameLines2d, Color color)
+   public synchronized void addFrameLines2d(ArrayList<FrameLine2D> frameLines2d, Color color)
    {
       FrameLineGroup frameLineGroup = frameLineGroups.get(color);
       if (frameLineGroup == null)
@@ -230,7 +234,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    }
 
-   public synchronized void addFrameLines2d(FrameLine2d[] frameLines2d, Color color)
+   public synchronized void addFrameLines2d(FrameLine2D[] frameLines2d, Color color)
    {
       FrameLineGroup frameLineGroup = frameLineGroups.get(color);
       if (frameLineGroup == null)
@@ -242,7 +246,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameLineGroup.addFrameLines(frameLines2d);
    }
 
-   public synchronized void addFrameLineSegment2d(FrameLineSegment2d frameLinesSegment2d, Color color)
+   public synchronized void addFrameLineSegment2d(FrameLineSegment2D frameLinesSegment2d, Color color)
    {
       FrameLineSegmentGroup frameLineSegmentGroup = frameLineSegmentGroups.get(color);
 
@@ -256,7 +260,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    }
 
-   public synchronized void addFrameLineSegments2d(ArrayList<FrameLineSegment2d> frameLinesSegments2d, Color color)
+   public synchronized void addFrameLineSegments2d(ArrayList<FrameLineSegment2D> frameLinesSegments2d, Color color)
    {
       FrameLineSegmentGroup frameLineSegmentGroup = frameLineSegmentGroups.get(color);
 
@@ -354,7 +358,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
    }
 
-   public synchronized void addFramePoint2d(FramePoint2D framePoint2d)
+   public synchronized void addFramePoint2d(FramePoint2DReadOnly framePoint2d)
    {
       this.addFramePoint2d(framePoint2d, Color.black);
    }
@@ -453,25 +457,25 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       }
    }
 
-   private void drawFrameLines(ArrayList<FrameLine2d> frameLines, Graphics graphics)
+   private void drawFrameLines(ArrayList<FrameLine2D> frameLines, Graphics graphics)
    {
-      for (FrameLine2d frameLine : frameLines)
+      for (FrameLine2D frameLine : frameLines)
       {
          this.drawLine(frameLine, graphics);
       }
    }
 
-   private void drawFrameLineSegments(ArrayList<FrameLineSegment2d> frameLineSegments, Graphics graphics)
+   private void drawFrameLineSegments(ArrayList<FrameLineSegment2D> frameLineSegments, Graphics graphics)
    {
-      for (FrameLineSegment2d frameLineSegment : frameLineSegments)
+      for (FrameLineSegment2D frameLineSegment : frameLineSegments)
       {
          this.drawLineSegment(frameLineSegment, graphics);
       }
    }
 
-   private void drawFramePoints(ArrayList<FramePoint2D> framePoints, Graphics graphics)
+   private void drawFramePoints(ArrayList<? extends FramePoint2DReadOnly> framePoints, Graphics graphics)
    {
-      for (FramePoint2D framePoint : framePoints)
+      for (FramePoint2DReadOnly framePoint : framePoints)
       {
          this.drawPoint(framePoint, graphics);
       }
@@ -546,12 +550,10 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       graphics.drawPolygon(polygon);
    }
 
-   private void drawLine(FrameLine2d frameLine2d, Graphics graphics)
+   private void drawLine(FrameLine2D frameLine2d, Graphics graphics)
    {
-      Point2D point = new Point2D();
-      frameLine2d.getPoint2d(point);
-      Vector2D vector = new Vector2D();
-      frameLine2d.getNormalizedFrameVector(vector);
+      Point2D point = new Point2D(frameLine2d.getPoint());
+      Vector2D vector = new Vector2D(frameLine2d.getDirection());
 
       double largeNumber = scale * 100; // 1.0e3;
 
@@ -561,14 +563,15 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       drawLine(point.getX(), point.getY(), X2, Y2, graphics);
    }
 
-   private void drawLineSegment(FrameLineSegment2d frameLineSegment2d, Graphics graphics)
+   private void drawLineSegment(FrameLineSegment2D frameLineSegment2d, Graphics graphics)
    {
-      Point2D[] points = frameLineSegment2d.lineSegment.getEndpointsCopy();
+      Point2DBasics firstEndpoint = frameLineSegment2d.getFirstEndpoint();
+      Point2DBasics secondEndpoint = frameLineSegment2d.getSecondEndpoint();
 
-      drawLine(points[0].getX(), points[0].getY(), points[1].getX(), points[1].getY(), graphics);
+      drawLine(firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY(), graphics);
    }
 
-   private void drawPoint(FramePoint2D framePoint2d, Graphics graphics)
+   private void drawPoint(FramePoint2DReadOnly framePoint2d, Graphics graphics)
    {
       drawPoint(framePoint2d.getX(), framePoint2d.getY(), graphics);
    }

@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -20,7 +21,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
@@ -36,7 +36,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
 
    
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
-   private final boolean useSimpleAdjustment;
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, ICPPlannerParameters icpPlannerParameters,
@@ -72,7 +71,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
 
       ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
-      useSimpleAdjustment = icpOptimizationParameters.useSimpleOptimization();
       icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
                                                                 contactableFeet, controlDT, registry, yoGraphicsListRegistry);
    }
@@ -93,7 +91,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
-      icpOptimizationController.setFinalTransferSplitFractionToDefault();
    }
 
    @Override
@@ -137,32 +134,20 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
    }
 
-   private final FramePose footstepPose = new FramePose();
+   private final FramePose3D footstepPose = new FramePose3D();
    private final FramePoint2D footstepPositionSolution = new FramePoint2D();
 
    @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
-      if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
+      if (icpOptimizationController.useStepAdjustment())
       {
-         icpOptimizationController.getFootstepSolution(0, footstepToPack);
+         icpOptimizationController.getFootstepSolution(footstepToPack);
          /*
-         if (useSimpleAdjustment)
-         {
-            footstepToPack.getPose(footstepPose);
-            icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
-            footstepPose.setXYFromPosition2d(footstepPositionSolution);
-            footstepToPack.setPose(footstepPose);
-         }
-         else
-         {
-            RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstepToPack.getRobotSide());
-
-            footstepToPack.getAnklePose(footstepPose, ankleToSole);
-            icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
-            footstepPose.setXYFromPosition2d(footstepPositionSolution);
-            footstepToPack.setFromAnklePose(footstepPose, ankleToSole);
-         }
+         footstepToPack.getPose(footstepPose);
+         icpOptimizationController.getFootstepSolution(footstepPositionSolution);
+         footstepPose.setPosition(footstepPositionSolution);
+         footstepToPack.setPose(footstepPose);
          */
       }
 
@@ -182,20 +167,14 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    }
 
    @Override
-   public double getOptimizedTimeRemaining()
-   {
-      return icpOptimizationController.getOptimizedTimeRemaining();
-   }
-
-   @Override
-   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity)
-   {
-      icpOptimizationController.setReferenceICPVelocity(referenceICPVelocity);
-   }
-
-   @Override
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
       icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
+   }
+
+   @Override
+   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   {
+      this.icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 }

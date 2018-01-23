@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -91,7 +92,7 @@ public class GroundContactPointsSlipper implements RobotController
       this.percentToSlipPerTick.set(percentToSlipPerTick);
    }
 
-   public void setSlipTranslation(Vector3D slipAmount)
+   public void setSlipTranslation(Vector3DReadOnly slipAmount)
    {
       this.slipAmount.set(slipAmount);
    }
@@ -135,7 +136,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    private void applyTranslationalSlip(double percentOfDelta) 
    {
-      FrameVector3D slipDelta = slipAmount.getFrameVectorCopy();
+      FrameVector3D slipDelta = new FrameVector3D(slipAmount);
       slipDelta.scale(percentOfDelta);
       slipAmount.sub(slipDelta);
 

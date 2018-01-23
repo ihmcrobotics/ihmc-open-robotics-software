@@ -3,18 +3,15 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
@@ -25,6 +22,10 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WristForceSensorFilteredUpdatable implements Updatable
 {
@@ -136,19 +137,19 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       return sensorMassCompensator.getDistalMass();
    }
 
-   public FramePoint3D getWristPositionInWorld()
+   public FramePoint3DReadOnly getWristPositionInWorld()
    {
       return sensorMassCompensator.getSensorPosition();
    }
 
-   public FrameVector3D getWristForceRawInWorld()
+   public FrameVector3DReadOnly getWristForceRaw()
    {
-      return sensorMassCompensator.getSensorForceRaw(world);
+      return sensorMassCompensator.getSensorForceRaw();
    }
 
-   public FrameVector3D getWristForceMassCompensatedInWorld()
+   public FrameVector3DReadOnly getWristForceMassCompensated()
    {
-      return sensorMassCompensator.getSensorForceMassCompensated(world);
+      return sensorMassCompensator.getSensorForceMassCompensated();
    }
 
    public YoDouble getWristForceMagnitude()
@@ -198,8 +199,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       forceSensorData.getWrench(wristSensorWrench);
       sensorMassCompensator.update(forceSensorData);
 
-      FrameVector3D sensorForceRawInWorld = sensorMassCompensator.getSensorForceRaw(world);
-      yoWristSensorForceMagnitude.set(sensorForceRawInWorld.length());
+      yoWristSensorForceMagnitude.set(sensorMassCompensator.getSensorForceRaw().length());
    }
 
    private double maxFilteredForce;
@@ -245,10 +245,10 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private void estimateStiffnessOfConstraintsActingUponWrist()
    {
-      FramePoint3D sensorPositionInWorld = sensorMassCompensator.getSensorPosition();
+      FramePoint3DReadOnly sensorPositionInWorld = sensorMassCompensator.getSensorPosition();
 
-      FrameVector3D forceInWorldFrame = sensorMassCompensator.getSensorForceMassCompensated(world);
-      wristSensorForceInWorld.setIncludingFrame(forceInWorldFrame);
+      wristSensorForceInWorld.setIncludingFrame(sensorMassCompensator.getSensorForceMassCompensated());
+      wristSensorForceInWorld.changeFrame(world);
 
       taskspaceStiffnessCalc.update(sensorPositionInWorld, wristSensorForceInWorld);
    }

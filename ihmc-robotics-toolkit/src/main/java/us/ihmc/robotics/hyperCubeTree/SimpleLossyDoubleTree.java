@@ -46,7 +46,6 @@ public class SimpleLossyDoubleTree extends HyperCubeTree<Double,Void>
 
    public void treeCleared()
    {
-      // TODO Auto-generated method stub
       
    }
 

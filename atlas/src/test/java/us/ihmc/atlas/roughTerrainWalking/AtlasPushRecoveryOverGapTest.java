@@ -3,7 +3,7 @@ package us.ihmc.atlas.roughTerrainWalking;
 import org.junit.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasSimpleICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -36,7 +36,7 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 70000)
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
@@ -68,7 +68,7 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
-                  return new AtlasSimpleICPOptimizationParameters(false)
+                  return new AtlasICPOptimizationParameters(false)
                   {
                      @Override
                      public boolean useAngularMomentum()
@@ -78,6 +78,18 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
 
                      @Override
                      public boolean useStepAdjustment()
+                     {
+                        return true;
+                     }
+
+                     @Override
+                     public boolean usePlanarRegionConstraints()
+                     {
+                        return true;
+                     }
+
+                     @Override
+                     public boolean switchPlanarRegionConstraintsAutomatically()
                      {
                         return true;
                      }

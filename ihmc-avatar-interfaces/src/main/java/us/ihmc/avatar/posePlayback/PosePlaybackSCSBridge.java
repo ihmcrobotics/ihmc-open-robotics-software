@@ -7,6 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -21,7 +22,6 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
@@ -250,7 +250,7 @@ public class PosePlaybackSCSBridge
 
             ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
 
-            FramePose palmPose = new FramePose(handFrame);
+            FramePose3D palmPose = new FramePose3D(handFrame);
             FramePoint3D palmPositionWithRespectToHandFrame = new FramePoint3D(handFrame, 0.0, robotSide.negateIfRightSide(0.08), -0.04);
             double yaw = 0.0;
             double pitch = 0.0;

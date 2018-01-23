@@ -8,11 +8,11 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
@@ -24,7 +24,7 @@ public class BlendedPoseTrajectoryGeneratorTest
 {
    private final double EPSILON = 1e-3;
 
-   private boolean geometricEquals(FramePose poseA, FramePose poseB, double epsilon)
+   private boolean geometricEquals(FramePose3D poseA, FramePose3D poseB, double epsilon)
    {
       return RotationTools.quaternionEpsilonEquals(poseA.getOrientation(), poseB.getOrientation(), epsilon) && poseA.getPosition()
             .epsilonEquals(poseB.getPosition(), epsilon);
@@ -32,7 +32,7 @@ public class BlendedPoseTrajectoryGeneratorTest
 
    private boolean geometricEquals(FrameQuaternion orientationA, FrameQuaternion orientationB, double epsilon)
    {
-      return RotationTools.quaternionEpsilonEquals(orientationA.getQuaternion(), orientationB.getQuaternion(), epsilon);
+      return RotationTools.quaternionEpsilonEquals(orientationA, orientationB, epsilon);
    }
 
    private class PoseTrajectoryState
@@ -85,11 +85,11 @@ public class BlendedPoseTrajectoryGeneratorTest
          return new FrameSE3TrajectoryPoint(time, position, orientation, linearVelocity, angularVelocity);
       }
 
-      public FramePose getPose()
+      public FramePose3D getPose()
       {
          position.changeFrame(expressedInFrame);
          orientation.changeFrame(expressedInFrame);
-         return new FramePose(position, orientation);
+         return new FramePose3D(position, orientation);
       }
 
       public Twist getTwist()

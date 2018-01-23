@@ -10,7 +10,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
@@ -51,7 +50,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       return supportedCommands();
    }
 
-   static List<Class<? extends Command<?, ?>>> supportedCommands()
+   public static List<Class<? extends Command<?, ?>>> supportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(KinematicsToolboxCenterOfMassCommand.class);
@@ -71,7 +70,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       return supportedStatus();
    }
 
-   static List<Class<? extends SettablePacket<?>>> supportedStatus()
+   public static List<Class<? extends SettablePacket<?>>> supportedStatus()
    {
       List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);

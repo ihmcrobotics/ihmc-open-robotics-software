@@ -68,7 +68,7 @@ public class QuadrupedPreplannedStepInputProvider
          {
             debugTimedStepPacket.getSteps().get(0).setRobotQuadrant(yoTimedStepQuadrant.getEnumValue());
             debugTimedStepPacket.getSteps().get(0).setGroundClearance(yoTimedStepGroundClearance.getDoubleValue());
-            debugTimedStepPacket.getSteps().get(0).setGoalPosition(yoTimedStepGoalPosition.getFrameTuple().getPoint());
+            debugTimedStepPacket.getSteps().get(0).setGoalPosition(yoTimedStepGoalPosition);
             debugTimedStepPacket.getSteps().get(0).getTimeInterval().setInterval(0.5, 0.5 + yoTimedStepDuration.getDoubleValue());
             inputTimedStepPacket.set(debugTimedStepPacket);
          }

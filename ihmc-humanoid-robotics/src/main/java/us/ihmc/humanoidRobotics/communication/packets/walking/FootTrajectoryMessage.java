@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
@@ -82,7 +82,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
       this.robotSide = robotSide;
    }
 
-   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose desiredPose)
+   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose3D desiredPose)
    {
       this(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
    }

@@ -6,9 +6,10 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 
 /**
  * One of the main goals of this class is to check, at runtime, that operations on matrices occur within the same Frame.
@@ -150,7 +151,7 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
      * @param frameTupleToPack the frameTuple to be multiplied by this frameMatrix3D and then replaced
      * @throws ReferenceFrameMismatchException
      */
-   public void transform(FrameTuple3D<?, ?> frameTupleToPack)
+   public void transform(FrameTuple3DBasics frameTupleToPack)
    {
       checkReferenceFrameMatch(frameTupleToPack);
       matrix.transform(frameTupleToPack);
@@ -163,7 +164,7 @@ public class FrameMatrix3D extends FrameGeometryObject<FrameMatrix3D, Matrix3D>
      * @param frameTupleToPack the FrameTuple into which the product is placed
      * @throws ReferenceFrameMismatchException
      */
-   public void transform(FrameTuple3D<?, ?> frameTupleOriginal, FrameTuple3D<?, ?> frameTupleToPack)
+   public void transform(FrameTuple3DReadOnly frameTupleOriginal, FrameTuple3DBasics frameTupleToPack)
    {
       checkReferenceFrameMatch(frameTupleOriginal);
       frameTupleToPack.setIncludingFrame(frameTupleOriginal);

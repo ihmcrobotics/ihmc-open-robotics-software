@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -8,16 +9,16 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class PIDController extends AbstractPIDController
 {
-   final PDController pdController;
-   final YoDouble integralGain;
-   final YoDouble maxIntegralError;
-   final YoDouble maxOutput;
-   final YoDouble integralLeakRatio;
-   
+   private final PDController pdController;
+   private final YoDouble integralGain;
+   private final YoDouble maxIntegralError;
+   private final YoDouble maxFeedback;
+   private final YoDouble integralLeakRatio;
+
    public PIDController(String suffix, YoVariableRegistry registry)
    {
       super(suffix, registry);
-      
+
       pdController = new PDController(suffix, registry);
 
       integralGain = new YoDouble("ki_" + suffix, registry);
@@ -25,11 +26,10 @@ public class PIDController extends AbstractPIDController
 
       maxIntegralError = new YoDouble("maxIntegralError_" + suffix, registry);
       maxIntegralError.set(Double.POSITIVE_INFINITY);
-      
-      maxOutput = new YoDouble("maxOutput_" + suffix, registry);
-      maxOutput.set(Double.POSITIVE_INFINITY);
 
-      
+      maxFeedback = new YoDouble("maxOutput_" + suffix, registry);
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+
       integralLeakRatio = new YoDouble("leak_" + suffix, registry);
       integralLeakRatio.set(1.0);
 
@@ -40,7 +40,8 @@ public class PIDController extends AbstractPIDController
    {
       VariableChangedListener leakRatioClipper = new VariableChangedListener()
       {
-         @Override public void notifyOfVariableChange(YoVariable<?> v)
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             integralLeakRatio.set(MathTools.clamp(integralLeakRatio.getDoubleValue(), 0.0, 1.0), false);
          }
@@ -49,43 +50,42 @@ public class PIDController extends AbstractPIDController
       integralLeakRatio.addVariableChangedListener(leakRatioClipper);
    }
 
-   public PIDController(YoDouble proportionalGain, YoDouble integralGain, YoDouble derivativeGain, YoDouble maxIntegralError,
-         String suffix, YoVariableRegistry registry)
+   public PIDController(YoDouble proportionalGain, YoDouble integralGain, YoDouble derivativeGain, YoDouble maxIntegralError, String suffix,
+                        YoVariableRegistry registry)
    {
       super(suffix, registry);
-      
+
       pdController = new PDController(proportionalGain, derivativeGain, suffix, registry);
       this.integralGain = integralGain;
       this.maxIntegralError = maxIntegralError;
-      
-      maxOutput = new YoDouble("maxOutput_" + suffix, registry);
-      maxOutput.set(Double.POSITIVE_INFINITY);
 
-      
+      maxFeedback = new YoDouble("maxOutput_" + suffix, registry);
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+
       integralLeakRatio = new YoDouble("leak_" + suffix, registry);
       integralLeakRatio.set(1.0);
-      
+
       addLeakRatioClipper();
    }
 
    public PIDController(YoPIDGains yoPIDGains, String suffix, YoVariableRegistry registry)
    {
       super(suffix, registry);
-      
+
       pdController = new PDController(yoPIDGains, suffix, registry);
       this.integralGain = yoPIDGains.getYoKi();
       this.maxIntegralError = yoPIDGains.getYoMaxIntegralError();
-      this.maxOutput = yoPIDGains.getYoMaximumOutput();
+      this.maxFeedback = yoPIDGains.getYoMaximumFeedback();
 
       integralLeakRatio = yoPIDGains.getYoIntegralLeakRatio();
    }
-   
+
    public void setMaximumOutputLimit(double max)
    {
-      if( max <=0 )
-         maxOutput.set(Double.POSITIVE_INFINITY);
+      if (max <= 0.0)
+         maxFeedback.set(Double.POSITIVE_INFINITY);
       else
-         maxOutput.set( max );
+         maxFeedback.set(max);
    }
 
    public void setProportionalGain(double proportionalGain)
@@ -107,12 +107,12 @@ public class PIDController extends AbstractPIDController
    {
       this.integralGain.set(integralGain);
    }
-   
+
    public void setIntegralLeakRatio(double integralLeakRatio)
    {
       this.integralLeakRatio.set(MathTools.clamp(integralLeakRatio, 0.0, 1.0));
    }
-   
+
    public void setMaxIntegralError(double maxIntegralError)
    {
       this.maxIntegralError.set(maxIntegralError);
@@ -125,9 +125,9 @@ public class PIDController extends AbstractPIDController
    }
 
    @Override
-   public double getMaximumOutputLimit()
+   public double getMaximumFeedback()
    {
-      return maxOutput.getDoubleValue();
+      return maxFeedback.getDoubleValue();
    }
 
    @Override

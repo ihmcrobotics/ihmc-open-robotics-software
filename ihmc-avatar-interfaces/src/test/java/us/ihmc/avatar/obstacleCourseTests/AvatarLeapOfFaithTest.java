@@ -401,6 +401,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
       double distanceTraveled = 0.5 * starterLength;

@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -33,9 +33,9 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       putYoValuesIntoFrameWaypoint();
    }
 
-   public FrameTuple3D getFrameTuple()
+   public FramePoint3DReadOnly getFrameTuple()
    {
-      return yoFramePointInWorld.getFrameTuple();
+      return yoFramePointInWorld;
    }
 
    public boolean epsilonEquals(FramePoint2D point, double threshold)
@@ -71,7 +71,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               getPosition().getFrameTupleIncludingFrame(localFramePoint);
+               localFramePoint.setIncludingFrame(getPosition());
                yoFramePointInWorld.setAndMatchFrame(localFramePoint);
             }
          });

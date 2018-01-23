@@ -227,7 +227,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    public void getContactPointCentroid(FramePoint2D centroidToPack)
    {
-      this.contactPointCentroid.getFrameTuple2dIncludingFrame(centroidToPack);
+      centroidToPack.setIncludingFrame(this.contactPointCentroid);
    }
 
    @Override

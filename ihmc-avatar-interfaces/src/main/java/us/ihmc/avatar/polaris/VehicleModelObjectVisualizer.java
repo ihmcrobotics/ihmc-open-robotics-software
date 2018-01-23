@@ -1,12 +1,12 @@
 package us.ihmc.avatar.polaris;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.commons.FormattingTools;
 
@@ -25,7 +25,7 @@ public class VehicleModelObjectVisualizer
       for (VehicleObject vehicleObject : VehicleObject.values())
       {
 
-         FramePose framePose = vehicleModelObjects.getFramePose(vehicleFrame, vehicleObject);
+         FramePose3D framePose = vehicleModelObjects.getFramePose(vehicleFrame, vehicleObject);
 
          String objectName = FormattingTools.underscoredToCamelCase(vehicleObject.toString(), false);
          ReferenceFrame objectFrame = new PoseReferenceFrame(objectName, framePose);

@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class PlanarRegionsList
 {
@@ -144,7 +145,7 @@ public class PlanarRegionsList
     * @return the list of planar regions containing the query. Returns null when no region contains
     *         the query.
     */
-   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3D point, double maximumOrthogonalDistance)
+   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3DReadOnly point, double maximumOrthogonalDistance)
    {
       List<PlanarRegion> containers = null;
 

@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.2"
+      classpath "us.ihmc:ihmc-build:0.12.2"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -34,9 +34,10 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCNativeLibraryLoader', version: '1.0'
    compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-trajectory-optimization", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
@@ -47,8 +48,8 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.1"
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
@@ -58,6 +59,6 @@ testDependencies {
 }
 
 visualizersDependencies {
-   compile rootProject
+   compile ihmc.sourceSetProject("main")
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
 }
