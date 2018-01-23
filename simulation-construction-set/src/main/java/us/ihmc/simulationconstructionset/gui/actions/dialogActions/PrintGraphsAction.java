@@ -17,7 +17,7 @@ public class PrintGraphsAction extends AbstractAction
       super("Print Graphs");
       this.constructor = constructor;
 
-      String iconFilename = "icons/Print24.gif";
+      String iconFilename = "icons/PrintGraphs.png";
       int shortKey = KeyEvent.VK_P;
       String longDescription = "Print Graphs";
       String shortDescription = "Print Graphs";

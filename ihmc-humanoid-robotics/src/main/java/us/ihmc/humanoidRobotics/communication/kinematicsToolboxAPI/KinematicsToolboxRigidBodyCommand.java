@@ -4,9 +4,9 @@ import java.util.Map;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -19,8 +19,8 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    /** This is the end-effector to be solved for. */
    private RigidBody endEffector;
 
-   private final FramePose desiredPose = new FramePose();
-   private final FramePose controlFramePose = new FramePose();
+   private final FramePose3D desiredPose = new FramePose3D();
+   private final FramePose3D controlFramePose = new FramePose3D();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
 
@@ -88,12 +88,12 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       return selectionMatrix;
    }
 
-   public FramePose getDesiredPose()
+   public FramePose3D getDesiredPose()
    {
       return desiredPose;
    }
 
-   public FramePose getControlFramePose()
+   public FramePose3D getControlFramePose()
    {
       return controlFramePose;
    }

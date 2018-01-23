@@ -311,7 +311,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
 
-   public abstract void computeCMPInternal(FramePoint2D desiredCMPPreviousValue);
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
@@ -337,4 +336,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
    {
       this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
+
+   public abstract void computeCMPInternal(FramePoint2D desiredCMPPreviousValue);
+
+   public abstract void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
 }

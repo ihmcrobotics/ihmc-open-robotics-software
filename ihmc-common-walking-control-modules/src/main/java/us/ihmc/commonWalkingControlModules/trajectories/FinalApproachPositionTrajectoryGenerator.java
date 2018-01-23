@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -164,7 +165,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       initialPosition.set(x, y, z);
    }
 
-   public void setInitialPosition(FramePoint3D initialPosition)
+   public void setInitialPosition(FramePoint3DReadOnly initialPosition)
    {
       this.initialPosition.set(initialPosition);
    }
@@ -174,7 +175,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       finalPosition.set(x, y, z);
    }
 
-   public void setFinalPosition(FramePoint3D finalPosition)
+   public void setFinalPosition(FramePoint3DReadOnly finalPosition)
    {
       this.finalPosition.set(finalPosition);
    }
@@ -185,7 +186,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    {
       this.finalDirection.set(finalDirection);
       this.finalDirection.normalize();
-      this.finalDirection.get(tempVector);
+      tempVector.set(this.finalDirection);
       tempVector.negate();
       EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.finalDirection.getReferenceFrame(), axisAngleToWorld);
@@ -273,7 +274,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       {
          double t = i / ((double) numberOfBalls - 1) * trajectoryTime.getDoubleValue();
          compute(t);
-         currentPosition.getFrameTupleIncludingFrame(ballPosition);
+         ballPosition.setIncludingFrame(currentPosition);
          ballPosition.changeFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(ballPosition);
       }
@@ -300,19 +301,19 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    @Override

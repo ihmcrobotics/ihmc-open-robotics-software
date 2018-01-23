@@ -11,13 +11,13 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTr
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -88,9 +88,9 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
-      FramePose stanceFootPose = new FramePose();
-      FramePose swingStartPose = new FramePose();
-      FramePose swingEndPose = new FramePose();
+      FramePose3D stanceFootPose = new FramePose3D();
+      FramePose3D swingStartPose = new FramePose3D();
+      FramePose3D swingEndPose = new FramePose3D();
 
       stanceFootPose.setPosition(0.0, -stepWidth, 0.0);
       swingEndPose.setPosition(0.0, stepWidth, 0.0);
@@ -124,10 +124,8 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          PrintTools.info("Foot: " + robotSide + "  X: " + footstepX + "  Y: " + footstepY);
 
          footstepData.setTrajectoryType(TrajectoryType.CUSTOM);
-         Point3D waypointOne = new Point3D();
-         Point3D waypointTwo = new Point3D();
-         swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypointOne);
-         swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypointTwo);
+         Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
+         Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          footstepData.setCustomPositionWaypoints(new Point3D[] {waypointOne, waypointTwo});
 
          double maxSpeed = maxSpeedDimensionless / swingTime;

@@ -12,6 +12,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -63,7 +65,7 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F solverInput_bineq;
 
 
-   /** QP Objective to minimize the amount of feedback action. Also contains feedback regularization. */
+   /** QP Objective to minimize the amount of feedback action. Also contains feedback rate. */
    private final ICPQPInput feedbackTaskInput;
    /** QP Objective to minimize the amount of step adjustment. Also contains step adjustment. */
    private final ICPQPInput footstepTaskInput;
@@ -93,12 +95,12 @@ public class ICPOptimizationQPSolver
 
    /** List of weights for tracking the different footsteps. */
    private final DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 2);
-   /** Weight for the footstep regularization task. */
-   private final DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
+   /** Weight for the footstep rate task. */
+   private final DenseMatrix64F footstepRateWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the CMP feedback action. */
    private final DenseMatrix64F feedbackWeight = new DenseMatrix64F(2, 2);
    /** Weight regularizing the CMP feedback action. */
-   private final DenseMatrix64F feedbackRegularizationWeight = new DenseMatrix64F(2, 2);
+   private final DenseMatrix64F feedbackRateWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the dynamic relaxation magnitude. */
    private final DenseMatrix64F dynamicsWeight = new DenseMatrix64F(2, 2);
    /** Weight minimizing the angular momentum magnitude. */
@@ -118,7 +120,7 @@ public class ICPOptimizationQPSolver
    /** Angular momentum solution to the quadratic program. */
    private final DenseMatrix64F angularMomentumSolution;
 
-   /** Previous solution for the feedback action, used in the feedback regularization objective. */
+   /** Previous solution for the feedback action, used in the feedback rate objective. */
    private final DenseMatrix64F previousFeedbackDeltaSolution;
    private final DenseMatrix64F previousFootstepLocation = new DenseMatrix64F(2, 1);
 
@@ -143,10 +145,10 @@ public class ICPOptimizationQPSolver
    private final boolean computeCostToGo;
    private final boolean autoSetPreviousSolution;
 
-   /** boolean indicating whether or not the footstep regularization term has been added and can be used. */
-   private boolean hasFootstepRegularizationTerm = false;
-   /** boolean indicating whether or not the feedback regularization term has been added and can be used. */
-   private boolean hasFeedbackRegularizationTerm = false;
+   /** boolean indicating whether or not the footstep rate term has been added and can be used. */
+   private boolean hasFootstepRateTerm = false;
+   /** boolean indicating whether or not the feedback rate term has been added and can be used. */
+   private boolean hasFeedbackRateTerm = false;
 
    /** Minimum allowable weight on the step adjustment task. */
    private final double minimumFootstepWeight;
@@ -408,7 +410,7 @@ public class ICPOptimizationQPSolver
       feedbackGain.zero();
       dynamicsWeight.zero();
 
-      hasFeedbackRegularizationTerm = false;
+      hasFeedbackRateTerm = false;
    }
 
    /**
@@ -430,13 +432,13 @@ public class ICPOptimizationQPSolver
    {
       indexHandler.resetFootsteps();
 
-      footstepRegularizationWeight.zero();
+      footstepRateWeight.zero();
 
       referenceFootstepLocation.zero();
       footstepRecursionMultiplier = 0.0;
       footstepWeight.zero();
 
-      hasFootstepRegularizationTerm = false;
+      hasFootstepRateTerm = false;
    }
 
    /**
@@ -507,25 +509,25 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Enables the use of footstep regularization in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
+    * Enables the use of footstep rate in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
     * footstep location.
     *
-    * @param regularizationWeight weight placed on changes in the footstep location solution.
+    * @param rateWeight weight placed on changes in the footstep location solution.
     */
-   public void setFootstepRegularizationWeight(double regularizationWeight)
+   public void setFootstepRateWeight(double rateWeight)
    {
-      CommonOps.setIdentity(footstepRegularizationWeight);
-      CommonOps.scale(regularizationWeight, footstepRegularizationWeight);
+      CommonOps.setIdentity(footstepRateWeight);
+      CommonOps.scale(rateWeight, footstepRateWeight);
 
-      hasFootstepRegularizationTerm = true;
+      hasFootstepRateTerm = true;
    }
 
    /**
-    * Resets the footstep regularization objectives. This is important to call at the start of every new step, if using footstep regularization.
+    * Resets the footstep rate objectives. This is important to call at the start of every new step, if using footstep rate.
     *
     * @param previousFootstepLocation new location of the previous footstep location to try and minimize against.
     */
-   public void resetFootstepRegularization(FramePoint2D previousFootstepLocation)
+   public void resetFootstepRate(FramePoint2D previousFootstepLocation)
    {
       previousFootstepLocation.changeFrame(worldFrame);
       this.previousFootstepLocation.set(0, 0, previousFootstepLocation.getX());
@@ -533,11 +535,11 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Resets the feedback regularization objective.
+    * Resets the feedback rate objective.
     *
     * @param previousFeedbackDeltaSolution new location of the previous feedback location to try and minimize against.
     */
-   public void resetFeedbackRegularization(FramePoint2D previousFeedbackDeltaSolution)
+   public void resetFeedbackRate(FramePoint2D previousFeedbackDeltaSolution)
    {
       previousFeedbackDeltaSolution.changeFrame(worldFrame);
       this.previousFeedbackDeltaSolution.set(0, 0, previousFeedbackDeltaSolution.getX());
@@ -590,17 +592,17 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Enables the use of feedback regularization in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
+    * Enables the use of feedback rate in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
     * amount of CMP feedback to stabilize the ICP dynamics.
     *
-    * @param regularizationWeight weight placed on changes in the CMP feedback solution.
+    * @param rateWeight weight placed on changes in the CMP feedback solution.
     */
-   public void setFeedbackRegularizationWeight(double regularizationWeight)
+   public void setFeedbackRateWeight(double rateWeight)
    {
-      CommonOps.setIdentity(feedbackRegularizationWeight);
-      CommonOps.scale(regularizationWeight, feedbackRegularizationWeight);
+      CommonOps.setIdentity(feedbackRateWeight);
+      CommonOps.scale(rateWeight, feedbackRateWeight);
 
-      hasFeedbackRegularizationTerm = true;
+      hasFeedbackRateTerm = true;
    }
 
    /**
@@ -613,12 +615,7 @@ public class ICPOptimizationQPSolver
     * @param perfectCMP current desired value of the CMP based on the nominal ICP location.
     * @throws NoConvergenceException whether or not a solution was found. If it is thrown, the previous valid problem solution is used.
     */
-   public void compute(YoFrameVector2d currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
-   {
-      compute(currentICPError.getFrameTuple2d(), perfectCMP);
-   }
-
-   public void compute(FrameVector2D currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
+   public void compute(FrameVector2DReadOnly currentICPError, FramePoint2D perfectCMP) throws NoConvergenceException
    {
       indexHandler.computeProblemSize();
 
@@ -694,29 +691,29 @@ public class ICPOptimizationQPSolver
 
    /**
     * Adds the minimization of step adjustment task to the quadratic program.<br>
-    * Also adds the regularization of the footstep adjustment,  if enabled.
+    * Also adds the rate of the footstep adjustment,  if enabled.
     */
    private void addStepAdjustmentTask()
    {
       int stepIndex = 0;
       inputCalculator.computeFootstepTask(stepIndex, footstepTaskInput, footstepWeight, referenceFootstepLocation);
 
-      if (hasFootstepRegularizationTerm)
-         inputCalculator.computeFootstepRegularizationTask(stepIndex, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocation);
+      if (hasFootstepRateTerm)
+         inputCalculator.computeFootstepRateTask(stepIndex, footstepTaskInput, footstepRateWeight, previousFootstepLocation);
 
       inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
     * Adds the minimization of feedback task to the quadratic program's cost objectives.<br>
-    * Also adds the regularization of the feedback term, if enabled.
+    * Also adds the rate of the feedback term, if enabled.
     */
    private void addFeedbackTask()
    {
       ICPQPInputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
 
-      if (hasFeedbackRegularizationTerm)
-         inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
+      if (hasFeedbackRateTerm)
+         inputCalculator.computeFeedbackRateTask(feedbackTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution);
 
       inputCalculator.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
@@ -893,7 +890,7 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Sets the location of the previous footstep location for the footstep regularization task.
+    * Sets the location of the previous footstep location for the footstep rate task.
     *
     * @param footstepLocationSolution location of the footstep solution.
     */
@@ -904,7 +901,7 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Sets the location of the previous CMP feedback for the feedback regularization task.
+    * Sets the location of the previous CMP feedback for the feedback rate task.
     *
     * @param feedbackDeltaSolution amount of CMP feedback.
     */

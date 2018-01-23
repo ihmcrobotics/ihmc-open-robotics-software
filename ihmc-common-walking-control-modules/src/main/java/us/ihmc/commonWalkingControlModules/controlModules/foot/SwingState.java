@@ -15,6 +15,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,7 +25,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -77,7 +77,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
 
-   private final FramePose initialPose = new FramePose();
+   private final FramePose3D initialPose = new FramePose3D();
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
@@ -132,7 +132,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final PoseReferenceFrame desiredSoleFrame = new PoseReferenceFrame("desiredSoleFrame", worldFrame);
    private final PoseReferenceFrame desiredControlFrame = new PoseReferenceFrame("desiredControlFrame", desiredSoleFrame);
    private final RigidBodyTransform soleToControlFrameTransform = new RigidBodyTransform();
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D desiredPose = new FramePose3D();
    private final Twist desiredTwist = new Twist();
    private final SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector();
 
@@ -142,8 +142,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameVector adjustmentVelocityCorrection;
    private final FramePoint3D unadjustedPosition = new FramePoint3D(worldFrame);
 
-   private final FramePose footstepPose = new FramePose();
-   private final FramePose lastFootstepPose = new FramePose();
+   private final FramePose3D footstepPose = new FramePose3D();
+   private final FramePose3D lastFootstepPose = new FramePose3D();
 
    private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
 
@@ -265,7 +265,7 @@ public class SwingState extends AbstractUnconstrainedState
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, leapOfFaithParameters, registry);
 
-      FramePose controlFramePose = new FramePose(controlFrame);
+      FramePose3D controlFramePose = new FramePose3D(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(controlFramePose);
 
@@ -335,8 +335,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
-      footstepPose.getPoseIncludingFrame(finalPosition, finalOrientation);
-      finalLinearVelocity.setIncludingFrame(yoTouchdownVelocity.getFrameTuple());
+      footstepPose.get(finalPosition, finalOrientation);
+      finalLinearVelocity.setIncludingFrame(yoTouchdownVelocity);
       finalAngularVelocity.setToZero(worldFrame);
 
       // append current pose as initial trajectory point
@@ -401,8 +401,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       // setup touchdown trajectory
       // TODO: revisit the touchdown velocity and accelerations
-      FrameVector3D touchdownAcceleration = yoTouchdownAcceleration.getFrameTuple();
-      touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
+      touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, yoTouchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
 
       swingTrajectory.initialize();
@@ -543,7 +542,7 @@ public class SwingState extends AbstractUnconstrainedState
          adjustmentVelocityCorrection.setZ(0.0);
          adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getDoubleValue());
 
-         desiredLinearVelocity.add(adjustmentVelocityCorrection.getFrameTuple());
+         desiredLinearVelocity.add(adjustmentVelocityCorrection);
       }
       else
       {
@@ -577,8 +576,8 @@ public class SwingState extends AbstractUnconstrainedState
       // change pose
       desiredPose.setToZero(desiredControlFrame);
       desiredPose.changeFrame(worldFrame);
-      desiredPose.getPosition(desiredPosition.getPoint());
-      desiredPose.getOrientation(desiredOrientation);
+      desiredPosition.setIncludingFrame(desiredPose.getPosition());
+      desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
 
       // change twist
       desiredLinearVelocity.changeFrame(desiredSoleFrame);
@@ -681,7 +680,7 @@ public class SwingState extends AbstractUnconstrainedState
       doContinuousReplanning.set(continuousReplan);
    }
    
-   public void getDesireds(FramePose desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
+   public void getDesireds(FramePose3D desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
    {
       desiredPoseToPack.setIncludingFrame(this.desiredPose);
       desiredAngularVelocityToPack.setIncludingFrame(this.desiredAngularVelocity);

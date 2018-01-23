@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -81,7 +82,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       supportZUpFrame.update();
       ReferenceFrame supportFrame = soleFrames.get(supportLegSide);
 
-      computeDistanceAndAngleToDestination(supportZUpFrame, swingLegSide, desiredDestination.getFramePoint2dCopy());
+      computeDistanceAndAngleToDestination(supportZUpFrame, swingLegSide, desiredDestination);
 
       if (distanceToDestination.getDoubleValue() < DISTANCE_TO_DESTINATION_FOR_STEP_IN_PLACE)
       {
@@ -104,14 +105,14 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       ReferenceFrame futureSupportZUpFrame = new ZUpFrame(worldFrame, futureSupportFrame, "supportZUp");
       futureSupportZUpFrame.update();
 
-      computeDistanceAndAngleToDestination(futureSupportZUpFrame, futureSwingLegSide, desiredDestination.getFramePoint2dCopy());
+      computeDistanceAndAngleToDestination(futureSupportZUpFrame, futureSwingLegSide, desiredDestination);
       FrameQuaternion footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), futureSwingLegSide, futureSupportZUpFrame);
       FramePoint3D footstepPosition = getDesiredFootstepPositionCopy(futureSupportZUpFrame, futureSupportFrame, futureSwingLegSide);
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setRobotSide(futureSwingLegSide);
-      predictedFootstep.setLocation(footstepPosition.getPoint());
-      predictedFootstep.setOrientation(footOrientation.getQuaternion());
+      predictedFootstep.setLocation(footstepPosition);
+      predictedFootstep.setOrientation(footOrientation);
       return predictedFootstep;
    }
 
@@ -125,7 +126,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       return footstepPosition;
    }
 
-   private void computeDistanceAndAngleToDestination(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, FramePoint2D desiredDestination)
+   private void computeDistanceAndAngleToDestination(ReferenceFrame supportAnkleZUpFrame, RobotSide swingLegSide, FramePoint2DReadOnly desiredDestination)
    {
       FramePoint2D destinationInAnkleFrame = new FramePoint2D(desiredDestination);
       destinationInAnkleFrame.changeFrame(supportAnkleZUpFrame);

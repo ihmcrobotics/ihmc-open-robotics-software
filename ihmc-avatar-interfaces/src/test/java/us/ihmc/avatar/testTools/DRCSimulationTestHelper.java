@@ -95,6 +95,8 @@ public class DRCSimulationTestHelper
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private final DRCGuiInitialSetup guiInitialSetup;
 
+   private final boolean checkIfDesiredICPHasBeenInvalid = true;
+
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
       this(simulationTestParameters, robotModel, null);
@@ -171,6 +173,8 @@ public class DRCSimulationTestHelper
       {
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
          simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
+         blockingSimulationRunner.createValidDesiredICPListener();
+         blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
       }
 
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())

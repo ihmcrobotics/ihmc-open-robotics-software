@@ -1038,12 +1038,12 @@ public class LookAheadCoMHeightTrajectoryGenerator
       orientation.changeFrame(worldFrame);
 
       System.out.println("footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide." + robotSide + ", new Point3D(" + position.getX() + ", "
-            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getQuaternion().getS() + ", " + orientation.getQuaternion().getX()
-            + ", " + orientation.getQuaternion().getY() + ", " + orientation.getQuaternion().getZ() + ")));");
+            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getS() + ", " + orientation.getX()
+            + ", " + orientation.getY() + ", " + orientation.getZ() + ")));");
    }
 
    public void getCurrentDesiredHeight(FramePoint3D positionToPack)
    {
-      desiredCoMPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredCoMPosition);
    }
 }

@@ -5,6 +5,7 @@ import java.awt.Color;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +18,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -59,7 +59,7 @@ public class FootStepPlanner
    private final PoseReferenceFrame bodyFrameProjectedInFuture;
    private final PoseReferenceFrame bodyFrameEndRotationProjectedInFuture;
    private final YoGraphicReferenceFrame bodyFrameProjectedInFutureViz;
-   private final FramePose bodyPoseProjectedInFuture = new FramePose();
+   private final FramePose3D bodyPoseProjectedInFuture = new FramePose3D();
    private final CircleArtifact bodyFrameProjectedInFutureCircleArtifact = new CircleArtifact("bodyFrameProjectedInFutureArtifact", 0.0, 0.0, 0.03, false);
    private final LineArtifact bodyFrameProjectedInFutureLineArtifact = new LineArtifact("bodyFrameProjectedInFutureLineArtifact");
 
@@ -102,8 +102,7 @@ public class FootStepPlanner
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
          temp.setToZero(footFrame);
          temp.changeFrame(bodyZUpFrame);
-         Vector3D offsetFromBodyToFoot = new Vector3D();
-         temp.get(offsetFromBodyToFoot);
+         Vector3D offsetFromBodyToFoot = new Vector3D(temp);
          YoFrameVector yoOffset = new YoFrameVector(prefix + robotSextant.name() + "offsetFromBodyToFoot", bodyZUpFrame, registry);
          yoOffset.set(offsetFromBodyToFoot);
          if (robotSextant == RobotSextant.FRONT_LEFT || robotSextant == RobotSextant.FRONT_RIGHT)
@@ -141,7 +140,7 @@ public class FootStepPlanner
    public void getDesiredFootPosition(RobotSextant robotSextant, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity, double swingTime, FramePoint3D framePointToPack)
    {
       YoFrameVector offsetFromBodyToFootDesired = nominalOffsetsFromBodyToFeet.get(robotSextant);
-      offsetFromBodyToFootDesired.getFrameTupleIncludingFrame(offsetFromBodyToFoot);
+      offsetFromBodyToFoot.setIncludingFrame(offsetFromBodyToFootDesired);
       offsetFromBodyToFoot.scale(footScalarFromNominalToBody.getX(), footScalarFromNominalToBody.getY(), footScalarFromNominalToBody.getZ());
       
       desiredVelocityScaled.setToNaN(desiredLinearVelocity.getReferenceFrame());
@@ -162,7 +161,7 @@ public class FootStepPlanner
          turnRadiusVisual.setPosition(centerOfTurn.getX(), centerOfTurn.getY());
          
          bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
-         bodyPoseProjectedInFuture.getPositionIncludingFrame(bodyPositionProjectedInFuture);
+         bodyPositionProjectedInFuture.setIncludingFrame(bodyPoseProjectedInFuture.getPosition());
          centerOfTurn.changeFrame(bodyZUpFrame);
          GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
          bodyPoseProjectedInFuture.setPosition(bodyPositionProjectedInFuture);
@@ -180,7 +179,7 @@ public class FootStepPlanner
          frameEndPoint.setX(0.3);
          frameEndPoint.changeFrame(ReferenceFrame.getWorldFrame());
 
-         bodyFrameProjectedInFutureLineArtifact.setPoints(startPoint, frameEndPoint.getPoint());
+         bodyFrameProjectedInFutureLineArtifact.setPoints(startPoint, frameEndPoint);
 //      }
 //      else
 //      {
@@ -193,8 +192,8 @@ public class FootStepPlanner
 //      }
       
       framePointToPack.setToZero(bodyFrameEndRotationProjectedInFuture);
-      framePointToPack.add(offsetFromBodyToFoot.getVector());
-      framePointToPack.add(feetOffsetFromBody.getFrameTuple().getVector());
+      framePointToPack.add(offsetFromBodyToFoot);
+      framePointToPack.add(feetOffsetFromBody);
       framePointToPack.changeFrame(ReferenceFrame.getWorldFrame());
       framePointToPack.setZ(0.0);
       

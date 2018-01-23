@@ -267,7 +267,7 @@ public class PlanarRegionConstraintProvider
          footstep.getPosition2d(tempPoint);
          tempPoint.changeFrame(planeReferenceFrame);
 
-         if (planarRegion.isPointInside(tempPoint.getPoint()))
+         if (planarRegion.isPointInside(tempPoint))
          {
             activePlanarRegion = planarRegion;
 

@@ -331,13 +331,13 @@ public class SimulatedIMURawSensorReaderTest
          updateFrames();
 
          // Update Body Velocity
-         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocity.getVector(), angularVelocity.getVector());
+         Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocity, angularVelocity);
          rootJoint.setJointTwist(bodyTwist);
 
          // Update Body Acceleration
          SpatialAccelerationVector accelerationOfChestWithRespectToWorld = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame,
-                                                                                                         linearAcceleration.getVector(),
-                                                                                                         angularAcceleration.getVector());
+                                                                                                         linearAcceleration,
+                                                                                                         angularAcceleration);
          accelerationOfChestWithRespectToWorld.changeBaseFrameNoRelativeAcceleration(getElevatorFrame());
          rootJoint.setAcceleration(accelerationOfChestWithRespectToWorld);
 

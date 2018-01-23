@@ -568,7 +568,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
          if (previousExitCMP != null)
          {
-            previousExitCMP.getFrameTuple2dIncludingFrame(previousExitCMP2d);
+            previousExitCMP2d.setIncludingFrame(previousExitCMP);
             previousExitCMP2d.changeFrameAndProjectToXYPlane(soleFrame);
             // Choose the laziest option
             if (Math.abs(previousExitCMP2d.getX()) < Math.abs(centroidOfFootstepToConsider.getX()))
@@ -786,12 +786,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public void getNextEntryCMP(FramePoint3D entryCMPToPack)
    {
-      entryCMPsInWorldFrameReadOnly.get(0).getFrameTupleIncludingFrame(entryCMPToPack);
+      entryCMPToPack.setIncludingFrame(entryCMPsInWorldFrameReadOnly.get(0));
    }
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
-      exitCMPsInWorldFrameReadOnly.get(0).getFrameTupleIncludingFrame(entryCMPToPack);
+      entryCMPToPack.setIncludingFrame(exitCMPsInWorldFrameReadOnly.get(0));
    }
 
    public boolean isDoneWalking()

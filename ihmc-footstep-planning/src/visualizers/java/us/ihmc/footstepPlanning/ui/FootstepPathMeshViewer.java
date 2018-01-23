@@ -8,6 +8,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -16,7 +17,6 @@ import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +41,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       meshBuilder.clear();
 
-      FramePose footPose = new FramePose();
+      FramePose3D footPose = new FramePose3D();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D foothold = new ConvexPolygon2D();
 
@@ -52,7 +52,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          regionColor = Color.hsb(regionColor.getHue(), 0.9, 1.0);
 
          footstep.getSoleFramePose(footPose);
-         footPose.getRigidBodyTransform(transformToWorld);
+         footPose.get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
          if(footstep.hasFoothold())

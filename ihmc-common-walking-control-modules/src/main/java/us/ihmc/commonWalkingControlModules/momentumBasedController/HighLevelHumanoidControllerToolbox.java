@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -531,7 +532,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getAdjustedDesiredCapturePoint(FramePoint2D desiredCapturePoint, FramePoint2D adjustedDesiredCapturePoint)
    {
-      filteredYoAngularMomentum.getFrameTuple(angularMomentum);
+      angularMomentum.set(filteredYoAngularMomentum);
       ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
       localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
       localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
@@ -546,12 +547,12 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getCapturePoint(FramePoint2D capturePointToPack)
    {
-      yoCapturePoint.getFrameTuple2dIncludingFrame(capturePointToPack);
+      capturePointToPack.setIncludingFrame(yoCapturePoint);
    }
 
    public void getCapturePoint(FramePoint3D capturePointToPack)
    {
-      yoCapturePoint.getFrameTuple(capturePointToPack);
+      capturePointToPack.setIncludingFrame(yoCapturePoint);
    }
 
    private final FramePoint2D copDesired = new FramePoint2D();
@@ -702,7 +703,7 @@ public class HighLevelHumanoidControllerToolbox
       return getName();
    }
 
-   public void setDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoP)
+   public void setDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2DReadOnly desiredCoP)
    {
       YoFramePoint2d cop = footDesiredCenterOfPressures.get(contactablePlaneBody);
       if (cop != null)
@@ -718,12 +719,12 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
-      footDesiredCenterOfPressures.get(contactablePlaneBody).getFrameTuple2dIncludingFrame(desiredCoPToPack);
+      desiredCoPToPack.setIncludingFrame(footDesiredCenterOfPressures.get(contactablePlaneBody));
    }
 
    public void getFilteredDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
    {
-      filteredFootDesiredCenterOfPressures.get(contactablePlaneBody).getFrameTuple2dIncludingFrame(desiredCoPToPack);
+      desiredCoPToPack.setIncludingFrame(filteredFootDesiredCenterOfPressures.get(contactablePlaneBody));
    }
 
    public void updateContactPointsForUpcomingFootstep(Footstep nextFootstep)
@@ -957,8 +958,8 @@ public class HighLevelHumanoidControllerToolbox
       if (wristRawMeasuredForces == null || wristRawMeasuredTorques == null)
          return;
 
-      wristRawMeasuredForces.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
-      wristRawMeasuredTorques.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+      tempWristForce.setIncludingFrame(wristRawMeasuredForces.get(robotSide));
+      tempWristTorque.setIncludingFrame(wristRawMeasuredTorques.get(robotSide));
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
       wrenchToPack.setLinearPart(tempWristForce);
@@ -970,8 +971,8 @@ public class HighLevelHumanoidControllerToolbox
       if (wristForcesHandWeightCancelled == null || wristTorquesHandWeightCancelled == null)
          return;
 
-      wristForcesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
-      wristTorquesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+      tempWristForce.setIncludingFrame(wristForcesHandWeightCancelled.get(robotSide));
+      tempWristTorque.setIncludingFrame(wristTorquesHandWeightCancelled.get(robotSide));
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
       wrenchToPack.setLinearPart(tempWristForce);
@@ -1011,12 +1012,12 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getCoP(FramePoint3D copToPack)
    {
-      yoCenterOfPressure.getFrameTupleIncludingFrame(copToPack);
+      copToPack.setIncludingFrame(yoCenterOfPressure, 0.0);
    }
 
    public void getCoP(FramePoint2D copToPack)
    {
-      yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
+      copToPack.setIncludingFrame(yoCenterOfPressure);
    }
 
    public void getAngularMomentum(FrameVector3D upperBodyAngularMomentumToPack)

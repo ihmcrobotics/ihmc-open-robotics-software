@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepData
@@ -95,7 +95,7 @@ public class FootstepData
       return timing.getStepTime();
    }
 
-   public FramePose getFramePose()
+   public FramePose3D getFramePose()
    {
       return footstep.getFootstepPose();
    }   

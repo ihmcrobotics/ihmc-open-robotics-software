@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
 import java.awt.Color;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,8 +16,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotController.RobotController;
@@ -26,7 +25,8 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedSupportPolygonVisualizer implements RobotController
 {
@@ -215,7 +215,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       for (RobotQuadrant quadrant : vertices.quadrants())
       {
          YoFramePoint vertex = vertices.get(quadrant);
-         supportPolygon.setFootstep(quadrant, vertex.getFrameTuple());
+         supportPolygon.setFootstep(quadrant, vertex);
       }
       drawSupportPolygon(supportPolygon, currentSupportPolygon);
       

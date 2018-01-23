@@ -3,21 +3,21 @@ package us.ihmc.humanoidBehaviors.utilities;
 import static org.junit.Assert.assertTrue;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
 {
    private final boolean DEBUG = false;
 
-   private final FramePose initialPose;
-   private final FramePose currentPose;
-   private final FramePose poseAtTrajectoryEnd;
+   private final FramePose3D initialPose;
+   private final FramePose3D currentPose;
+   private final FramePose3D poseAtTrajectoryEnd;
    private boolean initialPoseHasBeenSet = false;
 
    private double trajectoryLength;
@@ -34,22 +34,22 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
    private final double stopPercent;
 
    public TrajectoryBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, AbstractBehavior behavior, double pausePercent, double pauseDuration,
-         double stopPercent, FramePose2d pose2dAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
+         double stopPercent, FramePose2D pose2dAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
    {
-      this(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent, new FramePose(), frameToKeepTrackOf);
+      this(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent, new FramePose3D(), frameToKeepTrackOf);
 
       RigidBodyTransform transformToWorldAtTrajectoryEnd = new RigidBodyTransform();
-      pose2dAtTrajectoryEnd.getPose(transformToWorldAtTrajectoryEnd);
-      poseAtTrajectoryEnd.setPoseIncludingFrame(worldFrame, transformToWorldAtTrajectoryEnd);
+      pose2dAtTrajectoryEnd.get(transformToWorldAtTrajectoryEnd);
+      poseAtTrajectoryEnd.setIncludingFrame(worldFrame, transformToWorldAtTrajectoryEnd);
    }
 
    public TrajectoryBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, AbstractBehavior behavior, double pausePercent, double pauseDuration,
-         double stopPercent, FramePose poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
+         double stopPercent, FramePose3D poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
    {
       super(robotDataReceiver, behavior, frameToKeepTrackOf);
 
-      this.initialPose = new FramePose();
-      this.currentPose = new FramePose();
+      this.initialPose = new FramePose3D();
+      this.currentPose = new FramePose3D();
       this.poseAtTrajectoryEnd = poseAtTrajectoryEnd;
 
       this.pausePercent = pausePercent;

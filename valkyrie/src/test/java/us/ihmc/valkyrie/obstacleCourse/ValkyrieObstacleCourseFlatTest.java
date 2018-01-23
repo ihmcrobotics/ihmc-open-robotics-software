@@ -129,7 +129,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 76.3)
-   @Test(timeout = 135000)
+   @Test(timeout = 170000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       super.testLongStepsMaxHeightPauseAndResume();

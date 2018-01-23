@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class Wrench extends SpatialForceVector
 {
@@ -26,7 +26,7 @@ public class Wrench extends SpatialForceVector
     * @param force force part of the wrench
     * @param torque torque part of the wrench
     */
-   public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3D force, Vector3D torque)
+   public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly force, Vector3DReadOnly torque)
    {
       super(expressedInFrame, force, torque);
       this.bodyFrame = bodyFrame;

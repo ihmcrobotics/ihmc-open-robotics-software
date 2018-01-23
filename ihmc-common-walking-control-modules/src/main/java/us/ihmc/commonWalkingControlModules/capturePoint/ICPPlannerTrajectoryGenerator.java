@@ -41,22 +41,22 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
 
    public void setInitialConditions(YoFramePoint initialPosition, YoFrameVector initialVelocity, ReferenceFrame attachedFrame)
    {
-      initialPosition.getFrameTupleIncludingFrame(initialPositionInSpecificFrame);
-      initialVelocity.getFrameTupleIncludingFrame(initialVelocityInSpecificFrame);
+      initialPositionInSpecificFrame.setIncludingFrame(initialPosition);
+      initialVelocityInSpecificFrame.setIncludingFrame(initialVelocity);
       initialPositionInSpecificFrame.changeFrame(attachedFrame);
       initialVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
    public void setInitialCoMPosition(YoFramePoint initialCoMPosition, ReferenceFrame attachedFrame)
    {
-      initialCoMPosition.getFrameTupleIncludingFrame(initialCoMPositionInSpecificFrame);
+      initialCoMPositionInSpecificFrame.setIncludingFrame(initialCoMPosition);
       initialCoMPositionInSpecificFrame.changeFrame(attachedFrame);
    }
    
    public void setFinalConditions(YoFramePoint finalPosition, YoFrameVector finalVelocity, ReferenceFrame attachedFrame)
    {
-      finalPosition.getFrameTupleIncludingFrame(finalPositionInSpecificFrame);
-      finalVelocity.getFrameTupleIncludingFrame(finalVelocityInSpecificFrame);
+      finalPositionInSpecificFrame.setIncludingFrame(finalPosition);
+      finalVelocityInSpecificFrame.setIncludingFrame(finalVelocity);
       finalPositionInSpecificFrame.changeFrame(attachedFrame);
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }

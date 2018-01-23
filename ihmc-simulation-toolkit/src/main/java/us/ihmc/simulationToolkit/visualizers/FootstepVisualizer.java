@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -25,7 +26,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappin
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -310,7 +310,7 @@ public class FootstepVisualizer
          }
       }
 
-      new FramePose2d(worldFrame, new Point2D(0.0, 0.0), 0);
+      new FramePose2D(worldFrame, new Point2D(0.0, 0.0), 0);
       FramePoint2D endPoint = new FramePoint2D(worldFrame, 3.0, 0.0);
 
       SimplePathParameters pathType = new SimplePathParameters(0.5, 0.2, 0.0, Math.PI / 6, Math.PI / 12, 0.3);
@@ -321,10 +321,10 @@ public class FootstepVisualizer
 //      FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
 
-      FramePose2d leftFootPose2d = new FramePose2d(worldFrame, new Point2D(0.0, 0.1), 0);
+      FramePose2D leftFootPose2d = new FramePose2D(worldFrame, new Point2D(0.0, 0.1), 0);
       Footstep leftStart = footstepSnapper.generateFootstepWithoutHeightMap(leftFootPose2d, feetRigidBodies.get(RobotSide.LEFT),
                               soleFrames.get(RobotSide.LEFT), RobotSide.LEFT, 0.0, new Vector3D(0.0, 0.0, 1.0));
-      FramePose2d rightFootPose2d = new FramePose2d(worldFrame, new Point2D(0.0, -0.1), 0);
+      FramePose2D rightFootPose2d = new FramePose2D(worldFrame, new Point2D(0.0, -0.1), 0);
       Footstep rightStart = footstepSnapper.generateFootstepWithoutHeightMap(rightFootPose2d, feetRigidBodies.get(RobotSide.RIGHT),
                                soleFrames.get(RobotSide.RIGHT), RobotSide.RIGHT, 0.0, new Vector3D(0.0, 0.0, 1.0));
 

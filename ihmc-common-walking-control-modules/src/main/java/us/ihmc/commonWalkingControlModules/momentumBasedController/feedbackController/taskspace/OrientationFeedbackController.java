@@ -192,7 +192,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
       yoDesiredOrientation.setAndMatchFrame(desiredOrientation);
-      yoDesiredRotationVector.setAsRotationVector(desiredOrientation);
+      desiredOrientation.get(yoDesiredRotationVector);
 
       yoDesiredAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
 
@@ -231,7 +231,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
-      yoFeedForwardAngularAcceleration.getFrameTupleIncludingFrame(feedForwardAngularAcceleration);
+      feedForwardAngularAcceleration.setIncludingFrame(yoFeedForwardAngularAcceleration);
       feedForwardAngularAcceleration.changeFrame(endEffectorFrame);
 
       desiredAngularAcceleration.setIncludingFrame(proportionalFeedback);
@@ -240,7 +240,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
       rateLimitedFeedbackAngularAcceleration.update();
-      rateLimitedFeedbackAngularAcceleration.getFrameTupleIncludingFrame(desiredAngularAcceleration);
+      desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAngularAcceleration);
 
       desiredAngularAcceleration.changeFrame(endEffectorFrame);
       desiredAngularAcceleration.add(feedForwardAngularAcceleration);
@@ -258,7 +258,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       inverseKinematicsOutput.setProperties(inverseDynamicsOutput);
 
-      yoFeedForwardAngularVelocity.getFrameTupleIncludingFrame(feedForwardAngularVelocity);
+      feedForwardAngularVelocity.setIncludingFrame(yoFeedForwardAngularVelocity);
       computeProportionalTerm(proportionalFeedback);
       computeIntegralTerm(integralFeedback);
 
@@ -267,7 +267,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
       rateLimitedFeedbackAngularVelocity.update();
-      rateLimitedFeedbackAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
+      desiredAngularVelocity.setIncludingFrame(rateLimitedFeedbackAngularVelocity);
 
       desiredAngularVelocity.add(feedForwardAngularVelocity);
 
@@ -313,9 +313,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentOrientation.setToZero(endEffectorFrame);
       currentOrientation.changeFrame(worldFrame);
       yoCurrentOrientation.set(currentOrientation);
-      yoCurrentRotationVector.setAsRotationVector(yoCurrentOrientation);
+      yoCurrentOrientation.get(yoCurrentRotationVector);
 
-      yoDesiredOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
+      desiredOrientation.setIncludingFrame(yoDesiredOrientation);
       desiredOrientation.changeFrame(endEffectorFrame);
 
       desiredOrientation.normalizeAndLimitToPi();
@@ -323,7 +323,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
-      yoErrorOrientation.setRotationVector(yoErrorRotationVector);
+      yoErrorOrientation.set(yoErrorRotationVector);
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);
@@ -331,7 +331,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }
@@ -357,7 +357,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentAngularVelocity.changeFrame(worldFrame);
       yoCurrentAngularVelocity.set(currentAngularVelocity);
 
-      yoDesiredAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
+      desiredAngularVelocity.setIncludingFrame(yoDesiredAngularVelocity);
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
@@ -371,7 +371,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }
@@ -402,8 +402,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          return;
       }
 
-      yoErrorOrientationCumulated.getFrameOrientationIncludingFrame(errorOrientationCumulated);
-      errorOrientationCumulated.multiply(yoErrorOrientation.getFrameOrientation());
+      errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
+      errorOrientationCumulated.multiply(yoErrorOrientation);
       yoErrorOrientationCumulated.set(errorOrientationCumulated);
       errorOrientationCumulated.normalizeAndLimitToPi();
 
@@ -419,7 +419,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }

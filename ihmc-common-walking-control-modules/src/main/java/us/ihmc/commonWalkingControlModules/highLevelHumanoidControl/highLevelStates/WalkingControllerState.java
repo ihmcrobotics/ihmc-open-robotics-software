@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -24,7 +23,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -43,7 +41,6 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean setupVirtualModelControlSolver = false;
 
    private final boolean deactivateAccelerationIntegrationInWBC;
-   private final AccelerationIntegrationParameterHelper accelerationIntegrationParameterHelper;
 
    public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -83,8 +80,6 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
-      accelerationIntegrationParameterHelper = new AccelerationIntegrationParameterHelper(highLevelControllerParameters, controlledOneDofJoints,
-                                                                                          walkingController, registry);
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -146,38 +141,21 @@ public class WalkingControllerState extends HighLevelControllerState
    public void doAction()
    {
       walkingController.doAction();
-      accelerationIntegrationParameterHelper.update();
 
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+
+      JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
+      JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
       if (!deactivateAccelerationIntegrationInWBC)
       {
-         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationParameterHelper.getJointAccelerationIntegrationCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
       }
-      controllerCoreCommand.completeLowLevelJointData(getStateSpecificJointSettings());
+      controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
-   }
-
-   @Override
-   protected JointDesiredOutputList getStateSpecificJointSettings()
-   {
-      JointDesiredOutputList stateSpecificJointLevelSettings = super.getStateSpecificJointSettings();
-
-      // update the additional joint settings with the values from the acceleration integration parameters
-      JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = accelerationIntegrationParameterHelper.getJointAccelerationIntegrationCommand();
-      for (int jointIdx = 0; jointIdx < jointAccelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); jointIdx++)
-      {
-         OneDoFJoint joint = jointAccelerationIntegrationCommand.getJointToComputeDesiredPositionFor(jointIdx);
-         JointAccelerationIntegrationParametersReadOnly jointParameters = jointAccelerationIntegrationCommand.getJointParameters(jointIdx);
-         JointDesiredOutput jointDesiredOutput = stateSpecificJointLevelSettings.getJointDesiredOutput(joint);
-         jointDesiredOutput.setVelocityIntegrationLeakRate(jointParameters.getAlphaVelocity());
-         jointDesiredOutput.setPositionIntegrationLeakRate(jointParameters.getAlphaPosition());
-      }
-
-      return stateSpecificJointLevelSettings;
    }
 
    public void reinitializePelvisOrientation(boolean reinitialize)
@@ -202,6 +180,12 @@ public class WalkingControllerState extends HighLevelControllerState
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return controllerCore.getOutputForLowLevelController();
+   }
+
+   @Override
+   public boolean isJointLoaded(String jointName)
+   {
+      return walkingController.isJointLoaded(jointName);
    }
 
    /**

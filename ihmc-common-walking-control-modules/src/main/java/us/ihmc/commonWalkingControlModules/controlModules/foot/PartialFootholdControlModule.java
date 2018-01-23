@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,7 +17,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -46,7 +46,7 @@ public class PartialFootholdControlModule
       public static RotationCalculatorType[] values = values();
    }
    private final EnumMap<RotationCalculatorType, FootRotationCalculator> rotationCalculators = new EnumMap<>(RotationCalculatorType.class);
-   private final EnumMap<RotationCalculatorType, FrameLine2d> lineOfRotations = new EnumMap<>(RotationCalculatorType.class);
+   private final EnumMap<RotationCalculatorType, FrameLine2D> lineOfRotations = new EnumMap<>(RotationCalculatorType.class);
    private final YoEnum<RotationCalculatorType> rotationCalculatorType;
 
    private final RotationVerificator rotationVerificator;
@@ -78,7 +78,7 @@ public class PartialFootholdControlModule
 
    private final YoBoolean doPartialFootholdDetection;
 
-   private final FrameLine2d lineOfRotation;
+   private final FrameLine2D lineOfRotation;
 
    private final YoBoolean useCoPOccupancyGrid;
    private final YoBoolean cropToConvexHullOfCoPs;
@@ -118,7 +118,7 @@ public class PartialFootholdControlModule
       controllerFootPolygonInWorld = new FrameConvexPolygon2d(defaultFootPolygon);
       backupFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       unsafePolygon = new FrameConvexPolygon2d(defaultFootPolygon);
-      lineOfRotation = new FrameLine2d(soleFrame);
+      lineOfRotation = new FrameLine2D(soleFrame);
 
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
@@ -175,8 +175,8 @@ public class PartialFootholdControlModule
             new GeometricFootRotationCalculator(namePrefix, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
       rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);
       rotationCalculators.put(RotationCalculatorType.GEOMETRY, geometricFootRotationCalculator);
-      lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2d(soleFrame));
-      lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2d(soleFrame));
+      lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2D(soleFrame));
+      lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2D(soleFrame));
 
       rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
 
@@ -236,7 +236,7 @@ public class PartialFootholdControlModule
          if (expectingLineContact.getBooleanValue())
          {
             lineOfRotation.shiftToLeft(0.01);
-            lineOfRotation.negateDirection();
+            lineOfRotation.getDirection().negate();
 
             dummyDesiredCop.setToNaN(unsafePolygon.getReferenceFrame());
             computeShrunkFoothold(dummyDesiredCop);
@@ -374,9 +374,9 @@ public class PartialFootholdControlModule
       return true;
    }
 
-   private final FrameLine2d line = new FrameLine2d();
-   private final FrameLine2d lineL = new FrameLine2d();
-   private final FrameLine2d lineR = new FrameLine2d();
+   private final FrameLine2D line = new FrameLine2D();
+   private final FrameLine2D lineL = new FrameLine2D();
+   private final FrameLine2D lineR = new FrameLine2D();
    private static final double width = 0.01;
    private void fitLine()
    {

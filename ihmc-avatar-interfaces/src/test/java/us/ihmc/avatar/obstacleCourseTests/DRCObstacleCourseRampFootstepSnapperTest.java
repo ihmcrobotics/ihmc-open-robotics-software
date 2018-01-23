@@ -17,6 +17,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -34,7 +35,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -140,8 +140,8 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       {
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          RobotSide robotSide = footstepData.getRobotSide();
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
-         pose.setPose(footstepData.getLocation(), footstepData.getOrientation());
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame());
+         pose.set(footstepData.getLocation(), footstepData.getOrientation());
          corruptedFootstepList.add(new Footstep(robotSide, pose));
       }
 
@@ -191,7 +191,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FramePoint3D position = new FramePoint3D();
          FrameQuaternion orientation = new FrameQuaternion();
          footstep.getPose(position, orientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation.getQuaternion());
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position, orientation);
          snappedFootstepDataList.add(footstepData);
       }
 

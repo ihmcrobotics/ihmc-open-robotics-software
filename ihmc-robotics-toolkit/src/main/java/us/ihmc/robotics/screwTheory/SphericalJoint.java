@@ -44,21 +44,21 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    public void getJointTwist(Twist twistToPack)
    {
       twistToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      twistToPack.setAngularPart(jointAngularVelocity.getVector());
+      twistToPack.setAngularPart(jointAngularVelocity);
    }
 
    @Override
    public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      accelerationToPack.setAngularPart(jointAngularAcceleration.getVector());
+      accelerationToPack.setAngularPart(jointAngularAcceleration);
    }
 
    @Override
    public void getDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
    {
       jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      jointAcceleration.setAngularPart(jointAngularAccelerationDesired.getVector());
+      jointAcceleration.setAngularPart(jointAngularAccelerationDesired);
    }
 
    @Override
@@ -287,23 +287,23 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    {
       SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
       setRotation(originalSphericalJoint.jointRotation);
-      jointAngularVelocity.set(originalSphericalJoint.jointAngularVelocity.getVector());
-      jointAngularAcceleration.set(originalSphericalJoint.jointAngularAcceleration.getVector());
+      jointAngularVelocity.set(originalSphericalJoint.jointAngularVelocity);
+      jointAngularAcceleration.set(originalSphericalJoint.jointAngularAcceleration);
    }
 
    @Override
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
       SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
-      jointAngularAccelerationDesired.set(originalSphericalJoint.jointAngularAccelerationDesired.getVector());
+      jointAngularAccelerationDesired.set(originalSphericalJoint.jointAngularAccelerationDesired);
    }
 
    @Override
    public void calculateJointStateChecksum(GenericCRC32 checksum)
    {
       checksum.update(jointRotation);
-      checksum.update(jointAngularVelocity.getVector());
-      checksum.update(jointAngularAcceleration.getVector());
+      checksum.update(jointAngularVelocity);
+      checksum.update(jointAngularAcceleration);
    }
 
 }

@@ -85,7 +85,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.3)
-   @Test(timeout = 40000)
+   @Test(timeout = 60000)
    public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
    {
       super.testQueueWithUsingDifferentTrajectoryFrameWithoutOverride();

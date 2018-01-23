@@ -17,6 +17,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -46,7 +47,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -201,11 +201,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
          this.planarRegionsList = Optional.of(planarRegionsList);
       }
 
-      FramePose initialStancePose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D initialStancePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       initialStancePose.setPosition(new Point3D(request.stanceFootPositionInWorld));
       initialStancePose.setOrientation(new Quaternion(request.stanceFootOrientationInWorld));
 
-      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       goalPose.setPosition(new Point3D(request.goalPositionInWorld));
       goalPose.setOrientation(new Quaternion(request.goalOrientationInWorld));
 

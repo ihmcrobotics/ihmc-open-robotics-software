@@ -90,7 +90,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    public void setDesiredPosition(FramePoint3D desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPosition(desiredPosition.getPoint());
+      setDesiredPosition(desiredPosition);
    }
 
    /** Ensures that the array for the weights is initialized. */

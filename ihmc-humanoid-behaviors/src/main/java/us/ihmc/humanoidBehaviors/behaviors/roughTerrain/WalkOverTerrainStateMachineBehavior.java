@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -29,7 +30,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.tools.taskExecutor.PipeLine;
@@ -172,10 +172,9 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          @Override
          protected void setBehaviorInput()
          {
-            FramePose goalPose = new FramePose();
+            FramePose3D goalPose = new FramePose3D();
             lookForGoalBehavior.getGoalPose(goalPose);
-            Tuple3DBasics goalPosition = new Point3D();
-            goalPose.getPosition(goalPosition);
+            Tuple3DBasics goalPosition = new Point3D(goalPose.getPosition());
 
             String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
             String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);

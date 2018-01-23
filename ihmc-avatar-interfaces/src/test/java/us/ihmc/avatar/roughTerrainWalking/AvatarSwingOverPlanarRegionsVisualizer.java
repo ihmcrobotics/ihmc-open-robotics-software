@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryCollisionType;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -17,7 +18,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -45,9 +45,9 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition> intersectionMap;
 
    private final ConvexPolygon2D footPolygon;
-   private final FramePose stanceFootPose;
-   private final FramePose swingStartPose;
-   private final FramePose swingEndPose;
+   private final FramePose3D stanceFootPose;
+   private final FramePose3D swingStartPose;
+   private final FramePose3D swingEndPose;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
    public AvatarSwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -111,9 +111,9 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", swingStartGraphic);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", swingEndGraphic);
 
-      stanceFootPose = new FramePose(WORLD);
-      swingStartPose = new FramePose(WORLD);
-      swingEndPose = new FramePose(WORLD);
+      stanceFootPose = new FramePose3D(WORLD);
+      swingStartPose = new FramePose3D(WORLD);
+      swingEndPose = new FramePose3D(WORLD);
    }
 
    public AvatarSwingOverPlanarRegionsVisualizer(WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
@@ -153,7 +153,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       ThreadTools.sleepForever();
    }
 
-   public double expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose, FramePose swingEndPose,
+   public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose, FramePose3D swingEndPose,
                                                  PlanarRegionsList planarRegionsList)
    {
       this.stanceFootPose.set(stanceFootPose);

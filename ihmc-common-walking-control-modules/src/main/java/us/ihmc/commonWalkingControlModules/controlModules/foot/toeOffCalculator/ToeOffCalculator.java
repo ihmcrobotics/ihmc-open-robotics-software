@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.geometry.*;
@@ -19,5 +20,5 @@ public interface ToeOffCalculator
 
    public void computeToeOffContactLine(FramePoint2D desiredCMP, RobotSide trailingLeg);
 
-   public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg);
+   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg);
 }

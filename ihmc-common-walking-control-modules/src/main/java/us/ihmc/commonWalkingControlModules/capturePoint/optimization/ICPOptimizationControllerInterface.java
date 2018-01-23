@@ -18,6 +18,8 @@ public interface ICPOptimizationControllerInterface
 
    void setFinalTransferDuration(double finalTransferDuration);
 
+   void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
+
    void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
 
    void initializeForStanding(double initialTime);

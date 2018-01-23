@@ -154,7 +154,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       FrameVector3D angularVelocity = robot.getRootJointAngularVelocityInRootJointFrame(pelvisFrame);
       angularVelocity.changeFrame(pelvisFrame);
 
-      Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
+      Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity, angularVelocity);
       rootJoint.setJointTwist(bodyTwist);
    }
 

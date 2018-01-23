@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -20,7 +21,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
@@ -134,7 +134,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
    }
 
-   private final FramePose footstepPose = new FramePose();
+   private final FramePose3D footstepPose = new FramePose3D();
    private final FramePoint2D footstepPositionSolution = new FramePoint2D();
 
    @Override
@@ -144,7 +144,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       {
          footstepToPack.getPose(footstepPose);
          icpOptimizationController.getFootstepSolution(footstepPositionSolution);
-         footstepPose.setXYFromPosition2d(footstepPositionSolution);
+         footstepPose.setPosition(footstepPositionSolution);
          footstepToPack.setPose(footstepPose);
       }
 
@@ -167,5 +167,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
       icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
+   }
+
+   @Override
+   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   {
+      this.icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 }

@@ -109,4 +109,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
    @Override
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {}
+
+   @Override
+   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   {}
 }

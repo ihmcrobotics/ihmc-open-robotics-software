@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatus
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
@@ -99,6 +100,7 @@ public class PacketsForwardedToTheUi
       DrillDetectionPacket.class,
       ManipulationAbortedStatus.class,
       KinematicsToolboxOutputStatus.class,
+      WholeBodyTrajectoryToolboxOutputStatus.class,
       FootstepPlanningToolboxOutputStatus.class,
       TextToSpeechPacket.class,
       UIPositionCheckerPacket.class,

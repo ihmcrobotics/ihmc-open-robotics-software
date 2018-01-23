@@ -5,6 +5,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.rotationConversion.QuaternionConversion;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
@@ -87,24 +88,18 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       this.roll.set(roll);
    }
 
-   public void set(QuaternionReadOnly rotation)
-   {
-      tempFrameOrientation.setIncludingFrame(getReferenceFrame(), rotation);
-      set(tempFrameOrientation);
-   }
-
    public void set(RotationMatrixReadOnly rotation)
    {
       tempFrameOrientation.setIncludingFrame(getReferenceFrame(), rotation);
       set(tempFrameOrientation);
    }
 
-   public void set(Quaternion quaternion)
+   public void set(QuaternionReadOnly quaternion)
    {
       set(quaternion, true);
    }
 
-   public void set(Quaternion quaternion, boolean notifyListeners)
+   public void set(QuaternionReadOnly quaternion, boolean notifyListeners)
    {
       tempFrameOrientation.setIncludingFrame(getReferenceFrame(), quaternion);
       set(tempFrameOrientation, notifyListeners);
@@ -116,12 +111,12 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       set(tempFrameOrientation);
    }
 
-   public void set(FrameQuaternion orientation)
+   public void set(FrameQuaternionReadOnly orientation)
    {
       set(orientation, true);
    }
 
-   public void set(FrameQuaternion orientation, boolean notifyListeners)
+   public void set(FrameQuaternionReadOnly orientation, boolean notifyListeners)
    {
       orientation.checkReferenceFrameMatch(getReferenceFrame());
       orientation.getYawPitchRoll(tempYawPitchRoll);
@@ -138,36 +133,14 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       roll.set(orientation.roll.getDoubleValue());
    }
 
-   public void set(YoFrameQuaternion orientation)
-   {
-      orientation.checkReferenceFrameMatch(getReferenceFrame());
-      orientation.getFrameOrientationIncludingFrame(tempFrameOrientation);
-      set(tempFrameOrientation);
-   }
-
-   public void setAndMatchFrame(FrameQuaternion orientation)
+   public void setAndMatchFrame(FrameQuaternionReadOnly orientation)
    {
       setAndMatchFrame(orientation, true);
    }
 
-   public void setAndMatchFrame(FrameQuaternion orientation, boolean notifyListeners)
+   public void setAndMatchFrame(FrameQuaternionReadOnly orientation, boolean notifyListeners)
    {
       tempFrameOrientation.setIncludingFrame(orientation);
-      tempFrameOrientation.changeFrame(getReferenceFrame());
-      tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
-      yaw.set(tempYawPitchRoll[0], notifyListeners);
-      pitch.set(tempYawPitchRoll[1], notifyListeners);
-      roll.set(tempYawPitchRoll[2], notifyListeners);
-   }
-
-   public void setAndMatchFrame(YoFrameQuaternion yoFrameQuaternion)
-   {
-      setAndMatchFrame(yoFrameQuaternion, true);
-   }
-
-   public void setAndMatchFrame(YoFrameQuaternion yoFrameQuaternion, boolean notifyListeners)
-   {
-      yoFrameQuaternion.getFrameOrientationIncludingFrame(tempFrameOrientation);
       tempFrameOrientation.changeFrame(getReferenceFrame());
       tempFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
       yaw.set(tempYawPitchRoll[0], notifyListeners);

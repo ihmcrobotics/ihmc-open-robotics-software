@@ -22,6 +22,8 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -34,8 +36,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -174,9 +174,9 @@ public abstract class DRCWalkToGoalWithPlanningBehaviorTest implements MultiRobo
    private WalkToGoalWithPlanningBehavior testWalkToGoalBehavior(double walkDistance, Vector2D walkDirection, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
-      FramePose2d initialMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D initialMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
-      FramePose2d desiredMidFeetPose = offsetMidFeetPose2d(initialMidFeetPose, walkDistance, walkDirection);
+      FramePose2D desiredMidFeetPose = offsetMidFeetPose2d(initialMidFeetPose, walkDistance, walkDirection);
 
       final WalkToGoalWithPlanningBehavior walkToGoalWithPlanningBehavior = new WalkToGoalWithPlanningBehavior(communicationBridge, fullRobotModel, yoTime);
       walkToGoalWithPlanningBehavior.initialize();
@@ -196,7 +196,7 @@ public abstract class DRCWalkToGoalWithPlanningBehaviorTest implements MultiRobo
       boolean success = executeBehavior(walkToGoalWithPlanningBehavior, trajectoryTime);
       assertTrue(success);
 
-      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       //      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
 
       PrintTools.debug(this, " initial Midfeet Pose :\n" + initialMidFeetPose + "\n");
@@ -205,9 +205,9 @@ public abstract class DRCWalkToGoalWithPlanningBehaviorTest implements MultiRobo
       return walkToGoalWithPlanningBehavior;
    }
 
-   private FramePose2d offsetMidFeetPose2d(FramePose2d initialPose, double walkDistance, Vector2D walkDirection)
+   private FramePose2D offsetMidFeetPose2d(FramePose2D initialPose, double walkDistance, Vector2D walkDirection)
    {
-      FramePose2d ret = new FramePose2d(initialPose);
+      FramePose2D ret = new FramePose2D(initialPose);
 
       walkDirection.normalize();
       ret.setX(initialPose.getX() + walkDistance * walkDirection.getX());
@@ -263,57 +263,57 @@ public abstract class DRCWalkToGoalWithPlanningBehaviorTest implements MultiRobo
       return ret;
    }
 
-   private FramePose2d getCurrentMidFeetPose2d(HumanoidReferenceFrames referenceFrames)
+   private FramePose2D getCurrentMidFeetPose2d(HumanoidReferenceFrames referenceFrames)
    {
       robotDataReceiver.updateRobotModel();
       referenceFrames.updateFrames();
       ReferenceFrame midFeetFrame = referenceFrames.getMidFeetZUpFrame();
 
-      FramePose midFeetPose = new FramePose();
+      FramePose3D midFeetPose = new FramePose3D();
       midFeetPose.setToZero(midFeetFrame);
       midFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose2d ret = new FramePose2d();
+      FramePose2D ret = new FramePose2D();
       ret.setIncludingFrame(midFeetPose.getReferenceFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }
 
-   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
+   private FramePose2D getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
    {
-      FramePose midFeetPose = getRobotMidFeetPose(robot);
+      FramePose3D midFeetPose = getRobotMidFeetPose(robot);
 
-      FramePose2d ret = new FramePose2d();
+      FramePose2D ret = new FramePose2D();
       ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }
 
-   private FramePose getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
+   private FramePose3D getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
    {
-      FramePose leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
-      FramePose rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
+      FramePose3D leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
+      FramePose3D rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
 
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       ret.interpolate(leftFootPose, rightFootPose, 0.5);
 
       return ret;
    }
 
-   private FramePose getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
+   private FramePose3D getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();
       RigidBodyTransform ankleTransformToWorld = new RigidBodyTransform();
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
-      FramePose ret = new FramePose();
-      ret.setPose(ankleTransformToWorld);
+      FramePose3D ret = new FramePose3D();
+      ret.set(ankleTransformToWorld);
 
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose2d framePose1, FramePose2d framePose2)
+   private void assertPosesAreWithinThresholds(FramePose2D framePose1, FramePose2D framePose2)
    {
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);

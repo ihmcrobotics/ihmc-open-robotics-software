@@ -50,7 +50,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       return supportedCommands();
    }
 
-   static List<Class<? extends Command<?, ?>>> supportedCommands()
+   public static List<Class<? extends Command<?, ?>>> supportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(KinematicsToolboxCenterOfMassCommand.class);
@@ -70,7 +70,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       return supportedStatus();
    }
 
-   static List<Class<? extends SettablePacket<?>>> supportedStatus()
+   public static List<Class<? extends SettablePacket<?>>> supportedStatus()
    {
       List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);

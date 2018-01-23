@@ -103,7 +103,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
+      desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.setToZero();
       feedForwardLinearAccelerationInWorld.setToZero();
    }
@@ -126,9 +126,9 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
       feedForwardLinearAcceleration.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
-      desiredLinearVelocity.get(desiredLinearVelocityInWorld);
-      feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
+      desiredPositionInWorld.set(desiredPosition);
+      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);
    }
 
    /**

@@ -86,7 +86,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
       }
       else
       {
-         lineSegment.getFrameLineSegment2d().get(tempLineSegment);
+         tempLineSegment.set(lineSegment);
          graphics.drawLineSegment(tempLineSegment);
       }
 

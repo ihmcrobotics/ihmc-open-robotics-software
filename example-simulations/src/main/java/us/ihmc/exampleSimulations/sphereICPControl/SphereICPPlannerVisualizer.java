@@ -17,7 +17,9 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -44,8 +46,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -129,7 +129,7 @@ public class SphereICPPlannerVisualizer
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
 
-   private final SideDependentList<FramePose> footPosesAtTouchdown = new SideDependentList<FramePose>(new FramePose(), new FramePose());
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<FramePose3D>(new FramePose3D(), new FramePose3D());
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
 
@@ -367,7 +367,7 @@ public class SphereICPPlannerVisualizer
             icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
 
             FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
-            FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
+            FramePose3D nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
             nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
             nextSupportPose.changeFrame(worldFrame);
             footSpoof.setSoleFrame(nextSupportPose);
@@ -406,18 +406,18 @@ public class SphereICPPlannerVisualizer
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, eCMP);
 
-      centerOfMassVelocity.setByProjectionOntoXYPlane(desiredICP);
+      centerOfMassVelocity.set(desiredICP);
       centerOfMassVelocity.sub(centerOfMass);
       centerOfMassVelocity.scale(omega0);
 
-      centerOfMassVelocity.getFrameTuple2d(tempVector2d);
+      tempVector2d.set(centerOfMassVelocity);
       tempVector2d.scale(dt);
       centerOfMass.add(tempVector2d);
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
-         icpTrack.setBallLoop(desiredICP.getFramePointCopy());
-         cmpTrack.setBallLoop(eCMP.getFramePointCopy());
+         icpTrack.setBallLoop(desiredICP);
+         cmpTrack.setBallLoop(eCMP);
       }
       yoTime.add(dt);
 
@@ -430,7 +430,7 @@ public class SphereICPPlannerVisualizer
       {
          if (contactStates.get(robotSide).inContact())
          {
-            FramePose footPose = new FramePose(contactableFeet.get(robotSide).getSoleFrame());
+            FramePose3D footPose = new FramePose3D(contactableFeet.get(robotSide).getSoleFrame());
             footPose.changeFrame(worldFrame);
             currentFootPoses.get(robotSide).set(footPose);
          }
@@ -460,7 +460,7 @@ public class SphereICPPlannerVisualizer
       double maxY = 0.5 * randomSupportPolygon.getMaxY();
       FramePoint2D randomLineOrigin = EuclidFrameRandomTools.nextFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, maxX, minY, maxY);
       FrameVector2D randomLineVector = EuclidFrameRandomTools.nextFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
-      FrameLine2d randomLine = new FrameLine2d(randomLineOrigin, randomLineVector);
+      FrameLine2D randomLine = new FrameLine2D(randomLineOrigin, randomLineVector);
 
       ConvexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
       randomSupportPolygon.update();
@@ -506,7 +506,7 @@ public class SphereICPPlannerVisualizer
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextFootstepPose = new FramePose(nextFootstep.getSoleReferenceFrame());
+      FramePose3D nextFootstepPose = new FramePose3D(nextFootstep.getSoleReferenceFrame());
       yoNextFootstepPose.setAndMatchFrame(nextFootstepPose);
 
       if (nextNextFootstep == null)
@@ -527,7 +527,7 @@ public class SphereICPPlannerVisualizer
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextNextFootstepPose = new FramePose(nextNextFootstep.getSoleReferenceFrame());
+      FramePose3D nextNextFootstepPose = new FramePose3D(nextNextFootstep.getSoleReferenceFrame());
       yoNextNextFootstepPose.setAndMatchFrame(nextNextFootstepPose);
 
       if (nextNextNextFootstep == null)
@@ -546,7 +546,7 @@ public class SphereICPPlannerVisualizer
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextNextNextFootstepPose = new FramePose(nextNextNextFootstep.getSoleReferenceFrame());
+      FramePose3D nextNextNextFootstepPose = new FramePose3D(nextNextNextFootstep.getSoleReferenceFrame());
       yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);
    }
 
@@ -629,7 +629,7 @@ public class SphereICPPlannerVisualizer
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, footWidthForControl / 2.0));
          FootSpoof contactableFoot = new FootSpoof(sidePrefix + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInSoleFrame, 0.0);
-         FramePose startingPose = footPosesAtTouchdown.get(robotSide);
+         FramePose3D startingPose = footPosesAtTouchdown.get(robotSide);
          startingPose.setToZero(worldFrame);
          startingPose.setY(robotSide.negateIfRightSide(0.15));
          if (USE_PITCH_ROLL_OSCILLATIONS_WITH_HIGH_Z)

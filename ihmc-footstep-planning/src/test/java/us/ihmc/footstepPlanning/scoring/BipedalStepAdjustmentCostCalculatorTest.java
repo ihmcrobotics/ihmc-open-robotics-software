@@ -14,6 +14,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.BipedalStepAdjustmentCostCalculator;
@@ -28,7 +29,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotControllerAdapter;
@@ -71,20 +71,20 @@ public class BipedalStepAdjustmentCostCalculatorTest
 
       for (int i = 0; i < numberOfIdealStepsToTest; i++)
       {
-         FramePose stanceFoot = new FramePose(worldFrame);
+         FramePose3D stanceFoot = new FramePose3D(worldFrame);
          stanceFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
          stanceFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
-         FramePose swingStartFoot = new FramePose(worldFrame);
+         FramePose3D swingStartFoot = new FramePose3D(worldFrame);
          swingStartFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
          swingStartFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
-         FramePose idealFootstep = new FramePose(worldFrame);
+         FramePose3D idealFootstep = new FramePose3D(worldFrame);
          idealFootstep.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
          idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
 
-         FramePose candidateFootstep = new FramePose(worldFrame);
-         candidateFootstep.setPose(idealFootstep);
+         FramePose3D candidateFootstep = new FramePose3D(worldFrame);
+         candidateFootstep.set(idealFootstep);
 
          double idealFootstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
          assertEquals(stepAdjustmentCostCalculator.getStepBaseCost(), idealFootstepCost, 1e-7);
@@ -94,19 +94,19 @@ public class BipedalStepAdjustmentCostCalculatorTest
 
       for (int i = 0; i<numberOfRandomXYTranslations; i++)
       {
-         FramePose stanceFoot = new FramePose(worldFrame);
+         FramePose3D stanceFoot = new FramePose3D(worldFrame);
          stanceFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
          stanceFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
-         FramePose swingStartFoot = new FramePose(worldFrame);
+         FramePose3D swingStartFoot = new FramePose3D(worldFrame);
          swingStartFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
          swingStartFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
-         FramePose idealFootstep = new FramePose(worldFrame);
+         FramePose3D idealFootstep = new FramePose3D(worldFrame);
          idealFootstep.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
          idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
 
-         FramePose candidateFootstep = new FramePose(worldFrame);
+         FramePose3D candidateFootstep = new FramePose3D(worldFrame);
          candidateFootstep.set(idealFootstep);
 
          RigidBodyTransform transform = new RigidBodyTransform();
@@ -146,15 +146,15 @@ public class BipedalStepAdjustmentCostCalculatorTest
       stanceFootPitch.set(-0.2);
 
       defaultFootPolygon = PlanningTestTools.createDefaultFootPolygon();
-      FramePose idealFramePose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D idealFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       idealFramePose.setPosition(0.45, 0.0, 0.31);
       createStaticFootstep("ideal", idealFramePose, YoAppearance.HotPink(), registry, yoGraphicsListRegistry);
-      FramePose swingStartFramePose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D swingStartFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       swingStartFramePose.setPosition(0.0, 0.0, 0.31);
       createStaticFootstep("swingStart", swingStartFramePose, YoAppearance.Blue(), registry, yoGraphicsListRegistry);
-      FramePose stanceFramePose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D stanceFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       stanceFramePose.setPosition(0.2, 0.26, 0.31);
-      stanceFramePose.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
+      stanceFramePose.setOrientationYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
       YoGraphicPolygon stanceFootPolygon = createStaticFootstep("stance", stanceFramePose, YoAppearance.DarkGreen(), registry, yoGraphicsListRegistry);
 
       for (int candidateFootstepIndex = 0; candidateFootstepIndex < numInX * numInY; candidateFootstepIndex++)
@@ -168,9 +168,9 @@ public class BipedalStepAdjustmentCostCalculatorTest
          public void doControl()
          {
             stanceFootPolygon.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
-            stanceFramePose.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
+            stanceFramePose.setOrientationYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
 
-            FramePose candidateFramePose = new FramePose(ReferenceFrame.getWorldFrame());
+            FramePose3D candidateFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
 //            applySlopeCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
             applyVerticalCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
@@ -206,7 +206,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       }
    }
 
-   private void applySlopeCandidateSet(FramePose candidateFramePose, YoDouble xYoVariable, YoDouble yYoVariable)
+   private void applySlopeCandidateSet(FramePose3D candidateFramePose, YoDouble xYoVariable, YoDouble yYoVariable)
    {
       candidateIndex.set((int) yoTime.getDoubleValue() % (numInX * numInY));
 
@@ -218,7 +218,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       candidateFramePose.setPosition(x, y, 0.3 + (y - 0.2) * 0.2);
    }
 
-   private void applyVerticalCandidateSet(FramePose candidateFramePose, YoDouble xYoVariable, YoDouble yYoVariable)
+   private void applyVerticalCandidateSet(FramePose3D candidateFramePose, YoDouble xYoVariable, YoDouble yYoVariable)
    {
       double height = 1.0;
       double verticalIncrement = 0.005;
@@ -244,7 +244,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), footstepYoGraphicPolygon);
    }
 
-   private YoGraphicPolygon createStaticFootstep(String name, FramePose framePose, AppearanceDefinition appearance, YoVariableRegistry registry,
+   private YoGraphicPolygon createStaticFootstep(String name, FramePose3D framePose, AppearanceDefinition appearance, YoVariableRegistry registry,
                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoFramePose footstepYoFramePose = new YoFramePose(name + "FramePose", ReferenceFrame.getWorldFrame(), registry);

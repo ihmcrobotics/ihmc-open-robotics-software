@@ -10,6 +10,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -17,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -50,12 +50,12 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          // First need to pick up the foot:
-         FramePose footPoseCloseToActual = new FramePose(fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG));
+         FramePose3D footPoseCloseToActual = new FramePose3D(fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG));
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.05);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
+         footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);

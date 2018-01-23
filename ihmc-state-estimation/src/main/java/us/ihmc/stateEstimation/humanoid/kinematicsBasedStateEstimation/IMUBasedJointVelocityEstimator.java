@@ -99,15 +99,15 @@ public class IMUBasedJointVelocityEstimator
       CommonOps.invert(jacobianAngularPart64F, inverseAngularJacobian64F);
 
       chestAngularVelocity.setToZero(chestIMU.getMeasurementFrame());
-      chestIMU.getAngularVelocityMeasurement(chestAngularVelocity.getVector());
+      chestIMU.getAngularVelocityMeasurement(chestAngularVelocity);
       chestAngularVelocity.changeFrame(jacobian.getJacobianFrame());
 
       pelvisAngularVelocity.setToZero(pelvisIMU.getMeasurementFrame());
-      pelvisIMU.getAngularVelocityMeasurement(pelvisAngularVelocity.getVector());
+      pelvisIMU.getAngularVelocityMeasurement(pelvisAngularVelocity);
       pelvisAngularVelocity.changeFrame(jacobian.getJacobianFrame());
       chestAngularVelocity.sub(pelvisAngularVelocity);
 
-      chestAngularVelocity.getVector().get(omega);
+      chestAngularVelocity.get(omega);
       CommonOps.mult(inverseAngularJacobian64F, omega, qd_estimated);
 
       for (int i = 0; i < joints.length; i++)

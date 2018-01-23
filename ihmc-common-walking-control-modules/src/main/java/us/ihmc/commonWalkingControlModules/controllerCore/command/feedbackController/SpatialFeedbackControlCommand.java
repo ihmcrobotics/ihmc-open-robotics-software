@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -278,12 +278,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePose desiredPose)
+   public void set(FramePose3D desiredPose)
    {
       desiredPose.checkReferenceFrameMatch(worldFrame);
 
-      desiredPose.getPosition(desiredPositionInWorld);
-      desiredPose.getOrientation(desiredOrientationInWorld);
+      desiredPositionInWorld.set(desiredPose.getPosition());
+      desiredOrientationInWorld.set(desiredPose.getOrientation());
       desiredLinearVelocityInWorld.setToZero();
       desiredAngularVelocityInWorld.setToZero();
       feedForwardLinearAccelerationInWorld.setToZero();
@@ -309,7 +309,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
+      desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.setToZero();
       feedForwardLinearAccelerationInWorld.setToZero();
    }
@@ -340,9 +340,9 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
       feedForwardLinearAcceleration.checkReferenceFrameMatch(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
-      desiredLinearVelocity.get(desiredLinearVelocityInWorld);
-      feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
+      desiredPositionInWorld.set(desiredPosition);
+      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);
    }
 
    /**
@@ -424,9 +424,9 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       desiredLinearVelocity.changeFrame(worldFrame);
       feedForwardLinearAcceleration.changeFrame(worldFrame);
 
-      desiredPosition.get(desiredPositionInWorld);
-      desiredLinearVelocity.get(desiredLinearVelocityInWorld);
-      feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
+      desiredPositionInWorld.set(desiredPosition);
+      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);
    }
 
    /**
@@ -485,7 +485,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      position.get(controlFrameOriginInEndEffectorFrame);
+      controlFrameOriginInEndEffectorFrame.set(position);
       controlFrameOrientationInEndEffectorFrame.setToZero();
    }
 
@@ -547,11 +547,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setControlFrameFixedInEndEffector(FramePose pose)
+   public void setControlFrameFixedInEndEffector(FramePose3D pose)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       pose.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      pose.getPose(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+      pose.get(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
    }
 
    /**
@@ -565,11 +565,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param pose the of the {@code controlFrame}. Modified.
     */
-   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePose pose)
+   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePose3D pose)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       pose.changeFrame(endEffector.getBodyFixedFrame());
-      pose.getPose(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+      pose.get(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
    }
 
    /**

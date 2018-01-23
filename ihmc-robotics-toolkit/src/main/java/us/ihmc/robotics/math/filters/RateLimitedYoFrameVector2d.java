@@ -1,13 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
 
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public class RateLimitedYoFrameVector2d extends YoFrameVector2d
@@ -80,13 +80,13 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2d
       y.update(yUnfiltered);
    }
 
-   public void update(Vector2D vector2dUnfiltered)
+   public void update(Vector2DReadOnly vector2dUnfiltered)
    {
       x.update(vector2dUnfiltered.getX());
       y.update(vector2dUnfiltered.getY());
    }
 
-   public void update(FrameTuple2D<?, ?> vector2dUnfiltered)
+   public void update(FrameTuple2DReadOnly vector2dUnfiltered)
    {
       x.update(vector2dUnfiltered.getX());
       y.update(vector2dUnfiltered.getY());

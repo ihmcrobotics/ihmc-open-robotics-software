@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPOptimizationControllerHelper
@@ -51,7 +51,7 @@ public class ICPOptimizationControllerHelper
       transformValues(weightsToPack, xWeight.getValue(), yWeight.getValue(), frame.getTransformToWorldFrame());
    }
 
-   private void transformValues(FrameTuple2D valuesToPack, double xValue, double yValue, RigidBodyTransform transformToDesiredFrame)
+   private void transformValues(FrameTuple2DBasics valuesToPack, double xValue, double yValue, RigidBodyTransform transformToDesiredFrame)
    {
       transformToDesiredFrame.getRotation(rotation);
       rotationTranspose.set(rotation);

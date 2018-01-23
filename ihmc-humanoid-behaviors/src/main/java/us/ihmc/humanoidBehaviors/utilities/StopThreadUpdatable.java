@@ -3,6 +3,8 @@ package us.ihmc.humanoidBehaviors.utilities;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -10,8 +12,6 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.BehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 
 public abstract class StopThreadUpdatable implements Updatable
 {
@@ -75,39 +75,39 @@ public abstract class StopThreadUpdatable implements Updatable
       return testFrameTransformToWorld.get(controlMode);
    }
 
-   public FramePose getTestFramePoseCopyAtTransition(BehaviorControlModeEnum controlMode)
+   public FramePose3D getTestFramePoseCopyAtTransition(BehaviorControlModeEnum controlMode)
    {
-      FramePose ret = new FramePose(ReferenceFrame.getWorldFrame(), getTestFrameTransformToWorldAtTransition(controlMode));
+      FramePose3D ret = new FramePose3D(ReferenceFrame.getWorldFrame(), getTestFrameTransformToWorldAtTransition(controlMode));
       return ret;
    }
 
-   public FramePose getCurrentTestFramePoseCopy()
+   public FramePose3D getCurrentTestFramePoseCopy()
    {
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       getCurrentTestFramePose(ret);
       return ret;
    }
 
-   public void getCurrentTestFramePose(FramePose poseToPack)
+   public void getCurrentTestFramePose(FramePose3D poseToPack)
    {
-      poseToPack.setPoseIncludingFrame(worldFrame, getCurrentTestFrameTransformToWorld());
+      poseToPack.setIncludingFrame(worldFrame, getCurrentTestFrameTransformToWorld());
    }
 
-   public FramePose2d getTestFramePose2dAtTransition(BehaviorControlModeEnum controlMode)
+   public FramePose2D getTestFramePose2dAtTransition(BehaviorControlModeEnum controlMode)
    {
-      FramePose2d ret = new FramePose2d();
+      FramePose2D ret = new FramePose2D();
       ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), getTestFrameTransformToWorldAtTransition(controlMode), false);
       return ret;
    }
 
-   public FramePose2d getCurrentTestFramePose2dCopy()
+   public FramePose2D getCurrentTestFramePose2dCopy()
    {
       return getTestFramePose2dCopy(getCurrentTestFrameTransformToWorld());
    }
 
-   public FramePose2d getTestFramePose2dCopy(RigidBodyTransform testFrameTransformToWorld)
+   public FramePose2D getTestFramePose2dCopy(RigidBodyTransform testFrameTransformToWorld)
    {
-      FramePose2d ret = new FramePose2d(ReferenceFrame.getWorldFrame());
+      FramePose2D ret = new FramePose2D(ReferenceFrame.getWorldFrame());
       ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), testFrameTransformToWorld, false);
       return ret;
    }

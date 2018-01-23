@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,7 +21,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,7 +47,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
 
    private PoseTrajectoryGenerator poseTrajectoryGenerator;
 
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D desiredPose = new FramePose3D();
    private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D desiredVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D desiredAcceleration = new FrameVector3D(worldFrame);
@@ -444,7 +444,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
    {
    }
 
-   public void getDesiredPose(FramePose desiredPoseToPack)
+   public void getDesiredPose(FramePose3D desiredPoseToPack)
    {
       desiredPoseToPack.setIncludingFrame(desiredPose);
    }

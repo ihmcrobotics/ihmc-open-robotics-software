@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -258,13 +259,13 @@ public class DynamicReachabilityCalculator
          {
             predictedCoMPosition.changeFrame(worldFrame);
             predictedPelvisOrientation.changeFrame(worldFrame);
-            transformToParent.setTranslation(predictedCoMPosition.getPoint());
-            transformToParent.setRotation(predictedPelvisOrientation.getQuaternion());
+            transformToParent.setTranslation(predictedCoMPosition);
+            transformToParent.setRotation(predictedPelvisOrientation);
          }
       };
 
       predictedPelvisFrame = new TranslationReferenceFrame("Predicted Pelvis Frame", predictedCoMFrame);
-      predictedPelvisFrame.updateTranslation(translationToCoM.getVector());
+      predictedPelvisFrame.updateTranslation((Vector3DReadOnly) translationToCoM);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -276,7 +277,7 @@ public class DynamicReachabilityCalculator
          translationToPelvis.sub(pelvisCenter);
          TranslationReferenceFrame predictedHipFrame = new TranslationReferenceFrame(robotSide.getShortLowerCaseName() + " Predicted Hip Frame",
                predictedPelvisFrame);
-         predictedHipFrame.updateTranslation(translationToPelvis.getVector());
+         predictedHipFrame.updateTranslation((Vector3DReadOnly) translationToPelvis);
          predictedHipFrames.put(robotSide, predictedHipFrame);
 
          Vector2dZUpFrame stepDirectionFrame = new Vector2dZUpFrame(robotSide.getShortLowerCaseName() + "Step Direction Frame", worldFrame);

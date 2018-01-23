@@ -55,7 +55,7 @@ public class ZUpPreserveYReferenceFrame extends ReferenceFrame
      
       transformToParent.setRotation(zUpToWorldRotation);
 
-      originPoint3d.set(origin.getPoint());
+      originPoint3d.set(origin);
       nonZUpToWorld.transform(originPoint3d);
       translation.set(originPoint3d);
       transformToParent.setTranslation(translation);

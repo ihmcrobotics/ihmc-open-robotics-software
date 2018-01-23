@@ -3,11 +3,11 @@ package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMessage>
@@ -15,7 +15,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    private long timestamp = -1L;
    private final RecyclingArrayList<Point3D32> scan = new RecyclingArrayList<>(Point3D32.class);
    private final ReferenceFrame pointCloudFrame = ReferenceFrame.getWorldFrame();
-   private final FramePose lidarPose = new FramePose();
+   private final FramePose3D lidarPose = new FramePose3D();
 
    @Override
    public void clear()
@@ -76,12 +76,12 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
 
    public void getLidarPosition(Point3D positionToPack)
    {
-      lidarPose.getPosition(positionToPack);
+      positionToPack.set(lidarPose.getPosition());
    }
    
    public void getLidarOrientation(Quaternion orientationToPack)
    {
-      lidarPose.getOrientation(orientationToPack);
+      orientationToPack.set(lidarPose.getOrientation());
    }
 
    @Override

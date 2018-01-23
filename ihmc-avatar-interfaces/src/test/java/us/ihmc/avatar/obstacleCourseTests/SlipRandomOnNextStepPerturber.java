@@ -247,7 +247,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       groundContactPointsSlipper.setGroundContactPoints(groundContactPointsMap.get(robotSide));
       groundContactPointsSlipper.setPercentToSlipPerTick(nextSlipPercentSlipPerTick.getDoubleValue());
       groundContactPointsSlipper.setDoSlip(true);
-      groundContactPointsSlipper.setSlipTranslation(nextTranslationToSlip.getVector3dCopy());
+      groundContactPointsSlipper.setSlipTranslation(nextTranslationToSlip);
       groundContactPointsSlipper.setSlipRotationYawPitchRoll(nextRotationToSlip.getYawPitchRoll());
 
       //      System.out.println("Slip of " + robotSide.getLowerCaseName() + " foot with amount" + nextTranslationToSlip.getVector3dCopy().toString()

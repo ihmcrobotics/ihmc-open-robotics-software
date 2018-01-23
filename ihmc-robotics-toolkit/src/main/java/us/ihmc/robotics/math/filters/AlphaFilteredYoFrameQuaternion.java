@@ -53,7 +53,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
                + "quaternion variable to call update(), otherwise use update(Quat4d)");
       }
 
-      unfilteredQuaternion.get(qMeasured);
+      qMeasured.set(unfilteredQuaternion);
       update(qMeasured);
    }
 
@@ -61,7 +61,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
    {
       if (hasBeenCalled.getBooleanValue())
       {
-         get(qPreviousFiltered);
+         qPreviousFiltered.set(this);
 
          qNewFiltered.interpolate(qMeasured, qPreviousFiltered, alpha.getDoubleValue()); // qPreviousFiltered 'gets multiplied by alpha'
          set(qNewFiltered);

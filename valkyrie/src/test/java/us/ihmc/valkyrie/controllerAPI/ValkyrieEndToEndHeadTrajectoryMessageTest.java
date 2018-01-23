@@ -16,7 +16,7 @@ public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTraje
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 17.9)
-   @Test(timeout = 30000)
+   @Test(timeout = 50000)
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();
