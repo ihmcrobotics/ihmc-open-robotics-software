@@ -9,13 +9,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
@@ -40,7 +41,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private final Vector3D tempAngularWeightVector = new Vector3D();
    private final Vector3D tempLinearWeightVector = new Vector3D();
 
-   private final FramePose initialPose = new FramePose();
+   private final FramePose3D initialPose = new FramePose3D();
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private ReferenceFrame controlFrame;
@@ -80,17 +81,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
    }
 
-   public void setWeight(double weight)
-   {
-      angularWeight.set(1.0, 1.0, 1.0);
-      angularWeight.scale(weight);
-      linearWeight.set(1.0, 1.0, 1.0);
-      linearWeight.scale(weight);
-
-      taskspaceControlState.setWeight(weight);
-   }
-
-   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
       this.angularWeight.set(angularWeight);
       this.linearWeight.set(linearWeight);
@@ -164,8 +155,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    {
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      angularWeight.get(tempAngularWeightVector);
-      linearWeight.get(tempLinearWeightVector);
+      tempAngularWeightVector.set(angularWeight);
+      tempLinearWeightVector.set(linearWeight);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
    }
 
@@ -187,7 +178,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    private final FramePoint3D desiredAnklePosition = new FramePoint3D();
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D desiredPose = new FramePose3D();
 
    private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
    {
@@ -196,15 +187,15 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
          spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
-         desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-         desiredPose.getPositionIncludingFrame(desiredAnklePosition);
+         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
          legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
 
          desiredPose.setPosition(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-         desiredPose.getPositionIncludingFrame(desiredPosition);
+         desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
 
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
@@ -215,16 +206,16 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private final RigidBodyTransform newBodyFrameDesiredTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformFromNewBodyFrameToOldBodyFrame = new RigidBodyTransform();
 
-   private void changeDesiredPoseBodyFrame(ReferenceFrame oldBodyFrame, ReferenceFrame newBodyFrame, FramePose framePoseToModify)
+   private void changeDesiredPoseBodyFrame(ReferenceFrame oldBodyFrame, ReferenceFrame newBodyFrame, FramePose3D framePoseToModify)
    {
       if (oldBodyFrame == newBodyFrame)
          return;
 
-      framePoseToModify.getPose(oldBodyFrameDesiredTransform);
+      framePoseToModify.get(oldBodyFrameDesiredTransform);
       newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
       newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
       newBodyFrameDesiredTransform.multiply(transformFromNewBodyFrameToOldBodyFrame);
-      framePoseToModify.setPose(newBodyFrameDesiredTransform);
+      framePoseToModify.set(newBodyFrameDesiredTransform);
    }
 
    public void requestStopTrajectory()

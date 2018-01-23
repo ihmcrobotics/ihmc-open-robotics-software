@@ -5,6 +5,8 @@ import java.util.Arrays;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,8 +14,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -28,7 +28,7 @@ public class Handstep
    private final FrameVector3D surfaceNormal;
    private double swingTrajectoryTime;
 
-   public Handstep(RobotSide robotSide, RigidBody endEffector, FramePose framePose, FrameVector3D surfaceNormal, double swingTrajectoryTime)
+   public Handstep(RobotSide robotSide, RigidBody endEffector, FramePose3D framePose, FrameVector3D surfaceNormal, double swingTrajectoryTime)
    {
       this(robotSide, endEffector, new PoseReferenceFrame("Handstep" + counter, framePose), surfaceNormal, swingTrajectoryTime);
    }
@@ -91,7 +91,7 @@ public class Handstep
       poseReferenceFrame.setPoseAndUpdate(newHandstep.poseReferenceFrame);
    }
 
-   public void setPose(FramePose newHandstepPose)
+   public void setPose(FramePose3D newHandstepPose)
    {
       poseReferenceFrame.setPoseAndUpdate(newHandstepPose);
    }
@@ -166,7 +166,7 @@ public class Handstep
       poseReferenceFrame.getPoseIncludingFrame(positionToPack, orientationToPack);
    }
 
-   public void getPose(FramePose poseToPack)
+   public void getPose(FramePose3D poseToPack)
    {
       poseReferenceFrame.getPoseIncludingFrame(poseToPack);
    }
@@ -183,7 +183,7 @@ public class Handstep
 
    public void getSurfaceNormal(Vector3D surfaceNormalToPack)
    {
-      this.surfaceNormal.get(surfaceNormalToPack);
+      surfaceNormalToPack.set(this.surfaceNormal);
    }
 
    public RigidBody getBody()
@@ -216,7 +216,7 @@ public class Handstep
       poseReferenceFrame.getOrientationIncludingFrame(frameOrientationToPack);
    }
 
-   public void getPose2d(FramePose2d framePose2dToPack)
+   public void getPose2d(FramePose2D framePose2dToPack)
    {
       poseReferenceFrame.getPose2dIncludingFrame(framePose2dToPack);
    }

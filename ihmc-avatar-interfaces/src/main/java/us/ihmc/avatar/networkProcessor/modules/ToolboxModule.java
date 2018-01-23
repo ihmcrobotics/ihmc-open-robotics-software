@@ -370,7 +370,7 @@ public abstract class ToolboxModule
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
    abstract public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus();
-
+   
    /**
     * @return the collection of commands that cannot wake up this module.
     */

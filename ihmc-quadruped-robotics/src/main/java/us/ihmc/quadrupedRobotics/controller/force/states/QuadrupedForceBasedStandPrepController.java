@@ -114,13 +114,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       {
          solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
          solePositionSetpoint.changeFrame(referenceFrames.getBodyFrame());
-         quadrupedSoleWaypointList.get(quadrant).get(0).set(solePositionSetpoint.getPoint(), zeroVelocity, 0.0);
+         quadrupedSoleWaypointList.get(quadrant).get(0).set(solePositionSetpoint, zeroVelocity, 0.0);
          solePositionSetpoint.setToZero(referenceFrames.getBodyFrame());
          solePositionSetpoint.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
          solePositionSetpoint.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
          solePositionSetpoint.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(),
                quadrant.getEnd().negateIfHindEnd(Math.sin(stancePitchParameter.get())) * robotLength / 2 - stanceHeightParameter.get());
-         quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
+         quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.get());
       }
       quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains, taskSpaceEstimates, false);
 

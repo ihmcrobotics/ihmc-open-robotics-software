@@ -4,17 +4,12 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.2"
+      classpath "us.ihmc:ihmc-build:0.12.2"
    }
 }
 
 import us.ihmc.build.IHMCSettingsConfigurator
 
 def ihmcSettingsConfigurator = new IHMCSettingsConfigurator(settings, logger, ext)
-ihmcSettingsConfigurator.configureProjectName(hyphenatedName) // rootProject.name = hyphenatedName
-ihmcSettingsConfigurator.configureAsGroupOfProjects() // isProjectGroup = true
-
-if (Boolean.valueOf(includeBuildsFromWorkspace))
-{
-   ihmcSettingsConfigurator.findAndIncludeCompositeBuilds() // Search workspace and `includeBuild` matches
-}
+ihmcSettingsConfigurator.configureAsGroupOfProjects()
+ihmcSettingsConfigurator.findAndIncludeCompositeBuilds()

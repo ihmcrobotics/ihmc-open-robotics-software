@@ -19,7 +19,7 @@ public class ZoomOutAction extends AbstractAction
       super("Zoom Out");
       this.executor = executor;
 
-      String iconFilename = "icons/ZoomOut24.gif";
+      String iconFilename = "icons/ZoomOut.png";
       int shortKey = KeyEvent.VK_O;
       String longDescription = "Zoom Out";
       String shortDescription = "Zoom Out";

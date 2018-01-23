@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.11.2"
+      classpath "us.ihmc:ihmc-build:0.12.2"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -34,8 +34,18 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
+}
+
+visualizersDependencies {
+   compile ihmc.sourceSetProject("main")
+
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: groupDependencyVersion
 }

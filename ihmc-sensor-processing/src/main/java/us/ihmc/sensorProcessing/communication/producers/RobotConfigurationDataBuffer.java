@@ -18,7 +18,8 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 /**
- * Buffer for RobotConfigurationData. Allows updating a fullrobotmodel based on timestamps. Make sure not to share fullrobotmodels between thread
+ * Buffer for RobotConfigurationData. Allows updating a fullrobotmodel based on timestamps. Make
+ * sure not to share fullrobotmodels between thread
  *
  * @author jesper
  *
@@ -42,7 +43,6 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          return new HashMap<>();
       }
    };
-
 
    public void update(RobotConfigurationData data)
    {
@@ -68,7 +68,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       long currentTimestamp;
       while ((currentTimestamp = getNewestTimestamp()) < timestamp)
       {
-         if(DEBUG)
+         if (DEBUG)
          {
             System.out.println("Current timestamp: " + currentTimestamp + ", waiting for " + timestamp);
          }
@@ -87,7 +87,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
    public long getNewestTimestamp()
    {
       RobotConfigurationData newestConfigurationData = configurationBuffer[currentIndex.get()];
-      if(newestConfigurationData == null)
+      if (newestConfigurationData == null)
       {
          return -1;
       }
@@ -122,7 +122,8 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
     * Update a full robot model with data from timestamp. Optionally update force sensors
     *
     * @param waitForTimestamp Will block if no timestamp is not received yet
-    * @param timestamp Timestamp to get. Will return the data for the last received that is smaller or equal to timestamp.
+    * @param timestamp Timestamp to get. Will return the data for the last received that is smaller
+    *           or equal to timestamp.
     * @param model Model to update. Will call updateFramesRecursively()
     * @param forceSensorDataHolder. Optional, update force sensor data holders
     *
@@ -203,8 +204,8 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       {
          for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
          {
-            forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(
-                  robotConfigurationData.getMomentAndForceVectorForSensor(i));
+            forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i))
+                                 .setWrench(robotConfigurationData.getMomentAndForceVectorForSensor(i));
          }
       }
    }
@@ -230,11 +231,12 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
 
       private FullRobotModelCache(FullRobotModel fullRobotModel)
       {
-         if(fullRobotModel instanceof FullHumanoidRobotModel)
+         if (fullRobotModel instanceof FullHumanoidRobotModel)
             allJoints = FullRobotModelUtils.getAllJointsExcludingHands((FullHumanoidRobotModel) fullRobotModel);
          else
             allJoints = fullRobotModel.getOneDoFJoints();
-         jointNameHash = RobotConfigurationData.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+         jointNameHash = RobotConfigurationData.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
+                                                                       fullRobotModel.getIMUDefinitions());
       }
    }
 

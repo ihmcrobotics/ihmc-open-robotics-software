@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,7 +28,7 @@ public class FootstepVisualizer
    private final YoFramePose yoFootstepPose;
    private final YoFrameConvexPolygon2d yoFoothold;
 
-   private final FramePose footstepPose = new FramePose();
+   private final FramePose3D footstepPose = new FramePose3D();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
 
    private final RobotSide robotSide;

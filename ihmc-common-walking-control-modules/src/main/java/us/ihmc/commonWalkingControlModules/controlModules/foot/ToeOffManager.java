@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -19,7 +20,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -654,7 +654,7 @@ public class ToeOffManager
 
    private abstract class AbstractToeContact
    {
-      protected final FrameLineSegment2d toeOffLine = new FrameLineSegment2d();
+      protected final FrameLineSegment2D toeOffLine = new FrameLineSegment2D();
       protected final FramePoint2D toeOffPoint = new FramePoint2D();
       protected final FramePoint2D tmpPoint2d = new FramePoint2D();
 
@@ -677,7 +677,7 @@ public class ToeOffManager
             footDefaultPolygon.getFrameVertex(i, tmpPoint2d);
             if (tmpPoint2d.getX() > toeOffLine.getFirstEndpoint().getX())
             { // further ahead than leading point
-               toeOffLine.setSecondEndpoint(referenceFrame, toeOffLine.getFirstEndpoint());
+               toeOffLine.setSecondEndpoint(toeOffLine.getFirstEndpoint());
                toeOffLine.setFirstEndpoint(tmpPoint2d);
             }
             else if (tmpPoint2d.getX() > toeOffLine.getSecondEndpoint().getX())
@@ -709,9 +709,9 @@ public class ToeOffManager
          onToesSupportPolygon.setIncludingFrameAndUpdate(leadingFootSupportPolygon);
          onToesSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
-         toeOffLine.getFirstEndpoint(tmpPoint2d);
+         tmpPoint2d.setIncludingFrame(toeOffLine.getFirstEndpoint());
          onToesSupportPolygon.addVertexChangeFrameAndProjectToXYPlane(tmpPoint2d);
-         toeOffLine.getSecondEndpoint(tmpPoint2d);
+         tmpPoint2d.setIncludingFrame(toeOffLine.getSecondEndpoint());
          onToesSupportPolygon.addVertexChangeFrameAndProjectToXYPlane(tmpPoint2d);
 
          onToesSupportPolygon.update();

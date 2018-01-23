@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -15,7 +16,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.taskExecutor.PipeLine;
@@ -94,10 +94,10 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
       TextToSpeechPacket p1 = new TextToSpeechPacket(description);
       sendPacket(p1);
 
-      FramePose point = offsetPointFromChestInWorldFrame(x, y, z, yaw, pitch, roll);
+      FramePose3D point = offsetPointFromChestInWorldFrame(x, y, z, yaw, pitch, roll);
 
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-            point.getFrameOrientationCopy().getQuaternion(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
+            point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
@@ -120,14 +120,14 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
       return pipeLine.isDone();
    }
 
-   private FramePose offsetPointFromChestInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
+   private FramePose3D offsetPointFromChestInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
    {
       FramePoint3D point1 = new FramePoint3D(referenceFrames.getChestFrame(), x, y, z);
       point1.changeFrame(ReferenceFrame.getWorldFrame());
       FrameQuaternion orient = new FrameQuaternion(referenceFrames.getChestFrame(), yaw, pitch, roll);
       orient.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose pose = new FramePose(point1, orient);
+      FramePose3D pose = new FramePose3D(point1, orient);
 
       return pose;
    }

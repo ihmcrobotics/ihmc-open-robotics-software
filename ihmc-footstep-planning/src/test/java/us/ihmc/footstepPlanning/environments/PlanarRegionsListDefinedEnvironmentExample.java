@@ -55,7 +55,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
 
             Vector3D normal = new Vector3D();
             terrainObject3D.getHeightMapIfAvailable().heightAndNormalAt(translation.getX(), translation.getY(), translation.getZ(), normal);
-            surfaceNormal.setVector(normal);
+            surfaceNormal.set(normal);
 
             YoGraphicVector surfaceNormalGraphic = new YoGraphicVector("PlanarRegionSurfaceNormalGraphic" + i, planarRegionPointInWorld, surfaceNormal,
                   YoAppearance.Aqua());

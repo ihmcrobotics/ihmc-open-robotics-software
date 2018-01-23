@@ -1,8 +1,8 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
@@ -70,7 +70,7 @@ public class ConvexPolygon2dCalculator
     * If the line goes through a vertex but is not parallel to an edge adjacent to that vertex this method will
     * only pack the edge before the vertex, not both edges.
     */
-   public static int getIntersectingEdges(Line2D line, LineSegment2D edgeToPack1, LineSegment2D edgeToPack2, ConvexPolygon2D polygon)
+   public static int getIntersectingEdges(Line2DReadOnly line, LineSegment2D edgeToPack1, LineSegment2D edgeToPack2, ConvexPolygon2D polygon)
    {
       if (polygon.getNumberOfVertices() == 1)
          return 0;
@@ -113,7 +113,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Checks if a line intersects the edge with the given index.
     */
-   public static boolean doesLineIntersectEdge(Line2D line, int edgeIndex, ConvexPolygon2D polygon)
+   public static boolean doesLineIntersectEdge(Line2DReadOnly line, int edgeIndex, ConvexPolygon2D polygon)
    {
       if (polygon.getNumberOfVertices() < 2)
          return false;
@@ -133,7 +133,7 @@ public class ConvexPolygon2dCalculator
    }
 
    // --- Methods that generate garbage ---
-   public static LineSegment2D[] getIntersectingEdgesCopy(Line2D line, ConvexPolygon2D polygon)
+   public static LineSegment2D[] getIntersectingEdgesCopy(Line2DReadOnly line, ConvexPolygon2D polygon)
    {
       LineSegment2D edge1 = new LineSegment2D();
       LineSegment2D edge2 = new LineSegment2D();

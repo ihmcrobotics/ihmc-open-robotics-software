@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -78,7 +78,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
       statemachine.setStartState(WalkState.GET_READY_TO_WALK);
    }
 
-   private FramePose2d getoffsetPoint()
+   private FramePose2D getoffsetPoint()
    {
 
       FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), pickUpLocation.getX(), pickUpLocation.getY());
@@ -99,7 +99,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
       double newX = ballPosition2d.getX() + (x - ballPosition2d.getX()) * Math.cos(rotationAngle) - (y - ballPosition2d.getY()) * Math.sin(rotationAngle);
       double newY = ballPosition2d.getY() + (x - ballPosition2d.getX()) * Math.sin(rotationAngle) + (y - ballPosition2d.getY()) * Math.cos(rotationAngle);
 
-      FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(newX, newY), walkingYaw);
+      FramePose2D poseToWalkTo = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(newX, newY), walkingYaw);
       return poseToWalkTo;
    }
 

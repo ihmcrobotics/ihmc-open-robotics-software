@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -107,7 +108,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
             if (robot.getTime() > touchdownTimeForSlip.getDoubleValue() + slipAfterTimeDelta.getDoubleValue())
             {
                slipState.set(SlipState.SLIPPING);
-               startSlipping(amountToSlipNextStep.getVector3dCopy(), rotationToSlipNextStep.getYawPitchRoll());
+               startSlipping(amountToSlipNextStep, rotationToSlipNextStep.getYawPitchRoll());
             }
 
             break;
@@ -135,7 +136,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
       }
    }
    
-   private void startSlipping(Vector3D slipAmount, double[] yawPitchRoll)
+   private void startSlipping(Vector3DReadOnly slipAmount, double[] yawPitchRoll)
    {
       groundContactPointsSlipper.setDoSlip(true);
       groundContactPointsSlipper.setPercentToSlipPerTick(0.01);

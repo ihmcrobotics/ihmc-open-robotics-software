@@ -21,7 +21,14 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.escher.configuration.EscherConfigurationRoot;
-import us.ihmc.escher.parameters.*;
+import us.ihmc.escher.parameters.EscherCapturePointPlannerParameters;
+import us.ihmc.escher.parameters.EscherContactPointParameters;
+import us.ihmc.escher.parameters.EscherHighLevelControllerParameters;
+import us.ihmc.escher.parameters.EscherJointMap;
+import us.ihmc.escher.parameters.EscherSensorInformation;
+import us.ihmc.escher.parameters.EscherStateEstimatorParameters;
+import us.ihmc.escher.parameters.EscherUIParameters;
+import us.ihmc.escher.parameters.EscherWalkingControllerParameters;
 import us.ihmc.escher.sensors.EscherSensorSuiteManager;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -152,7 +159,7 @@ public class EscherRobotModel implements DRCRobotModel, SDFDescriptionMutator
       capturePointPlannerParameters = new EscherCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new EscherWalkingControllerParameters(target, jointMap);
       stateEstimatorParamaters = new EscherStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
-      highLevelControllerParameters = new EscherHighLevelControllerParameters();
+      highLevelControllerParameters = new EscherHighLevelControllerParameters(jointMap);
       robotDescription = createRobotDescription();
    }
 

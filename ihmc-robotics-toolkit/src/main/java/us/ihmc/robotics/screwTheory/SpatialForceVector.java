@@ -108,8 +108,8 @@ public class SpatialForceVector
    {
       force.checkReferenceFrameMatch(pointOfApplication);
       expressedInFrame = force.getReferenceFrame();
-      force.get(linearPart);
-      pointOfApplication.get(tempVector);
+      linearPart.set(force);
+      tempVector.set(pointOfApplication);
       angularPart.cross(tempVector, linearPart);
    }
 
@@ -117,10 +117,9 @@ public class SpatialForceVector
    {
       force.checkReferenceFrameMatch(pointOfApplication);
       expressedInFrame = force.getReferenceFrame();
-      force.get(linearPart);
-      pointOfApplication.get(tempVector);
-      angularPart.cross(tempVector, linearPart);
-      angularPart.add(moment.getVector());
+      linearPart.set(force);
+      angularPart.cross(pointOfApplication, linearPart);
+      angularPart.add(moment);
    }
 
    /**
@@ -137,7 +136,7 @@ public class SpatialForceVector
    public void setAngularPart(FrameVector3D angularPart)
    {
       expressedInFrame.checkReferenceFrameMatch(angularPart);
-      angularPart.get(this.angularPart);
+      this.angularPart.set(angularPart);
    }
 
    /**
@@ -154,7 +153,7 @@ public class SpatialForceVector
    public void setLinearPart(FrameVector3D linearPart)
    {
       expressedInFrame.checkReferenceFrameMatch(linearPart);
-      linearPart.get(this.linearPart);
+      this.linearPart.set(linearPart);
    }
 
    /**
@@ -251,8 +250,8 @@ public class SpatialForceVector
    {
       expressedInFrame.checkReferenceFrameMatch(linearPart);
       expressedInFrame.checkReferenceFrameMatch(angularPart);
-      linearPart.get(this.linearPart);
-      angularPart.get(this.angularPart);
+      this.linearPart.set(linearPart);
+      this.angularPart.set(angularPart);
    }
 
    public void set(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
@@ -302,7 +301,7 @@ public class SpatialForceVector
    public void subAngularPart(FrameVector3D angularPart)
    {
       expressedInFrame.checkReferenceFrameMatch(angularPart);
-      this.angularPart.sub(angularPart.getVector());
+      this.angularPart.sub(angularPart);
    }
 
    /**
@@ -316,7 +315,7 @@ public class SpatialForceVector
    public void addLinearPart(FrameVector3D linearPart)
    {
       expressedInFrame.checkReferenceFrameMatch(linearPart);
-      this.linearPart.add(linearPart.getVector());
+      this.linearPart.add(linearPart);
    }
 
    public void subLinearPart(Vector3DReadOnly linearPart)
@@ -327,7 +326,7 @@ public class SpatialForceVector
    public void subLinearPart(FrameVector3D linearPart)
    {
       expressedInFrame.checkReferenceFrameMatch(linearPart);
-      this.linearPart.sub(linearPart.getVector());
+      this.linearPart.sub(linearPart);
    }
 
    /**

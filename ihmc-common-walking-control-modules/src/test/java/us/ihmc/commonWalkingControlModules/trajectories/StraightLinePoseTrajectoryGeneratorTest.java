@@ -9,13 +9,13 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
@@ -108,7 +108,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
             trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
 
       trajToTest.setInitialPose(initialPosition, initialOrientation);
-      trajToTest.setFinalPose(new FramePose(finalPosition, finalOrientation));
+      trajToTest.setFinalPose(new FramePose3D(finalPosition, finalOrientation));
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
 
       originalPosition.initialize();
@@ -166,7 +166,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
 
       trajToTest.setInitialPose(initialPosition, initialOrientation);
-      trajToTest.setFinalPose(new FramePose(finalPosition, finalOrientation));
+      trajToTest.setFinalPose(new FramePose3D(finalPosition, finalOrientation));
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
 
       trajToTest.initialize();
@@ -212,7 +212,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
 
       trajToTest.setInitialPose(initialPosition, initialOrientation);
-      trajToTest.setFinalPose(new FramePose(finalPosition, finalOrientation));
+      trajToTest.setFinalPose(new FramePose3D(finalPosition, finalOrientation));
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
 
       trajToTest.initialize();
@@ -267,7 +267,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
             trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
 
       trajToTest.setInitialPose(initialPosition, initialOrientation);
-      trajToTest.setFinalPose(new FramePose(finalPosition, finalOrientation));
+      trajToTest.setFinalPose(new FramePose3D(finalPosition, finalOrientation));
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
 
       originalPosition.initialize();
@@ -328,7 +328,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       trajToTest.registerNewTrajectoryFrame(frameA);
       trajToTest.switchTrajectoryFrame(frameA);
       trajToTest.setInitialPose(initialPosition, initialOrientation);
-      trajToTest.setFinalPose(new FramePose(finalPosition, finalOrientation));
+      trajToTest.setFinalPose(new FramePose3D(finalPosition, finalOrientation));
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
 
       originalPosition.initialize();

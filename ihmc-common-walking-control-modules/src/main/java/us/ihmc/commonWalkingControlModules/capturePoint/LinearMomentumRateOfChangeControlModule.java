@@ -15,8 +15,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -313,7 +311,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
 
-   public abstract void computeCMPInternal(FramePoint2D desiredCMPPreviousValue);
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
@@ -340,8 +337,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
 
+   public abstract void computeCMPInternal(FramePoint2D desiredCMPPreviousValue);
 
-   public abstract void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
-
-   public abstract void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
+   public abstract void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
 }

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -9,7 +10,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class UserDesiredPelvisHeightControllerCommandGenerators
 {
@@ -36,10 +36,10 @@ public class UserDesiredPelvisHeightControllerCommandGenerators
             if (userDesiredSetPelvisHeightToActual.getBooleanValue())
             {
                ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-               FramePose currentPose = new FramePose(pelvisFrame);
+               FramePose3D currentPose = new FramePose3D(pelvisFrame);
                currentPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-               userDesiredPelvisHeight.set(currentPose.getFramePointCopy().getZ());
+               userDesiredPelvisHeight.set(currentPose.getZ());
 
                userDesiredSetPelvisHeightToActual.set(false);
             }

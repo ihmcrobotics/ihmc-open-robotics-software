@@ -1,9 +1,11 @@
 package us.ihmc.thor.parameters;
 
+import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 /** {@inheritDoc} */
@@ -12,8 +14,8 @@ public class ThorCapturePointPlannerParameters extends ContinuousCMPICPPlannerPa
    private final boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport;
 
-   private List<Vector2D> copOffsets;
-   private List<Vector2D> copForwardOffsetBounds;
+   private EnumMap<CoPPointName, Vector2D> copOffsets;
+   private EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
 
    public ThorCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
@@ -31,31 +33,46 @@ public class ThorCapturePointPlannerParameters extends ContinuousCMPICPPlannerPa
          return 1;
    }
 
+   /**{@inheritDoc} */
+   @Override
+   public CoPPointName getExitCoPName()
+   {
+      return exitCoPName;
+   }
+
+   /**{@inheritDoc} */
+   @Override
+   public CoPPointName getEntryCoPName()
+   {
+      return entryCoPName;
+   }
+
    /** {@inheritDoc} */
    @Override
-   public List<Vector2D> getCoPOffsets()
+   public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
    {
       if (copOffsets != null)
          return copOffsets;
 
       Vector2D entryOffset, exitOffset;
       if (runningOnRealRobot)
-         entryOffset = new Vector2D(0.01, 0.02);
+         entryOffset = new Vector2D(0.01, 0.01);
       else
          entryOffset = new Vector2D(0.0, 0.006);
 
       exitOffset = new Vector2D(0.0, 0.025);
 
-      copOffsets = new ArrayList<>();
-      copOffsets.add(entryOffset);
-      copOffsets.add(exitOffset);
+      copOffsets = new EnumMap<>(CoPPointName.class);
+      copOffsets.put(entryCoPName, entryOffset);
+      copOffsets.put(exitCoPName, exitOffset);
 
       return copOffsets;
    }
 
+
    /** {@inheritDoc} */
    @Override
-   public List<Vector2D> getCoPForwardOffsetBounds()
+   public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
    {
       if (copForwardOffsetBounds != null)
          return copForwardOffsetBounds;
@@ -63,9 +80,9 @@ public class ThorCapturePointPlannerParameters extends ContinuousCMPICPPlannerPa
       Vector2D entryBounds = new Vector2D(0.0, 0.03);
       Vector2D exitBounds = new Vector2D(-0.04, 0.06);
 
-      copForwardOffsetBounds = new ArrayList<>();
-      copForwardOffsetBounds.add(entryBounds);
-      copForwardOffsetBounds.add(exitBounds);
+      copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
+      copForwardOffsetBounds.put(entryCoPName, entryBounds);
+      copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
       return copForwardOffsetBounds;
    }

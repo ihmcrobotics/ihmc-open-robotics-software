@@ -175,7 +175,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    private FootstepDataListMessage createFootstepDataListMessage(double swingTime, double transferTime)
    {
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
-      Point3D location = new Point3D(0.35, 0.15, 0.0);
+      Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
@@ -197,7 +197,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    public void showMemoryUsageBeforeTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After

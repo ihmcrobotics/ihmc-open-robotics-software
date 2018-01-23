@@ -21,10 +21,11 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -224,8 +225,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final double updateDT;
 
    private final RotationMatrix tempOrientation = new RotationMatrix();
-   private final Vector3D tempAngularVelocity = new Vector3D();
-   private final Vector3D tempLinearAcceleration = new Vector3D();
 
    private final FrameVector3D tempForce = new FrameVector3D();
    private final FrameVector3D tempTorque = new FrameVector3D();
@@ -375,24 +374,20 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
 
          IMUSensor inputIMU = inputIMUs.get(i);
-         inputOrientations.get(imuDefinition).get(tempOrientation);
-         inputAngularVelocities.get(imuDefinition).get(tempAngularVelocity);
-         inputLinearAccelerations.get(imuDefinition).get(tempLinearAcceleration);
+         tempOrientation.set(inputOrientations.get(imuDefinition));
          inputIMU.setOrientationMeasurement(tempOrientation);
-         inputIMU.setAngularVelocityMeasurement(tempAngularVelocity);
-         inputIMU.setLinearAccelerationMeasurement(tempLinearAcceleration);
+         inputIMU.setAngularVelocityMeasurement(inputAngularVelocities.get(imuDefinition));
+         inputIMU.setLinearAccelerationMeasurement(inputLinearAccelerations.get(imuDefinition));
 
          updateProcessors(processedOrientations.get(imuDefinition));
          updateProcessors(processedAngularVelocities.get(imuDefinition));
          updateProcessors(processedLinearAccelerations.get(imuDefinition));
          
          IMUSensor outputIMU = outputIMUs.get(i);
-         intermediateOrientations.get(imuDefinition).get(tempOrientation);
-         intermediateAngularVelocities.get(imuDefinition).get(tempAngularVelocity);
-         intermediateLinearAccelerations.get(imuDefinition).get(tempLinearAcceleration);
+         tempOrientation.set(intermediateOrientations.get(imuDefinition));
          outputIMU.setOrientationMeasurement(tempOrientation);
-         outputIMU.setAngularVelocityMeasurement(tempAngularVelocity);
-         outputIMU.setLinearAccelerationMeasurement(tempLinearAcceleration);
+         outputIMU.setAngularVelocityMeasurement(intermediateAngularVelocities.get(imuDefinition));
+         outputIMU.setLinearAccelerationMeasurement(intermediateLinearAccelerations.get(imuDefinition));
       }
 
       for (int i = 0; i < forceSensorDefinitions.size(); i++)
@@ -408,8 +403,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          updateProcessors(processedForces.get(forceSensorDefinition));
          updateProcessors(processedTorques.get(forceSensorDefinition));
 
-         intermediateForces.get(forceSensorDefinition).getFrameTupleIncludingFrame(tempForce);
-         intermediateTorques.get(forceSensorDefinition).getFrameTupleIncludingFrame(tempTorque);
+         tempForce.setIncludingFrame(intermediateForces.get(forceSensorDefinition));
+         tempTorque.setIncludingFrame(intermediateTorques.get(forceSensorDefinition));
          tempWrench.set(tempForce, tempTorque);
          outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
       }
@@ -1654,22 +1649,22 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       inputJointTaus.get(oneDoFJoint).set(value);
    }
 
-   public void setOrientationSensorValue(IMUDefinition imuDefinition, Quaternion value)
+   public void setOrientationSensorValue(IMUDefinition imuDefinition, QuaternionReadOnly value)
    {
       inputOrientations.get(imuDefinition).set(value);
    }
 
-   public void setOrientationSensorValue(IMUDefinition imuDefinition, RotationMatrix value)
+   public void setOrientationSensorValue(IMUDefinition imuDefinition, RotationMatrixReadOnly value)
    {
       inputOrientations.get(imuDefinition).set(value);
    }
 
-   public void setAngularVelocitySensorValue(IMUDefinition imuDefinition, Vector3D value)
+   public void setAngularVelocitySensorValue(IMUDefinition imuDefinition, Vector3DReadOnly value)
    {
       inputAngularVelocities.get(imuDefinition).set(value);
    }
 
-   public void setLinearAccelerationSensorValue(IMUDefinition imuDefinition, Vector3D value)
+   public void setLinearAccelerationSensorValue(IMUDefinition imuDefinition, Vector3DReadOnly value)
    {
       inputLinearAccelerations.get(imuDefinition).set(value);
    }

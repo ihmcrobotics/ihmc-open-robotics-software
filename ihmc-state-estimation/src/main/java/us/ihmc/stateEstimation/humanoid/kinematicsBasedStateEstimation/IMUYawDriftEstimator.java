@@ -299,13 +299,13 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBody foot = allFeet.get(i);
-         referenceAverageFootPosition.getFrameTupleIncludingFrame(averagePosition);
-         referenceFootPositions.get(foot).getFrameTupleIncludingFrame(footPosition);
+         averagePosition.setIncludingFrame(referenceAverageFootPosition);
+         footPosition.setIncludingFrame(referenceFootPositions.get(foot));
          referenceAverageToFootPosition.setToZero(worldFrame);
          referenceAverageToFootPosition.sub(footPosition, averagePosition);
 
-         currentAverageFootPosition.getFrameTupleIncludingFrame(averagePosition);
-         currentFootPositions.get(foot).getFrameTupleIncludingFrame(footPosition);
+         averagePosition.setIncludingFrame(currentAverageFootPosition);
+         footPosition.setIncludingFrame(currentFootPositions.get(foot));
          currentAverageToFootPosition.setToZero(worldFrame);
          currentAverageToFootPosition.sub(footPosition, averagePosition);
 

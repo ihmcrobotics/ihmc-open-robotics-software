@@ -263,7 +263,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -330,14 +329,12 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public double getStandPrepAngle(String jointName)
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -353,7 +350,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                                          HumanoidGlobalDataProducer globalDataProducer,
                                                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 

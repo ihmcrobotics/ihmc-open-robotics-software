@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.modules.mocap;
 
 import optiTrack.MocapRigidBody;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePose;
 
 
 // SMcCrory 2/1/2017 - this module is specific to localization tests performed on Atlas given a certain marker configuration
@@ -59,9 +59,9 @@ public class MocapToPelvisFrameConverter
       RigidBodyTransform pelvisToMocapTransform = new RigidBodyTransform(mocapRigidBody.getOrientation(), mocapRigidBody.getPosition());
       pelvisToMocapTransform.multiply(pelvisToMarker2Transform);
 
-      FramePose pelvisPose = new FramePose(mocapFrame, pelvisToMocapTransform);
+      FramePose3D pelvisPose = new FramePose3D(mocapFrame, pelvisToMocapTransform);
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      pelvisPose.getRigidBodyTransform(pelvisToWorldTransformToPack);
+      pelvisPose.get(pelvisToWorldTransformToPack);
    }
    
    public ReferenceFrame getMocapFrame()

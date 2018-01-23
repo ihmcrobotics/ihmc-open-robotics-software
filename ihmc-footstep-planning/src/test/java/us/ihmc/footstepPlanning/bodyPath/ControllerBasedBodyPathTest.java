@@ -11,6 +11,7 @@ import net.java.games.input.Component;
 import net.java.games.input.Event;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
@@ -39,7 +40,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -216,21 +216,21 @@ public class ControllerBasedBodyPathTest
             Pose2D finalPose = new Pose2D();
             bodyPath.getPointAlongPath(1.0, finalPose);
 
-            FramePose initialMidFootPose = new FramePose();
+            FramePose3D initialMidFootPose = new FramePose3D();
             initialMidFootPose.setX(startPose.getX());
             initialMidFootPose.setY(startPose.getY());
-            initialMidFootPose.setYawPitchRoll(0.0, 0.0, 0.0);
+            initialMidFootPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
             PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
             RobotSide initialStanceFootSide = newY > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
-            FramePose initialStanceFootPose = new FramePose(midFootFrame);
+            FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
             initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
             initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            FramePose goalPose = new FramePose();
+            FramePose3D goalPose = new FramePose3D();
             goalPose.setX(finalPose.getX());
             goalPose.setY(finalPose.getY());
-            goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+            goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
             FootstepPlannerGoal goal = new FootstepPlannerGoal();
             goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -250,7 +250,7 @@ public class ControllerBasedBodyPathTest
                for (int i = 0; i < stepsToVisualize; i++)
                {
                   SimpleFootstep footstep = footstepPlan.getFootstep(i);
-                  FramePose footstepPose = new FramePose();
+                  FramePose3D footstepPose = new FramePose3D();
                   footstep.getSoleFramePose(footstepPose);
 
                   RobotSide robotSide = footstep.getRobotSide();

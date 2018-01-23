@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 
 /**
  * User: Matt
@@ -52,8 +53,8 @@ public class LinePainter implements PostProcessor
       Line2D xMax = new Line2D(new Point2D(0, imageHeight), new Vector2D(1.0, 0.0));
       for (Line2D line : lines)
       {
-         Point2D p1 = line.intersectionWith(xMin);
-         Point2D p2 = line.intersectionWith(xMax);
+         Point2DBasics p1 = line.intersectionWith(xMin);
+         Point2DBasics p2 = line.intersectionWith(xMax);
          graphics.drawLine((int) p1.getX(), (int)p1.getY(), (int)p2.getX(), (int) p2.getY());
       }
 

@@ -257,7 +257,7 @@ public interface FootstepPlannerParameters
    public abstract double getMaximumStepWidth();
 
    /**
-    * The planner can be setup to shift footsteps away from "cliffs". When the footstep has a planar region
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
     * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
@@ -267,14 +267,14 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   public default double getCliffHeightToShiftAwayFrom()
+   public default double getCliffHeightToAvoid()
    {
-      return 0.0;
+      return Double.MAX_VALUE;
    }
 
    /**
-    * The planner can be setup to shift footsteps away from "cliffs". When the footstep has a planar region
-    * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
     * <p>

@@ -1,16 +1,17 @@
 package us.ihmc.humanoidBehaviors.utilities;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TaskSpaceStiffnessCalculator
 {
@@ -68,9 +69,9 @@ public class TaskSpaceStiffnessCalculator
       return yoForceAlongDirectionOfMotion.getDoubleValue();
    }
    
-   public FrameVector3D getForceRateOfChange()
+   public FrameVector3DReadOnly getForceRateOfChange()
    {
-      return yoForcePointForceRateOfChange.getFrameTuple();
+      return yoForcePointForceRateOfChange;
    }
    
    public double getForceRateOfChangeAlongDirectionOfMotion()
@@ -85,14 +86,14 @@ public class TaskSpaceStiffnessCalculator
 
    public void update(ExternalForcePoint efp)
    {
-      update(efp.getYoPosition().getFrameTuple(), efp.getYoForce().getFrameTuple());
+      update(efp.getYoPosition(), efp.getYoForce());
    }
 
    private boolean updateHasBeenCalled = false;
 
    private final FrameVector3D directionOfMotion = new FrameVector3D();
 
-   public void update(FramePoint3D forcePointPosition, FrameVector3D force)
+   public void update(FramePoint3DReadOnly forcePointPosition, FrameVector3DReadOnly force)
    {
       yoForcePointPosition.set(forcePointPosition);
 
@@ -110,7 +111,7 @@ public class TaskSpaceStiffnessCalculator
          yoForcePointVelocity.update();
          yoForcePointForceRateOfChange.update();
 
-         directionOfMotion.set(yoForcePointVelocity.getFrameTuple());
+         directionOfMotion.set(yoForcePointVelocity);
 
          if (directionOfMotion.length() > 0.0)
          {
@@ -147,7 +148,7 @@ public class TaskSpaceStiffnessCalculator
 
    private void doYoVectorCrossProduct(YoFrameVector v1, YoFrameVector v2, YoFrameVector vecToPack)
    {
-      temp.cross(v1.getFrameTuple(), v2.getFrameTuple());
+      temp.cross(v1, v2);
       if (temp.length() > 0)
       {
          temp.normalize();

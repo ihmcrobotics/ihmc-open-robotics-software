@@ -135,13 +135,13 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
       stiffnessMatrix.multiply(stiffnessGainMatrix);
       stiffnessFrameToWorldFrameRotation.transpose();
       stiffnessMatrix.multiply(stiffnessFrameToWorldFrameRotation);
-      stiffnessMatrix.transform(connectionPositionError.getVector(), springForce);
+      stiffnessMatrix.transform(connectionPositionError, springForce);
 
       stiffnessMatrix.set(stiffnessFrameToWorldFrameRotation);
       stiffnessMatrix.multiply(stiffnessGainMatrix);
       stiffnessFrameToWorldFrameRotation.transpose();
       stiffnessMatrix.multiply(stiffnessFrameToWorldFrameRotation);
-      stiffnessMatrix.transform(connectionPositionError.getVector(), springForce);
+      stiffnessMatrix.transform(connectionPositionError, springForce);
 
       stiffnessFrameToWorldFrameRotation.transpose();
 
@@ -149,7 +149,7 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
       dampingMatrix.multiply(dampingGainMatrix);
       stiffnessFrameToWorldFrameRotation.transpose();
       dampingMatrix.multiply(stiffnessFrameToWorldFrameRotation);
-      dampingMatrix.transform(connectionVelocityError.getVector(), damperForce);
+      dampingMatrix.transform(connectionVelocityError, damperForce);
 
       totalForce.setToZero(worldFrame);
       totalForce.add(springForce);
@@ -157,18 +157,18 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
       
       System.out.println("total force = " + totalForce);
 
-      connectionPointA.setForce(totalForce.getVector());
+      connectionPointA.setForce(totalForce);
       totalForce.scale(-1.0);
-      connectionPointB.setForce(totalForce.getVector());
+      connectionPointB.setForce(totalForce);
    }
 
    private void updateFrameAndKinematics()
    {
-      yoConnectionAPosition.getFrameTupleIncludingFrame(connectionAPosition);
-      yoConnectionBPosition.getFrameTupleIncludingFrame(connectionBPosition);
+      connectionAPosition.setIncludingFrame(yoConnectionAPosition);
+      connectionBPosition.setIncludingFrame(yoConnectionBPosition);
 
-      yoConnectionAVelocity.getFrameTupleIncludingFrame(connectionAVelocity);
-      yoConnectionBVelocity.getFrameTupleIncludingFrame(connectionBVelocity);
+      connectionAVelocity.setIncludingFrame(yoConnectionAVelocity);
+      connectionBVelocity.setIncludingFrame(yoConnectionBVelocity);
 
       stiffnessFrame.update();
    }

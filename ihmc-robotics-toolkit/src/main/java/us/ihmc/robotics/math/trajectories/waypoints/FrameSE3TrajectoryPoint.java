@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,7 +14,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
@@ -276,7 +276,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void getPosition(FramePoint3D positionToPack)
    {
       checkReferenceFrameMatch(positionToPack);
-      geometryObject.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack);
    }
 
    public FramePoint3D getPositionCopy()
@@ -299,7 +299,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       return orientationCopy;
    }
 
-   public void getPose(FramePose poseToPack)
+   public void getPose(FramePose3D poseToPack)
    {
       checkReferenceFrameMatch(poseToPack);
       SE3Waypoint waypointData = geometryObject.waypointData;
@@ -310,7 +310,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       checkReferenceFrameMatch(linearVelocityToPack);
-      geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
+      geometryObject.getLinearVelocity(linearVelocityToPack);
    }
 
    public FrameVector3D getLinearVelocityCopy()
@@ -323,7 +323,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
-      geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+      geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
    public FrameVector3D getAngularVelocityCopy()
@@ -336,7 +336,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
-      geometryObject.getPosition(positionToPack.getPoint());
+      geometryObject.getPosition(positionToPack);
    }
 
    public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
@@ -345,7 +345,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.getOrientation(orientationToPack);
    }
 
-   public void getPoseIncludingFrame(FramePose poseToPack)
+   public void getPoseIncludingFrame(FramePose3D poseToPack)
    {
       poseToPack.setToZero(getReferenceFrame());
       getPose(poseToPack);
@@ -354,13 +354,13 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
       linearVelocityToPack.setToZero(getReferenceFrame());
-      geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
+      geometryObject.getLinearVelocity(linearVelocityToPack);
    }
 
    public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(getReferenceFrame());
-      geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+      geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
    public double getPositionX()

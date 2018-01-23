@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,7 +38,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -103,7 +104,7 @@ public class SphereControlToolbox
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
 
-   private final SideDependentList<FramePose> footPosesAtTouchdown = new SideDependentList<FramePose>(new FramePose(), new FramePose());
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<FramePose3D>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<YoFramePose> currentFootPoses = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
@@ -228,7 +229,7 @@ public class SphereControlToolbox
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, footWidthForControl / 2.0));
          FootSpoof contactableFoot = new FootSpoof(sidePrefix + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInSoleFrame, 0.0);
-         FramePose startingPose = footPosesAtTouchdown.get(robotSide);
+         FramePose3D startingPose = footPosesAtTouchdown.get(robotSide);
          startingPose.setToZero(worldFrame);
          startingPose.setY(robotSide.negateIfRightSide(0.15));
          contactableFoot.setSoleFrame(startingPose);
@@ -345,7 +346,7 @@ public class SphereControlToolbox
       return contactStates;
    }
 
-   public SideDependentList<FramePose> getFootPosesAtTouchdown()
+   public SideDependentList<FramePose3D> getFootPosesAtTouchdown()
    {
       return footPosesAtTouchdown;
    }
@@ -437,7 +438,7 @@ public class SphereControlToolbox
       {
          if (contactStates.get(robotSide).inContact())
          {
-            FramePose footPose = new FramePose(contactableFeet.get(robotSide).getSoleFrame());
+            FramePose3D footPose = new FramePose3D(contactableFeet.get(robotSide).getSoleFrame());
             footPose.changeFrame(worldFrame);
             currentFootPoses.get(robotSide).set(footPose);
          }
@@ -499,7 +500,7 @@ public class SphereControlToolbox
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextFootstepPose = new FramePose(nextFootstep.getSoleReferenceFrame());
+      FramePose3D nextFootstepPose = new FramePose3D(nextFootstep.getSoleReferenceFrame());
       yoNextFootstepPose.setAndMatchFrame(nextFootstepPose);
 
       if (nextNextFootstep == null)
@@ -520,7 +521,7 @@ public class SphereControlToolbox
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextNextFootstepPose = new FramePose(nextNextFootstep.getSoleReferenceFrame());
+      FramePose3D nextNextFootstepPose = new FramePose3D(nextNextFootstep.getSoleReferenceFrame());
       yoNextNextFootstepPose.setAndMatchFrame(nextNextFootstepPose);
 
       if (nextNextNextFootstep == null)
@@ -539,7 +540,7 @@ public class SphereControlToolbox
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextNextNextFootstepPose = new FramePose(nextNextNextFootstep.getSoleReferenceFrame());
+      FramePose3D nextNextNextFootstepPose = new FramePose3D(nextNextNextFootstep.getSoleReferenceFrame());
       yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);
    }
 
@@ -593,31 +594,45 @@ public class SphereControlToolbox
          }
 
          @Override
-         public List<Vector2D> getCoPForwardOffsetBounds()
+         public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
          {
-            ArrayList<Vector2D> copForwardOffsetBounds = new ArrayList<>();
+            EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
 
             Vector2D entryBounds = new Vector2D(0.0, 0.03);
             Vector2D exitBounds = new Vector2D(-0.04, 0.08);
 
-            copForwardOffsetBounds = new ArrayList<>();
-            copForwardOffsetBounds.add(entryBounds);
-            copForwardOffsetBounds.add(exitBounds);
+            copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
+            copForwardOffsetBounds.put(entryCoPName, entryBounds);
+            copForwardOffsetBounds.put(exitCoPName, exitBounds);
 
             return copForwardOffsetBounds;
          }
 
+         /**{@inheritDoc} */
          @Override
-         public List<Vector2D> getCoPOffsets()
+         public CoPPointName getExitCoPName()
          {
-            ArrayList<Vector2D> copOffsets = new ArrayList<>();
+            return exitCoPName;
+         }
+
+         /**{@inheritDoc} */
+         @Override
+         public CoPPointName getEntryCoPName()
+         {
+            return entryCoPName;
+         }
+
+         @Override
+         public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
+         {
+            EnumMap<CoPPointName, Vector2D> copOffsets;
 
             Vector2D entryOffset = new Vector2D(0.0, -0.005);
             Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
 
-            copOffsets = new ArrayList<>();
-            copOffsets.add(entryOffset);
-            copOffsets.add(exitOffset);
+            copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
+            copOffsets.put(entryCoPName, entryOffset);
+            copOffsets.put(entryCoPName, exitOffset);
 
             return copOffsets;
          }
@@ -687,18 +702,6 @@ public class SphereControlToolbox
       return new ICPOptimizationParameters()
       {
          @Override
-         public boolean useSimpleOptimization()
-         {
-            return false;
-         }
-
-         @Override
-         public int numberOfFootstepsToConsider()
-         {
-            return 4;
-         }
-
-         @Override
          public double getForwardFootstepWeight()
          {
             return 20.0;
@@ -711,7 +714,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFootstepRegularizationWeight()
+         public double getFootstepRateWeight()
          {
             return 0.001;
          }
@@ -729,7 +732,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFeedbackRegularizationWeight()
+         public double getFeedbackRateWeight()
          {
             return 0.0001;
          }
@@ -747,13 +750,13 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getDynamicRelaxationWeight()
+         public double getDynamicsObjectiveWeight()
          {
             return 500.0;
          }
 
          @Override
-         public double getDynamicRelaxationDoubleSupportWeightModifier()
+         public double getDynamicsObjectiveDoubleSupportWeightModifier()
          {
             return 1.0;
          }
@@ -765,7 +768,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean scaleStepRegularizationWeightWithTime()
+         public boolean scaleStepRateWeightWithTime()
          {
             return false;
          }
@@ -777,13 +780,7 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean scaleUpcomingStepWeights()
-         {
-            return true;
-         }
-
-         @Override
-         public boolean useFeedbackRegularization()
+         public boolean useFeedbackRate()
          {
             return true;
          }
@@ -800,14 +797,8 @@ public class SphereControlToolbox
             return true;
          }
 
-         @Override
-         public boolean useTimingOptimization()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean useFootstepRegularization()
+        @Override
+         public boolean useFootstepRate()
          {
             return true;
          }

@@ -1,17 +1,19 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
-
-import java.util.List;
 
 public class SmoothCoMIntegrationToolbox
 {
@@ -149,9 +151,9 @@ public class SmoothCoMIntegrationToolbox
 
    public void calculateCoMQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int comDerivativeOrder, 
                                                                            FrameTrajectory3D cmpPolynomial3D, 
-                                                                           FrameTuple3D<?, ?> icpPositionDesiredFinal, 
-                                                                           FrameTuple3D<?, ?> comPositionDesiredInitial, 
-                                                                           FrameTuple3D<?, ?> comQuantityDesired)
+                                                                           FrameTuple3DReadOnly icpPositionDesiredFinal, 
+                                                                           FrameTuple3DReadOnly comPositionDesiredInitial, 
+                                                                           FrameTuple3DBasics comQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if (numberOfCoefficients < 0)
@@ -201,8 +203,8 @@ public class SmoothCoMIntegrationToolbox
    // FIXME this can probably be more efficient
    public void calculateCoMQuantity3D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, double generalizedGammaCoMPrime,
                                       double generalizedDeltaCoMPrime, DenseMatrix64F generalizedAlphaPrimeTerminalMatrix,
-                                      DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3D<?, ?> icpPositionDesiredFinal,
-                                      FrameTuple3D<?, ?> comPositionDesiredInitial, FrameTuple3D<?, ?> comQuantityDesired)
+                                      DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3DReadOnly icpPositionDesiredFinal,
+                                      FrameTuple3DReadOnly comPositionDesiredInitial, FrameTuple3DBasics comQuantityDesired)
    {
       int numRows = generalizedAlphaBetaCoMPrimeMatrix.getNumRows();
       M1.reshape(numRows, 1);
@@ -416,7 +418,7 @@ public class SmoothCoMIntegrationToolbox
    {
       double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
 
-      polynomialCoefficientVector.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
       polynomialCoefficientVector.setData(polynomialCoefficients);
+      polynomialCoefficientVector.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
    }
 }

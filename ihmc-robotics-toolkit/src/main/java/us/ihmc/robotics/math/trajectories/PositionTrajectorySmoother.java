@@ -177,17 +177,17 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      yoSmoothedPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(yoSmoothedPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      yoSmoothedVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(yoSmoothedVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      yoSmoothedAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(yoSmoothedAcceleration);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
@@ -199,11 +199,9 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
 
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

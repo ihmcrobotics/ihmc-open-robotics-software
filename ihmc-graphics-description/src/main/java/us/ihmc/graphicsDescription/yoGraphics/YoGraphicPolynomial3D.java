@@ -854,7 +854,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       if (poseToWorldFrame != null)
       {
-         poseToWorldFrame.getPose(rigidBodyTransform);
+         poseToWorldFrame.get(rigidBodyTransform);
          transform.set(rigidBodyTransform);
       }
       else

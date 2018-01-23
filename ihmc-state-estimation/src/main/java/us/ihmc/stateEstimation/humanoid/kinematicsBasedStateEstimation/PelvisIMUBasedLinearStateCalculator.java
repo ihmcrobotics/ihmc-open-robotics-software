@@ -122,7 +122,7 @@ public class PelvisIMUBasedLinearStateCalculator
       imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput, accelerationBias);
 
       linearAccelerationMeasurement.setToZero(measurementFrame);
-      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
+      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement);
       linearAccelerationMeasurement.sub(accelerationBias);
 
       // Update acceleration in world (minus gravity)
@@ -137,7 +137,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
       // Update acceleration in local frame (minus gravity)
       linearAccelerationMeasurement.setToZero(measurementFrame);
-      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
+      imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement);
       linearAccelerationMeasurement.sub(accelerationBias);
 
       if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
@@ -155,11 +155,11 @@ public class PelvisIMUBasedLinearStateCalculator
    {
       updateLinearAccelerationMeasurement();
 
-      yoLinearAccelerationMeasurementInWorld.getFrameTupleIncludingFrame(linearAccelerationMeasurement);
+      linearAccelerationMeasurement.setIncludingFrame(yoLinearAccelerationMeasurementInWorld);
       linearAccelerationMeasurement.scale(estimatorDT);
 
       yoMeasurementFrameLinearVelocityInWorld.add(linearAccelerationMeasurement);
-      yoMeasurementFrameLinearVelocityInWorld.getFrameTupleIncludingFrame(rootJointVelocityToPack);
+      rootJointVelocityToPack.setIncludingFrame(yoMeasurementFrameLinearVelocityInWorld);
 
       getCorrectionVelocityForMeasurementFrameOffset(correctionVelocityForMeasurementFrameOffset);
       correctionVelocityForMeasurementFrameOffset.changeFrame(worldFrame);
@@ -184,7 +184,7 @@ public class PelvisIMUBasedLinearStateCalculator
       if (!isEstimationEnabled())
          throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");
 
-      rootJointLinearVelocity.getFrameTupleIncludingFrame(tempRootJointVelocityIntegrated);
+      tempRootJointVelocityIntegrated.setIncludingFrame(rootJointLinearVelocity);
       tempRootJointVelocityIntegrated.scale(estimatorDT);
 
       if(setRootJointPositionImuOnlyToCurrent.getBooleanValue())
@@ -196,7 +196,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
       rootJointPosition.set(rootJointPositionPrevValue);
       rootJointPosition.add(tempRootJointVelocityIntegrated);
-      rootJointPosition.getFrameTupleIncludingFrame(rootJointPositionToPack);
+      rootJointPositionToPack.setIncludingFrame(rootJointPosition);
    }
 
    private final Twist tempRootJointTwist = new Twist();

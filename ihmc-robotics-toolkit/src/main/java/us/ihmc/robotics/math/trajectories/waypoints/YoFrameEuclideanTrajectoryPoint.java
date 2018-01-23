@@ -131,33 +131,33 @@ public class YoFrameEuclideanTrajectoryPoint
    @Override
    public void getPosition(Point3DBasics positionToPack)
    {
-      position.get(positionToPack);
+      positionToPack.set(position);
    }
 
    @Override
    public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
-      linearVelocity.get(linearVelocityToPack);
+      linearVelocityToPack.set(linearVelocity);
    }
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTuple(positionToPack);
+      positionToPack.set(position);
    }
 
    public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
-      linearVelocity.getFrameTuple(linearVelocityToPack);
+      linearVelocityToPack.set(linearVelocity);
    }
 
    public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
-      linearVelocity.getFrameTupleIncludingFrame(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(linearVelocity);
    }
 
    public void getPosition(YoFramePoint positionToPack)
@@ -203,8 +203,8 @@ public class YoFrameEuclideanTrajectoryPoint
       frameWaypoint.setToZero(getReferenceFrame());
 
       frameWaypoint.setTime(time.getDoubleValue());
-      frameWaypoint.setPosition(position.getFrameTuple());
-      frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
+      frameWaypoint.setPosition(position);
+      frameWaypoint.setLinearVelocity(linearVelocity);
    }
 
    @Override

@@ -86,11 +86,11 @@ public class ContactPointWrenchMatrixCalculator
             for (FrameVector3D supportVector : normalizedSupportVectors)
             {
                supportVector.changeFrame(centerOfMassFrame);
-               supportVector.getVector().get(3, column, q);
+               supportVector.get(3, column, q);
 
                tempVector.setToZero(centerOfMassFrame);
                tempVector.cross(tempContactPoint, supportVector);
-               tempVector.getVector().get(0, column, q);
+               tempVector.get(0, column, q);
                column++;
             }
          }

@@ -203,7 +203,7 @@ public class WholeBodyVirtualModelControlSolver
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
       yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
-      yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
+      achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
 
       // submit forces for contact forces
       for (RigidBody rigidBody : bodiesInContact)

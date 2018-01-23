@@ -68,7 +68,43 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       maxProportionalError = new DoubleParameter("maxProportionalError" + suffix, registry, Double.POSITIVE_INFINITY);
       maxFeedback = new DoubleParameter("maximumFeedback" + suffix, registry, Double.POSITIVE_INFINITY);
       maxFeedbackRate = new DoubleParameter("maximumFeedbackRate" + suffix, registry, Double.POSITIVE_INFINITY);
+   }
 
+   public ParameterizedPID3DGains(String suffix, PID3DGainsReadOnly defaults, YoVariableRegistry registry)
+   {
+      this.gainCoupling = defaults.getGainCoupling();
+      this.useIntegrator = defaults.isUseIntegrator();
+
+      double[] defaultProportionalGains = defaults.getProportionalGains();
+      double[] defaultDerivativeGains = defaults.getDerivativeGains();
+      double[] defaultIntegralGains = defaults.getIntegralGains();
+      double[] defaultZetas = new double[3];
+
+      for (int i = 0; i < 3; i++)
+      {
+         defaultZetas[i] = GainCalculator.computeDampingRatio(defaultProportionalGains[i], defaultDerivativeGains[i]);
+      }
+
+      populateMap(kpMap, "kp", suffix, gainCoupling, defaultProportionalGains, registry);
+      DefaultYoPID3DGains.populateMap(kdMap, "kd", suffix, gainCoupling, registry);
+      populateMap(zetaMap, "zeta", suffix, gainCoupling, defaultZetas, registry);
+
+      if (useIntegrator)
+      {
+         populateMap(kiMap, "ki", suffix, gainCoupling, defaultIntegralGains, registry);
+         maxIntegralError = new DoubleParameter("maxIntegralError" + suffix, registry, defaults.getMaximumIntegralError());
+      }
+      else
+      {
+         maxIntegralError = null;
+      }
+
+      createDampingUpdaters(kpMap, kdMap, zetaMap, gainCoupling);
+
+      maxDerivativeError = new DoubleParameter("maxDerivativeError" + suffix, registry, defaults.getMaximumDerivativeError());
+      maxProportionalError = new DoubleParameter("maxProportionalError" + suffix, registry, defaults.getMaximumProportionalError());
+      maxFeedback = new DoubleParameter("maximumFeedback" + suffix, registry, defaults.getMaximumFeedback());
+      maxFeedbackRate = new DoubleParameter("maximumFeedbackRate" + suffix, registry, defaults.getMaximumFeedbackRate());
    }
 
    private static void populateMap(Map<Axis, DoubleParameter> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
@@ -97,6 +133,39 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
          break;
       case XYZ:
          mapToFill.put(Axis.X, new DoubleParameter(prefix + "XYZ" + suffix, registry));
+         mapToFill.put(Axis.Y, mapToFill.get(Axis.X));
+         mapToFill.put(Axis.Z, mapToFill.get(Axis.X));
+         break;
+      }
+   }
+
+   private static void populateMap(Map<Axis, DoubleParameter> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, double[] defaults,
+                                   YoVariableRegistry registry)
+   {
+      switch (gainCoupling)
+      {
+      case NONE:
+         mapToFill.put(Axis.X, new DoubleParameter(prefix + "X" + suffix, registry, defaults[0]));
+         mapToFill.put(Axis.Y, new DoubleParameter(prefix + "Y" + suffix, registry, defaults[1]));
+         mapToFill.put(Axis.Z, new DoubleParameter(prefix + "Z" + suffix, registry, defaults[2]));
+         break;
+      case XY:
+         mapToFill.put(Axis.X, new DoubleParameter(prefix + "XY" + suffix, registry, defaults[0]));
+         mapToFill.put(Axis.Y, mapToFill.get(Axis.X));
+         mapToFill.put(Axis.Z, new DoubleParameter(prefix + "Z" + suffix, registry, defaults[2]));
+         break;
+      case YZ:
+         mapToFill.put(Axis.X, new DoubleParameter(prefix + "X" + suffix, registry, defaults[0]));
+         mapToFill.put(Axis.Y, new DoubleParameter(prefix + "YZ" + suffix, registry, defaults[1]));
+         mapToFill.put(Axis.Z, mapToFill.get(Axis.Y));
+         break;
+      case XZ:
+         mapToFill.put(Axis.X, new DoubleParameter(prefix + "XZ" + suffix, registry, defaults[0]));
+         mapToFill.put(Axis.Y, new DoubleParameter(prefix + "Y" + suffix, registry, defaults[1]));
+         mapToFill.put(Axis.Z, mapToFill.get(Axis.X));
+         break;
+      case XYZ:
+         mapToFill.put(Axis.X, new DoubleParameter(prefix + "XYZ" + suffix, registry, defaults[0]));
          mapToFill.put(Axis.Y, mapToFill.get(Axis.X));
          mapToFill.put(Axis.Z, mapToFill.get(Axis.X));
          break;

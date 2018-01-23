@@ -46,7 +46,7 @@ public class AtlasObstacleCourseTrialsWalkingTaskTest extends DRCObstacleCourseT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 47.3)
-   @Test(timeout = 90000)
+   @Test(timeout = 120000)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
    {
       super.testStepOnCinderBlocksSlowlyWithDisturbance();

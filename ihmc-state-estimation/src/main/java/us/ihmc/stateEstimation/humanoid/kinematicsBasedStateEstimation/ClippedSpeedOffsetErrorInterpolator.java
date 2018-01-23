@@ -2,6 +2,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,7 +14,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -47,13 +47,13 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoDouble dt;
 
    ////////////////////////////////////////////
-   private final FramePose stateEstimatorPose_Translation = new FramePose(worldFrame);
+   private final FramePose3D stateEstimatorPose_Translation = new FramePose3D(worldFrame);
    private final PoseReferenceFrame stateEstimatorReferenceFrame_Translation = new PoseReferenceFrame("stateEstimatorReferenceFrame_Translation", stateEstimatorPose_Translation);
-   private final FramePose stateEstimatorPose_Rotation = new FramePose(worldFrame);
+   private final FramePose3D stateEstimatorPose_Rotation = new FramePose3D(worldFrame);
    private final PoseReferenceFrame stateEstimatorReferenceFrame_Rotation = new PoseReferenceFrame("stateEstimatorReferenceFrame_Rotation", stateEstimatorPose_Rotation);
 
    private final RigidBodyTransform updatedStartOffsetTransform = new RigidBodyTransform();
-   private final FramePose startOffsetErrorPose = new FramePose(worldFrame);
+   private final FramePose3D startOffsetErrorPose = new FramePose3D(worldFrame);
    private final Vector3D updatedStartOffset_Translation = new Vector3D();
    private final FrameQuaternion updatedStartOffset_Rotation = new FrameQuaternion(worldFrame);
    private final Quaternion updatedStartOffset_Rotation_quat = new Quaternion(0.0, 0.0, 0.0, 1.0);
@@ -64,7 +64,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final Quaternion interpolatedRotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
    private final RigidBodyTransform updatedGoalOffsetTransform = new RigidBodyTransform();
-   private final FramePose goalOffsetErrorPose = new FramePose(worldFrame);
+   private final FramePose3D goalOffsetErrorPose = new FramePose3D(worldFrame);
    private final Vector3D updatedGoalOffset_Translation = new Vector3D();
    private final FrameQuaternion updatedGoalOffset_Rotation = new FrameQuaternion(worldFrame);
    private final Quaternion updatedGoalOffset_Rotation_quat = new Quaternion(0.0, 0.0, 0.0, 1.0);
@@ -145,8 +145,8 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoFramePose yoGoalOffsetErrorPose_InWorldFrame;
    private final YoFramePose yoInterpolatedOffset_InWorldFrame;
 
-   private final FramePose startOffsetErrorPose_Translation = new FramePose(worldFrame);
-   private final FramePose startOffsetErrorPose_Rotation = new FramePose(worldFrame);
+   private final FramePose3D startOffsetErrorPose_Translation = new FramePose3D(worldFrame);
+   private final FramePose3D startOffsetErrorPose_Rotation = new FramePose3D(worldFrame);
    private final PoseReferenceFrame startOffsetErrorReferenceFrame_Translation = new PoseReferenceFrame("startOffsetErrorReferenceFrame_Translation", startOffsetErrorPose_Translation);
    private final PoseReferenceFrame startOffsetErrorReferenceFrame_Rotation= new PoseReferenceFrame("startOffsetErrorReferenceFrame_Rotation", startOffsetErrorPose_Rotation);
 
@@ -264,12 +264,12 @@ public class ClippedSpeedOffsetErrorInterpolator
       
    }
 
-   public boolean checkIfErrorIsTooBig(FramePose correctedPelvisPoseInWorldFrame, FramePose iterativeClosestPointInWorldFramePose, boolean isRotationCorrectionEnabled)
+   public boolean checkIfErrorIsTooBig(FramePose3D correctedPelvisPoseInWorldFrame, FramePose3D iterativeClosestPointInWorldFramePose, boolean isRotationCorrectionEnabled)
    {
       correctedPelvisPoseReferenceFrame.setPoseAndUpdate(correctedPelvisPoseInWorldFrame);
       
-      iterativeClosestPointInWorldFramePose.getOrientationIncludingFrame(iterativeClosestPointOrientation);
-      iterativeClosestPointInWorldFramePose.getPositionIncludingFrame(iterativeClosestPointTranslation);
+      iterativeClosestPointOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
+      iterativeClosestPointTranslation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getPosition());
       
       iterativeClosestPointOrientation.changeFrame(correctedPelvisPoseReferenceFrame);
       iterativeClosestPointTranslation.changeFrame(correctedPelvisPoseReferenceFrame);
@@ -294,14 +294,14 @@ public class ClippedSpeedOffsetErrorInterpolator
       return false;
    }
 
-   public void setInterpolatorInputs(FramePose startOffsetError, FramePose goalOffsetError, double alphaFilterPosition)
+   public void setInterpolatorInputs(FramePose3D startOffsetError, FramePose3D goalOffsetError, double alphaFilterPosition)
    {
-      startOffsetErrorPose.setPoseIncludingFrame(startOffsetError);
-      goalOffsetErrorPose.setPoseIncludingFrame(goalOffsetError);
+      startOffsetErrorPose.setIncludingFrame(startOffsetError);
+      goalOffsetErrorPose.setIncludingFrame(goalOffsetError);
       if (!isRotationCorrectionEnabled.getBooleanValue())
       {
-         startOffsetErrorPose.setYawPitchRoll(0.0, 0.0, 0.0);
-         goalOffsetErrorPose.setYawPitchRoll(0.0, 0.0, 0.0);
+         startOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+         goalOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
       }
       //scs feedback only
       yoStartOffsetErrorPose_InWorldFrame.set(startOffsetErrorPose);
@@ -334,14 +334,14 @@ public class ClippedSpeedOffsetErrorInterpolator
       //Translation
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
       stateEstimatorTransform_Translation.setRotationToZero();
-      stateEstimatorPose_Translation.setPose(stateEstimatorTransform_Translation);
+      stateEstimatorPose_Translation.set(stateEstimatorTransform_Translation);
       stateEstimatorReferenceFrame_Translation.setPoseAndUpdate(stateEstimatorPose_Translation);
       
       startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Translation);
-      startOffsetErrorPose.getPosition(updatedStartOffset_Translation);
+      updatedStartOffset_Translation.set(startOffsetErrorPose.getPosition());
       
       goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Translation);
-      goalOffsetErrorPose.getPosition(updatedGoalOffset_Translation);
+      updatedGoalOffset_Translation.set(goalOffsetErrorPose.getPosition());
       
       startOffsetTransform_Translation.setTranslationAndIdentityRotation(updatedStartOffset_Translation);
       
@@ -365,18 +365,18 @@ public class ClippedSpeedOffsetErrorInterpolator
       //Rotation  
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
       stateEstimatorTransform_Rotation.setTranslationToZero();
-      stateEstimatorPose_Rotation.setPose(stateEstimatorTransform_Rotation);
+      stateEstimatorPose_Rotation.set(stateEstimatorTransform_Rotation);
       stateEstimatorReferenceFrame_Rotation.setPoseAndUpdate(stateEstimatorPose_Rotation);
 
       startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
-      startOffsetErrorPose.getOrientation(updatedStartOffset_Rotation_quat);
+      updatedStartOffset_Rotation_quat.set(startOffsetErrorPose.getOrientation());
       startOffsetErrorPose.changeFrame(worldFrame);
-      startOffsetErrorPose.getOrientationIncludingFrame(updatedStartOffset_Rotation);
+      updatedStartOffset_Rotation.setIncludingFrame(startOffsetErrorPose.getOrientation());
       
       goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
-      goalOffsetErrorPose.getOrientation(updatedGoalOffset_Rotation_quat);
+      updatedGoalOffset_Rotation_quat.set(goalOffsetErrorPose.getOrientation());
       goalOffsetErrorPose.changeFrame(worldFrame);
-      goalOffsetErrorPose.getOrientationIncludingFrame(updatedGoalOffset_Rotation);
+      updatedGoalOffset_Rotation.setIncludingFrame(goalOffsetErrorPose.getOrientation());
       
       startOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedStartOffset_Rotation_quat);
       
@@ -409,7 +409,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    }
    
-   public void interpolateError(FramePose offsetPoseToPack)
+   public void interpolateError(FramePose3D offsetPoseToPack)
    {
       if (!hasBeenCalled.getBooleanValue())
       {
@@ -501,7 +501,7 @@ public class ClippedSpeedOffsetErrorInterpolator
          stateEstimatorTransform_Rotation.getRotation(interpolatedRotation);
       }
 
-      offsetPoseToPack.setPose(interpolatedTranslation, interpolatedRotation);
+      offsetPoseToPack.set(interpolatedTranslation, interpolatedRotation);
 
       //scs feedback only
       yoStartOffsetErrorPose_InWorldFrame.setPosition(updatedStartOffset_Translation);

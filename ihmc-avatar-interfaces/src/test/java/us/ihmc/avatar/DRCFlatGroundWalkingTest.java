@@ -124,6 +124,9 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       YoDouble icpErrorX = (YoDouble) scs.getVariable("icpErrorX");
       YoDouble icpErrorY = (YoDouble) scs.getVariable("icpErrorY");
 
+      YoDouble controllerICPErrorX = (YoDouble) scs.getVariable("controllerICPErrorX");
+      YoDouble controllerICPErrorY = (YoDouble) scs.getVariable("controllerICPErrorY");
+
       drcSimulationTestHelper.simulateAndBlock(standingTimeDuration);
 
       walk.set(false);
@@ -140,14 +143,21 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
          drcSimulationTestHelper.simulateAndBlock(yawingTimeDuration);
 
-         double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         double icpError;
+         if (icpErrorX != null && icpErrorY != null)
+            icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         else
+            icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue() + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
 
          userDesiredPelvisPoseYaw.set(startingYaw);
          userDoPelvisPose.set(true);
          drcSimulationTestHelper.simulateAndBlock(yawingTimeDuration + 0.3);
 
-         icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         if (icpErrorX != null && icpErrorY != null)
+            icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         else
+            icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue() + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
       }
 

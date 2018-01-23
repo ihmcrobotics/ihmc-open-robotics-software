@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +15,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
@@ -40,13 +40,13 @@ public class SmartCMPProjector extends CMPProjector
 
    // temporary variables to avoid garbage generation
    private final BoundingBox2D tempBoundingBox = new BoundingBox2D();
-   private final FrameLine2d icpToCMPLine = new FrameLine2d();
+   private final FrameLine2D icpToCMPLine = new FrameLine2D();
    private final FramePoint2D intersection1 = new FramePoint2D();
    private final FramePoint2D intersection2 = new FramePoint2D();
    private final FramePoint2D vertex = new FramePoint2D();
    private final FrameVector2D icpToCMPVector = new FrameVector2D();
    private final FrameVector2D icpToCandidateVector = new FrameVector2D();
-   private final FrameLine2d finalICPToICPLine = new FrameLine2d();
+   private final FrameLine2D finalICPToICPLine = new FrameLine2D();
    private final FrameVector2D finalICPToICPVector = new FrameVector2D();
    private final FramePoint2D centroid = new FramePoint2D();
 

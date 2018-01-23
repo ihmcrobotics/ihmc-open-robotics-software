@@ -59,9 +59,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
-      Point3D desiredPosition = new Point3D();
+      Point3D desiredPosition = new Point3D(desiredRandomPelvisPosition);
 
-      desiredRandomPelvisPosition.get(desiredPosition);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -69,7 +68,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       desiredRandomPelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomPelvisPosition.get(desiredPosition);
+      desiredPosition.set(desiredRandomPelvisPosition);
       if (DEBUG)
       {
          System.out.println(desiredPosition);
@@ -124,14 +123,13 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
-      Point3D desiredPosition = new Point3D();
+      Point3D desiredPosition = new Point3D(desiredRandomPelvisPosition);
 
-      desiredRandomPelvisPosition.get(desiredPosition);
       System.out.println(desiredPosition);
 
       desiredRandomPelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomPelvisPosition.get(desiredPosition);
+      desiredPosition.set(desiredRandomPelvisPosition);
       System.out.println(desiredPosition);
 
       PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(trajectoryTime, desiredPosition.getZ());

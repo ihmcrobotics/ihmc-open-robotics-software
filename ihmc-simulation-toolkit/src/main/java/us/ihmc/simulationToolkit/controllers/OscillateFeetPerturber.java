@@ -128,7 +128,7 @@ public class OscillateFeetPerturber extends ModularRobotController
       rotationPhaseEuler.setZ(rotationPhaseEuler.getZ() + 2.0  * Math.PI * rotationFreqHzYawPitchRoll[0] * deltaT);
 
       
-      Vector3D nextTranslationToSlip = translationMagnitude.getVector3dCopy();
+      Vector3D nextTranslationToSlip = new Vector3D(translationMagnitude);
       nextTranslationToSlip.setX(nextTranslationToSlip.getX() * (2.0 * Math.PI * translationFreqHz[0] * Math.sin(translationPhase.getX()) * deltaT));
       nextTranslationToSlip.setY(nextTranslationToSlip.getY() * (2.0 * Math.PI * translationFreqHz[1] * Math.sin(translationPhase.getY()) * deltaT));
       nextTranslationToSlip.setZ(nextTranslationToSlip.getZ() * (2.0 * Math.PI * translationFreqHz[2] * Math.sin(translationPhase.getZ()) * deltaT));

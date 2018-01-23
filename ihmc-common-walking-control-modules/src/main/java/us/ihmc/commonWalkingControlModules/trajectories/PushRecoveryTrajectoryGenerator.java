@@ -163,7 +163,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       {
          tForViz = t0ForViz + (double) i / (double) (numberOfBallsInBag) * (tfForViz - t0ForViz);
          computePositionsForVis(tForViz);
-         bagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+         bagOfBalls.setBall(desiredPosition, i);
       }
    }
 
@@ -185,17 +185,17 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      desiredPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(desiredVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(desiredAcceleration);
    }
 
    @Override
@@ -214,12 +214,10 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
    @Override
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    @Override
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

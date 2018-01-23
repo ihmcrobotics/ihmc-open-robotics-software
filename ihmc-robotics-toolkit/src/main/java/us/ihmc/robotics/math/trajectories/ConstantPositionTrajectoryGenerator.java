@@ -53,7 +53,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
@@ -75,11 +75,9 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
 
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
    }
 
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
    }
 }

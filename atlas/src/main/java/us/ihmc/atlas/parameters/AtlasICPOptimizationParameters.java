@@ -6,50 +6,40 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
+   private final boolean useAngularMomentum = false;
+   private final boolean useStepAdjustment = false;
 
    public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
-   public boolean useSimpleOptimization()
-   {
-      return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public int numberOfFootstepsToConsider()
-   {
-      return 1;
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 20.0;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getFootstepRegularizationWeight()
+   public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 0.001 : 0.005;
+      return runningOnRealRobot ? 0.001 : 0.001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackLateralWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.05;
+      return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */
@@ -61,49 +51,62 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackRegularizationWeight()
+   public double getFeedbackRateWeight()
    {
-      return runningOnRealRobot ? 0.0001 : 0.00001;
+      return runningOnRealRobot ? 0.00001 : 0.000001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackParallelGain()
    {
-      return runningOnRealRobot ? 3.0 : 3.0;
+      return runningOnRealRobot ? 2.5 : 2.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackOrthogonalGain()
    {
-      return runningOnRealRobot ? 2.5 : 2.5;
+      return runningOnRealRobot ? 1.5 : 1.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getDynamicRelaxationWeight()
+   public double getDynamicsObjectiveWeight()
    {
-      return runningOnRealRobot ? 500.0 : 1000.0;
+      if (runningOnRealRobot)
+         return 10000.0;
+      else if (useAngularMomentum)
+         return 100000.0;
+      else if (useStepAdjustment)
+         return 1000.0;
+      else
+         return 10000.0;
+      //return runningOnRealRobot ? 10000.0 : (useAngularMomentum ? 100000.0 : 1000.0);
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getDynamicRelaxationDoubleSupportWeightModifier()
+   public double getDynamicsObjectiveDoubleSupportWeightModifier()
    {
-      return runningOnRealRobot ? 1.0 : 1.0;
+      if (useAngularMomentum)
+         return runningOnRealRobot ? 50.0 : 100.0;
+      else if (useStepAdjustment)
+         return runningOnRealRobot ? 1.0 : 4.0;
+      else
+         return 1.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getAngularMomentumMinimizationWeight()
    {
-      return 50.00;
+      return 10.0;
    }
 
    /** {@inheritDoc} */
    @Override
-   public boolean scaleStepRegularizationWeightWithTime()
+   public boolean scaleStepRateWeightWithTime()
    {
       return false;
    }
@@ -117,44 +120,37 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public boolean scaleUpcomingStepWeights()
+   public boolean useFeedbackRate()
    {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useFeedbackRegularization()
-   {
-      return true;
+      return !runningOnRealRobot;
    }
 
    /** {@inheritDoc} */
    @Override
    public boolean useStepAdjustment()
    {
-      return true;
+      return useStepAdjustment;
    }
 
    /** {@inheritDoc} */
    @Override
    public boolean useAngularMomentum()
    {
-      return true;
+      return useAngularMomentum;
    }
 
    /** {@inheritDoc} */
    @Override
-   public boolean useTimingOptimization()
+   public double getSafeCoPDistanceToEdge()
+   {
+      return 0.001;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useFootstepRate()
    {
       return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useFootstepRegularization()
-   {
-      return true;
    }
 
    /** {@inheritDoc} */
@@ -182,28 +178,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getAdjustmentDeadband()
    {
-      return 0.05;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDoubleSupportSplitFractionForBigAdjustment()
-   {
-      return runningOnRealRobot ? 0.25 : 0.2;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumTimeOnInitialCMPForBigAdjustment()
-   {
-      return runningOnRealRobot ? 0.15 : 0.1;
+      return 0.02;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralReachabilityOuterLimit()
    {
-      return 0.85;
+      return runningOnRealRobot ? 0.5 : 0.85;
    }
 
    /** {@inheritDoc} */
@@ -217,20 +199,20 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardReachabilityLimit()
    {
-      return 0.9;
+      return runningOnRealRobot ? 0.65 : 0.9;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getBackwardReachabilityLimit()
    {
-      return -0.5;
+      return runningOnRealRobot ? -0.3 : -0.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public boolean useWarmStartInSolver()
+   public boolean getLimitReachabilityFromAdjustment()
    {
-      return true;
+      return false;
    }
 }

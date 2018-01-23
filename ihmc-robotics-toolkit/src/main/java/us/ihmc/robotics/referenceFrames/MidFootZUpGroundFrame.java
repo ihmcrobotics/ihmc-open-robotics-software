@@ -1,8 +1,8 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FramePose;
 
 /**
  * This is a common reference frame for humanoids with parent frame world. It is created with
@@ -17,9 +17,9 @@ public class MidFootZUpGroundFrame extends ReferenceFrame
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final ReferenceFrame frameOne, frameTwo;
-   private final FramePose framePose = new FramePose();
-   private final FramePose poseOne = new FramePose();
-   private final FramePose poseTwo = new FramePose();
+   private final FramePose3D framePose = new FramePose3D();
+   private final FramePose3D poseOne = new FramePose3D();
+   private final FramePose3D poseTwo = new FramePose3D();
 
    public MidFootZUpGroundFrame(String name, ReferenceFrame frameOne, ReferenceFrame frameTwo)
    {

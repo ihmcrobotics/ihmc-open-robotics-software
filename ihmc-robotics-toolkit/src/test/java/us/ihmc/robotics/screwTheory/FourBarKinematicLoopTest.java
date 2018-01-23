@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -72,10 +73,10 @@ public class FourBarKinematicLoopTest
 
       boolean recomputeJointLimits = false;
 
-      testPlanarSquare(recomputeJointLimits, jointAtoD.getVector());
+      testPlanarSquare(recomputeJointLimits, jointAtoD);
    }
 
-   private void testPlanarSquare(boolean recomputeJointLimits, Vector3D jointAtoD)
+   private void testPlanarSquare(boolean recomputeJointLimits, Vector3DReadOnly jointAtoD)
    {
       masterJointA.setQ(0.0);
       passiveJointB.setQ(0.0);
@@ -368,20 +369,20 @@ public class FourBarKinematicLoopTest
       // test all permutations of at least one bad bound
       masterJointA.setJointLimitUpper(0.5 * Math.PI - (interiorAngleAMin - angleEpsilon));
       masterJointA.setJointLimitLower(0.5 * Math.PI - (interiorAngleAMax - angleEpsilon));
-      failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD.getVector(), recomputeJointLimits);
+      failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
 
       masterJointA.setJointLimitUpper(0.5 * Math.PI - (interiorAngleAMin + angleEpsilon));
       masterJointA.setJointLimitLower(0.5 * Math.PI - (interiorAngleAMax + angleEpsilon));
-      failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD.getVector(), recomputeJointLimits);
+      failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
 
       masterJointA.setJointLimitUpper(0.5 * Math.PI - (interiorAngleAMin - angleEpsilon));
       masterJointA.setJointLimitLower(0.5 * Math.PI - (interiorAngleAMax + angleEpsilon));
-      failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD.getVector(), recomputeJointLimits);
+      failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
 
       // test just inside bounds
       masterJointA.setJointLimitUpper(0.5 * Math.PI - (interiorAngleAMin + angleEpsilon));
       masterJointA.setJointLimitLower(0.5 * Math.PI - (interiorAngleAMax - angleEpsilon));
-      new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD.getVector(), recomputeJointLimits);
+      new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -840,7 +841,7 @@ public class FourBarKinematicLoopTest
    }
 
    private static void failIfFourBarConstructsWithoutAnException(RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
-         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3D closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
+         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3DReadOnly closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
    {
       try
       {
@@ -934,13 +935,13 @@ public class FourBarKinematicLoopTest
       Vector3D jointAxisDFrameD = new Vector3D();
 
       jointAxisA.changeFrame(jointAFrame);
-      jointAxisA.get(jointAxisAFrameA);
+      jointAxisAFrameA.set(jointAxisA);
       jointAxisB.changeFrame(jointBFrame);
-      jointAxisB.get(jointAxisBFrameB);
+      jointAxisBFrameB.set(jointAxisB);
       jointAxisC.changeFrame(jointCFrame);
-      jointAxisC.get(jointAxisCFrameC);
+      jointAxisCFrameC.set(jointAxisC);
       jointAxisD.changeFrame(jointDFrame);
-      jointAxisD.get(jointAxisDFrameD);
+      jointAxisDFrameD.set(jointAxisD);
 
       RigidBodyTransform jointAtoElevator = jointAFrame.getTransformToDesiredFrame(worldFrame);
       RigidBodyTransform jointBtoA = jointBFrame.getTransformToDesiredFrame(jointAFrame);
@@ -1023,10 +1024,10 @@ public class FourBarKinematicLoopTest
       jointCPosition.changeFrame(worldFrame);
       jointDPosition.changeFrame(worldFrame);
 
-      System.out.println("joint a position = " + jointAPosition.getPoint());
-      System.out.println("joint b position = " + jointBPosition.getPoint());
-      System.out.println("joint c position = " + jointCPosition.getPoint());
-      System.out.println("joint d position = " + jointDPosition.getPoint());
+      System.out.println("joint a position = " + jointAPosition);
+      System.out.println("joint b position = " + jointBPosition);
+      System.out.println("joint c position = " + jointCPosition);
+      System.out.println("joint d position = " + jointDPosition);
    }
 
    private void printInitialJointPositions()
@@ -1046,9 +1047,9 @@ public class FourBarKinematicLoopTest
       jointCPosition.changeFrame(worldFrame);
       jointDPosition.changeFrame(worldFrame);
 
-      System.out.println("\njoint a position = " + jointAPosition.getPoint());
-      System.out.println("joint b position = " + jointBPosition.getPoint());
-      System.out.println("joint c position = " + jointCPosition.getPoint());
-      System.out.println("joint d position = " + jointDPosition.getPoint());
+      System.out.println("\njoint a position = " + jointAPosition);
+      System.out.println("joint b position = " + jointBPosition);
+      System.out.println("joint c position = " + jointCPosition);
+      System.out.println("joint d position = " + jointDPosition);
    }
 }

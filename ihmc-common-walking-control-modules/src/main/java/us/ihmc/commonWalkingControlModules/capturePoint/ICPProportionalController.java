@@ -93,7 +93,7 @@ public class ICPProportionalController
       icpError.set(capturePoint);
       icpError.sub(desiredCapturePoint);
 
-      icpError.getFrameTuple2d(tempControl);
+      tempControl.set(icpError);
       double epsilonZeroICPVelocity = 1e-5;
       if (desiredCapturePointVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
       {
@@ -108,7 +108,7 @@ public class ICPProportionalController
          tempControl.scale(captureKpOrthogonalToMotion.getValue());
       }
 
-      icpError.getFrameTuple2d(tempICPErrorIntegrated);
+      tempICPErrorIntegrated.set(icpError);
       tempICPErrorIntegrated.scale(controlDT);
       tempICPErrorIntegrated.scale(captureKi.getValue());
 
@@ -127,7 +127,7 @@ public class ICPProportionalController
          icpErrorIntegrated.set(0.0, 0.0);
       }
 
-      icpErrorIntegrated.getFrameTuple2d(icpIntegral);
+      icpIntegral.set(icpErrorIntegrated);
       tempControl.add(icpIntegral);
 
       feedbackPart.set(tempControl);

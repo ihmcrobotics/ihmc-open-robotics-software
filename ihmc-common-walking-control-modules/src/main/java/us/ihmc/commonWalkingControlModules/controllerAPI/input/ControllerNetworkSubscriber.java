@@ -44,11 +44,12 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    /** Used to filter messages coming in. */
    private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(null);
 
+   /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends SettablePacket<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
-
+   
    /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
    private final Map<Class<? extends SettablePacket<?>>, ConcurrentRingBuffer<? extends SettablePacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
@@ -73,7 +74,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       createAllSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
-
       createAllStatusMessageBuffers();
 
       if (scheduler != null)
@@ -101,7 +101,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
          statusMessageClassToBufferMap.put(statusMessageClass, newBuffer);
       }
    }
-
 
    private <T extends Packet<T>> void createAllSubscribersForSupportedMessages()
    {

@@ -27,7 +27,7 @@ public class RevoluteJoint extends OneDoFJoint
    @Override
    protected void updateJointTransform(RigidBodyTransform jointTransform)
    {
-      axisAngle.set(jointAxis.getVector(), getQ());
+      axisAngle.set(jointAxis, getQ());
       jointTransform.setRotationAndZeroTranslation(axisAngle);
    }
 
@@ -39,7 +39,7 @@ public class RevoluteJoint extends OneDoFJoint
       ReferenceFrame predecessorFrame = getPredecessor().getBodyFixedFrame();
       ReferenceFrame successorFrame = getSuccessor().getBodyFixedFrame();
 
-      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis.getVector());
+      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
 
       unitSuccessorTwist = new Twist(unitJointTwist);
       unitSuccessorTwist.changeBaseFrameNoRelativeTwist(predecessorFrame);
@@ -50,7 +50,7 @@ public class RevoluteJoint extends OneDoFJoint
       unitPredecessorTwist.invert();
       unitPredecessorTwist.changeFrame(predecessorFrame);
 
-      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis.getVector());
+      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
 
       unitSuccessorAcceleration = new SpatialAccelerationVector(unitJointAcceleration);
       unitSuccessorAcceleration.changeBaseFrameNoRelativeAcceleration(predecessorFrame);

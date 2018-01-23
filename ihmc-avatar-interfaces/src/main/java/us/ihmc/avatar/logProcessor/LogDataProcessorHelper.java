@@ -174,7 +174,7 @@ public class LogDataProcessorHelper
             @Override
             public void computeAndPackCoP(FramePoint2D copToPack)
             {
-               cops.get(robotSide).getFrameTuple2dIncludingFrame(copToPack);
+               copToPack.setIncludingFrame(cops.get(robotSide));
             }
 
             @Override
@@ -243,12 +243,12 @@ public class LogDataProcessorHelper
 
    public void getMeasuredCoP(RobotSide robotSide, FramePoint2D copToPack)
    {
-      cops.get(robotSide).getFrameTuple2dIncludingFrame(copToPack);
+      copToPack.setIncludingFrame(cops.get(robotSide));
    }
 
    public void getDesiredCoP(RobotSide robotSide, FramePoint2D desiredCoPToPack)
    {
-      desiredCoPs.get(robotSide).getFrameTuple2dIncludingFrame(desiredCoPToPack);
+      desiredCoPToPack.setIncludingFrame(desiredCoPs.get(robotSide));
    }
 
    public double getControllerDT()
