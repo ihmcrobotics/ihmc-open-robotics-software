@@ -15,6 +15,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -159,6 +161,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    public ICPOptimizationControllerInterface getICPOptimizationController()
    {
       return icpOptimizationController;
+   }
+
+   @Override
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
+      icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
    }
 
    @Override

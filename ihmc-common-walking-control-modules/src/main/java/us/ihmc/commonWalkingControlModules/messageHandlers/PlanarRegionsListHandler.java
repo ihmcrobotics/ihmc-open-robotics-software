@@ -38,6 +38,8 @@ public class PlanarRegionsListHandler
 
    public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
    {
+      planarRegions.clear();
+
       for (int i = 0; i < planarRegionsListCommand.getNumberOfPlanarRegions(); i++)
       {
          planarRegionsListCommand.getPlanarRegionCommand(i).getPlanarRegion(planarRegions.add());
@@ -54,6 +56,11 @@ public class PlanarRegionsListHandler
       waitingOnNewPlanarRegions.set(true);
    }
 
+   public boolean hasNewPlanarRegions()
+   {
+      return hasNewPlanarRegionsList.getBooleanValue();
+   }
+
    public boolean pollHasNewPlanarRegionsList(PlanarRegionsList planarRegionsListToPack)
    {
       if (!hasNewPlanarRegionsList.getBooleanValue())
@@ -67,5 +74,11 @@ public class PlanarRegionsListHandler
       planarRegions.clear();
 
       return true;
+   }
+
+   public RecyclingArrayList<PlanarRegion> pollHasNewPlanarRegionsList()
+   {
+      hasNewPlanarRegionsList.set(false);
+      return planarRegions;
    }
 }

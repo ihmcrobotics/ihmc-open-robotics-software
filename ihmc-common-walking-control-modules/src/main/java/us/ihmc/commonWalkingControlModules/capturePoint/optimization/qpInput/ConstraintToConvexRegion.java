@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -94,6 +95,41 @@ public class ConstraintToConvexRegion
    }
 
    /**
+    * Sets the convex polygon for the constraint as the convex hull of a planar region.
+    *
+    * @param planarRegion planar region to constrain to.
+    * @return success
+    */
+   public boolean addPlanarRegion(PlanarRegion planarRegion, double deltaInside)
+   {
+      if (planarRegion == null)
+         return false;
+
+      convexPolygon.set(planarRegion.getConvexHull());
+      this.deltaInside = deltaInside;
+      return true;
+   }
+
+   public boolean addPlanarRegion(ConvexPolygon2D convexPolygon, double deltaInside)
+   {
+      if (convexPolygon == null)
+         return false;
+
+      this.convexPolygon.set(convexPolygon);
+      this.deltaInside = deltaInside;
+      return true;
+   }
+
+   public boolean addPlanarRegion(ConvexPolygon2D convexPolygon)
+   {
+      if (convexPolygon == null)
+         return false;
+
+      this.convexPolygon.set(convexPolygon);
+      return true;
+   }
+
+   /**
     * Sets the polygon for the convex constraint to use. Should be called after
     * all the vertices have been added using {@link #addVertex(FramePoint3D)} or
     * {@link #addVertex(FramePoint2D)}.
@@ -150,4 +186,5 @@ public class ConstraintToConvexRegion
       else
          return 0;
    }
+
 }

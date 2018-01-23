@@ -5,6 +5,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -69,4 +71,6 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
    public abstract ICPOptimizationControllerInterface getICPOptimizationController();
+
+   public abstract void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
 }

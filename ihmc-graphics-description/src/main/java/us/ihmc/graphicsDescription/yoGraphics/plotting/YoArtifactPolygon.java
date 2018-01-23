@@ -25,15 +25,31 @@ public class YoArtifactPolygon extends YoArtifact
    
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill)
    {
-      this(name, yoConvexPolygon2d, color, fill, 2);
+      this(name, yoConvexPolygon2d, color, fill, 2, false);
    }
 
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
    {
+      this(name, yoConvexPolygon2d, color, fill, lineWidth, false);
+   }
+
+   public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, boolean dashedLine)
+   {
+      this(name, yoConvexPolygon2d, color, fill, 2, dashedLine);
+   }
+
+   public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth, boolean dashedLine)
+   {
       super(name,  new double[] {fill ? 1.0 : 0.0}, color);
       this.convexPolygon = yoConvexPolygon2d;
       this.fill = fill;
-      this.stroke = new BasicStroke(lineWidth);
+      if (!dashedLine)
+         this.stroke = new BasicStroke(lineWidth);
+      else
+      {
+         float[] dashArray = new float[]{10.0f};
+         this.stroke = new BasicStroke(lineWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, dashArray, 0.0F);
+      }
    }
 
    @Override
