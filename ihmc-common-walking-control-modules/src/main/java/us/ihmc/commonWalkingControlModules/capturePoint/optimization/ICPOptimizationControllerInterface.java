@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -26,14 +28,15 @@ public interface ICPOptimizationControllerInterface
    void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0);
    void initializeForSingleSupport(double initialTime, RobotSide transferToSide, double omega0);
 
-   void getDesiredCMP(FramePoint2D desiredCMP);
+   void getDesiredCMP(FramePoint2D desiredCMPToPack);
    void getFootstepSolution(FramePoint2D footstepSolutionToPack);
 
    boolean wasFootstepAdjusted();
    boolean useAngularMomentum();
    boolean useStepAdjustment();
 
-   void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
+   void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCMP,
+                FramePoint2DReadOnly currentICP, double omega0);
 
    void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 

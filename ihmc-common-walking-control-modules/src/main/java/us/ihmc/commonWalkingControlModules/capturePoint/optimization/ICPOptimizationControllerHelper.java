@@ -5,6 +5,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -46,7 +47,7 @@ public class ICPOptimizationControllerHelper
    }
 
 
-   public void transformToWorldFrame(FrameVector2D weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
+   public void transformToWorldFrame(FrameTuple2DBasics weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
    {
       transformValues(weightsToPack, xWeight.getValue(), yWeight.getValue(), frame.getTransformToWorldFrame());
    }
@@ -85,7 +86,7 @@ public class ICPOptimizationControllerHelper
          xAxis = new FrameVector2D(parentFrame);
       }
 
-      public void setXAxis(FrameVector2D xAxis)
+      public void setXAxis(FixedFrameTuple2DBasics xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
          this.xAxis.changeFrame(parentFrame);

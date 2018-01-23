@@ -5,6 +5,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -137,7 +139,7 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint3D referenceFootstepLocation = new FramePoint3D();
    private final FramePoint2D referenceFootstepLocation2D = new FramePoint2D();
 
-   public void extractFootstepSolution(YoFramePoint2d footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
+   public void extractFootstepSolution(FixedFramePoint2DBasics footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
                                        ICPOptimizationQPSolver solver)
    {
       upcomingFootstep.getPosition(referenceFootstepLocation);
@@ -168,7 +170,7 @@ public class ICPOptimizationSolutionHandler
       this.footstepWasAdjusted.set(footstepWasAdjusted);
    }
 
-   public void extractFootstepSolution(YoFramePoint2d footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
+   public void extractFootstepSolution(FixedFramePoint2DBasics footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
                                        PlanarRegion activePlanarRegion, ICPOptimizationQPSolver solver)
    {
       if (activePlanarRegion == null)
@@ -212,14 +214,14 @@ public class ICPOptimizationSolutionHandler
       footstepWasAdjusted.set(false);
    }
 
-   public void updateVisualizers(FramePoint2D desiredICP, double footstepMultiplier)
+   public void updateVisualizers(FramePoint2DReadOnly desiredICP, double footstepMultiplier)
    {
       adjustedICPReferenceLocation.set(clippedFootstepAdjustment);
       adjustedICPReferenceLocation.scale(footstepMultiplier);
       adjustedICPReferenceLocation.add(desiredICP);
    }
 
-   private boolean applyLocationDeadband(FramePoint2D solutionLocationToPack, FramePoint2D currentSolutionLocation, FramePoint2D referenceLocation2d,
+   private boolean applyLocationDeadband(FramePoint2D solutionLocationToPack, FramePoint2DReadOnly currentSolutionLocation, FramePoint2DReadOnly referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
    {
       solutionLocation.setIncludingFrame(solutionLocationToPack, 0.0);

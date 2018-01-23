@@ -12,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -438,9 +440,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    }
 
    @Override
-   public void getDesiredCMP(FramePoint2D desiredCMP)
+   public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
-      desiredCMP.set(feedbackCMP);
+      desiredCMPToPack.set(feedbackCMP);
    }
 
    @Override
@@ -462,19 +464,22 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    }
 
    @Override
-   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0)
+   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCMP,
+                       FramePoint2DReadOnly currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 
-      desiredICP.changeFrame(worldFrame);
-      desiredICPVelocity.changeFrame(worldFrame);
-      perfectCMP.changeFrame(worldFrame);
-      currentICP.changeFrame(worldFrame);
-
-      this.currentICP.set(currentICP);
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
-      this.yoPerfectCMP.set(perfectCMP);
+      this.perfectCMP.set(perfectCMP);
+      this.currentICP.set(currentICP);
+
+      this.desiredICP.changeFrame(worldFrame);
+      this.desiredICPVelocity.changeFrame(worldFrame);
+      this.perfectCMP.changeFrame(worldFrame);
+      this.currentICP.changeFrame(worldFrame);
+
+      this.yoPerfectCMP.set(this.perfectCMP);
 
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);
