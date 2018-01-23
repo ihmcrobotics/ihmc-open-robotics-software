@@ -2,9 +2,11 @@ package us.ihmc.robotics.parameterGui.gui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -55,9 +57,18 @@ public class GuiController
    @FXML
    private VBox tuningBox;
 
+   @FXML
+   private Button connect;
+
+   @FXML
+   private Button send;
+
    private File originalFile;
    private List<Registry> registries;
    private TuningBoxManager tuningBoxManager;
+
+   private boolean isRemote = false;
+   private ParameterGuiNetworkManager networkManager;
 
    public void initialize()
    {
@@ -111,10 +122,17 @@ public class GuiController
 
       if (file != null)
       {
+         if (isRemote && networkManager != null)
+         {
+            networkManager.disconnect();
+            send.setDisable(true);
+         }
+
          originalFile = file;
          registries = ParameterTuningTools.getParameters(originalFile);
          updateTree();
          tuningBoxManager.clearAllParameters();
+         send.setDisable(true);
       }
    }
 
@@ -160,6 +178,48 @@ public class GuiController
       if (result.get() == ButtonType.OK)
       {
          ParameterTuningTools.save(registries, originalFile);
+      }
+   }
+
+   protected void addNetworkManager(ParameterGuiNetworkManager networkManager)
+   {
+      connect.setDisable(false);
+      this.networkManager = networkManager;
+   }
+
+   @FXML
+   protected void handleConnect(ActionEvent event) throws InterruptedException
+   {
+      if (isRemote && networkManager != null)
+      {
+         networkManager.disconnect();
+      }
+
+      registries = new ArrayList<>();
+      tuningBoxManager.clearAllParameters();
+      updateTree();
+
+      isRemote = networkManager.createNewConnection(actionEvent -> {
+         Registry parameterCopy = networkManager.getParameterCopy();
+         if (parameterCopy != null)
+         {
+            Platform.runLater(() -> {
+               if (registries.isEmpty())
+               {
+                  registries.add(parameterCopy);
+                  updateTree();
+               }
+            });
+         }
+      });
+
+      if (isRemote)
+      {
+         send.setDisable(false);
+      }
+      else
+      {
+         send.setDisable(true);
       }
    }
 
