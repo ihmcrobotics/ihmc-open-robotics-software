@@ -33,9 +33,8 @@
 								<Button text="Save" fx:id="save" onAction="#handleSave" />
 								<Button text="Save as..." fx:id="saveAs" onAction="#handleSaveAs" />
 								<Region HBox.hgrow="ALWAYS" />
-								<Button text="Connect" disable="true" />
-								<Button text="Load" disable="true" />
-								<Button text="Send" disable="true" />
+								<Button text="Connect" fx:id="connect" onAction="#handleConnect" disable="true" />
+								<Button text="Send" fx:id="send" disable="true" />
 							</children>
 						</HBox>
 					</children>
