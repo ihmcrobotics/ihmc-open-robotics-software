@@ -203,9 +203,8 @@ public class Twist extends SpatialMotionVector
     * Packs the linear velocity of a 2D point that is fixed in bodyFrame,
     * with respect to baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getLineaVelocityOfPoint2dFixedInBodyFrame(FrameVector3DBasics linearVelocityToPack, FixedFramePoint2DBasics point2dFixedInBodyFrame)
+   public void getLinearVelocityOfPoint2dFixedInBodyFrame(FrameVector3DBasics linearVelocityToPack, FixedFramePoint2DBasics point2dFixedInBodyFrame)
    {
-      baseFrame.checkReferenceFrameMatch(expressedInFrame);
       point2dFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
 
       freeVector.set(point2dFixedInBodyFrame, 0.0);
