@@ -646,7 +646,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                activePlanarRegion = null;
 
             solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
-            solutionHandler.setFootstepWasAdjustedBySnapper(planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution));
+
+            boolean footstepWasAdjustedBySnapper = planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
+            solutionHandler.setFootstepWasAdjustedBySnapper(footstepWasAdjustedBySnapper);
          }
 
          if (isInDoubleSupport.getBooleanValue())
