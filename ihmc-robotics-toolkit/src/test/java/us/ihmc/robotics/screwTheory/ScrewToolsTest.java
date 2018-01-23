@@ -154,7 +154,7 @@ public class ScrewToolsTest
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
-      assertTrue(jointAxis.equals(joint.getJointAxis().getVector()));
+      assertTrue(jointAxis.equals(joint.getJointAxis()));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -170,7 +170,7 @@ public class ScrewToolsTest
 
       assertEquals("Should be equal", jointName, joint.getName());
       assertTrue(parentBody.equals(joint.getPredecessor()));
-      assertTrue(jointAxis.equals(joint.getJointAxis().getVector()));
+      assertTrue(jointAxis.equals(joint.getJointAxis()));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

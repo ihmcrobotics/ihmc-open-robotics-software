@@ -81,7 +81,7 @@ public class SpatialAccelerationCalculatorTest
             rootPosition.changeFrame(bodyFrame);
             rootAngularAcceleration.changeFrame(bodyFrame);
             Vector3D crossPart = new Vector3D();
-            crossPart.cross(new Vector3D(rootPosition), rootAngularAcceleration.getVector());
+            crossPart.cross(new Vector3D(rootPosition), rootAngularAcceleration);
             expectedAcceleration.linearPart.add(crossPart);
 
             expectedAcceleration.setAngularPart(rootAngularAcceleration);
@@ -195,7 +195,7 @@ public class SpatialAccelerationCalculatorTest
                bodyTwist.changeFrame(bodyFrame);
                FrameVector3D coriolis = new FrameVector3D(bodyFrame);
                jointAxis.changeFrame(bodyFrame);
-               coriolis.cross(bodyTwist.getAngularPart(), jointAxis.getVector());
+               coriolis.cross(bodyTwist.getAngularPart(), jointAxis);
                coriolis.scale(joint.getQd());
                cumulatedAngularAcceleration.add(coriolis);
             }
@@ -356,7 +356,7 @@ public class SpatialAccelerationCalculatorTest
                                                                                                          rootAcceleration);
 
             expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration.getVector(), actualLinearAcceleration.getVector(), 1.0e-4);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration, actualLinearAcceleration, 1.0e-4);
 
          }
       }
@@ -462,8 +462,8 @@ public class SpatialAccelerationCalculatorTest
                                                                                                             bodyFixedPoint);
 
                expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
-               EuclidCoreTestTools.assertTuple3DEquals("iteration: " + i + ", joint index: " + baseJointIndex, expectedLinearAcceleration.getVector(),
-                                                       actualLinearAcceleration.getVector(), 7.0e-5);
+               EuclidCoreTestTools.assertTuple3DEquals("iteration: " + i + ", joint index: " + baseJointIndex, expectedLinearAcceleration,
+                                                       actualLinearAcceleration, 7.0e-5);
             }
          }
       }
@@ -572,7 +572,7 @@ public class SpatialAccelerationCalculatorTest
             spatialAccelerationCalculatorNoVelocity.getLinearAccelerationOfBodyFixedPoint(bodyNoVelocity, frameBodyFixedPoint, expectedLinearAcceleration);
 
             assertEquals(expectedLinearAcceleration.getReferenceFrame().getName(), actualLinearAcceleration.getReferenceFrame().getName());
-            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration.getVector(), actualLinearAcceleration.getVector(), 1.0e-12);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);
 
             // Assert relative twist
             for (int baseJointIndex = 0; baseJointIndex < numberOfRevoluteJoints + 1; baseJointIndex++)
@@ -595,7 +595,7 @@ public class SpatialAccelerationCalculatorTest
                                                                                              expectedLinearAcceleration);
 
                assertEquals(expectedLinearAcceleration.getReferenceFrame().getName(), actualLinearAcceleration.getReferenceFrame().getName());
-               EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, expectedLinearAcceleration.getVector(), actualLinearAcceleration.getVector(), 1.0e-12);
+               EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);
             }
          }
       }
@@ -615,7 +615,7 @@ public class SpatialAccelerationCalculatorTest
       twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(bodyInFuture, pointInFuture, pointLinearVelocityInFuture);
 
       FrameVector3D pointLinearAcceleration = new FrameVector3D(worldFrame);
-      pointLinearAcceleration.sub(pointLinearVelocityInFuture.getVector(), pointLinearVelocity.getVector());
+      pointLinearAcceleration.sub(pointLinearVelocityInFuture, pointLinearVelocity);
       pointLinearAcceleration.scale(1.0 / dt);
 
       // Need to account for the root acceleration
@@ -652,7 +652,7 @@ public class SpatialAccelerationCalculatorTest
       twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(baseInFuture, bodyInFuture, pointInFuture, pointLinearVelocityInFuture);
 
       FrameVector3D pointLinearAcceleration = new FrameVector3D(base.getBodyFixedFrame());
-      pointLinearAcceleration.sub(pointLinearVelocityInFuture.getVector(), pointLinearVelocity.getVector());
+      pointLinearAcceleration.sub((Vector3DReadOnly) pointLinearVelocityInFuture, pointLinearVelocity);
       pointLinearAcceleration.scale(1.0 / dt);
 
       return pointLinearAcceleration;
@@ -702,14 +702,14 @@ public class SpatialAccelerationCalculatorTest
       FrameVector3D rootLinearAcceleration = new FrameVector3D(rootAcceleration.getExpressedInFrame(), rootAcceleration.getLinearPart());
       rootAngularAcceleration.changeFrame(expectedAcceleration.getExpressedInFrame());
       rootLinearAcceleration.changeFrame(expectedAcceleration.getExpressedInFrame());
-      expectedAcceleration.angularPart.add(rootAngularAcceleration.getVector());
+      expectedAcceleration.angularPart.add(rootAngularAcceleration);
 
       FramePoint3D rootToBody = new FramePoint3D(rootAcceleration.getExpressedInFrame());
       rootToBody.changeFrame(expectedAcceleration.getExpressedInFrame());
       Vector3D crossPart = new Vector3D();
-      crossPart.cross(rootToBody, rootAngularAcceleration.getVector());
+      crossPart.cross(rootToBody, rootAngularAcceleration);
       expectedAcceleration.linearPart.add(crossPart);
-      expectedAcceleration.linearPart.add(rootLinearAcceleration.getVector());
+      expectedAcceleration.linearPart.add(rootLinearAcceleration);
 
       return expectedAcceleration;
    }

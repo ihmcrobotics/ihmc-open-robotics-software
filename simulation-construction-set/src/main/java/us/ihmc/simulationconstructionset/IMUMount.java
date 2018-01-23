@@ -158,12 +158,12 @@ public class IMUMount
 
    public void getOrientation(Quaternion orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    public void getOrientation(RotationMatrix rotationMatrixToPack)
    {
-      orientation.get(rotationMatrixToPack);
+      rotationMatrixToPack.set(orientation);
    }
 
    public void setAngularVelocityInBody(Vector3D angularVelocityInBody)
@@ -173,7 +173,7 @@ public class IMUMount
    
    public void getAngularVelocityInBody(Vector3D angularVelocityInBodyToPack)
    {
-      angularVelocityInBody.get(angularVelocityInBodyToPack);
+      angularVelocityInBodyToPack.set(angularVelocityInBody);
    }
    
    public void setAngularAccelerationInBody(Vector3D angularAccelerationInBody)
@@ -183,7 +183,7 @@ public class IMUMount
    
    public void getAngularAccelerationInBody(Vector3D angularAccelerationInBodyToPack)
    {
-      angularAccelerationInBody.get(angularAccelerationInBodyToPack);
+      angularAccelerationInBodyToPack.set(angularAccelerationInBody);
    }
 
    public void setLinearAccelerationInBody(Vector3D linearAccelerationInBody)
@@ -193,7 +193,7 @@ public class IMUMount
    
    public void getLinearAccelerationInBody(Vector3D linearAccelerationInBodyToPack)
    {
-      linearAccelerationInBody.get(linearAccelerationInBodyToPack);
+      linearAccelerationInBodyToPack.set(linearAccelerationInBody);
    }
 
    public void getTransformFromMountToJoint(RigidBodyTransform transformToPack)

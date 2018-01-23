@@ -11,6 +11,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBu
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -265,7 +265,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       RigidBodyTransform pelvisAfterCorrection = new RigidBodyTransform();
       RigidBodyTransform pelvisExpectedCorrection = new RigidBodyTransform();
 
-      FramePose correctedPelvisverify = new FramePose(worldFrame);
+      FramePose3D correctedPelvisverify = new FramePose3D(worldFrame);
       YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
 
 
@@ -285,7 +285,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          pelvisCorrector.doControl(timeStamp);
          pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
 
-         correctedPelvisverify.setPose(pelvisAfterCorrection);
+         correctedPelvisverify.set(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
 
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
@@ -333,7 +333,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       RigidBodyTransform pelvisBeforeCorrection = new RigidBodyTransform();
       RigidBodyTransform pelvisAfterCorrection = new RigidBodyTransform();
 
-      FramePose correctedPelvisverify = new FramePose(worldFrame);
+      FramePose3D correctedPelvisverify = new FramePose3D(worldFrame);
       YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
 
 
@@ -364,7 +364,7 @@ public class NewPelvisPoseHistoryCorrectionTest
             checkPacketHasBeenSentNextLoopIteration = true;
          }
 
-         correctedPelvisverify.setPose(pelvisAfterCorrection);
+         correctedPelvisverify.set(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
 
          simulationConstructionSet.tickAndUpdate();

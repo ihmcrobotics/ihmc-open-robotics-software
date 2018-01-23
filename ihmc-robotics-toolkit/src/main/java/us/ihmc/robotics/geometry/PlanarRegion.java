@@ -380,8 +380,6 @@ public class PlanarRegion
     */
    private LineSegment2D projectLineSegmentVerticallyToRegion(LineSegment2D lineSegmentInWorld)
    {
-      Point2D[] snappedEndpoints = new Point2D[2];
-
       Point2DReadOnly originalVertex = lineSegmentInWorld.getFirstEndpoint();
       Point3D snappedVertex3d = new Point3D();
 
@@ -392,7 +390,7 @@ public class PlanarRegion
 
       // Transform to local coordinates
       fromWorldToLocalTransform.transform(snappedVertex3d);
-      snappedEndpoints[0] = new Point2D(snappedVertex3d.getX(), snappedVertex3d.getY());
+      Point2D snappedFirstEndpoint = new Point2D(snappedVertex3d.getX(), snappedVertex3d.getY());
 
       originalVertex = lineSegmentInWorld.getSecondEndpoint();
 
@@ -403,9 +401,9 @@ public class PlanarRegion
 
       // Transform to local coordinates
       fromWorldToLocalTransform.transform(snappedVertex3d);
-      snappedEndpoints[1] = new Point2D(snappedVertex3d.getX(), snappedVertex3d.getY());
+      Point2D snappedSecondEndpoint = new Point2D(snappedVertex3d.getX(), snappedVertex3d.getY());
 
-      LineSegment2D projectedLineSegment = new LineSegment2D(snappedEndpoints);
+      LineSegment2D projectedLineSegment = new LineSegment2D(snappedFirstEndpoint, snappedSecondEndpoint);
       return projectedLineSegment;
    }
 
@@ -924,8 +922,8 @@ public class PlanarRegion
 
       for (LineSegment3D intersectionWithThis : intersectionsWithThis)
       {
-         Point3D start = intersectionWithThis.getFirstEndpoint();
-         Point3D end = intersectionWithThis.getSecondEndpoint();
+         Point3DBasics start = intersectionWithThis.getFirstEndpoint();
+         Point3DBasics end = intersectionWithThis.getSecondEndpoint();
          for (LineSegment3D intersectionWithOther : intersectionsWithOther)
          {
             if (intersectionWithThis.getDirection(false).dot(intersectionWithOther.getDirection(false)) < 0.0)

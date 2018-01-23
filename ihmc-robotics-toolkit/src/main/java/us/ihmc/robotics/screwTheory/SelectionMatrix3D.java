@@ -458,6 +458,32 @@ public class SelectionMatrix3D
    }
 
    /**
+    * Whether the {@code axisIndex}<sup>th</sup> axis of the current selection frame has been selected.
+    * <p>
+    * For an {@code axisIndex} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2
+    * it is {@code z}.
+    * </p>
+    *
+    * @param axisIndex the index of the axis to get the selection state of.
+    * @return the selection state of the chosen axis.
+    * @throws IndexOutOfBoundsException if {@code axisIndex} &notin; [0, 2].
+    */
+   public boolean isAxisSelected(int axisIndex)
+   {
+      switch (axisIndex)
+      {
+      case 0:
+         return isXSelected();
+      case 1:
+         return isYSelected();
+      case 2:
+         return isZSelected();
+      default:
+         throw new IndexOutOfBoundsException(Integer.toString(axisIndex));
+      }
+   }
+
+   /**
     * The reference frame to which the axis selection is referring to.
     * <p>
     * This selection frame can be {@code null}.

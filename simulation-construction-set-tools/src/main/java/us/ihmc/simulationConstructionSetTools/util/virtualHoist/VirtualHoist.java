@@ -160,7 +160,6 @@ public class VirtualHoist implements RobotController
          teepeeLocation.getYoZ().sub(hoistUpDownSpeed.getDoubleValue() * updateDT);
       }
 
-      Point3D teepeePosition = teepeeLocation.getPoint3dCopy();
       Point3D pointPosition = new Point3D();
       Vector3D forceVector = new Vector3D();
       Vector3D velocityVector = new Vector3D();
@@ -170,7 +169,7 @@ public class VirtualHoist implements RobotController
          ExternalForcePoint externalForcePoint = externalForcePoints.get(i);
          pointPosition.set(externalForcePoint.getX(), externalForcePoint.getY(), externalForcePoint.getZ());
 
-         double cableLength = teepeePosition.distance(pointPosition);
+         double cableLength = teepeeLocation.distance(pointPosition);
          cableLengths.get(i).set(cableLength);
 
          if (cableLength < physicalCableLength.getDoubleValue())
@@ -180,7 +179,7 @@ public class VirtualHoist implements RobotController
 
          else
          {
-            forceVector.sub(teepeePosition, pointPosition);
+            forceVector.sub(teepeeLocation, pointPosition);
             double delta = forceVector.length() - physicalCableLength.getDoubleValue();
             double springForce = hoistStiffness.getDoubleValue() * delta;
 

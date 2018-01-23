@@ -17,11 +17,11 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -84,7 +84,7 @@ public class GroundPlaneEstimatorTest
       
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
       QuadrantDependentList<FramePoint3D> contactPoints = new QuadrantDependentList<>();
-      FramePose centerOfFeetPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D centerOfFeetPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       PoseReferenceFrame centerOfFeetFrame = new PoseReferenceFrame("centerOfFeetFrame", centerOfFeetPose);
       
       //set feet random distance from each other on the same plane, max of 2 meters
@@ -92,7 +92,7 @@ public class GroundPlaneEstimatorTest
       
       //test random pitch between +-0.25 radians
       double actualPitch = 0.25;//random.nextDouble() * 0.5 - 0.25;
-      centerOfFeetPose.setYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
+      centerOfFeetPose.setOrientationYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       double computedPitch = groundPlaneEstimator.getPitch();
@@ -122,7 +122,7 @@ public class GroundPlaneEstimatorTest
       
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
       QuadrantDependentList<FramePoint3D> contactPoints = new QuadrantDependentList<>();
-      FramePose centerOfFeetPose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D centerOfFeetPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       PoseReferenceFrame centerOfFeetFrame = new PoseReferenceFrame("centerOfFeetFrame", centerOfFeetPose);
       
       //set feet random distance from each other on the same plane, max of 2 meters
@@ -138,7 +138,7 @@ public class GroundPlaneEstimatorTest
       changeFrame(contactPoints, centerOfFeetFrame);
       
       //test pitch of 0.1 doesn't equal 0.0
-      centerOfFeetPose.setYawPitchRoll(centerOfFeetPose.getYaw(), 0.1, centerOfFeetPose.getRoll());
+      centerOfFeetPose.setOrientationYawPitchRoll(centerOfFeetPose.getYaw(), 0.1, centerOfFeetPose.getRoll());
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       computedPitch = groundPlaneEstimator.getPitch();
@@ -149,7 +149,7 @@ public class GroundPlaneEstimatorTest
       
       //test random pitch between +-0.25 radians
       actualPitch = random.nextDouble() * 0.5 - 0.25;
-      centerOfFeetPose.setYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
+      centerOfFeetPose.setOrientationYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       computedPitch = groundPlaneEstimator.getPitch();

@@ -21,11 +21,11 @@ public class PlanarRegionDataImporter
       if (result == null)
          return null;
       else
-         return PlanarRegionFileTools.importPlanRegionData(result);
+         return PlanarRegionFileTools.importPlanarRegionData(result);
    }
 
-   public static PlanarRegionsList importPlanRegionData(File dataFolder)
+   public static PlanarRegionsList importPlanarRegionData(File dataFolder)
    {
-      return PlanarRegionFileTools.importPlanRegionData(dataFolder);
+      return PlanarRegionFileTools.importPlanarRegionData(dataFolder);
    }
 }

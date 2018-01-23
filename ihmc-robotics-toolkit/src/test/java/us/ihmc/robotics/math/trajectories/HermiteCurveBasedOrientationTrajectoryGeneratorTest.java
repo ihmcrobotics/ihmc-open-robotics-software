@@ -68,13 +68,13 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             traj.compute(time);
             traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-            currentAngularVelocity.get(angularVelocityVector);
+            angularVelocityVector.set(currentAngularVelocity);
             RotationTools.integrateAngularVelocity(angularVelocityVector, dt, integratedAngularVelocity);
             quaternionFromIntegration.set(orientationFromIntegration);
             quaternionFromIntegration.multiply(integratedAngularVelocity, quaternionFromIntegration);
             orientationFromIntegration.set(quaternionFromIntegration);
 
-            currentAngularAcceleration.get(integratedAngularAcceleration);
+            integratedAngularAcceleration.set(currentAngularAcceleration);
             integratedAngularAcceleration.scale(dt);
             angularVelocityFromIntegration.add(integratedAngularAcceleration);
 

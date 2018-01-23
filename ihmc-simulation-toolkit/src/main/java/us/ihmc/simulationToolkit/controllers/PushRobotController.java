@@ -189,7 +189,7 @@ public class PushRobotController implements RobotController
             && yoTime.getDoubleValue() >= pushTimeSwitch.getDoubleValue())
       {
          isBeingPushed.set(true);
-         pushForce.get(forceVector);
+         forceVector.set(pushForce);
          pushNumber.decrement();
       }
       else

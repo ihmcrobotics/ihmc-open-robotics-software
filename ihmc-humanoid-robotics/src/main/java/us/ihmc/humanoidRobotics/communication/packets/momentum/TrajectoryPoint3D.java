@@ -27,14 +27,11 @@ public class TrajectoryPoint3D implements Settable<TrajectoryPoint3D>, us.ihmc.r
       this.time = time;
    }
 
-   public TrajectoryPoint3D(FramePoint3D centerOfMassPosition, FrameVector3D centerOfMassVelocity, double time)
+   public TrajectoryPoint3D(FramePoint3D position, FrameVector3D velocity, double time)
    {
       this.time = time;
-      this.position = new Point3D();
-      this.velocity = new Vector3D();
-      
-      centerOfMassPosition.get(position);
-      centerOfMassVelocity.get(velocity);
+      this.position = new Point3D(position);
+      this.velocity = new Vector3D(velocity);
    }
 
    public TrajectoryPoint3D()

@@ -544,7 +544,7 @@ public class ConcaveHullTools
          Point2DReadOnly next = concaveHullVertices.get(nextIndex);
 
          edge.set(current, next);
-         Point2D intersection = edge.intersectionWith(rayLine);
+         Point2DBasics intersection = edge.intersectionWith(rayLine);
 
          if (intersection != null)
          {

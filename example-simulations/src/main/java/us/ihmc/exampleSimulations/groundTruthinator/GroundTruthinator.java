@@ -2,11 +2,11 @@ package us.ihmc.exampleSimulations.groundTruthinator;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class GroundTruthinator
 {
@@ -40,12 +40,12 @@ public class GroundTruthinator
    /** Assumes sensed cable lengths are set before calling this
     *
     */
-   public void estimateObjectPose(FramePose estimatedPose, double epsilon)
+   public void estimateObjectPose(FramePose3D estimatedPose, double epsilon)
    {
       estimateObjectPose(estimatedPose, 0.999, epsilon);
    }
 
-   public void estimateObjectPose(FramePose estimatedPose, double rate, double epsilon)
+   public void estimateObjectPose(FramePose3D estimatedPose, double rate, double epsilon)
    {
       System.out.println(".");
       int numberOfSensors = getNumberOfSensors();
@@ -80,7 +80,7 @@ public class GroundTruthinator
 
       averageCorrectionVector.scale(rate);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(averageCorrectionVector.getVector());
+      transform.setTranslation(averageCorrectionVector);
 
       estimatedPose.applyTransform(transform);
 
@@ -108,12 +108,12 @@ public class GroundTruthinator
    private final Point3D attachmentPositionInWorldFrame = new Point3D();
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
-   public void computeEstimatedCableLengthsFromObjectPose(FramePose estimatedObjectPoseInWorld)
+   public void computeEstimatedCableLengthsFromObjectPose(FramePose3D estimatedObjectPoseInWorld)
    {
       estimatedCableVectors.clear();
 
       estimatedObjectPoseInWorld.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      estimatedObjectPoseInWorld.getRigidBodyTransform(transform);
+      estimatedObjectPoseInWorld.get(transform);
 
       int numberOfSensors = getNumberOfSensors();
 

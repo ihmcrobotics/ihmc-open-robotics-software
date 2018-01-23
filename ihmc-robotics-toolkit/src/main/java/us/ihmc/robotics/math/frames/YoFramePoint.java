@@ -1,89 +1,63 @@
 package us.ihmc.robotics.math.frames;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.interfaces.PointInterface;
 
-//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
-//since they contain YoVariables.
-public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint3D> implements PointInterface
+public class YoFramePoint extends YoFrameTuple implements FixedFramePoint3DBasics
 {
-   public YoFramePoint(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
-   {
-      this(namePrefix, "", frame, registry);
-   }
-   
-   public YoFramePoint(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
-   {
-      super(namePrefix, nameSuffix, frame, registry);
-   }
+   /** Only for some garbage-free operations and reducing number of operations on the YoDoubles. */
+   private final FramePoint3D framePoint3D = new FramePoint3D();
 
-   public YoFramePoint(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame frame)
+   /**
+    * Creates a new yo frame point using the given yo variables and sets its reference frame to
+    * {@code referenceFrame}.
+    *
+    * @param xVariable an existing variable representing the x value of this yo frame point.
+    * @param yVariable an existing variable representing the y value of this yo frame point.
+    * @param zVariable an existing variable representing the z value of this yo frame point.
+    * @param referenceFrame the reference frame for this yo frame point.
+    */
+   public YoFramePoint(YoDouble xVariable, YoDouble yVariable, YoDouble zVariable, ReferenceFrame referenceFrame)
    {
-      super(xVariable, yVariable, zVariable, frame);
-   }
-
-   protected FramePoint3D createEmptyFrameTuple()
-   {
-      return new FramePoint3D();
-   }
-
-   public double distance(FramePoint3D framePoint)
-   {
-      return getFrameTuple().distance(framePoint);
-   }
-
-   public double distance(YoFramePoint yoFramePoint)
-   {
-      return distance(yoFramePoint.getFrameTuple());
-   }
-
-   public double getXYPlaneDistance(FramePoint3D framePoint)
-   {
-      return getFrameTuple().distanceXY(framePoint);
-   }
-
-   public double getXYPlaneDistance(FramePoint2D framePoint2d)
-   {
-      return getFrameTuple().distanceXY(framePoint2d);
-   }
-
-   public double getXYPlaneDistance(YoFramePoint yoFramePoint)
-   {
-      return getXYPlaneDistance(yoFramePoint.getFrameTuple());
-   }
-
-   @Override
-   public void getPoint(Point3D pointToPack)
-   {
-      this.get(pointToPack);
-   }
-
-   private final Point3D tempPoint = new Point3D();
-   
-   @Override
-   public void setPoint(PointInterface pointInterface)
-   {
-      pointInterface.getPoint(tempPoint);
-      this.set(tempPoint);
-   }
-
-   @Override
-   public void setPoint(Point3D point)
-   {
-      this.set(point);
+      super(xVariable, yVariable, zVariable, referenceFrame);
    }
 
    /**
-    * Sets this point to the location of the origin of passed in referenceFrame.
+    * Creates a new yo frame point, initializes its coordinates to zero and its reference frame to
+    * {@code referenceFrame}, and registers variables to {@code registry}.
+    *
+    * @param namePrefix a unique name string to use as the prefix for child variable names.
+    * @param referenceFrame the reference frame for this yo frame point.
+    * @param registry the registry to register child variables to.
     */
-   @Override
-   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   public YoFramePoint(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super.setFromReferenceFrame(referenceFrame);
+      super(namePrefix, "", referenceFrame, registry);
+   }
+
+   /**
+    * Creates a new yo frame point, initializes its coordinates to zero and its reference frame to
+    * {@code referenceFrame}, and registers variables to {@code registry}.
+    *
+    * @param namePrefix a unique name string to use as the prefix for child variable names.
+    * @param nameSuffix a string to use as the suffix for child variable names.
+    * @param referenceFrame the reference frame for this yo frame point.
+    * @param registry the registry to register child variables to.
+    */
+   public YoFramePoint(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   {
+      super(namePrefix, nameSuffix, referenceFrame, registry);
+   }
+
+   @Override
+   public void setAndMatchFrame(FrameTuple3DReadOnly frameTuple3DReadOnly)
+   {
+      framePoint3D.setIncludingFrame(frameTuple3DReadOnly);
+      framePoint3D.changeFrame(getReferenceFrame());
+      set(framePoint3D);
    }
 }

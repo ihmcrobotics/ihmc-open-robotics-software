@@ -14,6 +14,7 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
@@ -53,6 +54,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
       tryToStartModule(() -> setupMultisenseManualTestModule(robotModel, params));
       tryToStartModule(() -> setupDrillDetectionModule(params));
+      tryToStartModule(() -> setupConstrainedWholebodyPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts()));
@@ -114,12 +116,12 @@ public class DRCNetworkProcessor
          packetRouter.attachPacketCommunicator(destinationId, packetCommunicator);
          try
          {
-		   	packetCommunicator.connect();
-		   }
+            packetCommunicator.connect();
+         }
          catch (IOException e)
          {
-   			e.printStackTrace();
-	   	}
+            e.printStackTrace();
+         }
          printModuleConnectedDebugStatement(destinationId, "addRobotSpecificModuleCommunicators");
       }
    }
@@ -163,6 +165,24 @@ public class DRCNetworkProcessor
          printModuleConnectedDebugStatement(PacketDestination.OBJECT_DETECTOR, methodName);
       }
    }
+   
+   private void setupConstrainedWholebodyPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isConstrainedWholeBodyPlanningToolboxEnabled())
+         return;
+      
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+
+      new WholeBodyTrajectoryToolboxModule(robotModel, fullRobotModel, null, params.isConstrainedWholeBodyToolboxVisualizerEnabled());
+
+      PacketCommunicator cwbPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE, cwbPlanningToolboxCommunicator);
+      cwbPlanningToolboxCommunicator.connect();
+
+      String methodName = "setupConstrainedWholebodyPlanningModule";
+      printModuleConnectedDebugStatement(PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE, methodName);
+      PrintTools.info("setupConstrainedWholebodyPlanningToolboxModule");
+   }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
@@ -177,6 +197,7 @@ public class DRCNetworkProcessor
 
       String methodName = "setupWholeBodyInverseKinematicsModule";
       printModuleConnectedDebugStatement(PacketDestination.KINEMATICS_TOOLBOX_MODULE, methodName);
+      PrintTools.info("setupKinematicsToolboxModule");
    }
 
    private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

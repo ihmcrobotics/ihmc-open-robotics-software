@@ -7,6 +7,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,7 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -101,7 +101,7 @@ public class SingleFootstepVisualizer
       
       ReferenceFrame soleReferenceFrame = footstep.getSoleReferenceFrame();
       double increaseZSlightlyToSeeBetter = 0.001;
-      FramePose soleFramePose = new FramePose(soleReferenceFrame, new Point3D(0.0, 0.0, increaseZSlightlyToSeeBetter), new AxisAngle());
+      FramePose3D soleFramePose = new FramePose3D(soleReferenceFrame, new Point3D(0.0, 0.0, increaseZSlightlyToSeeBetter), new AxisAngle());
       soleFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       
       this.soleFramePose.set(soleFramePose);
@@ -113,7 +113,7 @@ public class SingleFootstepVisualizer
          FramePoint3D pointInWorld = new FramePoint3D(soleReferenceFrame, contactPoint.getX(), contactPoint.getY(), 0.0);
          pointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          
-         yoContactPoints[i].set(pointInWorld.getPoint());
+         yoContactPoints[i].set(pointInWorld);
       }
 
       footPolygon.setConvexPolygon2d(new ConvexPolygon2D(predictedContactPoints));

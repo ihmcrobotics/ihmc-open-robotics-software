@@ -68,7 +68,8 @@ public class Plotter implements PlotterInterface
    private boolean rotationEnabled = ENABLE_ROTATION_BY_DEFAULT;
    
    private final PlotterColors plotterColors;
-   
+ 
+   private JFrame frame;   
    private final JPanel panel;
    
    private final PlotterMouseAdapter mouseAdapter;
@@ -770,10 +771,10 @@ public class Plotter implements PlotterInterface
    {
       showInNewWindow("Plotter", false);
    }
-   
+      
    public void showInNewWindow(String title, boolean showLegend)
    {
-      JFrame frame = new JFrame(title);
+      frame = new JFrame(title);
       if (showLegend)
       {
          frame.getContentPane().add(createAndAttachPlotterLegendPanel(), BorderLayout.CENTER);
@@ -840,6 +841,11 @@ public class Plotter implements PlotterInterface
    public JPanel getJPanel()
    {
       return panel;
+   }
+   
+   public JFrame getJFrame()
+   {
+      return frame;
    }
    
    public Graphics2DAdapter getGraphics2DAdapter()

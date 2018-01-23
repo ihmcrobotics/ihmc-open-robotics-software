@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,7 +20,6 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -104,7 +104,7 @@ public class HexapodStepController
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          RigidBody shinRigidBody = oneDoFJoint.getSuccessor();
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
-         FramePose footInShinFrame = new FramePose(footFrame);
+         FramePose3D footInShinFrame = new FramePose3D(footFrame);
          footInShinFrame.changeFrame(shinRigidBody.getBodyFixedFrame());
          shinRigidBodies.set(robotSextant, shinRigidBody);
          rigidBodiesToControl[i] = shinRigidBody;

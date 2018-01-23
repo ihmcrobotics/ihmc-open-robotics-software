@@ -77,18 +77,18 @@ public class ICPQPInputCalculator
    }
 
    /**
-    * Computes the CMP feedback regularization task. This tries to minimize the distance of the current solution
+    * Computes the CMP feedback rate task. This tries to minimize the distance of the current solution
     * from the previous solution. Has the form<br>
     *    (&delta; - &delta;<sub>prev</sub>)<sup>T</sup> Q (&delta; - &delta;<sub>prev</sub>)<br>
     * where &delta; is the CMP feedback and &delta;<sub>prev</sub> is the previous solution.
     *
-    * @param icpQPInputToPack QP input to store the CMP feedback regularization task. Modified.
-    * @param regularizationWeight weight attached to regularization the CMP feedback.
+    * @param icpQPInputToPack QP input to store the CMP feedback rate task. Modified.
+    * @param rateWeight weight attached to rate the CMP feedback.
     * @param objective the previous solution value, &delta;<sub>prev</sub>
     */
-   public void computeFeedbackRegularizationTask(ICPQPInput icpQPInputToPack, DenseMatrix64F regularizationWeight, DenseMatrix64F objective)
+   public void computeFeedbackRateTask(ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
    {
-      computeQuadraticTask(0, icpQPInputToPack, regularizationWeight, objective);
+      computeQuadraticTask(0, icpQPInputToPack, rateWeight, objective);
    }
 
    /**
@@ -124,21 +124,21 @@ public class ICPQPInputCalculator
    }
 
    /**
-    * Computes the step adjustment regularization task for a single footstep. This attempts to minimize the change from the previous step
+    * Computes the step adjustment rate task for a single footstep. This attempts to minimize the change from the previous step
     * adjustment solution. Has the form<br>
     *    (r<sub>f</sub> - r<sub>f,prev</sub>)<sup>T</sup> Q (r<sub>f</sub> - r<sub>f,prev</sub>)<br>
     * where r<sub>f</sub> is the footstep location and r<sub>f,r</sub> is the previous footstep location solution.
     *
     *
     * @param footstepNumber current footstep number of the task to formulate.
-    * @param icpQPInputToPack QP input to store the step adjustment regularization task. Modified.
-    * @param regularizationWeight weight attached to regularizing the step adjustment.
+    * @param icpQPInputToPack QP input to store the step adjustment rate task. Modified.
+    * @param rateWeight weight attached to regularizing the step adjustment.
     * @param objective previous footstep location, r<sub>f,prev</sub>
     */
-   public void computeFootstepRegularizationTask(int footstepNumber, ICPQPInput icpQPInputToPack, DenseMatrix64F regularizationWeight, DenseMatrix64F objective)
+   public void computeFootstepRateTask(int footstepNumber, ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
    {
       int footstepIndex = 2 * footstepNumber;
-      computeQuadraticTask(footstepIndex, icpQPInputToPack, regularizationWeight, objective);
+      computeQuadraticTask(footstepIndex, icpQPInputToPack, rateWeight, objective);
    }
 
    private void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective)

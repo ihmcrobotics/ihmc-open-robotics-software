@@ -3,17 +3,17 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ListOfPointsContactableFoot extends ListOfPointsContactablePlaneBody implements ContactableFoot
 {
    private final FramePoint2D toeOffContactPoint = new FramePoint2D();
-   private final FrameLineSegment2d toeOffContactLine = new FrameLineSegment2d();
+   private final FrameLineSegment2D toeOffContactLine = new FrameLineSegment2D();
 
    public ListOfPointsContactableFoot(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame, Point2D toeOffContactPointInSoleFrame,
          LineSegment2D toeOffContactLineInSoleFrame)
@@ -31,7 +31,7 @@ public class ListOfPointsContactableFoot extends ListOfPointsContactablePlaneBod
    }
 
    @Override
-   public void getToeOffContactLine(FrameLineSegment2d contactLineToPack)
+   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack)
    {
       contactLineToPack.setIncludingFrame(toeOffContactLine);
    }

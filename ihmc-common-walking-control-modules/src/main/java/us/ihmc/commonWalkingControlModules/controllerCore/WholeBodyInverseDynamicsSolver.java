@@ -189,10 +189,10 @@ public class WholeBodyInverseDynamicsSolver
       SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
-      yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
+      achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
 
       yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
-      yoAchievedMomentumRateAngular.getFrameTupleIncludingFrame(achievedMomentumRateAngular);
+      achievedMomentumRateAngular.setIncludingFrame(yoAchievedMomentumRateAngular);
 
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)

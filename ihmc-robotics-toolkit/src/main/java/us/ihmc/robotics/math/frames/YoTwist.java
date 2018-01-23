@@ -42,8 +42,8 @@ public class YoTwist extends YoSpatialVector
    protected void putYoValuesIntoTwist()
    {
       twist.setToZero(bodyFrame, baseFrame, expressedInFrame);
-      twist.setLinearPart(linearPart.getFrameTuple());
-      twist.setAngularPart(angularPart.getFrameTuple());
+      twist.setLinearPart(linearPart);
+      twist.setAngularPart(angularPart);
    }
    
    protected void getYoValuesFromTwist()

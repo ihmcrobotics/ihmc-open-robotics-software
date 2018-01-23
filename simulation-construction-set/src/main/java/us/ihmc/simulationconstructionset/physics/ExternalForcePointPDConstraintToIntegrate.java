@@ -95,18 +95,18 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
       totalForce.add(springForce);
       totalForce.add(damperForce);
 
-      connectionPointA.setForce(totalForce.getVector());
+      connectionPointA.setForce(totalForce);
       totalForce.scale(-1.0);
-      connectionPointB.setForce(totalForce.getVector());
+      connectionPointB.setForce(totalForce);
    }
 
    private void updateFrameAndKinematics()
    {
-      yoConnectionAPosition.getFrameTupleIncludingFrame(connectionAPosition);
-      yoConnectionBPosition.getFrameTupleIncludingFrame(connectionBPosition);
+      connectionAPosition.setIncludingFrame(yoConnectionAPosition);
+      connectionBPosition.setIncludingFrame(yoConnectionBPosition);
 
-      yoConnectionAVelocity.getFrameTupleIncludingFrame(connectionAVelocity);
-      yoConnectionBVelocity.getFrameTupleIncludingFrame(connectionBVelocity);
+      connectionAVelocity.setIncludingFrame(yoConnectionAVelocity);
+      connectionBVelocity.setIncludingFrame(yoConnectionBVelocity);
    }
 
    private void computeErrors()

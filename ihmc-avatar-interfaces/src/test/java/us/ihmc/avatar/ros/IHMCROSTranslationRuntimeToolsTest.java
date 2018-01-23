@@ -21,6 +21,12 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Tests the proper ROS<->Java translation of the IHMC messages.
+ * <p>
+ * If this test fails, the ROS messages are very likely to be out of date. To regenerate the ROS API
+ * start here: {@link DRCROSMessageGenerator}.
+ * </p>
+ * 
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -33,10 +39,11 @@ public class IHMCROSTranslationRuntimeToolsTest
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<?>> concreteTypes = new HashSet<>();
       Set<Class<?>> annotatedTypes = reflections.getTypesAnnotatedWith(RosMessagePacket.class);
-      Stream<Class<?>> ihmcPacketClassesStream = annotatedTypes.stream().filter(annotatedType -> annotatedType.getAnnotation(RosMessagePacket.class).isIHMCPacket());
+      Stream<Class<?>> ihmcPacketClassesStream = annotatedTypes.stream()
+                                                               .filter(annotatedType -> annotatedType.getAnnotation(RosMessagePacket.class).isIHMCPacket());
       for (Class<?> aClass : ihmcPacketClassesStream.collect(Collectors.toSet()))
       {
-         if(!Modifier.isAbstract(aClass.getModifiers()))
+         if (!Modifier.isAbstract(aClass.getModifiers()))
          {
             concreteTypes.add(aClass);
          }
@@ -46,7 +53,7 @@ public class IHMCROSTranslationRuntimeToolsTest
       Packet<?> ihmcMessage = null;
       Random random = new Random(1976L);
 
-      for(int i = 0; i < 5000; i++)
+      for (int i = 0; i < 5000; i++)
       {
          int packetsFailed = 0;
          for (Class<?> concreteType : concreteTypes)

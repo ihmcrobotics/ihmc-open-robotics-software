@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,7 +21,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -134,16 +134,16 @@ public class KickBehavior extends AbstractBehavior
    private void submitFootPosition(RobotSide robotSide, FramePoint3D desiredFootPosition)
    {
       FrameQuaternion desiredFootOrientation = new FrameQuaternion(desiredFootPosition.getReferenceFrame());
-      FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);
+      FramePose3D desiredFootPose = new FramePose3D(desiredFootPosition, desiredFootOrientation);
       submitFootPose(robotSide, desiredFootPose);
    }
 
-   private void submitFootPose(RobotSide robotSide, FramePose desiredFootPose)
+   private void submitFootPose(RobotSide robotSide, FramePose3D desiredFootPose)
    {
       desiredFootPose.changeFrame(worldFrame);
       Point3D desiredFootPosition = new Point3D();
       Quaternion desiredFootOrientation = new Quaternion();
-      desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
+      desiredFootPose.get(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryTask task = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, footTrajectoryBehavior,
             trajectoryTime.getDoubleValue());
       pipeLine.submitSingleTaskStage(task);

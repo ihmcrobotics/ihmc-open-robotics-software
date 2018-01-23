@@ -3,12 +3,13 @@ package us.ihmc.robotics.lists;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
-public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends RecyclingArrayList<T>
+public class FrameTuple2dArrayList<T extends FrameTuple2DBasics> extends RecyclingArrayList<T>
 {
    private FrameTuple2dArrayList(Class<T> clazz)
    {
@@ -20,7 +21,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends Recycli
       super(initialSize, clazz);
    }
 
-   public void setOrCreate(int i, FrameTuple2D<?, ?> frameTuple2d)
+   public void setOrCreate(int i, FrameTuple2DReadOnly frameTuple2d)
    {
       if (i >= size)
       {
@@ -30,17 +31,17 @@ public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends Recycli
       unsafeGet(i).setIncludingFrame(frameTuple2d);
    }
 
-   public void set(int i, FrameTuple2D<?, ?> frameTuple2d)
+   public void set(int i, FrameTuple2DReadOnly frameTuple2d)
    {
       get(i).setIncludingFrame(frameTuple2d);
    }
 
-   private void unsafeSet(int i, FrameTuple2D<?, ?> frameTuple2d)
+   private void unsafeSet(int i, FrameTuple2DReadOnly frameTuple2d)
    {
       unsafeGet(i).setIncludingFrame(frameTuple2d);
    }
 
-   private void unsafeSet(int i, ReferenceFrame referenceFrame, Tuple2DBasics tuple2d)
+   private void unsafeSet(int i, ReferenceFrame referenceFrame, Tuple2DReadOnly tuple2d)
    {
       unsafeGet(i).setIncludingFrame(referenceFrame, tuple2d);
    }
@@ -56,7 +57,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends Recycli
       }
    }
 
-   public void copyFromListAndTrimSize(List<? extends FrameTuple2D<?, ?>> otherList)
+   public void copyFromListAndTrimSize(List<? extends FrameTuple2DReadOnly> otherList)
    {
       ensureCapacity(otherList.size());
       size = otherList.size();
@@ -67,7 +68,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2D<?, ?>> extends Recycli
       }
    }
 
-   public void copyFromPoint2dListAndTrimSize(ReferenceFrame referenceFrame, List<? extends Tuple2DBasics> otherList)
+   public void copyFromPoint2dListAndTrimSize(ReferenceFrame referenceFrame, List<? extends Tuple2DReadOnly> otherList)
    {
       ensureCapacity(otherList.size());
       size = otherList.size();

@@ -38,8 +38,8 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
 
       bodySpatialLinearQPWeight = new YoFrameVector("bodySpatial_linear_QPWeight", ReferenceFrame.getWorldFrame(), registry);
       bodySpatialAngularQPWeight = new YoFrameVector("bodySpatial_angular_QPWeight", ReferenceFrame.getWorldFrame(), registry);
-      bodySpatialAngularQPWeight.setVector(angularWeight);
-      bodySpatialLinearQPWeight.setVector(linearWeight);
+      bodySpatialAngularQPWeight.set(angularWeight);
+      bodySpatialLinearQPWeight.set(linearWeight);
 
       DefaultYoPID3DGains positionGains = new DefaultYoPID3DGains(name + "FootPosition", GainCoupling.XY, false, registry);
       positionGains.setProportionalGains(getSwingXYProportionalGain(), getSwingXYProportionalGain(), getSwingZProportionalGain());
@@ -84,13 +84,13 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    @Override
    public void getBodySpatialLinearQPWeight(Vector3D linearWeight)
    {
-      bodySpatialLinearQPWeight.get(linearWeight);
+      linearWeight.set(bodySpatialLinearQPWeight);
    }
 
    @Override
    public void getBodySpatialAngularQPWeight(Vector3D angularWeight)
    {
-      bodySpatialAngularQPWeight.get(angularWeight);
+      angularWeight.set(bodySpatialAngularQPWeight);
    }
 
    @Override

@@ -707,17 +707,17 @@ public class YoConcatenatedSplines
 
    public FramePoint3D getPosition()
    {
-      return position.getFramePointCopy();
+      return new FramePoint3D(position);
    }
 
    public FrameVector3D getVelocity()
    {
-      return velocity.getFrameVectorCopy();
+      return new FrameVector3D(velocity);
    }
 
    public FrameVector3D getAcceleration()
    {
-      return acceleration.getFrameVectorCopy();
+      return new FrameVector3D(acceleration);
    }
 
    public void getPosition(YoFramePoint positionToPack)

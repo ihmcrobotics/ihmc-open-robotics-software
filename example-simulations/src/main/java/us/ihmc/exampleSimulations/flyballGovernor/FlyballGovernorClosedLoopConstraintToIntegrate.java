@@ -55,10 +55,10 @@ public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionT
 
    public void doConstraint()
    {
-      positionA.get(posA);
-      positionB.get(posB);
-      velocityA.get(velA);
-      velocityB.get(velB);
+      posA.set(positionA);
+      posB.set(positionB);
+      velA.set(velocityA);
+      velB.set(velocityB);
 
       springForceA.sub(posB, posA);
       positionErrorMagnitude.set(springForceA.length());

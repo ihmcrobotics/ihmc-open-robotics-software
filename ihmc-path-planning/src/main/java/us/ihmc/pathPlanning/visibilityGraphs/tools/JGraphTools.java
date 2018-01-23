@@ -12,6 +12,7 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 public class JGraphTools
@@ -82,6 +83,11 @@ public class JGraphTools
 
    public static void addConnectionToGraph(Connection connection, SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graphToUpdate)
    {
+      addConnectionToGraph(connection, connection.length(), graphToUpdate);
+   }
+
+   public static void addConnectionToGraph(Connection connection, double connectionWeight, SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> graphToUpdate)
+   {
       ConnectionPoint3D source = connection.getSourcePoint();
       ConnectionPoint3D target = connection.getTargetPoint();
 
@@ -91,7 +97,7 @@ public class JGraphTools
          graphToUpdate.addVertex(target);
          DefaultWeightedEdge edge = new DefaultWeightedEdge();
          graphToUpdate.addEdge(source, target, edge);
-         graphToUpdate.setEdgeWeight(edge, source.distance(target));
+         graphToUpdate.setEdgeWeight(edge, connectionWeight);
       }
    }
 
@@ -104,7 +110,12 @@ public class JGraphTools
    {
       SimpleWeightedGraph<ConnectionPoint3D, DefaultWeightedEdge> globalVisMap = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-      allVisibilityMapHolders.stream().map(VisibilityMapHolder::getVisibilityMapInWorld).forEach(map -> addConnectionsToGraph(map, globalVisMap));
+      for (VisibilityMapHolder visibilityMapHolder : allVisibilityMapHolders)
+      {
+         VisibilityMap visibilityMap = visibilityMapHolder.getVisibilityMapInWorld();
+         for (Connection connection : visibilityMap)
+            addConnectionToGraph(connection, visibilityMapHolder.getConnectionWeight(connection), globalVisMap);
+      }
 
       return globalVisMap;
    }

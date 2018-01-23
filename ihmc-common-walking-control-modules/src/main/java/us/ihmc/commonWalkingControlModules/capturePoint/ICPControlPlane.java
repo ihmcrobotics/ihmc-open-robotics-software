@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -68,7 +69,7 @@ public class ICPControlPlane
       return controlPlaneHeight.getDoubleValue();
    }
 
-   public void projectPointOntoControlPlane(ReferenceFrame desiredReferenceFrame, FramePoint3D pointToProject, FramePoint3D projectionToPack)
+   public void projectPointOntoControlPlane(ReferenceFrame desiredReferenceFrame, FramePoint3DReadOnly pointToProject, FramePoint3D projectionToPack)
    {
       tempFramePoint.setIncludingFrame(pointToProject);
       tempFramePoint.changeFrame(centerOfMassFrame);

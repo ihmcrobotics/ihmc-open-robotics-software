@@ -5,6 +5,7 @@ import static us.ihmc.robotics.geometry.AngleTools.*;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,7 +24,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -109,7 +109,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final ReferenceFrame trajectoryFrame;
    private ReferenceFrame controlledFrame;
    private final PoseReferenceFrame tangentialCircleFrame;
-   private final FramePose tangentialCircleFramePose = new FramePose();
+   private final FramePose3D tangentialCircleFramePose = new FramePose3D();
    private final YoFramePose yoTangentialCircleFramePose;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
@@ -177,8 +177,8 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            circleOrigin.get(localTranslation);
-            rotationAxis.get(localRotationAxis);
+            localTranslation.set(circleOrigin);
+            localRotationAxis.set(rotationAxis);
             EuclidGeometryTools.axisAngleFromZUpToVector3D(localRotationAxis, localAxisAngle);
             transformToParent.set(localAxisAngle, localTranslation);
          }
@@ -281,10 +281,10 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoInitialOrientation.set(initialOrientation);
    }
 
-   public void setInitialPose(FramePose initialPose)
+   public void setInitialPose(FramePose3D initialPose)
    {
       initialPose.changeFrame(trajectoryFrame);
-      initialPose.getPoseIncludingFrame(initialPosition, initialOrientation);
+      initialPose.get(initialPosition, initialOrientation);
       yoInitialPosition.set(initialPosition);
       yoInitialOrientation.set(initialOrientation);
    }
@@ -299,7 +299,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       currentTime.set(0.0);
       desiredTrajectoryTime.set(desiredTrajectoryTimeProvider.getValue());
 
-      yoInitialPosition.getFrameTupleIncludingFrame(initialPosition);
+      initialPosition.setIncludingFrame(yoInitialPosition);
       initialPosition.changeFrame(circleFrame);
 
       if (rotateHandAngleAboutAxis)
@@ -441,7 +441,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double y = tangentialCircleFramePose.getY();
 
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
-      tangentialCircleFramePose.setYawPitchRoll(yaw, 0.0, 0.0);
+      tangentialCircleFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       tangentialCircleFrame.setPoseAndUpdate(tangentialCircleFramePose);
       yoTangentialCircleFramePose.setAndMatchFrame(tangentialCircleFramePose);
    }
@@ -497,16 +497,16 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private void visualizeTrajectory()
    {
-      yoInitialPosition.getFrameTupleIncludingFrame(initialPosition);
+      initialPosition.setIncludingFrame(yoInitialPosition);
       yoInitialPositionWorld.setAndMatchFrame(initialPosition);
-      yoFinalPosition.getFrameTupleIncludingFrame(finalPosition);
+      finalPosition.setIncludingFrame(yoFinalPosition);
       yoFinalPositionWorld.setAndMatchFrame(finalPosition);
 
       for (int i = 0; i < numberOfBalls; i++)
       {
          double t = (double) i / ((double) numberOfBalls - 1) * desiredTrajectoryTime.getDoubleValue();
          compute(t, false);
-         yoCurrentPosition.getFrameTupleIncludingFrame(ballPosition);
+         ballPosition.setIncludingFrame(yoCurrentPosition);
          ballPosition.changeFrame(worldFrame);
          bagOfBalls.setBallLoop(ballPosition);
       }
@@ -540,40 +540,38 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(yoCurrentAdjustedPositionWorld);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      yoCurrentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(yoCurrentVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      yoCurrentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(yoCurrentAcceleration);
    }
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(yoCurrentOrientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
-      yoCurrentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(yoCurrentAngularVelocity);
    }
 
    public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
-      yoCurrentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
+      angularAccelerationToPack.setIncludingFrame(yoCurrentAngularAcceleration);
    }
 
    @Override
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
-      yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(currentPosition);
-      yoCurrentOrientation.getFrameOrientationIncludingFrame(currentOrientation);
-      framePoseToPack.setPoseIncludingFrame(currentPosition, currentOrientation);
+      framePoseToPack.setIncludingFrame(yoCurrentAdjustedPositionWorld, yoCurrentOrientation);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)

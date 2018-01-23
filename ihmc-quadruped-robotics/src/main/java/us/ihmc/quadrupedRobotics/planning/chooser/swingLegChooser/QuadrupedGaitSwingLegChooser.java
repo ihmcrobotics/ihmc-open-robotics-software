@@ -1,19 +1,20 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
 {
@@ -22,7 +23,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
    private final QuadrantDependentList<TranslationReferenceFrame> feetFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<FramePoint3D> feet = new QuadrantDependentList<>();
    private final FramePoint3D feetCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   private final FramePose feetCentroidPose = new FramePose(ReferenceFrame.getWorldFrame());
+   private final FramePose3D feetCentroidPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame centroidFrame = new PoseReferenceFrame("", feetCentroidPose);
    private final YoGraphicReferenceFrame centroidFrameViz;
    
@@ -35,7 +36,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
    }
    
    @Override
-   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3D desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3DReadOnly desiredVelocity, double desiredYawRate)
    {
       RobotQuadrant nextSwingLeg = null;
       
@@ -78,7 +79,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
          yaw += Math.PI;
       }
       yaw -= desiredYawRate;
-      feetCentroidPose.setYawPitchRoll(yaw, 0.0, 0.0);
+      feetCentroidPose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       
       supportPolygon.getCentroid(feetCentroid);
       feetCentroidPose.setPosition(feetCentroid);

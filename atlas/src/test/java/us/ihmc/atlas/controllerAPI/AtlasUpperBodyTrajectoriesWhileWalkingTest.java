@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,7 +37,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
@@ -68,7 +68,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.FAST, estimatedDuration = 31.3)
-   @Test(timeout = 160000)
+   @Test(timeout = 190000)
    public void testWalkingWithRandomArmTrajectoryMovements() throws Exception
    {
       Random random = new Random(564654L);
@@ -117,13 +117,11 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame handFrame = referenceFrames.getHandFrame(robotSide);
-         FramePose handPosition = new FramePose();
+         FramePose3D handPosition = new FramePose3D();
          handPosition.setToZero(handFrame);
          handPosition.changeFrame(worldFrame);
-         Point3D position = new Point3D();
-         handPosition.getPosition(position);
-         Quaternion orientation = new Quaternion();
-         handPosition.getOrientation(orientation);
+         Point3D position = new Point3D(handPosition.getPosition());
+         Quaternion orientation = new Quaternion(handPosition.getOrientation());
 
          HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage(robotSide, 1);
          handHoldMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));

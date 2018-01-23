@@ -10,6 +10,7 @@ import org.junit.rules.TestName;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,7 +37,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -60,10 +60,10 @@ public class FootstepPlanningWithBodyPathTest
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
       double goalDistance = 5.0;
-      FramePose initialStanceFootPose = new FramePose();
+      FramePose3D initialStanceFootPose = new FramePose3D();
       RobotSide initialStanceFootSide = RobotSide.LEFT;
       initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
-      FramePose goalPose = new FramePose();
+      FramePose3D goalPose = new FramePose3D();
       goalPose.setX(goalDistance);
 
       WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
@@ -114,21 +114,21 @@ public class FootstepPlanningWithBodyPathTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
-      FramePose initialMidFootPose = new FramePose();
+      FramePose3D initialMidFootPose = new FramePose3D();
       initialMidFootPose.setX(startPos.getX());
       initialMidFootPose.setY(startPos.getY());
-      initialMidFootPose.setYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
+      initialMidFootPose.setOrientationYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
       PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
       RobotSide initialStanceFootSide = RobotSide.RIGHT;
-      FramePose initialStanceFootPose = new FramePose(midFootFrame);
+      FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
       initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
       initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose goalPose = new FramePose();
+      FramePose3D goalPose = new FramePose3D();
       goalPose.setX(finalPose.getX());
       goalPose.setY(finalPose.getY());
-      goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+      goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
       AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);

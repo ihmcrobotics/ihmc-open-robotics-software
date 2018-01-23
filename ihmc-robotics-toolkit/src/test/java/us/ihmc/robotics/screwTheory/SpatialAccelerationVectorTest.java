@@ -93,7 +93,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       expected.cross(twist.getAngularPart(), expected);
       expected.cross(twist.getAngularPart(), expected);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expected, accelerationOfPointFixedInFrameB.getVector(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, accelerationOfPointFixedInFrameB, 1e-7);
    }
 
 	/**
@@ -135,7 +135,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
          
          // Verify that they are the same
          bodyFixedPointLinearAccelerationInBody.changeFrame(baseFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearAccelerationInBase.getVector(), bodyFixedPointLinearAccelerationInBody.getVector(), 1.0e-12);
+         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearAccelerationInBase, bodyFixedPointLinearAccelerationInBody, 1.0e-12);
       }
    }
 
@@ -367,7 +367,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       acceleration.getLinearAccelerationFromOriginAcceleration(twistOfBodyWithRespectToBase, linearAccelerationCheck);
       linearAccelerationCheck.changeFrame(originAcceleration.getReferenceFrame());
 
-      EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck.getVector(), originAcceleration.getVector(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck, originAcceleration, 1e-12);
       
       FrameVector3D originAccelerationBack = new FrameVector3D(twistOfBodyWithRespectToBase.getExpressedInFrame());
       FramePoint3D origin = new FramePoint3D(acceleration.getBodyFrame());
@@ -377,7 +377,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       acceleration.getAccelerationOfPointFixedInBodyFrame(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
 
       originAccelerationBack.changeFrame(originAcceleration.getReferenceFrame());
-      EuclidCoreTestTools.assertTuple3DEquals(originAccelerationBack.getVector(), originAcceleration.getVector(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(originAccelerationBack, originAcceleration, 1e-12);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

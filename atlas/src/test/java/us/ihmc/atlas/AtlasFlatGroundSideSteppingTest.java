@@ -2,12 +2,14 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundSideSteppingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -36,6 +38,19 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
             public boolean alwaysAllowMomentum()
             {
                return true;
+            }
+
+            @Override
+            public ICPOptimizationParameters getICPOptimizationParameters()
+            {
+               return new AtlasICPOptimizationParameters(false)
+               {
+                  @Override
+                  public boolean useAngularMomentum()
+                  {
+                     return true;
+                  }
+               };
             }
          };
       }

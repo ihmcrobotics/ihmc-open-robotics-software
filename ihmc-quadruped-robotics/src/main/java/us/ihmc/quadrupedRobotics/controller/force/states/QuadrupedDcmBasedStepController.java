@@ -6,28 +6,39 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedComPositionController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedFootStateMachine;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.quadrupedRobotics.planning.*;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
+import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
@@ -227,7 +238,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       groundPlaneEstimator.clearContactPoints();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant).getFrameTuple().getPoint());
+         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
       }
       groundPlaneEstimator.compute();
 
@@ -289,7 +300,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       if (onTouchDownTriggered.getBooleanValue())
       {
          onTouchDownTriggered.set(false);
-         accumulatedStepAdjustment.add(instantaneousStepAdjustment.getFrameTuple().getVector());
+         accumulatedStepAdjustment.add(instantaneousStepAdjustment);
          accumulatedStepAdjustment.setZ(0);
       }
    }
@@ -357,7 +368,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
             stepSequence.get(stepSequence.size() - 1).set(stepStream.getSteps().get(i));
             stepSequence.get(stepSequence.size() - 1).getGoalPosition(stepGoalPosition);
             stepGoalPosition.changeFrame(worldFrame);
-            stepGoalPosition.add(accumulatedStepAdjustment.getFrameTuple());
+            stepGoalPosition.add(accumulatedStepAdjustment);
             stepSequence.get(stepSequence.size() - 1).setGoalPosition(stepGoalPosition);
          }
       }
@@ -387,9 +398,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
             {
                stepSequence.get(i).getGoalPosition(stepGoalPosition);
                stepGoalPosition.changeFrame(worldFrame);
-               stepGoalPosition.add(instantaneousStepAdjustment.getFrameTuple());
+               stepGoalPosition.add(instantaneousStepAdjustment);
                crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), robotQuadrant);
-               groundPlaneEstimator.projectZ(stepGoalPosition.getPoint());
+               groundPlaneEstimator.projectZ(stepGoalPosition);
                footStateMachine.get(robotQuadrant).adjustStep(stepGoalPosition);
             }
          }
@@ -453,7 +464,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          groundPlanePositions.get(robotQuadrant).setAndMatchFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
-         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant).getFrameTuple().getPoint());
+         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
       }
       groundPlaneEstimator.compute();
 

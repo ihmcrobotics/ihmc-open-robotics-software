@@ -19,7 +19,7 @@ public class ExportSnapshotAction extends AbstractAction
       super("Export Snapshot...");
       this.constructor = constructor;
 
-      String iconFilename = "icons/YoExportSnapshot.gif";
+      String iconFilename = "icons/Screenshot.png";
       int shortKey = KeyEvent.VK_S;
       String longDescription = "Export snapshot to a file.";
       String shortDescription = "Export Snapshot";

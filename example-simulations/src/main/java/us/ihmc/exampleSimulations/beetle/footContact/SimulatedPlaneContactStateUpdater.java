@@ -8,14 +8,13 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 
@@ -53,7 +52,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       if (isFootInContact())
       {
          YoFramePoint yoPosition = contactPoint.getYoPosition();
-         yoPosition.getFrameTupleIncludingFrame(touchdownPoint);
+         touchdownPoint.setIncludingFrame(yoPosition);
          touchdownPoint.changeFrame(soleFrame);
          planeContactStateCommand.addPointInContact(touchdownPoint);
       }
@@ -70,7 +69,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
       YoFramePoint yoPosition = contactPoint.getYoPosition();
-      yoPosition.getFrameTupleIncludingFrame(touchdownPoint);
+      touchdownPoint.setIncludingFrame(yoPosition);
       touchdownPoint.changeFrame(soleFrame);
       planeContactStateCommand.addPointInContact(touchdownPoint);
 
@@ -127,8 +126,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    @Override
    public void getContactNormalFrameVector(FrameVector3D frameVectorToPack)
    {
-      YoFrameVector yoSurfaceNormal = contactPoint.getYoSurfaceNormal();
-      yoSurfaceNormal.getFrameTuple(frameVectorToPack);
+      frameVectorToPack.set(contactPoint.getYoSurfaceNormal());
    }
 
    @Override
@@ -223,7 +221,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       @Override
       public FramePoint3D getPosition()
       {
-         return groundContactPoint.getYoPosition().getFrameTuple();
+         return new FramePoint3D(groundContactPoint.getYoPosition());
       }
 
       @Override
@@ -245,7 +243,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void getPosition2d(FrameTuple2D<?, ?> framePoint2dToPack)
+      public void getPosition2d(FrameTuple2DBasics framePoint2dToPack)
       {
          
       }
@@ -257,13 +255,13 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void setPosition(FrameTuple3D<?, ?> position)
+      public void setPosition(FrameTuple3DReadOnly position)
       {
          
       }
 
       @Override
-      public void setPosition2d(FrameTuple2D<?, ?> position2d)
+      public void setPosition2d(FrameTuple2DReadOnly position2d)
       {
          
       }

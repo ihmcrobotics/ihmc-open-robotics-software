@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -19,7 +20,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,7 +49,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
 
    private HeightMap heightMap;
 
-   private final FrameOrientation2d pelvisOrientation2d = new FrameOrientation2d();
+   private final FrameOrientation2D pelvisOrientation2d = new FrameOrientation2D();
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
    public ComponentBasedDesiredFootstepCalculator(ReferenceFrame pelvisZUpFrame, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
@@ -120,8 +120,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setRobotSide(futureSwingLegSide);
-      predictedFootstep.setLocation(footstepPosition.getPoint());
-      predictedFootstep.setOrientation(footstepOrientation.getQuaternion());
+      predictedFootstep.setLocation(footstepPosition);
+      predictedFootstep.setOrientation(footstepOrientation);
       return predictedFootstep;
    }
 

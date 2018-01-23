@@ -94,7 +94,7 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
       double distance = initialPosition.distance(tempPoint);
       double estimatedCollisionTime = distance / ballVelocityMagnitude;
 
-      Point3D ret = new Point3D(ballTargetVelocity.getFrameVectorCopy().getVector());
+      Point3D ret = new Point3D(ballTargetVelocity);
       ret.scale(estimatedCollisionTime);
       ret.add(tempPoint);
       return ret;

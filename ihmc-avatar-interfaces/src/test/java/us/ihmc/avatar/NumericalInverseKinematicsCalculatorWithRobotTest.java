@@ -12,6 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,7 +20,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsStepListener;
@@ -314,7 +314,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private void solveForArmPoseWithInverseKinematics(Random random, FrameQuaternion desiredOrientation, FramePoint3D desiredPosition,
            InitialGuessForTests initialGuessForTests, boolean updateListenersEachStep)
    {
-      FramePose handPose = new FramePose(worldFrame);
+      FramePose3D handPose = new FramePose3D(worldFrame);
 
       handPose.setOrientation(desiredOrientation);
       handPose.setPosition(desiredPosition);
@@ -322,7 +322,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       RigidBodyTransform transform = new RigidBodyTransform();
 
-      handPose.getPose(transform);
+      handPose.get(transform);
 
       createInitialGuess(random, initialGuessForTests);
 

@@ -3,7 +3,6 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
 
 import java.io.File;
-import java.nio.file.Path;
 
 import com.sun.javafx.scene.control.skin.LabeledText;
 
@@ -117,12 +116,11 @@ public class DatasetNavigationAccordionController
          return;
 
       String filename = listViewOwner.getSelectionModel().getSelectedItem();
-//      File dataFile = findChildFile(dataFolder, filename);
-      Path datasetFolder = dataFolder.toPath().resolve(filename);
-      File dataFile = VisibilityGraphsIOTools.fileFromClassPath(datasetFolder);
+      File dataFile = findChildFile(dataFolder, filename);
+
       if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(dataFile))
       {
-         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(datasetFolder);
+         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(dataFile);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());

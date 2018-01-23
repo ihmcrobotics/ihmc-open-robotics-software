@@ -3,10 +3,11 @@ package us.ihmc.robotics.lists;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 
-public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends RecyclingArrayList<T>
+public class FrameTupleArrayList<T extends FrameTuple3DBasics> extends RecyclingArrayList<T>
 {
    private FrameTupleArrayList(Class<T> clazz)
    {
@@ -18,7 +19,7 @@ public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends Recycling
       super(initialSize, clazz);
    }
 
-   public void setOrCreate(int i, FrameTuple3D<?, ?> frameTuple)
+   public void setOrCreate(int i, FrameTuple3DReadOnly frameTuple)
    {
       if (i >= size)
       {
@@ -28,12 +29,12 @@ public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends Recycling
       unsafeGet(i).setIncludingFrame(frameTuple);
    }
 
-   public void set(int i, FrameTuple3D<?, ?> frameTuple)
+   public void set(int i, FrameTuple3DReadOnly frameTuple)
    {
       get(i).setIncludingFrame(frameTuple);
    }
 
-   private void unsafeSet(int i, FrameTuple3D<?, ?> frameTuple)
+   private void unsafeSet(int i, FrameTuple3DReadOnly frameTuple)
    {
       unsafeGet(i).setIncludingFrame(frameTuple);
    }
@@ -49,7 +50,7 @@ public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends Recycling
       }
    }
 
-   public void copyFromListAndTrimSize(List<? extends FrameTuple3D<?, ?>> otherList)
+   public void copyFromListAndTrimSize(List<? extends FrameTuple3DReadOnly> otherList)
    {
       ensureCapacity(otherList.size());
       size = otherList.size();

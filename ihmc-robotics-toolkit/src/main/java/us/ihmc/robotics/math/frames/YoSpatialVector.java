@@ -2,9 +2,10 @@ package us.ihmc.robotics.math.frames;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -133,27 +134,27 @@ public class YoSpatialVector
       return angularPart;
    }
 
-   public FrameVector3D getLinearPart()
+   public FrameVector3DReadOnly getLinearPart()
    {
-      return linearPart.getFrameTuple();
+      return linearPart;
    }
 
-   public FrameVector3D getAngularPart()
+   public FrameVector3DReadOnly getAngularPart()
    {
-      return angularPart.getFrameTuple();
+      return angularPart;
    }
 
-   public void setAndMatchFrameLinearPart(FrameTuple3D<?, ?> frameVector)
+   public void setAndMatchFrameLinearPart(FrameTuple3DReadOnly frameVector)
    {
       linearPart.setAndMatchFrame(frameVector);
    }
 
-   public void setAndMatchFrameAngularPart(FrameTuple3D<?, ?> frameVector)
+   public void setAndMatchFrameAngularPart(FrameTuple3DReadOnly frameVector)
    {
       angularPart.setAndMatchFrame(frameVector);
    }
 
-   public void setAndMatchFrame(FrameTuple3D<?, ?> linearPart, FrameTuple3D<?, ?> angularPart)
+   public void setAndMatchFrame(FrameTuple3DReadOnly linearPart, FrameTuple3DReadOnly angularPart)
    {
       setAndMatchFrameLinearPart(linearPart);
       setAndMatchFrameAngularPart(angularPart);
@@ -191,17 +192,17 @@ public class YoSpatialVector
 
    public void getLinearPart(Vector3DBasics linearPartToPack)
    {
-      this.linearPart.get(linearPartToPack);
+      linearPartToPack.set(this.linearPart);
    }
 
    public void getLinearPart(FrameVector3D linearPartToPack)
    {
-      this.linearPart.getFrameTuple(linearPartToPack);
+      linearPartToPack.set(this.linearPart);
    }
 
    public void getLinearPartIncludingFrame(FrameVector3D linearPartToPack)
    {
-      this.linearPart.getFrameTupleIncludingFrame(linearPartToPack);
+      linearPartToPack.setIncludingFrame(this.linearPart);
    }
 
    public void getLinearPart(YoFrameVector linearPartToPack)
@@ -211,17 +212,17 @@ public class YoSpatialVector
 
    public void getAngularPart(Vector3DBasics angularPartToPack)
    {
-      this.angularPart.get(angularPartToPack);
+      angularPartToPack.set(this.angularPart);
    }
 
    public void getAngularPart(FrameVector3D angularPartToPack)
    {
-      this.angularPart.getFrameTuple(angularPartToPack);
+      angularPartToPack.set(this.angularPart);
    }
 
    public void getAngularPartIncludingFrame(FrameVector3D angularPartToPack)
    {
-      this.angularPart.getFrameTupleIncludingFrame(angularPartToPack);
+      angularPartToPack.setIncludingFrame(this.angularPart);
    }
 
    public void getAngularPart(YoFrameVector angularPartToPack)

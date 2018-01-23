@@ -1,15 +1,13 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
@@ -19,8 +17,6 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
    protected final YoFrameOrientation yoFrameOrientation;
    protected final double scale;
    private final Vector3D translationVector = new Vector3D();
-   private final Point3D tempPoint = new Point3D();
-   private final Quaternion tempQuaternion = new Quaternion();
 
    protected YoGraphicAbstractShape(String name, YoFramePoint framePoint, YoFrameOrientation frameOrientation, double scale)
    {
@@ -33,15 +29,11 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       this.scale = scale;
    }
 
-   public void setPose(FramePose framePose)
+   public void setPose(FramePose3D framePose)
    {
       yoFramePoint.checkReferenceFrameMatch(framePose.getReferenceFrame());
-
-      framePose.getPosition(tempPoint);
-      yoFramePoint.setPoint(tempPoint);
-
-      framePose.getOrientation(tempQuaternion);
-      yoFrameOrientation.set(tempQuaternion);
+      yoFramePoint.set(framePose.getPosition());
+      yoFrameOrientation.set(framePose.getOrientation());
    }
 
    public void setPosition(double x, double y, double z)
@@ -51,7 +43,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
 
    public void getPosition(FramePoint3D framePointToPack)
    {
-      yoFramePoint.getFrameTuple(framePointToPack);
+      framePointToPack.set(yoFramePoint);
    }
 
    public void setPosition(FramePoint3D position)

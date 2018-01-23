@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,7 +21,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -197,21 +197,21 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
    
    private void addFootstep(ReferenceFrame stepReferenceFrame, RobotSide robotSide, Point3D stepLocation, Quaternion stepOrientation, FootstepDataListMessage footstepMessage)
    {
-      FramePose stepPose = new FramePose();
+      FramePose3D stepPose = new FramePose3D();
       getRelativeFootstepInWorldFrame(stepReferenceFrame, stepLocation, stepOrientation, stepPose);
-      FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPose.getFramePointCopy().getPoint(), stepPose.getFrameOrientationCopy().getQuaternion());
+      FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPose.getPosition(), stepPose.getOrientation());
 
       footstepMessage.add(footstepData);
    }
 
-   private void getRelativeFootstepInWorldFrame(ReferenceFrame frame, Point3D point3d, Quaternion quat4d, FramePose framePoseToPack)
+   private void getRelativeFootstepInWorldFrame(ReferenceFrame frame, Point3D point3d, Quaternion quat4d, FramePose3D framePoseToPack)
    {
       FramePoint3D position = new FramePoint3D(frame, point3d);
       position.changeFrame(ReferenceFrame.getWorldFrame());
       FrameQuaternion orientation = new FrameQuaternion(frame, quat4d);
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
             
-      framePoseToPack.setPoseIncludingFrame(position, orientation);
+      framePoseToPack.setIncludingFrame(position, orientation);
    }
 
    @Override

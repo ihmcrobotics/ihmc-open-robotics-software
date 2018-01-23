@@ -5,9 +5,9 @@ import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -72,8 +72,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final TIntArrayList icpPhaseEntryCornerPointIndices = new TIntArrayList();
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
-   private List<FrameTuple3D<?, ?>> icpQuantityCalculatedInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
-   private List<FrameTuple3D<?, ?>> icpQuantitySetInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
+   private List<FrameTuple3DBasics> icpQuantityCalculatedInitialConditionList = new ArrayList<>();
+   private List<FrameTuple3DBasics> icpQuantitySetInitialConditionList = new ArrayList<>();
 
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
@@ -153,7 +153,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          FrameTrajectory3D copPolynomial3D = copPolynomials3D.get(0);
          for (int i = 0; i < copPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
          {
-            FrameTuple3D<?, ?> icpQuantityInitialCondition = icpQuantityCalculatedInitialConditionList.get(i);
+            FrameTuple3DBasics icpQuantityInitialCondition = icpQuantityCalculatedInitialConditionList.get(i);
 
             copPolynomial3D.getDerivative(i, localTime, icpQuantityInitialCondition);
          }
@@ -163,7 +163,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          FrameTrajectory3D copPolynomial3D = copPolynomials3D.get(currentSwingSegment);
          for (int i = 0; i < copPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
          {
-            FrameTuple3D<?, ?> icpQuantityInitialCondition = icpQuantityCalculatedInitialConditionList.get(i);
+            FrameTuple3DBasics icpQuantityInitialCondition = icpQuantityCalculatedInitialConditionList.get(i);
 
             icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, localTime, i, copPolynomial3D,
                                                                             exitCornerPointsFromCoPs.get(currentSwingSegment), icpQuantityInitialCondition);

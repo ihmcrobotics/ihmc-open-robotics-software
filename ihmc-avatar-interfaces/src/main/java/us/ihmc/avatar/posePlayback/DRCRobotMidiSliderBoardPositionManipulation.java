@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,7 +28,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -673,18 +673,18 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       for (RobotSide robotSide : RobotSide.values())
       {
          YoFramePose yoFramePose = feetIKs.get(robotSide);
-         FramePose framePose = new FramePose(fullRobotModel.getFoot(robotSide).getBodyFixedFrame());
+         FramePose3D framePose = new FramePose3D(fullRobotModel.getFoot(robotSide).getBodyFixedFrame());
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
          yoFramePose.set(framePose);
 
          yoFramePose = handIKs.get(robotSide);
-         framePose = new FramePose(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
+         framePose = new FramePose3D(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
          yoFramePose.set(framePose);
       }
 
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      FramePose framePose = new FramePose(pelvisFrame);
+      FramePose3D framePose = new FramePose3D(pelvisFrame);
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       System.out.println("Pelvis is at " + framePose);
@@ -903,19 +903,19 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             for (RobotSide robotSide : RobotSide.values())
             {
                YoFramePose footIK = feetIKs.get(robotSide);
-               FramePoint3D position = footIK.getPosition().getFramePointCopy();
+               FramePoint3D position = new FramePoint3D(footIK.getPosition());
                FrameQuaternion orientation = footIK.getOrientation().getFrameOrientationCopy();
-               FramePose framePose = new FramePose(position, orientation);
+               FramePose3D framePose = new FramePose3D(position, orientation);
                framePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
-               framePose.getPose(desiredTransform);
+               framePose.get(desiredTransform);
                legInverseKinematicsCalculators.get(robotSide).solve(desiredTransform);
 
                YoFramePose handIK = handIKs.get(robotSide);
-               position = handIK.getPosition().getFramePointCopy();
+               position = new FramePoint3D(handIK.getPosition());
                orientation = handIK.getOrientation().getFrameOrientationCopy();
-               framePose = new FramePose(position, orientation);
+               framePose = new FramePose3D(position, orientation);
                framePose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
-               framePose.getPose(desiredTransform);
+               framePose.get(desiredTransform);
                armInverseKinematicsCalculators.get(robotSide).solve(desiredTransform);
             }
 

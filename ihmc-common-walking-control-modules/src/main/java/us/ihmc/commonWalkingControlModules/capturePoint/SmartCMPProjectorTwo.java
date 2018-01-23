@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -8,14 +9,13 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
 
 public class SmartCMPProjectorTwo extends CMPProjector
 {
    private final YoBoolean cmpProjectedAlongRay, cmpProjectedToPushTowardFinalDesiredICP, cmpProjectedToVertex;
-   private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
+   private final FrameLine2D icpToCMPLine = new FrameLine2D(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
    private final FrameVector2D finalDesiredICPToICPDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
-   private final FrameLine2d rayFromICPAwayFromFinalDesiredICP = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
+   private final FrameLine2D rayFromICPAwayFromFinalDesiredICP = new FrameLine2D(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
    private final FramePoint2D finalDesiredICPLocation = new FramePoint2D();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

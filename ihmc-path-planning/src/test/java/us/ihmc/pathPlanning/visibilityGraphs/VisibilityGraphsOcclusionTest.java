@@ -19,6 +19,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,6 +27,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -35,7 +37,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -247,7 +248,7 @@ public class VisibilityGraphsOcclusionTest
 
       int iteration = -1;
 
-      while (!currentPosition.getFrameTuple().epsilonEquals(goal, 1.0e-3))
+      while (!currentPosition.epsilonEquals(goal, 1.0e-3))
       {
          iteration++;
 
@@ -259,7 +260,7 @@ public class VisibilityGraphsOcclusionTest
             PrintTools.info("Too many iterations too reach goal.");
             break;
          }
-         Point3D observer = new Point3D(currentPosition.getFrameTuple());
+         Point3D observer = new Point3D(currentPosition);
          observer.addZ(0.05);
 
          if (occlusionMethod != OcclusionMethod.NO_OCCLUSION)
@@ -275,7 +276,7 @@ public class VisibilityGraphsOcclusionTest
             }
             int polygons = Math.min(maxPolygonsToVisualize, visiblePlanarRegions.getNumberOfPlanarRegions());
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            FramePose pose = new FramePose();
+            FramePose3D pose = new FramePose3D();
             for (int polygonIdx = 0; polygonIdx < polygons; polygonIdx++)
             {
                PlanarRegion planarRegion = visiblePlanarRegions.getPlanarRegion(polygonIdx);
@@ -284,7 +285,7 @@ public class VisibilityGraphsOcclusionTest
                   throw new RuntimeException("Increase max number of vertices for visualization.");
                }
                planarRegion.getTransformToWorld(transformToWorld);
-               pose.setPose(transformToWorld);
+               pose.set(transformToWorld);
                visiblePolygonPoses.get(polygonIdx).set(pose);
                visiblePolygons.get(polygonIdx).setConvexPolygon2d(planarRegion.getConvexHull());
             }
@@ -298,7 +299,7 @@ public class VisibilityGraphsOcclusionTest
          {
             long startTime = System.currentTimeMillis();
 //            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
-            bodyPath = vizGraphs.calculateBodyPathWithOcclussions(currentPosition.getPoint3dCopy(), goal);
+            bodyPath = vizGraphs.calculateBodyPathWithOcclussions(currentPosition, goal);
 
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             solveTime.set(seconds);
@@ -336,18 +337,18 @@ public class VisibilityGraphsOcclusionTest
          }
 
          // Use different epsilon for xy and z in case the point got projected onto a region
-         if (bodyPath.get(0).distanceXY(currentPosition.getFramePointCopy()) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(0).getZ(), currentPosition.getZ(), 0.1))
+         if (bodyPath.get(0).distanceXY(currentPosition) > 1.0e-3 || !MathTools.epsilonEquals(bodyPath.get(0).getZ(), currentPosition.getZ(), 0.1))
          {
             if (visualize)
             {
                scs.setTime(iteration);
                scs.tickAndUpdate();
             }
-            PrintTools.info("Failed, not starting from current position: " + currentPosition.getPoint3dCopy() + ", beginning of plan: " + bodyPath.get(0));
+            PrintTools.info("Failed, not starting from current position: " + new Point3D(currentPosition) + ", beginning of plan: " + bodyPath.get(0));
             plannerFailed.set(true);
          }
 
-         if (currentPosition.getPoint3dCopy().distance(goal) < 0.05)
+         if (currentPosition.distance(goal) < 0.05)
          {
             if (bodyPath.size() > 2)
             {
@@ -369,9 +370,9 @@ public class VisibilityGraphsOcclusionTest
          }
 
          currentPosition.set(bodyPath.get(0)); // Set to remove precision problems causing the travel method to fail. Already checked that the bodyPath starts from the currentPosition.
-         currentPosition.set(travelAlongBodyPath(marchingSpeedInMetersPerTick, currentPosition.getPoint3dCopy(), bodyPath));
+         currentPosition.set(travelAlongBodyPath(marchingSpeedInMetersPerTick, currentPosition, bodyPath));
 
-         if (regions.findPlanarRegionsContainingPoint(currentPosition.getPoint3dCopy(), maximumFlyingDistance) == null)
+         if (regions.findPlanarRegionsContainingPoint(currentPosition, maximumFlyingDistance) == null)
          {
             PrintTools.info("Planner failed: path results in a flying robot.");
             plannerFailed.set(true);
@@ -417,7 +418,7 @@ public class VisibilityGraphsOcclusionTest
       }
    }
 
-   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
+   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3DReadOnly startingPosition, List<Point3DReadOnly> bodyPath)
    {
       Point3D newPosition = new Point3D();
 
@@ -427,7 +428,7 @@ public class VisibilityGraphsOcclusionTest
 
          if (segment.distance(startingPosition) < 1.0e-4)
          {
-            Vector3D segmentDirection = segment.getDirection(true);
+            Vector3DBasics segmentDirection = segment.getDirection(true);
             newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
 
             if (segment.distance(newPosition) < 1.0e-4)

@@ -8,13 +8,13 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -54,13 +54,12 @@ public class ICPOptimizationSolutionHandlerTest
       RobotSide robotSide = RobotSide.LEFT;
       for (int i = 0; i < numberOfSteps; i++)
       {
-         FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame());
+         FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
          footstepPose.setPosition(length * (i + 1), robotSide.negateIfRightSide(0.5 * width), 0.0);
          upcomingFootsteps.add(new Footstep(robotSide, footstepPose, false));
 
-         FramePoint2D referenceFootstepPosition = new FramePoint2D();
-         footstepPose.getPosition2dIncludingFrame(referenceFootstepPosition);
+         FramePoint2D referenceFootstepPosition = new FramePoint2D(footstepPose.getPosition());
 
          robotSide = robotSide.getOppositeSide();
       }
@@ -393,11 +392,6 @@ public class ICPOptimizationSolutionHandlerTest
          this.resolution = resolution;
       }
 
-      @Override public int numberOfFootstepsToConsider()
-      {
-         return 0;
-      }
-
       @Override public double getForwardFootstepWeight()
       {
          return 5.0;
@@ -408,7 +402,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 5.0;
       }
 
-      @Override public double getFootstepRegularizationWeight()
+      @Override public double getFootstepRateWeight()
       {
          return 0.0001;
       }
@@ -423,7 +417,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 2.0;
       }
 
-      @Override public double getFeedbackRegularizationWeight()
+      @Override public double getFeedbackRateWeight()
       {
          return 0.0001;
       }
@@ -453,7 +447,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 0.5;
       }
 
-      @Override public boolean scaleStepRegularizationWeightWithTime()
+      @Override public boolean scaleStepRateWeightWithTime()
       {
          return false;
       }
@@ -463,7 +457,7 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean useFeedbackRegularization()
+      @Override public boolean useFeedbackRate()
       {
          return false;
       }
@@ -478,7 +472,7 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean useFootstepRegularization()
+      @Override public boolean useFootstepRate()
       {
          return false;
       }

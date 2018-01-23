@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -286,19 +286,19 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private FootstepDataMessage createRelativeFootStep(PoseReferenceFrame frame, RobotSide side, Point3D location, Quaternion orientation)
    {
 
-      FramePose pose = offsetPointFromFrameInWorldFrame(frame, location, orientation);
-      FootstepDataMessage message = new FootstepDataMessage(side, pose.getFramePointCopy().getPoint(), pose.getFrameOrientationCopy().getQuaternion());
+      FramePose3D pose = offsetPointFromFrameInWorldFrame(frame, location, orientation);
+      FootstepDataMessage message = new FootstepDataMessage(side, pose.getPosition(), pose.getOrientation());
       return message;
    }
 
-   private FramePose offsetPointFromFrameInWorldFrame(PoseReferenceFrame frame, Point3D point3d, Quaternion quat4d)
+   private FramePose3D offsetPointFromFrameInWorldFrame(PoseReferenceFrame frame, Point3D point3d, Quaternion quat4d)
    {
       FramePoint3D point1 = new FramePoint3D(frame, point3d);
       point1.changeFrame(ReferenceFrame.getWorldFrame());
       FrameQuaternion orient = new FrameQuaternion(frame, quat4d);
       orient.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose pose = new FramePose(point1, orient);
+      FramePose3D pose = new FramePose3D(point1, orient);
 
       return pose;
    }

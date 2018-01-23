@@ -128,7 +128,7 @@ public class SkippyICPBasedController extends SimpleRobotController
    public void doControl()
    {
       skippy.computeComAndICP(com, comVelocity, icp, angularMomentum);
-      skippy.computeFootContactForce(groundReaction.getVector());
+      skippy.computeFootContactForce(groundReaction);
       footLocation.set(skippy.computeFootLocation());
       cmpFromIcpDynamics(icp, footLocation, desiredCMP);
 
@@ -158,8 +158,8 @@ public class SkippyICPBasedController extends SimpleRobotController
       }
       tickCounter.increment();
 
-      skippy.getHipJoint().getTranslationToWorld(worldToHip.getVector());
-      skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder.getVector());
+      skippy.getHipJoint().getTranslationToWorld(worldToHip);
+      skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder);
       skippy.getShoulderJointAxis(shoulderAxis);
       skippy.getHipJointAxis(hipAxis);
 

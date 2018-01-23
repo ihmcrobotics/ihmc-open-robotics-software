@@ -19,6 +19,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
@@ -33,7 +34,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -138,7 +138,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
-      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, cinderBlockField, startingLocation, goalPose);
    }
@@ -149,7 +149,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
-      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, startingLocation, goalPose);
    }
@@ -159,7 +159,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public void testSteppingStonesWithAStar() throws IOException
    {
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
-      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, startingLocation, goalPose);
    }
@@ -169,13 +169,13 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public void testSteppingStonesWithPlanarRegionBipedalPlanner() throws IOException
    {
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
-      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
+      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, startingLocation, goalPose);
    }
 
    private void runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
-                                                       DRCStartingLocation startingLocation, FramePose goalPose)
+                                                       DRCStartingLocation startingLocation, FramePose3D goalPose)
    {
       try
       {
@@ -196,7 +196,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    }
 
    private void runEndToEndTest(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList,
-                                DRCStartingLocation startingLocation, FramePose goalPose) throws Exception
+                                DRCStartingLocation startingLocation, FramePose3D goalPose) throws Exception
    {
       outputStatus = new AtomicReference<>();
       outputStatus.set(null);
@@ -232,7 +232,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
 
       ReferenceFrame soleFrame = humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
-      FramePose initialStancePose = new FramePose(soleFrame, new Point3D(0.0, 0.0, 0.001), new AxisAngle());
+      FramePose3D initialStancePose = new FramePose3D(soleFrame, new Point3D(0.0, 0.0, 0.001), new AxisAngle());
       initialStancePose.changeFrame(ReferenceFrame.getWorldFrame());
       RobotSide initialStanceSide = RobotSide.LEFT;
 
@@ -277,7 +277,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       assertTrue(yPositionErrorMagnitude < errorThreshold);
    }
 
-   private YoGraphicsListRegistry createStartAndGoalGraphics(FramePose initialStancePose, FramePose goalPose)
+   private YoGraphicsListRegistry createStartAndGoalGraphics(FramePose3D initialStancePose, FramePose3D goalPose)
    {
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicsList graphicsList = new YoGraphicsList("testViz");

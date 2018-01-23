@@ -153,8 +153,8 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
       else
       {
          desiredConfiguration.reshape(7, 1);
-         MatrixTools.insertYoFrameQuaternionIntoEJMLVector(orientation, desiredConfiguration, 0);
-         MatrixTools.insertYoFrameTupleIntoEJMLVector(position, desiredConfiguration, 4);
+         MatrixTools.insertFrameQuaternionIntoEJMLVector(orientation, desiredConfiguration, 0);
+         MatrixTools.insertFrameTupleIntoEJMLVector(position, desiredConfiguration, 4);
          return desiredConfiguration;
       }
    }
@@ -170,8 +170,8 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
       else
       {
          desiredVelocity.reshape(6, 1);
-         MatrixTools.insertYoFrameTupleIntoEJMLVector(angularVelocity, desiredVelocity, 0);
-         MatrixTools.insertYoFrameTupleIntoEJMLVector(linearVelocity, desiredVelocity, 3);
+         MatrixTools.insertFrameTupleIntoEJMLVector(angularVelocity, desiredVelocity, 0);
+         MatrixTools.insertFrameTupleIntoEJMLVector(linearVelocity, desiredVelocity, 3);
          return desiredVelocity;
       }
    }
@@ -187,8 +187,8 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
       else
       {
          desiredAcceleration.reshape(6, 1);
-         MatrixTools.insertYoFrameTupleIntoEJMLVector(angularAcceleration, desiredAcceleration, 0);
-         MatrixTools.insertYoFrameTupleIntoEJMLVector(linearAcceleration, desiredAcceleration, 3);
+         MatrixTools.insertFrameTupleIntoEJMLVector(angularAcceleration, desiredAcceleration, 0);
+         MatrixTools.insertFrameTupleIntoEJMLVector(linearAcceleration, desiredAcceleration, 3);
          return desiredAcceleration;
       }
    }

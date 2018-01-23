@@ -13,6 +13,7 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -83,7 +84,7 @@ public class SnapBasedNodeCheckerTest
                graphics.identity();
                graphics.translate(intersection.getFirstEndpoint());
                Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
-               Vector3D direction = intersection.getDirection(true);
+               Vector3DBasics direction = intersection.getDirection(true);
                double dotProduct = zAxis.dot(direction);
                Vector3D rotationAxis = new Vector3D();
                rotationAxis.cross(zAxis, direction);
@@ -160,7 +161,7 @@ public class SnapBasedNodeCheckerTest
                graphics.identity();
                graphics.translate(intersection.getFirstEndpoint());
                Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
-               Vector3D direction = intersection.getDirection(true);
+               Vector3DBasics direction = intersection.getDirection(true);
                double dotProduct = zAxis.dot(direction);
                Vector3D rotationAxis = new Vector3D();
                rotationAxis.cross(zAxis, direction);

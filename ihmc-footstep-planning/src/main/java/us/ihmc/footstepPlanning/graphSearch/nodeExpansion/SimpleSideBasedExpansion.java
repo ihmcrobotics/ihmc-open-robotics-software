@@ -2,10 +2,10 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
 import java.util.HashSet;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -31,8 +31,8 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 
       HashSet<FootstepNode> neighbors = new HashSet<>();
 
-      FramePose stanceFootPose = new FramePose(worldFrame);
-      stanceFootPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      FramePose3D stanceFootPose = new FramePose3D(worldFrame);
+      stanceFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
       stanceFootPose.setX(node.getX());
       stanceFootPose.setY(node.getY());
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);
@@ -48,7 +48,7 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
          {
             double yaw = stepYaws[j];
 
-            FramePose forwardStep = new FramePose(stanceFrame);
+            FramePose3D forwardStep = new FramePose3D(stanceFrame);
             forwardStep.setX(stepLength);
             forwardStep.setY(ySign * defaultStepWidth);
             forwardStep.changeFrame(worldFrame);
@@ -60,14 +60,14 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
       for (int i = 0; i < stepWidths.length; i++)
       {
          double stepWidth = stepWidths[i];
-         FramePose sideStep = new FramePose(stanceFrame);
+         FramePose3D sideStep = new FramePose3D(stanceFrame);
          sideStep.setY(ySign * stepWidth);
          sideStep.changeFrame(worldFrame);
          neighbors.add(new FootstepNode(sideStep.getX(), sideStep.getY(), node.getYaw(), stepSide));
       }
 
       // turn in place
-      FramePose turnStep = new FramePose(stanceFrame);
+      FramePose3D turnStep = new FramePose3D(stanceFrame);
       turnStep.setY(ySign * defaultStepWidth * (1.0 + Math.cos(maxYaw)) / 2.0);
       turnStep.setX(-defaultStepWidth * Math.sin(maxYaw) / 2.0);
       turnStep.changeFrame(worldFrame);

@@ -6,13 +6,11 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,6 +21,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumanoidControllerToolbox
 {
@@ -84,8 +83,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
-         FramePoint2D desiredCop = desiredCoPsUpdatedFromSCS.get(robotSide).getFrameTuple2d();
-         setDesiredCenterOfPressure(contactableFoot, desiredCop);
+         setDesiredCenterOfPressure(contactableFoot, desiredCoPsUpdatedFromSCS.get(robotSide));
       }
    }
 }
