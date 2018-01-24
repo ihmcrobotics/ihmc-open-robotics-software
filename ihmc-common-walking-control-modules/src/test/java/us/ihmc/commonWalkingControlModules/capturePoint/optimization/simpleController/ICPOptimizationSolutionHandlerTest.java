@@ -8,17 +8,18 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 
@@ -43,42 +44,35 @@ public class ICPOptimizationSolutionHandlerTest
    private void setupTest(double deadbandSize, double resolution)
    {
       parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
-      solutionHandler = new ICPOptimizationSolutionHandler(parameters, false, "test", registry);
+      solutionHandler = new ICPOptimizationSolutionHandler(parameters, new YoBoolean("useICPControlPolygons", registry), "test", registry);
       solver = new ICPOptimizationQPSolver(parameters, 4, false);
    }
 
-   private ArrayList<Footstep> createFootsteps(double length, double width, int numberOfSteps)
+   private Footstep createFootsteps(double length, double width, int numberOfSteps)
    {
       ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
       RobotSide robotSide = RobotSide.LEFT;
       for (int i = 0; i < numberOfSteps; i++)
       {
-         FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame());
+         FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
          footstepPose.setPosition(length * (i + 1), robotSide.negateIfRightSide(0.5 * width), 0.0);
          upcomingFootsteps.add(new Footstep(robotSide, footstepPose, false));
 
-         FramePoint2D referenceFootstepPosition = new FramePoint2D();
-         footstepPose.getPosition2dIncludingFrame(referenceFootstepPosition);
+         FramePoint2D referenceFootstepPosition = new FramePoint2D(footstepPose.getPosition());
 
          robotSide = robotSide.getOppositeSide();
       }
 
-      return upcomingFootsteps;
+      return upcomingFootsteps.get(0);
    }
 
-   private ArrayList<FramePoint2D> createReferenceLocations(ArrayList<Footstep> upcomingFootsteps)
+   private FramePoint2D createReferenceLocations(Footstep upcomingFootstep)
    {
-      ArrayList<FramePoint2D> referenceFootstepLocations = new ArrayList<>();
+      FramePoint2D referenceLocation = new FramePoint2D();
+      upcomingFootstep.getPosition2d(referenceLocation);
 
-      for (int i = 0; i < upcomingFootsteps.size(); i++)
-      {
-         FramePoint2D referenceLocation = new FramePoint2D();
-         upcomingFootsteps.get(i).getPosition2d(referenceLocation);
-         referenceFootstepLocations.add(referenceLocation);
-      }
-
-      return referenceFootstepLocations;
+      return referenceLocation;
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -157,21 +151,15 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      ArrayList<YoFramePoint2d> foostepSolutions = new ArrayList<>();
-      ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
+      YoFramePoint2d foostepSolution = new YoFramePoint2d("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
 
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         foostepSolutions.add(new YoFramePoint2d("footstepSolution" + i, ReferenceFrame.getWorldFrame(), registry));
-         unclippedFootstepSolutions.add(new FramePoint2D(ReferenceFrame.getWorldFrame()));
-      }
-
-      ArrayList<Footstep> upcomingFootsteps = createFootsteps(stepLength, stanceWidth, numberOfSteps);
-      ArrayList<FramePoint2D> referenceFootstepPositions = createReferenceLocations(upcomingFootsteps);
+      Footstep upcomingFootstep = createFootsteps(stepLength, stanceWidth, numberOfSteps);
+      FramePoint2D referenceFootstepPosition = createReferenceLocations(upcomingFootstep);
 
       double recursionMultiplier = Math.exp(-3.0 * 0.5);
       setupFeedbackTask(10000.0, stanceWidth);
-      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPositions.get(0));
+      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPosition);
 
       FrameVector2D currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize, 0.0);
       currentICPError.scale(recursionMultiplier);
@@ -179,14 +167,14 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep,  solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
       // first solution should be just outside the deadband
-      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
       expectedUnclippedSolution.add(scale * deadbandSize, 0.0);
-      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPosition);
 
 
       FrameVector2D clippedAdjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), (scale - 1.0) * deadbandSize, 0.0);
@@ -195,8 +183,8 @@ public class ICPOptimizationSolutionHandlerTest
       FrameVector2D adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize, 0.0);
 
-      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
-      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertTrue(foostepSolution.epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolution.epsilonEquals(expectedUnclippedSolution, 1e-3));
       assertEquals(true, solutionHandler.wasFootstepAdjusted());
       assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
       assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
@@ -207,17 +195,17 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
 
       // new solution should be clipped to the same value
-      expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
       expectedUnclippedSolution.add(scale * deadbandSize + 0.5 * deadbandResolution, 0.0);
 
       adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize + 0.5 * deadbandResolution, 0.0);
 
-      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
-      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertTrue(foostepSolution.epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolution.epsilonEquals(expectedUnclippedSolution, 1e-3));
       assertEquals(false, solutionHandler.wasFootstepAdjusted());
       assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
       assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
@@ -241,21 +229,14 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      ArrayList<YoFramePoint2d> foostepSolutions = new ArrayList<>();
-      ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
-
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         foostepSolutions.add(new YoFramePoint2d("footstepSolution" + i, ReferenceFrame.getWorldFrame(), registry));
-         unclippedFootstepSolutions.add(new FramePoint2D(ReferenceFrame.getWorldFrame()));
-      }
-
-      ArrayList<Footstep> upcomingFootsteps = createFootsteps(stepLength, stanceWidth, numberOfSteps);
-      ArrayList<FramePoint2D> referenceFootstepPositions = createReferenceLocations(upcomingFootsteps);
+      YoFramePoint2d foostepSolution = new YoFramePoint2d("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      Footstep upcomingFootstep = createFootsteps(stepLength, stanceWidth, numberOfSteps);
+      FramePoint2D referenceFootstepPosition = createReferenceLocations(upcomingFootstep);
 
       double recursionMultiplier = Math.exp(-3.0 * 0.5);
       setupFeedbackTask(10000.0, stanceWidth);
-      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPositions.get(0));
+      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPosition);
 
       FrameVector2D currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize, 0.0);
       currentICPError.scale(recursionMultiplier);
@@ -263,14 +244,14 @@ public class ICPOptimizationSolutionHandlerTest
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
       // first solution should be just outside the deadband
-      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
       expectedUnclippedSolution.add(scale * deadbandSize, 0.0);
-      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPosition);
 
 
       FrameVector2D clippedAdjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), (scale - 1.0) * deadbandSize, 0.0);
@@ -279,8 +260,8 @@ public class ICPOptimizationSolutionHandlerTest
       FrameVector2D adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize, 0.0);
 
-      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
-      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertTrue(foostepSolution.epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolution.epsilonEquals(expectedUnclippedSolution, 1e-3));
       assertEquals(true, solutionHandler.wasFootstepAdjusted());
       assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
       assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
@@ -291,20 +272,20 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
 
       // new solution should be clipped to the same value
-      expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
       adjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize + 1.5 * deadbandResolution, 0.0);
       expectedUnclippedSolution.add(adjustment);
 
-      expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      expectedClippedSolution = new FramePoint2D(referenceFootstepPosition);
       clippedAdjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize + 1.5 * deadbandResolution - deadbandSize, 0.0);
       expectedClippedSolution.add(clippedAdjustment);
 
 
-      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
-      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertTrue(foostepSolution.epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolution.epsilonEquals(expectedUnclippedSolution, 1e-3));
       assertEquals(true, solutionHandler.wasFootstepAdjusted());
       assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
       assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
@@ -323,21 +304,14 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      ArrayList<YoFramePoint2d> foostepSolutions = new ArrayList<>();
-      ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
-
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         foostepSolutions.add(new YoFramePoint2d("footstepSolution" + i, ReferenceFrame.getWorldFrame(), registry));
-         unclippedFootstepSolutions.add(new FramePoint2D(ReferenceFrame.getWorldFrame()));
-      }
-
-      ArrayList<Footstep> upcomingFootsteps = createFootsteps(stepLength, stanceWidth, numberOfSteps);
-      ArrayList<FramePoint2D> referenceFootstepPositions = createReferenceLocations(upcomingFootsteps);
+      YoFramePoint2d foostepSolution = new YoFramePoint2d("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      Footstep upcomingFootstep = createFootsteps(stepLength, stanceWidth, numberOfSteps);
+      FramePoint2D referenceFootstepPosition = createReferenceLocations(upcomingFootstep);
 
       double recursionMultiplier = Math.exp(-3.0 * 0.5);
       setupFeedbackTask(10000.0, stanceWidth);
-      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPositions.get(0));
+      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPosition);
 
       FrameVector2D currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize, 0.0);
       currentICPError.scale(recursionMultiplier);
@@ -351,14 +325,14 @@ public class ICPOptimizationSolutionHandlerTest
       {
       }
 
-      solutionHandler.extractFootstepSolutions(foostepSolutions.get(0), unclippedFootstepSolutions.get(0), upcomingFootsteps.get(0), solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
       // this should be within the deadband
-      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
       expectedUnclippedSolution.add(scale * deadbandSize, 0.0);
-      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPosition);
 
       boolean wasAdjusted = scale > 1.0;
 
@@ -370,8 +344,8 @@ public class ICPOptimizationSolutionHandlerTest
       FrameVector2D adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize, 0.0);
 
-      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
-      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertTrue(foostepSolution.epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolution.epsilonEquals(expectedUnclippedSolution, 1e-3));
       assertEquals(wasAdjusted, solutionHandler.wasFootstepAdjusted());
       assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
       assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
@@ -428,7 +402,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 5.0;
       }
 
-      @Override public double getFootstepRegularizationWeight()
+      @Override public double getFootstepRateWeight()
       {
          return 0.0001;
       }
@@ -443,7 +417,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 2.0;
       }
 
-      @Override public double getFeedbackRegularizationWeight()
+      @Override public double getFeedbackRateWeight()
       {
          return 0.0001;
       }
@@ -473,7 +447,7 @@ public class ICPOptimizationSolutionHandlerTest
          return 0.5;
       }
 
-      @Override public boolean scaleStepRegularizationWeightWithTime()
+      @Override public boolean scaleStepRateWeightWithTime()
       {
          return false;
       }
@@ -483,7 +457,7 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean useFeedbackRegularization()
+      @Override public boolean useFeedbackRate()
       {
          return false;
       }
@@ -498,7 +472,7 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean useFootstepRegularization()
+      @Override public boolean useFootstepRate()
       {
          return false;
       }

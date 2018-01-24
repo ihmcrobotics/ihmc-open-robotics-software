@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +15,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -70,7 +70,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
    private final CommandInputManager commandInputManager;
 
-   private final PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", new FramePose());
+   private final PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", new FramePose3D());
    private ReferenceFrame newStepReferenceFrame;
    private PoseReferenceFrame previousPoseFrame;
 
@@ -218,7 +218,7 @@ public class UserDesiredFootstepDataMessageGenerator
       desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), stepPitch, stepRoll);
 
       footstepPoseFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
-      desiredFootstepCommand.setPose(desiredPosition.getPoint(), desiredOrientation.getQuaternion());
+      desiredFootstepCommand.setPose(desiredPosition, desiredOrientation);
 
       // set contact points
       contactFramePoints = swingFoot.getContactPoints2d();

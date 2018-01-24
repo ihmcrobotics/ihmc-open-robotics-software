@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -103,8 +104,8 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
 
    private void updateBoundingBox()
    {
-      Point3D firstEndpoint = lineSegment.getFirstEndpoint();
-      Point3D secondEndpoint = lineSegment.getSecondEndpoint();
+      Point3DBasics firstEndpoint = lineSegment.getFirstEndpoint();
+      Point3DBasics secondEndpoint = lineSegment.getSecondEndpoint();
 
       double xMin, yMin, zMin, xMax, yMax, zMax;
 

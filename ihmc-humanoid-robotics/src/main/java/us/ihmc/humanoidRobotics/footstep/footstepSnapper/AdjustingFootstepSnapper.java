@@ -5,6 +5,8 @@ import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -13,8 +15,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -80,7 +80,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
 
    @Override
-   public Footstep generateFootstepWithoutHeightMap(FramePose2d desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepWithoutHeightMap(FramePose2D desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
            double height, Vector3D planeNormal)
    {
       return convexHullFootstepSnapper.generateFootstepWithoutHeightMap(desiredSolePosition, foot, soleFrame, robotSide, height, planeNormal);
@@ -91,13 +91,13 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
-      FramePose2d footPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
+      FramePose2D footPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
 
       return generateFootstepUsingHeightMap(footPose2d, foot, soleFrame, robotSide, heightMap);
    }
 
    @Override
-   public Footstep generateFootstepUsingHeightMap(FramePose2d desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
@@ -119,8 +119,8 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position.getPoint());
-      originalFootstep.setOrientation(orientation.getQuaternion());
+      originalFootstep.setLocation(position);
+      originalFootstep.setOrientation(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
@@ -129,7 +129,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       }
       footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
-      FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
+      FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
@@ -187,8 +187,8 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
       boolean isOriginalPosition = true;
-      FramePose2d desiredSolePosition = new FramePose2d(ReferenceFrame.getWorldFrame(), originalPosition, originalYaw);
-      FramePose2d newDesiredSolePosition = new FramePose2d(desiredSolePosition);
+      FramePose2D desiredSolePosition = new FramePose2D(ReferenceFrame.getWorldFrame(), originalPosition, originalYaw);
+      FramePose2D newDesiredSolePosition = new FramePose2D(desiredSolePosition);
       for (int i = 0; i < angleOffsets.length; i++)
       {
          for (Point2D point2d : possiblePositions)

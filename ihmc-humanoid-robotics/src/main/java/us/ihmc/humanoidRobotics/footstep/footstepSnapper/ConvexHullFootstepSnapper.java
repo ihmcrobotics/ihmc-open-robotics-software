@@ -14,6 +14,8 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -24,8 +26,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
@@ -147,7 +147,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepWithoutHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
+   public Footstep generateFootstepWithoutHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
          Vector3D planeNormal)
    {
       return simpleSnapper.generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, height, planeNormal);
@@ -157,12 +157,12 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
          HeightMapWithPoints heightMap) throws InsufficientDataException
    {
-      FramePose2d footPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
+      FramePose2D footPose2d = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
 
       return generateFootstepUsingHeightMap(footPose2d, foot, soleFrame, robotSide, heightMap);
    }
 
-   public Footstep generateFootstepUsingHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
          List<Point3D> pointList, double defaultHeight)
    {
       Footstep toReturn = generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, 0.0, new Vector3D(0.0, 0.0, 1.0));
@@ -172,7 +172,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep generateFootstepUsingHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
+   public Footstep generateFootstepUsingHeightMap(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
          HeightMapWithPoints heightMap) throws InsufficientDataException
    {
       Footstep toReturn = generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, 0.0, new Vector3D(0.0, 0.0, 1.0));
@@ -193,8 +193,8 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position.getPoint());
-      originalFootstep.setOrientation(orientation.getQuaternion());
+      originalFootstep.setLocation(position);
+      originalFootstep.setOrientation(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
@@ -204,7 +204,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
       footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
-      FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
+      FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
@@ -247,14 +247,14 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position.getPoint());
-      originalFootstep.setOrientation(orientation.getQuaternion());
+      originalFootstep.setLocation(position);
+      originalFootstep.setOrientation(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, pointList, defaultHeight);
       footstep.setFootstepType(type);
       footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
-      FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
+      FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
@@ -462,7 +462,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       return true;
    }
 
-   private void addLowerBoundaryPointsToHullPointList(List<Point3D> convexHullPointsList, FramePose2d positioning)
+   private void addLowerBoundaryPointsToHullPointList(List<Point3D> convexHullPointsList, FramePose2D positioning)
    {
       addLowerBoundaryPointsToHullPointList(convexHullPointsList, positioning.getX(), positioning.getY(), positioning.getYaw());
    }
@@ -704,6 +704,6 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    {
       LineSegment2D closestEdge = new LineSegment2D();
       polygon.getClosestEdge(point2d, closestEdge);
-      return closestEdge.orthogonalProjectionCopy(point2d);
+      return new Point2D(closestEdge.orthogonalProjectionCopy(point2d));
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -96,9 +96,9 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
          ReferenceFrame controlFrame = converter.getFullRobotModel().getHandControlFrame(robotSide);
-         FramePose desiredHandPose = new FramePose(controlFrame);
+         FramePose3D desiredHandPose = new FramePose3D(controlFrame);
          desiredHandPose.changeFrame(worldFrame);
-         desiredHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredHandPose.get(desiredPosition, desiredOrientation);
 
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);
@@ -150,11 +150,10 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       {
          converter.updateFullRobotModel(solution.getRobotConfigurations()[i]);
 
-         Quaternion desiredOrientation = new Quaternion();
          ReferenceFrame controlFrame = converter.getFullRobotModel().getChest().getBodyFixedFrame();
-         FramePose desiredHandPose = new FramePose(controlFrame);
+         FramePose3D desiredHandPose = new FramePose3D(controlFrame);
          desiredHandPose.changeFrame(worldFrame);
-         desiredHandPose.getOrientation(desiredOrientation);
+         Quaternion desiredOrientation = new Quaternion(desiredHandPose.getOrientation());
 
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
@@ -205,9 +204,9 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
          ReferenceFrame controlFrame = converter.getFullRobotModel().getPelvis().getBodyFixedFrame();
-         FramePose desiredHandPose = new FramePose(controlFrame);
+         FramePose3D desiredHandPose = new FramePose3D(controlFrame);
          desiredHandPose.changeFrame(worldFrame);
-         desiredHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredHandPose.get(desiredPosition, desiredOrientation);
 
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);

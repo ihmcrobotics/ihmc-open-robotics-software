@@ -263,17 +263,16 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       baseFrame.checkReferenceFrameMatch(twist.getBaseFrame());
 
       linearAccelerationToPack.setToZero(expressedInFrame);
-      Vector3D vectorToPack = linearAccelerationToPack.getVector();
 
-      tempVector.set(pointFixedInBodyFrame.getPoint());
-      vectorToPack.cross(angularPart, tempVector);
-      vectorToPack.add(linearPart);
+      tempVector.set(pointFixedInBodyFrame);
+      linearAccelerationToPack.cross(angularPart, tempVector);
+      linearAccelerationToPack.add(linearPart);
 
-      tempVector.set(pointFixedInBodyFrame.getPoint());
+      tempVector.set(pointFixedInBodyFrame);
       tempVector.cross(twist.getAngularPart(), tempVector);
       tempVector.add(twist.getLinearPart());
       tempVector.cross(twist.getAngularPart(), tempVector);
-      vectorToPack.add(tempVector);
+      linearAccelerationToPack.add(tempVector);
    }
 
    public void setBasedOnOriginAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
@@ -293,12 +292,12 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       twistOfBodyWithRespectToBase.getBaseFrame().checkReferenceFrameMatch(baseFrame);
 
       angularAcceleration.changeFrame(bodyFrame);
-      angularPart.set(angularAcceleration.getVector());
+      angularPart.set(angularAcceleration);
 
       originAcceleration.changeFrame(bodyFrame);
       twistOfBodyWithRespectToBase.changeFrame(bodyFrame);
       linearPart.cross(twistOfBodyWithRespectToBase.getAngularPart(), twistOfBodyWithRespectToBase.getLinearPart());
-      linearPart.sub(originAcceleration.getVector(), linearPart);
+      linearPart.sub(originAcceleration, linearPart);
    }
 
    public void getLinearAccelerationFromOriginAcceleration(Twist twistOfBodyWithRespectToBase, FrameVector3D linearAccelerationToPack)

@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -26,14 +28,14 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
 
    private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
-   private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
+   private final FrameLineSegment2D toeOffContactLine2d = new FrameLineSegment2D();
 
    private final FramePoint3D exitCMP = new FramePoint3D();
    private final FramePoint2D exitCMP2d = new FramePoint2D();
    private final FrameVector2D exitCMPRayDirection2d = new FrameVector2D();
 
    private final FramePoint2D tmpPoint2d = new FramePoint2D();
-   private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
+   private final FrameLine2D rayThroughExitCMP = new FrameLine2D();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
 
@@ -165,7 +167,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg)
+   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactLine.getBooleanValue())
          computeToeOffContactLine(null, trailingLeg);

@@ -12,7 +12,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class PolygonizerTools
 {
@@ -26,7 +28,7 @@ public class PolygonizerTools
       return pointsToTransform.stream().map(point -> toPointInPlane(point, planeOrigin, planeOrientation)).collect(Collectors.toList());
    }
 
-   public static Point2D toPointInPlane(Point3D pointToTransform, Point3D planeOrigin, Quaternion planeOrientation)
+   public static Point2D toPointInPlane(Point3DReadOnly pointToTransform, Point3DReadOnly planeOrigin, Quaternion planeOrientation)
    {
       return toPointInPlane(pointToTransform.getX(), pointToTransform.getY(), pointToTransform.getZ(), planeOrigin, planeOrientation);
    }
@@ -58,7 +60,7 @@ public class PolygonizerTools
       return new LineSegment2D(lineSemgentStart, lineSemgentEnd);
    }
 
-   public static Point2D toPointInPlane(double xToTransform, double yToTransform, double zToTransform, Point3D planeOrigin, Quaternion planeOrientation)
+   public static Point2D toPointInPlane(double xToTransform, double yToTransform, double zToTransform, Point3DReadOnly planeOrigin, QuaternionReadOnly planeOrientation)
    {
       Point2D pointInPlane = new Point2D();
 

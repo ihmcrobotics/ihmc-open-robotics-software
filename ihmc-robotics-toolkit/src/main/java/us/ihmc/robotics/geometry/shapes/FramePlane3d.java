@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.FrameLine3D;
 
 public class FramePlane3d implements ReferenceFrameHolder
 {
@@ -49,7 +49,7 @@ public class FramePlane3d implements ReferenceFrameHolder
    {
       normal.checkReferenceFrameMatch(point);
       this.referenceFrame = normal.getReferenceFrame();
-      this.plane3d = new Plane3D(point.getPoint(), normal.getVector());
+      this.plane3d = new Plane3D(point, normal);
    }
 
    public FramePlane3d(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly normal)
@@ -147,14 +147,14 @@ public class FramePlane3d implements ReferenceFrameHolder
    {
       checkReferenceFrameMatch(pointToTest);
 
-      return plane3d.isOnOrAbove(pointToTest.getPoint());
+      return plane3d.isOnOrAbove(pointToTest);
    }
 
    public boolean isOnOrBelow(FramePoint3D pointToTest)
    {
       checkReferenceFrameMatch(pointToTest);
 
-      return plane3d.isOnOrBelow(pointToTest.getPoint());
+      return plane3d.isOnOrBelow(pointToTest);
    }
 
    /**
@@ -214,7 +214,7 @@ public class FramePlane3d implements ReferenceFrameHolder
    public void orthogonalProjection(FramePoint3D point)
    {
       checkReferenceFrameMatch(point);
-      plane3d.orthogonalProjection(point.getPoint());
+      plane3d.orthogonalProjection(point);
    }
 
    public double getZOnPlane(FramePoint2D xyPoint)
@@ -226,7 +226,7 @@ public class FramePlane3d implements ReferenceFrameHolder
    public double distance(FramePoint3D point)
    {
       checkReferenceFrameMatch(point);
-      return plane3d.distance(point.getPoint());
+      return plane3d.distance(point);
    }
 
    public boolean epsilonEquals(FramePlane3d plane, double epsilon)

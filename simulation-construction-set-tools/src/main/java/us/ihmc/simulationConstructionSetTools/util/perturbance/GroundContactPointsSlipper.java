@@ -136,7 +136,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    private void applyTranslationalSlip(double percentOfDelta) 
    {
-      FrameVector3D slipDelta = slipAmount.getFrameVectorCopy();
+      FrameVector3D slipDelta = new FrameVector3D(slipAmount);
       slipDelta.scale(percentOfDelta);
       slipAmount.sub(slipDelta);
 

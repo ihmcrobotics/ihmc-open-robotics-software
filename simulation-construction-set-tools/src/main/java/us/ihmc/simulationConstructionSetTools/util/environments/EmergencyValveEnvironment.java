@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
@@ -57,12 +57,12 @@ public class EmergencyValveEnvironment implements CommonAvatarEnvironmentInterfa
 
    private void createValve(String valveRobotName, ValveType valveType, double x, double y, double z, double yaw_degrees, double forceVectorScale)
    {
-      FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D valvePose = new FramePose3D(ReferenceFrame.getWorldFrame());
       Point3D position = new Point3D(x, y, z);
       Quaternion orientation = new Quaternion();
 
       orientation.setYawPitchRoll(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
-      valvePose.setPose(position, orientation);
+      valvePose.set(position, orientation);
 
       ContactableValveRobot valve = new ContactableValveRobot(valveRobotName, valveType, 0.5, valvePose);
 

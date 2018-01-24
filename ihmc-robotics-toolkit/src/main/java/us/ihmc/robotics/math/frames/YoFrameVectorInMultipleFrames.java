@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.frames;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -32,6 +31,12 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
    }
 
    @Override
+   public boolean containsNaN()
+   {
+      return super.containsNaN();
+   }
+
+   @Override
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
       multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
@@ -46,11 +51,6 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       frameVector.changeFrame(desiredFrame);
       vector.set(frameVector);
       set(vector);
-   }
-
-   public void setIncludingFrame(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      setIncludingFrame(yoFrameTuple.getFrameTuple());
    }
 
    public void setIncludingFrame(FrameTuple3DReadOnly frameTuple)
@@ -69,13 +69,6 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
       ReferenceFrame previousReferenceFrame = multipleFramesHelper.switchCurrentReferenceFrame(referenceFrame);
       setToZero();
       return previousReferenceFrame;
-   }
-
-   public final void subIncludingFrame(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      yoFrameTuple1.checkReferenceFrameMatch(yoFrameTuple2);
-      multipleFramesHelper.switchCurrentReferenceFrame(yoFrameTuple1.getReferenceFrame());
-      sub(yoFrameTuple1, yoFrameTuple2);
    }
 
    @Override
@@ -121,7 +114,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               getFrameTupleIncludingFrame(localFrameVector);
+               localFrameVector.setIncludingFrame(YoFrameVectorInMultipleFrames.this);
                vector.setAndMatchFrame(localFrameVector);
             }
          });
@@ -149,7 +142,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
    
    public String toStringForASingleReferenceFrame(ReferenceFrame referenceFrame)
    {
-      getFrameTupleIncludingFrame(frameVector);
+      frameVector.setIncludingFrame(this);
       frameVector.changeFrame(referenceFrame);
       return frameVector.toString();
    }

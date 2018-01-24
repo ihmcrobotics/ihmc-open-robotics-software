@@ -31,8 +31,7 @@ public class AlphaFilteredYoFrameQuaternionTest
 
       // call update once
       q.update();
-      Quaternion qFiltered = new Quaternion();
-      q.get(qFiltered);
+      Quaternion qFiltered = new Quaternion(q);
 
       // verify measurement equals filtered
       EuclidCoreTestTools.assertQuaternionEquals(qMeasured, qFiltered, 1e-12);
@@ -56,8 +55,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       int nUpdates = 100;
       doRandomUpdates(q, random, nUpdates);
 
-      Quaternion qFiltered = new Quaternion();
-      q.get(qFiltered);
+      Quaternion qFiltered = new Quaternion(q);
 
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qInitial, qFiltered, 1e-12);
    }
@@ -80,8 +78,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       q.getUnfilteredQuaternion().set(qFinal);
       q.update();
 
-      Quaternion qFiltered = new Quaternion();
-      q.get(qFiltered);
+      Quaternion qFiltered = new Quaternion(q);
 
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(qFinal, qFiltered, 1e-12);
    }
@@ -113,7 +110,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       for (int i = 0; i < nUpdates; i++)
       {
          q.update();
-         q.get(qFiltered);
+         qFiltered.set(q);
          double newAngleDifference = getAngleDifference(qFiltered, qFinal);
          //         System.out.println(i + ": " + newAngleDifference);
          boolean sameQuaternion = newAngleDifference == 0.0;

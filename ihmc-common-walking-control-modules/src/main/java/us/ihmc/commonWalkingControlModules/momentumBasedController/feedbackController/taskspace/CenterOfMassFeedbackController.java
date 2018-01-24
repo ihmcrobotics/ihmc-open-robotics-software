@@ -191,7 +191,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
-      yoFeedForwardLinearAcceleration.getFrameTupleIncludingFrame(feedForwardLinearAcceleration);
+      feedForwardLinearAcceleration.setIncludingFrame(yoFeedForwardLinearAcceleration);
       feedForwardLinearAcceleration.changeFrame(centerOfMassFrame);
 
       desiredLinearAcceleration.setIncludingFrame(proportionalFeedback);
@@ -200,7 +200,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
       rateLimitedFeedbackLinearAcceleration.update();
-      rateLimitedFeedbackLinearAcceleration.getFrameTupleIncludingFrame(desiredLinearAcceleration);
+      desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
       desiredLinearAcceleration.changeFrame(centerOfMassFrame);
       desiredLinearAcceleration.add(feedForwardLinearAcceleration);
@@ -220,7 +220,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       inverseKinematicsOutput.setProperties(inverseDynamicsOutput);
 
-      yoFeedForwardLinearVelocity.getFrameTupleIncludingFrame(feedForwardLinearVelocity);
+      feedForwardLinearVelocity.setIncludingFrame(yoFeedForwardLinearVelocity);
       computeProportionalTerm(proportionalFeedback);
       computeIntegralTerm(integralFeedback);
 
@@ -229,7 +229,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
       rateLimitedFeedbackLinearVelocity.update();
-      rateLimitedFeedbackLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
+      desiredLinearVelocity.setIncludingFrame(rateLimitedFeedbackLinearVelocity);
 
       desiredLinearVelocity.add(feedForwardLinearVelocity);
 
@@ -274,7 +274,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       currentPosition.changeFrame(worldFrame);
       yoCurrentPosition.set(currentPosition);
 
-      yoDesiredPosition.getFrameTupleIncludingFrame(desiredPosition);
+      desiredPosition.setIncludingFrame(yoDesiredPosition);
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
@@ -284,7 +284,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
    }
 
    /**
@@ -306,7 +306,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 
-      yoDesiredLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
+      desiredLinearVelocity.setIncludingFrame(yoDesiredLinearVelocity);
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
@@ -316,7 +316,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
    }
 
    /**
@@ -342,16 +342,16 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          return;
       }
 
-      yoErrorPosition.getFrameTupleIncludingFrame(feedbackTermToPack);
+      feedbackTermToPack.setIncludingFrame(yoErrorPosition);
       feedbackTermToPack.scale(dt);
-      feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+      feedbackTermToPack.add(yoErrorPositionIntegrated);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack.getVector());
+      tempGainMatrix.transform(feedbackTermToPack);
    }
 
    @Override

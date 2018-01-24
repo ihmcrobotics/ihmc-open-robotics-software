@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -22,7 +23,6 @@ import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -188,8 +188,7 @@ public class KickBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint2D ballToKickLocation = new FramePoint2D();
-            getoffsetPoint().getPositionIncludingFrame(ballToKickLocation);
+            FramePoint2D ballToKickLocation = new FramePoint2D(getoffsetPoint().getPosition());
             kickBehavior.setObjectToKickPoint(ballToKickLocation);
          }
       };
@@ -201,7 +200,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    }
 
-   private FramePose2d getoffsetPoint()
+   private FramePose2D getoffsetPoint()
    {
       FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().getX(),
             sphereDetectionBehavior.getBallLocation().getY());
@@ -214,7 +213,7 @@ public class KickBallBehavior extends AbstractBehavior
       double walkingYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
       double x = ballPosition2d.getX() - walkingDirection.getX() * standingDistance;
       double y = ballPosition2d.getY() - walkingDirection.getY() * standingDistance;
-      FramePose2d poseToWalkTo = new FramePose2d(worldFrame, new Point2D(x, y), walkingYaw);
+      FramePose2D poseToWalkTo = new FramePose2D(worldFrame, new Point2D(x, y), walkingYaw);
       return poseToWalkTo;
    }
 

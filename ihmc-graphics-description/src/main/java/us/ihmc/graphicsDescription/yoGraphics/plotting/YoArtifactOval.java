@@ -58,8 +58,8 @@ public class YoArtifactOval extends YoArtifact
    @Override
    public void draw(Graphics2DAdapter graphics)
    {
-      center.get(tempCenter);
-      radii.get(tempRadii);
+      tempCenter.set(center);
+      tempRadii.set(radii);
       graphics.setColor(color);
       graphics.drawOval(tempCenter, tempRadii);
    }

@@ -469,7 +469,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       else
       {
          referenceCMPsCalculator.getNextEntryCMP(tempConstantCMP);
-         singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
+         tempICP.setIncludingFrame(singleSupportInitialICP);
          singleSupportInitialCoM.set(yoSingleSupportInitialCoM);
          tempICP.changeFrame(worldFrame);
          double swingDuration = swingDurations.get(0).getDoubleValue();
@@ -516,10 +516,10 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          tempICP.setToZero(midFeetZUpFrame);
          tempICP.changeFrame(worldFrame);
-         double distanceFromDesiredICPToMidfeetZUpFrame = desiredICPPosition.getXYPlaneDistance(tempICP);
+         double distanceFromDesiredICPToMidfeetZUpFrame = desiredICPPosition.distanceXY(tempICP);
          tempICP.setToZero(transferFromSoleFrame);
          tempICP.changeFrame(worldFrame);
-         double distanceFromDesiredICPToTransferFromSoleFrame = desiredICPPosition.getXYPlaneDistance(tempICP);
+         double distanceFromDesiredICPToTransferFromSoleFrame = desiredICPPosition.distanceXY(tempICP);
 
          if (distanceFromDesiredICPToMidfeetZUpFrame < distanceFromDesiredICPToTransferFromSoleFrame)
             initialFrame = midFeetZUpFrame;
@@ -797,7 +797,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       if (isStanding.getBooleanValue())
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
       else
-         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+         tempFinalICP.setIncludingFrame(entryCornerPoints.get(1));
       tempFinalICP.changeFrame(worldFrame);
       finalDesiredCapturePointPositionToPack.setIncludingFrame(tempFinalICP);
    }
@@ -814,13 +814,13 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       {
          tempFinalICP.setToZero(midFeetZUpFrame);
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
       else
       {
-         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+         tempFinalICP.setIncludingFrame(entryCornerPoints.get(1));
          tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
-         finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+         finalDesiredCapturePointPositionToPack.set(tempFinalICP);
       }
    }
 

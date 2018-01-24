@@ -3,6 +3,7 @@ package us.ihmc.communication.packets;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class LidarScanMessage extends Packet<LidarScanMessage>
 {
@@ -121,9 +121,9 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       orientationToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), lidarOrientation);
    }
 
-   public void getLidarPose(FramePose poseToPack)
+   public void getLidarPose(FramePose3D poseToPack)
    {
-      poseToPack.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), lidarPosition, lidarOrientation);
+      poseToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), lidarPosition, lidarOrientation);
    }
 
    public int getNumberOfScanPoints()

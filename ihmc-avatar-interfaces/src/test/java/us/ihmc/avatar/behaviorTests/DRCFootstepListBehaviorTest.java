@@ -14,6 +14,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -29,8 +31,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -110,14 +110,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
-      SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
+      SideDependentList<FramePose2D> desiredFootPoses = new SideDependentList<FramePose2D>();
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
 
       double xOffset = 0.1;
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, xOffset, 0.0);
+         FramePose2D desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, xOffset, 0.0);
          Footstep desiredFootStep = generateFootstepOnFlatGround(robotSide, desiredFootPose);
 
          desiredFootPoses.set(robotSide, desiredFootPose);
@@ -145,7 +145,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d finalFootPose = getRobotFootPose2d(robot, robotSide);
+         FramePose2D finalFootPose = getRobotFootPose2d(robot, robotSide);
          assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
       }
 
@@ -165,14 +165,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
-      SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
+      SideDependentList<FramePose2D> desiredFootPoses = new SideDependentList<FramePose2D>();
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
 
       double yOffset = 0.1;
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, 0.0, yOffset);
+         FramePose2D desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, 0.0, yOffset);
          Footstep desiredFootStep = generateFootstepOnFlatGround(robotSide, desiredFootPose);
 
          desiredFootPoses.set(robotSide, desiredFootPose);
@@ -200,7 +200,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d finalFootPose = getRobotFootPose2d(robot, robotSide);
+         FramePose2D finalFootPose = getRobotFootPose2d(robot, robotSide);
          assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
       }
 
@@ -215,10 +215,10 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SideDependentList<FramePose2d> initialFootPoses = new SideDependentList<FramePose2d>();
+      SideDependentList<FramePose2D> initialFootPoses = new SideDependentList<FramePose2D>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d initialFootPose = getRobotFootPose2d(robot, robotSide);
+         FramePose2D initialFootPose = getRobotFootPose2d(robot, robotSide);
          initialFootPoses.put(robotSide, initialFootPose);
       }
 
@@ -226,14 +226,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
-      SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
+      SideDependentList<FramePose2D> desiredFootPoses = new SideDependentList<FramePose2D>();
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
 
       double xOffset = 1.5 * getRobotModel().getWalkingControllerParameters().getSteppingParameters().getMaxStepLength();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose2d desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, xOffset, 0.0);
+         FramePose2D desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, xOffset, 0.0);
          Footstep desiredFootStep = generateFootstepOnFlatGround(robotSide, desiredFootPose);
 
          desiredFootPoses.set(robotSide, desiredFootPose);
@@ -255,7 +255,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation.getQuaternion());
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position, orientation);
          ret.add(footstepData);
       }
 
@@ -292,14 +292,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       xOffsets.add(0.3);
 
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
-      SideDependentList<FramePose2d> desiredFinalFootPoses = new SideDependentList<FramePose2d>();
+      SideDependentList<FramePose2D> desiredFinalFootPoses = new SideDependentList<FramePose2D>();
 
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();
       for (double xOffset : xOffsets)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePose2d desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, xOffset, 0.0);
+            FramePose2D desiredFootPose = createFootPoseOffsetFromCurrent(robotSide, xOffset, 0.0);
             desiredFootsteps.add(generateFootstepOnFlatGround(robotSide, desiredFootPose));
             desiredFinalFootPoses.put(robotSide, desiredFootPose);
          }
@@ -322,14 +322,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(footstepListBehavior, stopThreadUpdatable);
       PrintTools.debug(this, "Behavior should be done");
 
-      SideDependentList<FramePose2d> footPosesAtStop = new SideDependentList<FramePose2d>();
+      SideDependentList<FramePose2D> footPosesAtStop = new SideDependentList<FramePose2D>();
       for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame footFrame = stopThreadUpdatable.getReferenceFramesAtTransition(BehaviorControlModeEnum.STOP).getFootFrame(robotSide);
          footPosesAtStop.put(robotSide, stopThreadUpdatable.getTestFramePose2dCopy(footFrame.getTransformToWorldFrame()));
       }
 
-      SideDependentList<FramePose2d> footPosesFinal = new SideDependentList<FramePose2d>();
+      SideDependentList<FramePose2D> footPosesFinal = new SideDependentList<FramePose2D>();
       for (RobotSide robotSide : RobotSide.values)
       {
          drcBehaviorTestHelper.updateRobotModel();
@@ -350,22 +350,22 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private FramePose2d createFootPoseOffsetFromCurrent(RobotSide robotSide, double xOffset, double yOffset)
+   private FramePose2D createFootPoseOffsetFromCurrent(RobotSide robotSide, double xOffset, double yOffset)
    {
-      FramePose2d currentFootPose = getRobotFootPose2d(robot, robotSide);
+      FramePose2D currentFootPose = getRobotFootPose2d(robot, robotSide);
       return createFootPoseOffsetFromExisting(robotSide, xOffset, yOffset, currentFootPose);
    }
 
-   private FramePose2d createFootPoseOffsetFromExisting(RobotSide robotSide, double xOffset, double yOffset, FramePose2d existingFootStep)
+   private FramePose2D createFootPoseOffsetFromExisting(RobotSide robotSide, double xOffset, double yOffset, FramePose2D existingFootStep)
    {
-      FramePose2d desiredFootPose = new FramePose2d(existingFootStep);
+      FramePose2D desiredFootPose = new FramePose2D(existingFootStep);
       desiredFootPose.setX(desiredFootPose.getX() + xOffset);
       desiredFootPose.setY(desiredFootPose.getY() + yOffset);
 
       return desiredFootPose;
    }
 
-   private Footstep generateFootstepOnFlatGround(RobotSide robotSide, FramePose2d desiredFootPose2d)
+   private Footstep generateFootstepOnFlatGround(RobotSide robotSide, FramePose2D desiredFootPose2d)
    {
       Footstep ret = generateFootstep(desiredFootPose2d, fullRobotModel.getFoot(robotSide), fullRobotModel.getSoleFrame(robotSide), robotSide, 0.0,
             new Vector3D(0.0, 0.0, 1.0));
@@ -373,43 +373,43 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return ret;
    }
 
-   private Footstep generateFootstep(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3D planeNormal)
+   private Footstep generateFootstep(FramePose2D footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3D planeNormal)
    {
       double yaw = footPose2d.getYaw();
       Point3D position = new Point3D(footPose2d.getX(), footPose2d.getY(), height);
       Quaternion orientation = new Quaternion();
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
-      FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
+      FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
       Footstep footstep = new Footstep(robotSide, footstepPose);
 
       return footstep;
    }
 
-   private FramePose2d getRobotFootPose2d(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
+   private FramePose2D getRobotFootPose2d(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();
       RigidBodyTransform ankleTransformToWorld = new RigidBodyTransform();
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
-      FramePose2d ret = new FramePose2d();
+      FramePose2D ret = new FramePose2D();
       ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), ankleTransformToWorld, false);
 
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose2d desiredPose, FramePose2d actualPose)
+   private void assertPosesAreWithinThresholds(FramePose2D desiredPose, FramePose2D actualPose)
    {
       assertPosesAreWithinThresholds(desiredPose, actualPose, POSITION_THRESHOLD);
    }
 
-   private void assertPosesAreWithinThresholds(FramePose2d desiredPose, FramePose2d actualPose, double positionThreshold)
+   private void assertPosesAreWithinThresholds(FramePose2D desiredPose, FramePose2D actualPose, double positionThreshold)
    {
       assertPosesAreWithinThresholds(desiredPose, actualPose, positionThreshold, ORIENTATION_THRESHOLD);
    }
 
-   private void assertPosesAreWithinThresholds(FramePose2d desiredPose, FramePose2d actualPose, double positionThreshold, double orientationThreshold)
+   private void assertPosesAreWithinThresholds(FramePose2D desiredPose, FramePose2D actualPose, double positionThreshold, double orientationThreshold)
    {
       double positionDistance = desiredPose.getPositionDistance(actualPose);
       double orientationDistance = desiredPose.getOrientationDistance(actualPose);

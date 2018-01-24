@@ -5,17 +5,19 @@ import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 import java.io.Serializable;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -48,10 +50,10 @@ public class QuadrupedSupportPolygon implements Serializable
    private final Point2D[] tempPointsForCornerCircle = new Point2D[] {new Point2D(), new Point2D(), new Point2D(), new Point2D()};
    private final Vector2D tempVectorForCornerCircle = new Vector2D();
    
-   private final FrameLineSegment2d tempLineSegment2d = new FrameLineSegment2d();
+   private final FrameLineSegment2D tempLineSegment2d = new FrameLineSegment2D();
    private final FramePoint2D tempFramePoint2dOne = new FramePoint2D();
    private final FramePoint2D tempFramePoint2dTwo = new FramePoint2D();
-   private final FrameLine2d tempFrameLine2d = new FrameLine2d();
+   private final FrameLine2D tempFrameLine2d = new FrameLine2D();
 
    public QuadrupedSupportPolygon()
    {
@@ -291,7 +293,7 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
 
-   public void setFootstep(RobotQuadrant robotQuadrant, FramePoint3D footstep)
+   public void setFootstep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly footstep)
    {
       if (footstep == null)
       {
@@ -542,7 +544,7 @@ public class QuadrupedSupportPolygon implements Serializable
 
          tempFramePoint2dOne.set(x, y);
          tempFrameConvexPolygon2d.getClosestEdge(tempLineSegment2d, tempFramePoint2dOne);
-         tempLineSegment2d.getClosestPointOnLineSegment(tempFramePoint2dTwo, tempFramePoint2dOne);
+         tempLineSegment2d.orthogonalProjection(tempFramePoint2dOne, tempFramePoint2dTwo);
          
          return tempFramePoint2dTwo;
       }
@@ -555,7 +557,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
    public void snapPointToEdgeTowardsInnerPointIfOutside(YoFramePoint pointToSnap, YoFramePoint innerPoint)
    {
-      if (size() > 0 && !isInside(pointToSnap.getFrameTuple()))
+      if (size() > 0 && !isInside(pointToSnap))
       {
          updateTempFrameConvexPolygon();
 
@@ -699,25 +701,25 @@ public class QuadrupedSupportPolygon implements Serializable
    }
    
    private final FramePoint3D tempFramePointForCentroids = new FramePoint3D();
-   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose framePose)
+   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();
       double nominalYaw = getNominalYaw();
       
       getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
-      framePose.setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
    }
    
-   public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose framePose)
+   public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();
       double nominalYaw = getNominalYaw();
       
       getCentroidWithEqualWeightedEndsAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
-      framePose.setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
    }
 
@@ -783,7 +785,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param point Point2d
     * @return boolean
     */
-   public boolean isInside(FramePoint3D point)
+   public boolean isInside(FramePoint3DReadOnly point)
    {
       return isInside(point.getX(), point.getY());
    }
@@ -811,7 +813,7 @@ public class QuadrupedSupportPolygon implements Serializable
       return false;
    }
    
-   public double getDistanceInside2d(FramePoint2D point)
+   public double getDistanceInside2d(FramePoint2DReadOnly point)
    {
       return getDistanceInside2d(point.getX(), point.getY());
    }
@@ -1651,7 +1653,7 @@ public class QuadrupedSupportPolygon implements Serializable
    /**
     * Gets distance from P1 to trotLine specified by front quadrant.
     */
-   public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint3D p1, FramePoint3D p2)
+   public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint3DReadOnly p1, FramePoint3DReadOnly p2)
    {
       boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()), tempIntersection);
 

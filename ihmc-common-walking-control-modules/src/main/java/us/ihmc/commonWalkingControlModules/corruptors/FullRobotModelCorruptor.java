@@ -179,7 +179,7 @@ public class FullRobotModelCorruptor
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            rigidBodyCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
+            tempFramePoint.setIncludingFrame(rigidBodyCoMOffset);
             tempFramePoint.changeFrame(rigidBody.getBodyFixedFrame());
             rigidBody.setCoMOffset(tempFramePoint);
          }

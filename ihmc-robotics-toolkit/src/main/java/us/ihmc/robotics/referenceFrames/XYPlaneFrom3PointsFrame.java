@@ -38,9 +38,9 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      eX.sub(p2.getPoint(), p1.getPoint());
+      eX.sub(p2, p1);
       eX.normalize();
-      eY.sub(p3.getPoint(), p1.getPoint()); // temp only
+      eY.sub(p3, p1); // temp only
       eZ.cross(eX, eY);
       eZ.normalize();
       eY.cross(eZ, eX);

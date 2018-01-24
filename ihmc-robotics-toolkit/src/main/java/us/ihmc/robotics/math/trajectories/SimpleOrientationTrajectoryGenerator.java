@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -76,12 +77,12 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
       parentRegistry.addChild(registry);
    }
 
-   public void setInitialOrientation(FrameQuaternion initialOrientation)
+   public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
       this.initialOrientation.setAndMatchFrame(initialOrientation);
    }
 
-   public void setFinalOrientation(FrameQuaternion finalOrientation)
+   public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
       this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
@@ -136,19 +137,19 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    @Override
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(currentOrientation);
    }
 
    @Override
    public void getAngularVelocity(FrameVector3D velocityToPack)
    {
-      currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
    @Override
    public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAngularAcceleration);
    }
 
    @Override

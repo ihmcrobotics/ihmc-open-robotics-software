@@ -587,8 +587,8 @@ public class PelvisLinearStateUpdater
          comAcceleration.scale(estimatorDT);
          yoCenterOfMassVelocityIntegrateGRF.add(comAcceleration);
 
-         comVelocityGRFPart.set(yoCenterOfMassVelocity.getFrameTuple());
-         comVelocityGRFPart.add(comAcceleration.getFrameTuple());
+         comVelocityGRFPart.set(yoCenterOfMassVelocity);
+         comVelocityGRFPart.add(comAcceleration);
          comAcceleration.scale(1.0/estimatorDT);
 
          comVelocityPelvisAndKinPart.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
@@ -604,7 +604,7 @@ public class PelvisLinearStateUpdater
          yoCenterOfMassVelocity.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
       }
       
-      if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity.getFrameTuple());
+      if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity);
    }
 
 
@@ -662,22 +662,22 @@ public class PelvisLinearStateUpdater
 
    public void getEstimatedPelvisPosition(FramePoint3D pelvisPositionToPack)
    {
-      yoRootJointPosition.getFrameTupleIncludingFrame(pelvisPositionToPack);
+      pelvisPositionToPack.setIncludingFrame(yoRootJointPosition);
    }
 
    public void getEstimatedPelvisLinearVelocity(FrameVector3D pelvisLinearVelocityToPack)
    {
-      yoRootJointVelocity.getFrameTupleIncludingFrame(pelvisLinearVelocityToPack);
+      pelvisLinearVelocityToPack.setIncludingFrame(yoRootJointVelocity);
    }
 
    public void getEstimatedCoMPosition(FramePoint3D comPositionToPack)
    {
-      yoCenterOfMassPosition.getFrameTupleIncludingFrame(comPositionToPack);
+      comPositionToPack.setIncludingFrame(yoCenterOfMassPosition);
    }
 
    public void getEstimatedCoMVelocity(FrameVector3D comVelocityToPack)
    {
-      yoCenterOfMassVelocity.getFrameTupleIncludingFrame(comVelocityToPack);
+      comVelocityToPack.setIncludingFrame(yoCenterOfMassVelocity);
    }
 
    public List<RigidBody> getCurrentListOfTrustedFeet()

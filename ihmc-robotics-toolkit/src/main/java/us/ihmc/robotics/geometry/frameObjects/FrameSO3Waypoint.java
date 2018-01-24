@@ -42,14 +42,14 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
    {
       checkReferenceFrameMatch(orientation);
       checkReferenceFrameMatch(angularVelocity);
-      geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
+      geometryObject.set(orientation, angularVelocity);
    }
 
    public void setIncludingFrame(FrameQuaternion orientation, FrameVector3D angularVelocity)
    {
       orientation.checkReferenceFrameMatch(angularVelocity);
       setToZero(orientation.getReferenceFrame());
-      geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
+      geometryObject.set(orientation, angularVelocity);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, SO3WaypointInterface<?> so3Waypoint)
@@ -67,7 +67,7 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
    public void setOrientation(FrameQuaternion orientation)
    {
       checkReferenceFrameMatch(orientation);
-      geometryObject.setOrientation(orientation.getQuaternion());
+      geometryObject.setOrientation(orientation);
    }
 
    @Override
@@ -79,7 +79,7 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
    public void setAngularVelocity(FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(angularVelocity);
-      geometryObject.setAngularVelocity(angularVelocity.getVector());
+      geometryObject.setAngularVelocity(angularVelocity);
    }
 
    @Override
@@ -133,13 +133,13 @@ public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3W
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
-      geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+      geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
    public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       setToZero(getReferenceFrame());
-      geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
+      geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
    public void get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)

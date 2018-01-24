@@ -562,7 +562,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       linearVelocityFrameVector.changeFrame(bodyFrame);
       floatingJoint.getAngularVelocity(angularVelocityFrameVector, bodyFrame);
 
-      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector.getVector(), angularVelocityFrameVector.getVector());
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, linearVelocityFrameVector, angularVelocityFrameVector);
       sixDoFJoint.setJointTwist(bodyTwist);
    }
 
@@ -810,8 +810,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);
 
-      floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
-      floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+      floatingJoint.getLinearAccelerationInWorld(originAcceleration);
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration);
       originAcceleration.changeFrame(elevatorFrame);
 
       SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
@@ -832,8 +832,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       FrameVector3D originAcceleration = new FrameVector3D(elevatorFrame);
       FrameVector3D angularAcceleration = new FrameVector3D(bodyFrame);
 
-      floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
-      floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+      floatingJoint.getLinearAccelerationInWorld(originAcceleration);
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration);
       originAcceleration.changeFrame(elevatorFrame);
 
       //TODO: These should be from the inverse dynamics to the SCS frames...

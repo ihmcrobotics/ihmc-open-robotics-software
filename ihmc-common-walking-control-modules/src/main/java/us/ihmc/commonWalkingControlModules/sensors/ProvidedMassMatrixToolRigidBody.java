@@ -114,7 +114,7 @@ public class ProvidedMassMatrixToolRigidBody
    {
       toolBody.getInertia().setMass(objectMass.getDoubleValue());
 
-      temporaryPoint.setIncludingFrame(objectCenterOfMass.getFrameTuple());
+      temporaryPoint.setIncludingFrame(objectCenterOfMass);
       temporaryPoint.changeFrame(toolBody.getBodyFixedFrame());
       toolBody.setCoMOffset(temporaryPoint);
 

@@ -315,7 +315,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    @Override
    public void getOrientationMeasurement(RotationMatrix orientationToPack)
    {
-      quaternion.get(orientationToPack);
+      orientationToPack.set(quaternion);
    }
 
    @Override

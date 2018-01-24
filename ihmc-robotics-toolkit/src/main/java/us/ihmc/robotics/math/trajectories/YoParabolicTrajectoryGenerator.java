@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -33,19 +34,21 @@ public class YoParabolicTrajectoryGenerator
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(FramePoint3D initialPosition, FramePoint3D finalPosition, double heightAtParameter, double parameter)
+   public void initialize(FramePoint3DReadOnly initialPosition, FramePoint3DReadOnly finalPosition, double heightAtParameter, double parameter)
    {
       double q = parameter;
       MathTools.checkIntervalContains(q, 0.0, 1.0);
 
-      initialPosition.changeFrame(referenceFrame);
-      finalPosition.changeFrame(referenceFrame);
+      FramePoint3D tempInitialPosition = new FramePoint3D(initialPosition);
+      FramePoint3D tempFinalPosition = new FramePoint3D(finalPosition);
+      tempInitialPosition.changeFrame(referenceFrame);
+      tempFinalPosition.changeFrame(referenceFrame);
 
       FramePoint3D intermediatePosition = new FramePoint3D(referenceFrame);
-      intermediatePosition.setX(initialPosition.getX() + q * (finalPosition.getX() - initialPosition.getX()));
-      intermediatePosition.setY(initialPosition.getY() + q * (finalPosition.getY() - initialPosition.getY()));
+      intermediatePosition.setX(tempInitialPosition.getX() + q * (tempFinalPosition.getX() - tempInitialPosition.getX()));
+      intermediatePosition.setY(tempInitialPosition.getY() + q * (tempFinalPosition.getY() - tempInitialPosition.getY()));
       intermediatePosition.setZ(heightAtParameter);
-      initialize(initialPosition, intermediatePosition, finalPosition, q);
+      initialize(tempInitialPosition, intermediatePosition, tempFinalPosition, q);
    }
    
    public void initialize(FramePoint3D initialPosition, FramePoint3D intermediatePosition, FramePoint3D finalPosition, double intermediateParameter)

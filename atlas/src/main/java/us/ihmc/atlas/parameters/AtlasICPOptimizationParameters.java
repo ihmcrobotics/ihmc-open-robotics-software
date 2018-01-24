@@ -30,7 +30,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getFootstepRegularizationWeight()
+   public double getFootstepRateWeight()
    {
       return runningOnRealRobot ? 0.001 : 0.001;
    }
@@ -51,7 +51,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackRegularizationWeight()
+   public double getFeedbackRateWeight()
    {
       return runningOnRealRobot ? 0.00001 : 0.000001;
    }
@@ -106,7 +106,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public boolean scaleStepRegularizationWeightWithTime()
+   public boolean scaleStepRateWeightWithTime()
    {
       return false;
    }
@@ -120,9 +120,9 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public boolean useFeedbackRegularization()
+   public boolean useFeedbackRate()
    {
-      return true;
+      return !runningOnRealRobot;
    }
 
    /** {@inheritDoc} */
@@ -148,7 +148,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public boolean useFootstepRegularization()
+   public boolean useFootstepRate()
    {
       return false;
    }

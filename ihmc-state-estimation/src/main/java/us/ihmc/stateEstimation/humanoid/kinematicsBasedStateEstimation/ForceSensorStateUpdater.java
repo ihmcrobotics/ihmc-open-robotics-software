@@ -302,8 +302,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.get(footForceSensorDefinition);
          footForceSensor.getWrench(tempWrench);
 
-         footForceCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempForce);
-         footTorqueCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempTorque);
+         tempForce.setIncludingFrame(footForceCalibrationOffsets.get(robotSide));
+         tempTorque.setIncludingFrame(footTorqueCalibrationOffsets.get(robotSide));
 
          tempWrench.subLinearPart(tempForce);
          tempWrench.subAngularPart(tempTorque);
@@ -328,8 +328,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          RigidBody measurementLink = wristForceSensorDefinition.getRigidBody();
          wristForceSensor.getWrench(tempWrench);
 
-         wristForceCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempForce);
-         wristTorqueCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempTorque);
+         tempForce.setIncludingFrame(wristForceCalibrationOffsets.get(robotSide));
+         tempTorque.setIncludingFrame(wristTorqueCalibrationOffsets.get(robotSide));
 
          tempWrench.subLinearPart(tempForce);
          tempWrench.subAngularPart(tempTorque);

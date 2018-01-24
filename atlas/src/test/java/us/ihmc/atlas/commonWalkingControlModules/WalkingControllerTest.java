@@ -220,7 +220,7 @@ public class WalkingControllerTest
 
          location.changeFrame(ReferenceFrame.getWorldFrame());
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
-         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location.getPoint(), orientation.getQuaternion());
+         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
          footsteps.add(footstep);
       }
       commandInputManager.submitMessage(footsteps);

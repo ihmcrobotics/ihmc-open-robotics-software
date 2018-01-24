@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
@@ -14,7 +15,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
@@ -31,7 +31,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
    private boolean walkSucceded = true;
 
-   private FramePose goalPose;
+   private FramePose3D goalPose;
 
    private final FootstepListBehavior footstepListBehavior;
    private final PlanPathToLocationBehavior planPathToLocationBehavior;
@@ -51,7 +51,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
    }
 
-   public void setTarget(FramePose targetPoseInWorld)
+   public void setTarget(FramePose3D targetPoseInWorld)
    {
       goalPose = targetPoseInWorld;
    }
@@ -77,7 +77,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          {
             RobotSide initialStanceSide = RobotSide.LEFT;
             RigidBodyTransform soleToWorld = referenceFrames.getSoleFrame(initialStanceSide).getTransformToWorldFrame();
-            FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame(), soleToWorld);
+            FramePose3D stanceFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), soleToWorld);
             if (goalPose == null)
                System.err.println("WalkToLocationPlannedBehavior: goal pose NULL");
 

@@ -12,7 +12,7 @@ public class BacklashProcessingYoFrameVector extends YoFrameVector implements Pr
    private final BacklashProcessingYoVariable xDot, yDot, zDot;
 
    public static BacklashProcessingYoFrameVector createBacklashProcessingYoFrameVector(String namePrefix, String nameSuffix, double dt, YoDouble slopTime,
-           YoVariableRegistry registry, YoFrameTuple<?, ?> yoFrameTupleToProcess)
+           YoVariableRegistry registry, YoFrameTuple yoFrameTupleToProcess)
    {
       String xName = YoFrameVariableNameTools.createXName(namePrefix, nameSuffix);
       String yName = YoFrameVariableNameTools.createYName(namePrefix, nameSuffix);

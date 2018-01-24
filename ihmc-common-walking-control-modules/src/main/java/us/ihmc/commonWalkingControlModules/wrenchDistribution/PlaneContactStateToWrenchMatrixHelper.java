@@ -384,7 +384,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       yoPlaneContactState.getContactNormalFrameVector(contactNormalVector);
       contactNormalVector.changeFrame(planeFrame);
       contactNormalVector.normalize();
-      EuclidGeometryTools.axisAngleFromZUpToVector3D(contactNormalVector.getVector(), normalContactVectorRotation);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(contactNormalVector, normalContactVectorRotation);
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
@@ -397,7 +397,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorToPack.setIncludingFrame(planeFrame, Math.cos(angle) * mu, Math.sin(angle) * mu, 1.0);
 
       // Transforming the result to consider the actual normal contact vector
-      normalContactVectorRotationMatrix.transform(basisVectorToPack.getVector());
+      normalContactVectorRotationMatrix.transform(basisVectorToPack);
       basisVectorToPack.normalize();
    }
 

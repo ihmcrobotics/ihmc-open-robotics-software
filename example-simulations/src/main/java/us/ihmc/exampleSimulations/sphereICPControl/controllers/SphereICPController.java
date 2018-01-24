@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,7 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -60,7 +60,7 @@ public class SphereICPController implements GenericSphereController
 
    private final SideDependentList<YoPlaneContactState> contactStates;
    private final SideDependentList<FootSpoof> contactableFeet;
-   private final SideDependentList<FramePose> footPosesAtTouchdown;
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown;
 
    private final YoFramePoint icp;
    private final YoFramePoint desiredICP;
@@ -157,7 +157,7 @@ public class SphereICPController implements GenericSphereController
 
       controlToolbox.update();
 
-      icp.getFrameTuple2d(capturePoint2d);
+      capturePoint2d.set(icp);
       icpPlanner.compute(yoTime.getDoubleValue());
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity);
@@ -175,15 +175,15 @@ public class SphereICPController implements GenericSphereController
       double fZ = heightController.getVerticalForce();
       FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);
       reactionForces.changeFrame(worldFrame);
-      planarForces.setByProjectionOntoXYPlane(reactionForces);
+      planarForces.set(reactionForces);
 
       desiredCMP.changeFrame(worldFrame);
       yoDesiredCMP.set(desiredCMP, 0.0);
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
-         icpTrack.setBallLoop(desiredICP.getFramePointCopy());
-         cmpTrack.setBallLoop(yoDesiredCMP.getFramePointCopy());
+         icpTrack.setBallLoop(desiredICP);
+         cmpTrack.setBallLoop(yoDesiredCMP);
          comTrack.setBallLoop(centerOfMass);
       }
    }
@@ -289,7 +289,7 @@ public class SphereICPController implements GenericSphereController
          icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
 
          FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
-         FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
+         FramePose3D nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
          nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
          nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
          footSpoof.setSoleFrame(nextSupportPose);

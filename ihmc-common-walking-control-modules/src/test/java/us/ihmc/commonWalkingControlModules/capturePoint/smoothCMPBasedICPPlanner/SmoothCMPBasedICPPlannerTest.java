@@ -25,6 +25,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -43,7 +44,6 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
@@ -89,7 +89,7 @@ public class SmoothCMPBasedICPPlannerTest
    private final double coefficientOfFriction = 0.1;
 
    // Robot parameters
-   private final FramePose initialPose = new FramePose(worldFrame, new Point3D(0.0, 0.0, 0.0), new Quaternion());
+   private final FramePose3D initialPose = new FramePose3D(worldFrame, new Point3D(0.0, 0.0, 0.0), new Quaternion());
 
    // Planning parameters
    private final double defaultSwingTime = 0.6;
@@ -186,7 +186,7 @@ public class SmoothCMPBasedICPPlannerTest
       {
          String footName = side.getCamelCaseName();
          FootSpoof foot = new FootSpoof(footName + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInFootFrame, coefficientOfFriction);
-         FramePose footPose = new FramePose(initialPose);
+         FramePose3D footPose = new FramePose3D(initialPose);
          footPose.appendTranslation(0.0, side.negateIfRightSide(stepWidth / 2.0), 0.0);
          foot.setSoleFrame(footPose);
 

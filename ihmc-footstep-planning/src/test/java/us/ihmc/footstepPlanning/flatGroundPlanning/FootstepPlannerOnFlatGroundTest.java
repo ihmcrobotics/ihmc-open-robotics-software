@@ -4,14 +4,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
@@ -31,17 +31,17 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       double yGoal = -stepWidth/2.0;
       double yawGoal = 0.0;
       Point2D goalPosition = new Point2D(xGoal, yGoal);
-      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
+      FramePose2D goalPose = new FramePose2D(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
       Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
-      FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
+      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
@@ -62,17 +62,17 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       double yGoal = 0.5;
       double yawGoal = 0.0;
       Point2D goalPosition = new Point2D(xGoal, yGoal);
-      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
+      FramePose2D goalPose = new FramePose2D(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
       Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
-      FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
+      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
@@ -94,17 +94,17 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       double yGoal = -stepWidth/2.0;
       double yawGoal = Math.toRadians(20.0);
       Point2D goalPosition = new Point2D(xGoal, yGoal);
-      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
+      FramePose2D goalPose = new FramePose2D(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = Math.toRadians(20.0);
       Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
-      FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
+      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
@@ -124,17 +124,17 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       double yGoal = -stepWidth/2.0;
       double yawGoal = Math.toRadians(160.0);
       Point2D goalPosition = new Point2D(xGoal, yGoal);
-      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
+      FramePose2D goalPose = new FramePose2D(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
       Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
 
-      FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
-      FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
+      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
@@ -154,17 +154,17 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       double yGoal = random.nextDouble();
       double yawGoal = 0.0;
       Point2D goalPosition = new Point2D(xGoal, yGoal);
-      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
+      FramePose2D goalPose = new FramePose2D(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = random.nextDouble();
       double yInitialStanceFoot = random.nextDouble();
       double yawInitial = 0.0;
       Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
-      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      FramePose2D initialStanceFootPose = new FramePose2D(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.generateRandomRobotSide(random);
 
-      FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
-      FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
+      FramePose3D initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose3D goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 

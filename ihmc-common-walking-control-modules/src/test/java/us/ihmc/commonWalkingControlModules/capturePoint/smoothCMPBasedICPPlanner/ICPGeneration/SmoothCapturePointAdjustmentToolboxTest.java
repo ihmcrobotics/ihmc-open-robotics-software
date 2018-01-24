@@ -11,9 +11,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -33,7 +33,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
-   private final List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList = new ArrayList<>();
+   private final List<FrameTuple3DBasics> icpQuantityInitialConditionList = new ArrayList<>();
 
    @Before
    public void setupTest()
@@ -62,9 +62,9 @@ public class SmoothCapturePointAdjustmentToolboxTest
       List<FramePoint3D> exitCornerPoints = new ArrayList<FramePoint3D>();
 
       // Boundary Conditions
-      List<FrameTuple3D<?, ?>> icp0QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp0QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp2QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> icp0QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp0QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp2QuantitiesBefore = new ArrayList<>();
 
       for (int i = 0; i < nTests; i++)
       {
@@ -176,9 +176,9 @@ public class SmoothCapturePointAdjustmentToolboxTest
       List<FramePoint3D> exitCornerPointsTransfer = new ArrayList<FramePoint3D>();
 
       // Boundary Conditions
-      List<FrameTuple3D<?, ?>> icp1QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp1QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp3QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> icp1QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp1QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp3QuantitiesBefore = new ArrayList<>();
 
       for (int i = 0; i < nTests; i++)
       {
@@ -321,9 +321,9 @@ public class SmoothCapturePointAdjustmentToolboxTest
       double endTimeOffset = 0.03;
 
       // Boundary Conditions
-      List<FrameTuple3D<?, ?>> icp1QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp1QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp3QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> icp1QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp1QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp3QuantitiesBefore = new ArrayList<>();
 
       for (int i = 0; i < nTests; i++)
       {
@@ -472,9 +472,9 @@ public class SmoothCapturePointAdjustmentToolboxTest
       List<FramePoint3D> exitCornerPoints = new ArrayList<FramePoint3D>();
 
       // Boundary Conditions
-      List<FrameTuple3D<?, ?>> icp0QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp0QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp2QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> icp0QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp0QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp2QuantitiesBefore = new ArrayList<>();
 
       for (int i = 0; i < nTests; i++)
       {
@@ -586,9 +586,9 @@ public class SmoothCapturePointAdjustmentToolboxTest
       List<FramePoint3D> exitCornerPointsTransfer = new ArrayList<FramePoint3D>();
 
       // Boundary Conditions
-      List<FrameTuple3D<?, ?>> icp1QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp1QuantitiesBefore = new ArrayList<>();
-      List<FrameTuple3D<?, ?>> cmp3QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> icp1QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp1QuantitiesBefore = new ArrayList<>();
+      List<FrameTuple3DBasics> cmp3QuantitiesBefore = new ArrayList<>();
 
       for (int i = 0; i < nTests; i++)
       {
@@ -706,7 +706,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
          FrameTrajectory3D copPolynomial3D = copPolynomials3D.get(0);
          for (int i = 0; i < copPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
          {
-            FrameTuple3D<?, ?> icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
+            FrameTuple3DBasics icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
 
             copPolynomial3D.getDerivative(i, localTime, icpQuantityInitialCondition);
          }
@@ -716,7 +716,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
          FrameTrajectory3D copPolynomial3D = copPolynomials3D.get(currentSwingSegment);
          for (int i = 0; i < copPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
          {
-            FrameTuple3D<?, ?> icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
+            FrameTuple3DBasics icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
 
             icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, localTime, i, copPolynomial3D,
                                                                             exitCornerPointsFromCoPs.get(currentSwingSegment), icpQuantityInitialCondition);

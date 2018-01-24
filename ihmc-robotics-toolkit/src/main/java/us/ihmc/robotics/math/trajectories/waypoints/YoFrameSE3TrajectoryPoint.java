@@ -199,7 +199,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    @Override
    public void getOrientation(QuaternionBasics orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    @Override
@@ -221,7 +221,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientation(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    public void getLinearVelocity(FrameVector3D linearVelocityToPack)
@@ -236,22 +236,22 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
 
    public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(orientation);
    }
 
    public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
-      linearVelocity.getFrameTupleIncludingFrame(linearVelocityToPack);
+      linearVelocityToPack.setIncludingFrame(linearVelocity);
    }
 
    public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
-      angularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(angularVelocity);
    }
 
    public void getPosition(YoFramePoint positionToPack)
@@ -326,10 +326,10 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       frameWaypoint.setToZero(getReferenceFrame());
 
       frameWaypoint.setTime(time.getDoubleValue());
-      frameWaypoint.setPosition(position.getFrameTuple());
-      frameWaypoint.setOrientation(orientation.getFrameOrientation());
-      frameWaypoint.setLinearVelocity(linearVelocity.getFrameTuple());
-      frameWaypoint.setAngularVelocity(angularVelocity.getFrameTuple());
+      frameWaypoint.setPosition(position);
+      frameWaypoint.setOrientation(orientation);
+      frameWaypoint.setLinearVelocity(linearVelocity);
+      frameWaypoint.setAngularVelocity(angularVelocity);
    }
 
    @Override

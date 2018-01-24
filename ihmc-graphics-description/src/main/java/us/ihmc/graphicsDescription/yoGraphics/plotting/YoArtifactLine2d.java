@@ -30,7 +30,7 @@ public class YoArtifactLine2d extends YoArtifact
       graphics.setColor(color);
       graphics.setStroke(STROKE);
 
-      yoFrameLine2d.getFrameLine2d().get(tempLine);
+      tempLine.set(yoFrameLine2d);
       graphics.drawLine(tempLine);
    }
 

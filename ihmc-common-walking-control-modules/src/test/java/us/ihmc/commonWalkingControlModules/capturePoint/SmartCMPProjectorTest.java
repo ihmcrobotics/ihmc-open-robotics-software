@@ -689,13 +689,13 @@ public class SmartCMPProjectorTest
          }
 
          ConvexPolygon2D plotHelperPolygon = new ConvexPolygon2D(projectionArea.getConvexPolygon2d());
-         plotHelperPolygon.addVertex(capturePoint.getPoint());
-         plotHelperPolygon.addVertex(projectedCMP.getPoint());
-         plotHelperPolygon.addVertex(desiredCMP.getPoint());
+         plotHelperPolygon.addVertex(capturePoint);
+         plotHelperPolygon.addVertex(projectedCMP);
+         plotHelperPolygon.addVertex(desiredCMP);
          if (expectedProjection != null)
-            plotHelperPolygon.addVertex(expectedProjection.getPoint());
+            plotHelperPolygon.addVertex(expectedProjection);
          if (finalCapturePoint != null)
-            plotHelperPolygon.addVertex(finalCapturePoint.getPoint());
+            plotHelperPolygon.addVertex(finalCapturePoint);
          plotHelperPolygon.update();
 
          Point2DReadOnly focus = plotHelperPolygon.getCentroid();

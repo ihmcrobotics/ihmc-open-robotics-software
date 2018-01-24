@@ -348,7 +348,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          stepLocation.add(lastPosition);
 
          lastPosition.set(stepLocation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(swingSide, stepLocation, stepOrientation.getQuaternion());
+         FootstepDataMessage footstepData = new FootstepDataMessage(swingSide, stepLocation, stepOrientation);
          footstepData.setSwingDuration(swingTime);
          message.add(footstepData);
          swingSide = swingSide.getOppositeSide();

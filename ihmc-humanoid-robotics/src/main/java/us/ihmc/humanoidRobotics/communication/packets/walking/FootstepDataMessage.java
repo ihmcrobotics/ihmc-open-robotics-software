@@ -171,7 +171,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.location = location.getPoint();
+      this.location = new Point3D(location);
       this.orientation = new Quaternion(orientation);
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
@@ -206,7 +206,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          {
             FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
             framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            positionWaypoints[i] = new Point3D(framePoint.getPoint());
+            positionWaypoints[i] = new Point3D(framePoint);
          }
       }
    }

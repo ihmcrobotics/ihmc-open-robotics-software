@@ -91,13 +91,8 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       YoVariableRegistry scsRootRegistry = drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry();
-
-      AtlasPrimitiveActions primitiveActions = new AtlasPrimitiveActions(communicationBridge, fullRobotModel, drcRobotModel, referenceFrames, yoTime, drcRobotModel, scsRootRegistry);
-
-      LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
-
-      WalkOverTerrainStateMachineBehavior walkOverTerrainBehavior = new WalkOverTerrainStateMachineBehavior(communicationBridge, yoTime, primitiveActions,
-            logModelProvider, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+      
+      WalkOverTerrainStateMachineBehavior walkOverTerrainBehavior = new WalkOverTerrainStateMachineBehavior(communicationBridge, yoTime, referenceFrames);
       walkOverTerrainBehavior.initialize();
       drcBehaviorTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
 

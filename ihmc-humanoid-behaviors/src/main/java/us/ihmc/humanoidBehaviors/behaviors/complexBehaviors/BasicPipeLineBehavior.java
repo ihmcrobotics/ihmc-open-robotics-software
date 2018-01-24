@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -81,7 +81,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             currentState = BasicStates.WALK_TO_LOCATION_AND_HOME_ARM;
-            FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0, 0), 0);
+            FramePose2D poseToWalkTo = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0, 0), 0);
             walkToLocationBehavior.setTarget(poseToWalkTo);
          }
 

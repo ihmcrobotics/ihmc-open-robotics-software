@@ -498,17 +498,17 @@ public class SkippyController implements RobotController
       /*
        * Foot to hip position vector
        */
-      robot.getHipJoint().getTranslationToWorld(hipToFootInWorld.getVector());
+      robot.getHipJoint().getTranslationToWorld(hipToFootInWorld);
       hipJointPosition.set(hipToFootInWorld);
-      hipToFootPositionVector.sub(footLocation, hipToFootInWorld.getVector());
+      hipToFootPositionVector.sub(footLocation, hipToFootInWorld);
       hipToFootUnitVector.set(hipToFootPositionVector);
       hipToFootUnitVector.normalize();
       /*
        * Shoulder to Foot position vector
        */
-      robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld.getVector());
+      robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld);
       shoulderJointPosition.set(shoulderToFootInWorld);
-      shoulderToFootPositionVector.sub(footLocation, shoulderToFootInWorld.getVector());
+      shoulderToFootPositionVector.sub(footLocation, shoulderToFootInWorld);
       shoulderToFootUnitVector.set(shoulderToFootPositionVector);
       shoulderToFootUnitVector.normalize();
    }
@@ -559,7 +559,7 @@ public class SkippyController implements RobotController
       /*
        * CoM to Foot error
        */
-      comToFootError.sub(com.getFrameTuple(), footLocation.getFrameTuple());
+      comToFootError.sub(com, footLocation);
       comToFootError.setZ(0.0);
    }
 
@@ -583,7 +583,7 @@ public class SkippyController implements RobotController
       Point3D footLocationInWorld = new Point3D();
       footLocationInWorld.set(robot.computeFootLocation());
       tempFootToComPositionVector.set(com);
-      footToComPositionVector.setVector(tempFootToComPositionVector);
+      footToComPositionVector.set(tempFootToComPositionVector);
       footToComPositionVector.sub(footLocationInWorld);
    }
 
@@ -595,7 +595,7 @@ public class SkippyController implements RobotController
       /*
        * ICP to Foot error
        */
-      icpToFootError.sub(icp.getFrameTuple(), footLocation.getFrameTuple());
+      icpToFootError.sub(icp, footLocation);
       /*
        * Compute CMP from ICP-CMP dynamics
        */
@@ -654,12 +654,12 @@ public class SkippyController implements RobotController
    {
       FramePoint2D tempCMP = new FramePoint2D(ReferenceFrame.getWorldFrame());
 
-      tempCMP.set(reactionForce.getFrameVector2dCopy());
+      tempCMP.set(reactionForce);
       if (reactionForce.getZ() != 0.0)
          tempCMP.scale(-com.getZ() / reactionForce.getZ());
       else
          tempCMP.set(0.0, 0.0);
-      tempCMP.add(com.getFramePoint2dCopy());
+      tempCMP.add(new FramePoint2D(com));
       this.cmpFromParameterizedReaction.set(tempCMP, 0.0);
    }
 
@@ -692,8 +692,8 @@ public class SkippyController implements RobotController
 
       footLocation.set(robot.computeFootLocation());
 
-      footLocation.getFrameTupleIncludingFrame(tempFootLocation);
-      com.getFrameTupleIncludingFrame(tempCoMLocation);
+      tempFootLocation.setIncludingFrame(footLocation);
+      tempCoMLocation.setIncludingFrame(com);
       tempFootLocation.changeFrame(bodyFrame);
       tempCoMLocation.changeFrame(bodyFrame);
 

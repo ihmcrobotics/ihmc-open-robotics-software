@@ -105,9 +105,9 @@ public class CoPPointsInFootTest
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.12, testLocation2);
       assertTrue(copPointsInFoot.getCoPPointList().size() == 2);
 
-      assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1.getFramePointCopy(), epsilon));
+      assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1, epsilon));
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.87, epsilon));
-      assertTrue(copPointsInFoot.get(1).getPosition().epsilonEquals(testLocation2.getFramePointCopy(), epsilon));
+      assertTrue(copPointsInFoot.get(1).getPosition().epsilonEquals(testLocation2, epsilon));
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(1).getTime(), 0.12, epsilon));
    }
 
@@ -125,13 +125,13 @@ public class CoPPointsInFootTest
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.12, testLocation2);
       assertTrue(copPointsInFoot.getCoPPointList().size() == 2);
 
-      assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1.getPosition().getFramePointCopy(), epsilon));
+      assertTrue(copPointsInFoot.get(0).getPosition().epsilonEquals(testLocation1.getPosition(), epsilon));
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.87, epsilon));
-      assertTrue(copPointsInFoot.get(1).getPosition().epsilonEquals(testLocation2.getPosition().getFramePointCopy(), epsilon));
+      assertTrue(copPointsInFoot.get(1).getPosition().epsilonEquals(testLocation2.getPosition(), epsilon));
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(1).getTime(), 0.12, epsilon));
       FramePoint3D tempFramePointForTesting = new FramePoint3D(footSpoof.getSoleFrame());
       copPointsInFoot.getFinalCoPPosition(tempFramePointForTesting);
-      assertTrue(tempFramePointForTesting.epsilonEquals(testLocation2.getPosition().getFramePointCopy(), epsilon));
+      assertTrue(tempFramePointForTesting.epsilonEquals(testLocation2.getPosition(), epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
@@ -73,7 +74,7 @@ public class FourBarKinematicLoop
     *
     */
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC,
-         PassiveRevoluteJoint passiveJointD, Vector3D jointDInJointABeforeFrame, boolean recomputeJointLimits)
+         PassiveRevoluteJoint passiveJointD, Vector3DReadOnly jointDInJointABeforeFrame, boolean recomputeJointLimits)
    {
       this.name = name;
       this.masterJointA = masterJointA;

@@ -6,6 +6,8 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -380,25 +382,25 @@ public class YoSpline3D
    /**
     * GC-free but unsafe accessor.
     */
-   public FramePoint3D getPosition()
+   public FramePoint3DReadOnly getPosition()
    {
-      return position.getFrameTuple();
+      return position;
    }
 
    /**
     * GC-free but unsafe accessor.
     */
-   public FrameVector3D getVelocity()
+   public FrameVector3DReadOnly getVelocity()
    {
-      return velocity.getFrameTuple();
+      return velocity;
    }
 
    /**
     * GC-free but unsafe accessor.
     */
-   public FrameVector3D getAcceleration()
+   public FrameVector3DReadOnly getAcceleration()
    {
-      return acceleration.getFrameTuple();
+      return acceleration;
    }
 
    /**
@@ -406,7 +408,7 @@ public class YoSpline3D
     */
    public FramePoint3D getPositionCopy()
    {
-      return position.getFramePointCopy();
+      return new FramePoint3D(position);
    }
 
    /**
@@ -414,7 +416,7 @@ public class YoSpline3D
     */
    public FrameVector3D getVelocityCopy()
    {
-      return velocity.getFrameVectorCopy();
+      return new FrameVector3D(velocity);
    }
    
    /**
@@ -422,22 +424,22 @@ public class YoSpline3D
     */
    public FrameVector3D getAccelerationCopy()
    {
-      return acceleration.getFrameVectorCopy();
+      return new FrameVector3D(acceleration);
    }
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      velocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(velocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      acceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(acceleration);
    }
 
    public void getPosition(YoFramePoint positionToPack)

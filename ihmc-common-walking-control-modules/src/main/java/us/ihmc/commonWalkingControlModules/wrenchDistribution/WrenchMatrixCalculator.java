@@ -171,16 +171,16 @@ public class WrenchMatrixCalculator
    {
       double rhoWeight = this.rhoWeight.getDoubleValue();
       double rhoRateWeight;
-      desiredCoPWeight.get(tempDeisredCoPWeight);
+      tempDeisredCoPWeight.set(desiredCoPWeight);
       if (useForceRateHighWeight.getBooleanValue())
       {
          rhoRateWeight = rhoRateHighWeight.getDoubleValue();
-         copRateHighWeight.get(tempCoPRateWeight);
+         tempCoPRateWeight.set(copRateHighWeight);
       }
       else
       {
          rhoRateWeight = rhoRateDefaultWeight.getDoubleValue();
-         copRateDefaultWeight.get(tempCoPRateWeight);
+         tempCoPRateWeight.set(copRateDefaultWeight);
       }
 
       int rhoStartIndex = 0;

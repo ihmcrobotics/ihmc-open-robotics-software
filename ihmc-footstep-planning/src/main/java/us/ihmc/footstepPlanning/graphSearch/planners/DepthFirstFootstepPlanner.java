@@ -9,6 +9,7 @@ import java.util.List;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -27,7 +28,6 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuris
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -126,11 +126,11 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    }
 
    @Override
-   public final void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
+   public final void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide initialSide)
    {
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
-      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
       checker.addStartNode(startNode, startNodeSnapTransform);
    }
@@ -139,12 +139,12 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    public final void setGoal(FootstepPlannerGoal goal)
    {
       checkGoalType(goal);
-      FramePose goalPose = goal.getGoalPoseBetweenFeet();
+      FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
       ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
 
       for (RobotSide side : RobotSide.values)
       {
-         FramePose goalNodePose = new FramePose(goalFrame);
+         FramePose3D goalNodePose = new FramePose3D(goalFrame);
          goalNodePose.setY(side.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
          goalNodePose.changeFrame(goalPose.getReferenceFrame());
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
@@ -193,7 +193,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
          if(!snapTransform.containsNaN())
             snapTransform.transform(footstepPose);
 
-         plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
+         plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
       }
 
       return plan;
@@ -305,7 +305,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
             if(!snapTransform.containsNaN())
                snapTransform.transform(footstepPose);
 
-            plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
+            plan.addFootstep(robotSide, new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPose));
          }
 
          listener.solutionWasFound(plan);

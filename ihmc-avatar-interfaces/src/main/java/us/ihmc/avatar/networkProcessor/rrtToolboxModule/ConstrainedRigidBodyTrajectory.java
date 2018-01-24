@@ -9,6 +9,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxSettings;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -64,9 +64,9 @@ public class ConstrainedRigidBodyTrajectory
          }
          trajectorySelectionMatrix.set(trajectoryCommand.getSelectionMatrix());
 
-         FramePose controlFramePose = new FramePose(trajectoryCommand.getControlFramePose());
+         FramePose3D controlFramePose = new FramePose3D(trajectoryCommand.getControlFramePose());
          controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
-         this.controlFramePose.set(controlFramePose.getGeometryObject());
+         this.controlFramePose.set(controlFramePose);
          this.hasTrajectoryCommand = true;
          if (Double.isNaN(trajectoryCommand.getWeight()))
             weight = DEFAULT_WEIGHT;

@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryExpansionStatus;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -21,7 +22,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep.FootstepType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -30,9 +30,9 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
-   private final FramePose stanceFootPose;
-   private final FramePose swingStartPose;
-   private final FramePose swingEndPose;
+   private final FramePose3D stanceFootPose;
+   private final FramePose3D swingStartPose;
+   private final FramePose3D swingEndPose;
    private final ConvexPolygon2D partialFootholdPolygon;
 
    private static final double maxSwingSpeed = 1.0;
@@ -46,9 +46,9 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, parentRegistry,
                                                                                               graphicsListRegistry);
 
-      stanceFootPose = new FramePose();
-      swingStartPose = new FramePose();
-      swingEndPose = new FramePose();
+      stanceFootPose = new FramePose3D();
+      swingStartPose = new FramePose3D();
+      swingEndPose = new FramePose3D();
       partialFootholdPolygon = new ConvexPolygon2D();
    }
 

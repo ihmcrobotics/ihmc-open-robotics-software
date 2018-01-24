@@ -13,11 +13,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
@@ -44,9 +45,8 @@ public class CirclePoseTrajectoryGeneratorTest
       worldFrame = ReferenceFrame.getWorldFrame();
       registry = new YoVariableRegistry("reg");
 
-      FramePose initialPose = FramePose.generateRandomFramePose(random, worldFrame, 1.0, 1.0, 1.0);
-      FrameQuaternion initialOrientation = new FrameQuaternion();
-      initialPose.getOrientationIncludingFrame(initialOrientation);
+      FramePose3D initialPose = EuclidFrameRandomTools.nextFramePose3D(random, worldFrame, 1.0, 1.0, 1.0);
+      FrameQuaternion initialOrientation = new FrameQuaternion(initialPose.getOrientation());
       initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
 
       trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
@@ -338,7 +338,7 @@ public class CirclePoseTrajectoryGeneratorTest
          difference.difference(initialOrientation, orientation);
 
          FramePoint3D rotatedInitialPosition = new FramePoint3D(initialPosition);
-         difference.transform(rotatedInitialPosition.getPoint());
+         difference.transform(rotatedInitialPosition);
          //         JUnitTools.assertFramePointEquals(newPosition, rotatedInitialPosition, 1e-9);
       }
    }

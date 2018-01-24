@@ -1,9 +1,11 @@
 package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -14,7 +16,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -223,7 +224,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void setDesiredPosition(FramePoint3D desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPosition(desiredPosition.getPoint());
+      setDesiredPosition(desiredPosition);
    }
 
    /**
@@ -252,7 +253,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void setDesiredOrientation(FrameQuaternion desiredOrientation)
    {
       desiredOrientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredOrientation(desiredOrientation.getQuaternion());
+      setDesiredOrientation(desiredOrientation);
    }
 
    /**
@@ -276,7 +277,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * 
     * @param desiredPose the pose the control frame should reach. Not modified.
     */
-   public void setDesiredPose(Pose3D pose)
+   public void setDesiredPose(Pose3DReadOnly pose)
    {
       setDesiredPosition(pose.getPosition());
       setDesiredOrientation(pose.getOrientation());
@@ -306,10 +307,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * @param desiredPose the pose the control frame should reach. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
     */
-   public void setDesiredPose(FramePose desiredPose)
+   public void setDesiredPose(FramePose3D desiredPose)
    {
       desiredPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPose(desiredPose.getGeometryObject());
+      setDesiredPose((Pose3DReadOnly) desiredPose);
    }
 
    /** Ensures that the weight matrix's are initialized. */
@@ -545,7 +546,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       return endEffectorNameBasedHashCode;
    }
 
-   public void getDesiredPose(FramePose desiredPoseToPack)
+   public void getDesiredPose(FramePose3D desiredPoseToPack)
    {
       desiredPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
 
@@ -555,7 +556,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
          desiredPoseToPack.setOrientation(desiredOrientationInWorld);
    }
 
-   public void getControlFramePose(RigidBody endEffector, FramePose controlFramePoseToPack)
+   public void getControlFramePose(RigidBody endEffector, FramePose3D controlFramePoseToPack)
    {
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
       controlFramePoseToPack.setToZero(referenceFrame);

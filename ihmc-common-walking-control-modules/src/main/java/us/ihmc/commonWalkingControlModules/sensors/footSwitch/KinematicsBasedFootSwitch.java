@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -81,11 +82,11 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
    FramePoint3D tmpFramePoint = new FramePoint3D();
 
-   private Point3D getPointInWorld(ReferenceFrame frame)
+   private Point3DReadOnly getPointInWorld(ReferenceFrame frame)
    {
       tmpFramePoint.setToZero(frame);
       tmpFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      return tmpFramePoint.getPoint();
+      return tmpFramePoint;
    }
 
    /**
