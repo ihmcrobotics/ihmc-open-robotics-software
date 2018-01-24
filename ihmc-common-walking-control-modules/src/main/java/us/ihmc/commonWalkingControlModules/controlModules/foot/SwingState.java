@@ -472,15 +472,6 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer.initialize();
    }
 
-   private void reinitializeTrajectory()
-   {
-      // Can not yet replan if trajectory type is WAYPOINTS
-      if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
-         return;
-
-      fillAndInitializeTrajectories(false);
-   }
-
    @Override
    protected void computeAndPackTrajectory()
    {
@@ -509,32 +500,23 @@ public class SwingState extends AbstractUnconstrainedState
 
       PoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
-      {
          activeTrajectory = touchdownTrajectory;
-      }
       else
-      {
          activeTrajectory = blendedSwingTrajectory;
-      }
 
       boolean footstepWasAdjusted = false;
       if (replanTrajectory.getBooleanValue())
       {
-         activeTrajectory.compute(time);
+         activeTrajectory.compute(time); // compute to get the current unadjusted position
          activeTrajectory.getPosition(unadjustedPosition);
-         //reinitializeTrajectory();
-         fillAndInitializeBlendedTrajectory();
-
          footstepWasAdjusted = true;
-         replanTrajectory.set(false);
       }
-      else if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS)
-      {
-         if (swingTrajectoryOptimizer.doOptimizationUpdate())
-         {
-            reinitializeTrajectory();
-         }
-      }
+
+      if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
+         fillAndInitializeTrajectories(false);
+      else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
+         fillAndInitializeBlendedTrajectory();
+      replanTrajectory.set(false);
 
       activeTrajectory.compute(time);
       activeTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
@@ -628,21 +610,21 @@ public class SwingState extends AbstractUnconstrainedState
       if (lastFootstepPose.containsNaN())
          lastFootstepPose.setToZero(soleFrame);
 
-      setFootstepInternal(footstep, swingTime);
+      setFootstepInternal(footstep);
+      setFootstepDurationInternal(swingTime);
    }
 
-   private void setFootstepInternal(Footstep footstep, double swingTime)
+   private void setFootstepDurationInternal(double swingTime)
    {
       swingDuration.set(swingTime);
       maxSwingTimeSpeedUpFactor.set(Math.max(swingTime / minSwingTimeForDisturbanceRecovery.getDoubleValue(), 1.0));
+   }
 
+   private void setFootstepInternal(Footstep footstep)
+   {
       footstep.getPose(footstepPose);
       footstepPose.changeFrame(worldFrame);
       footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getValue()); //getDoubleValue());
-
-      // if replanning do not change the original trajectory type or waypoints
-      if (replanTrajectory.getBooleanValue())
-         return;
 
       if (footstep.getTrajectoryType() == null)
       {
@@ -672,13 +654,8 @@ public class SwingState extends AbstractUnconstrainedState
       {
          swingHeight.set(footstep.getSwingHeight());
 
-         double zDifference = Math.abs(footstepPose.getZ() - lastFootstepPose.getZ());
-         boolean stepUpOrDown = zDifference > minHeightDifferenceForObstacleClearance.getDoubleValue();
-
-         if (stepUpOrDown)
-         {
+         if (checkStepUpOrDown(footstepPose))
             activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
-         }
       }
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
@@ -687,10 +664,17 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryBlendDuration = 0.0;
    }
 
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, Footstep originalFootstep, double swingTime, boolean continuousReplan)
+   private boolean checkStepUpOrDown(FramePose3D footstepPose)
+   {
+      double zDifference = Math.abs(footstepPose.getZ() - lastFootstepPose.getZ());
+      return zDifference > minHeightDifferenceForObstacleClearance.getDoubleValue();
+   }
+
+
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime, boolean continuousReplan)
    {
       replanTrajectory.set(true);
-      setFootstepInternal(originalFootstep, swingTime);
+      setFootstepDurationInternal(swingTime);
       doContinuousReplanning.set(continuousReplan);
 
       adjustedFootstep.getPose(adjustedFootstepPose);
