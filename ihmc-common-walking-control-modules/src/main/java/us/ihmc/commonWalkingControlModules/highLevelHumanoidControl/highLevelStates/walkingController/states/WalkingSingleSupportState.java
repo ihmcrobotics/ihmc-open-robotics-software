@@ -112,7 +112,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime, true);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             balanceManager.updateCurrentICPPlan();
          }
@@ -129,7 +129,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime, true);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
@@ -145,7 +145,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime, false);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
