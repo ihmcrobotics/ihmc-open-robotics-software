@@ -15,26 +15,28 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       setCellFactory(param -> new ParameterTreeCell());
    }
 
-   public void setRegistries(GuiRegistry registry, boolean hideNamespaces, String regex)
+   public void setRegistries(GuiRegistry registry, boolean hideNamespaces, String regexParameters, String regexNamespaces)
    {
       ParameterTreeItem root = new ParameterTreeItem(null);
       root.setExpanded(true);
       setShowRoot(false);
       setRoot(root);
 
-      boolean searching = regex != null && !regex.isEmpty();
+      boolean searchingParameters = regexParameters != null && !regexParameters.isEmpty();
+      boolean searchingNamespaces = regexNamespaces != null && !regexNamespaces.isEmpty();
+      boolean searching = searchingParameters || searchingNamespaces;
+
       if (hideNamespaces && searching)
       {
-         addAllMatching(registry.getAllParameters(), root, regex);
+         addAllMatching(registry.getAllParameters(), root, regexParameters);
       }
       else if (hideNamespaces)
       {
-         addAll(registry.getAllParameters(), root);
+         addAllMatching(registry.getAllParameters(), root, "");
       }
       else if (searching)
       {
-         addMatchingRecursive(registry, root, regex);
-         sortChildren(root);
+         addMatchingRecursive(registry, root, regexParameters, regexNamespaces);
       }
       else
       {
@@ -43,31 +45,22 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       }
    }
 
-   private static void sortChildren(ParameterTreeItem item)
+   private static void addMatchingRecursive(GuiRegistry registry, ParameterTreeItem item, String regexParameters, String regexNamespaces)
    {
-      item.getChildren().sort((o1, o2) -> {
-         if (o1.getValue().isRegistry() && !o2.getValue().isRegistry())
-         {
-            return -1;
-         }
-         if (o2.getValue().isRegistry() && !o1.getValue().isRegistry())
-         {
-            return 1;
-         }
-         return 0;
-      });
-   }
-
-   private static void addMatchingRecursive(GuiRegistry registry, ParameterTreeItem item, String regex)
-   {
-      if (RegularExpression.check(registry.getName(), regex))
+      if (RegularExpression.check(registry.getName(), regexNamespaces))
       {
-         addRecursive(registry, item);
+         ParameterTreeItem registryItem = new ParameterTreeItem(new ParameterTreeRegistry(registry));
+         registryItem.setExpanded(true);
+         addAllMatching(registry.getParameters(), registryItem, regexParameters);
+         if (!registryItem.getChildren().isEmpty())
+         {
+            item.getChildren().add(registryItem);
+         }
       }
+
       registry.getRegistries().stream().forEach(child -> {
-         addMatchingRecursive(child, item, regex);
+         addMatchingRecursive(child, item, regexParameters, regexNamespaces);
       });
-      addAllMatching(registry.getParameters(), item, regex);
    }
 
    private static void addRecursive(GuiRegistry registry, ParameterTreeItem item)
@@ -77,17 +70,12 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       registry.getRegistries().stream().forEach(child -> {
          addRecursive(child, registryItem);
       });
-      addAll(registry.getParameters(), registryItem);
+      addAllMatching(registry.getParameters(), registryItem, "");
    }
 
    private static void addAllMatching(List<GuiParameter> parameters, ParameterTreeItem item, String regex)
    {
       parameters.stream().filter(parameter -> RegularExpression.check(parameter.getName(), regex))
                 .forEach(parameter -> item.getChildren().add(new ParameterTreeItem(new ParameterTreeParameter(parameter))));
-   }
-
-   private static void addAll(List<GuiParameter> parameters, ParameterTreeItem item)
-   {
-      parameters.stream().forEach(parameter -> item.getChildren().add(new ParameterTreeItem(new ParameterTreeParameter(parameter))));
    }
 }

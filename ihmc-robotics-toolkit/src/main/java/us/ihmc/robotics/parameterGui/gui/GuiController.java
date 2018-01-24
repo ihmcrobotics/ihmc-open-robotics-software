@@ -27,7 +27,9 @@ import us.ihmc.robotics.parameterGui.tuning.TuningBoxManager;
 public class GuiController
 {
    @FXML
-   private TextField searchField;
+   private TextField searchFieldParameters;
+   @FXML
+   private TextField searchFieldNamespaces;
    @FXML
    private CheckBox hideNamespaces;
    @FXML
@@ -44,7 +46,8 @@ public class GuiController
 
    public void initialize()
    {
-      searchField.textProperty().addListener(observable -> updateTree());
+      searchFieldParameters.textProperty().addListener(observable -> updateTree());
+      searchFieldNamespaces.textProperty().addListener(observable -> updateTree());
       tuningBoxManager = new TuningBoxManager(tuningBox);
 
       tree.setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -85,7 +88,7 @@ public class GuiController
 
    private void updateTree()
    {
-      tree.setRegistries(rootRegistry, hideNamespaces.isSelected(), searchField.getText());
+      tree.setRegistries(rootRegistry, hideNamespaces.isSelected(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
    }
 
    public void addInputNode(Node node)
