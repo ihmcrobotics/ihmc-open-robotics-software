@@ -22,25 +22,23 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       setShowRoot(false);
       setRoot(root);
 
-      List<GuiRegistry> registries = registry.getRegistries();
-
       boolean searching = regex != null && !regex.isEmpty();
       if (hideNamespaces && searching)
       {
-         addMatchingParametersRecursive(registries, root, regex);
+         addAllMatching(registry.getAllParameters(), root, regex);
       }
       else if (hideNamespaces)
       {
-         addParametersRecursive(registries, root);
+         addAll(registry.getAllParameters(), root);
       }
       else if (searching)
       {
-         addMatchingRecursive(registries, root, regex);
+         addMatchingRecursive(registry, root, regex);
          sortChildren(root);
       }
       else
       {
-         addRecursive(registries, root);
+         addRecursive(registry, root);
          root.expandChildrenIfEmpty();
       }
    }
@@ -60,79 +58,36 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       });
    }
 
-   private static void addMatchingRecursive(List<GuiRegistry> registries, ParameterTreeItem item, String regex)
+   private static void addMatchingRecursive(GuiRegistry registry, ParameterTreeItem item, String regex)
    {
-      if (registries == null)
+      if (RegularExpression.check(registry.getName(), regex))
       {
-         return;
+         addRecursive(registry, item);
       }
-      registries.stream().forEach(registry -> {
-         if (RegularExpression.check(registry.getName(), regex))
-         {
-            ParameterTreeItem registryItem = new ParameterTreeItem(new ParameterTreeRegistry(registry));
-            item.getChildren().add(registryItem);
-            addRecursive(registry.getRegistries(), registryItem);
-            addAll(registry.getParameters(), registryItem);
-         }
-         addAllMatching(registry.getParameters(), item, regex);
-         addMatchingRecursive(registry.getRegistries(), item, regex);
+      registry.getRegistries().stream().forEach(child -> {
+         addMatchingRecursive(child, item, regex);
       });
+      addAllMatching(registry.getParameters(), item, regex);
    }
 
-   private static void addRecursive(List<GuiRegistry> registries, ParameterTreeItem item)
+   private static void addRecursive(GuiRegistry registry, ParameterTreeItem item)
    {
-      if (registries == null)
-      {
-         return;
-      }
-      registries.stream().forEach(registry -> {
-         ParameterTreeItem registryItem = new ParameterTreeItem(new ParameterTreeRegistry(registry));
-         item.getChildren().add(registryItem);
-         addRecursive(registry.getRegistries(), registryItem);
-         addAll(registry.getParameters(), registryItem);
+      ParameterTreeItem registryItem = new ParameterTreeItem(new ParameterTreeRegistry(registry));
+      item.getChildren().add(registryItem);
+      registry.getRegistries().stream().forEach(child -> {
+         addRecursive(child, registryItem);
       });
-   }
-
-   private static void addMatchingParametersRecursive(List<GuiRegistry> registries, ParameterTreeItem item, String regex)
-   {
-      if (registries == null)
-      {
-         return;
-      }
-      registries.stream().forEach(registry -> {
-         addAllMatching(registry.getParameters(), item, regex);
-         addMatchingParametersRecursive(registry.getRegistries(), item, regex);
-      });
-   }
-
-   private static void addParametersRecursive(List<GuiRegistry> registries, ParameterTreeItem item)
-   {
-      if (registries == null)
-      {
-         return;
-      }
-      registries.stream().forEach(registry -> {
-         addAll(registry.getParameters(), item);
-         addParametersRecursive(registry.getRegistries(), item);
-      });
+      addAll(registry.getParameters(), registryItem);
    }
 
    private static void addAllMatching(List<GuiParameter> parameters, ParameterTreeItem item, String regex)
    {
-      if (parameters == null)
-      {
-         return;
-      }
       parameters.stream().filter(parameter -> RegularExpression.check(parameter.getName(), regex))
                 .forEach(parameter -> item.getChildren().add(new ParameterTreeItem(new ParameterTreeParameter(parameter))));
    }
 
    private static void addAll(List<GuiParameter> parameters, ParameterTreeItem item)
    {
-      if (parameters == null)
-      {
-         return;
-      }
       parameters.stream().forEach(parameter -> item.getChildren().add(new ParameterTreeItem(new ParameterTreeParameter(parameter))));
    }
 }
