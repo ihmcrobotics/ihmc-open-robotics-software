@@ -142,6 +142,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameVector adjustmentVelocityCorrection;
    private final FramePoint3D unadjustedPosition = new FramePoint3D(worldFrame);
 
+   private final FramePose3D adjustedFootstepPose = new FramePose3D();
    private final FramePose3D footstepPose = new FramePose3D();
    private final FramePose3D lastFootstepPose = new FramePose3D();
 
@@ -330,6 +331,8 @@ public class SwingState extends AbstractUnconstrainedState
       initialAngularVelocity.clipToMaxLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
       stanceFootPosition.setToZero(oppositeSoleFrame);
 
+      adjustedFootstepPose.setToNaN();
+
       fillAndInitializeTrajectories(true);
    }
 
@@ -411,6 +414,10 @@ public class SwingState extends AbstractUnconstrainedState
       {
          initialPose.changeFrame(worldFrame);
          blendedSwingTrajectory.blendInitialConstraint(initialPose, 0.0, swingTrajectoryBlendDuration);
+      }
+      if (!adjustedFootstepPose.containsNaN())
+      {
+         blendedSwingTrajectory.blendFinalConstraint(adjustedFootstepPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();
    }
@@ -500,13 +507,9 @@ public class SwingState extends AbstractUnconstrainedState
       {
          activeTrajectory = touchdownTrajectory;
       }
-      else if (swingTrajectoryBlendDuration > 0.0)
-      {
-         activeTrajectory = blendedSwingTrajectory;
-      }
       else
       {
-         activeTrajectory = swingTrajectory;
+         activeTrajectory = blendedSwingTrajectory;
       }
 
       boolean footstepWasAdjusted = false;
@@ -618,6 +621,7 @@ public class SwingState extends AbstractUnconstrainedState
       swingDuration.set(swingTime);
       maxSwingTimeSpeedUpFactor.set(Math.max(swingTime / minSwingTimeForDisturbanceRecovery.getDoubleValue(), 1.0));
 
+      // FIXME this probably should not be reset every time for replanning
       lastFootstepPose.setIncludingFrame(footstepPose);
       if (lastFootstepPose.containsNaN())
          lastFootstepPose.setToZero(soleFrame);
@@ -673,11 +677,13 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryBlendDuration = 0.0;
    }
 
-   public void replanTrajectory(Footstep newFootstep, double swingTime, boolean continuousReplan)
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, Footstep originalFootstep, double swingTime, boolean continuousReplan)
    {
       replanTrajectory.set(true);
-      setFootstep(newFootstep, swingTime);
+      setFootstep(originalFootstep, swingTime);
       doContinuousReplanning.set(continuousReplan);
+
+      adjustedFootstep.getPose(adjustedFootstepPose);
    }
    
    public void getDesireds(FramePose3D desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
@@ -685,7 +691,7 @@ public class SwingState extends AbstractUnconstrainedState
       desiredPoseToPack.setIncludingFrame(this.desiredPose);
       desiredAngularVelocityToPack.setIncludingFrame(this.desiredAngularVelocity);
       desiredLinearVelocityToPack.setIncludingFrame(this.desiredLinearVelocity);
-   };
+   }
 
    private double computeSwingTimeRemaining()
    {

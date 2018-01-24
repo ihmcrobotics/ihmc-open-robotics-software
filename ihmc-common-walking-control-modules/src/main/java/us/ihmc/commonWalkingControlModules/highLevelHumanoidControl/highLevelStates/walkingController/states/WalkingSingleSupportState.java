@@ -27,6 +27,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final Footstep originalFootstep = new Footstep();
    private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private double swingTime;
@@ -104,13 +105,14 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (walkingMessageHandler.hasRequestedFootstepAdjustment())
       {
          boolean footstepHasBeenAdjusted = walkingMessageHandler.pollRequestedFootstepAdjustment(nextFootstep);
+
          if (footstepHasBeenAdjusted)
          {
             walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, originalFootstep, swingTime, true);
 
             balanceManager.updateCurrentICPPlan();
          }
@@ -127,7 +129,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, originalFootstep, swingTime, true);
 
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
@@ -143,7 +145,8 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, false);
+            //feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, false);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, originalFootstep, swingTime, false);
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
@@ -216,6 +219,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          swingTime = walkingMessageHandler.getNextSwingTime();
          walkingMessageHandler.poll(nextFootstep, footstepTiming);
       }
+      originalFootstep.set(nextFootstep);
 
       updateFootstepParameters();
 
