@@ -125,17 +125,17 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(desiredOrientation);
    }
 
    public void getAngularVelocity(FrameVector3D velocityToPack)
    {
-      desiredAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(desiredAngularVelocity);
    }
 
    public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
-      desiredAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(desiredAngularAcceleration);
    }
 
    public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)

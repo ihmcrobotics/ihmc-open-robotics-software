@@ -29,7 +29,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(point);
       
-      return getGeometryObject().distance(point.getPoint());
+      return getGeometryObject().distance(point);
    }
    
    /**
@@ -45,7 +45,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
       closestPointToPack.setToZero(referenceFrame);
       normalToPack.setToZero(referenceFrame);
       
-      getGeometryObject().checkIfInside(pointInWorldToCheck.getPoint(), closestPointToPack.getPoint(), normalToPack.getVector());
+      getGeometryObject().checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
    }
    
    /**
@@ -72,7 +72,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(pointToCheck);
       
-      return getGeometryObject().isInsideOrOnSurface(pointToCheck.getPoint());
+      return getGeometryObject().isInsideOrOnSurface(pointToCheck);
    }
 
    /**
@@ -86,7 +86,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(pointToCheck);
       
-      return getGeometryObject().isInsideEpsilon(pointToCheck.getPoint(), epsilon);
+      return getGeometryObject().isInsideEpsilon(pointToCheck, epsilon);
    }
 
    /**
@@ -100,6 +100,6 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(pointToCheckAndPack);
       
-      getGeometryObject().orthogonalProjection(pointToCheckAndPack.getPoint());
+      getGeometryObject().orthogonalProjection(pointToCheckAndPack);
    }
 }

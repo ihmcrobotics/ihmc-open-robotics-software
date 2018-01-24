@@ -18,8 +18,8 @@ public class TransformTools
    public static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint3D point, FrameVector3D zAxis)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVector()));
-      ret.setTranslation(point.getPoint());
+      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis));
+      ret.setTranslation(point);
       return ret;
    }
 

@@ -83,7 +83,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
          frameLocation.changeFrame(ReferenceFrame.getWorldFrame());
          FrameQuaternion frameOrientation = new FrameQuaternion(midFeetFrame);
          frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-         FootstepDataMessage footstep = new FootstepDataMessage(stepSide, frameLocation.getPoint(), frameOrientation.getQuaternion());
+         FootstepDataMessage footstep = new FootstepDataMessage(stepSide, frameLocation, frameOrientation);
 
          // between 0.75 and 1.25 times the nominal time:
          double swingTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalSwingTime;

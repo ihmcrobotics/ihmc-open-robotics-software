@@ -333,7 +333,7 @@ public class BagOfBalls
     *
     * @param location FramePoint to set the next ball to.
     */
-   public void setBallLoop(FramePoint3D location)
+   public void setBallLoop(FramePoint3DReadOnly location)
    {
       setBallLoop(location, null);
    }
@@ -345,9 +345,9 @@ public class BagOfBalls
     * @param location FramePoint to set the next ball to.
     * @param appearance Appearance to give the next ball.
     */
-   public void setBallLoop(FramePoint3D location, AppearanceDefinition appearance)
+   public void setBallLoop(FramePoint3DReadOnly location, AppearanceDefinition appearance)
    {
-      location.changeFrame(worldFrame);
+      location.checkReferenceFrameMatch(worldFrame);
 
       if (index >= yoGraphicPositions.size())
       {

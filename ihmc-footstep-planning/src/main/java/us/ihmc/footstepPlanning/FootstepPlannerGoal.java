@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepPlannerGoal
 {
-   private FramePose goalPoseBetweenFeet;
+   private FramePose3D goalPoseBetweenFeet;
    private FramePoint3D goalPositionBetweenFeet;
    private SimpleFootstep singleFootstepGoal;
    private SideDependentList<SimpleFootstep> doubleFootstepGoal;
@@ -16,12 +16,12 @@ public class FootstepPlannerGoal
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
 
-   public FramePose getGoalPoseBetweenFeet()
+   public FramePose3D getGoalPoseBetweenFeet()
    {
       return goalPoseBetweenFeet;
    }
 
-   public void setGoalPoseBetweenFeet(FramePose goalPoseBetweenFeet)
+   public void setGoalPoseBetweenFeet(FramePose3D goalPoseBetweenFeet)
    {
       this.goalPoseBetweenFeet = goalPoseBetweenFeet;
    }

@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -11,7 +12,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -85,8 +85,8 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    {
       ReferenceFrame leftSoleFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
 
-      FramePose stepPoseLeft = new FramePose(leftSoleFrame);
-      FramePose stepPoseRight = new FramePose(leftSoleFrame);
+      FramePose3D stepPoseLeft = new FramePose3D(leftSoleFrame);
+      FramePose3D stepPoseRight = new FramePose3D(leftSoleFrame);
       stepPoseRight.setY(-0.25);
 
       stepPoseLeft.changeFrame(ReferenceFrame.getWorldFrame());

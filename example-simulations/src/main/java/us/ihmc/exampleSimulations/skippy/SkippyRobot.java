@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -468,7 +469,7 @@ public class SkippyRobot extends Robot
       return footGroundContactPoint.getPositionPoint();
    }
 
-   public void computeFootContactForce(Vector3D tempForce){
+   public void computeFootContactForce(Vector3DBasics tempForce){
 	  footGroundContactPoint.getForce(tempForce);
    }
 

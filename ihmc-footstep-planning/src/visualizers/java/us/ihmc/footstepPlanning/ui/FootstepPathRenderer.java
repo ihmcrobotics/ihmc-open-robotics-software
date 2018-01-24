@@ -6,6 +6,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
@@ -17,7 +18,6 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -128,11 +128,11 @@ public class FootstepPathRenderer
          AxisAngle startRotation = new AxisAngle(startOrientationReference.get(), 0.0, 0.0);
          AxisAngle goalRotation = new AxisAngle(goalOrientationReference.get(), 0.0, 0.0);
 
-         planner.setInitialStanceFoot(new FramePose(ReferenceFrame.getWorldFrame(), start, startRotation), RobotSide.LEFT);
+         planner.setInitialStanceFoot(new FramePose3D(ReferenceFrame.getWorldFrame(), start, startRotation), RobotSide.LEFT);
 
          FootstepPlannerGoal plannerGoal = new FootstepPlannerGoal();
          plannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-         plannerGoal.setGoalPoseBetweenFeet(new FramePose(ReferenceFrame.getWorldFrame(), goal, goalRotation));
+         plannerGoal.setGoalPoseBetweenFeet(new FramePose3D(ReferenceFrame.getWorldFrame(), goal, goalRotation));
          planner.setGoal(plannerGoal);
 
          FootstepPlanningResult planningResult = planner.plan();

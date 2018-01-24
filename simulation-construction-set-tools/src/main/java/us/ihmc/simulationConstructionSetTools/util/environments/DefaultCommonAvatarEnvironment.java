@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -19,7 +20,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingFiducialBoxRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -803,7 +803,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       return setUpCinderBlockFieldActual(name, courseAngle, startDistance, null);
    }
 
-   public static CombinedTerrainObject3D setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance, List<List<FramePose>> cinderBlockPoseToPack)
+   public static CombinedTerrainObject3D setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance, List<List<FramePose3D>> cinderBlockPoseToPack)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
@@ -885,7 +885,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       for (int i = 0; i < nBlocksLong; i++)
       {
-         ArrayList<FramePose> rowCinderBlockLocations = null;
+         ArrayList<FramePose3D> rowCinderBlockLocations = null;
 
          if (cinderBlockPoseToPack != null)
          {
@@ -944,7 +944,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                cinderBlockOrientation.setToYawMatrix(Math.toRadians(courseAngle));
                cinderBlockOrientation.multiply(pitchRollMatrix);
 
-               FramePose cinderBlockPose = new FramePose(ReferenceFrame.getWorldFrame());
+               FramePose3D cinderBlockPose = new FramePose3D(ReferenceFrame.getWorldFrame());
                cinderBlockPose.setPosition(rotatedPoint[0], rotatedPoint[1], z);
                cinderBlockPose.setOrientation(cinderBlockOrientation);
 

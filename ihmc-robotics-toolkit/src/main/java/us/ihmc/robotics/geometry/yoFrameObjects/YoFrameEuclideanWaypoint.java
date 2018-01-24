@@ -111,7 +111,7 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
    protected void putYoValuesIntoFrameWaypoint()
    {
       EuclideanWaypoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      simpleWaypoint.set(position.getFrameTuple().getPoint(), linearVelocity.getFrameTuple().getVector());
+      simpleWaypoint.set(position, linearVelocity);
    }
 
    @Override

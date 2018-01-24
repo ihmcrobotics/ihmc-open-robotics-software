@@ -31,7 +31,7 @@ public abstract class ICPOptimizationParameters
     * Penalization on changes in the footstep location solution between control ticks.
     * This weight is normalized by the control DT.
     */
-   public abstract double getFootstepRegularizationWeight();
+   public abstract double getFootstepRateWeight();
 
    /**
     * The weight for tracking the nominal desired CMP.
@@ -51,7 +51,7 @@ public abstract class ICPOptimizationParameters
     * Penalization on changes feedback CMP between control ticks.
     * This weight is normalized by the control DT.
     */
-   public abstract double getFeedbackRegularizationWeight();
+   public abstract double getFeedbackRateWeight();
 
    /**
     * Feedback gain for ICP error parallel to the desired ICP dynamics.
@@ -84,10 +84,10 @@ public abstract class ICPOptimizationParameters
    public abstract double getAngularMomentumMinimizationWeight();
 
    /**
-    * Enabling this boolean causes the {@link #getFootstepRegularizationWeight()} to be increased when approaching the end of the step.
+    * Enabling this boolean causes the {@link #getFootstepRateWeight()} to be increased when approaching the end of the step.
     * This acts as a way to cause the solution to "lock in" near the step end.
     */
-   public abstract boolean scaleStepRegularizationWeightWithTime();
+   public abstract boolean scaleStepRateWeightWithTime();
 
    /**
     * Enabling this boolean causes the {@link #getFeedbackForwardWeight()} and {@link #getFeedbackLateralWeight()} to be decreased
@@ -97,9 +97,9 @@ public abstract class ICPOptimizationParameters
    public abstract boolean scaleFeedbackWeightWithGain();
 
    /**
-    * Enabling this boolean enables the use of feedback regularization, found in {@link #getFeedbackRegularizationWeight()}.
+    * Enabling this boolean enables the use of feedback rate, found in {@link #getFeedbackRateWeight()}.
     */
-   public abstract boolean useFeedbackRegularization();
+   public abstract boolean useFeedbackRate();
 
    /**
     * Enabling this boolean enables the use step adjustment for stabilization.
@@ -113,9 +113,9 @@ public abstract class ICPOptimizationParameters
    public abstract boolean useAngularMomentum();
 
    /**
-    * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
+    * Enabling this boolean enables the use of step adjustment rate, found in {@link #getFootstepRateWeight()}.
     */
-   public abstract boolean useFootstepRegularization();
+   public abstract boolean useFootstepRate();
 
    /**
     * The minimum value to allow the footstep weight {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be set to.
@@ -144,7 +144,7 @@ public abstract class ICPOptimizationParameters
 
    /**
     * This method sets what the minimum change in the current footstep is allowed to be.
-    * Works in tandem with the footstep regularization parameter.
+    * Works in tandem with the footstep rate parameter.
     */
    public double getFootstepSolutionResolution()
    {
@@ -213,7 +213,7 @@ public abstract class ICPOptimizationParameters
     */
    public boolean getLimitReachabilityFromAdjustment()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -260,6 +260,22 @@ public abstract class ICPOptimizationParameters
     * Sets whether or not to account for the used CoP feedback when computing the amount of step adjustment.
     */
    public boolean considerFeedbackInAdjustment()
+   {
+      return true;
+   }
+
+   /**
+    * Sets whether or not the ICP optimization algorithm will consider planar regions.
+    */
+   public boolean usePlanarRegionConstraints()
+   {
+      return false;
+   }
+
+   /**
+    * Sets whether or not the ICP optimization algorithm will switch the planar region if it starts to lose balance.
+    */
+   public boolean switchPlanarRegionConstraintsAutomatically()
    {
       return true;
    }

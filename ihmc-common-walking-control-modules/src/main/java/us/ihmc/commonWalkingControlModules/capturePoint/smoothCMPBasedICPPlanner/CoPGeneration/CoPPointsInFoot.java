@@ -109,7 +109,7 @@ public class CoPPointsInFoot
    {
       copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
       zeroVector.setToZero(location.getReferenceFrame());
-      tempVariableForSetting.setIncludingFrame(time, location.getFrameTuple(), zeroVector);
+      tempVariableForSetting.setIncludingFrame(time, location, zeroVector);
       copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
@@ -117,7 +117,7 @@ public class CoPPointsInFoot
    {
       copLocations.get(waypointIndex).registerReferenceFrame(location.getReferenceFrame());
       zeroVector.setToZero(location.getReferenceFrame());;
-      tempVariableForSetting.setIncludingFrame(time, location.getPosition().getFrameTuple(), zeroVector);
+      tempVariableForSetting.setIncludingFrame(time, location.getPosition(), zeroVector);
       copLocations.get(waypointIndex).setIncludingFrame(tempVariableForSetting);
    }
 
@@ -187,7 +187,7 @@ public class CoPPointsInFoot
 
    public void getSwingFootLocation(FramePoint3D footLocationToPack)
    {
-      footLocationToPack.setIncludingFrame(swingFootCentroid.getFrameTuple());
+      footLocationToPack.setIncludingFrame(swingFootCentroid);
    }
 
    public void setSupportFootLocation(FramePoint3D footLocation)
@@ -202,7 +202,7 @@ public class CoPPointsInFoot
 
    public void getSupportFootLocation(FramePoint3D footLocationToPack)
    {
-      footLocationToPack.setIncludingFrame(supportFootCentroid.getFrameTuple());
+      footLocationToPack.setIncludingFrame(supportFootCentroid);
    }
    
    public void setFeetLocation(FramePoint3D swingFootLocation, FramePoint3D supportFootLocation)

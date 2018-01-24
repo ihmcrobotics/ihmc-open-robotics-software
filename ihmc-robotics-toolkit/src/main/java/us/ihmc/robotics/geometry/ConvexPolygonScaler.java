@@ -143,7 +143,7 @@ public class ConvexPolygonScaler
          vectorPerpendicularToEdgeOnQ.negate();
          linePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
          linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
-         edgeOnQ.getDirection(normalizedVector);
+         normalizedVector.set(edgeOnQ.getDirection());
          
          
          Line2D newEdge = getARay(rays.size());
@@ -326,7 +326,7 @@ public class ConvexPolygonScaler
 
 
          linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distanceInside + extraDistance, referencePoint);
-         edgeOnQ.getDirection(normalizedVector);
+         normalizedVector.set(edgeOnQ.getDirection());
 
          Line2D newEdge = getARay(rays.size());
          newEdge.set(referencePoint, normalizedVector);

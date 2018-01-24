@@ -66,7 +66,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       humanoidReferenceFrames.updateFrames();
       FrameQuaternion pelvisOrientation = new FrameQuaternion(midFootZUpGroundFrame, orientation);
       pelvisOrientation.changeFrame(worldFrame);
-      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation.getQuaternion());
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
       drcSimulationTestHelper.send(message);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.25));
 
@@ -80,7 +80,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       humanoidReferenceFrames.updateFrames();
       FrameQuaternion homeOrientation = new FrameQuaternion(midFootZUpGroundFrame, new Quaternion());
       homeOrientation.changeFrame(worldFrame);
-      SO3TrajectoryPointMessage home = new SO3TrajectoryPointMessage(trajectoryTime, homeOrientation.getQuaternion(), zeroVector);
+      SO3TrajectoryPointMessage home = new SO3TrajectoryPointMessage(trajectoryTime, homeOrientation, zeroVector);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, home, scs, epsilon);
    }
 
@@ -101,7 +101,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FrameQuaternion pelvisOrientation = new FrameQuaternion(midFootZUpGroundFrame, orientation);
       pelvisOrientation.changeFrame(worldFrame);
 
-      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation.getQuaternion());
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
       SO3TrajectoryPointMessage waypoint = message.taskspaceTrajectoryPoints[0];
       drcSimulationTestHelper.send(message);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
@@ -133,7 +133,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FrameQuaternion midFeetOrientation = new FrameQuaternion(midFeetZUpFrame);
       midFeetOrientation.changeFrame(worldFrame);
       String pelvisName = fullRobotModel.getPelvis().getName();
-      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation.getQuaternion(), zeroVector, scs, epsilon);
+      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation, zeroVector, scs, epsilon);
       
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -169,7 +169,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       humanoidReferenceFrames.updateFrames();
       desiredAfterTrajectory.changeFrame(worldFrame);
-      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory.getQuaternion(), zeroVector, scs, epsilon);
+      EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory, zeroVector, scs, epsilon);
       
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -277,7 +277,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       // first hold the chest in world to avoid feedback effects
       FrameQuaternion chestOrientation = new FrameQuaternion(chestFrame);
       chestOrientation.changeFrame(worldFrame);
-      ChestTrajectoryMessage holdChestInWorldMessage = new ChestTrajectoryMessage(0.0, chestOrientation.getQuaternion(), worldFrame, worldFrame);
+      ChestTrajectoryMessage holdChestInWorldMessage = new ChestTrajectoryMessage(0.0, chestOrientation, worldFrame, worldFrame);
       drcSimulationTestHelper.send(holdChestInWorldMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
 
@@ -335,7 +335,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          location.changeFrame(worldFrame);
          FrameQuaternion orientation = new FrameQuaternion(midFootZUpGroundFrame);
          orientation.changeFrame(worldFrame);
-         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location.getPoint(), orientation.getQuaternion());
+         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
          messageToPack.add(footstep);
          robotSide = robotSide.getOppositeSide();
          time += swingDuration + transferDuration;

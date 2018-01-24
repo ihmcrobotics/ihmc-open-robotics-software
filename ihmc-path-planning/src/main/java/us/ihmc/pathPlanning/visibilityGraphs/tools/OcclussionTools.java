@@ -5,12 +5,13 @@ import java.util.List;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 
 public class OcclussionTools
 {
-   public static boolean IsTheGoalIntersectingAnyObstacles(NavigableRegion region, Point3D start, Point3D goal)
+   public static boolean IsTheGoalIntersectingAnyObstacles(NavigableRegion region, Point3DReadOnly start, Point3DReadOnly goal)
    {
       for (Cluster cluster : region.getObstacleClusters())
       {
@@ -32,7 +33,7 @@ public class OcclussionTools
       return false;
    }
 
-   public static List<Cluster> getListOfIntersectingObstacles(List<Cluster> obstacleClusters, Point3D start, Point3D goal)
+   public static List<Cluster> getListOfIntersectingObstacles(List<Cluster> obstacleClusters, Point3DReadOnly start, Point3DReadOnly goal)
    {
       List<Cluster> clustersTemp = new ArrayList<Cluster>();
       for (Cluster cluster : obstacleClusters)

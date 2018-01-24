@@ -1,111 +1,71 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 public class CoMIntegrationTools
 {
    /**
-    * Calculation of center of mass position at the end of a certain duration, assuming that the CMP location is held constant throughout that time interval.
-    * This has an analytic solution to the center of mass dynamics.
+    * Calculation of center of mass position at the end of a certain duration, assuming that the CMP
+    * location is held constant throughout that time interval. This has an analytic solution to the
+    * center of mass dynamics.
     *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingConstantCMP(double, double, double, FramePoint3D, FramePoint3D, FramePoint3D, FramePoint3D)}, but
-    * assumes the initial time is 0.0.
+    * Utilizes the same method as
+    * {@link #integrateCoMPositionUsingConstantCMP(double, double, double, FramePoint3D, FramePoint3D, FramePoint3D, FramePoint3D)},
+    * but assumes the initial time is 0.0.
     *
-    * @param duration time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0.
+    * @param duration time interval over which to integrate the center of mass dynamics. Assumes
+    *           that the initial time is time = 0.0.
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
-   public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, YoFramePoint constantCMP, YoFramePoint initialICP,
-         FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
-   {
-      integrateCoMPositionUsingConstantCMP(0.0, duration, omega0, constantCMP.getFrameTuple(), initialICP.getFrameTuple(), initialCoM, finalCoMToPack);
-   }
-
-   /**
-    * Calculation of center of mass position at the end of a certain duration, assuming that the CMP location is held constant throughout that time interval.
-    * This has an analytic solution to the center of mass dynamics.
-    *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingConstantCMP(double, double, double, FramePoint3D, FramePoint3D, FramePoint3D, FramePoint3D)}, but
-    * assumes the initial time is 0.0.
-    *
-    * @param duration time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0.
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param constantCMP constant location of the CMP during the integration interval.
-    * @param initialICP initial location of the ICP at the beginning of the integration interval.
-    * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
-    */
-   public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
+   public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, FramePoint3DReadOnly constantCMP, FramePoint3DReadOnly initialICP,
+                                                           FramePoint3DReadOnly initialCoM, FramePoint3D finalCoMToPack)
    {
       integrateCoMPositionUsingConstantCMP(0.0, duration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack);
    }
 
-
-
    /**
-    * Calculation of center of mass position at the end of a certain duration, assuming that the CMP location is held constant throughout that time interval.
-    * This has an analytic solution to the center of mass dynamics.
+    * Calculation of center of mass position at the end of a certain duration, assuming that the CMP
+    * location is held constant throughout that time interval. This has an analytic solution to the
+    * center of mass dynamics.
     *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingConstantCMP(double, double, double, FramePoint3D, FramePoint3D, FramePoint3D, FramePoint3D)}, but
-    * assumes the initial time is 0.0.
+    * Utilizes the same method as
+    * {@link #integrateCoMPositionUsingConstantCMP(double, double, double, FramePoint3D, FramePoint3D, FramePoint3D, FramePoint3D)},
+    * but assumes the initial time is 0.0.
     *
-    * @param duration time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0.
+    * @param duration time interval over which to integrate the center of mass dynamics. Assumes
+    *           that the initial time is time = 0.0.
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
-   public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, YoFramePoint constantCMP, YoFramePoint initialICP,
-         FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
-   {
-      integrateCoMPositionUsingConstantCMP(0.0, duration, omega0, constantCMP.getFrameTuple(), initialICP.getFrameTuple(), initialCoM, finalCoMToPack);
-   }
-
-   /**
-    * Calculation of center of mass position at the end of a certain duration, assuming that the CMP location is held constant throughout that time interval.
-    * This has an analytic solution to the center of mass dynamics.
-    *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingConstantCMP(double, double, double, FramePoint3D, FramePoint3D, FramePoint3D, FramePoint3D)}, but
-    * assumes the initial time is 0.0.
-    *
-    * @param duration time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0.
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param constantCMP constant location of the CMP during the integration interval.
-    * @param initialICP initial location of the ICP at the beginning of the integration interval.
-    * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
-    */
-   public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
+   public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, FramePoint3DReadOnly constantCMP, FramePoint3DReadOnly initialICP,
+                                                           FramePoint2DReadOnly initialCoM, FramePoint2D finalCoMToPack)
    {
       integrateCoMPositionUsingConstantCMP(0.0, duration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack);
    }
 
-
-
-
    /**
-    * Calculation of center of mass position at the end of a certain time interval, assuming that the CMP location is held constant throughout that time
-    * interval. This has an analytic solution to the center of mass dynamics.
+    * Calculation of center of mass position at the end of a certain time interval, assuming that
+    * the CMP location is held constant throughout that time interval. This has an analytic solution
+    * to the center of mass dynamics.
     *
     * @param initialTime initial time of the interval over which to integrate.
     * @param omega0 the natural frequency &omega; =
@@ -114,29 +74,11 @@ public class CoMIntegrationTools
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
-   public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         YoFramePoint initialCoM, FramePoint3D finalCoMToPack)
-   {
-      integrateCoMPositionUsingConstantCMP(initialTime, finalTime, omega0, constantCMP, initialICP, initialCoM.getFrameTuple(), finalCoMToPack);
-   }
-
-   /**
-    * Calculation of center of mass position at the end of a certain time interval, assuming that the CMP location is held constant throughout that time
-    * interval. This has an analytic solution to the center of mass dynamics.
-    *
-    * @param initialTime initial time of the interval over which to integrate.
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param constantCMP constant location of the CMP during the integration interval.
-    * @param initialICP initial location of the ICP at the beginning of the integration interval.
-    * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
-    */
-   public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
+   public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3DReadOnly constantCMP,
+                                                           FramePoint3DReadOnly initialICP, FramePoint3DReadOnly initialCoM, FramePoint3D finalCoMToPack)
    {
       initialCoM.checkReferenceFrameMatch(constantCMP);
       initialCoM.checkReferenceFrameMatch(initialICP);
@@ -155,11 +97,10 @@ public class CoMIntegrationTools
       finalCoMToPack.setY(yPosition);
    }
 
-
-
    /**
-    * Calculation of center of mass position at the end of a certain time interval, assuming that the CMP location is held constant throughout that time
-    * interval. This has an analytic solution to the center of mass dynamics.
+    * Calculation of center of mass position at the end of a certain time interval, assuming that
+    * the CMP location is held constant throughout that time interval. This has an analytic solution
+    * to the center of mass dynamics.
     *
     * @param initialTime initial time of the interval over which to integrate.
     * @param omega0 the natural frequency &omega; =
@@ -168,29 +109,11 @@ public class CoMIntegrationTools
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
-   public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         YoFramePoint2d initialCoM, FramePoint2D finalCoMToPack)
-   {
-      integrateCoMPositionUsingConstantCMP(initialTime, finalTime, omega0, constantCMP, initialICP, initialCoM.getFrameTuple2d(), finalCoMToPack);
-   }
-
-   /**
-    * Calculation of center of mass position at the end of a certain time interval, assuming that the CMP location is held constant throughout that time
-    * interval. This has an analytic solution to the center of mass dynamics.
-    *
-    * @param initialTime initial time of the interval over which to integrate.
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param constantCMP constant location of the CMP during the integration interval.
-    * @param initialICP initial location of the ICP at the beginning of the integration interval.
-    * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
-    */
-   public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3D constantCMP, FramePoint3D initialICP,
-         FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
+   public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint3DReadOnly constantCMP,
+                                                           FramePoint3DReadOnly initialICP, FramePoint2DReadOnly initialCoM, FramePoint2D finalCoMToPack)
    {
       initialCoM.checkReferenceFrameMatch(constantCMP);
       initialCoM.checkReferenceFrameMatch(initialICP);
@@ -211,7 +134,7 @@ public class CoMIntegrationTools
    }
 
    private static double integrateCoMPositionWithConstantCMP(double duration, double omega0, double initialICPPosition, double initialCoMPosition,
-         double cmpPosition)
+                                                             double cmpPosition)
    {
       if (duration == 0.0)
          return initialCoMPosition;
@@ -223,111 +146,98 @@ public class CoMIntegrationTools
       return position;
    }
 
-
-
-
    /**
-    * Calculation of center of mass position at the end of a certain duration, assuming that the ICP trajectory is in the form of a cubic spline over that
-    * time interval.
+    * Calculation of center of mass position at the end of a certain duration, assuming that the ICP
+    * trajectory is in the form of a cubic spline over that time interval.
     *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingCubicICP(double, double, double, double, ReferenceFrame, YoPolynomial, YoPolynomial,
-    * FramePoint3D, FramePoint3D)}, but assumes the initial time is 0.0, and segment duration is the integration duration.
+    * Utilizes the same method as
+    * {@link #integrateCoMPositionUsingCubicICP(double, double, double, double, ReferenceFrame, YoPolynomial, YoPolynomial, FramePoint3D, FramePoint3D)},
+    * but assumes the initial time is 0.0, and segment duration is the integration duration.
     *
-    * @param duration time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0, and that this is the
-    *                 entire duration of the spline.
+    * @param duration time interval over which to integrate the center of mass dynamics. Assumes
+    *           that the initial time is time = 0.0, and that this is the entire duration of the
+    *           spline.
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param polynomialFrame reference frame in which the polynomial coefficients are defined.
-    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
-    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
+    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the X-Direction.
+    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
    public static void integrateCoMPositionFromCubicICP(double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
-         YoPolynomial yPolynomial, YoFramePoint initialCoM, FramePoint3D finalCoMToPack)
+                                                       YoPolynomial yPolynomial, FramePoint3DReadOnly initialCoM, FramePoint3D finalCoMToPack)
    {
-      integrateCoMPositionFromCubicICP(duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM.getFrameTuple(), finalCoMToPack);
+      integrateCoMPositionFromCubicICP(duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM, finalCoMToPack);
    }
 
    /**
-    * Calculation of center of mass position at the end of a certain duration, assuming that the ICP trajectory is in the form of a cubic spline over that
-    * time interval.
+    * Calculation of center of mass position at the end of a certain time, assuming that the ICP
+    * trajectory is in the form of a cubic spline over that time interval.
     *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingCubicICP(double, double, double, double, ReferenceFrame, YoPolynomial, YoPolynomial,
-    * FramePoint3D, FramePoint3D)}, but assumes the initial time is 0.0, and segment duration is the integration duration.
+    * Utilizes the same method as
+    * {@link #integrateCoMPositionUsingCubicICP(double, double, double, double, ReferenceFrame, YoPolynomial, YoPolynomial, FramePoint3D, FramePoint3D)},
+    * but assumes the initial time is 0.0.
     *
-    * @param duration time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0, and that this is the
-    *                 entire duration of the spline.
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param polynomialFrame reference frame in which the polynomial coefficients are defined.
-    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
-    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
-    * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
-    */
-   public static void integrateCoMPositionFromCubicICP(double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
-         YoPolynomial yPolynomial, FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
-   {
-      integrateCoMPositionUsingCubicICP(0.0, duration, duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM, finalCoMToPack);
-   }
-
-   /**
-    * Calculation of center of mass position at the end of a certain time, assuming that the ICP trajectory is in the form of a cubic spline over that
-    * time interval.
-    *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingCubicICP(double, double, double, double, ReferenceFrame, YoPolynomial, YoPolynomial,
-    * FramePoint3D, FramePoint3D)}, but assumes the initial time is 0.0.
-    *
-    * @param time time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0
+    * @param time time interval over which to integrate the center of mass dynamics. Assumes that
+    *           the initial time is time = 0.0
     * @param duration total duration for which the spline is defined.
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param polynomialFrame reference frame in which the polynomial coefficients are defined.
-    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
-    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
+    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the X-Direction.
+    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double time, double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
-         YoPolynomial yPolynomial, FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
+                                                        YoPolynomial yPolynomial, FramePoint3DReadOnly initialCoM, FramePoint3D finalCoMToPack)
    {
       integrateCoMPositionUsingCubicICP(0.0, MathTools.clamp(time, 0.0, duration), duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
-            finalCoMToPack);
+                                        finalCoMToPack);
    }
 
    /**
-    * Calculation of center of mass position at the end of a certain time, assuming that the ICP trajectory is in the form of a cubic spline over that
-    * time interval.
+    * Calculation of center of mass position at the end of a certain time, assuming that the ICP
+    * trajectory is in the form of a cubic spline over that time interval.
     *
-    * Utilizes the same method as {@link #integrateCoMPositionUsingCubicICP(double, double, double, double, ReferenceFrame, YoPolynomial, YoPolynomial,
-    * FramePoint3D, FramePoint3D)}, but assumes the initial time is 0.0.
+    * Utilizes the same method as
+    * {@link #integrateCoMPositionUsingCubicICP(double, double, double, double, ReferenceFrame, YoPolynomial, YoPolynomial, FramePoint3D, FramePoint3D)},
+    * but assumes the initial time is 0.0.
     *
-    * @param time time interval over which to integrate the center of mass dynamics. Assumes that the initial time is time = 0.0
+    * @param time time interval over which to integrate the center of mass dynamics. Assumes that
+    *           the initial time is time = 0.0
     * @param duration total duration for which the spline is defined.
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param polynomialFrame reference frame in which the polynomial coefficients are defined.
-    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
-    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
+    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the X-Direction.
+    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double time, double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
-         YoPolynomial yPolynomial, FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
+                                                        YoPolynomial yPolynomial, FramePoint2DReadOnly initialCoM, FramePoint2D finalCoMToPack)
    {
       integrateCoMPositionUsingCubicICP(0.0, MathTools.clamp(time, 0.0, duration), duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
-            finalCoMToPack);
+                                        finalCoMToPack);
    }
 
-
    /**
-    * Calculation of center of mass position at the end of certain time interval, assuming that the ICP trajectory is in the form of a cubic spline over that
-    * time interval.
+    * Calculation of center of mass position at the end of certain time interval, assuming that the
+    * ICP trajectory is in the form of a cubic spline over that time interval.
     *
     * @param initialTime time at the beginning of the time interval
     * @param finalTime time at the end of the time interval
@@ -336,36 +246,17 @@ public class CoMIntegrationTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param polynomialFrame reference frame in which the polynomial coefficients are defined.
-    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
-    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
+    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the X-Direction.
+    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
-    */
-   public static void integrateCoMPositionUsingCubicICP(double initialTime, double finalTime, double duration, double omega0,
-         ReferenceFrame polynomialFrame, YoPolynomial xPolynomial, YoPolynomial yPolynomial, YoFramePoint initialCoM, FramePoint3D finalCoMToPack)
-   {
-      integrateCoMPositionUsingCubicICP(initialTime, finalTime, duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM.getFrameTuple(),
-            finalCoMToPack);
-   }
-
-   /**
-    * Calculation of center of mass position at the end of certain time interval, assuming that the ICP trajectory is in the form of a cubic spline over that
-    * time interval.
-    *
-    * @param initialTime time at the beginning of the time interval
-    * @param finalTime time at the end of the time interval
-    * @param duration total duration for which the spline is defined.
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param polynomialFrame reference frame in which the polynomial coefficients are defined.
-    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
-    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
-    * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double initialTime, double finalTime, double duration, double omega0, ReferenceFrame polynomialFrame,
-         YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
+                                                        YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint3DReadOnly initialCoM,
+                                                        FramePoint3D finalCoMToPack)
    {
       initialCoM.checkReferenceFrameMatch(polynomialFrame);
       initialCoM.checkReferenceFrameMatch(finalCoMToPack);
@@ -389,8 +280,8 @@ public class CoMIntegrationTools
    }
 
    /**
-    * Calculation of center of mass position at the end of certain time interval, assuming that the ICP trajectory is in the form of a cubic spline over that
-    * time interval.
+    * Calculation of center of mass position at the end of certain time interval, assuming that the
+    * ICP trajectory is in the form of a cubic spline over that time interval.
     *
     * @param initialTime time at the beginning of the time interval
     * @param finalTime time at the end of the time interval
@@ -399,13 +290,17 @@ public class CoMIntegrationTools
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param polynomialFrame reference frame in which the polynomial coefficients are defined.
-    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
-    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
+    * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the X-Direction.
+    * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in
+    *           the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    *           Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double initialTime, double finalTime, double duration, double omega0, ReferenceFrame polynomialFrame,
-         YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint2D initialCoM, FramePoint2D finalCoMToPack)
+                                                        YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint2DReadOnly initialCoM,
+                                                        FramePoint2D finalCoMToPack)
    {
       initialCoM.checkReferenceFrameMatch(polynomialFrame);
       initialCoM.checkReferenceFrameMatch(finalCoMToPack);
@@ -426,26 +321,24 @@ public class CoMIntegrationTools
       finalCoMToPack.setX(xPosition);
       finalCoMToPack.setY(yPosition);
    }
-
-
-
-
 
    public static void integrateFinalCoMPositionFromCubicDCM(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
-         YoPolynomial yPolynomial, YoPolynomial zPolynomial, FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
+                                                            YoPolynomial yPolynomial, YoPolynomial zPolynomial, FramePoint3DReadOnly initialCoM,
+                                                            FramePoint3D finalCoMToPack)
    {
       integrateCoMPositionUsingCubicDCM(0.0, segmentDuration, segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, zPolynomial, initialCoM,
-            finalCoMToPack);
+                                        finalCoMToPack);
    }
 
-   public static void integrateCoMPositionUsingCubicDCM(double initialTime, double finalTime, double segmentDuration, double omega0, ReferenceFrame polynomialFrame,
-         YoPolynomial xPolynomial, YoPolynomial yPolynomial, YoPolynomial zPolynomial, FramePoint3D initialCoM, FramePoint3D finalCoMToPack)
+   public static void integrateCoMPositionUsingCubicDCM(double initialTime, double finalTime, double segmentDuration, double omega0,
+                                                        ReferenceFrame polynomialFrame, YoPolynomial xPolynomial, YoPolynomial yPolynomial,
+                                                        YoPolynomial zPolynomial, FramePoint3DReadOnly initialCoM, FramePoint3D finalCoMToPack)
    {
       initialCoM.checkReferenceFrameMatch(polynomialFrame);
       initialCoM.checkReferenceFrameMatch(finalCoMToPack);
 
-      if (xPolynomial.getNumberOfCoefficients() != yPolynomial.getNumberOfCoefficients() &&
-            yPolynomial.getNumberOfCoefficients() != zPolynomial.getNumberOfCoefficients() && zPolynomial.getNumberOfCoefficients() != 4)
+      if (xPolynomial.getNumberOfCoefficients() != yPolynomial.getNumberOfCoefficients()
+            && yPolynomial.getNumberOfCoefficients() != zPolynomial.getNumberOfCoefficients() && zPolynomial.getNumberOfCoefficients() != 4)
          throw new RuntimeException("The number of coefficients in the polynomials are wrong!");
 
       double integrationDuration = finalTime - initialTime;

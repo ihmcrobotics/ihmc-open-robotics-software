@@ -37,6 +37,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-trajectory-optimization", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion

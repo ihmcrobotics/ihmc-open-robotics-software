@@ -19,12 +19,12 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -254,8 +254,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (isUserControllingRigidBody(foot))
             continue;
 
-         FramePose poseToHold = new FramePose();
-         initialFootPoses.get(robotSide).getFramePoseIncludingFrame(poseToHold);
+         FramePose3D poseToHold = new FramePose3D(initialFootPoses.get(robotSide));
 
          SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
@@ -290,8 +289,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return null;
       }
 
-      FramePoint3D positionToHold = new FramePoint3D();
-      initialCenterOfMassPosition.getFrameTupleIncludingFrame(positionToHold);
+      FramePoint3D positionToHold = new FramePoint3D(initialCenterOfMassPosition);
 
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
       feedbackControlCommand.setGains(getDefaultGains().getPositionGains());

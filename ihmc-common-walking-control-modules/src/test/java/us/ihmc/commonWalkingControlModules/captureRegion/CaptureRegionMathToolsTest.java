@@ -49,6 +49,6 @@ public class CaptureRegionMathToolsTest
       FramePoint2D actualPoint = new FramePoint2D();
       captureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alpha, radius, center, actualPoint);
 
-      EuclidCoreTestTools.assertTuple2DEquals(expectedPoint.getPoint(), actualPoint.getPoint(), 1.0e-12);
+      EuclidCoreTestTools.assertTuple2DEquals(expectedPoint, actualPoint, 1.0e-12);
    }
 }

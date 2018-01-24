@@ -5,11 +5,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -187,7 +191,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint3D desiredPosition)
+   public void set(FramePoint3DReadOnly desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
@@ -216,7 +220,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
+   public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
@@ -250,7 +254,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setBodyFixedPointToControl(FramePoint3D bodyFixedPointInEndEffectorFrame)
+   public void setBodyFixedPointToControl(FramePoint3DReadOnly bodyFixedPointInEndEffectorFrame)
    {
       bodyFixedPointInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
       this.bodyFixedPointInEndEffectorFrame.set(bodyFixedPointInEndEffectorFrame);
@@ -325,18 +329,18 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *
     * @param weight the weight to use for each direction. Not modified.
     */
-   public void setWeightsForSolver(Vector3D weight)
+   public void setWeightsForSolver(Vector3DReadOnly weight)
    {
       spatialAccelerationCommand.setLinearWeights(weight);
       spatialAccelerationCommand.setAngularWeightsToZero();
    }
 
-   public void getIncludingFrame(FramePoint3D desiredPositionToPack)
+   public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
    }
 
-   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D feedForwardLinearAccelerationToPack)
+   public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack, FrameVector3DBasics desiredLinearVelocityToPack, FrameVector3DBasics feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredLinearVelocityToPack.setIncludingFrame(worldFrame, desiredLinearVelocityInWorld);

@@ -7,12 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.tools.MemoryTools;
 
 public class OverheadPathTest
@@ -39,17 +39,17 @@ public class OverheadPathTest
       double eps = 1e-15;
       FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, 1.0, 2.0);
       double startYaw = Math.PI / 4;
-      FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
+      FrameOrientation2D startOrientation = new FrameOrientation2D(WORLD_FRAME, startYaw);
       double endYaw = Math.PI * 3 / 4;
-      FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
-      FramePose2d startPose = new FramePose2d(startPosition, startOrientation);
+      FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
+      FramePose2D startPose = new FramePose2D(startPosition, startOrientation);
       TurningOverheadPath turningPath = new TurningOverheadPath(startPose, endOrientation);
 
       assertEquals("StartYaw", startYaw, turningPath.getPoseAtS(0).getYaw(), eps);
       assertEquals("EndYaw", endYaw, turningPath.getPoseAtS(1).getYaw(), eps);
       assertEquals("DeltaYaw", endYaw - startYaw, turningPath.getDeltaYaw(), eps);
 
-      FramePose2d framePose2d;
+      FramePose2D framePose2d;
       for (double s = 0; s <= 1.0; s += 0.1)
       {
          framePose2d = turningPath.getPoseAtS(s);
@@ -69,17 +69,17 @@ public class OverheadPathTest
       double eps = 1e-15;
       FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, 1.0, 2.0);
       double startYaw = 3 * Math.PI / 4;
-      FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
+      FrameOrientation2D startOrientation = new FrameOrientation2D(WORLD_FRAME, startYaw);
       double endYaw = -startYaw;
-      FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
-      FramePose2d startPose = new FramePose2d(startPosition, startOrientation);
+      FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
+      FramePose2D startPose = new FramePose2D(startPosition, startOrientation);
       TurningOverheadPath turningPath = new TurningOverheadPath(startPose, endOrientation);
 
       assertEquals("StartYaw", startYaw, turningPath.getPoseAtS(0).getYaw(), eps);
       assertEquals("EndYaw", endYaw, turningPath.getPoseAtS(1).getYaw(), eps);
       assertEquals("DeltaYaw", 2 * (Math.PI - startYaw), turningPath.getDeltaYaw(), eps);
 
-      FramePose2d framePose2d;
+      FramePose2D framePose2d;
       for (double s = 0; s <= 1.0; s += 0.1)
       {
          framePose2d = turningPath.getPoseAtS(s);
@@ -107,8 +107,8 @@ public class OverheadPathTest
 
       FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
       FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
-      FrameOrientation2d orientation = new FrameOrientation2d(WORLD_FRAME, yaw);
-      FramePose2d startPose = new FramePose2d(startPosition, orientation);
+      FrameOrientation2D orientation = new FrameOrientation2D(WORLD_FRAME, yaw);
+      FramePose2D startPose = new FramePose2D(startPosition, orientation);
       StraightLineOverheadPath straightPath = new StraightLineOverheadPath(startPose, endPosition);
 
       assertEquals("StartYaw", yaw, straightPath.getPoseAtS(0).getYaw(), eps);
@@ -118,7 +118,7 @@ public class OverheadPathTest
       assertEquals("StartY", y1, straightPath.getPoseAtS(0).getY(), eps);
       assertEquals("EndY", y2, straightPath.getPoseAtS(1).getY(), eps);
 
-      FramePose2d framePose2d;
+      FramePose2D framePose2d;
       for (double s = 0; s <= 1.0; s += 0.1)
       {
          framePose2d = straightPath.getPoseAtS(s);
@@ -147,8 +147,8 @@ public class OverheadPathTest
 
       FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
       FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
-      FrameOrientation2d orientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
-      FramePose2d startPose = new FramePose2d(startPosition, orientation);
+      FrameOrientation2D orientation = new FrameOrientation2D(WORLD_FRAME, startYaw);
+      FramePose2D startPose = new FramePose2D(startPosition, orientation);
 
       for (double headingOffset = -Math.PI; headingOffset < Math.PI; headingOffset += Math.PI / 2)    // Direction facing relative to the path direction while traveling on the straight line portion of the path
       {
@@ -167,7 +167,7 @@ public class OverheadPathTest
          assertEquals("MidY", y1, path.getPoseAtS(0.5).getY(), eps);
          assertEquals("EndY", y2, path.getPoseAtS(1).getY(), eps);
 
-         FramePose2d framePose2d;
+         FramePose2D framePose2d;
          double smid = 0.5;
          for (double s = 0; s <= smid; s += 0.1)
          {
@@ -214,10 +214,10 @@ public class OverheadPathTest
 
       FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
       FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
-      FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
-      FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
-      FramePose2d startPose = new FramePose2d(startPosition, startOrientation);
-      FramePose2d endPose = new FramePose2d(endPosition, endOrientation);
+      FrameOrientation2D startOrientation = new FrameOrientation2D(WORLD_FRAME, startYaw);
+      FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
+      FramePose2D startPose = new FramePose2D(startPosition, startOrientation);
+      FramePose2D endPose = new FramePose2D(endPosition, endOrientation);
 
       for (double headingOffset = -Math.PI; headingOffset < Math.PI; headingOffset += Math.PI / 2)    // Direction facing relative to the path direction while traveling on the straight line portion of the path
       {
@@ -277,12 +277,12 @@ public class OverheadPathTest
 
       FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
       FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
-      FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
-      FramePose2d startPose = new FramePose2d(startPosition, startOrientation);
+      FrameOrientation2D startOrientation = new FrameOrientation2D(WORLD_FRAME, startYaw);
+      FramePose2D startPose = new FramePose2D(startPosition, startOrientation);
       for (double endYaw = 0; endYaw < 2 * Math.PI; endYaw += Math.PI / 8)
       {
-         FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
-         FramePose2d endPose = new FramePose2d(endPosition, endOrientation);
+         FrameOrientation2D endOrientation = new FrameOrientation2D(WORLD_FRAME, endYaw);
+         FramePose2D endPose = new FramePose2D(endPosition, endOrientation);
 
          // headingOffset is the direction facing relative to the path direction while traveling on the straight line portion of the path
          // e.g. 0 is forwards, -Math.PI is backwards, Math.PI/2 is facing left/walking to the right.
@@ -343,11 +343,11 @@ public class OverheadPathTest
    {
       double eps = 1e-14;
       
-      FramePose2d startPose = new FramePose2d(WORLD_FRAME);
-      FrameOrientation2d endPosition = new FrameOrientation2d(WORLD_FRAME, 1.0);
+      FramePose2D startPose = new FramePose2D(WORLD_FRAME);
+      FrameOrientation2D endPosition = new FrameOrientation2D(WORLD_FRAME, 1.0);
       TurningOverheadPath p = new TurningOverheadPath(startPose, endPosition);
       
-      FramePose2d poseAtS = p.getPoseAtS(2.0);
+      FramePose2D poseAtS = p.getPoseAtS(2.0);
       assertEquals("Should cap at 1.0", 1.0, poseAtS.getYaw(), eps);
       
       poseAtS = p.getExtrapolatedPoseAtS(2.0);
@@ -366,13 +366,13 @@ public class OverheadPathTest
    {
       double eps = 1e-14;
 
-      FramePose2d startPose = new FramePose2d(WORLD_FRAME);
+      FramePose2D startPose = new FramePose2D(WORLD_FRAME);
       Point2D position = new Point2D(1.0, 0.0);
       FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, position);
       StraightLineOverheadPath p = new StraightLineOverheadPath(startPose, endPosition);
       
       
-      FramePose2d poseAtS = p.getPoseAtS(2.0);
+      FramePose2D poseAtS = p.getPoseAtS(2.0);
       assertEquals("Should cap at 1.0", 1.0, poseAtS.getX(), eps);
       
       poseAtS = p.getExtrapolatedPoseAtS(2.0);

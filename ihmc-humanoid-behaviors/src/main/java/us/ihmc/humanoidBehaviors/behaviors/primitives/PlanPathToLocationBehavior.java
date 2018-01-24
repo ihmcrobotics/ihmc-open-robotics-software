@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -17,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
@@ -27,10 +27,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final boolean DEBUG = false;
    private boolean planningSuccess = false;
    private PipeLine pipeLine = new PipeLine();
-   private FramePose goalPose = null;
+   private FramePose3D goalPose = null;
    private double timeout = 5.0;
    private final SleepBehavior sleepBehavior;
-   private final FramePose initialStanceFootPose = new FramePose();
+   private final FramePose3D initialStanceFootPose = new FramePose3D();
    private RobotSide initialStanceSide;
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
@@ -47,7 +47,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
    }
 
-   public void setInputs(FramePose goalPose, FramePose initialStanceFootPose, RobotSide initialStanceSide)
+   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
    {
       this.goalPose = goalPose;
       this.initialStanceSide = initialStanceSide;

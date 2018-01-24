@@ -33,6 +33,12 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
    }
 
    @Override
+   public boolean containsNaN()
+   {
+      return super.containsNaN();
+   }
+
+   @Override
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
       multipleFramesHelper.registerReferenceFrame(newReferenceFrame);
@@ -55,22 +61,10 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
       set(frameTuple);
    }
 
-   public void setIncludingFrame(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      multipleFramesHelper.switchCurrentReferenceFrame(yoFrameTuple.getReferenceFrame());
-      set(yoFrameTuple);
-   }
-
    public void setIncludingFrame(FrameTuple2DReadOnly frameTuple2d, double z)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
       set(frameTuple2d, z);
-   }
-
-   public void setIncludingFrame(YoFrameTuple2d<?, ?> yoFrameTuple2d, double z)
-   {
-      multipleFramesHelper.switchCurrentReferenceFrame(yoFrameTuple2d.getReferenceFrame());
-      set(yoFrameTuple2d, z);
    }
 
    /**
@@ -128,7 +122,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
             @Override
             public void notifyOfVariableChange(YoVariable<?> v)
             {
-               getFrameTupleIncludingFrame(localFramePoint);
+               localFramePoint.setIncludingFrame(YoFramePointInMultipleFrames.this);
                point.setAndMatchFrame(localFramePoint);
             }
          });
@@ -156,7 +150,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
    
    public String toStringForASingleReferenceFrame(ReferenceFrame referenceFrame)
    {
-      getFrameTupleIncludingFrame(framePoint);
+      framePoint.setIncludingFrame(this);
       framePoint.changeFrame(referenceFrame);
       return framePoint.toString();
    }

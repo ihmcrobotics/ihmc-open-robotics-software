@@ -414,12 +414,12 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       Vector3D32[] vertexNormals = new Vector3D32[numberOfVertices];
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      currentRegionPose.getPose(transform);
+      currentRegionPose.get(transform);
 
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {
          Point3D32 vertex = new Point3D32();
-         vertexBuffer.get(vertexIndex + indexInVertexBuffer).get(vertex);
+         vertex.set(vertexBuffer.get(vertexIndex + indexInVertexBuffer));
          transform.transform(vertex);
          vertices[vertexIndex] = vertex;
       }
@@ -650,7 +650,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       currentIndex++;
       currentMeshIndex.set(currentIndex);
       planarRegionToProcess.getTransformToWorld(regionTransform);
-      currentRegionPose.setPose(regionTransform);
+      currentRegionPose.set(regionTransform);
       currentRegionId.set(planarRegionToProcess.getRegionId());
 
       boolean isDonePackingPolygons = false;

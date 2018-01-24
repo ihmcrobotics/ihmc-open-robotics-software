@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -27,7 +28,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -58,7 +58,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    private final MovingReferenceFrame pelvisFrame;
    private final ReferenceFrame baseFrame;
    private final YoDouble defaultHeightAboveAnkleForHome;
-   private final FramePose tempPose = new FramePose();
+   private final FramePose3D tempPose = new FramePose3D();
    private final Point3D tempPoint = new Point3D();
    private final RigidBodyTransform controlFrame = new RigidBodyTransform();
 
@@ -143,7 +143,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       taskspaceControlState.doAction();
    }
 
-   public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose initialPose)
+   public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose3D initialPose)
    {
       if (command.useCustomControlFrame())
       {
@@ -159,7 +159,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(pelvisFrame);
       tempPose.changeFrame(controlFrame);
-      tempPose.getPosition(tempPoint);
+      tempPoint.set(tempPose.getPosition());
 
       initialPose.prependTranslation(tempPoint);
 
@@ -172,7 +172,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
     * @param initialPose the initial pelvis position
     * @return whether the command passed validation and was queued
     */
-   public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command, FramePose initialPose)
+   public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command, FramePose3D initialPose)
    {
       // We have to remove the orientation and xy components of the command, and adjust the selection matrix;
       // We do this to break up the pelvis control, it reduces the complexity of each manager at the expense of these little hacks.
@@ -236,7 +236,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(pelvisFrame);
       tempPose.changeFrame(controlFrame);
-      tempPose.getPosition(tempPoint);
+      tempPoint.set(tempPose.getPosition());
 
       initialPose.prependTranslation(tempPoint);
 
@@ -264,12 +264,12 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
       taskspaceControlState.getDesiredPose(tempPose);
-      tempPose.getPositionIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(tempPose.getPosition());
 
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(controlFrame);
       tempPose.changeFrame(pelvisFrame);
-      tempPose.getPosition(tempPoint);
+      tempPoint.set(tempPose.getPosition());
 
       positionToPack.add(tempPoint);
    }

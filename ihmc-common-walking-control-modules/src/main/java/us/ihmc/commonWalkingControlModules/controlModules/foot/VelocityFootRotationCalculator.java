@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -11,8 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
@@ -103,9 +103,9 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final FrameVector2D footAngularVelocityUnitVector = new FrameVector2D();
 
    private final FramePoint2D centerOfRotation = new FramePoint2D();
-   private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
-   private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
-   private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
+   private final FrameLine2D lineOfRotationInSoleFrame = new FrameLine2D();
+   private final FrameLine2D lineOfRotationInWorldFrame = new FrameLine2D();
+   private final FrameLineSegment2D lineSegmentOfRotation = new FrameLineSegment2D();
 
    private final FrameVector3D pointingBackwardVector = new FrameVector3D();
 
@@ -208,7 +208,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       angularVelocity2d.setIncludingFrame(soleFrame, angularVelocity.getX(), angularVelocity.getY());
 
       yoFootAngularVelocityFiltered.update(angularVelocity2d);
-      yoFootAngularVelocityFiltered.getFrameTuple2dIncludingFrame(angularVelocity2d);
+      angularVelocity2d.setIncludingFrame(yoFootAngularVelocityFiltered);
 
       yoAngleOfLoR.set(Math.atan2(angularVelocity2d.getY(), angularVelocity2d.getX()));
       yoLoRAngularVelocityFiltered.updateForAngles();
@@ -219,11 +219,11 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 //      yoCoPErrorFiltered.update(copError2d);
 //      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(footAngularVelocityUnitVector));
 
-      yoFootAngularVelocityFiltered.getFrameTuple2dIncludingFrame(footAngularVelocityUnitVector);
+      footAngularVelocityUnitVector.setIncludingFrame(yoFootAngularVelocityFiltered);
       footAngularVelocityUnitVector.normalize();
 
       yoCoRPositionFiltered.update(centerOfPressure);
-      yoCoRPositionFiltered.getFrameTuple2dIncludingFrame(centerOfRotation);
+      centerOfRotation.setIncludingFrame(yoCoRPositionFiltered);
       yoCoRVelocityFiltered.update();
       yoCoRTransversalVelocity.set(yoCoRVelocityFiltered.cross(footAngularVelocityUnitVector));
 
@@ -270,7 +270,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
          {
             lineSegmentOfRotation.setIncludingFrame(frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne(),
                                                     frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo());
-            yoLineOfRotation.setFrameLineSegment2d(lineSegmentOfRotation);
+            yoLineOfRotation.set(lineSegmentOfRotation);
          }
       }
       else
@@ -286,7 +286,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    }
 
    @Override
-   public void getLineOfRotation(FrameLine2d lineOfRotationToPack)
+   public void getLineOfRotation(FrameLine2D lineOfRotationToPack)
    {
       lineOfRotationToPack.setIncludingFrame(lineOfRotationInSoleFrame);
    }

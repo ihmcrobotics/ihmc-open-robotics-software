@@ -12,6 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,7 +20,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableValveRobot;
@@ -104,7 +104,7 @@ public class ContactableValveRobotTest
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
-      FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
+      FramePose3D valvePose = new FramePose3D(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
 
       assertEquals(valveX, valvePose.getX(), 1e-7);
       assertEquals(valveY, valvePose.getY(), 1e-7);
@@ -238,7 +238,7 @@ public class ContactableValveRobotTest
    {
       double forceVectorScale = 1.0 / 50.0;
 
-      FramePose valvePoseInWorld = createFramePose(x, y, z, yaw_degrees);
+      FramePose3D valvePoseInWorld = createFramePose(x, y, z, yaw_degrees);
 
       ContactableValveRobot valveRobot = new ContactableValveRobot("valveRobot", ValveType.SMALL_VALVE, 0.125, valvePoseInWorld);
       valveRobot.createValveRobot();
@@ -247,15 +247,15 @@ public class ContactableValveRobotTest
       return valveRobot;
    }
 
-   private FramePose createFramePose(double x, double y, double z, double yaw_degrees)
+   private FramePose3D createFramePose(double x, double y, double z, double yaw_degrees)
    {
-      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
       Point3D position = new Point3D(x, y, z);
       Quaternion orientation = new Quaternion();
 
       orientation.setYawPitchRoll(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
-      framePose.setPose(position, orientation);
+      framePose.set(position, orientation);
 
       return framePose;
    }

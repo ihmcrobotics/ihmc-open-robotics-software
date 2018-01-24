@@ -8,9 +8,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
@@ -52,7 +52,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       if (isFootInContact())
       {
          YoFramePoint yoPosition = contactPoint.getYoPosition();
-         yoPosition.getFrameTupleIncludingFrame(touchdownPoint);
+         touchdownPoint.setIncludingFrame(yoPosition);
          touchdownPoint.changeFrame(soleFrame);
          planeContactStateCommand.addPointInContact(touchdownPoint);
       }
@@ -69,7 +69,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
       YoFramePoint yoPosition = contactPoint.getYoPosition();
-      yoPosition.getFrameTupleIncludingFrame(touchdownPoint);
+      touchdownPoint.setIncludingFrame(yoPosition);
       touchdownPoint.changeFrame(soleFrame);
       planeContactStateCommand.addPointInContact(touchdownPoint);
 
@@ -221,7 +221,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       @Override
       public FramePoint3D getPosition()
       {
-         return groundContactPoint.getYoPosition().getFrameTuple();
+         return new FramePoint3D(groundContactPoint.getYoPosition());
       }
 
       @Override
@@ -243,7 +243,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void getPosition2d(FrameTuple2D<?, ?> framePoint2dToPack)
+      public void getPosition2d(FrameTuple2DBasics framePoint2dToPack)
       {
          
       }

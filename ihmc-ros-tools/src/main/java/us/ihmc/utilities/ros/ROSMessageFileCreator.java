@@ -31,7 +31,7 @@ public class ROSMessageFileCreator
    public String createNewRosMessageFromGenerator(RosCustomGenerator generator, boolean overwrite) throws Exception
    {
       String messageName = generator.getMessageName();
-      Path msgDirectoryPath = Paths.get("..", "IHMCROSTools", "ROSMessagesAndServices", generator.getRosPackage(), "msg");
+      Path msgDirectoryPath = Paths.get("..", "ihmc-ros-tools", "ROSMessagesAndServices", generator.getRosPackage(), "msg");
       if(!Files.exists(msgDirectoryPath))
       {
          Files.createDirectories(msgDirectoryPath);
@@ -74,7 +74,7 @@ public class ROSMessageFileCreator
       RosMessagePacket rosMessageAnnotation = (RosMessagePacket) clazz.getAnnotation(RosMessagePacket.class);
       String messageName = clazz.getSimpleName();
 
-      Path msgDirectoryPath = Paths.get("..", "IHMCROSTools", "ROSMessagesAndServices", rosMessageAnnotation.rosPackage(), "msg");
+      Path msgDirectoryPath = Paths.get("..", "ihmc-ros-tools", "ROSMessagesAndServices", rosMessageAnnotation.rosPackage(), "msg");
       if(!Files.exists(msgDirectoryPath))
       {
          Files.createDirectories(msgDirectoryPath);

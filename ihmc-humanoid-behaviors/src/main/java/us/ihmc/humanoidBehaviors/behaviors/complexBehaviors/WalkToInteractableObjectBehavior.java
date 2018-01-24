@@ -5,6 +5,7 @@ import com.jme3.math.Quaternion;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +18,6 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
@@ -93,7 +93,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
             Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
 
-            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
+            FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
                   JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
@@ -120,7 +120,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             float walkingYaw = (float) Math.atan2(walkingDirection.getY(), walkingDirection.getX());
             Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
 
-            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
+            FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
                   JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }

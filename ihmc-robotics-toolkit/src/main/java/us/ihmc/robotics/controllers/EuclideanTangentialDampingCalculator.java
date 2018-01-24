@@ -43,7 +43,7 @@ public class EuclideanTangentialDampingCalculator
          {
             positionError.changeFrame(bodyFrame);
 
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(positionError.getVector(), rotationToControlFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(positionError, rotationToControlFrame);
 
             transformToParent.setRotationAndZeroTranslation(rotationToControlFrame);
          }
@@ -60,7 +60,7 @@ public class EuclideanTangentialDampingCalculator
     */
    public void compute(YoFrameVector positionError, Matrix3D derivativeGainsToPack)
    {
-      this.positionError.setIncludingFrame(positionError.getFrameTuple());
+      this.positionError.setIncludingFrame(positionError);
 
       if (positionError.length() > tangentialDampingGains.getParallelDampingDeadband())
       {

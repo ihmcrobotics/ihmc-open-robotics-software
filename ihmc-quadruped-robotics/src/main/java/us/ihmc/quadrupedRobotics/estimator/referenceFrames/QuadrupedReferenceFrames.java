@@ -9,11 +9,11 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -42,9 +42,9 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final QuadrantDependentList<ReferenceFrame> soleFrames = new QuadrantDependentList<ReferenceFrame>();
 
    private final QuadrantDependentList<PoseReferenceFrame> tripleSupportFrames = new QuadrantDependentList<PoseReferenceFrame>();
-   private final QuadrantDependentList<FramePose> tripleSupportCentroidPoses = new QuadrantDependentList<FramePose>();
+   private final QuadrantDependentList<FramePose3D> tripleSupportCentroidPoses = new QuadrantDependentList<FramePose3D>();
 
-   private final FramePose supportPolygonCentroidWithNominalRotation = new FramePose(ReferenceFrame.getWorldFrame());
+   private final FramePose3D supportPolygonCentroidWithNominalRotation = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame supportPolygonCentroidFrameWithNominalRotation;
    private final ZUpFrame supportPolygonCentroidZUpFrame;
 
@@ -56,13 +56,13 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final ReferenceFrame centerOfMassFrame;
    private final PoseReferenceFrame centerOfMassFrameWithRotation;
    private final ZUpFrame centerOfMassZUpFrame;
-   private final FramePose centerOfMassPose;
+   private final FramePose3D centerOfMassPose;
    private final PoseReferenceFrame centerOfFourHipsFrame;
-   private final FramePose centerOfFourHipsFramePose;
+   private final FramePose3D centerOfFourHipsFramePose;
    private final FramePoint3D centerOfFourHipsFramePoint = new FramePoint3D();
 
    private final PoseReferenceFrame centerOfFourFeetFrameWithBodyRotation;
-   private final FramePose centerOfFourFeetFramePose;
+   private final FramePose3D centerOfFourFeetFramePose;
    private final FramePoint3D centerOfFourFeetFramePoint = new FramePoint3D();
 
    private QuadrupedSupportPolygon supportPolygonForCentroids = new QuadrupedSupportPolygon();
@@ -73,7 +73,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
       rootJointFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
       bodyFrame = fullRobotModel.getRootJoint().getSuccessor().getBodyFixedFrame();
-      centerOfMassPose = new FramePose(bodyFrame);
+      centerOfMassPose = new FramePose3D(bodyFrame);
 
       bodyZUpFrame = new ZUpFrame(worldFrame, bodyFrame, "bodyZUpFrame");
 
@@ -140,7 +140,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          legAttachementFrames.set(robotQuadrant, legAttachmentFrame);
 
 
-         FramePose tripleSupportCentroidPose = new FramePose(worldFrame);
+         FramePose3D tripleSupportCentroidPose = new FramePose3D(worldFrame);
          PoseReferenceFrame tripleSupport = new PoseReferenceFrame(robotQuadrant.getCamelCaseNameForStartOfExpression() + "TripleSupportFrame", tripleSupportCentroidPose);
 
          tripleSupportCentroidPoses.set(robotQuadrant, tripleSupportCentroidPose);
@@ -156,10 +156,10 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
       centerOfMassZUpFrame = new ZUpFrame(worldFrame, centerOfMassFrameWithRotation, "centerOfMassZUpFrame");
 
-      centerOfFourHipsFramePose = new FramePose(bodyFrame);
+      centerOfFourHipsFramePose = new FramePose3D(bodyFrame);
       centerOfFourHipsFrame = new PoseReferenceFrame("centerOfFourHipsFrame", bodyFrame);
 
-      centerOfFourFeetFramePose = new FramePose(bodyFrame);
+      centerOfFourFeetFramePose = new FramePose3D(bodyFrame);
       centerOfFourFeetFrameWithBodyRotation = new PoseReferenceFrame("centerOfFourFeetFrame", bodyFrame);
       supportPolygonCentroidFrameWithNominalRotation = new PoseReferenceFrame("centerOfFourFeetWithSupportPolygonRotation", supportPolygonCentroidWithNominalRotation);
       supportPolygonCentroidZUpFrame = new ZUpFrame(worldFrame, supportPolygonCentroidFrameWithNominalRotation, "centerFootPolygonZUp");
@@ -241,7 +241,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       for(RobotQuadrant swingLeg : RobotQuadrant.values)
       {
          updateSupportPolygon(swingLeg, supportPolygonForCentroids);
-         FramePose framePose = tripleSupportCentroidPoses.get(swingLeg);
+         FramePose3D framePose = tripleSupportCentroidPoses.get(swingLeg);
          supportPolygonForCentroids.getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(framePose);
 
          PoseReferenceFrame tripleSupportFrame = tripleSupportFrames.get(swingLeg);

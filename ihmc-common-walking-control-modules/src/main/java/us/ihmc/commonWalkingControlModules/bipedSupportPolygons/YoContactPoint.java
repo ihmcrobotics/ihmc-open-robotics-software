@@ -3,8 +3,9 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -59,21 +60,21 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void getPosition2d(FrameTuple2D<?, ?> framePoint2dToPack)
+   public void getPosition2d(FrameTuple2DBasics framePoint2dToPack)
    {
-      yoPosition.getFrameTuple2dIncludingFrame(framePoint2dToPack);
+      framePoint2dToPack.setIncludingFrame(yoPosition);
    }
 
    @Override
-   public FramePoint3D getPosition()
+   public FramePoint3DReadOnly getPosition()
    {
-      return yoPosition.getFrameTuple();
+      return yoPosition;
    }
 
    @Override
    public void getPosition(FramePoint3D framePointToPack)
    {
-      yoPosition.getFrameTupleIncludingFrame(framePointToPack);
+      framePointToPack.setIncludingFrame(yoPosition);
    }
 
    @Override

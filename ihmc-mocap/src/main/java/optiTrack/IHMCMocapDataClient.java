@@ -2,12 +2,12 @@ package optiTrack;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class IHMCMocapDataClient extends MocapDataClient
 {
@@ -68,12 +68,12 @@ public class IHMCMocapDataClient extends MocapDataClient
          mocapOriginFrame.update();
          mocapRbZUpFrame.update();
          
-         FramePose pose = new FramePose(mocapRbZUpFrame, new Point3D(),
+         FramePose3D pose = new FramePose3D(mocapRbZUpFrame, new Point3D(),
                                         new Quaternion());
          pose.changeFrame(ReferenceFrame.getWorldFrame());
 
          RigidBodyTransform r = new RigidBodyTransform();
-         pose.getRigidBodyTransform(r);
+         pose.get(r);
 
          Vector3D position = new Vector3D();
          r.getTranslation(position);

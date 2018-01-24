@@ -279,7 +279,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      currentPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(currentPosition);
    }
 
    public void get(YoFramePoint positionToPack)
@@ -300,7 +300,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentVelocity);
    }
 
    public void getVelocity(YoFrameVector velocityToPack)
@@ -316,7 +316,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAcceleration);
    }
 
    public void getAcceleration(YoFrameVector accelerationToPack)

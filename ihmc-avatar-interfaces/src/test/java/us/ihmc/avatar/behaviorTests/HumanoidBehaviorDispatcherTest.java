@@ -23,6 +23,8 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -53,8 +55,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -248,7 +248,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3D(0.0, 1.0, 0.0), Math.toRadians(5.0));
-      FramePose desiredPelvisPose = new FramePose();
+      FramePose3D desiredPelvisPose = new FramePose3D();
       desiredPelvisPose.setOrientation(pelvisPosePacket.getLastTrajectoryPoint().orientation);
 
       pelvisOrientationTrajectoryBehavior.initialize();
@@ -293,7 +293,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       double walkDistance = 2.0;
-      FramePose2d targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
+      FramePose2D targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
@@ -305,7 +305,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
          Point3D footstepPositionInWorld = new Point3D();
          for (Footstep footStep : footsteps)
          {
-            FramePose footstepPose = new FramePose();
+            FramePose3D footstepPose = new FramePose3D();
             footStep.getPose(footstepPose);
             footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
             PrintTools.debug(this, footstepPose.getPosition().toString());
@@ -319,7 +319,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
          assertTrue(success);
       }
 
-      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
       assertTrue(walkToLocationBehavior.isDone());
 
@@ -403,7 +403,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       double walkDistance = 2.0;
-      FramePose2d targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
+      FramePose2D targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
@@ -411,7 +411,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseBeforeStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseBeforeStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       BehaviorControlModePacket stopModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.STOP);
       behaviorCommunicatorClient.send(stopModePacket);
@@ -419,7 +419,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseTwoSecondsAfterStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseTwoSecondsAfterStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterStop.getPositionDistance(poseBeforeStop);
       assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
@@ -452,7 +452,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
 
       double walkDistance = 2.0;
-      FramePose2d targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
+      FramePose2D targetMidFeetPose = offsetCurrentRobotMidFeetZUpPose(walkDistance);
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
@@ -460,7 +460,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseBeforePause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseBeforePause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       BehaviorControlModePacket pauseModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
       behaviorCommunicatorClient.send(pauseModePacket);
@@ -468,7 +468,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
-      FramePose2d poseTwoSecondsAfterPause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D poseTwoSecondsAfterPause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       double distanceWalkedAfterStopRequest = poseTwoSecondsAfterPause.getPositionDistance(poseBeforePause);
       assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
@@ -485,50 +485,50 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       }
 
       assertTrue(walkToLocationBehavior.isDone());
-      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private FramePose2d offsetCurrentRobotMidFeetZUpPose(double walkDistance)
+   private FramePose2D offsetCurrentRobotMidFeetZUpPose(double walkDistance)
    {
-      FramePose2d targetMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
+      FramePose2D targetMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       targetMidFeetPose.setX(targetMidFeetPose.getX() + walkDistance);
 
       return targetMidFeetPose;
    }
 
-   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
+   private FramePose2D getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
    {
-      FramePose midFeetPose = getRobotMidFeetPose(robot);
+      FramePose3D midFeetPose = getRobotMidFeetPose(robot);
 
-      FramePose2d ret = new FramePose2d();
+      FramePose2D ret = new FramePose2D();
       ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), midFeetPose.getX(), midFeetPose.getY(), midFeetPose.getYaw());
 
       return ret;
    }
 
-   private FramePose getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
+   private FramePose3D getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
    {
-      FramePose leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
-      FramePose rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
+      FramePose3D leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
+      FramePose3D rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
 
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       ret.interpolate(leftFootPose, rightFootPose, 0.5);
 
       return ret;
    }
 
-   private FramePose getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
+   private FramePose3D getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();
       RigidBodyTransform ankleTransformToWorld = new RigidBodyTransform();
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
-      FramePose ret = new FramePose();
-      ret.setPose(ankleTransformToWorld);
+      FramePose3D ret = new FramePose3D();
+      ret.set(ankleTransformToWorld);
 
       return ret;
    }
@@ -543,17 +543,17 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return pelvisOrientationTrajectoryMessage;
    }
 
-   private FramePose getCurrentPelvisPose()
+   private FramePose3D getCurrentPelvisPose()
    {
       fullRobotModel.updateFrames();
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
       ret.setToZero(fullRobotModel.getPelvis().getBodyFixedFrame());
       ret.changeFrame(ReferenceFrame.getWorldFrame());
 
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose2d framePose1, FramePose2d framePose2)
+   private void assertPosesAreWithinThresholds(FramePose2D framePose1, FramePose2D framePose2)
    {
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);
@@ -572,7 +572,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
             ORIENTATION_THRESHOLD);
    }
 
-   private void assertOrientationsAreWithinThresholds(FramePose framePose1, FramePose framePose2)
+   private void assertOrientationsAreWithinThresholds(FramePose3D framePose1, FramePose3D framePose2)
    {
       double orientationDistance = framePose1.getOrientationDistance(framePose2);
 

@@ -26,7 +26,7 @@ public class WrenchDistributorTools
       torque.setY(-cop.getX() * force.getZ());
       torque.setZ(cop.getX() * force.getY() - cop.getY() * force.getX() + normalTorque);
 
-      groundReactionWrenchToPack.set(referenceFrame, force.getVector(), torque);
+      groundReactionWrenchToPack.set(referenceFrame, force, torque);
    }
 
    public static FramePoint3D computePseudoCMP3d(FramePoint3D centerOfMass, FramePoint2D cmp, double fZ, double totalMass, double omega0)
@@ -92,7 +92,7 @@ public class WrenchDistributorTools
       {
          FrameVector3D normalizedSupportVector = normalizedSupportVectors.get(i);
          normalizedSupportVector.changeFrame(referenceFrame);
-         normalizedSupportVector.getVector().get(0, i, supportVectorMatrixBlock);
+         normalizedSupportVector.get(0, i, supportVectorMatrixBlock);
       }
    }
 

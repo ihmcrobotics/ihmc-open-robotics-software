@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
-   private final List<List<FramePose>> cinderBlockPoses = new ArrayList<>();
+   private final List<List<FramePose3D>> cinderBlockPoses = new ArrayList<>();
 
    public CinderBlockFieldEnvironment()
    {
@@ -20,7 +20,7 @@ public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpCinderBlockFieldActual("CinderBlockField", 0.0, 0.0, cinderBlockPoses));
    }
 
-   public List<List<FramePose>> getCinderBlockPoses()
+   public List<List<FramePose3D>> getCinderBlockPoses()
    {
       return cinderBlockPoses;
    }

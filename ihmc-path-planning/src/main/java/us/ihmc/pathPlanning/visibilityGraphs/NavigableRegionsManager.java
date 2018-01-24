@@ -144,7 +144,7 @@ public class NavigableRegionsManager
       return path;
    }
 
-   public List<Point3DReadOnly> calculateBodyPathWithOcclussions(Point3D start, Point3D goal)
+   public List<Point3DReadOnly> calculateBodyPathWithOcclussions(Point3DReadOnly start, Point3DReadOnly goal)
    {
       List<Point3DReadOnly> path = calculateBodyPath(start, goal);
 

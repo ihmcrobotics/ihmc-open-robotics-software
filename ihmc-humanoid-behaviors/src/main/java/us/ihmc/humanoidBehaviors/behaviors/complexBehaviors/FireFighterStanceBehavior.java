@@ -7,6 +7,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,8 +29,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -85,13 +85,13 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 
             referenceFrames.updateFrames();
             {
-               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
+               FramePose3D desiredFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
                Footstep desiredFootStep = new Footstep(RobotSide.LEFT, desiredFootPose);
                desiredFootsteps.add(desiredFootStep);
             }
             {
-               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.RIGHT), new Pose3D(-.2, -.1, 0, Math.toRadians(-45), 0, 0));
+               FramePose3D desiredFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT), new Pose3D(-.2, -.1, 0, Math.toRadians(-45), 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
                Footstep desiredFootStep = new Footstep(RobotSide.RIGHT, desiredFootPose);
@@ -116,13 +116,13 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 
             referenceFrames.updateFrames();
             {
-               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
+               FramePose3D desiredFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
                Footstep desiredFootStep = new Footstep(RobotSide.LEFT, desiredFootPose);
                desiredFootsteps.add(desiredFootStep);
             }
             {
-               FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(-.2, -.3, 0, Math.toRadians(-45), 0, 0));
+               FramePose3D desiredFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(-.2, -.3, 0, Math.toRadians(-45), 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
                Footstep desiredFootStep = new Footstep(RobotSide.RIGHT, desiredFootPose);
@@ -160,7 +160,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             FramePoint3D p = new FramePoint3D(referenceFrames.getPelvisZUpFrame(), new double[] {0.075, 0.04, 0});
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
             p.changeFrame(ReferenceFrame.getWorldFrame());
-            PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(2, p.getPoint(), orientation.getQuaternion());
+            PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(2, p, orientation);
             pelvisTrajectoryBehavior.setInput(message);
             TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Pelvis To Final Location");
             sendPacket(p1);
@@ -264,14 +264,14 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 
    }
 
-   private FramePose2d getRobotFootPose2d(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
+   private FramePose2D getRobotFootPose2d(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();
       RigidBodyTransform ankleTransformToWorld = new RigidBodyTransform();
       ankleJoint.getTransformToWorld(ankleTransformToWorld);
 
-      FramePose2d ret = new FramePose2d();
+      FramePose2D ret = new FramePose2D();
       ret.setIncludingFrame(ReferenceFrame.getWorldFrame(), ankleTransformToWorld, false);
 
       return ret;
