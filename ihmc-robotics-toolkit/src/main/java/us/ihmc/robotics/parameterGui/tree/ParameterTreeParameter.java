@@ -1,12 +1,12 @@
 package us.ihmc.robotics.parameterGui.tree;
 
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.robotics.parameterGui.GuiParameter;
 
 public class ParameterTreeParameter extends ParameterTreeValue
 {
-   private final Parameter parameter;
+   private final GuiParameter parameter;
 
-   public ParameterTreeParameter(Parameter parameter)
+   public ParameterTreeParameter(GuiParameter parameter)
    {
       this.parameter = parameter;
    }
@@ -18,18 +18,12 @@ public class ParameterTreeParameter extends ParameterTreeValue
    }
 
    @Override
-   public String getDescription()
-   {
-      return parameter.getDescription();
-   }
-
-   @Override
    public String getName()
    {
       return parameter.getName();
    }
 
-   public Parameter getParameter()
+   public GuiParameter getParameter()
    {
       return parameter;
    }

@@ -1,10 +1,10 @@
 package us.ihmc.robotics.parameterGui.tuning;
 
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.robotics.parameterGui.GuiParameter;
 
 public class DoubleTuner extends NumericTuner<Double>
 {
-   public DoubleTuner(Parameter parameter)
+   public DoubleTuner(GuiParameter parameter)
    {
       super(parameter);
    }

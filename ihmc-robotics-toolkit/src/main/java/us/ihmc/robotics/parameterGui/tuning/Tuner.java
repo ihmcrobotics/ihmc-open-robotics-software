@@ -11,7 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.robotics.parameterGui.GuiParameter;
+import us.ihmc.robotics.parameterGui.ParameterTuningTools;
 
 public class Tuner extends VBox
 {
@@ -26,7 +27,7 @@ public class Tuner extends VBox
    @FXML
    private Button remove;
 
-   public Tuner(Parameter parameter)
+   public Tuner(GuiParameter parameter)
    {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
       loader.setRoot(this);
@@ -41,8 +42,13 @@ public class Tuner extends VBox
       }
 
       name.setText(parameter.getName());
-      description.setText(parameter.getDescription());
-      description.textProperty().addListener(observable -> parameter.setDescription(description.getText()));
+      description.setText(parameter.getCurrentDescription());
+      ParameterTuningTools.addThreadSafeListeners(description, () -> parameter.setDescription(description.getText()));
+
+      parameter.addChangedListener(p -> {
+         // This listener will be triggered by an external change and is called from the animation timer.
+         description.setText(parameter.getCurrentDescription());
+      });
 
       switch (parameter.getType())
       {

@@ -6,7 +6,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.robotics.parameterGui.GuiParameter;
+import us.ihmc.robotics.parameterGui.ParameterTuningTools;
 
 public class EnumTuner extends HBox
 {
@@ -15,7 +16,7 @@ public class EnumTuner extends HBox
    @FXML
    private TextField enumString;
 
-   public EnumTuner(Parameter parameter)
+   public EnumTuner(GuiParameter parameter)
    {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
       loader.setRoot(this);
@@ -29,7 +30,12 @@ public class EnumTuner extends HBox
          e.printStackTrace();
       }
 
-      enumString.setText(parameter.getValue());
-      enumString.textProperty().addListener((observable, oldValue, newValue) -> parameter.setValue(enumString.getText()));
+      enumString.setText(parameter.getCurrentValue());
+      ParameterTuningTools.addThreadSafeListeners(enumString, () -> parameter.setValue(enumString.getText()));
+
+      parameter.addChangedListener(p -> {
+         // This listener will be triggered by an external change and is called from the animation timer.
+         enumString.setText(parameter.getCurrentValue());
+      });
    }
 }

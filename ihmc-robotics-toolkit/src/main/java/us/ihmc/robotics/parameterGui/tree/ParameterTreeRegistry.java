@@ -1,12 +1,12 @@
 package us.ihmc.robotics.parameterGui.tree;
 
-import us.ihmc.yoVariables.parameters.xml.Registry;
+import us.ihmc.robotics.parameterGui.GuiRegistry;
 
 public class ParameterTreeRegistry extends ParameterTreeValue
 {
-   private final Registry registry;
+   private final GuiRegistry registry;
 
-   public ParameterTreeRegistry(Registry registry)
+   public ParameterTreeRegistry(GuiRegistry registry)
    {
       this.registry = registry;
    }
@@ -15,12 +15,6 @@ public class ParameterTreeRegistry extends ParameterTreeValue
    public boolean isRegistry()
    {
       return true;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return "Parameter Registry";
    }
 
    @Override

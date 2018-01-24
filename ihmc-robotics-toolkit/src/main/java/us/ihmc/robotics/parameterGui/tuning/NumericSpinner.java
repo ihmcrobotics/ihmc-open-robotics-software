@@ -2,14 +2,13 @@ package us.ihmc.robotics.parameterGui.tuning;
 
 import java.util.function.UnaryOperator;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextFormatter.Change;
-import javafx.scene.input.KeyCode;
 import javafx.util.StringConverter;
+import us.ihmc.robotics.parameterGui.ParameterTuningTools;
 
 public abstract class NumericSpinner <T extends Number> extends Spinner<T>
 {
@@ -66,19 +65,9 @@ public abstract class NumericSpinner <T extends Number> extends Spinner<T>
       });
 
       // Update value when enter is pressed or focus is lost.
-      getEditor().setOnKeyPressed(event -> {
-         if (event.getCode() == KeyCode.ENTER)
-         {
-            T newNumber = getValueFactory().getConverter().fromString(getEditor().getText());
-            Platform.runLater(() -> setValue(newNumber));
-         }
-      });
-      getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
-         if (oldValue && !newValue)
-         {
-            T newNumber = getValueFactory().getConverter().fromString(getEditor().getText());
-            Platform.runLater(() -> setValue(newNumber));
-         }
+      ParameterTuningTools.addThreadSafeListeners(getEditor(), () -> {
+         T newNumber = getValueFactory().getConverter().fromString(getEditor().getText());
+         setValue(newNumber);
       });
    }
 

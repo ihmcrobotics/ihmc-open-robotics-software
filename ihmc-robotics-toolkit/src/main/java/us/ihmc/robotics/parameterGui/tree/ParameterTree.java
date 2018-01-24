@@ -3,9 +3,9 @@ package us.ihmc.robotics.parameterGui.tree;
 import java.util.List;
 
 import javafx.scene.control.TreeView;
+import us.ihmc.robotics.parameterGui.GuiParameter;
+import us.ihmc.robotics.parameterGui.GuiRegistry;
 import us.ihmc.robotics.parameterGui.RegularExpression;
-import us.ihmc.yoVariables.parameters.xml.Parameter;
-import us.ihmc.yoVariables.parameters.xml.Registry;
 
 public class ParameterTree extends TreeView<ParameterTreeValue>
 {
@@ -15,12 +15,14 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       setCellFactory(param -> new ParameterTreeCell());
    }
 
-   public void setRegistries(List<Registry> registries, boolean hideNamespaces, String regex)
+   public void setRegistries(GuiRegistry registry, boolean hideNamespaces, String regex)
    {
       ParameterTreeItem root = new ParameterTreeItem(null);
       root.setExpanded(true);
       setShowRoot(false);
       setRoot(root);
+
+      List<GuiRegistry> registries = registry.getRegistries();
 
       boolean searching = regex != null && !regex.isEmpty();
       if (hideNamespaces && searching)
@@ -58,7 +60,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       });
    }
 
-   private static void addMatchingRecursive(List<Registry> registries, ParameterTreeItem item, String regex)
+   private static void addMatchingRecursive(List<GuiRegistry> registries, ParameterTreeItem item, String regex)
    {
       if (registries == null)
       {
@@ -77,7 +79,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       });
    }
 
-   private static void addRecursive(List<Registry> registries, ParameterTreeItem item)
+   private static void addRecursive(List<GuiRegistry> registries, ParameterTreeItem item)
    {
       if (registries == null)
       {
@@ -91,7 +93,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       });
    }
 
-   private static void addMatchingParametersRecursive(List<Registry> registries, ParameterTreeItem item, String regex)
+   private static void addMatchingParametersRecursive(List<GuiRegistry> registries, ParameterTreeItem item, String regex)
    {
       if (registries == null)
       {
@@ -103,7 +105,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       });
    }
 
-   private static void addParametersRecursive(List<Registry> registries, ParameterTreeItem item)
+   private static void addParametersRecursive(List<GuiRegistry> registries, ParameterTreeItem item)
    {
       if (registries == null)
       {
@@ -115,7 +117,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       });
    }
 
-   private static void addAllMatching(List<Parameter> parameters, ParameterTreeItem item, String regex)
+   private static void addAllMatching(List<GuiParameter> parameters, ParameterTreeItem item, String regex)
    {
       if (parameters == null)
       {
@@ -125,7 +127,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
                 .forEach(parameter -> item.getChildren().add(new ParameterTreeItem(new ParameterTreeParameter(parameter))));
    }
 
-   private static void addAll(List<Parameter> parameters, ParameterTreeItem item)
+   private static void addAll(List<GuiParameter> parameters, ParameterTreeItem item)
    {
       if (parameters == null)
       {

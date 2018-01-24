@@ -2,12 +2,13 @@ package us.ihmc.robotics.parameterGui.tuning;
 
 import java.io.IOException;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.robotics.parameterGui.GuiParameter;
 
 public class BooleanTuner extends HBox
 {
@@ -16,9 +17,9 @@ public class BooleanTuner extends HBox
    @FXML
    private CheckBox value;
 
-   private final Parameter parameter;
+   private final GuiParameter parameter;
 
-   public BooleanTuner(Parameter parameter)
+   public BooleanTuner(GuiParameter parameter)
    {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
       loader.setRoot(this);
@@ -33,12 +34,17 @@ public class BooleanTuner extends HBox
       }
 
       this.parameter = parameter;
-      value.setSelected(Boolean.parseBoolean(parameter.getValue()));
+      value.setSelected(Boolean.parseBoolean(parameter.getCurrentValue()));
+
+      parameter.addChangedListener(p -> {
+         // This listener will be triggered by an external change and is called from the animation timer.
+         value.setSelected(Boolean.parseBoolean(parameter.getCurrentValue()));
+      });
    }
 
    @FXML
    protected void handleButton(ActionEvent event)
    {
-      parameter.setValue(Boolean.toString(value.isSelected()));
+      Platform.runLater(() -> parameter.setValue(Boolean.toString(value.isSelected())));
    }
 }

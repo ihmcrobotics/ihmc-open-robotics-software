@@ -27,16 +27,7 @@
 						<CheckBox text="Hide Namespaces" fx:id="hideNamespaces"
 							onAction="#handleNamespaceButton" />
 						<ParameterTree VBox.vgrow="ALWAYS" fx:id="tree" />
-						<HBox spacing="10.0">
-							<children>
-								<Button text="Open" fx:id="open" onAction="#handleOpen" />
-								<Button text="Save" fx:id="save" onAction="#handleSave" />
-								<Button text="Save as..." fx:id="saveAs" onAction="#handleSaveAs" />
-								<Region HBox.hgrow="ALWAYS" />
-								<Button text="Connect" fx:id="connect" onAction="#handleConnect" disable="true" />
-								<Button text="Send" fx:id="send" disable="true" />
-							</children>
-						</HBox>
+						<StackPane fx:id="inputPane" />
 					</children>
 				</VBox>
 				<ScrollPane>
