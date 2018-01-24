@@ -2,7 +2,7 @@ package us.ihmc.robotics.parameterGui.tree;
 
 import us.ihmc.robotics.parameterGui.GuiRegistry;
 
-public class ParameterTreeRegistry extends ParameterTreeValue
+public class ParameterTreeRegistry implements ParameterTreeValue
 {
    private final GuiRegistry registry;
 

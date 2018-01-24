@@ -1,8 +1,8 @@
 package us.ihmc.robotics.parameterGui.tree;
 
-public abstract class ParameterTreeValue
+public interface ParameterTreeValue
 {
-   public abstract boolean isRegistry();
+   public boolean isRegistry();
 
-   public abstract String getName();
+   public String getName();
 }
