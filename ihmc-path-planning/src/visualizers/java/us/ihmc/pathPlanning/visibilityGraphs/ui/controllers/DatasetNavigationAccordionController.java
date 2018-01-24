@@ -24,14 +24,14 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class DatasetNavigationAccordionController
 {
-   private final File visualizerDataFolder, testDataFolder;
+   private final File visualizerDataFolder, testDataFolder, inDevelopmentTestDataFolder;
    private File customDataFolder = null;
 
    @FXML
    private Accordion datasetNavigationAccordion;
 
    @FXML
-   private ListView<String> visualizerDataListView, testDataListView, customDataListView;
+   private ListView<String> visualizerDataListView, testDataListView, inDevelopmentTestDataListView, customDataListView;
 
    private SimpleUIMessager messager;
    private Window ownerWindow;
@@ -40,14 +40,18 @@ public class DatasetNavigationAccordionController
    {
       URL planarRegionDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.PLANAR_REGION_DATA_URL);
       URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.TEST_DATA_URL);
+      URL inDevelopmentDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.IN_DEVELOLOPMENT_TEST_DATA_URL);
 
       visualizerDataFolder = new File(planarRegionDataFolderURL.toURI());
       testDataFolder = new File(testDataFolderURL.toURI());
+      inDevelopmentTestDataFolder = new File(inDevelopmentDataFolderURL.toURI());
 
       if (!visualizerDataFolder.exists())
          throw new RuntimeException("Wrong path to the visualizer data folder, please update me.");
       if (!testDataFolder.exists())
          throw new RuntimeException("Wrong path to the test data folder, please update me.");
+      if (!inDevelopmentTestDataFolder.exists())
+         throw new RuntimeException("Wrong path to the in development test data folder, please update me");
    }
 
    public void attachMessager(SimpleUIMessager messager)
@@ -72,6 +76,9 @@ public class DatasetNavigationAccordionController
 
       testDataListView.getItems().clear();
       testDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(testDataFolder));
+
+      inDevelopmentTestDataListView.getItems().clear();
+      inDevelopmentTestDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(inDevelopmentTestDataFolder));
 
       customDataListView.getItems().clear();
       if (customDataFolder != null && customDataFolder.exists() && customDataFolder.isDirectory())
@@ -106,6 +113,12 @@ public class DatasetNavigationAccordionController
    private void requestNewTestData(MouseEvent event)
    {
       requestNewData(testDataListView, testDataFolder, event);
+   }
+
+   @FXML
+   private void requestNewInDevelopmentTestData(MouseEvent event)
+   {
+      requestNewData(inDevelopmentTestDataListView, inDevelopmentTestDataFolder, event);
    }
 
    @FXML
