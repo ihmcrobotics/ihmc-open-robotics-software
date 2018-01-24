@@ -38,10 +38,10 @@ public class DatasetNavigationAccordionController
 
    public DatasetNavigationAccordionController() throws URISyntaxException
    {
-      URL visualizerDataFolderURL = Thread.currentThread().getContextClassLoader().getResource("Data");
-      URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.DATA_FOLDER_NAME);
+      URL planarRegionDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.PLANAR_REGION_DATA_URL);
+      URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.TEST_DATA_URL);
 
-      visualizerDataFolder = new File(visualizerDataFolderURL.toURI());
+      visualizerDataFolder = new File(planarRegionDataFolderURL.toURI());
       testDataFolder = new File(testDataFolderURL.toURI());
 
       if (!visualizerDataFolder.exists())
