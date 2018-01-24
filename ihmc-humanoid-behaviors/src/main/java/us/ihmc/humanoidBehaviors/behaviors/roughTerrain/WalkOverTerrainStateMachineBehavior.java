@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -200,12 +201,12 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
    class WalkingState extends State<WalkOverTerrainState>
    {
-      private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>();
+      private final AtomicReference<FootstepStatus> footstepStatusMessage = new AtomicReference<>();
 
       WalkingState(CommunicationBridge communicationBridge)
       {
          super(WalkOverTerrainState.WALKING);
-         communicationBridge.attachListener(WalkingStatusMessage.class, walkingStatusMessage::set);
+         communicationBridge.attachListener(FootstepStatus.class, footstepStatusMessage::set);
       }
 
       @Override
@@ -228,8 +229,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       boolean stepHasCompleted()
       {
-         WalkingStatusMessage walkingStatusMessage = this.walkingStatusMessage.get();
-         return (walkingStatusMessage != null) && (walkingStatusMessage.status == WalkingStatusMessage.Status.COMPLETED);
+         FootstepStatus footstepStatus = this.footstepStatusMessage.getAndSet(null);
+         return (footstepStatus != null) && (footstepStatus.status == FootstepStatus.Status.COMPLETED);
       }
    }
 }
