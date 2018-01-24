@@ -159,7 +159,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
          stopwatch.reset();
 
-         if(!hasWalkedBetweenWaiting.getBooleanValue())
+         if(hasWalkedBetweenWaiting.getBooleanValue())
          {
             waitTime.set(initialWaitTime);
             hasWalkedBetweenWaiting.set(false);
