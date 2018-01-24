@@ -51,7 +51,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class SwingState extends AbstractUnconstrainedState
 {
    private final YoBoolean replanTrajectory;
-   private final YoBoolean doContinuousReplanning;
 
    private static final double maxScalingFactor = 1.5;
    private static final double minScalingFactor = 0.1;
@@ -127,11 +126,9 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoDouble minHeightDifferenceForObstacleClearance;
 
    private final MovingReferenceFrame soleFrame;
-   private final ReferenceFrame controlFrame;
 
    private final PoseReferenceFrame desiredSoleFrame = new PoseReferenceFrame("desiredSoleFrame", worldFrame);
    private final PoseReferenceFrame desiredControlFrame = new PoseReferenceFrame("desiredControlFrame", desiredSoleFrame);
-   private final RigidBodyTransform soleToControlFrameTransform = new RigidBodyTransform();
    private final FramePose3D desiredPose = new FramePose3D();
    private final Twist desiredTwist = new Twist();
    private final SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector();
@@ -154,8 +151,6 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector yoDesiredSoleLinearVelocity;
    private final YoFrameVector yoDesiredSoleAngularVelocity;
-   
-   private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
          YoPIDSE3Gains gains, YoVariableRegistry registry)
@@ -172,7 +167,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
-      swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
+      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
       finalSwingHeightOffset = new DoubleParameter(namePrefix + "SwingFinalHeightOffset", registry, swingTrajectoryParameters.getDesiredTouchdownHeightOffset(), -0.01, 0.005);
       //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
@@ -215,13 +210,11 @@ public class SwingState extends AbstractUnconstrainedState
       maxInitialLinearVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
       maxInitialAngularVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
-      // todo make a smarter distinction on this as a way to work with the push recovery module
-      doContinuousReplanning = new YoBoolean(namePrefix + "DoContinuousReplanning", registry);
-
       soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
       ReferenceFrame toeFrame = createToeFrame(robotSide);
-      controlFrame = walkingControllerParameters.controlToeDuringSwing() ? toeFrame : footFrame;
+      ReferenceFrame controlFrame = walkingControllerParameters.controlToeDuringSwing() ? toeFrame : footFrame;
+      RigidBodyTransform soleToControlFrameTransform = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
@@ -336,6 +329,160 @@ public class SwingState extends AbstractUnconstrainedState
 
       fillAndInitializeTrajectories(true);
    }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+      super.doTransitionIntoAction();
+      swingTimeSpeedUpFactor.set(1.0);
+      currentTimeWithSwingSpeedUp.set(Double.NaN);
+      replanTrajectory.set(false);
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+      super.doTransitionOutOfAction();
+
+      swingTimeSpeedUpFactor.set(Double.NaN);
+      currentTimeWithSwingSpeedUp.set(Double.NaN);
+
+      swingTrajectoryOptimizer.informDone();
+
+      adjustmentVelocityCorrection.setToZero();
+
+      yoDesiredSolePosition.setToNaN();
+      yoDesiredSoleOrientation.setToNaN();
+      yoDesiredSoleLinearVelocity.setToNaN();
+      yoDesiredSoleAngularVelocity.setToNaN();
+   }
+
+
+   @Override
+   protected void computeAndPackTrajectory()
+   {
+      currentTime.set(getTimeInCurrentState());
+
+      double time;
+      if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
+      {
+         time = currentTime.getDoubleValue();
+      }
+      else
+      {
+         currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
+         time = currentTimeWithSwingSpeedUp.getDoubleValue();
+      }
+
+      PoseTrajectoryGenerator activeTrajectory;
+      if (time > swingDuration.getDoubleValue())
+         activeTrajectory = touchdownTrajectory;
+      else
+         activeTrajectory = blendedSwingTrajectory;
+
+      boolean footstepWasAdjusted = false;
+      if (replanTrajectory.getBooleanValue())
+      {
+         activeTrajectory.compute(time); // compute to get the current unadjusted position
+         activeTrajectory.getPosition(unadjustedPosition);
+         footstepWasAdjusted = true;
+      }
+
+      if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
+         fillAndInitializeTrajectories(false);
+      else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
+         fillAndInitializeBlendedTrajectory();
+      replanTrajectory.set(false);
+
+      activeTrajectory.compute(time);
+      activeTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      activeTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+
+      leapOfFaithModule.compute(time);
+      leapOfFaithModule.scaleFootWeight(unscaledLinearWeight, linearWeight);
+
+      if (footstepWasAdjusted)
+      {
+         adjustmentVelocityCorrection.set(desiredPosition);
+         adjustmentVelocityCorrection.sub(unadjustedPosition);
+         adjustmentVelocityCorrection.scale(1.0 / controlDT);
+         adjustmentVelocityCorrection.setZ(0.0);
+         adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getDoubleValue());
+
+         desiredLinearVelocity.add(adjustmentVelocityCorrection);
+      }
+      else
+      {
+         adjustmentVelocityCorrection.setToZero();
+      }
+
+      if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
+      {
+         desiredLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         desiredAngularVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+
+         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
+         desiredLinearAcceleration.scale(speedUpFactorSquared);
+         desiredAngularAcceleration.scale(speedUpFactorSquared);
+      }
+
+      yoDesiredSolePosition.setAndMatchFrame(desiredPosition);
+      yoDesiredSoleOrientation.setAndMatchFrame(desiredOrientation);
+      yoDesiredSoleLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoDesiredSoleAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+      currentTrajectoryWaypoint.set(swingTrajectory.getCurrentPositionWaypointIndex());
+
+      transformDesiredsFromSoleFrameToControlFrame();
+      secondaryJointWeightScale.set(computeSecondaryJointWeightScale(time));
+   }
+
+   public void setFootstep(Footstep footstep, double swingTime)
+   {
+      lastFootstepPose.setIncludingFrame(footstepPose);
+      if (lastFootstepPose.containsNaN())
+         lastFootstepPose.setToZero(soleFrame);
+
+      setFootstepInternal(footstep);
+      setFootstepDurationInternal(swingTime);
+   }
+
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * @param speedUpFactor
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(double speedUpFactor)
+   {
+      if (isSwingSpeedUpEnabled.getBooleanValue() && (speedUpFactor > 1.1 && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
+      {
+         speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
+
+         swingTimeSpeedUpFactor.set(speedUpFactor);
+         if (currentTimeWithSwingSpeedUp.isNaN())
+            currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
+      }
+
+      return computeSwingTimeRemaining();
+   }
+
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
+   {
+      replanTrajectory.set(true);
+      adjustedFootstep.getPose(adjustedFootstepPose);
+
+      setFootstepDurationInternal(swingTime);
+   }
+
+
+   public void getDesireds(FramePose3D desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
+   {
+      desiredPoseToPack.setIncludingFrame(this.desiredPose);
+      desiredAngularVelocityToPack.setIncludingFrame(this.desiredAngularVelocity);
+      desiredLinearVelocityToPack.setIncludingFrame(this.desiredLinearVelocity);
+   }
+
+
 
    private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
@@ -472,93 +619,6 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer.initialize();
    }
 
-   @Override
-   protected void computeAndPackTrajectory()
-   {
-      if (this.replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
-      {
-         if (!doContinuousReplanning.getBooleanValue())
-         {
-            //reinitializeTrajectory();
-            fillAndInitializeBlendedTrajectory();
-            replanTrajectory.set(false);
-         }
-      }
-
-      currentTime.set(getTimeInCurrentState());
-
-      double time;
-      if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
-      {
-         time = currentTime.getDoubleValue();
-      }
-      else
-      {
-         currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
-         time = currentTimeWithSwingSpeedUp.getDoubleValue();
-      }
-
-      PoseTrajectoryGenerator activeTrajectory;
-      if (time > swingDuration.getDoubleValue())
-         activeTrajectory = touchdownTrajectory;
-      else
-         activeTrajectory = blendedSwingTrajectory;
-
-      boolean footstepWasAdjusted = false;
-      if (replanTrajectory.getBooleanValue())
-      {
-         activeTrajectory.compute(time); // compute to get the current unadjusted position
-         activeTrajectory.getPosition(unadjustedPosition);
-         footstepWasAdjusted = true;
-      }
-
-      if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
-         fillAndInitializeTrajectories(false);
-      else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
-         fillAndInitializeBlendedTrajectory();
-      replanTrajectory.set(false);
-
-      activeTrajectory.compute(time);
-      activeTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      activeTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-
-      leapOfFaithModule.compute(time);
-      leapOfFaithModule.scaleFootWeight(unscaledLinearWeight, linearWeight);
-
-      if (footstepWasAdjusted)
-      {
-         adjustmentVelocityCorrection.set(desiredPosition);
-         adjustmentVelocityCorrection.sub(unadjustedPosition);
-         adjustmentVelocityCorrection.scale(1.0 / controlDT);
-         adjustmentVelocityCorrection.setZ(0.0);
-         adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getDoubleValue());
-
-         desiredLinearVelocity.add(adjustmentVelocityCorrection);
-      }
-      else
-      {
-         adjustmentVelocityCorrection.setToZero();
-      }
-
-      if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
-      {
-         desiredLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
-         desiredAngularVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
-
-         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
-         desiredLinearAcceleration.scale(speedUpFactorSquared);
-         desiredAngularAcceleration.scale(speedUpFactorSquared);
-      }
-
-      yoDesiredSolePosition.setAndMatchFrame(desiredPosition);
-      yoDesiredSoleOrientation.setAndMatchFrame(desiredOrientation);
-      yoDesiredSoleLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
-      yoDesiredSoleAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
-      currentTrajectoryWaypoint.set(swingTrajectory.getCurrentPositionWaypointIndex());
-
-      transformDesiredsFromSoleFrameToControlFrame();
-      secondaryJointWeightScale.set(computeScaleFactor(time));
-   }
 
    private void transformDesiredsFromSoleFrameToControlFrame()
    {
@@ -591,28 +651,6 @@ public class SwingState extends AbstractUnconstrainedState
       desiredAngularAcceleration.changeFrame(worldFrame);
    }
 
-   private double computeScaleFactor(double timeInState)
-   {
-      double phaseInSwingState = timeInState / swingDuration.getDoubleValue();
-
-      double scaleFactor;
-      if (timeInState < swingDuration.getDoubleValue())
-         scaleFactor = (maxScalingFactor - minScalingFactor) * (1.0 - Math.exp(-exponentialScalingRate * phaseInSwingState)) + minScalingFactor;
-      else
-         scaleFactor = (1.0 + 0.1 * (timeInState - swingDuration.getDoubleValue())) * maxScalingFactor;
-
-      return scaleFactor;
-   }
-
-   public void setFootstep(Footstep footstep, double swingTime)
-   {
-      lastFootstepPose.setIncludingFrame(footstepPose);
-      if (lastFootstepPose.containsNaN())
-         lastFootstepPose.setToZero(soleFrame);
-
-      setFootstepInternal(footstep);
-      setFootstepDurationInternal(swingTime);
-   }
 
    private void setFootstepDurationInternal(double swingTime)
    {
@@ -624,7 +662,7 @@ public class SwingState extends AbstractUnconstrainedState
    {
       footstep.getPose(footstepPose);
       footstepPose.changeFrame(worldFrame);
-      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getValue()); //getDoubleValue());
+      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getValue());
 
       if (footstep.getTrajectoryType() == null)
       {
@@ -670,23 +708,6 @@ public class SwingState extends AbstractUnconstrainedState
       return zDifference > minHeightDifferenceForObstacleClearance.getDoubleValue();
    }
 
-
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime, boolean continuousReplan)
-   {
-      replanTrajectory.set(true);
-      setFootstepDurationInternal(swingTime);
-      doContinuousReplanning.set(continuousReplan);
-
-      adjustedFootstep.getPose(adjustedFootstepPose);
-   }
-   
-   public void getDesireds(FramePose3D desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
-   {
-      desiredPoseToPack.setIncludingFrame(this.desiredPose);
-      desiredAngularVelocityToPack.setIncludingFrame(this.desiredAngularVelocity);
-      desiredLinearVelocityToPack.setIncludingFrame(this.desiredLinearVelocity);
-   }
-
    private double computeSwingTimeRemaining()
    {
       double swingDuration = this.swingDuration.getDoubleValue();
@@ -701,53 +722,17 @@ public class SwingState extends AbstractUnconstrainedState
       }
    }
 
-   /**
-    * Request the swing trajectory to speed up using the given speed up factor.
-    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
-    * @param speedUpFactor
-    * @return the current swing time remaining for the swing foot trajectory
-    */
-   public double requestSwingSpeedUp(double speedUpFactor)
+   private double computeSecondaryJointWeightScale(double timeInState)
    {
-      if (isSwingSpeedUpEnabled.getBooleanValue() && (speedUpFactor > 1.1 && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
-      {
-         speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
+      double phaseInSwingState = timeInState / swingDuration.getDoubleValue();
 
-         //         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, 0.7, maxSwingTimeSpeedUpFactor.getDoubleValue());
-         //         if (speedUpFactor < 1.0) speedUpFactor = 1.0 - 0.5 * (1.0 - speedUpFactor);
+      double scaleFactor;
+      if (timeInState < swingDuration.getDoubleValue())
+         scaleFactor = (maxScalingFactor - minScalingFactor) * (1.0 - Math.exp(-exponentialScalingRate * phaseInSwingState)) + minScalingFactor;
+      else
+         scaleFactor = (1.0 + 0.1 * (timeInState - swingDuration.getDoubleValue())) * maxScalingFactor;
 
-         swingTimeSpeedUpFactor.set(speedUpFactor);
-         if (currentTimeWithSwingSpeedUp.isNaN())
-            currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
-      }
-
-      return computeSwingTimeRemaining();
+      return scaleFactor;
    }
 
-   @Override
-   public void doTransitionIntoAction()
-   {
-      super.doTransitionIntoAction();
-      swingTimeSpeedUpFactor.set(1.0);
-      currentTimeWithSwingSpeedUp.set(Double.NaN);
-      replanTrajectory.set(false);
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-      super.doTransitionOutOfAction();
-
-      swingTimeSpeedUpFactor.set(Double.NaN);
-      currentTimeWithSwingSpeedUp.set(Double.NaN);
-
-      swingTrajectoryOptimizer.informDone();
-
-      adjustmentVelocityCorrection.setToZero();
-
-      yoDesiredSolePosition.setToNaN();
-      yoDesiredSoleOrientation.setToNaN();
-      yoDesiredSoleLinearVelocity.setToNaN();
-      yoDesiredSoleAngularVelocity.setToNaN();
-   }
 }
