@@ -9,7 +9,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.parameterGui.GuiParameter;
 
 public abstract class NumericTuner <T extends Number> extends HBox
 {
@@ -27,7 +28,7 @@ public abstract class NumericTuner <T extends Number> extends HBox
    private StackPane maxPane;
    private final NumericSpinner<T> max = createASpinner();
 
-   public NumericTuner(Parameter parameter)
+   public NumericTuner(GuiParameter parameter)
    {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
       loader.setRoot(this);
@@ -46,9 +47,9 @@ public abstract class NumericTuner <T extends Number> extends HBox
       maxPane.getChildren().add(max);
 
       NumericSpinner<T> spinner = createASpinner();
-      T initialValue = spinner.convertStringToNumber(parameter.getValue());
-      T initialMin = spinner.convertStringToNumber(parameter.getMin());
-      T initialMax = spinner.convertStringToNumber(parameter.getMax());
+      T initialValue = spinner.convertStringToNumber(parameter.getCurrentValue());
+      T initialMin = spinner.convertStringToNumber(parameter.getCurrentMin());
+      T initialMax = spinner.convertStringToNumber(parameter.getCurrentMax());
 
       if (!areBoundsConsistent(initialValue, initialMin, initialMax))
       {
@@ -84,9 +85,33 @@ public abstract class NumericTuner <T extends Number> extends HBox
          });
       });
 
-      value.setValue(initialValue);
-      min.setValue(initialMin);
-      max.setValue(initialMax);
+      parameter.addChangedListener(p -> {
+         // This listener will be triggered by an external change and is called from the animation timer.
+         T newValue = value.convertStringToNumber(parameter.getCurrentValue());
+         T newMin = min.convertStringToNumber(parameter.getCurrentMin());
+         T newMax = max.convertStringToNumber(parameter.getCurrentMax());
+
+         if (!areBoundsConsistent(newValue, newMin, newMax))
+         {
+            PrintTools.warn(parameter.getName() + ": Parameter bound was changed externally to be inconsistent.");
+            T adjustedMin = getSmallerNumber(newMin, newValue);
+            T adjustedMax = getLargerNumber(newMax, newValue);
+            Platform.runLater(() -> set(newValue, adjustedMin, adjustedMax));
+         }
+         else
+         {
+            set(newValue, newMin, newMax);
+         }
+      });
+
+      set(initialValue, initialMin, initialMax);
+   }
+
+   private void set(T newValue, T newMin, T newMax)
+   {
+      value.setValue(newValue);
+      min.setValue(newMin);
+      max.setValue(newMax);
    }
 
    public abstract NumericSpinner<T> createASpinner();

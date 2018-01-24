@@ -1,10 +1,10 @@
 package us.ihmc.robotics.parameterGui.tuning;
 
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.robotics.parameterGui.GuiParameter;
 
 public class IntegerTuner extends NumericTuner<Integer>
 {
-   public IntegerTuner(Parameter parameter)
+   public IntegerTuner(GuiParameter parameter)
    {
       super(parameter);
    }

@@ -8,7 +8,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
-import us.ihmc.yoVariables.parameters.xml.Parameter;
+import us.ihmc.robotics.parameterGui.GuiParameter;
 
 public class TuningBoxManager
 {
@@ -20,7 +20,7 @@ public class TuningBoxManager
       this.tuningBox = tuningBox;
    }
 
-   public void handleNewParameter(Parameter parameter)
+   public void handleNewParameter(GuiParameter parameter)
    {
       String parameterName = parameter.getName();
       if (parametersBeingTuned.contains(parameterName))
