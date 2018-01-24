@@ -272,6 +272,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       lastFootstepPose.setToNaN();
       footstepPose.setToNaN();
+      adjustedFootstepPose.setToNaN();
 
       currentTrajectoryWaypoint = new YoInteger(namePrefix + "CurrentTrajectoryWaypoint", registry);
       yoDesiredSolePosition = new YoFramePoint(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
@@ -406,9 +407,14 @@ public class SwingState extends AbstractUnconstrainedState
       // TODO: revisit the touchdown velocity and accelerations
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, yoTouchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
-
-      swingTrajectory.initialize();
       touchdownTrajectory.initialize();
+
+      fillAndInitializeBlendedTrajectory();
+   }
+
+   private void fillAndInitializeBlendedTrajectory()
+   {
+      double swingDuration = this.swingDuration.getDoubleValue();
       blendedSwingTrajectory.clear();
       if (swingTrajectoryBlendDuration > 0.0)
       {
@@ -466,15 +472,13 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer.initialize();
    }
 
-   protected void reinitializeTrajectory(boolean initializeOptimizer)
+   private void reinitializeTrajectory()
    {
       // Can not yet replan if trajectory type is WAYPOINTS
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
-      {
          return;
-      }
 
-      fillAndInitializeTrajectories(initializeOptimizer);
+      fillAndInitializeTrajectories(false);
    }
 
    @Override
@@ -484,7 +488,8 @@ public class SwingState extends AbstractUnconstrainedState
       {
          if (!doContinuousReplanning.getBooleanValue())
          {
-            reinitializeTrajectory(true);
+            //reinitializeTrajectory();
+            fillAndInitializeBlendedTrajectory();
             replanTrajectory.set(false);
          }
       }
@@ -517,7 +522,8 @@ public class SwingState extends AbstractUnconstrainedState
       {
          activeTrajectory.compute(time);
          activeTrajectory.getPosition(unadjustedPosition);
-         reinitializeTrajectory(true);
+         //reinitializeTrajectory();
+         fillAndInitializeBlendedTrajectory();
 
          footstepWasAdjusted = true;
          replanTrajectory.set(false);
@@ -526,7 +532,7 @@ public class SwingState extends AbstractUnconstrainedState
       {
          if (swingTrajectoryOptimizer.doOptimizationUpdate())
          {
-            reinitializeTrajectory(false);
+            reinitializeTrajectory();
          }
       }
 
@@ -618,13 +624,17 @@ public class SwingState extends AbstractUnconstrainedState
 
    public void setFootstep(Footstep footstep, double swingTime)
    {
-      swingDuration.set(swingTime);
-      maxSwingTimeSpeedUpFactor.set(Math.max(swingTime / minSwingTimeForDisturbanceRecovery.getDoubleValue(), 1.0));
-
-      // FIXME this probably should not be reset every time for replanning
       lastFootstepPose.setIncludingFrame(footstepPose);
       if (lastFootstepPose.containsNaN())
          lastFootstepPose.setToZero(soleFrame);
+
+      setFootstepInternal(footstep, swingTime);
+   }
+
+   private void setFootstepInternal(Footstep footstep, double swingTime)
+   {
+      swingDuration.set(swingTime);
+      maxSwingTimeSpeedUpFactor.set(Math.max(swingTime / minSwingTimeForDisturbanceRecovery.getDoubleValue(), 1.0));
 
       footstep.getPose(footstepPose);
       footstepPose.changeFrame(worldFrame);
@@ -680,7 +690,7 @@ public class SwingState extends AbstractUnconstrainedState
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, Footstep originalFootstep, double swingTime, boolean continuousReplan)
    {
       replanTrajectory.set(true);
-      setFootstep(originalFootstep, swingTime);
+      setFootstepInternal(originalFootstep, swingTime);
       doContinuousReplanning.set(continuousReplan);
 
       adjustedFootstep.getPose(adjustedFootstepPose);
