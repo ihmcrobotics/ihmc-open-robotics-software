@@ -25,7 +25,10 @@ public class VisibilityGraphsIOTools
 {
    private static final boolean DEBUG = true;
 
-   public static final String DATA_FOLDER_NAME = "us/ihmc/pathPlanning/visibilityGraphs/data";
+   public static final String TEST_DATA_URL = "unitTestData/testable";
+   public static final String IN_DEVELOLOPMENT_TEST_DATA_URL = "unitTestData/inDevelopment";
+   public static final String PLANAR_REGION_DATA_URL = "planarRegionData";
+
    private static final String VIZ_GRAPHS_DATA_FOLDER_SUFFIX = "VizGraphs";
    public static final String INPUTS_PARAMETERS_FILENAME = "VizGraphsInputs.txt";
    private static final String PLANAR_REGION_DIRECTORY_KEYWORD = "PlanarRegion";
@@ -196,8 +199,8 @@ public class VisibilityGraphsIOTools
    public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets(Class<?> loadingClass)
    {
       ArrayList<Path> relativePaths = new ArrayList<>();
-      PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, DATA_FOLDER_NAME)
-                           .forEach(entry -> relativePaths.add(Paths.get(DATA_FOLDER_NAME, entry)));
+      PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, TEST_DATA_URL)
+                           .forEach(entry -> relativePaths.add(Paths.get(TEST_DATA_URL, entry)));
 
       return relativePaths.stream().map(VisibilityGraphsIOTools::loadDataset).collect(Collectors.toList());
    }
