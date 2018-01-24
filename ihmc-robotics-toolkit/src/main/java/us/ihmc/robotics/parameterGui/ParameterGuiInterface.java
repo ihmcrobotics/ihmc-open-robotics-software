@@ -21,7 +21,7 @@ public interface ParameterGuiInterface
    /**
     * This will be called periodically by the GUI if the user modifies any parameter. The list will
     * contain copies of all parameters that were changed by the user. The GUI will not hold on to a
-    * reference of the changed parameters so they are safe so modify.
+    * reference of the changed parameters so they are safe to modify.
     */
    public void submitChangedParameters(List<GuiParameter> changedParameters);
 
