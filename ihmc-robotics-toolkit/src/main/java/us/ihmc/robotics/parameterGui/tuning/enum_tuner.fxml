@@ -11,6 +11,6 @@
 	xmlns:fx="http://javafx.com/fxml">
 	<children>
 		<Text text="Value" />
-		<TextField fx:id="enumString" />
+		<StackPane fx:id="tuningPane" />
 	</children>
 </fx:root>

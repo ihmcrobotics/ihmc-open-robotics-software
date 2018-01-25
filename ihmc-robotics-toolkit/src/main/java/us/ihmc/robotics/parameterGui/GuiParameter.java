@@ -6,6 +6,7 @@ import javafx.beans.property.StringProperty;
 public class GuiParameter extends GuiElement
 {
    private final String type;
+   private final String[] valueOptions;
 
    private final StringProperty value = new SimpleStringProperty();
    private final StringProperty min = new SimpleStringProperty();
@@ -14,8 +15,14 @@ public class GuiParameter extends GuiElement
 
    public GuiParameter(String name, String type, GuiRegistry parent)
    {
+      this(name, type, null, parent);
+   }
+
+   public GuiParameter(String name, String type, String[] valueOptions, GuiRegistry parent)
+   {
       super(name, parent);
       this.type = type;
+      this.valueOptions = valueOptions;
    }
 
    public void setValue(String value)
@@ -41,6 +48,11 @@ public class GuiParameter extends GuiElement
    public String getType()
    {
       return type;
+   }
+
+   public String[] getValueOptions()
+   {
+      return valueOptions;
    }
 
    public String getCurrentValue()
@@ -73,7 +85,7 @@ public class GuiParameter extends GuiElement
 
    public GuiParameter createCopy()
    {
-      GuiParameter copy = new GuiParameter(getName(), getType(), getParent());
+      GuiParameter copy = new GuiParameter(getName(), getType(), getValueOptions(), getParent());
       copy.set(this);
       return copy;
    }
