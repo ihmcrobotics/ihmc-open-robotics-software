@@ -462,7 +462,7 @@ public class ICPOptimizationSolutionHandlerTest
          return false;
       }
 
-      @Override public boolean useStepAdjustment()
+      @Override public boolean allowStepAdjustment()
       {
          return true;
       }

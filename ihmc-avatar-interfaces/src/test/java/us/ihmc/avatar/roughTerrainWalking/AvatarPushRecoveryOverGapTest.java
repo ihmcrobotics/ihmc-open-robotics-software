@@ -177,15 +177,15 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
       Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation, true));
 
       location = new Point3D(0.75, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation, true));
 
       location = new Point3D(1.05, 0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation, true));
       location = new Point3D(1.05, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation, true));
 
       return message;
    }
