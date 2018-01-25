@@ -11,14 +11,15 @@ public class ParameterTreeCell extends TreeCell<ParameterTreeValue>
    protected void updateItem(ParameterTreeValue value, boolean empty)
    {
       super.updateItem(value, empty);
+      setText(null);
 
       if (empty || value == null)
       {
-         setText(null);
+         setGraphic(null);
       }
       else
       {
-         setText(value.getName());
+         setGraphic(value.getOrCreateNode());
          pseudoClassStateChanged(isRegistry, value.isRegistry());
       }
    }
