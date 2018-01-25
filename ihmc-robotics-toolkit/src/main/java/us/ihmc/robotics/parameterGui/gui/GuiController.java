@@ -84,6 +84,7 @@ public class GuiController
    protected void handleNamespaceButton(ActionEvent event)
    {
       updateTree();
+      searchFieldNamespaces.setDisable(hideNamespaces.isSelected());
    }
 
    private void updateTree()

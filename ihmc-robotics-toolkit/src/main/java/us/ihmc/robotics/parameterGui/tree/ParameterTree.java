@@ -17,6 +17,11 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
 
    public void setRegistries(GuiRegistry registry, boolean hideNamespaces, String regexParameters, String regexNamespaces)
    {
+      if (registry == null)
+      {
+         return;
+      }
+
       ParameterTreeItem root = new ParameterTreeItem(null);
       root.setExpanded(true);
       setShowRoot(false);
