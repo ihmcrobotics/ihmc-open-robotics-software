@@ -6,8 +6,8 @@ public class IntegerSpinner extends NumericSpinner<Integer>
 {
    public IntegerSpinner()
    {
-         super(new IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, 0));
-      }
+      super(new IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, 0));
+   }
 
    @Override
    public void setMaxValue(Integer maxValue)
@@ -33,5 +33,11 @@ public class IntegerSpinner extends NumericSpinner<Integer>
    public String convertNumberToString(Integer number)
    {
       return Integer.toString(number);
+   }
+
+   @Override
+   public String[] getSpecialStringOptions()
+   {
+      return new String[] {};
    }
 }
