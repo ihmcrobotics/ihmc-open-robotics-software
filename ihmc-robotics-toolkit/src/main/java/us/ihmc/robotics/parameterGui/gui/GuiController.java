@@ -41,7 +41,6 @@ public class GuiController
 
    private final HashMap<String, GuiParameter> parameterMap = new HashMap<>();
    private ChangeCollector changeCollector;
-   private GuiRegistry rootRegistry;
    private TuningBoxManager tuningBoxManager;
 
    public void initialize()
@@ -89,7 +88,7 @@ public class GuiController
 
    private void updateTree()
    {
-      tree.setRegistries(rootRegistry, hideNamespaces.isSelected(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
+      tree.filterRegistries(hideNamespaces.isSelected(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
    }
 
    public void addInputNode(Node node)
@@ -102,13 +101,13 @@ public class GuiController
 
    public void setRegistry(GuiRegistry fullRegistry)
    {
-      rootRegistry = fullRegistry;
+      tree.setRegistries(fullRegistry);
       updateTree();
       tuningBoxManager.clearAllParameters();
 
       changeCollector = new ChangeCollector();
       parameterMap.clear();
-      List<GuiParameter> allParameters = rootRegistry.getAllParameters();
+      List<GuiParameter> allParameters = fullRegistry.getAllParameters();
       allParameters.stream().forEach(parameter -> {
          parameter.addChangedListener(changeCollector);
          parameterMap.put(parameter.getUniqueName(), parameter);
