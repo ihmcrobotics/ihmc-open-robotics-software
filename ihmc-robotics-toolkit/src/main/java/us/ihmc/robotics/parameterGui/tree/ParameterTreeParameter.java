@@ -1,9 +1,6 @@
 package us.ihmc.robotics.parameterGui.tree;
 
-import java.io.IOException;
-
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -49,26 +46,17 @@ public class ParameterTreeParameter implements ParameterTreeValue
 
    private class ParameterNode extends HBox
    {
-      private static final String FXML_PATH = "parameter_node.fxml";
-
-      @FXML
-      private Text name;
-      @FXML
-      private Label value;
+      private final Text name = new Text();
+      private final Label value = new Label();
 
       public ParameterNode(GuiParameter parameter)
       {
-         FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-         loader.setRoot(this);
-         loader.setController(this);
-         try
-         {
-            loader.load();
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
+         // Creating this using fxml causes crazy slow down since it is done a lot.
+         value.setPrefWidth(80.0);
+         setSpacing(10.0);
+         setAlignment(Pos.CENTER_LEFT);
+         getChildren().add(value);
+         getChildren().add(name);
 
          parameter.addChangedListener(p -> value.setText(parameter.getCurrentValue()));
          name.setText(parameter.getName());
