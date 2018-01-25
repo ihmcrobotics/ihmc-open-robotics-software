@@ -49,6 +49,8 @@ public class Footstep implements Settable<Footstep>
    private double swingTrajectoryBlendDuration = 0.0;
    private boolean trustHeight = true;
 
+   private boolean adjustable = false;
+
    private final FramePose3D tempPose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
@@ -61,7 +63,12 @@ public class Footstep implements Settable<Footstep>
 
    public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight)
    {
-      this(robotSide, footstepPose, trustHeight, null);
+      this(robotSide, footstepPose, trustHeight, false, null);
+   }
+
+   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean adjustable)
+   {
+      this(robotSide, footstepPose, trustHeight, adjustable, null);
    }
 
    public Footstep(RobotSide robotSide)
@@ -76,14 +83,20 @@ public class Footstep implements Settable<Footstep>
 
    public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints)
    {
-      this(robotSide, footstepPose, trustHeight, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
+      this(robotSide, footstepPose, trustHeight, false, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints, TrajectoryType trajectoryType,
+   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean adjustable, List<Point2D> predictedContactPoints)
+   {
+      this(robotSide, footstepPose, trustHeight, adjustable, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
+   }
+
+   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean adjustable, List<Point2D> predictedContactPoints, TrajectoryType trajectoryType,
                    double swingHeight)
    {
       this.robotSide = robotSide;
       this.trustHeight = trustHeight;
+      this.adjustable = adjustable;
       this.footstepPose.setIncludingFrame(footstepPose);
       setPredictedContactPoints(predictedContactPoints);
       this.trajectoryType = trajectoryType;
@@ -97,6 +110,7 @@ public class Footstep implements Settable<Footstep>
       this.footstepType = other.footstepType;
       this.swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       this.trustHeight = other.trustHeight;
+      this.adjustable = other.adjustable;
       this.scriptedFootstep = other.scriptedFootstep;
       this.trajectoryType = other.trajectoryType;
       this.swingHeight = other.swingHeight;
@@ -131,6 +145,7 @@ public class Footstep implements Settable<Footstep>
       this.swingTrajectoryBlendDuration = command.getSwingTrajectoryBlendDuration();
       this.trajectoryType = command.getTrajectoryType();
       this.swingHeight = command.getSwingHeight();
+      this.adjustable = command.getIsAdjustable();
       this.trustHeight = trustHeight;
 
       this.footstepPose.setIncludingFrame(command.getPosition(), command.getOrientation());
@@ -179,6 +194,7 @@ public class Footstep implements Settable<Footstep>
       swingTrajectory.clear();
       swingTrajectoryBlendDuration = 0.0;
       trustHeight = true;
+      adjustable = false;
       scriptedFootstep = false;
       trajectoryType = TrajectoryType.DEFAULT;
       swingHeight = 0.0;
@@ -243,6 +259,10 @@ public class Footstep implements Settable<Footstep>
       this.trustHeight = trustHeight;
    }
 
+   public void setAdjustable(boolean adjustable)
+   {
+      this.adjustable = adjustable;
+   }
    public void setPredictedContactPoints(List<? extends Point2DReadOnly> contactPointList)
    {
       predictedContactPoints.clear();
@@ -326,6 +346,11 @@ public class Footstep implements Settable<Footstep>
       return trustHeight;
    }
 
+   public boolean getAdjustable()
+   {
+      return adjustable;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -398,6 +423,7 @@ public class Footstep implements Settable<Footstep>
       boolean arePosesEqual = footstepPose.epsilonEquals(otherFootstep.footstepPose, epsilon);
       boolean sameRobotSide = robotSide == otherFootstep.robotSide;
       boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
+      boolean isAdjustableTheSame = adjustable = otherFootstep.adjustable;
 
       boolean sameWaypoints = customPositionWaypoints.size() == otherFootstep.customPositionWaypoints.size();
       if (sameWaypoints)
@@ -412,7 +438,7 @@ public class Footstep implements Settable<Footstep>
 
       boolean sameBlendDuration = MathTools.epsilonEquals(swingTrajectoryBlendDuration, otherFootstep.swingTrajectoryBlendDuration, epsilon);
 
-      return arePosesEqual && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameBlendDuration;
+      return arePosesEqual && sameRobotSide && isTrustHeightTheSame && isAdjustableTheSame && sameWaypoints && sameBlendDuration;
    }
 
    @Override
@@ -424,6 +450,7 @@ public class Footstep implements Settable<Footstep>
       builder.append(" Position: " + footstepPose.getPosition() + "\n");
       builder.append(" Orientation: " + footstepPose.getOrientation() + "\n");
       builder.append(" Trust Height: " + trustHeight + "\n");
+      builder.append(" Adjustable: " + adjustable + "\n");
       return builder.toString();
    }
 
