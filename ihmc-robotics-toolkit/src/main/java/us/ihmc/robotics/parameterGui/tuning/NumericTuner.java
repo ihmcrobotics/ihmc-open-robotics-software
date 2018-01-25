@@ -44,23 +44,15 @@ public abstract class NumericTuner <T extends Number> extends HBox
       maxPane.getChildren().add(max);
 
       value.addListener((observable, oldValue, newValue) -> {
-         Platform.runLater(() -> {
-            parameter.setValue(value.getValueAsText());
-         });
+         Platform.runLater(() -> parameter.setValue(value.getValueAsText()));
       });
 
       min.addListener((observable, oldValue, newValue) -> {
-         Platform.runLater(() -> {
-            max.setMinValue(min.getValue());
-            parameter.setMin(min.getValueAsText());
-         });
+         Platform.runLater(() -> parameter.setMin(min.getValueAsText()));
       });
 
       max.addListener((observable, oldValue, newValue) -> {
-         Platform.runLater(() -> {
-            min.setMaxValue(max.getValue());
-            parameter.setMax(max.getValueAsText());
-         });
+         Platform.runLater(() -> parameter.setMax(max.getValueAsText()));
       });
 
       parameter.addChangedListener(p -> {
