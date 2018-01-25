@@ -10,20 +10,8 @@ public class DoubleTuner extends NumericTuner<Double>
    }
 
    @Override
-   public NumericSpinner<Double> createASpinner()
+   public NumericSpinner<Double> createSpinner()
    {
       return new DoubleSpinner();
-   }
-
-   @Override
-   public Double getSmallerNumber(Double a, Double b)
-   {
-      return Math.min(a, b);
-   }
-
-   @Override
-   public Double getLargerNumber(Double a, Double b)
-   {
-      return Math.max(a, b);
    }
 }
