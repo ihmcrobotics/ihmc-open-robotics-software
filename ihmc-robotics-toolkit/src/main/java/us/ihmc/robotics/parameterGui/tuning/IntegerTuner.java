@@ -10,20 +10,8 @@ public class IntegerTuner extends NumericTuner<Integer>
    }
 
    @Override
-   public NumericSpinner<Integer> createASpinner()
+   public NumericSpinner<Integer> createSpinner()
    {
       return new IntegerSpinner();
-   }
-
-   @Override
-   public Integer getSmallerNumber(Integer a, Integer b)
-   {
-      return Math.min(a, b);
-   }
-
-   @Override
-   public Integer getLargerNumber(Integer a, Integer b)
-   {
-      return Math.max(a, b);
    }
 }

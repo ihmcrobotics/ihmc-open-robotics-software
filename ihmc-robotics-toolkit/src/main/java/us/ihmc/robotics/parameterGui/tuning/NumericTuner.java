@@ -15,15 +15,15 @@ public abstract class NumericTuner <T extends Number> extends HBox
 
    @FXML
    private StackPane valuePane;
-   private final NumericSpinner<T> value = createASpinner();
+   private final NumericSpinner<T> value = createSpinner();
 
    @FXML
    private StackPane minPane;
-   private final NumericSpinner<T> min = createASpinner();
+   private final NumericSpinner<T> min = createSpinner();
 
    @FXML
    private StackPane maxPane;
-   private final NumericSpinner<T> max = createASpinner();
+   private final NumericSpinner<T> max = createSpinner();
 
    public NumericTuner(GuiParameter parameter)
    {
@@ -75,9 +75,5 @@ public abstract class NumericTuner <T extends Number> extends HBox
       numberToPack.setValue(newValue);
    }
 
-   public abstract NumericSpinner<T> createASpinner();
-
-   public abstract T getSmallerNumber(T a, T b);
-
-   public abstract T getLargerNumber(T a, T b);
+   public abstract NumericSpinner<T> createSpinner();
 }
