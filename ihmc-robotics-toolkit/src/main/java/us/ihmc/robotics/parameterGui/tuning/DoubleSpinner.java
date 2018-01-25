@@ -6,7 +6,7 @@ public class DoubleSpinner extends NumericSpinner<Double>
 {
    public DoubleSpinner()
    {
-      super(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
+      super(new DoubleSpinnerValueFactory(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0, 0.1));
    }
 
    @Override
@@ -35,5 +35,11 @@ public class DoubleSpinner extends NumericSpinner<Double>
    public String convertNumberToString(Double number)
    {
       return Double.toString(number);
+   }
+
+   @Override
+   public String[] getSpecialStringOptions()
+   {
+      return new String[] {convertNumberToString(Double.POSITIVE_INFINITY), convertNumberToString(Double.NEGATIVE_INFINITY)};
    }
 }

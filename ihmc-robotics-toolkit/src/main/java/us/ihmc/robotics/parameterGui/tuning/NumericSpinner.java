@@ -2,7 +2,10 @@ package us.ihmc.robotics.parameterGui.tuning;
 
 import java.util.function.UnaryOperator;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextFormatter;
@@ -10,7 +13,7 @@ import javafx.scene.control.TextFormatter.Change;
 import javafx.util.StringConverter;
 import us.ihmc.robotics.parameterGui.ParameterTuningTools;
 
-public abstract class NumericSpinner <T extends Number> extends Spinner<T>
+public abstract class NumericSpinner<T extends Number> extends Spinner<T>
 {
    public NumericSpinner(SpinnerValueFactory<T> valueFactory)
    {
@@ -27,16 +30,20 @@ public abstract class NumericSpinner <T extends Number> extends Spinner<T>
             String newText = change.getControlNewText();
             if (newText.isEmpty() || newText.equals("-"))
             {
+               // So the user can delete all text or start with a minus.
                return change;
             }
             if (isValidString(newText))
             {
+               // If the text parses to a number it id fine.
                return change;
             }
-            else
+            if (change.isDeleted())
             {
-               return null;
+               // In case the textbox contained a special string such as "Infinity" the delete action should clear the editor.
+               Platform.runLater(() -> getEditor().setText(""));
             }
+            return null;
          }
       };
       getEditor().setTextFormatter(new TextFormatter<>(filter));
@@ -59,6 +66,7 @@ public abstract class NumericSpinner <T extends Number> extends Spinner<T>
             }
             catch (Exception e)
             {
+               // If the text does not parse (e.g. it is empty or just a minus sign) remember the last value.
                return getValue();
             }
          }
@@ -69,6 +77,18 @@ public abstract class NumericSpinner <T extends Number> extends Spinner<T>
          T newNumber = getValueFactory().getConverter().fromString(getEditor().getText());
          setValue(newNumber);
       });
+
+      // Add options for strings that are not allowed to type such as "Infinity" for Double.
+      ContextMenu contextMenu = new ContextMenu();
+      String[] specialStringOptions = getSpecialStringOptions();
+      for (String option : specialStringOptions)
+      {
+         MenuItem menuItem = new MenuItem(option);
+         T number = getValueFactory().getConverter().fromString(option);
+         menuItem.setOnAction(actionEvent -> setValue(number));
+         contextMenu.getItems().add(menuItem);
+      }
+      getEditor().setContextMenu(contextMenu);
    }
 
    public void setValue(T newValue)
@@ -112,4 +132,6 @@ public abstract class NumericSpinner <T extends Number> extends Spinner<T>
    public abstract T convertStringToNumber(String numberString);
 
    public abstract String convertNumberToString(T number);
+
+   public abstract String[] getSpecialStringOptions();
 }
