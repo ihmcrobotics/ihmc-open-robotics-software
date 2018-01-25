@@ -1,12 +1,10 @@
 package us.ihmc.robotics.parameterGui.tuning;
 
-import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-
 public class DoubleSpinner extends NumericSpinner<Double>
 {
    public DoubleSpinner()
    {
-      super(new DoubleSpinnerValueFactory(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0, 0.1));
+      super(new DoubleSpinnerValueFactory(0.1));
    }
 
    @Override
@@ -28,6 +26,10 @@ public class DoubleSpinner extends NumericSpinner<Double>
    @Override
    public Double convertStringToNumber(String numberString)
    {
+      if (numberString.endsWith("e") || numberString.endsWith("E"))
+      {
+         return Double.parseDouble(numberString.substring(0, numberString.length() - 1));
+      }
       return Double.parseDouble(numberString);
    }
 
