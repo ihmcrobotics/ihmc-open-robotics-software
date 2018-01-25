@@ -265,6 +265,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(orientation);
       footstepData.setRobotSide(robotSide);
+      footstepData.setIsAdjustable(true);
 
       return footstepData;
    }

@@ -104,6 +104,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0, false);
    }
 
+   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, boolean adjustable)
+   {
+      this(robotSide, location, orientation, null, TrajectoryType.DEFAULT, 0.0, adjustable);
+   }
+
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
    {
       this(robotSide, location, orientation, null, trajectoryType, swingHeight, false);
