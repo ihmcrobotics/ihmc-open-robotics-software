@@ -1,7 +1,9 @@
 package us.ihmc.robotics.parameterGui.tuning;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -14,6 +16,7 @@ public class TuningBoxManager
 {
    private final VBox tuningBox;
    private final List<String> parametersBeingTuned = new ArrayList<>();
+   private final Map<String, Tuner> tunerMap = new HashMap<>();
 
    public TuningBoxManager(VBox tuningBox)
    {
@@ -33,10 +36,17 @@ public class TuningBoxManager
          return;
       }
 
+      Tuner tuner = tunerMap.get(parameter.getUniqueName());
+      if (tuner == null)
+      {
+         tuner = new Tuner(parameter);
+         tunerMap.put(parameter.getUniqueName(), tuner);
+      }
+      Tuner finalTuner = tuner;
+
       parametersBeingTuned.add(parameterName);
-      Tuner tuner = new Tuner(parameter);
       EventHandler<ActionEvent> closeHandler = event -> {
-         tuningBox.getChildren().remove(tuner);
+         tuningBox.getChildren().remove(finalTuner);
          parametersBeingTuned.remove(parameterName);
       };
       tuner.setCloseHandler(closeHandler);
@@ -47,5 +57,6 @@ public class TuningBoxManager
    {
       tuningBox.getChildren().clear();
       parametersBeingTuned.clear();
+      tunerMap.clear();
    }
 }
