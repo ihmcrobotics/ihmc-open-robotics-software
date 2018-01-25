@@ -51,6 +51,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "Contains information on how high the robot should swing its foot. This affects trajectory types DEFAULT and OBSTACLE_CLEARANCE."
          + "If a value smaller then the minumal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.")
    public double swingHeight = 0.0;
+   @RosExportedField(documentation = "Contains information on whether the robot can automatically adjust its footstep to retain balance.")
+   public boolean adjustable = false;
    @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
          + "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
          + "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
@@ -99,16 +101,27 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
    {
-      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
+      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0, false);
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
    {
-      this(robotSide, location, orientation, null, trajectoryType, swingHeight);
+      this(robotSide, location, orientation, null, trajectoryType, swingHeight, false);
+   }
+
+   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight, boolean adjustable)
+   {
+      this(robotSide, location, orientation, null, trajectoryType, swingHeight, adjustable);
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
                               TrajectoryType trajectoryType, double swingHeight)
+   {
+      this(robotSide, location, orientation, predictedContactPoints, trajectoryType, swingHeight, false);
+   }
+
+   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
+                              TrajectoryType trajectoryType, double swingHeight, boolean adjustable)
    {
       this.robotSide = robotSide;
       this.location = location;
@@ -119,6 +132,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          this.predictedContactPoints = predictedContactPoints;
       this.trajectoryType = trajectoryType;
       this.swingHeight = swingHeight;
+      this.adjustable = adjustable;
    }
 
    public FootstepDataMessage(FootstepDataMessage footstepData)
@@ -142,6 +156,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
       this.trajectoryType = footstepData.trajectoryType;
       this.swingHeight = footstepData.swingHeight;
+      this.adjustable = footstepData.adjustable;
       this.swingTrajectoryBlendDuration = footstepData.swingTrajectoryBlendDuration;
 
       if (footstepData.positionWaypoints != null)
@@ -197,6 +212,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
       trajectoryType = footstep.getTrajectoryType();
       swingHeight = footstep.getSwingHeight();
+      adjustable = footstep.getAdjustable();
       swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
 
       if (footstep.getCustomPositionWaypoints().size() != 0)
@@ -246,6 +262,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return swingHeight;
    }
 
+   public boolean getIsAdjustable()
+   {
+      return adjustable;
+   }
+
    public double getSwingTrajectoryBlendDuration()
    {
       return swingTrajectoryBlendDuration;
@@ -273,6 +294,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
+   }
+
+   public void setIsAdjustable(boolean isAdjustable)
+   {
+      this.adjustable = adjustable;
    }
 
    public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)
@@ -518,6 +544,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.trajectoryType = trajectoryTypes[randomOrdinal];
       this.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.05);
+      this.adjustable = RandomNumbers.nextBoolean(random, 0.5);
 
       this.swingDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
       this.transferDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
