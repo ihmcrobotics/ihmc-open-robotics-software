@@ -16,12 +16,6 @@ public class DoubleTuner extends NumericTuner<Double>
    }
 
    @Override
-   public boolean areBoundsConsistent(Double value, Double min, Double max)
-   {
-      return value >= min && value <= max;
-   }
-
-   @Override
    public Double getSmallerNumber(Double a, Double b)
    {
       return Math.min(a, b);
