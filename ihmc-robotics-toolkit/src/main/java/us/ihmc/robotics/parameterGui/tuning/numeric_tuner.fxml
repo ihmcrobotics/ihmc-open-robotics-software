@@ -14,6 +14,7 @@
 		<StackPane fx:id="valuePane" prefWidth="120" />
 		<Text text="Min" />
 		<StackPane fx:id="minPane" prefWidth="120" />
+		<StackPane fx:id="sliderPane" prefWidth="200"/>
 		<Text text="Max" />
 		<StackPane fx:id="maxPane" prefWidth="120" />
 	</children>
