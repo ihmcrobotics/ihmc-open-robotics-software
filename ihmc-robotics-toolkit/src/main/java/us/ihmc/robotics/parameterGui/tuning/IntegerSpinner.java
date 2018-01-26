@@ -26,6 +26,10 @@ public class IntegerSpinner extends NumericSpinner<Integer>
    @Override
    public Integer convertStringToNumber(String numberString)
    {
+      if (numberString == null)
+      {
+         return 0;
+      }
       return Integer.parseInt(numberString);
    }
 
