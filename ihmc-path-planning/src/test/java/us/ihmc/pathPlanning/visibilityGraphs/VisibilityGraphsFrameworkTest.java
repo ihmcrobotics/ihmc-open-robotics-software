@@ -150,7 +150,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsWithoutOcclusion() throws Exception
    {
       if (VISUALIZE)
