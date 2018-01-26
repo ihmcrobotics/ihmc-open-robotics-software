@@ -400,4 +400,15 @@ public class PlanarRegionFileTools
          throw new RuntimeException(e.getMessage());
       }
    }
+
+   public static URL getResourceURL(String resourceName)
+   {
+      return Thread.currentThread().getContextClassLoader().getResource(resourceName);
+   }
+
+   public static File getResourceFile(String resourceName)
+   {
+      URL url = getResourceURL(resourceName);
+      return new File(url.getFile());
+   }
 }
