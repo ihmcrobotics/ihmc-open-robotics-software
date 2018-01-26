@@ -57,6 +57,8 @@ public class ParameterTreeParameter implements ParameterTreeValue
          setAlignment(Pos.CENTER_LEFT);
          getChildren().add(value);
          getChildren().add(name);
+         value.setId("parameter-value-in-tree-view");
+         name.setId("parameter-name-in-tree-view");
 
          parameter.addChangedListener(p -> value.setText(parameter.getCurrentValue()));
          name.setText(parameter.getName());
