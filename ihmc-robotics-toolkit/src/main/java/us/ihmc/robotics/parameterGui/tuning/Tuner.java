@@ -41,6 +41,9 @@ public class Tuner extends VBox
          e.printStackTrace();
       }
 
+      setId("tuner-window");
+      name.setId("parameter-name-in-tuner");
+
       name.setText(parameter.getName());
       description.setText(parameter.getCurrentDescription());
       ParameterTuningTools.addThreadSafeListeners(description, () -> parameter.setDescription(description.getText()));

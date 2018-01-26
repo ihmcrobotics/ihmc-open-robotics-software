@@ -18,11 +18,7 @@
 			<children>
 				<VBox prefWidth="600.0" spacing="10.0" HBox.hgrow="ALWAYS">
 					<children>
-						<Label text="Parameters">
-							<font>
-								<Font size="20.0" />
-							</font>
-						</Label>
+						<Label text="Parameters" styleClass="heading" />
 						<HBox spacing="10.0" alignment="CENTER_LEFT">
 							<children>
 								<Text text="Parameters" />
