@@ -324,7 +324,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                swingDuration.set(timing.getSwingTime());
                transferDuration.set(timing.getTransferTime());
 
-               useStepAdjustment.set(allowStepAdjustment.getBooleanValue() && footstep.getAdjustable());
+               useStepAdjustment.set(allowStepAdjustment.getBooleanValue() && footstep.getIsAdjustable());
             }
             else if (upcomingFootsteps.size() == 1)
             {

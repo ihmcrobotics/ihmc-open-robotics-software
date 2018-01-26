@@ -121,7 +121,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       return footstepDataListMessage;
    }
 
-   public FootstepDataListMessage assemble(List<Footstep> footstepList, double swingTime, double transferTime, boolean footstepIsAdjustable, ExecutionMode executionMode,
+   public FootstepDataListMessage assemble(List<Footstep> footstepList, double swingTime, double transferTime, ExecutionMode executionMode,
                                            PlanarRegionsList planarRegionsList)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
@@ -148,7 +148,6 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          footstepDataMessage.setCustomPositionWaypoints(waypoints);
-         footstepDataMessage.setIsAdjustable(footstepIsAdjustable);
 
          if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
          {
