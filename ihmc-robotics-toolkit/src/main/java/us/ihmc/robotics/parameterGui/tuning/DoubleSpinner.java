@@ -26,6 +26,10 @@ public class DoubleSpinner extends NumericSpinner<Double>
    @Override
    public Double convertStringToNumber(String numberString)
    {
+      if (numberString == null)
+      {
+         return 0.0;
+      }
       if (numberString.endsWith("e") || numberString.endsWith("E"))
       {
          return Double.parseDouble(numberString.substring(0, numberString.length() - 1));
