@@ -16,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.parameterGui.GuiParameter;
 import us.ihmc.robotics.parameterGui.GuiRegistry;
 import us.ihmc.robotics.parameterGui.ParameterGuiInterface;
@@ -80,7 +79,6 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
    {
       changedParameters.stream().forEach(parameter -> {
          parameterMap.get(parameter.getUniqueName()).set(parameter);
-         PrintTools.info("GUI changed " + parameter.getName() + ".");
       });
    }
 
