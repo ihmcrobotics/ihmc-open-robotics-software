@@ -23,6 +23,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private double adjustedExecutionTime;
    /** If {@code false} the controller adjust each footstep height to be at the support sole height. */
    private boolean trustHeightOfFootsteps = true;
+   /** If {@code false} the controller can adjust the footsteps. */
+   private boolean areFootstepsAdjustable = false;
    /** If {@code true} the controller will adjust upcoming footsteps with the location error of previous steps. */
    private boolean offsetFootstepsWithExecutionError = false;
 
@@ -52,6 +54,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       executionTiming = message.executionTiming;
       executionDelayTime = message.executionDelayTime;
       trustHeightOfFootsteps = message.trustHeightOfFootsteps;
+      areFootstepsAdjustable = message.areFootstepsAdjustable;
       offsetFootstepsWithExecutionError = message.isOffsetFootstepsWithExecutionError();
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -75,6 +78,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       executionDelayTime = other.executionDelayTime;
       adjustedExecutionTime = other.adjustedExecutionTime;
       trustHeightOfFootsteps = other.trustHeightOfFootsteps;
+      areFootstepsAdjustable = other.areFootstepsAdjustable;
       offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
@@ -210,6 +214,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public boolean isTrustHeightOfFootsteps()
    {
       return trustHeightOfFootsteps;
+   }
+
+   public boolean areFootstepsAdjustable()
+   {
+      return areFootstepsAdjustable;
    }
 
    public boolean isOffsetFootstepsWithExecutionError()

@@ -28,8 +28,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private final FramePoint3D position = new FramePoint3D();
    private final FrameQuaternion orientation = new FrameQuaternion();
 
-   private boolean adjustable = false;
-
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
    private final RecyclingArrayList<FramePoint3D> customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
@@ -58,7 +56,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = null;
       trajectoryType = TrajectoryType.DEFAULT;
       swingHeight = 0.0;
-      adjustable = false;
       position.set(0.0, 0.0, 0.0);
       orientation.set(0.0, 0.0, 0.0, 1.0);
       predictedContactPoints.clear();
@@ -76,7 +73,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = message.getRobotSide();
       trajectoryType = message.getTrajectoryType();
       swingHeight = message.getSwingHeight();
-      adjustable = message.getIsAdjustable();
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
@@ -122,7 +118,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = other.robotSide;
       trajectoryType = other.trajectoryType;
       swingHeight = other.swingHeight;
-      adjustable = other.adjustable;
       swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       position.setIncludingFrame(other.position);
       orientation.setIncludingFrame(other.orientation);
@@ -175,11 +170,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       this.swingHeight = swingHeight;
    }
 
-   public void setIsAdjustable(boolean adjustable)
-   {
-      this.adjustable = adjustable;
-   }
-
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
@@ -225,11 +215,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public double getSwingHeight()
    {
       return swingHeight;
-   }
-
-   public boolean getIsAdjustable()
-   {
-      return adjustable;
    }
 
    public FramePoint3D getPosition()

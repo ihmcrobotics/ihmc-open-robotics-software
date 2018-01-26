@@ -294,6 +294,7 @@ public class PushRecoveryControlModule
    {
       footstepToPack.setRobotSide(robotSide);
       footstepToPack.setTrustHeight(true);
+      footstepToPack.setIsAdjustable(true);
       footstepToPack.getFootstepPose().setToZero(soleFrames.get(robotSide));
       footstepToPack.getFootstepPose().changeFrame(worldFrame);
    }
