@@ -80,18 +80,19 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener, Exit
       this.yoVariableClientInterface = yoVariableClientInterface;
       YoVariableRegistry yoRegistry = handshakeParser.getRootRegistry();
 
-      yoRegistry.getAllParameters().stream().forEach(parameter -> parameter.addParameterChangedListener(new ParameterChangedListener()
-      {
-         @Override
-         public void notifyOfParameterChange(YoParameter<?> changedParameter)
+      yoRegistry.getAllParameters().stream().forEach(parameter -> {
+         parameter.addParameterChangedListener(new ParameterChangedListener()
          {
-            String yoName = getUniqueName(changedParameter);
-            GuiParameter newGuiParameter = guiParametersByYoName.get(yoName).createCopy();
-            newGuiParameter.setValue(changedParameter.getValueAsString());
-            newGuiParameter.setDescription(changedParameter.getDescription());
-            serverChangedParameters.put(newGuiParameter.getUniqueName(), newGuiParameter);
-         }
-      }));
+            @Override
+            public void notifyOfParameterChange(YoParameter<?> changedParameter)
+            {
+               String yoName = getUniqueName(changedParameter);
+               GuiParameter newGuiParameter = guiParametersByYoName.get(yoName).createCopy();
+               newGuiParameter.setValue(changedParameter.getValueAsString());
+               serverChangedParameters.put(newGuiParameter.getUniqueName(), newGuiParameter);
+            }
+         });
+      });
 
       guiParametersByYoName.clear();
       yoVariablesByGuiName.clear();
