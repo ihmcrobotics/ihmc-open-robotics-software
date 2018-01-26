@@ -245,7 +245,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       message.add(message4);
       message.add(message5);
       message.add(message6);
-      message.setAreFootstepsAdjustable(true);
 
       return message;
    }
