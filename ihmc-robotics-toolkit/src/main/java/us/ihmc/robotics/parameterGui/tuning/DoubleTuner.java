@@ -14,4 +14,10 @@ public class DoubleTuner extends NumericTuner<Double>
    {
       return new DoubleSpinner();
    }
+
+   @Override
+   public NumericSlider<Double> createSlider()
+   {
+      return new DoubleSlider();
+   }
 }

@@ -14,4 +14,10 @@ public class IntegerTuner extends NumericTuner<Integer>
    {
       return new IntegerSpinner();
    }
+
+   @Override
+   public NumericSlider<Integer> createSlider()
+   {
+      return new IntegerSlider();
+   }
 }
