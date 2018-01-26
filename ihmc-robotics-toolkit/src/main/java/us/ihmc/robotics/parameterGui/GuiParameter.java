@@ -1,12 +1,13 @@
 package us.ihmc.robotics.parameterGui;
 
+import gnu.trove.map.TObjectIntMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class GuiParameter extends GuiElement
 {
    private final String type;
-   private final String[] valueOptions;
+   private final TObjectIntMap<String> valueOptions;
 
    private final StringProperty value = new SimpleStringProperty();
    private final StringProperty min = new SimpleStringProperty();
@@ -18,7 +19,7 @@ public class GuiParameter extends GuiElement
       this(name, type, null, parent);
    }
 
-   public GuiParameter(String name, String type, String[] valueOptions, GuiRegistry parent)
+   public GuiParameter(String name, String type, TObjectIntMap<String> valueOptions, GuiRegistry parent)
    {
       super(name, parent);
       this.type = type;
@@ -50,7 +51,7 @@ public class GuiParameter extends GuiElement
       return type;
    }
 
-   public String[] getValueOptions()
+   public TObjectIntMap<String> getValueOptions()
    {
       return valueOptions;
    }

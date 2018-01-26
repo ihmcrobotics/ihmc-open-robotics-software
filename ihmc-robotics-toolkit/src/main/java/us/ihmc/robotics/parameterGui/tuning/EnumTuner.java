@@ -2,6 +2,7 @@ package us.ihmc.robotics.parameterGui.tuning;
 
 import java.io.IOException;
 
+import gnu.trove.map.TObjectIntMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -35,8 +36,8 @@ public class EnumTuner extends HBox
          e.printStackTrace();
       }
 
-      String[] valueOptions = parameter.getValueOptions();
-      if (valueOptions == null || valueOptions.length == 0)
+      TObjectIntMap<String> valueOptions = parameter.getValueOptions();
+      if (valueOptions == null)
       {
          createTextField(parameter);
       }
@@ -61,15 +62,14 @@ public class EnumTuner extends HBox
       tuningPane.getChildren().add(enumString);
    }
 
-   private void createChoiceBox(GuiParameter parameter, String[] valueOptions)
+   private void createChoiceBox(GuiParameter parameter, TObjectIntMap<String> valueOptions)
    {
       ChoiceBox<String> choiceBox = new ChoiceBox<>();
       ObservableList<String> items = choiceBox.getItems();
-      for (int i = 0; i < valueOptions.length; i++)
-      {
-         String option = valueOptions[i];
+      valueOptions.forEachKey(option -> {
          items.add(option);
-      }
+         return true;
+      });
       setChoiceBoxValue(parameter, choiceBox);
 
       choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
