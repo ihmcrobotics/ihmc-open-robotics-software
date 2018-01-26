@@ -90,6 +90,11 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
       return null;
    }
 
+   @Override
+   public void shutdown()
+   {
+   }
+
    @FXML
    protected void handleOpen(ActionEvent event) throws IOException
    {
@@ -157,4 +162,5 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
          originalFile = file;
       }
    }
+
 }

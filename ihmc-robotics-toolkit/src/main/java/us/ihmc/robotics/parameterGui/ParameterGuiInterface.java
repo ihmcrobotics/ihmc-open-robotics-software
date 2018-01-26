@@ -38,4 +38,10 @@ public interface ParameterGuiInterface
     * window.
     */
    public Node getInputManagerNode();
+
+   /**
+    * This will be called once by the GUI to inform the input manager that the program was shut down.
+    * This will allow the input manager to close any YoVariableServers and clean up.
+    */
+   public void shutdown();
 }
