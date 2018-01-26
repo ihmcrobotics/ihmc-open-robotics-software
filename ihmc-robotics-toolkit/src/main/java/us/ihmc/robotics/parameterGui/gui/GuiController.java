@@ -140,7 +140,7 @@ public class GuiController
          }
          else
          {
-            localParameter.set(externalParameter);
+            localParameter.setValue(externalParameter.getCurrentValue());
          }
       });
       changeCollector.startRecording();

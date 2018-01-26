@@ -27,7 +27,8 @@ public interface ParameterGuiInterface
 
    /**
     * This will be called periodically by the GUI to get a list with parameters that were updated by
-    * other entities such as a different tuning GUI or a YoVariableServer.
+    * other entities such as a different tuning GUI or a YoVariableServer. Note, that the GUI will
+    * only update the value of the parameters. Description and suggested bounds will not be updated.
     */
    public List<GuiParameter> pollUpdatedParameters();
 
