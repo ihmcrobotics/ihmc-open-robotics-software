@@ -20,13 +20,14 @@ public abstract class ParameterTuningApplication extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+      ParameterGuiInterface guiInterface = createInputManager();
+
       FXMLLoader mainLoader = new FXMLLoader();
       mainLoader.setLocation(ParameterTuningApplication.class.getResource(FXML_FILE));
       Scene mainScene = new Scene(mainLoader.<Pane> load());
       mainScene.getStylesheets().add(ParameterTuningApplication.class.getResource(CSS_FILE).toString());
 
       GuiController controller = mainLoader.getController();
-      ParameterGuiInterface guiInterface = createInputManager();
       controller.addInputNode(guiInterface.getInputManagerNode());
 
       AnimationTimer animationTimer = new AnimationTimer()
