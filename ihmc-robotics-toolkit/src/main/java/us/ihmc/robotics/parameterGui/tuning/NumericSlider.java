@@ -18,7 +18,9 @@ public abstract class NumericSlider<T extends Number> extends Slider
       double doubleMin = doDouble(min);
       double doubleMax = doDouble(max);
 
-      if (doubleValue < doubleMin || doubleValue > doubleMax || doubleMin >= doubleMax)
+      boolean boundsValid = doubleValue < doubleMin || doubleValue > doubleMax || doubleMin >= doubleMax;
+      boolean boundsInfinite = Double.isInfinite(doubleMin) || Double.isInfinite(doubleMax);
+      if (boundsValid || boundsInfinite)
       {
          setDisable(true);
          return;
