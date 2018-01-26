@@ -1,13 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
-
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
-
 import com.sun.javafx.scene.control.skin.LabeledText;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ListView;
@@ -20,7 +13,14 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
 
 public class DatasetNavigationAccordionController
 {
@@ -106,40 +106,41 @@ public class DatasetNavigationAccordionController
    @FXML
    private void requestNewVisualizerData(MouseEvent event)
    {
-      requestNewData(visualizerDataListView, visualizerDataFolder, event);
+      requestNewData(visualizerDataListView, VisibilityGraphsIOTools.PLANAR_REGION_DATA_URL, event);
    }
 
    @FXML
    private void requestNewTestData(MouseEvent event)
    {
-      requestNewData(testDataListView, testDataFolder, event);
+      requestNewData(testDataListView, VisibilityGraphsIOTools.TEST_DATA_URL, event);
    }
 
    @FXML
    private void requestNewInDevelopmentTestData(MouseEvent event)
    {
-      requestNewData(inDevelopmentTestDataListView, inDevelopmentTestDataFolder, event);
+      requestNewData(inDevelopmentTestDataListView, VisibilityGraphsIOTools.IN_DEVELOLOPMENT_TEST_DATA_URL, event);
    }
 
    @FXML
    private void requestNewCustomData(MouseEvent event)
    {
-      requestNewData(customDataListView, customDataFolder, event);
+      requestNewData(customDataListView, "", event);
    }
 
-   private void requestNewData(ListView<String> listViewOwner, File dataFolder, MouseEvent event)
+   private void requestNewData(ListView<String> listViewOwner, String datasetResourceName, MouseEvent event)
    {
-      if (dataFolder == null)
+      if (datasetResourceName == null)
          return;
       if (!hasListViewCellBeenDoubleClicked(event))
          return;
 
       String filename = listViewOwner.getSelectionModel().getSelectedItem();
-      File dataFile = findChildFile(dataFolder, filename);
+      String selectedDatasetResource = datasetResourceName + "/" + filename;
+      File file = PlanarRegionFileTools.getResourceFile(selectedDatasetResource);
 
-      if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(dataFile))
+      if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(file))
       {
-         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(dataFile);
+         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(selectedDatasetResource);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());
@@ -147,7 +148,7 @@ public class DatasetNavigationAccordionController
       }
       else
       {
-         PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(dataFile);
+         PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(file);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, new Point3D());
