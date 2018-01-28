@@ -78,6 +78,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFrameVector2d feedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2d feedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
+
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
    private final YoFramePoseUsingQuaternions upcomingFootstepLocation = new YoFramePoseUsingQuaternions(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
@@ -126,6 +127,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble angularMomentumIntegratorGain = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorGain", registry);
    private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
 
+   private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
+   private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
+   private final YoDouble integralGainWhenStuck = new YoDouble(yoNamePrefix + "IntegralGainWhenStuck", registry);
+   private final YoDouble integralBleedOffRate = new YoDouble(yoNamePrefix + "IntegralBleedOffRate", registry);
+   private final YoDouble maxIntegralFeedback = new YoDouble(yoNamePrefix + "MaxIntegralFeedback", registry);
+   private final YoFrameVector2d feedbackCMPIntegral = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
+
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final PlanarRegionConstraintProvider planarRegionConstraintProvider;
@@ -153,6 +161,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FramePoint2D perfectCoP = new FramePoint2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
+   private final FrameVector2D currentICPVelocity = new FrameVector2D();
 
    private final double controlDT;
    private final double dynamicsObjectiveDoubleSupportWeightModifier;
@@ -225,6 +234,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          maxAllowedDistanceCMPSupport.setToNaN();
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
+
+      thresholdForStuck.set(0.001);
+      integralGainWhenStuck.set(0.1);
+      integralBleedOffRate.set(0.95);
+      maxIntegralFeedback.set(0.05);
+
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -348,6 +363,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.initialTime.set(initialTime);
       isStanding.set(true);
       isInDoubleSupport.set(true);
+      isICPStuck.set(false);
 
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
 
@@ -369,6 +385,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       this.transferToSide.set(transferToSide);
       isInDoubleSupport.set(true);
+      isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
@@ -390,6 +407,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.supportSide.set(supportSide);
       isStanding.set(false);
       isInDoubleSupport.set(false);
+      isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
@@ -470,15 +488,15 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
-                       FramePoint2DReadOnly currentICP, double omega0)
+                       FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, omega0);
+      compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity, omega0);
    }
 
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
-                       FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, double omega0)
+                       FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       controllerTimer.startMeasurement();
 
@@ -487,12 +505,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.perfectCoP.set(perfectCoP);
       this.perfectCMPOffset.set(perfectCMPOffset);
       this.currentICP.set(currentICP);
+      this.currentICPVelocity.set(currentICPVelocity);
 
       this.desiredICP.changeFrame(worldFrame);
       this.desiredICPVelocity.changeFrame(worldFrame);
       this.perfectCoP.changeFrame(worldFrame);
       this.perfectCMPOffset.changeFrame(worldFrame);
       this.currentICP.changeFrame(worldFrame);
+      this.currentICPVelocity.changeFrame(worldFrame);
 
       this.yoPerfectCoP.set(this.perfectCoP);
       this.yoPerfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
@@ -528,6 +548,19 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
          this.speedUpTime.add(speedUpTime);
       }
+   }
+
+   @Override
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
+      if (planarRegionConstraintProvider != null)
+         planarRegionConstraintProvider.setPlanarRegions(planarRegions);
+   }
+
+   @Override
+   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   {
+      this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 
    private void submitSolverTaskConditions(double omega0, boolean includeFootsteps)
@@ -672,8 +705,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
             solutionHandler.updateCostsToGo(solver);
       }
 
+      computeIsStuck();
+      computeICPIntegralTerm();
+
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
       feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
+      feedbackCMP.add(feedbackCMPIntegral);
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
          updateReachabilityRegionFromAdjustment();
@@ -749,16 +786,45 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       scaledCMPFeedbackWeight.set(multiplier * cmpFeedbackWeight);
    }
 
-   @Override
-   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   private boolean computeIsStuck()
    {
-      if (planarRegionConstraintProvider != null)
-         planarRegionConstraintProvider.setPlanarRegions(planarRegions);
+      if (!isInDoubleSupport.getBooleanValue() || isStanding.getBooleanValue())
+         return false;
+
+      if (isICPStuck.getBooleanValue())
+         return true;
+
+      if (Math.max(currentICPVelocity.length(), desiredICPVelocity.length()) < thresholdForStuck.getDoubleValue())
+         return true;
+
+      return false;
    }
 
-   @Override
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   public void computeICPIntegralTerm()
    {
-      this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      if (isICPStuck.getBooleanValue())
+      {
+         tempVector2d.set(icpError);
+         tempVector2d.scale(controlDT * integralGainWhenStuck.getDoubleValue());
+
+         feedbackCMPIntegral.scale(integralBleedOffRate.getValue());
+         feedbackCMPIntegral.add(tempVector2d);
+
+         double length = feedbackCMPIntegral.length();
+         double maxLength = maxIntegralFeedback.getDoubleValue();
+         if (length > maxLength)
+         {
+            feedbackCMPIntegral.scale(maxLength / length);
+         }
+
+         if (Math.abs(integralGainWhenStuck.getValue()) < 1e-10)
+         {
+            feedbackCMPIntegral.setToZero();
+         }
+      }
+      else
+      {
+         feedbackCMPIntegral.setToZero();
+      }
    }
 }

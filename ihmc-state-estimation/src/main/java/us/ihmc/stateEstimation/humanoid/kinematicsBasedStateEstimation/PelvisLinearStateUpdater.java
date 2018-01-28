@@ -607,7 +607,11 @@ public class PelvisLinearStateUpdater
          yoCenterOfMassVelocity.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
       }
       
-      if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity);
+      if (estimatorCenterOfMassDataHolderToUpdate != null)
+      {
+         estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity);
+         estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassAcceleration(comAcceleration);
+      }
    }
 
 
