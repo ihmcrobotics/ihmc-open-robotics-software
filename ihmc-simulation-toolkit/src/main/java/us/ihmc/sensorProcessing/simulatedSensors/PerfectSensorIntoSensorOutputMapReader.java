@@ -28,7 +28,6 @@ import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoLong;
 
 /**
  * Perfect sensor reader that reads data from a simulated robot and outputs data in a SensorOutputMap
@@ -49,9 +48,6 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    private final ArrayList<ImmutablePair<IMUMount, IMUSensor>> imus = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoLong timestamp = new YoLong("timestamp", registry);
-   private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
-   private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
@@ -159,10 +155,10 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
       readAndUpdateIMUSensors();
 
       long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
-      this.timestamp.set(timestamp);
-      this.visionSensorTimestamp.set(timestamp);
-      this.sensorHeadPPSTimetamp.set(timestamp);
-
+      sensorOutputMap.setTimestamp(timestamp);
+      sensorOutputMap.setVisionSensorTimestamp(timestamp);
+      sensorOutputMap.setSensorHeadPPSTimetamp(timestamp);
+      
       if (forceSensorDataHolderToUpdate != null)
       {
          for (Entry<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensorEntry : forceTorqueSensors.entrySet())
