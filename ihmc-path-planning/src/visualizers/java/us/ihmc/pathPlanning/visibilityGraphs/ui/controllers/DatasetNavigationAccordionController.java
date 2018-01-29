@@ -1,11 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
-
-import java.io.File;
-
 import com.sun.javafx.scene.control.skin.LabeledText;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ListView;
@@ -18,30 +13,45 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.RandomizePlanarRegionIDRequest;
 
 public class DatasetNavigationAccordionController
 {
-   private final File visualizerDataFolder, testDataFolder;
+   private final File visualizerDataFolder, testDataFolder, inDevelopmentTestDataFolder;
    private File customDataFolder = null;
 
    @FXML
    private Accordion datasetNavigationAccordion;
 
    @FXML
-   private ListView<String> visualizerDataListView, testDataListView, customDataListView;
+   private ListView<String> visualizerDataListView, testDataListView, inDevelopmentTestDataListView, customDataListView;
 
    private SimpleUIMessager messager;
    private Window ownerWindow;
 
-   public DatasetNavigationAccordionController()
+   public DatasetNavigationAccordionController() throws URISyntaxException
    {
-      visualizerDataFolder = new File("..\\visualizers\\resources\\Data");
+      URL planarRegionDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.PLANAR_REGION_DATA_URL);
+      URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.TEST_DATA_URL);
+      URL inDevelopmentDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.IN_DEVELOLOPMENT_TEST_DATA_URL);
+
+      visualizerDataFolder = new File(planarRegionDataFolderURL.toURI());
+      testDataFolder = new File(testDataFolderURL.toURI());
+      inDevelopmentTestDataFolder = new File(inDevelopmentDataFolderURL.toURI());
+
       if (!visualizerDataFolder.exists())
          throw new RuntimeException("Wrong path to the visualizer data folder, please update me.");
-      testDataFolder = new File("..\\test\\resources\\" + VisibilityGraphsIOTools.DATA_FOLDER_NAME);
       if (!testDataFolder.exists())
          throw new RuntimeException("Wrong path to the test data folder, please update me.");
+      if (!inDevelopmentTestDataFolder.exists())
+         throw new RuntimeException("Wrong path to the in development test data folder, please update me");
    }
 
    public void attachMessager(SimpleUIMessager messager)
@@ -66,6 +76,9 @@ public class DatasetNavigationAccordionController
 
       testDataListView.getItems().clear();
       testDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(testDataFolder));
+
+      inDevelopmentTestDataListView.getItems().clear();
+      inDevelopmentTestDataListView.getItems().addAll(VisibilityGraphsIOTools.getPlanarRegionAndVizGraphsFilenames(inDevelopmentTestDataFolder));
 
       customDataListView.getItems().clear();
       if (customDataFolder != null && customDataFolder.exists() && customDataFolder.isDirectory())
@@ -93,34 +106,41 @@ public class DatasetNavigationAccordionController
    @FXML
    private void requestNewVisualizerData(MouseEvent event)
    {
-      requestNewData(visualizerDataListView, visualizerDataFolder, event);
+      requestNewData(visualizerDataListView, VisibilityGraphsIOTools.PLANAR_REGION_DATA_URL, event);
    }
 
    @FXML
    private void requestNewTestData(MouseEvent event)
    {
-      requestNewData(testDataListView, testDataFolder, event);
+      requestNewData(testDataListView, VisibilityGraphsIOTools.TEST_DATA_URL, event);
+   }
+
+   @FXML
+   private void requestNewInDevelopmentTestData(MouseEvent event)
+   {
+      requestNewData(inDevelopmentTestDataListView, VisibilityGraphsIOTools.IN_DEVELOLOPMENT_TEST_DATA_URL, event);
    }
 
    @FXML
    private void requestNewCustomData(MouseEvent event)
    {
-      requestNewData(customDataListView, customDataFolder, event);
+      requestNewData(customDataListView, "", event);
    }
 
-   private void requestNewData(ListView<String> listViewOwner, File dataFolder, MouseEvent event)
+   private void requestNewData(ListView<String> listViewOwner, String datasetResourceName, MouseEvent event)
    {
-      if (dataFolder == null)
+      if (datasetResourceName == null)
          return;
       if (!hasListViewCellBeenDoubleClicked(event))
          return;
 
       String filename = listViewOwner.getSelectionModel().getSelectedItem();
-      File dataFile = findChildFile(dataFolder, filename);
+      String selectedDatasetResource = datasetResourceName + "/" + filename;
+      File file = PlanarRegionFileTools.getResourceFile(selectedDatasetResource);
 
-      if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(dataFile))
+      if (VisibilityGraphsIOTools.isVisibilityGraphsDataset(file))
       {
-         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(dataFile);
+         VisibilityGraphsUnitTestDataset dataset = VisibilityGraphsIOTools.loadDataset(selectedDatasetResource);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, dataset.getPlanarRegionsList());
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, dataset.getStart());
@@ -128,7 +148,7 @@ public class DatasetNavigationAccordionController
       }
       else
       {
-         PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(dataFile);
+         PlanarRegionsList loadedPlanarRegions = VisibilityGraphsIOTools.importPlanarRegionData(file);
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
          messager.submitMessage(UIVisibilityGraphsTopics.PlanarRegionData, loadedPlanarRegions);
          messager.submitMessage(UIVisibilityGraphsTopics.StartPosition, new Point3D());

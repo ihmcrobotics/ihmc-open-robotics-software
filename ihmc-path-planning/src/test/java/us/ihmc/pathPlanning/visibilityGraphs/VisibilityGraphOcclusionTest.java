@@ -1,0 +1,146 @@
+package us.ihmc.pathPlanning.visibilityGraphs;
+
+import org.junit.Before;
+import org.junit.Test;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+
+import java.util.List;
+
+public class VisibilityGraphOcclusionTest
+{
+   private static final long timeout = 30000;
+   private boolean visualize = true;
+   private PlanarRegionsList occludedEnvironmentWithAGoalPlane;
+   private PlanarRegionsList occludedEnvironmentWithoutAGoalPlane;
+
+   @Before
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+      occludedEnvironmentWithAGoalPlane = simpleOccludedEnvironment(true);
+      occludedEnvironmentWithoutAGoalPlane = simpleOccludedEnvironment(false);
+   }
+
+   @Test(timeout = timeout)
+   public void testVisibilityGraphWithOcclusion()
+   {
+      runTest(occludedEnvironmentWithAGoalPlane);
+   }
+
+   @Test(timeout = timeout)
+   public void testVisibilityGraphWithOcclusionAndNoGoalPlane()
+   {
+      runTest(occludedEnvironmentWithoutAGoalPlane);
+   }
+
+   private void runTest(PlanarRegionsList planarRegionsList)
+   {
+      Point3D start = new Point3D();
+      Point3D goal = new Point3D(2.0, -1.0, 0.0);
+
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclussions(start, goal);
+
+      if(visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+   }
+
+   private static void visualize(List<Point3DReadOnly> path, PlanarRegionsList planarRegionsList, Point3D start, Point3D goal)
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet();
+
+      Graphics3DObject graphics3DObject = new Graphics3DObject();
+      graphics3DObject.addPlanarRegionsList(planarRegionsList, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
+      scs.setGroundVisible(false);
+
+      graphics3DObject.identity();
+      graphics3DObject.translate(start);
+      graphics3DObject.translate(0.0, 0.0, 0.05);
+      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Green());
+
+      graphics3DObject.identity();
+      graphics3DObject.translate(goal);
+      graphics3DObject.translate(0.0, 0.0, 0.05);
+      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Red());
+
+      if(path != null)
+      {
+         for (int i = 0; i < path.size(); i++)
+         {
+            Point3DReadOnly point = path.get(i);
+
+            graphics3DObject.identity();
+            graphics3DObject.translate(point);
+            graphics3DObject.addSphere(0.1, YoAppearance.Orange());
+
+            if(i != path.size() - 1)
+            {
+               Point3DReadOnly nextPoint = path.get(i + 1);
+               Vector3D direction = new Vector3D(nextPoint);
+               direction.sub(point);
+               int pathPoints = (int) Math.round(point.distance(nextPoint) / 0.05);
+
+               for (int j = 1; j < pathPoints; j++)
+               {
+                  Vector3D offset = new Vector3D(direction);
+                  offset.scaleAdd(((double) j) / pathPoints, point);
+
+                  graphics3DObject.identity();
+                  graphics3DObject.translate(offset);
+                  graphics3DObject.addSphere(0.025, YoAppearance.Orange());
+               }
+            }
+         }
+      }
+
+      scs.addStaticLinkGraphics(graphics3DObject);
+
+      scs.setCameraPosition(-7.0, -1.0, 25.0);
+      scs.setCameraFix(0.0, 0.0, 0.0);
+      scs.startOnAThread();
+
+      ThreadTools.sleepForever();
+   }
+
+   private static PlanarRegionsList simpleOccludedEnvironment(boolean includeGoalPlane)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(2.0, 4.0);
+
+      generator.translate(1.0, -1.0, 0.5);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+
+      generator.addRectangle(0.9, 1.9);
+
+      if (includeGoalPlane)
+      {
+         generator.identity();
+         generator.translate(2.0, -1.0, 0.0);
+         generator.addRectangle(1.0, 1.0);
+      }
+
+      return generator.getPlanarRegionsList();
+   }
+
+   private class TestParameters extends DefaultVisibilityGraphParameters
+   {
+      @Override
+      public double getSearchHostRegionEpsilon()
+      {
+         return 0;
+      }
+   }
+}

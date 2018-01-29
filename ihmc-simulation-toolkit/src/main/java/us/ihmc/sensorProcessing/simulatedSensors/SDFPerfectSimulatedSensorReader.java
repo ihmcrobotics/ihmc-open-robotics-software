@@ -124,8 +124,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       // Think about adding root body acceleration to the fullrobotmodel
       readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations();
       readAndUpdateRootJointPositionAndOrientation();
-      updateReferenceFrames();
       readAndUpdateRootJointAngularAndLinearVelocity();
+      // Update frames after setting angular and linear velocities to correctly update zup frames
+      updateReferenceFrames();
 
       long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
       this.timestamp.set(timestamp);
@@ -144,10 +145,14 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
-   {
+   {      
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame pelvisFrame = rootJoint.getFrameAfterJoint();
 
+      // Update base frames without updating all frames to transform velocity into pelvis
+      elevatorFrame.update();
+      pelvisFrame.update();
+      
       FrameVector3D linearVelocity = robot.getRootJointVelocity();
       linearVelocity.changeFrame(pelvisFrame);
 
