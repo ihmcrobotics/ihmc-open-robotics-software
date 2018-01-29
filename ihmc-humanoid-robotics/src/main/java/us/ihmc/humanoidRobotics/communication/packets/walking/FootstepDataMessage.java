@@ -99,32 +99,16 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
    {
-      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0, false);
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, boolean adjustable)
-   {
-      this(robotSide, location, orientation, null, TrajectoryType.DEFAULT, 0.0, adjustable);
+      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
    {
-      this(robotSide, location, orientation, null, trajectoryType, swingHeight, false);
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight, boolean adjustable)
-   {
-      this(robotSide, location, orientation, null, trajectoryType, swingHeight, adjustable);
+      this(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
                               TrajectoryType trajectoryType, double swingHeight)
-   {
-      this(robotSide, location, orientation, predictedContactPoints, trajectoryType, swingHeight, false);
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-                              TrajectoryType trajectoryType, double swingHeight, boolean adjustable)
    {
       this.robotSide = robotSide;
       this.location = location;
