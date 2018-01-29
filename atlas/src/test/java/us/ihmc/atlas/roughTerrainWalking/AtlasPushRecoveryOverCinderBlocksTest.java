@@ -5,10 +5,12 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
+import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverCinderBlocksTest;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -19,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOverCinderBlocksTest
 {
    @Override
@@ -55,7 +57,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 180000)
    public void testPushOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -63,7 +65,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 180000)
    public void testForwardPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -71,7 +73,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 180000)
    public void testLeftSidewaysPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -79,7 +81,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 180000)
    public void testRightSidewaysPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -87,7 +89,7 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 180000)
    public void testPushOverTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -115,6 +117,19 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
                public double getMinimumSwingTimeForDisturbanceRecovery()
                {
                   return 0.5;
+               }
+
+               @Override
+               public SteppingParameters getSteppingParameters()
+               {
+                  return new AtlasSteppingParameters(getJointMap())
+                  {
+                     @Override
+                     public double getMaxStepLength()
+                     {
+                        return 1.2;
+                     }
+                  };
                }
 
                @Override
