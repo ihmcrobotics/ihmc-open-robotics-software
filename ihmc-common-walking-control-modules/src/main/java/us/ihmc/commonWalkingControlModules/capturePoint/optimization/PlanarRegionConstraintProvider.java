@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -17,6 +18,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -64,6 +66,10 @@ public class PlanarRegionConstraintProvider
    private final ReferenceFrame planeReferenceFrame;
 
    private final ConvexPolygonToolbox convexPolygonToolbox = new ConvexPolygonToolbox();
+
+   private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
+
+   private final FramePoint2D tempPoint2D = new FramePoint2D();
 
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters walkingParameters, ICPOptimizationParameters optimizationParameters,
                                          BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -250,9 +256,6 @@ public class PlanarRegionConstraintProvider
    }
 
 
-   private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
-
-   private final FramePoint2D tempPoint = new FramePoint2D(worldFrame);
 
 
    private void findPlanarRegionAttachedToFootstep(Footstep footstep)
@@ -264,10 +267,10 @@ public class PlanarRegionConstraintProvider
          planarRegion.getTransformToWorld(planeTransformToWorld);
          planeReferenceFrame.update();
 
-         footstep.getPosition2d(tempPoint);
-         tempPoint.changeFrame(planeReferenceFrame);
+         footstep.getPosition2d(tempPoint2D);
+         tempPoint2D.changeFrameAndProjectToXYPlane(planeReferenceFrame);
 
-         if (planarRegion.isPointInside(tempPoint))
+         if (planarRegion.isPointInside(tempPoint2D))
          {
             activePlanarRegion = planarRegion;
 
@@ -372,5 +375,37 @@ public class PlanarRegionConstraintProvider
       yoActivePlanarRegion.clearAndHide();
       yoShrunkActivePlanarRegion.clearAndHide();
       yoActivePlanarRegionInControlPlane.clearAndHide();
+   }
+
+   private final FramePose3D footstepPose = new FramePose3D();
+   private final FramePoint2D footstepXYPosition = new FramePoint2D();
+
+   public boolean snapFootPoseToActivePlanarRegion(YoFramePose footPoseToPack)
+   {
+      if (activePlanarRegion == null)
+         return false;
+
+      footPoseToPack.getFramePose(footstepPose);
+      footstepXYPosition.set(footstepPose.getPosition());
+
+      // get the orientation of the foot
+      footstepPose.setToZero(planeReferenceFrame);
+
+      // get the height
+      footstepXYPosition.changeFrameAndProjectToXYPlane(worldFrame);
+      double zPosition = activePlanarRegion.getPlaneZGivenXY(footstepXYPosition.getX(), footstepXYPosition.getY());
+
+      // change the foot pose to be correct
+      footstepPose.changeFrame(worldFrame);
+      footstepPose.setPosition(footstepXYPosition);
+      footstepPose.setZ(zPosition);
+
+      boolean wasAdjusted = false;
+      if (footstepPose.getZ() != footPoseToPack.getZ())
+         wasAdjusted = true;
+
+      footPoseToPack.set(footstepPose);
+
+      return wasAdjusted;
    }
 }

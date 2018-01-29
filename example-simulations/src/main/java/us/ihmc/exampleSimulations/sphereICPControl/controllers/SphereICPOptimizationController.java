@@ -301,10 +301,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
             if (footstep != null)
             {
-               footstep.getPose(footstepPose);
-               icpOptimizationController.getFootstepSolution(footstepPositionSolution);
-               footstepPose.setPosition(footstepPositionSolution);
-               footstep.setPose(footstepPose);
+               icpOptimizationController.getFootstepSolution(footstep);
             }
          }
 
@@ -390,10 +387,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
                if (footstep != null)
                {
-                  footstep.getPose(footstepPose);
-                  icpOptimizationController.getFootstepSolution(footstepPositionSolution);
-                  footstepPose.setPosition(footstepPositionSolution);
-                  footstep.setPose(footstepPose);
+                  icpOptimizationController.getFootstepSolution(footstep);
                }
             }
          }
