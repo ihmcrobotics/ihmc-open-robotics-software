@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSettings
@@ -29,8 +27,8 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
    private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.0);
 
-   private final Vector3D defaultAngularFootWeight = new Vector3D(0.5, 0.5, 0.5);
-   private final Vector3D defaultLinearFootWeight = new Vector3D(30.0, 30.0, 30.0);
+   private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
+   private final Vector3D footLinearWeight = new Vector3D(30.0, 30.0, 30.0);
    private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
@@ -73,7 +71,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector3D handLinearWeight = new Vector3D(1.0, 1.0, 1.0);
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeights = new ArrayList<>();
 
-   public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap, int numberOfContactableBodies)
+   public AtlasMomentumOptimizationSettings(DRCRobotJointMap jointMap, int numberOfContactableBodies)
    {
       double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
@@ -103,13 +101,12 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       taskspaceAngularWeights.add(new GroupParameter<>("Pelvis", pelvisAngularWeight, Collections.singletonList(jointMap.getPelvisName())));
       taskspaceLinearWeights.add(new GroupParameter<>("Pelvis", pelvisLinearWeight, Collections.singletonList(jointMap.getPelvisName())));
 
-      List<String> handNames = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handNames.add(jointMap.getHandName(robotSide));
-      }
+      List<String> handNames = jointMap.getHandNames();
+      List<String> footNames = jointMap.getFootNames();
       taskspaceAngularWeights.add(new GroupParameter<>("Hand", handAngularWeight, handNames));
       taskspaceLinearWeights.add(new GroupParameter<>("Hand", handLinearWeight, handNames));
+      taskspaceAngularWeights.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
+      taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
 
       this.nContactableBodies = numberOfContactableBodies;
    }
@@ -209,20 +206,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    public Vector2D getCoPRateHighWeight()
    {
       return copRateHighWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultLinearFootWeight()
-   {
-      return defaultLinearFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultAngularFootWeight()
-   {
-      return defaultAngularFootWeight;
    }
 
    /** @inheritDoc */

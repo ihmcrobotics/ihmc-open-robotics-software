@@ -17,8 +17,8 @@ public class WandererMomentumOptimizationSettings extends MomentumOptimizationSe
    private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
    private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.0);
 
-   private final Vector3D defaultAngularFootWeight = new Vector3D(0.5, 0.5, 0.5);
-   private final Vector3D defaultLinearFootWeight = new Vector3D(30.0, 30.0, 30.0);
+   private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
+   private final Vector3D footLinearWeight = new Vector3D(30.0, 30.0, 30.0);
    private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
@@ -70,6 +70,10 @@ public class WandererMomentumOptimizationSettings extends MomentumOptimizationSe
 
       taskspaceAngularWeights.add(new GroupParameter<>("Pelvis", pelvisAngularWeight, Collections.singletonList(jointMap.getPelvisName())));
       taskspaceLinearWeights.add(new GroupParameter<>("Pelvis", pelvisLinearWeight, Collections.singletonList(jointMap.getPelvisName())));
+
+      List<String> footNames = jointMap.getFootNames();
+      taskspaceAngularWeights.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
+      taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
    }
 
    /** @inheritDoc */
@@ -154,20 +158,6 @@ public class WandererMomentumOptimizationSettings extends MomentumOptimizationSe
    public Vector2D getCoPRateHighWeight()
    {
       return copRateHighWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultLinearFootWeight()
-   {
-      return defaultLinearFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultAngularFootWeight()
-   {
-      return defaultAngularFootWeight;
    }
 
    /** @inheritDoc */

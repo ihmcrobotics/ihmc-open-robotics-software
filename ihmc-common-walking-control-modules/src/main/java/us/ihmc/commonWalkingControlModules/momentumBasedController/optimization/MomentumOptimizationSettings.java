@@ -51,8 +51,6 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
    public abstract List<GroupParameter<Vector3DReadOnly>> getTaskspaceLinearWeights();
 
    // TODO: figure out how to handle these with the maps:
-   public abstract Vector3D getDefaultLinearFootWeight();
-   public abstract Vector3D getDefaultAngularFootWeight();
    public abstract Vector3D getHighLinearFootWeight();
    public abstract Vector3D getHighAngularFootWeight();
 }
