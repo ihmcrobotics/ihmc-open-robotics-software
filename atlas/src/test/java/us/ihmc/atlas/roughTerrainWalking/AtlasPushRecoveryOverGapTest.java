@@ -77,7 +77,7 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                      }
 
                      @Override
-                     public boolean useStepAdjustment()
+                     public boolean allowStepAdjustment()
                      {
                         return true;
                      }
