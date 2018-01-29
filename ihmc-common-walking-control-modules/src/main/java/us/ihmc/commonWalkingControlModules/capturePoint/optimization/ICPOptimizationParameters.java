@@ -104,7 +104,7 @@ public abstract class ICPOptimizationParameters
    /**
     * Enabling this boolean enables the use step adjustment for stabilization.
     */
-   public abstract boolean useStepAdjustment();
+   public abstract boolean allowStepAdjustment();
 
    /**
     * Enabling this boolean allows the CMP to exit the support polygon.
