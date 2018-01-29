@@ -9,13 +9,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 public class WrenchDistributorTools
 {
-   public static void computeWrench(Wrench groundReactionWrenchToPack, FrameVector3D force, FramePoint2D cop, double normalTorque)
+   public static void computeWrench(Wrench groundReactionWrenchToPack, FrameVector3D force, FramePoint2DReadOnly cop, double normalTorque)
    {
       ReferenceFrame referenceFrame = cop.getReferenceFrame();
       force.changeFrame(referenceFrame);
@@ -29,7 +31,7 @@ public class WrenchDistributorTools
       groundReactionWrenchToPack.set(referenceFrame, force, torque);
    }
 
-   public static FramePoint3D computePseudoCMP3d(FramePoint3D centerOfMass, FramePoint2D cmp, double fZ, double totalMass, double omega0)
+   public static FramePoint3D computePseudoCMP3d(FramePoint3DReadOnly centerOfMass, FramePoint2DReadOnly cmp, double fZ, double totalMass, double omega0)
    {
       FramePoint3D pseudoCMP3d = new FramePoint3D();
 
@@ -38,7 +40,7 @@ public class WrenchDistributorTools
       return pseudoCMP3d;
    }
 
-   public static void computePseudoCMP3d(FramePoint3D pseudoCMP3dToPack, FramePoint3D centerOfMass, FramePoint2D cmp, double fZ, double totalMass, double omega0)
+   public static void computePseudoCMP3d(FramePoint3D pseudoCMP3dToPack, FramePoint3DReadOnly centerOfMass, FramePoint2DReadOnly cmp, double fZ, double totalMass, double omega0)
    {
       double zCMP = centerOfMass.getZ() - fZ / (totalMass * MathTools.square(omega0));
       pseudoCMP3dToPack.setIncludingFrame(cmp.getReferenceFrame(), cmp.getX(), cmp.getY(), 0.0);
@@ -46,7 +48,7 @@ public class WrenchDistributorTools
       pseudoCMP3dToPack.setZ(zCMP);
    }
 
-   public static FrameVector3D computeForce(FramePoint3D centerOfMass, FramePoint3D cmp, double fZ)
+   public static FrameVector3D computeForce(FramePoint3DReadOnly centerOfMass, FramePoint3D cmp, double fZ)
    {
       FrameVector3D force = new FrameVector3D(centerOfMass);
 
@@ -55,7 +57,7 @@ public class WrenchDistributorTools
       return force;
    }
 
-   public static void computeForce(FrameVector3D forceToPack, FramePoint3D centerOfMass, FramePoint3D cmp, double fZ)
+   public static void computeForce(FrameVector3D forceToPack, FramePoint3DReadOnly centerOfMass, FramePoint3D cmp, double fZ)
    {
       cmp.changeFrame(centerOfMass.getReferenceFrame());
       forceToPack.setIncludingFrame(centerOfMass);

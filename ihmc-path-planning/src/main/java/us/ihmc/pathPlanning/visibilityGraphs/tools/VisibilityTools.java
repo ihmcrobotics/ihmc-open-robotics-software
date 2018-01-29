@@ -125,7 +125,7 @@ public class VisibilityTools
          boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
 
          if (isNavigable)
-            isNavigable = !allClusters.stream().filter(c -> c.isInsideNonNavigableZone(query)).findFirst().isPresent();
+            isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
 
          areActuallyNavigable[i] = isNavigable;
       }

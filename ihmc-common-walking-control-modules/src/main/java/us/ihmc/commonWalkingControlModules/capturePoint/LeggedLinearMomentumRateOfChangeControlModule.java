@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -48,7 +49,7 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
    }
    
    @Override
-   public void compute(FramePoint2D desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
+   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
    {
       super.compute(desiredCMPPreviousValue, desiredCMPToPack);
       supportLegPreviousTick.set(supportSide);
