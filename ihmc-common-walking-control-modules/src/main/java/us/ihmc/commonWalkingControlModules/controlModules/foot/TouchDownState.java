@@ -88,6 +88,9 @@ public class TouchDownState extends AbstractFootControlState
    private final FramePoint3D endPointA = new FramePoint3D();
    private final FramePoint3D endPointB = new FramePoint3D();
 
+   private Vector3DReadOnly angularWeight;
+   private Vector3DReadOnly linearWeight;
+
    /**
     * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
     * This state is triggered after the foot comes in contact with the ground
@@ -162,6 +165,7 @@ public class TouchDownState extends AbstractFootControlState
       orientationTrajectory.compute(timeInCurrentState);
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
    }
    
    public void setTouchdownDuration(double touchdownDuration)
@@ -292,14 +296,10 @@ public class TouchDownState extends AbstractFootControlState
       contactState.setContactNormalVector(footControlHelper.getFullyConstrainedNormalContactVector());
    }
 
-   public void setWeight(double weight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      feedbackControlCommand.setWeightForSolver(weight);
-   }
-
-   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
-   {
-      feedbackControlCommand.setWeightsForSolver(angular, linear);
+      this.angularWeight = angularWeight;
+      this.linearWeight = linearWeight;
    }
 
    @Override
