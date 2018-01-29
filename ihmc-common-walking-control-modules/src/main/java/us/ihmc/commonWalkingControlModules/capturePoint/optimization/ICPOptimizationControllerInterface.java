@@ -29,7 +29,7 @@ public interface ICPOptimizationControllerInterface
    void initializeForSingleSupport(double initialTime, RobotSide transferToSide, double omega0);
 
    void getDesiredCMP(FramePoint2D desiredCMPToPack);
-   void getFootstepSolution(FramePoint2D footstepSolutionToPack);
+   void getFootstepSolution(Footstep footstepSolutionToPack);
 
    boolean wasFootstepAdjusted();
    boolean useAngularMomentum();

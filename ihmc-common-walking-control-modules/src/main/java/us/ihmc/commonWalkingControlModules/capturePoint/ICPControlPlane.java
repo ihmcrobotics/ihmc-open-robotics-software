@@ -84,7 +84,7 @@ public class ICPControlPlane
    public void projectPointFromPlaneOntoSurface(ReferenceFrame desiredReferenceFrame, FramePoint2DReadOnly pointToProject, FramePoint3D projectionToPack, double surfaceHeightInWorld)
    {
       tempFramePoint2D.setIncludingFrame(pointToProject);
-      tempFramePoint2D.changeFrame(worldFrame);
+      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
 
       tempFramePoint.setIncludingFrame(tempFramePoint2D, surfaceHeightInWorld);
       tempFramePoint.changeFrame(centerOfMassFrame);
@@ -99,7 +99,7 @@ public class ICPControlPlane
    public void projectPointFromPlaneOntoPlanarRegion(ReferenceFrame desiredReferenceFrame, FramePoint2DReadOnly pointToProject, FramePoint3D projectionToPack, PlanarRegion planarRegion)
    {
       tempFramePoint2D.setIncludingFrame(pointToProject);
-      tempFramePoint2D.changeFrame(centerOfMassFrame);
+      tempFramePoint2D.changeFrameAndProjectToXYPlane(centerOfMassFrame);
 
       tempFramePoint.setIncludingFrame(tempFramePoint2D, controlPlaneHeight.getDoubleValue());
       tempFramePoint.changeFrame(worldFrame);
@@ -131,7 +131,7 @@ public class ICPControlPlane
          Point2DReadOnly vertex = convexHull.getVertex(vertexIndex);
          tempFramePoint2D.setToZero(planarRegionFrame);
          tempFramePoint2D.set(vertex);
-         tempFramePoint2D.changeFrame(worldFrame);
+         tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
 
          double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint.getY());
 
@@ -163,7 +163,7 @@ public class ICPControlPlane
          Point2DReadOnly vertex = scaledConvexHull.getVertex(vertexIndex);
          tempFramePoint2D.setToZero(planarRegionFrame);
          tempFramePoint2D.set(vertex);
-         tempFramePoint2D.changeFrame(worldFrame);
+         tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
 
          double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint2D.getY());
 
@@ -196,7 +196,7 @@ public class ICPControlPlane
          Point2DReadOnly vertex = scaledConvexHull.getVertex(vertexIndex);
          tempFramePoint2D.setToZero(planarRegionFrame);
          tempFramePoint2D.set(vertex);
-         tempFramePoint2D.changeFrame(worldFrame);
+         tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
 
          double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint2D.getY());
 
