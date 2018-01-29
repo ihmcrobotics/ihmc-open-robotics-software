@@ -1,19 +1,10 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowBodyPath;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalVisibilityMap;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowPlanarRegions;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartVisibilityMap;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.VisibilityGraphsComputePath;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
+
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.*;
 
 public class VisibilityGraphsAnchorPaneController
 {
@@ -35,6 +26,8 @@ public class VisibilityGraphsAnchorPaneController
    private ToggleButton showClusterNavigableExtrusionsToggleButton;
    @FXML
    private ToggleButton showClusterNonNavigableExtrusionsToggleButton;
+   @FXML
+   private ToggleButton showWalkerToggleButton;
 
    private SimpleUIMessager messager;
 
@@ -57,6 +50,7 @@ public class VisibilityGraphsAnchorPaneController
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(EnableWalkerAnimation, showWalkerToggleButton.selectedProperty(), true);
    }
 
    @FXML
