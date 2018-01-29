@@ -181,14 +181,14 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
-   public void setWeights(Vector3DReadOnly highAngularFootWeight, Vector3DReadOnly highLinearFootWeight, Vector3DReadOnly defaultAngularFootWeight,
-                          Vector3DReadOnly defaultLinearFootWeight)
+   public void setWeights(Vector3DReadOnly loadedFootAngularWeight, Vector3DReadOnly loadedFootLinearWeight, Vector3DReadOnly footAngularWeight,
+                          Vector3DReadOnly footLinearWeight)
    {
-      swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      touchdownState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      swingState.setWeights(footAngularWeight, footLinearWeight);
+      moveViaWaypointsState.setWeights(footAngularWeight, footLinearWeight);
+      touchdownState.setWeights(footAngularWeight, footLinearWeight);
+      onToesState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
+      supportState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
    }
 
    public void replanTrajectory(Footstep footstep, double swingTime, boolean continuousReplan)
