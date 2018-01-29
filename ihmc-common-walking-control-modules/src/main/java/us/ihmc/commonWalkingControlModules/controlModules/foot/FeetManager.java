@@ -117,13 +117,13 @@ public class FeetManager
       parentRegistry.addChild(registry);
    }
 
-   public void setWeights(Vector3DReadOnly highAngularFootWeight, Vector3DReadOnly highLinearFootWeight, Vector3DReadOnly defaultAngularFootWeight,
-                          Vector3DReadOnly defaultLinearFootWeight)
+   public void setWeights(Vector3DReadOnly loadedFootAngularWeight, Vector3DReadOnly loadedFootLinearWeight, Vector3DReadOnly footAngularWeight,
+                          Vector3DReadOnly footLinearWeight)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModule.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
+         footControlModule.setWeights(loadedFootAngularWeight, loadedFootLinearWeight, footAngularWeight, footLinearWeight);
       }
    }
 
