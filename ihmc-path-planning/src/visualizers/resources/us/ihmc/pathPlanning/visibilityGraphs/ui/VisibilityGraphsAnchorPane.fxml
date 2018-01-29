@@ -33,6 +33,7 @@
             <ToggleButton fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <ToggleButton fx:id="showStartMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show start map" GridPane.columnIndex="3" />
             <ToggleButton fx:id="showGoalMapToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show goal map" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <ToggleButton fx:id="showWalkerToggleButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show walker" GridPane.columnIndex="3" GridPane.rowIndex="2" />
          </children>
       </GridPane>
    </children>
