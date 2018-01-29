@@ -106,7 +106,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       taskspaceAngularWeights.add(new GroupParameter<>("Hand", handAngularWeight, handNames));
       taskspaceLinearWeights.add(new GroupParameter<>("Hand", handLinearWeight, handNames));
       taskspaceAngularWeights.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
-      taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
+      taskspaceLinearWeights.add(new GroupParameter<>("Foot", getDefaultLinearFootWeight(), footNames));
 
       this.nContactableBodies = numberOfContactableBodies;
    }
@@ -115,6 +115,14 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    {
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), names));
+   }
+
+   /**
+    * Can be overwritten in a unit test to change the foot weight.
+    */
+   public Vector3D getDefaultLinearFootWeight()
+   {
+      return footLinearWeight;
    }
 
    /** @inheritDoc */
