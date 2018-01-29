@@ -134,18 +134,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       }
    }
 
-   private final FramePose3D footstepPose = new FramePose3D();
-   private final FramePoint2D footstepPositionSolution = new FramePoint2D();
-
    @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       if (icpOptimizationController.useStepAdjustment())
       {
-         footstepToPack.getPose(footstepPose);
-         icpOptimizationController.getFootstepSolution(footstepPositionSolution);
-         footstepPose.setPosition(footstepPositionSolution);
-         footstepToPack.setPose(footstepPose);
+         icpOptimizationController.getFootstepSolution(footstepToPack);
       }
 
       return icpOptimizationController.wasFootstepAdjusted();
