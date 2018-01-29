@@ -2,7 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -60,12 +61,13 @@ public class FootLeapOfFaithModule
       }
    }
 
-   public void scaleFootWeight(YoFrameVector unscaledLinearWeight, YoFrameVector scaledLinearWeight)
+   public void scaleFootWeight(Vector3DReadOnly unscaledLinearWeight, Vector3DBasics scaledLinearWeight)
    {
+      scaledLinearWeight.set(unscaledLinearWeight);
+
       if (!scaleFootWeight.getBooleanValue())
          return;
 
-      scaledLinearWeight.set(unscaledLinearWeight);
       scaledLinearWeight.scale(horizontalFootWeightScaleFraction.getDoubleValue());
 
       scaledLinearWeight.setX(Math.max(minimumHorizontalWeight.getDoubleValue(), scaledLinearWeight.getX()));
