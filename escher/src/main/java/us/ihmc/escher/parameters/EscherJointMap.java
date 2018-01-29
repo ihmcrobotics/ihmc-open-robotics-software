@@ -31,6 +31,7 @@ public class EscherJointMap implements DRCRobotJointMap
    private static final String fullPelvisNameInSdf = pelvisName;
    private static final String headName = "head";
    private static final SideDependentList<String> handNames = new SideDependentList<String>(getRobotSidePrefix(RobotSide.LEFT) + "_palm", getRobotSidePrefix(RobotSide.RIGHT) + "_palm");
+   private static final SideDependentList<String> footNames = new SideDependentList<String>(getRobotSidePrefix(RobotSide.LEFT) + "_foot", getRobotSidePrefix(RobotSide.RIGHT) + "_foot");
 
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
@@ -218,9 +219,16 @@ public class EscherJointMap implements DRCRobotJointMap
       return headName;
    }
 
+   @Override
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
+   }
+
+   @Override
+   public String getFootName(RobotSide robotSide)
+   {
+      return footNames.get(robotSide);
    }
 
    @Override
