@@ -162,14 +162,14 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
 
    /** @inheritDoc */
    @Override
-   public Vector3D getHighLinearFootWeight()
+   public Vector3D getLoadedFootLinearWeight()
    {
       return highLinearFootWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3D getHighAngularFootWeight()
+   public Vector3D getLoadedFootAngularWeight()
    {
       return highAngularFootWeight;
    }
