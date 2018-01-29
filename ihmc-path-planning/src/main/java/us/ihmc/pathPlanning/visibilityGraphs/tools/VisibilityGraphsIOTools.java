@@ -25,7 +25,10 @@ public class VisibilityGraphsIOTools
 {
    private static final boolean DEBUG = true;
 
-   public static final String DATA_FOLDER_NAME = "us/ihmc/pathPlanning/visibilityGraphs/data";
+   public static final String TEST_DATA_URL = "unitTestData/testable";
+   public static final String IN_DEVELOLOPMENT_TEST_DATA_URL = "unitTestData/inDevelopment";
+   public static final String PLANAR_REGION_DATA_URL = "planarRegionData";
+
    private static final String VIZ_GRAPHS_DATA_FOLDER_SUFFIX = "VizGraphs";
    public static final String INPUTS_PARAMETERS_FILENAME = "VizGraphsInputs.txt";
    private static final String PLANAR_REGION_DIRECTORY_KEYWORD = "PlanarRegion";
@@ -195,11 +198,18 @@ public class VisibilityGraphsIOTools
 
    public static List<VisibilityGraphsUnitTestDataset> loadAllDatasets(Class<?> loadingClass)
    {
-      ArrayList<Path> relativePaths = new ArrayList<>();
-      PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, DATA_FOLDER_NAME)
-                           .forEach(entry -> relativePaths.add(Paths.get(DATA_FOLDER_NAME, entry)));
+      List<String> childDirectories = PlanarRegionFileTools.listResourceDirectoryContents(loadingClass, TEST_DATA_URL);
+      List<VisibilityGraphsUnitTestDataset> datasets = new ArrayList<>();
 
-      return relativePaths.stream().map(VisibilityGraphsIOTools::loadDataset).collect(Collectors.toList());
+      for (int i = 0; i < childDirectories.size(); i++)
+      {
+         PrintTools.info("trying to load:");
+         PrintTools.info(TEST_DATA_URL + "/" + childDirectories.get(i));
+
+         datasets.add(loadDataset(TEST_DATA_URL + "/" + childDirectories.get(i)));
+      }
+
+      return datasets;
    }
 
    /**
@@ -258,40 +268,36 @@ public class VisibilityGraphsIOTools
       return PlanarRegionFileTools.isPlanarRegionFile(planarRegionFolders[0]);
    }
 
-   public static VisibilityGraphsUnitTestDataset loadDataset(Path datasetFolder)
+   public static VisibilityGraphsUnitTestDataset loadDataset(String datasetResourceName)
    {
-      return new VisibilityGraphsUnitTestDataset(datasetFolder);
-   }
-
-   public static VisibilityGraphsUnitTestDataset loadDataset(File datasetFolder)
-   {
-      return new VisibilityGraphsUnitTestDataset(datasetFolder);
+      return new VisibilityGraphsUnitTestDataset(datasetResourceName);
    }
 
    public static class VisibilityGraphsUnitTestDataset
    {
-      private final Path datasetPath;
+      private final String datasetName;
+      private final String datasetResourceName;
 
       private final int expectedPathSize;
       private final Point3D start;
       private final Point3D goal;
       private final PlanarRegionsList planarRegionsList;
 
-      private VisibilityGraphsUnitTestDataset(File file)
+      private VisibilityGraphsUnitTestDataset(String datasetResourceName)
       {
-         this.datasetPath = file.toPath();
-         String expectedParametersFileName = file.getAbsolutePath() + File.separator + INPUTS_PARAMETERS_FILENAME;
+         this.datasetName = getDatasetName(datasetResourceName);
+         this.datasetResourceName = datasetResourceName;
 
-         List<File> children = Arrays.asList(file.listFiles());
-         File parametersFile = children.stream().filter(child -> child.getName().endsWith(INPUTS_PARAMETERS_FILENAME)).findFirst().orElse(null);
+         String expectedParametersResourceName = datasetResourceName + "/" + INPUTS_PARAMETERS_FILENAME;
+         String expectedPlanarRegionsResourceName = datasetResourceName + "/" + getPlanarRegionsDirectoryName();
 
-         if (parametersFile == null || !parametersFile.getAbsolutePath().equals(expectedParametersFileName))
-            throw new RuntimeException("Could not find the parmeter file: " + expectedParametersFileName);
+         File parametersFile = PlanarRegionFileTools.getResourceFile(expectedParametersResourceName);
+         if (!parametersFile.exists())
+            throw new RuntimeException("Could not find the parmeter file: " + expectedParametersResourceName);
 
-         File planarRegionFile = children.stream().filter(child -> child.isDirectory()).findFirst().orElse(null);
-
-         if (planarRegionFile == null)
-            throw new RuntimeException("Could not find the planar region directory.");
+         File planarRegionFile = PlanarRegionFileTools.getResourceFile(expectedPlanarRegionsResourceName);
+         if(!planarRegionFile.exists())
+            throw new RuntimeException("Could not find planar regions file: " + expectedPlanarRegionsResourceName);
 
          expectedPathSize = parsePathSize(parametersFile);
          start = parseField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
@@ -306,50 +312,16 @@ public class VisibilityGraphsIOTools
             throw new RuntimeException("Could not load the planar regions. Data file: " + planarRegionFile);
       }
 
-      private VisibilityGraphsUnitTestDataset(Path datasetPath)
+      private static String getDatasetName(String datasetResourceName)
       {
-         this.datasetPath = datasetPath;
-         if (DEBUG)
-            PrintTools.info("Dataset path: " + datasetPath);
+         String[] resourcePath = datasetResourceName.split("/");
+         return resourcePath[resourcePath.length - 1];
+      }
 
-         Path parametersPath = datasetPath.resolve(INPUTS_PARAMETERS_FILENAME);
-
-         if (DEBUG)
-            PrintTools.info("expectedParametersFileName: " + parametersPath);
-
-         if (getClass().getClassLoader().getResource(parametersPath.toString()) == null)
-            throw new RuntimeException("Could not find the parmeter file: " + parametersPath);
-
-         String planarRegionDirectoryName = PlanarRegionFileTools.listResourceDirectoryContents(getClass(), datasetPath).stream()
-                                                                 .filter(content -> content.contains(PLANAR_REGION_DIRECTORY_KEYWORD)).findFirst().orElse(null);
-         if (DEBUG)
-            PrintTools.info(this, "PlanarRegion folder: " + planarRegionDirectoryName);
-
-         if (planarRegionDirectoryName == null)
-            throw new RuntimeException("Could not find the planar region directory.");
-
-         File parametersFile = PlanarRegionFileTools.fileFromClassPath(getClass(), parametersPath);
-         File planarRegionFile = PlanarRegionFileTools.fileFromClassPath(getClass(), datasetPath.resolve(planarRegionDirectoryName));
-         if (DEBUG)
-            PrintTools.info("Planar regions folder children, files found: " + Arrays.toString(planarRegionFile.listFiles()));
-
-         expectedPathSize = parsePathSize(parametersFile);
-         start = parseField(parametersFile, START_FIELD_OPEN, START_FIELD_CLOSE, VisibilityGraphsIOTools::parsePoint3D);
-         goal = parseField(parametersFile, GOAL_FIELD_OPEN, GOAL_FIELD_END, VisibilityGraphsIOTools::parsePoint3D);
-         planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(getClass(), datasetPath.resolve(planarRegionDirectoryName));
-
-         if (start == null)
-            throw new RuntimeException("Could not load the start position. Data file: " + parametersFile);
-         else if (DEBUG)
-            PrintTools.info("Start: " + start);
-
-         if (goal == null)
-            throw new RuntimeException("Could not load the goal position. Data file: " + parametersFile);
-         else if (DEBUG)
-            PrintTools.info("Goal: " + goal);
-
-         if (planarRegionsList == null)
-            throw new RuntimeException("Could not load the planar regions. Data file: " + planarRegionFile);
+      private String getPlanarRegionsDirectoryName()
+      {
+         String date = datasetName.substring(0, 15);
+         return date + "_PlanarRegion";
       }
 
       private static int parsePathSize(File file)
@@ -363,7 +335,7 @@ public class VisibilityGraphsIOTools
 
       public String getDatasetName()
       {
-         return datasetPath.toString();
+         return datasetResourceName;
       }
 
       public Point3D getStart()
