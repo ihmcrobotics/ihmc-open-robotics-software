@@ -26,7 +26,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.BlendedPoseTrajectoryGenerator;
@@ -51,6 +54,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class SwingState extends AbstractUnconstrainedState
 {
    private final YoBoolean replanTrajectory;
+   private final YoBoolean footstepWasAdjusted;
 
    private static final double maxScalingFactor = 1.5;
    private static final double minScalingFactor = 0.1;
@@ -140,6 +144,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePoint3D unadjustedPosition = new FramePoint3D(worldFrame);
 
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
+   private final RateLimitedYoFramePose rateLimitedAdjustedPose;
+
    private final FramePose3D footstepPose = new FramePose3D();
    private final FramePose3D lastFootstepPose = new FramePose3D();
 
@@ -172,6 +178,7 @@ public class SwingState extends AbstractUnconstrainedState
       finalSwingHeightOffset = new DoubleParameter(namePrefix + "SwingFinalHeightOffset", registry, swingTrajectoryParameters.getDesiredTouchdownHeightOffset(), -0.01, 0.005);
       //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
+      footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);
 
       minHeightDifferenceForObstacleClearance = new YoDouble(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
       minHeightDifferenceForObstacleClearance.set(swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown());
@@ -188,6 +195,8 @@ public class SwingState extends AbstractUnconstrainedState
       heelTouchdownAngle.set(swingTrajectoryParameters.getHeelTouchdownAngle());
       maximumHeightForHeelTouchdown.set(swingTrajectoryParameters.getMaximumHeightForHeelTouchdown());
       heelTouchdownLengthRatio.set(swingTrajectoryParameters.getHeelTouchdownLengthRatio());
+
+      rateLimitedAdjustedPose = new RateLimitedYoFramePose(namePrefix + "AdjustedFootstepPose", "", registry, 10.0, controlDT, worldFrame);
 
       doToeTouchdownIfPossible = new YoBoolean(namePrefix + "DoToeTouchdownIfPossible", registry);
       toeTouchdownAngle = new YoDouble(namePrefix + "ToeTouchdownAngle", registry);
@@ -265,7 +274,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       lastFootstepPose.setToNaN();
       footstepPose.setToNaN();
-      adjustedFootstepPose.setToNaN();
+      footstepWasAdjusted.set(false);
 
       currentTrajectoryWaypoint = new YoInteger(namePrefix + "CurrentTrajectoryWaypoint", registry);
       yoDesiredSolePosition = new YoFramePoint(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
@@ -325,7 +334,7 @@ public class SwingState extends AbstractUnconstrainedState
       initialAngularVelocity.clipToMaxLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
       stanceFootPosition.setToZero(oppositeSoleFrame);
 
-      adjustedFootstepPose.setToNaN();
+      footstepWasAdjusted.set(false);
 
       fillAndInitializeTrajectories(true);
    }
@@ -362,6 +371,7 @@ public class SwingState extends AbstractUnconstrainedState
    protected void computeAndPackTrajectory()
    {
       currentTime.set(getTimeInCurrentState());
+      rateLimitedAdjustedPose.update(adjustedFootstepPose);
 
       double time;
       if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
@@ -444,6 +454,9 @@ public class SwingState extends AbstractUnconstrainedState
 
       setFootstepInternal(footstep);
       setFootstepDurationInternal(swingTime);
+
+      adjustedFootstepPose.set(footstepPose);
+      rateLimitedAdjustedPose.set(footstepPose);
    }
 
    /**
@@ -469,6 +482,8 @@ public class SwingState extends AbstractUnconstrainedState
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
    {
       replanTrajectory.set(true);
+      footstepWasAdjusted.set(true);
+
       adjustedFootstep.getPose(adjustedFootstepPose);
 
       setFootstepDurationInternal(swingTime);
@@ -568,8 +583,9 @@ public class SwingState extends AbstractUnconstrainedState
          initialPose.changeFrame(worldFrame);
          blendedSwingTrajectory.blendInitialConstraint(initialPose, 0.0, swingTrajectoryBlendDuration);
       }
-      if (!adjustedFootstepPose.containsNaN())
+      if (footstepWasAdjusted.getBooleanValue())
       {
+         rateLimitedAdjustedPose.getFramePose(adjustedFootstepPose);
          blendedSwingTrajectory.blendFinalConstraint(adjustedFootstepPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();
