@@ -155,7 +155,7 @@
             </accel>
           </noise>
         </imu>
-        <pose>-0.0905 -0.04 -0.0125 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
       </sensor>
       
     </link>

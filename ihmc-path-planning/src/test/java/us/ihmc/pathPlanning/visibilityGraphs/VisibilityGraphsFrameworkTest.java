@@ -38,6 +38,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParamete
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools.VisibilityGraphsUnitTestDataset;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.VisibilityGraphsDataExporter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.SimpleUIMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
@@ -149,7 +150,7 @@ public class VisibilityGraphsFrameworkTest extends Application
    }
 
    @Test(timeout = TIMEOUT)
-   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 13.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testDatasetsWithoutOcclusion() throws Exception
    {
       if (VISUALIZE)
@@ -185,7 +186,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
    private void runAssertionsOnAllDatasets(DatasetTestRunner datasetTestRunner) throws Exception
    {
-      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(getClass());
+      List<VisibilityGraphsUnitTestDataset> allDatasets = VisibilityGraphsIOTools.loadAllDatasets(VisibilityGraphsDataExporter.class);
 
       if (DEBUG)
       {

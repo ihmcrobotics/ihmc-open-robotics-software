@@ -5,6 +5,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -29,7 +30,6 @@ public class ICPProportionalController
    private final DoubleProvider feedbackPartMaxRate;
 
    private final YoFramePoint icpPosition;
-   private final FrameVector2D icpIntegral = new FrameVector2D(worldFrame);
 
    private final double controlDT;
    private final DoubleProvider captureKpParallelToMotion;
@@ -72,8 +72,8 @@ public class ICPProportionalController
    private final FramePoint2D desiredCMP = new FramePoint2D();
    private final FramePoint2D previousPerfectCMP = new FramePoint2D();
 
-   public FramePoint2D doProportionalControl(FramePoint2D desiredCMPPreviousValue, FramePoint2D capturePoint, FramePoint2D desiredCapturePoint,
-         FramePoint2D finalDesiredCapturePoint, FrameVector2D desiredCapturePointVelocity, FramePoint2D perfectCMP, double omega0)
+   public FramePoint2D doProportionalControl(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D capturePoint, FramePoint2D desiredCapturePoint,
+                                             FramePoint2D finalDesiredCapturePoint, FrameVector2D desiredCapturePointVelocity, FramePoint2D perfectCMP, double omega0)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -127,8 +127,7 @@ public class ICPProportionalController
          icpErrorIntegrated.set(0.0, 0.0);
       }
 
-      icpIntegral.set(icpErrorIntegrated);
-      tempControl.add(icpIntegral);
+      tempControl.add(icpErrorIntegrated);
 
       feedbackPart.set(tempControl);
       desiredCMP.add(tempControl);
@@ -150,15 +149,15 @@ public class ICPProportionalController
    private final FrameVector2D cmpErrorPreviousValue = new FrameVector2D();
    private final FrameVector2D cmpErrorDifference = new FrameVector2D();
 
-   private void rateLimitCMP(FramePoint2D cmp, FramePoint2D cmpPreviousValue, FramePoint2D perfectCMP, FramePoint2D previousPerfectCMP)
+   private void rateLimitCMP(FramePoint2D cmpToPack, FramePoint2DReadOnly cmpPreviousValue, FramePoint2DReadOnly perfectCMP, FramePoint2DReadOnly previousPerfectCMP)
    {
       if (feedbackPartMaxRate.getValue() < 1.0e-3)
          return;
 
-      cmpError.setToZero(cmp.getReferenceFrame());
-      cmpError.sub(cmp, perfectCMP);
+      cmpError.setToZero(cmpToPack.getReferenceFrame());
+      cmpError.sub(cmpToPack, perfectCMP);
 
-      cmpErrorPreviousValue.setToZero(cmp.getReferenceFrame());
+      cmpErrorPreviousValue.setToZero(cmpToPack.getReferenceFrame());
       cmpErrorPreviousValue.sub(cmpPreviousValue, previousPerfectCMP);
 
       cmpErrorDifference.sub(cmpError, cmpErrorPreviousValue);
@@ -168,7 +167,7 @@ public class ICPProportionalController
          cmpErrorDifference.scale(errorDifferenceMax / errorDifferenceMagnitude);
 
       cmpError.add(cmpErrorPreviousValue, cmpErrorDifference);
-      cmp.add(perfectCMP, cmpError);
+      cmpToPack.add(perfectCMP, cmpError);
    }
 
    private class Vector2dZUpFrame extends ReferenceFrame
