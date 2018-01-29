@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICP
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -528,6 +529,18 @@ public class ICPOptimizationQPSolver
     * @param previousFootstepLocation new location of the previous footstep location to try and minimize against.
     */
    public void resetFootstepRate(FramePoint2D previousFootstepLocation)
+   {
+      previousFootstepLocation.changeFrame(worldFrame);
+      this.previousFootstepLocation.set(0, 0, previousFootstepLocation.getX());
+      this.previousFootstepLocation.set(1, 0, previousFootstepLocation.getY());
+   }
+
+   /**
+    * Resets the footstep rate objectives. This is important to call at the start of every new step, if using footstep rate.
+    *
+    * @param previousFootstepLocation new location of the previous footstep location to try and minimize against.
+    */
+   public void resetFootstepRate(FramePoint3D previousFootstepLocation)
    {
       previousFootstepLocation.changeFrame(worldFrame);
       this.previousFootstepLocation.set(0, 0, previousFootstepLocation.getX());

@@ -420,8 +420,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          else
             projectedTempPoint3d.set(tempPoint3d);
 
-         tempPoint2d.set(projectedTempPoint3d);
-         solver.resetFootstepRate(tempPoint2d);
+         solver.resetFootstepRate(projectedTempPoint3d);
       }
    }
 
