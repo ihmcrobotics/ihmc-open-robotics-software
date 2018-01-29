@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RateLimitedYoFramePose extends YoFramePoseUsingQuaternions
+public class RateLimitedYoFramePose extends YoFramePose
 {
    private final RateLimitedYoFrameVector position;
    private final RateLimitedYoFrameOrientation orientation;
@@ -45,8 +45,17 @@ public class RateLimitedYoFramePose extends YoFramePoseUsingQuaternions
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
 
-      this.position = new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maxRate, dt, rawPose.getPosition());
-      this.orientation = new RateLimitedYoFrameOrientation(namePrefix, nameSuffix, registry, maxRate, dt, rawPose.getOrientation());
+      if (rawPose != null)
+      {
+         this.position = new RateLimitedYoFrameVector(namePrefix, "Position" + nameSuffix, registry, maxRate, dt, rawPose.getPosition());
+         this.orientation = new RateLimitedYoFrameOrientation(namePrefix, "Orientation" + nameSuffix, registry, maxRate, dt, rawPose.getOrientation());
+      }
+      else
+      {
+         this.position = new RateLimitedYoFrameVector(namePrefix, "Position" + nameSuffix, registry, maxRate, dt, referenceFrame);
+         this.orientation = new RateLimitedYoFrameOrientation(namePrefix, "Orientation" + nameSuffix, registry, maxRate, dt, referenceFrame);
+      }
+
 
       reset();
    }
@@ -67,6 +76,9 @@ public class RateLimitedYoFramePose extends YoFramePoseUsingQuaternions
    {
       position.update();
       orientation.update();
+
+      setPosition(position);
+      setOrientation(orientation.getFrameOrientation());
    }
 
    public void update(YoFramePoseUsingQuaternions yoFramePoseUnfiltered)
@@ -74,6 +86,9 @@ public class RateLimitedYoFramePose extends YoFramePoseUsingQuaternions
       checkReferenceFrameMatch(yoFramePoseUnfiltered);
       position.update(yoFramePoseUnfiltered.getPosition());
       orientation.update(yoFramePoseUnfiltered.getOrientation());
+
+      setPosition(position);
+      setOrientation(orientation.getFrameOrientation());
    }
 
    public void update(FramePose3D framePoseUnfiltered)
@@ -81,5 +96,8 @@ public class RateLimitedYoFramePose extends YoFramePoseUsingQuaternions
       checkReferenceFrameMatch(framePoseUnfiltered);
       position.update(framePoseUnfiltered.getPosition());
       orientation.update(framePoseUnfiltered.getOrientation());
+
+      setPosition(position);
+      setOrientation(orientation.getFrameOrientation());
    }
 }
