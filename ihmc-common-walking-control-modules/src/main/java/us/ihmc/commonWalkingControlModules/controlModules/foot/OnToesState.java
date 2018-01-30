@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -61,7 +61,7 @@ public class OnToesState extends AbstractFootControlState
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
-   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoPIDSE3Gains gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
 

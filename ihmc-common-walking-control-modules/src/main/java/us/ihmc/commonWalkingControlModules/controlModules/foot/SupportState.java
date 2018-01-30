@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -108,7 +108,7 @@ public class SupportState extends AbstractFootControlState
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
-   public SupportState(FootControlHelper footControlHelper, YoPIDSE3Gains holdPositionGains, YoVariableRegistry parentRegistry)
+   public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
       String prefix = footControlHelper.getRobotSide().getLowerCaseName() + "Foot";

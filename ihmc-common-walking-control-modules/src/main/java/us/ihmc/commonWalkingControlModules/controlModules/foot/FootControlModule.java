@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -85,8 +85,9 @@ public class FootControlModule
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
-         YoPIDSE3Gains swingFootControlGains, YoPIDSE3Gains holdPositionFootControlGains, YoPIDSE3Gains toeOffFootControlGains,
-         HighLevelHumanoidControllerToolbox controllerToolbox, ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
+                            PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
+                            PIDSE3GainsReadOnly toeOffFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox,
+                            ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
