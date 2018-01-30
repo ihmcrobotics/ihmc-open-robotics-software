@@ -148,8 +148,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches,
             estimatorCenterOfMassDataHolderToUpdate,
-            centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
-            stateEstimatorParameters, yoGraphicsListRegistry, registry);
+            centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, stateEstimatorParameters,
+            yoGraphicsListRegistry, registry);
 
 
       if (yoGraphicsListRegistry != null)
