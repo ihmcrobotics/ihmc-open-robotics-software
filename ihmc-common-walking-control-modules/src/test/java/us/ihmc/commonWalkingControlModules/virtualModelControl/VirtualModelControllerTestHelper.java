@@ -775,7 +775,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
 
@@ -837,7 +837,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -884,7 +884,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -1074,7 +1074,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
 
@@ -1153,7 +1153,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -1200,7 +1200,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -1431,7 +1431,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
 
@@ -1510,7 +1510,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -1557,7 +1557,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -1777,7 +1777,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
 
@@ -1839,7 +1839,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -1886,7 +1886,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -2059,7 +2059,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
          oneDoFJointsToPack.clear();
          for (OneDoFJoint joint : joints)
@@ -2121,7 +2121,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
@@ -2168,7 +2168,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
       {
       }
 
