@@ -11,7 +11,7 @@ public class ValkyriePhysicalProperties
 
    public static final double ankleHeight = 0.09; // Should be 0.075 + 0.015 (sole thickness)
    public static final double footLength = 0.25 - footsizeReduction;
-   public static final double footBack = 0.073 - footsizeReduction/2.0;
+   public static final double footBack = 0.073 - footsizeReduction / 2.0;
    public static final double footForward = footLength - footBack;
    public static final double footWidth = 0.15 - footsizeReduction;
 
@@ -26,7 +26,7 @@ public class ValkyriePhysicalProperties
       for (RobotSide side : RobotSide.values)
       {
          RigidBodyTransform soleToAnkleFrame = new RigidBodyTransform();
-//         soleToAnkleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
+         //         soleToAnkleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
          soleToAnkleFrame.setTranslation(new Vector3D(footLength / 2.0 - footBack, 0.0, -ValkyriePhysicalProperties.ankleHeight));
          soleToAnkleFrameTransforms.put(side, soleToAnkleFrame);
       }
@@ -37,7 +37,8 @@ public class ValkyriePhysicalProperties
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform controlFrameToWristTransform = new RigidBodyTransform();
-         controlFrameToWristTransform.setTranslation(0.0, robotSide.negateIfRightSide(0.10), 0.0);
+         controlFrameToWristTransform.setTranslation(0.025, robotSide.negateIfRightSide(0.07), 0.0);
+         controlFrameToWristTransform.appendYawRotation(robotSide.negateIfRightSide(Math.PI * 0.5));
          handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
       }
    }
