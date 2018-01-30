@@ -641,16 +641,18 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
          if (localUseStepAdjustment && includeFootsteps)
          {
-            PlanarRegion activePlanarRegion;
             if (planarRegionConstraintProvider != null)
-               activePlanarRegion = planarRegionConstraintProvider.getActivePlanarRegion();
+            {
+               PlanarRegion activePlanarRegion = planarRegionConstraintProvider.getActivePlanarRegion();
+               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
+               boolean footstepWasAdjustedBySnapper = planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
+               solutionHandler.setFootstepWasAdjustedBySnapper(footstepWasAdjustedBySnapper);
+            }
             else
-               activePlanarRegion = null;
-
-            solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
-
-            boolean footstepWasAdjustedBySnapper = planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
-            solutionHandler.setFootstepWasAdjustedBySnapper(footstepWasAdjustedBySnapper);
+            {
+               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), null, solver);
+               solutionHandler.setFootstepWasAdjustedBySnapper(false);
+            }
          }
 
          if (isInDoubleSupport.getBooleanValue())

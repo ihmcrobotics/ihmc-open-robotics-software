@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCal
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -388,6 +389,10 @@ public class PlanarRegionConstraintProvider
       footPoseToPack.getFramePose(footstepPose);
       footstepXYPosition.set(footstepPose.getPosition());
 
+      // get the original yaw
+      footstepPose.changeFrame(worldFrame);
+      double originalYaw = footstepPose.getYaw();
+
       // get the orientation of the foot
       footstepPose.setToZero(planeReferenceFrame);
 
@@ -397,6 +402,9 @@ public class PlanarRegionConstraintProvider
 
       // change the foot pose to be correct
       footstepPose.changeFrame(worldFrame);
+      double currentYaw = footstepPose.getYaw();
+      footstepPose.appendYawRotation(originalYaw - currentYaw);
+
       footstepPose.setPosition(footstepXYPosition);
       footstepPose.setZ(zPosition);
 
