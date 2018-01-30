@@ -56,6 +56,7 @@ public class UIVisibilityGraphsTopics
    private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
    private static final TypedTopicTheme<Boolean> Stop = apiFactory.createTypedTopicTheme("Stop");
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
+   private static final TypedTopicTheme<Boolean> ComputePathWithOcclusions = apiFactory.createTypedTopicTheme("ComputePathWithOcclusions");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
@@ -91,6 +92,7 @@ public class UIVisibilityGraphsTopics
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);
 
    public static final Topic<Boolean> VisibilityGraphsComputePath = Root.child(VisibilityGraphs).topic(ComputePath);
+   public static final Topic<Boolean> VisibilityGraphsComputePathWithOcclusions = Root.child(VisibilityGraphs).topic(ComputePathWithOcclusions);
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParameters = Root.child(VisibilityGraphs).topic(Parameters);
    public static final Topic<Boolean> ShowBodyPath = Root.child(VisibilityGraphs).child(BodyPath).topic(Show);
    public static final Topic<Boolean> ShowPlanarRegions = Root.child(PlanarRegion).topic(Show);
