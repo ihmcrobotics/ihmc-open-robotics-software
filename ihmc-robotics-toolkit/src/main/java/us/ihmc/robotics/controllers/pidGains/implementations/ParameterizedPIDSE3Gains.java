@@ -67,8 +67,8 @@ public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
    public ParameterizedPIDSE3Gains(String suffix, PID3DGainsReadOnly defaultPositionGains, PID3DGainsReadOnly defaultOrientationGains,
                                    YoVariableRegistry registry)
    {
-      positionGains = new ParameterizedPID3DGains(suffix, defaultPositionGains, registry);
-      orientationGains = new ParameterizedPID3DGains(suffix, defaultOrientationGains, registry);
+      positionGains = new ParameterizedPID3DGains(suffix + "Position", defaultPositionGains, registry);
+      orientationGains = new ParameterizedPID3DGains(suffix + "Orientation", defaultOrientationGains, registry);
    }
 
    @Override
