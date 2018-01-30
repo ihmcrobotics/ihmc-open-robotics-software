@@ -191,9 +191,9 @@ public class FootControlModule
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
    }
 
-   public void replanTrajectory(Footstep footstep, double swingTime, boolean continuousReplan)
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
    {
-      swingState.replanTrajectory(footstep, swingTime, continuousReplan);
+      swingState.setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
    }
 
    public void requestTouchdownForDisturbanceRecovery()
