@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -256,7 +257,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
    {
       Collection<OneDoFJoint> values = oneDoFJoints.values();
       oneDoFJointsToPack.addAll(values);
@@ -271,7 +272,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
    {
       getOneDoFJoints(oneDoFJointsToPack);
    }
@@ -485,7 +486,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    }
 
    @Override
-   public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.clear();
       InverseDynamicsJoint parent = oneDoFJointAtEndOfChain;

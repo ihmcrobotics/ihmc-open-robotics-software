@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -380,7 +381,7 @@ public class FullRobotModelTestTools
          return oneDoFJoints;
       }
 
-      @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
       {
          oneDoFJointsToPack.clear();
          InverseDynamicsJoint parent = oneDoFJointAtEndOfChain;
@@ -403,7 +404,7 @@ public class FullRobotModelTestTools
          return getOneDoFJoints();
       }
 
-      @Override public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
          Collection<OneDoFJoint> values = oneDoFJoints.values();
          oneDoFJointsToPack.addAll(values);
@@ -414,7 +415,7 @@ public class FullRobotModelTestTools
          return oneDoFJoints.get(name);
       }
 
-      @Override public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      @Override public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
       {
          getOneDoFJoints(oneDoFJointsToPack);
       }

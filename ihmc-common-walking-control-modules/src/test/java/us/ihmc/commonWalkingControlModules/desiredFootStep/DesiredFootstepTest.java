@@ -11,9 +11,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -25,8 +28,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -35,7 +36,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class DesiredFootstepTest
@@ -399,6 +399,7 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(FootstepDataListMessage packet)
       {
+         boolean adjustable = packet.areFootstepsAdjustable;
          for (FootstepDataMessage footstepData : packet)
          {
             List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
@@ -406,7 +407,7 @@ public class DesiredFootstepTest
                contactPoints = null;
             FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
 
-            Footstep footstep = new Footstep(robotSide, footstepPose, true, contactPoints);
+            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable, contactPoints);
             footstep.setTrajectoryType(footstepData.getTrajectoryType());
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);

@@ -2,6 +2,7 @@ package us.ihmc.robotModels;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -169,7 +170,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.addAll(oneDoFJointsExcludingHands);
    }

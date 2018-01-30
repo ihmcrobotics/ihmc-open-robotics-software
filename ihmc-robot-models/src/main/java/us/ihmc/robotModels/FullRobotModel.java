@@ -1,6 +1,6 @@
 package us.ihmc.robotModels;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -97,7 +97,7 @@ public interface FullRobotModel
 
    public abstract Map<String, OneDoFJoint> getOneDoFJointsAsMap();
 
-   public abstract void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack);
+   public abstract void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack);
 
    /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
    public abstract OneDoFJoint[] getControllableOneDoFJoints();
@@ -105,9 +105,9 @@ public interface FullRobotModel
    /**
     *  Gets all the one DoF joints that this robot has.
     *
-    *  @param oneDoFJointsToPack {@code ArrayList<OneDoFJoint>} that will be packed will all the one DoF joints.
+    *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will all the one DoF joints.
     */
-   public abstract void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack);
+   public abstract void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
 
    /**
     * Gets the one DoF joint with the given name.
@@ -120,9 +120,9 @@ public interface FullRobotModel
    /**
     *  Gets all one DoF joints, excluding joints that do not exist in the controller.
     *
-    *  @param oneDoFJointsToPack {@code ArrayList<OneDoFJoint>} that will be packed will the controllable one DoF joints.
+    *  @param oneDoFJointsToPack {@code List<OneDoFJoint>} that will be packed will the controllable one DoF joints.
     */
-   public abstract void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack);
+   public abstract void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack);
 
    /**
     * Returns all the IMUDefinitions corresponding to each IMU attached to this robot.
