@@ -45,6 +45,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final YoBoolean allowStepAdjustment = new YoBoolean(yoNamePrefix + "AllowStepAdjustment", registry);
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final YoBoolean useAngularMomentum = new YoBoolean(yoNamePrefix + "UseAngularMomentum", registry);
 
@@ -185,7 +186,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       useFootstepRate = icpOptimizationParameters.useFootstepRate();
       useFeedbackRate = icpOptimizationParameters.useFeedbackRate();
 
-      useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
+      allowStepAdjustment.set(icpOptimizationParameters.allowStepAdjustment());
       useAngularMomentum.set(icpOptimizationParameters.useAngularMomentum());
 
       scaleStepRateWeightWithTime.set(icpOptimizationParameters.scaleStepRateWeightWithTime());
@@ -322,6 +323,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
                swingDuration.set(timing.getSwingTime());
                transferDuration.set(timing.getTransferTime());
+
+               useStepAdjustment.set(allowStepAdjustment.getBooleanValue() && footstep.getIsAdjustable());
             }
             else if (upcomingFootsteps.size() == 1)
             {

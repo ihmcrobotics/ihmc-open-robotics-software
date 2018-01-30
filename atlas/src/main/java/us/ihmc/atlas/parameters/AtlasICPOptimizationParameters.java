@@ -127,7 +127,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public boolean useStepAdjustment()
+   public boolean allowStepAdjustment()
    {
       return useStepAdjustment;
    }

@@ -60,6 +60,8 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
 
    /** If{@code false} the controller adjust each footstep height to be at the support sole height. */
    public boolean trustHeightOfFootsteps = true;
+   @RosExportedField(documentation = "Contains information on whether the robot can automatically adjust its footsteps to retain balance.")
+   public boolean areFootstepsAdjustable = true;
 
    /** If {@code true} the controller will adjust upcoming footsteps with the location error of previous steps. */
    public boolean offsetFootstepsWithExecutionError = false;
@@ -313,6 +315,11 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
    public void setTrustHeightOfFootsteps(boolean trustHeight)
    {
       trustHeightOfFootsteps = trustHeight;
+   }
+
+   public void setAreFootstepsAdjustable(boolean areFootstepsAdjustable)
+   {
+      this.areFootstepsAdjustable = areFootstepsAdjustable;
    }
 
    public void setOffsetFootstepsWithExecutionError(boolean offsetFootstepsWithExecutionError)
