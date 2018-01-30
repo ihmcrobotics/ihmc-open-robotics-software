@@ -8,10 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -23,7 +20,9 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -46,6 +45,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final YoBoolean allowStepAdjustment = new YoBoolean(yoNamePrefix + "AllowStepAdjustment", registry);
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final YoBoolean useAngularMomentum = new YoBoolean(yoNamePrefix + "UseAngularMomentum", registry);
 
@@ -81,9 +81,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
-   private final YoFramePoint2d footstepSolution = new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePose footstepSolution = new YoFramePose(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
    private final YoFramePoint2d footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
-   private final YoFramePoint2d upcomingFootstepLocation = new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+   private final YoFramePoint upcomingFootstepLocation = new YoFramePoint(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
    private final YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
    private final YoDouble footstepAdjustmentSafetyFactor = new YoDouble(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry);
@@ -144,6 +144,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private boolean localUseStepAdjustment;
 
+   private final FramePose3D tmpPose = new FramePose3D();
    private final FramePoint3D tempPoint3d = new FramePoint3D();
    private final FramePoint3D projectedTempPoint3d = new FramePoint3D();
    private final FramePoint2D tempPoint2d = new FramePoint2D();
@@ -185,7 +186,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       useFootstepRate = icpOptimizationParameters.useFootstepRate();
       useFeedbackRate = icpOptimizationParameters.useFeedbackRate();
 
-      useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
+      allowStepAdjustment.set(icpOptimizationParameters.allowStepAdjustment());
       useAngularMomentum.set(icpOptimizationParameters.useAngularMomentum());
 
       scaleStepRateWeightWithTime.set(icpOptimizationParameters.scaleStepRateWeightWithTime());
@@ -258,7 +259,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
                                                                        YoGraphicPosition.GraphicType.BALL);
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution, 0.005,
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution.getYoX(), this.footstepSolution.getYoY(), 0.005,
                                                                         YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.BALL);
       solutionHandler.setupVisualizers(artifactList);
 
@@ -314,14 +315,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          {
             if (upcomingFootsteps.size() == 0)
             {
-               footstep.getPosition2d(tempPoint2d);
-               upcomingFootstepLocation.set(tempPoint2d);
-
-               footstepSolution.set(tempPoint2d);
-               unclippedFootstepSolution.set(tempPoint2d);
+               footstep.getPosition(tempPoint3d);
+               footstep.getPose(tmpPose);
+               upcomingFootstepLocation.set(tempPoint3d);
+               unclippedFootstepSolution.set(tempPoint3d);
+               footstepSolution.set(tmpPose);
 
                swingDuration.set(timing.getSwingTime());
                transferDuration.set(timing.getTransferTime());
+
+               useStepAdjustment.set(allowStepAdjustment.getBooleanValue() && footstep.getIsAdjustable());
             }
             else if (upcomingFootsteps.size() == 1)
             {
@@ -420,8 +423,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          else
             projectedTempPoint3d.set(tempPoint3d);
 
-         tempPoint2d.set(projectedTempPoint3d);
-         solver.resetFootstepRate(tempPoint2d);
+         solver.resetFootstepRate(projectedTempPoint3d);
       }
    }
 
@@ -446,9 +448,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    }
 
    @Override
-   public void getFootstepSolution(FramePoint2D footstepSolutionToPack)
+   public void getFootstepSolution(Footstep footstepSolutionToPack)
    {
-      footstepSolutionToPack.set(footstepSolution);
+      footstepSolution.getFramePose(tmpPose);
+      footstepSolutionToPack.setPose(tmpPose);
    }
 
    @Override
@@ -645,6 +648,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                activePlanarRegion = null;
 
             solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
+
+            boolean footstepWasAdjustedBySnapper = planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
+            solutionHandler.setFootstepWasAdjustedBySnapper(footstepWasAdjustedBySnapper);
          }
 
          if (isInDoubleSupport.getBooleanValue())

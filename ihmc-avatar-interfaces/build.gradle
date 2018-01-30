@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.3"
+      classpath "us.ihmc:ihmc-build:0.12.5"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -43,7 +43,7 @@ mainDependencies {
    compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
    compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
    compile group: 'us.ihmc', name: 'robot-environment-awareness', version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
@@ -71,8 +71,8 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.1"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: groupDependencyVersion

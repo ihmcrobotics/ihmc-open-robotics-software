@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.3"
+      classpath "us.ihmc:ihmc-build:0.12.5"
    }
 }
 plugins {
@@ -32,7 +32,7 @@ mainDependencies {
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.3'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion

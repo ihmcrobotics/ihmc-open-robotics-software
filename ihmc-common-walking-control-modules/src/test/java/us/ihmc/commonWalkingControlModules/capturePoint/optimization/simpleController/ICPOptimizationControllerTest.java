@@ -81,7 +81,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public boolean useStepAdjustment()
+         public boolean allowStepAdjustment()
          {
             return false;
          }
@@ -153,7 +153,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public boolean useStepAdjustment()
+         public boolean allowStepAdjustment()
          {
             return false;
          }
@@ -225,7 +225,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public boolean useStepAdjustment()
+         public boolean allowStepAdjustment()
          {
             return false;
          }
@@ -313,7 +313,7 @@ public class ICPOptimizationControllerTest
          }
 
          @Override
-         public boolean useStepAdjustment()
+         public boolean allowStepAdjustment()
          {
             return false;
          }
@@ -502,7 +502,7 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public boolean useStepAdjustment()
+      public boolean allowStepAdjustment()
       {
          return false;
       }
