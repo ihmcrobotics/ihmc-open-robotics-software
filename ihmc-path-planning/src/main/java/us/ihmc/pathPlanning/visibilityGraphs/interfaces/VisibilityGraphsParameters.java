@@ -93,18 +93,18 @@ public interface VisibilityGraphsParameters
     */
    default ObstacleExtrusionDistanceCalculator getObstacleExtrusionDistanceCalculator()
    {
-      return new ObstacleExtrusionDistanceCalculator()
+      return (pointToExtrude, obstacleHeight) ->
       {
-         @Override
-         public double computeExtrusionDistance(Point2DReadOnly pointToExtrude, double obstacleHeight)
+         if(obstacleHeight < 0.0)
          {
-            if (obstacleHeight < 0.0)
-               return 0.0;
-            if (obstacleHeight <= getTooHighToStepDistance())
-            {
-               double alpha = obstacleHeight / getTooHighToStepDistance();
-               return EuclidCoreTools.interpolate(getExtrusionDistanceIfNotTooHighToStep(), getExtrusionDistance(), alpha);
-            }
+            return 0.0;
+         }
+         else if(obstacleHeight < getTooHighToStepDistance())
+         {
+            return getExtrusionDistanceIfNotTooHighToStep();
+         }
+         else
+         {
             return getExtrusionDistance();
          }
       };
