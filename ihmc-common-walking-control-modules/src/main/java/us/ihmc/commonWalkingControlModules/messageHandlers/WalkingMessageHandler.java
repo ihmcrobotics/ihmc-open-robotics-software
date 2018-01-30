@@ -206,11 +206,12 @@ public class WalkingMessageHandler
          finalTransferTime.set(defaultFinalTransferTime.getDoubleValue());
 
       boolean trustHeightOfFootsteps = command.isTrustHeightOfFootsteps();
+      boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
          setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), command.getExecutionMode());
-         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, upcomingFootsteps.add());
+         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
          currentNumberOfFootsteps.increment();
       }
 
@@ -740,9 +741,9 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, Footstep footstepToSet)
+   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, Footstep footstepToSet)
    {
-      footstepToSet.set(footstepData, trustHeight);
+      footstepToSet.set(footstepData, trustHeight, isAdjustable);
 
       if (offsettingPlanWithFootstepError.getBooleanValue())
       {
