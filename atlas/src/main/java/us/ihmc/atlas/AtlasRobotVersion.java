@@ -2,24 +2,19 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCHandType;
 
 public enum AtlasRobotVersion
 {
-   ATLAS_UNPLUGGED_V5_NO_FOREARMS,
-   ATLAS_UNPLUGGED_V5_NO_HANDS,
-   ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
-   ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI,
-   ATLAS_UNPLUGGED_V5_TROOPER;
+   ATLAS_UNPLUGGED_V5_NO_FOREARMS, ATLAS_UNPLUGGED_V5_NO_HANDS, ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI, ATLAS_UNPLUGGED_V5_TROOPER;
 
    private static String[] resourceDirectories;
-   private final SideDependentList<Transform> offsetHandFromAttachmentPlate = new SideDependentList<Transform>();
+   private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
 
    public DRCHandType getHandModel()
    {
@@ -34,18 +29,6 @@ public enum AtlasRobotVersion
       case ATLAS_UNPLUGGED_V5_NO_FOREARMS:
       default:
          return DRCHandType.NONE;
-      }
-   }
-
-   public double getDistanceAttachmentPlateHand()
-   {
-      switch (this)
-      {
-      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-      case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
-         return 0.16;
-      default:
-         return 0.0;
       }
    }
 
@@ -86,7 +69,7 @@ public enum AtlasRobotVersion
       return getClass().getClassLoader().getResourceAsStream(getSdfFile());
    }
 
-   public Transform getOffsetFromAttachmentPlate(RobotSide side)
+   public RigidBodyTransform getOffsetFromAttachmentPlate(RobotSide side)
    {
       if (offsetHandFromAttachmentPlate.get(side) == null)
       {
@@ -97,19 +80,30 @@ public enum AtlasRobotVersion
 
    private void createTransforms()
    {
+      double distanceAttachmentPlateHand;
+      
+      switch (this)
+      {
+      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
+      case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
+         distanceAttachmentPlateHand = 0.12; // On the palm.
+         break;
+      default:
+         distanceAttachmentPlateHand = 0.0;
+         break;
+      }
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         Vector3f centerOfHandToWristTranslation = new Vector3f();
-         float[] angles = new float[3];
+         Point3D centerOfHandToWristTranslation = new Point3D();
+         Quaternion centerOfHandToWristOrientation = new Quaternion();
+
          if (hasRobotiqHands())
          {
-            centerOfHandToWristTranslation = new Vector3f((float) getDistanceAttachmentPlateHand(), robotSide.negateIfLeftSide(0f), 0f);
-            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
-            angles[1] = 0.0f;
-            angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
+            centerOfHandToWristTranslation = new Point3D(distanceAttachmentPlateHand, 0.0, 0.0);
+            centerOfHandToWristOrientation.appendRollRotation(robotSide.negateIfLeftSide(Math.PI * 0.5));
          }
-         Quaternion centerOfHandToWristRotation = new Quaternion(angles);
-         offsetHandFromAttachmentPlate.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
+         offsetHandFromAttachmentPlate.set(robotSide, new RigidBodyTransform(centerOfHandToWristOrientation, centerOfHandToWristTranslation));
       }
    }
 
