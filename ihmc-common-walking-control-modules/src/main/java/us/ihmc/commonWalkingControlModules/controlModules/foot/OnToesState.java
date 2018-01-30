@@ -61,11 +61,14 @@ public class OnToesState extends AbstractFootControlState
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
+   private final PIDSE3GainsReadOnly gains;
+
    public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
 
       this.toeOffCalculator = toeOffCalculator;
+      this.gains = gains;
 
       String namePrefix = contactableFoot.getName();
 
@@ -95,7 +98,6 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       feedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       feedbackControlCommand.setPrimaryBase(pelvis);
-      feedbackControlCommand.setGains(gains);
 
       zeroAccelerationCommand.setWeight(SolverWeightLevels.HIGH);
       zeroAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
@@ -146,6 +148,7 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       zeroAccelerationCommand.setSpatialAccelerationToZero(toeOffFrame);
 
+      feedbackControlCommand.setGains(gains);
       feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       zeroAccelerationCommand.setWeights(angularWeight, linearWeight);
 
