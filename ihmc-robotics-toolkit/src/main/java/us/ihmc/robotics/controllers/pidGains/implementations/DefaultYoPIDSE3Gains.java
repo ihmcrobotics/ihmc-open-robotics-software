@@ -3,6 +3,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,7 +42,7 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
     * @param other the gains that will be copied into this object.
     * @param registry the registry to which the tuning variables are attached.
     */
-   public DefaultYoPIDSE3Gains(String suffix, PIDSE3Gains other, YoVariableRegistry registry)
+   public DefaultYoPIDSE3Gains(String suffix, PIDSE3GainsReadOnly other, YoVariableRegistry registry)
    {
       this(suffix, other.getPositionGains(), other.getOrientationGains(), registry);
    }
