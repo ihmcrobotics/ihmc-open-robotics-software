@@ -54,6 +54,12 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                      {
                         return true;
                      }
+
+                     @Override
+                     public boolean usePlanarRegionConstraints()
+                     {
+                        return true;
+                     }
                   };
                }
             };
