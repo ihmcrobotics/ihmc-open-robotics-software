@@ -7,6 +7,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -20,7 +21,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -31,7 +31,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class SnapBasedNodeCheckerTest
 {
@@ -69,8 +68,8 @@ public class SnapBasedNodeCheckerTest
          graphics.addCoordinateSystem(0.3);
          graphics.addPlanarRegionsList(planarRegions);
 
-         Point3D nodeA = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node0, parameters.getIdealFootstepWidth()));
-         Point3D nodeB = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node1, parameters.getIdealFootstepWidth()));
+         Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+         Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
 
          PlanarRegion bodyRegion = SnapBasedNodeChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
          graphics.addPlanarRegionsList(new PlanarRegionsList(bodyRegion), YoAppearance.White());
@@ -148,8 +147,8 @@ public class SnapBasedNodeCheckerTest
          graphics.addCoordinateSystem(0.3);
          graphics.addPlanarRegionsList(planarRegions);
 
-         Point3D nodeA = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node0, parameters.getIdealFootstepWidth()));
-         Point3D nodeB = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node1, parameters.getIdealFootstepWidth()));
+         Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+         Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          PlanarRegion bodyRegion = SnapBasedNodeChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
          graphics.addPlanarRegionsList(new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
