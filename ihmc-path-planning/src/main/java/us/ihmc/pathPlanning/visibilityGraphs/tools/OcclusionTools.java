@@ -9,9 +9,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 
-public class OcclussionTools
+public class OcclusionTools
 {
-   public static boolean IsTheGoalIntersectingAnyObstacles(NavigableRegion region, Point3DReadOnly start, Point3DReadOnly goal)
+   public static boolean isTheGoalIntersectingAnyObstacles(NavigableRegion region, Point3DReadOnly start, Point3DReadOnly goal)
    {
       for (Cluster cluster : region.getObstacleClusters())
       {

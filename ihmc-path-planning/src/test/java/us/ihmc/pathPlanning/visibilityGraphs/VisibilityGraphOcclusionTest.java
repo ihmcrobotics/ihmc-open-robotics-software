@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -50,7 +49,7 @@ public class VisibilityGraphOcclusionTest
       Point3D goal = new Point3D(2.0, -1.0, 0.0);
 
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclussions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
 
       if(visualize)
       {
