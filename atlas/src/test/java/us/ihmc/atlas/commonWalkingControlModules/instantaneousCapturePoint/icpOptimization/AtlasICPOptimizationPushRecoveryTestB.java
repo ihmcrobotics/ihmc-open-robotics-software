@@ -46,7 +46,7 @@ public class AtlasICPOptimizationPushRecoveryTestB extends AvatarICPOptimization
                      }
 
                      @Override
-                     public boolean useStepAdjustment()
+                     public boolean allowStepAdjustment()
                      {
                         return true;
                      }

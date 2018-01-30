@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.3"
+      classpath "us.ihmc:ihmc-build:0.12.5"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -40,7 +40,7 @@ mainDependencies {
    compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
    compile group: 'us.ihmc', name: 'IHMCRosControl', version: '0.5.0', changing: true
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-system-identification", version: groupDependencyVersion
@@ -66,8 +66,8 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.1"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion
 }

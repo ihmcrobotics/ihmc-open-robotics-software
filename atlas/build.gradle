@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.3"
+      classpath "us.ihmc:ihmc-build:0.12.5"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -54,7 +54,7 @@ mainDependencies {
    compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.2.0-170503'
    compile 'org.ros.rosjava_messages:geometry_msgs:1.11.9'
    compile "org.boofcv:recognition:0.24.1"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-mocap", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
@@ -85,8 +85,8 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.1"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion

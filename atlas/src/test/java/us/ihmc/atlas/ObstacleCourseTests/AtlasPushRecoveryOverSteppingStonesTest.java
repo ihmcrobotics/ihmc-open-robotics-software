@@ -50,7 +50,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                      }
 
                      @Override
-                     public boolean useStepAdjustment()
+                     public boolean allowStepAdjustment()
                      {
                         return true;
                      }

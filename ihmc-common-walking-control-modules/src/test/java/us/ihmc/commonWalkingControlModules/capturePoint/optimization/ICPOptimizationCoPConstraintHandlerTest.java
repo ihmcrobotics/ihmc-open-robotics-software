@@ -510,7 +510,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       }
 
       @Override
-      public boolean useStepAdjustment()
+      public boolean allowStepAdjustment()
       {
          return false;
       }

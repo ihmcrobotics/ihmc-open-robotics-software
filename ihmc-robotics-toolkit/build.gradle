@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.3"
+      classpath "us.ihmc:ihmc-build:0.12.5"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -37,7 +37,7 @@ mainDependencies {
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
@@ -46,6 +46,6 @@ testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
    compile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.1"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.1"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
 }
