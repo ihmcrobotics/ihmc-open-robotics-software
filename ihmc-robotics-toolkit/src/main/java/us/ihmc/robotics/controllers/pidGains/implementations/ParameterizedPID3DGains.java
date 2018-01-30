@@ -82,7 +82,15 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
 
       for (int i = 0; i < 3; i++)
       {
-         defaultZetas[i] = GainCalculator.computeDampingRatio(defaultProportionalGains[i], defaultDerivativeGains[i]);
+         double proportionalGain = defaultProportionalGains[i];
+         if (proportionalGain != 0.0)
+         {
+            defaultZetas[i] = GainCalculator.computeDampingRatio(proportionalGain, defaultDerivativeGains[i]);
+         }
+         else
+         {
+            defaultZetas[i] = 0.0;
+         }
       }
 
       populateMap(kpMap, "kp", suffix, gainCoupling, defaultProportionalGains, registry);
@@ -213,6 +221,7 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
          }
       };
 
+      updater.notifyOfParameterChange(null);
       kp.addParameterChangedListener(updater);
       zeta.addParameterChangedListener(updater);
    }
