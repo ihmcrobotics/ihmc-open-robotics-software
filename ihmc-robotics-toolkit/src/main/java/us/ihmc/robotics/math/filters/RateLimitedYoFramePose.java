@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
@@ -81,17 +82,7 @@ public class RateLimitedYoFramePose extends YoFramePose
       setOrientation(orientation.getFrameOrientation());
    }
 
-   public void update(YoFramePoseUsingQuaternions yoFramePoseUnfiltered)
-   {
-      checkReferenceFrameMatch(yoFramePoseUnfiltered);
-      position.update(yoFramePoseUnfiltered.getPosition());
-      orientation.update(yoFramePoseUnfiltered.getOrientation());
-
-      setPosition(position);
-      setOrientation(orientation.getFrameOrientation());
-   }
-
-   public void update(FramePose3D framePoseUnfiltered)
+   public void update(FramePose3DReadOnly framePoseUnfiltered)
    {
       checkReferenceFrameMatch(framePoseUnfiltered);
       position.update(framePoseUnfiltered.getPosition());
