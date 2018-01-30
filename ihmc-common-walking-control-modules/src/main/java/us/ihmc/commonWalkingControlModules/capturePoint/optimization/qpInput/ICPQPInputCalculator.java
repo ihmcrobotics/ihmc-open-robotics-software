@@ -15,7 +15,7 @@ public class ICPQPInputCalculator
    private boolean considerFeedbackInAdjustment = true;
 
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   public ICPQPIndexHandler indexHandler;
+   private final ICPQPIndexHandler indexHandler;
 
    private final DenseMatrix64F identity = CommonOps.identity(2, 2);
    private final DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 1);
@@ -181,12 +181,14 @@ public class ICPQPInputCalculator
       adjustmentObjtW.zero();
 
 
-      if (considerAngularMomentumInAdjustment)
+      if (considerFeedbackInAdjustment && considerAngularMomentumInAdjustment)
       {
          MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          if (indexHandler.useAngularMomentum())
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
          if (indexHandler.useStepAdjustment())
          {
@@ -197,14 +199,15 @@ public class ICPQPInputCalculator
             MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
          }
 
-         MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
       }
-      else
+      else if (considerFeedbackInAdjustment)
       {
          MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          if (indexHandler.useAngularMomentum())
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
          if (indexHandler.useStepAdjustment())
          {
@@ -217,8 +220,49 @@ public class ICPQPInputCalculator
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
          }
+      }
+      else if (considerAngularMomentumInAdjustment)
+      {
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+         if (indexHandler.useAngularMomentum())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
+         if (indexHandler.useStepAdjustment())
+         {
+            CommonOps.setIdentity(identity);
+            CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+
+            if (indexHandler.useAngularMomentum())
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+         }
+      }
+      else
+      {
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         if (indexHandler.useAngularMomentum())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
+         if (indexHandler.useStepAdjustment())
+         {
+            CommonOps.setIdentity(identity);
+            CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+         }
       }
 
 
