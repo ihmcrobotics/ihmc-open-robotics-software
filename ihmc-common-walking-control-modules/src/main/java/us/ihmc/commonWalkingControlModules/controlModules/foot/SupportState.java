@@ -108,9 +108,14 @@ public class SupportState extends AbstractFootControlState
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
+   private final PIDSE3GainsReadOnly gains;
+
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
+
+      this.gains = holdPositionGains;
+
       String prefix = footControlHelper.getRobotSide().getLowerCaseName() + "Foot";
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -141,7 +146,6 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
-      spatialFeedbackControlCommand.setGains(holdPositionGains);
 
       desiredLinearVelocity.setToZero(worldFrame);
       desiredAngularVelocity.setToZero(worldFrame);
@@ -298,6 +302,7 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.set(desiredCopPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
+      spatialFeedbackControlCommand.setGains(gains);
 
       // set selection matrices
       accelerationSelectionMatrix.resetSelection();

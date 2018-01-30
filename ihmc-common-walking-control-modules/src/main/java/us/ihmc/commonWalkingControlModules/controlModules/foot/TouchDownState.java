@@ -91,6 +91,8 @@ public class TouchDownState extends AbstractFootControlState
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
+   private final PIDSE3GainsReadOnly gains;
+
    /**
     * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
     * This state is triggered after the foot comes in contact with the ground
@@ -101,6 +103,8 @@ public class TouchDownState extends AbstractFootControlState
    public TouchDownState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly swingFootControlGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.TOUCHDOWN, footControlHelper);
+
+      this.gains = swingFootControlGains;
 
       MomentumOptimizationSettings momentumOptimizationSettings = footControlHelper.getWalkingControllerParameters().getMomentumOptimizationSettings();
 
@@ -134,7 +138,6 @@ public class TouchDownState extends AbstractFootControlState
       feedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       feedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       feedbackControlCommand.setPrimaryBase(pelvis);
-      feedbackControlCommand.setGains(swingFootControlGains);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(footBodyFixedFrame);
@@ -166,6 +169,7 @@ public class TouchDownState extends AbstractFootControlState
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
+      feedbackControlCommand.setGains(gains);
    }
    
    public void setTouchdownDuration(double touchdownDuration)
