@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
@@ -87,13 +88,7 @@ public class RateLimitedYoFrameVector extends YoFrameVector
       update(rawPosition);
    }
 
-   public void update(YoFrameTuple yoFrameVectorUnfiltered)
-   {
-      checkReferenceFrameMatch(yoFrameVectorUnfiltered);
-      update(yoFrameVectorUnfiltered.getX(), yoFrameVectorUnfiltered.getY(), yoFrameVectorUnfiltered.getZ());
-   }
-
-   public void update(FrameTuple3DBasics frameVectorUnfiltered)
+   public void update(FrameTuple3DReadOnly frameVectorUnfiltered)
    {
       checkReferenceFrameMatch(frameVectorUnfiltered);
       update(frameVectorUnfiltered.getX(), frameVectorUnfiltered.getY(), frameVectorUnfiltered.getZ());
