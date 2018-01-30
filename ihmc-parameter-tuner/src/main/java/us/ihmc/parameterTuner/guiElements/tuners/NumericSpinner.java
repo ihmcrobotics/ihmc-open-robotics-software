@@ -120,15 +120,6 @@ public abstract class NumericSpinner<T extends Number> extends Spinner<T>
       }
    }
 
-   protected void revalidate()
-   {
-      setValue(getValue());
-   }
-
-   public abstract void setMaxValue(T maxValue);
-
-   public abstract void setMinValue(T minValue);
-
    public abstract T convertStringToNumber(String numberString);
 
    public abstract String convertNumberToString(T number);

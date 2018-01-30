@@ -8,22 +8,6 @@ public class DoubleSpinner extends NumericSpinner<Double>
    }
 
    @Override
-   public void setMaxValue(Double maxValue)
-   {
-      DoubleSpinnerValueFactory valueFactory = (DoubleSpinnerValueFactory) getValueFactory();
-      valueFactory.setMax(maxValue);
-      revalidate();
-   }
-
-   @Override
-   public void setMinValue(Double minValue)
-   {
-      DoubleSpinnerValueFactory valueFactory = (DoubleSpinnerValueFactory) getValueFactory();
-      valueFactory.setMin(minValue);
-      revalidate();
-   }
-
-   @Override
    public Double convertStringToNumber(String numberString)
    {
       if (numberString == null)

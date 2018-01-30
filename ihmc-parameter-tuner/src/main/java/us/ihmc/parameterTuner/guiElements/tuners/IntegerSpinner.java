@@ -10,20 +10,6 @@ public class IntegerSpinner extends NumericSpinner<Integer>
    }
 
    @Override
-   public void setMaxValue(Integer maxValue)
-   {
-      IntegerSpinnerValueFactory valueFactory = (IntegerSpinnerValueFactory) getValueFactory();
-      valueFactory.setMax(maxValue);
-   }
-
-   @Override
-   public void setMinValue(Integer minValue)
-   {
-      IntegerSpinnerValueFactory valueFactory = (IntegerSpinnerValueFactory) getValueFactory();
-      valueFactory.setMin(minValue);
-   }
-
-   @Override
    public Integer convertStringToNumber(String numberString)
    {
       if (numberString == null)
