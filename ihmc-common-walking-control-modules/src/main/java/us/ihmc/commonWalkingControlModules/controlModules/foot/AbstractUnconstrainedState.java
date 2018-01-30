@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -52,9 +52,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
 
-   private final YoPIDSE3Gains gains;
+   private final PIDSE3GainsReadOnly gains;
 
-   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoPIDSE3Gains gains,
+   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains,
          YoVariableRegistry registry)
    {
       super(constraintType, footControlHelper);

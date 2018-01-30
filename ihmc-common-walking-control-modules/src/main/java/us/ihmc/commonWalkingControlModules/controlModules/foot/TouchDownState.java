@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
@@ -98,7 +98,7 @@ public class TouchDownState extends AbstractFootControlState
     * @param swingFootControlGains
     * @param parentRegistry
     */
-   public TouchDownState(FootControlHelper footControlHelper, YoPIDSE3Gains swingFootControlGains, YoVariableRegistry parentRegistry)
+   public TouchDownState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly swingFootControlGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.TOUCHDOWN, footControlHelper);
 
