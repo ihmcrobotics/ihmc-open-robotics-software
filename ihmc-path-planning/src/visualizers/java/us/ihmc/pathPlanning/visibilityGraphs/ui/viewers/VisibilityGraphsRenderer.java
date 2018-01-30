@@ -61,7 +61,8 @@ public class VisibilityGraphsRenderer
       goalPositionReference = messager.createInput(UIVisibilityGraphsTopics.GoalPosition);
       parameters = messager.createInput(UIVisibilityGraphsTopics.VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
 
-      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePath, request -> computePathOnThread());
+      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePath, request -> computePathOnThread(false));
+      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePathWithOcclusions, request -> computePathOnThread(true));
 
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
@@ -108,12 +109,12 @@ public class VisibilityGraphsRenderer
       executorService.shutdownNow();
    }
 
-   private void computePathOnThread()
+   private void computePathOnThread(boolean computePathWithOcclusions)
    {
-      executorService.submit(this::computePath);
+      executorService.submit(() -> computePath(computePathWithOcclusions));
    }
 
-   private void computePath()
+   private void computePath(boolean computePathWithOcclusions)
    {
       PlanarRegionsList planarRegionsList = planarRegionsReference.get();
 
@@ -139,7 +140,16 @@ public class VisibilityGraphsRenderer
 
          NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters.get());
          navigableRegionsManager.setPlanarRegions(planarRegions);
-         List<Point3DReadOnly> bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
+
+         List<Point3DReadOnly> bodyPath;
+         if (computePathWithOcclusions)
+         {
+            bodyPath = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+         }
+         else
+         {
+            bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
+         }
 
          messager.submitMessage(BodyPathData, bodyPath);
          messager.submitMessage(StartVisibilityMap, navigableRegionsManager.getStartMap());

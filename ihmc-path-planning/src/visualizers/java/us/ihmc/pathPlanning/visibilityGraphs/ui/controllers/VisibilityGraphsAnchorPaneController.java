@@ -58,4 +58,10 @@ public class VisibilityGraphsAnchorPaneController
    {
       messager.submitMessage(VisibilityGraphsComputePath, true);
    }
+
+   @FXML
+   public void computePathWithOcclusions()
+   {
+      messager.submitMessage(VisibilityGraphsComputePathWithOcclusions, true);
+   }
 }

@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.sphereICPControl.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -105,12 +104,12 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   @Override public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, List<OneDoFJoint> oneDoFJointsToPack)
    {
 
    }
 
-   public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   public void getOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
    {
       List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
 
@@ -130,7 +129,7 @@ public class SphereRobotModel implements FullRobotModel
    }
 
    @Override
-   public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   public void getControllableOneDoFJoints(List<OneDoFJoint> oneDoFJointsToPack)
    {
    }
 
