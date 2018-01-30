@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -13,10 +13,13 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPInputCalculatorTest
 {
+   private final double epsilon = 1e-7;
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFeedbackTask()
@@ -33,7 +36,7 @@ public class ICPQPInputCalculatorTest
 
       ICPQPInputCalculator.computeFeedbackTask(icpQPInputToTest, feedbackWeight);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -66,7 +69,7 @@ public class ICPQPInputCalculatorTest
 
       inputCalculator.computeFeedbackRateTask(icpQPInputToTest, rateWeight, previousSolution);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -85,7 +88,7 @@ public class ICPQPInputCalculatorTest
 
       ICPQPInputCalculator.computeAngularMomentumMinimizationTask(icpQPInputToTest, minimizationWeight);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -118,7 +121,7 @@ public class ICPQPInputCalculatorTest
 
       inputCalculator.computeFootstepTask(0, icpQPInputToTest, footstepWeight, footstepObjective);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
 
 
 
@@ -169,7 +172,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(footstepObjective, Qx_p, icpQPInputExpected.residualCost);
       CommonOps.scale(0.5, icpQPInputExpected.residualCost);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -202,7 +205,7 @@ public class ICPQPInputCalculatorTest
 
       inputCalculator.computeFootstepRateTask(0, icpQPInputToTest, footstepWeight, footstepObjective);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
 
 
       // test multiple footsteps
@@ -253,12 +256,24 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(footstepObjective, Qx_p, icpQPInputExpected.residualCost);
       CommonOps.scale(0.5, icpQPInputExpected.residualCost);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
    }
+
+
+
+
+
+
+
+
+
+
+
+
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 21000)
-   public void testComputeDynamicsTask()
+   public void testComputeDynamicsTaskWithFeedbackAndAngularMomentum()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
@@ -294,377 +309,839 @@ public class ICPQPInputCalculatorTest
       currentICPError.set(0, 0, 0.03);
       currentICPError.set(1, 0, 0.06);
 
+
+
+
+
       // test just feedback
       indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
       inputCalculator.setConsiderFeedbackInAdjustment(true);
-      inputCalculator.setConsiderFeedbackInAdjustment(true);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
+      icpQPInputExpected.reset();
+      icpQPInputToTest.reset();
 
       icpQPInputExpected.reshape(2);
       icpQPInputToTest.reshape(2);
 
       inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
 
-      DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 2);
-      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpObjective);
-      CommonOps.mult(invertedFeedbackGain, tmpObjective, icpQPInputExpected.quadraticTerm);
+      DenseMatrix64F tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
 
-      tmpObjective = new DenseMatrix64F(2, 1);
-      CommonOps.mult(weightMatrix, currentICPError, tmpObjective);
-      CommonOps.multTransA(invertedFeedbackGain, tmpObjective, icpQPInputExpected.linearTerm);
-      CommonOps.multTransA(0.5, currentICPError, tmpObjective, icpQPInputExpected.residualCost);
+      tmpMatrix = new DenseMatrix64F(2, 1);
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      DenseMatrix64F feedbackJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      DenseMatrix64F adjustmentJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+      feedbackJacobianExpected.set(invertedFeedbackGain);
+      feedbackObjectiveExpected.set(currentICPError);
 
-      // check all the permutations
-      weightMatrix = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      icpQPInputToTest.reset();
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
 
-      icpQPInputToTest.reset();
+
+
+
+      // test feedback and step adjustment
+      indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+
       inputCalculator.setConsiderFeedbackInAdjustment(true);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
-
+      icpQPInputExpected.reset();
       icpQPInputToTest.reset();
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reshape(4);
+      icpQPInputToTest.reshape(4);
+
       inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      feedbackJacobianExpected = new DenseMatrix64F(2, 4);
+      feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 4);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 2, CommonOps.identity(2), 0, 0, 2, 2, footstepRecursionMultiplier);
+      CommonOps.add(footstepRecursionMultiplier, referenceFootstepLocation, currentICPError, feedbackObjectiveExpected);
+
+
+      tmpMatrix = new DenseMatrix64F(4, 2);
+      CommonOps.multTransA(feedbackJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(tmpMatrix, feedbackJacobianExpected, icpQPInputExpected.quadraticTerm);
+
+      CommonOps.mult(tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.linearTerm);
+
+      tmpMatrix = new DenseMatrix64F(1, 2);
+      CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
+
+
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
 
 
 
       // test feedback and angular momentum
       indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
+
       inputCalculator.setConsiderFeedbackInAdjustment(true);
       inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
+      icpQPInputExpected.reset();
+      icpQPInputToTest.reset();
 
       icpQPInputExpected.reshape(4);
       icpQPInputToTest.reshape(4);
 
-      icpQPInputExpected.reset();
-      icpQPInputToTest.reset();
-
       inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
 
-      DenseMatrix64F tmpJacobian = new DenseMatrix64F(2, 4);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      feedbackJacobianExpected = new DenseMatrix64F(2, 4);
+      feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 4);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
 
-      DenseMatrix64F JtW = new DenseMatrix64F(4, 2);
-      CommonOps.multTransA(tmpJacobian, weightMatrix, JtW);
-      CommonOps.mult(JtW, tmpJacobian, icpQPInputExpected.quadraticTerm);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      feedbackObjectiveExpected.set(currentICPError);
 
-      tmpObjective = new DenseMatrix64F(2, 1);
-      CommonOps.mult(weightMatrix, currentICPError, tmpObjective);
-      CommonOps.multTransA(tmpJacobian, tmpObjective, icpQPInputExpected.linearTerm);
 
-      DenseMatrix64F OtW = new DenseMatrix64F(1, 2);
-      CommonOps.multTransA(currentICPError, weightMatrix, OtW);
-      CommonOps.mult(0.5, OtW, currentICPError, icpQPInputExpected.residualCost);
+      tmpMatrix = new DenseMatrix64F(4, 2);
+      CommonOps.multTransA(feedbackJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(tmpMatrix, feedbackJacobianExpected, icpQPInputExpected.quadraticTerm);
 
-      Assert.assertTrue(MatrixFeatures.isEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, 1e-7));
-      Assert.assertTrue(MatrixFeatures.isEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, 1e-7));
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      CommonOps.mult(tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.linearTerm);
 
-      // check all the permutations
-      weightMatrix = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
+      tmpMatrix = new DenseMatrix64F(1, 2);
+      CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      icpQPInputToTest.reset();
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
 
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      icpQPInputToTest.reset();
-      inputCalculator.setConsiderFeedbackInAdjustment(true);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
-
-      icpQPInputToTest.reset();
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
 
 
 
 
-      // test just the footstep adjustment independent of feedback
-      indexHandler.setUseAngularMomentum(false);
-      indexHandler.registerFootstep();
-      indexHandler.computeProblemSize();
-      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
-
-      icpQPInputExpected.reshape(4);
-      icpQPInputToTest.reshape(4);
-
-      icpQPInputExpected.reset();
-      icpQPInputToTest.reset();
-
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-      weightMatrix = new DenseMatrix64F(4, 4);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
-      tmpJacobian = new DenseMatrix64F(4, 4);
-      tmpObjective = new DenseMatrix64F(4, 4);
-      tmpJacobian.set(2, 2, footstepRecursionMultiplier);
-      tmpJacobian.set(3, 3, footstepRecursionMultiplier);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      CommonOps.mult(weightMatrix, tmpJacobian, tmpObjective);
-      CommonOps.multTransA(tmpJacobian, tmpObjective, icpQPInputExpected.quadraticTerm);
-
-      tmpObjective = new DenseMatrix64F(4, 1);
-      MatrixTools.setMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
-      MatrixTools.setMatrixBlock(tmpObjective, 2, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
-      MatrixTools.addMatrixBlock(tmpObjective, 2, 0, currentICPError, 0, 0, 2, 1, 1.0);
-
-      JtW = new DenseMatrix64F(4, 4);
-      CommonOps.multTransA(tmpJacobian, weightMatrix, JtW);
-      CommonOps.mult(JtW, tmpObjective, icpQPInputExpected.linearTerm);
-
-      OtW = new DenseMatrix64F(1, 4);
-
-      CommonOps.multTransA(tmpObjective, weightMatrix, OtW);
-      CommonOps.mult(0.5, OtW, tmpObjective, icpQPInputExpected.residualCost);
-
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
-
-      weightMatrix = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
-      // test the other permutation
-      icpQPInputToTest.reset();
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-
-
-      // test just the footstep adjustment combined with feedback
-      indexHandler.resetFootsteps();
-      indexHandler.setUseAngularMomentum(false);
-      indexHandler.registerFootstep();
-      indexHandler.computeProblemSize();
-      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
-      inputCalculator.setConsiderFeedbackInAdjustment(true);
-
-      icpQPInputExpected.reshape(4);
-      icpQPInputToTest.reshape(4);
-
-      icpQPInputExpected.reset();
-      icpQPInputToTest.reset();
-
-      weightMatrix = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-      tmpJacobian = new DenseMatrix64F(2, 4);
-      tmpObjective = new DenseMatrix64F(2, 4);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      tmpJacobian.set(0, 2, footstepRecursionMultiplier);
-      tmpJacobian.set(1, 3, footstepRecursionMultiplier);
-      CommonOps.mult(weightMatrix, tmpJacobian, tmpObjective);
-      CommonOps.multTransA(tmpJacobian, tmpObjective, icpQPInputExpected.quadraticTerm);
-
-      tmpObjective = new DenseMatrix64F(2, 1);
-      MatrixTools.setMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
-      MatrixTools.addMatrixBlock(tmpObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
-
-      JtW = new DenseMatrix64F(4, 2);
-      CommonOps.multTransA(tmpJacobian, weightMatrix, JtW);
-      CommonOps.mult(JtW, tmpObjective, icpQPInputExpected.linearTerm);
-
-      OtW = new DenseMatrix64F(1, 2);
-
-      CommonOps.multTransA(tmpObjective, weightMatrix, OtW);
-      CommonOps.mult(0.5, OtW, tmpObjective, icpQPInputExpected.residualCost);
-
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
-
-      // test the other permutation
-      icpQPInputToTest.reset();
-      inputCalculator.setConsiderFeedbackInAdjustment(true);
-      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-
-
-
-      // test footstep adjustment combined with feedback and angular momentum
-      indexHandler.resetFootsteps();
+      // test feedback and angular momentum and step adjustment
       indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
-      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
       inputCalculator.setConsiderFeedbackInAdjustment(true);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
+      icpQPInputExpected.reset();
+      icpQPInputToTest.reset();
 
       icpQPInputExpected.reshape(6);
       icpQPInputToTest.reshape(6);
 
-      icpQPInputExpected.reset();
-      icpQPInputToTest.reset();
-
-      weightMatrix = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
       inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
 
-      tmpJacobian = new DenseMatrix64F(2, 6);
-      tmpObjective = new DenseMatrix64F(2, 6);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      tmpJacobian.set(0, 4, footstepRecursionMultiplier);
-      tmpJacobian.set(1, 5, footstepRecursionMultiplier);
-      CommonOps.mult(weightMatrix, tmpJacobian, tmpObjective);
-      CommonOps.multTransA(tmpJacobian, tmpObjective, icpQPInputExpected.quadraticTerm);
 
-      tmpObjective = new DenseMatrix64F(2, 1);
-      MatrixTools.setMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
-      MatrixTools.addMatrixBlock(tmpObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+      feedbackJacobianExpected = new DenseMatrix64F(2, 6);
+      feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 6);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
 
-      JtW = new DenseMatrix64F(6, 2);
-      CommonOps.multTransA(tmpJacobian, weightMatrix, JtW);
-      CommonOps.mult(JtW, tmpObjective, icpQPInputExpected.linearTerm);
-
-      OtW = new DenseMatrix64F(1, 2);
-
-      CommonOps.multTransA(tmpObjective, weightMatrix, OtW);
-      CommonOps.mult(0.5, OtW, tmpObjective, icpQPInputExpected.residualCost);
-
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 4, CommonOps.identity(2), 0, 0, 2, 2, footstepRecursionMultiplier);
+      CommonOps.add(footstepRecursionMultiplier, referenceFootstepLocation, currentICPError, feedbackObjectiveExpected);
 
 
+      tmpMatrix = new DenseMatrix64F(6, 2);
+      CommonOps.multTransA(feedbackJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(tmpMatrix, feedbackJacobianExpected, icpQPInputExpected.quadraticTerm);
+
+      CommonOps.mult(tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.linearTerm);
+
+      tmpMatrix = new DenseMatrix64F(1, 2);
+      CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
 
-      // test footstep adjustment independent of feedback and angular momentum
-      indexHandler.resetFootsteps();
-      indexHandler.setUseAngularMomentum(true);
-      indexHandler.registerFootstep();
-      indexHandler.computeProblemSize();
-      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      icpQPInputExpected.reshape(6);
-      icpQPInputToTest.reshape(6);
-
-      icpQPInputExpected.reset();
-      icpQPInputToTest.reset();
-
-      weightMatrix = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-      weightMatrix = new DenseMatrix64F(4, 4);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
-      tmpJacobian = new DenseMatrix64F(4, 6);
-      tmpObjective = new DenseMatrix64F(4, 6);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      tmpJacobian.set(2, 4, footstepRecursionMultiplier);
-      tmpJacobian.set(3, 5, footstepRecursionMultiplier);
-      CommonOps.mult(weightMatrix, tmpJacobian, tmpObjective);
-      CommonOps.multTransA(tmpJacobian, tmpObjective, icpQPInputExpected.quadraticTerm);
-
-      tmpObjective = new DenseMatrix64F(4, 1);
-      MatrixTools.setMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
-      MatrixTools.setMatrixBlock(tmpObjective, 2, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
-      MatrixTools.addMatrixBlock(tmpObjective, 2, 0, currentICPError, 0, 0, 2, 1, 1.0);
-
-      JtW = new DenseMatrix64F(6, 4);
-      CommonOps.multTransA(tmpJacobian, weightMatrix, JtW);
-      CommonOps.mult(JtW, tmpObjective, icpQPInputExpected.linearTerm);
-
-      OtW = new DenseMatrix64F(1, 4);
-      CommonOps.multTransA(tmpObjective, weightMatrix, OtW);
-      CommonOps.mult(0.5, OtW, tmpObjective, icpQPInputExpected.residualCost);
-
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
-
-
-
-
-      // test just the footstep adjustment and angular momentum independent of feedback
-      indexHandler.resetFootsteps();
-      indexHandler.setUseAngularMomentum(true);
-      indexHandler.registerFootstep();
-      indexHandler.computeProblemSize();
-      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
-      inputCalculator.setConsiderFeedbackInAdjustment(false);
-
-      icpQPInputExpected.reshape(6);
-      icpQPInputToTest.reshape(6);
-
-      icpQPInputExpected.reset();
-      icpQPInputToTest.reset();
-
-      weightMatrix = new DenseMatrix64F(2, 2);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
-      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
-
-      weightMatrix = new DenseMatrix64F(4, 4);
-      CommonOps.setIdentity(weightMatrix);
-      CommonOps.scale(weight, weightMatrix);
-
-      tmpJacobian = new DenseMatrix64F(4, 6);
-      tmpObjective = new DenseMatrix64F(4, 6);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(tmpJacobian, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(tmpJacobian, 2, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-      tmpJacobian.set(2, 4, footstepRecursionMultiplier);
-      tmpJacobian.set(3, 5, footstepRecursionMultiplier);
-      CommonOps.mult(weightMatrix, tmpJacobian, tmpObjective);
-      CommonOps.multTransA(tmpJacobian, tmpObjective, icpQPInputExpected.quadraticTerm);
-
-      tmpObjective = new DenseMatrix64F(4, 1);
-      MatrixTools.setMatrixBlock(tmpObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
-      MatrixTools.setMatrixBlock(tmpObjective, 2, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
-      MatrixTools.addMatrixBlock(tmpObjective, 2, 0, currentICPError, 0, 0, 2, 1, 1.0);
-
-      JtW = new DenseMatrix64F(6, 4);
-      CommonOps.multTransA(tmpJacobian, weightMatrix, JtW);
-      CommonOps.mult(JtW, tmpObjective, icpQPInputExpected.linearTerm);
-
-      OtW = new DenseMatrix64F(1, 4);
-      CommonOps.multTransA(tmpObjective, weightMatrix, OtW);
-      CommonOps.mult(0.5, OtW, tmpObjective, icpQPInputExpected.residualCost);
-
-      Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest));
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 21000)
+   public void testComputeDynamicsTaskWithFeedback()
+   {
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+
+      // problem requirements
+      ICPQPInput icpQPInputToTest = new ICPQPInput(2);
+      ICPQPInput icpQPInputExpected = new ICPQPInput(2);
+
+      double omega = 3.0;
+      double timeRemainingInState = 1.0;
+      double footstepRecursionMultiplier = Math.exp(-omega * timeRemainingInState);
+
+      double gain = 2.5;
+      DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackGain);
+      CommonOps.scale(gain, feedbackGain);
+
+      DenseMatrix64F invertedFeedbackGain = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(invertedFeedbackGain);
+      CommonOps.scale(1.0 / gain, invertedFeedbackGain);
+
+      double weight = 4.7;
+      DenseMatrix64F weightMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(weightMatrix);
+      CommonOps.scale(weight, weightMatrix);
+
+
+      DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
+      referenceFootstepLocation.set(0, 0, 0.5);
+      referenceFootstepLocation.set(1, 0, 0.1);
+
+      DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
+      currentICPError.set(0, 0, 0.03);
+      currentICPError.set(1, 0, 0.06);
+
+
+
+
+
+      // test just feedback
+      indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(true);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reset();
+      icpQPInputToTest.reset();
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+
+      DenseMatrix64F feedbackJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      DenseMatrix64F adjustmentJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+      feedbackJacobianExpected.set(invertedFeedbackGain);
+      feedbackObjectiveExpected.set(currentICPError);
+
+
+
+      DenseMatrix64F tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.multTransA(feedbackJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(tmpMatrix, feedbackJacobianExpected, icpQPInputExpected.quadraticTerm);
+
+      CommonOps.mult(tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.linearTerm);
+
+      tmpMatrix = new DenseMatrix64F(1, 2);
+      CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+
+      // ONLY THE FEEDBACK ONE IS ENOUGH
+      // test feedback and step adjustment
+      indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(true);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reset();
+      icpQPInputToTest.reset();
+
+      icpQPInputExpected.reshape(4);
+      icpQPInputToTest.reshape(4);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      feedbackJacobianExpected = new DenseMatrix64F(2, 4);
+      feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 4);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 2, CommonOps.identity(2), 0, 0, 2, 2, footstepRecursionMultiplier);
+      CommonOps.add(footstepRecursionMultiplier, referenceFootstepLocation, currentICPError, feedbackObjectiveExpected);
+
+
+      tmpMatrix = new DenseMatrix64F(4, 2);
+      CommonOps.multTransA(feedbackJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(tmpMatrix, feedbackJacobianExpected, icpQPInputExpected.quadraticTerm);
+
+      CommonOps.mult(tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.linearTerm);
+
+      tmpMatrix = new DenseMatrix64F(1, 2);
+      CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
+
+
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+      // ONLY THE FEEDBACK ONE IS ENOUGH
+      // test feedback and angular momentum
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(true);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reset();
+      icpQPInputToTest.reset();
+      icpQPInputExpected.reshape(4);
+      icpQPInputToTest.reshape(4);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      feedbackJacobianExpected = new DenseMatrix64F(2, 4);
+      feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 4);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      feedbackObjectiveExpected.set(currentICPError);
+
+      tmpMatrix = new DenseMatrix64F(4, 2);
+      CommonOps.multTransA(feedbackJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(tmpMatrix, feedbackJacobianExpected, icpQPInputExpected.quadraticTerm);
+
+      CommonOps.mult(tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.linearTerm);
+
+      tmpMatrix = new DenseMatrix64F(1, 2);
+      CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+      // test feedback and angular momentum and step adjustment
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(true);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reset();
+      icpQPInputToTest.reset();
+      icpQPInputExpected.reshape(6);
+      icpQPInputToTest.reshape(6);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      feedbackJacobianExpected = new DenseMatrix64F(2, 6);
+      feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 6);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobianExpected, 0, 2, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      feedbackObjectiveExpected.set(currentICPError);
+
+      MatrixTools.setMatrixBlock(adjustmentJacobianExpected, 0, 0, invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(adjustmentJacobianExpected, 0, 4, CommonOps.identity(2), 0, 0, 2, 2, footstepRecursionMultiplier);
+      CommonOps.add(footstepRecursionMultiplier, referenceFootstepLocation, currentICPError, adjustmentObjectiveExpected);
+
+      tmpMatrix = new DenseMatrix64F(6, 2);
+      CommonOps.multTransA(feedbackJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(tmpMatrix, feedbackJacobianExpected, icpQPInputExpected.quadraticTerm);
+      CommonOps.mult(tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.linearTerm);
+
+      CommonOps.multTransA(adjustmentJacobianExpected, weightMatrix, tmpMatrix);
+      CommonOps.multAdd(tmpMatrix, adjustmentJacobianExpected, icpQPInputExpected.quadraticTerm);
+      CommonOps.multAdd(tmpMatrix, adjustmentObjectiveExpected, icpQPInputExpected.linearTerm);
+
+
+      tmpMatrix = new DenseMatrix64F(1, 2);
+      CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
+      CommonOps.multTransA(adjustmentObjectiveExpected, weightMatrix, tmpMatrix);
+      CommonOps.multAdd(0.5, tmpMatrix, adjustmentObjectiveExpected, icpQPInputExpected.residualCost);
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+   }
+
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 21000)
+   public void testComputeDynamicsTaskWithAngularMomentum()
+   {
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+
+      // problem requirements
+      ICPQPInput icpQPInputToTest = new ICPQPInput(2);
+      ICPQPInput icpQPInputExpected = new ICPQPInput(2);
+
+      double omega = 3.0;
+      double timeRemainingInState = 1.0;
+      double footstepRecursionMultiplier = Math.exp(-omega * timeRemainingInState);
+
+      double gain = 2.5;
+      DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackGain);
+      CommonOps.scale(gain, feedbackGain);
+
+      DenseMatrix64F invertedFeedbackGain = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(invertedFeedbackGain);
+      CommonOps.scale(1.0 / gain, invertedFeedbackGain);
+
+      double weight = 4.7;
+      DenseMatrix64F weightMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(weightMatrix);
+      CommonOps.scale(weight, weightMatrix);
+
+
+      DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
+      referenceFootstepLocation.set(0, 0, 0.5);
+      referenceFootstepLocation.set(1, 0, 0.1);
+
+      DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
+      currentICPError.set(0, 0, 0.03);
+      currentICPError.set(1, 0, 0.06);
+
+
+      DenseMatrix64F feedbackJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      DenseMatrix64F adjustmentJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+
+
+      // test just feedback
+      indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      DenseMatrix64F tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      tmpMatrix = new DenseMatrix64F(2, 1);
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+      feedbackJacobianExpected.set(invertedFeedbackGain);
+      feedbackObjectiveExpected.set(currentICPError);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 2);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+
+      // test feedback and step adjustment
+      indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+      // test feedback and angular momentum
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      tmpMatrix = new DenseMatrix64F(2, 1);
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+      // test feedback and angular momentum and step adjustment
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      tmpMatrix = new DenseMatrix64F(2, 1);
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 21000)
+   public void testComputeDynamicsTaskWithSeparateAdjustment()
+   {
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
+      ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
+
+      // problem requirements
+      ICPQPInput icpQPInputToTest = new ICPQPInput(2);
+      ICPQPInput icpQPInputExpected = new ICPQPInput(2);
+
+      double omega = 3.0;
+      double timeRemainingInState = 1.0;
+      double footstepRecursionMultiplier = Math.exp(-omega * timeRemainingInState);
+
+      double gain = 2.5;
+      DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackGain);
+      CommonOps.scale(gain, feedbackGain);
+
+      DenseMatrix64F invertedFeedbackGain = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(invertedFeedbackGain);
+      CommonOps.scale(1.0 / gain, invertedFeedbackGain);
+
+      double weight = 4.7;
+      DenseMatrix64F weightMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(weightMatrix);
+      CommonOps.scale(weight, weightMatrix);
+
+
+      DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
+      referenceFootstepLocation.set(0, 0, 0.5);
+      referenceFootstepLocation.set(1, 0, 0.1);
+
+      DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
+      currentICPError.set(0, 0, 0.03);
+      currentICPError.set(1, 0, 0.06);
+
+
+      DenseMatrix64F feedbackJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F feedbackObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      DenseMatrix64F adjustmentJacobianExpected = new DenseMatrix64F(2, 2);
+      DenseMatrix64F adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+
+
+      // test just feedback
+      indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      DenseMatrix64F tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      tmpMatrix = new DenseMatrix64F(2, 1);
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+      feedbackJacobianExpected.set(invertedFeedbackGain);
+      feedbackObjectiveExpected.set(currentICPError);
+      adjustmentJacobianExpected = new DenseMatrix64F(2, 2);
+      adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+
+      // test feedback and step adjustment
+      indexHandler.setUseAngularMomentum(false);
+      indexHandler.resetFootsteps();
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+      // test feedback and angular momentum
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      tmpMatrix = new DenseMatrix64F(2, 1);
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+
+
+
+
+      // test feedback and angular momentum and step adjustment
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.resetFootsteps();
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+
+      inputCalculator.setConsiderFeedbackInAdjustment(false);
+      inputCalculator.setConsiderAngularMomentumInAdjustment(false);
+
+      icpQPInputExpected.reshape(2);
+      icpQPInputToTest.reshape(2);
+
+      inputCalculator.computeDynamicsTask(icpQPInputToTest, currentICPError, referenceFootstepLocation, feedbackGain, weightMatrix, footstepRecursionMultiplier, 1.0);
+
+      tmpMatrix = new DenseMatrix64F(2, 2);
+      CommonOps.mult(weightMatrix, invertedFeedbackGain, tmpMatrix);
+      CommonOps.mult(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.quadraticTerm);
+
+      tmpMatrix = new DenseMatrix64F(2, 1);
+      CommonOps.mult(weightMatrix, currentICPError, tmpMatrix);
+      CommonOps.multTransA(invertedFeedbackGain, tmpMatrix, icpQPInputExpected.linearTerm);
+      CommonOps.multTransA(0.5, currentICPError, tmpMatrix, icpQPInputExpected.residualCost);
+
+
+      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+   }
+
+
+
+
+
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 21000)
