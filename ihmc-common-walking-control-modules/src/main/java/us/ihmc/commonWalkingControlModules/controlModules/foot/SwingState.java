@@ -33,6 +33,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.BlendedPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -63,8 +64,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoEnum<TrajectoryType> activeTrajectoryType;
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
-   private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
-   private final BlendedPoseTrajectoryGenerator blendedSwingTrajectory;
+   private final MultipleWaypointsBlendedPoseTrajectoryGenerator blendedSwingTrajectory;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
    private double swingTrajectoryBlendDuration = 0.0;
 
@@ -243,8 +243,8 @@ public class SwingState extends AbstractUnconstrainedState
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
 
-      swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
-      blendedSwingTrajectory = new BlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
+      MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
+      blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
@@ -440,7 +440,7 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleOrientation.setAndMatchFrame(desiredOrientation);
       yoDesiredSoleLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
       yoDesiredSoleAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
-      currentTrajectoryWaypoint.set(swingTrajectory.getCurrentPositionWaypointIndex());
+      currentTrajectoryWaypoint.set(blendedSwingTrajectory.getCurrentPositionWaypointIndex());
 
       transformDesiredsFromSoleFrameToControlFrame();
       secondaryJointWeightScale.set(computeSecondaryJointWeightScale(time));
@@ -506,7 +506,7 @@ public class SwingState extends AbstractUnconstrainedState
       finalAngularVelocity.setToZero(worldFrame);
 
       // append current pose as initial trajectory point
-      swingTrajectory.clear(worldFrame);
+      blendedSwingTrajectory.clearTrajectory(worldFrame);
       boolean appendFootstepPose = true;
       double swingDuration = this.swingDuration.getDoubleValue();
 
@@ -514,8 +514,8 @@ public class SwingState extends AbstractUnconstrainedState
       {
          if (swingWaypoints.get(0).getTime() > 1.0e-5)
          {
-            swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
-            swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
+            blendedSwingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
+            blendedSwingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
          }
          else if (swingTrajectoryBlendDuration < 1.0e-5)
          {
@@ -524,15 +524,15 @@ public class SwingState extends AbstractUnconstrainedState
 
          for (int i = 0; i < swingWaypoints.size(); i++)
          {
-            swingTrajectory.appendPoseWaypoint(swingWaypoints.get(i));
+            blendedSwingTrajectory.appendPoseWaypoint(swingWaypoints.get(i));
          }
 
          appendFootstepPose = !Precision.equals(swingWaypoints.getLast().getTime(), swingDuration);
       }
       else
       {
-         swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
-         swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
+         blendedSwingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialLinearVelocity);
+         blendedSwingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, initialAngularVelocity);
 
          // TODO: initialize optimizer somewhere else
          if (initializeOptimizer)
@@ -543,7 +543,7 @@ public class SwingState extends AbstractUnconstrainedState
          for (int i = 0; i < swingTrajectoryOptimizer.getNumberOfWaypoints(); i++)
          {
             swingTrajectoryOptimizer.getWaypointData(i, tempPositionTrajectoryPoint);
-            swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
+            blendedSwingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
          }
 
          // make the foot orientation better for avoidance
@@ -552,7 +552,7 @@ public class SwingState extends AbstractUnconstrainedState
             tmpOrientation.setToZero(worldFrame);
             tmpVector.setToZero(worldFrame);
             tmpOrientation.interpolate(initialOrientation, finalOrientation, midpointOrientationInterpolationForClearance.getDoubleValue());
-            swingTrajectory.appendOrientationWaypoint(0.5 * swingDuration, tmpOrientation, tmpVector);
+            blendedSwingTrajectory.appendOrientationWaypoint(0.5 * swingDuration, tmpOrientation, tmpVector);
          }
       }
 
@@ -561,8 +561,8 @@ public class SwingState extends AbstractUnconstrainedState
       // append footstep pose if not provided in the waypoints
       if (appendFootstepPose)
       {
-         swingTrajectory.appendPositionWaypoint(swingDuration, finalPosition, finalLinearVelocity);
-         swingTrajectory.appendOrientationWaypoint(swingDuration, finalOrientation, finalAngularVelocity);
+         blendedSwingTrajectory.appendPositionWaypoint(swingDuration, finalPosition, finalLinearVelocity);
+         blendedSwingTrajectory.appendOrientationWaypoint(swingDuration, finalOrientation, finalAngularVelocity);
       }
 
       // setup touchdown trajectory
