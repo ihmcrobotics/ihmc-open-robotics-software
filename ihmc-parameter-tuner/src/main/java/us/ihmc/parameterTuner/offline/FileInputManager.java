@@ -41,12 +41,18 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
 
    public FileInputManager()
    {
+      this(null);
+   }
+
+   public FileInputManager(File defaultFile)
+   {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
       loader.setRoot(this);
       loader.setController(this);
       try
       {
          loader.load();
+         openFile(defaultFile);
       }
       catch (IOException e)
       {
@@ -102,6 +108,11 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
       fileChooser.setTitle("Select Parameter File");
       File file = fileChooser.showOpenDialog(open.getScene().getWindow());
 
+      openFile(file);
+   }
+
+   private void openFile(File file) throws IOException
+   {
       if (file != null)
       {
          originalFile = file;
