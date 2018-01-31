@@ -44,7 +44,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-parameter-tuner", version: groupDependencyVersion
 }
 
 testDependencies {
