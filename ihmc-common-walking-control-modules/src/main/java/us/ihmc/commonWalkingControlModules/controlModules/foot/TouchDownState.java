@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
@@ -91,6 +91,8 @@ public class TouchDownState extends AbstractFootControlState
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
+   private final PIDSE3GainsReadOnly gains;
+
    /**
     * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
     * This state is triggered after the foot comes in contact with the ground
@@ -98,9 +100,11 @@ public class TouchDownState extends AbstractFootControlState
     * @param swingFootControlGains
     * @param parentRegistry
     */
-   public TouchDownState(FootControlHelper footControlHelper, YoPIDSE3Gains swingFootControlGains, YoVariableRegistry parentRegistry)
+   public TouchDownState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly swingFootControlGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.TOUCHDOWN, footControlHelper);
+
+      this.gains = swingFootControlGains;
 
       MomentumOptimizationSettings momentumOptimizationSettings = footControlHelper.getWalkingControllerParameters().getMomentumOptimizationSettings();
 
@@ -134,7 +138,6 @@ public class TouchDownState extends AbstractFootControlState
       feedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       feedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       feedbackControlCommand.setPrimaryBase(pelvis);
-      feedbackControlCommand.setGains(swingFootControlGains);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(footBodyFixedFrame);
@@ -166,6 +169,7 @@ public class TouchDownState extends AbstractFootControlState
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
+      feedbackControlCommand.setGains(gains);
    }
    
    public void setTouchdownDuration(double touchdownDuration)

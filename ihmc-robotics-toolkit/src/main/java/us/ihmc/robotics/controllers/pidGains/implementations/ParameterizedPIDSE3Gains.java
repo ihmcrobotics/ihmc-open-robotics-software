@@ -36,10 +36,39 @@ public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
     * @param registry the registry to which the tuning variables are attached.
     */
    public ParameterizedPIDSE3Gains(String suffix, GainCoupling gainCouplingPosition, GainCoupling gainCouplingOrientation, boolean useIntegratorPosition,
-                               boolean useIntegratorOrientation, YoVariableRegistry registry)
+                                   boolean useIntegratorOrientation, YoVariableRegistry registry)
    {
       positionGains = new ParameterizedPID3DGains(suffix + "Position", gainCouplingPosition, useIntegratorPosition, registry);
       orientationGains = new ParameterizedPID3DGains(suffix + "Orientation", gainCouplingOrientation, useIntegratorOrientation, registry);
+   }
+
+   /**
+    * Will create a new set of gain parameters. The provided gain values are used as default
+    * values for the parameters.
+    *
+    * @param suffix the name of the gains will be attached to all parameters.
+    * @param defaultGains default values for the gains.
+    * @param registry the registry to which the tuning variables are attached.
+    */
+   public ParameterizedPIDSE3Gains(String suffix, PIDSE3GainsReadOnly defaultGains, YoVariableRegistry registry)
+   {
+      this(suffix, defaultGains.getPositionGains(), defaultGains.getOrientationGains(), registry);
+   }
+
+   /**
+    * Will create a new set of gain parameters. The provided values for position and orientation
+    * gains are used as default values for the parameters.
+    *
+    * @param suffix the name of the gains will be attached to all parameters.
+    * @param defaultPositionGains default values for the position part of these gains.
+    * @param defaultOrientationGains default values for the orientation part of these gains.
+    * @param registry the registry to which the tuning variables are attached.
+    */
+   public ParameterizedPIDSE3Gains(String suffix, PID3DGainsReadOnly defaultPositionGains, PID3DGainsReadOnly defaultOrientationGains,
+                                   YoVariableRegistry registry)
+   {
+      positionGains = new ParameterizedPID3DGains(suffix + "Position", defaultPositionGains, registry);
+      orientationGains = new ParameterizedPID3DGains(suffix + "Orientation", defaultOrientationGains, registry);
    }
 
    @Override
