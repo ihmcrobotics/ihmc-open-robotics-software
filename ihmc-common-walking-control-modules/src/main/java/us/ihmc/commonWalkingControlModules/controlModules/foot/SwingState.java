@@ -27,12 +27,9 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.BlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -54,6 +51,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractUnconstrainedState
 {
+   private static final boolean USE_RATE_LIMIT_FOR_ADJUSTED_FOOTSTEP = false;
+   
    private final YoBoolean replanTrajectory;
    private final YoBoolean footstepWasAdjusted;
 
@@ -371,7 +370,10 @@ public class SwingState extends AbstractUnconstrainedState
    protected void computeAndPackTrajectory()
    {
       currentTime.set(getTimeInCurrentState());
-      rateLimitedAdjustedPose.update(adjustedFootstepPose);
+      if (USE_RATE_LIMIT_FOR_ADJUSTED_FOOTSTEP)
+         rateLimitedAdjustedPose.update(adjustedFootstepPose);
+      else
+         rateLimitedAdjustedPose.set(adjustedFootstepPose);
 
       double time;
       if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
