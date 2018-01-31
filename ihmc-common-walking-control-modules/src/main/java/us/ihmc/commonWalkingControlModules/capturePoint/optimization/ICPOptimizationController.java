@@ -20,10 +20,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.math.frames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -81,9 +78,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
-   private final YoFramePose footstepSolution = new YoFramePose(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePoseUsingQuaternions footstepSolution = new YoFramePoseUsingQuaternions(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
    private final YoFramePoint2d footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
-   private final YoFramePoint upcomingFootstepLocation = new YoFramePoint(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+   private final YoFramePoseUsingQuaternions upcomingFootstepLocation = new YoFramePoseUsingQuaternions(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
    private final YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
    private final YoDouble footstepAdjustmentSafetyFactor = new YoDouble(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry);
@@ -317,7 +314,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
             {
                footstep.getPosition(tempPoint3d);
                footstep.getPose(tmpPose);
-               upcomingFootstepLocation.set(tempPoint3d);
+               upcomingFootstepLocation.set(tmpPose);
                unclippedFootstepSolution.set(tempPoint3d);
                footstepSolution.set(tmpPose);
 
@@ -450,8 +447,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    @Override
    public void getFootstepSolution(Footstep footstepSolutionToPack)
    {
-      footstepSolution.getFramePose(tmpPose);
-      footstepSolutionToPack.setPose(tmpPose);
+      footstepSolutionToPack.setPose(footstepSolution);
    }
 
    @Override
@@ -592,7 +588,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
          predictedEndOfStateICP.add(perfectCMP);
 
-         tempPoint3d.set(upcomingFootstepLocation);
+         tempPoint3d.set(upcomingFootstepLocation.getPosition());
          if (useICPControlPolygons.getBooleanValue())
             icpControlPlane.projectPointOntoControlPlane(worldFrame, tempPoint3d, projectedTempPoint3d);
          else
