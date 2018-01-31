@@ -253,7 +253,7 @@ public abstract class ICPOptimizationParameters
     */
    public boolean considerAngularMomentumInAdjustment()
    {
-      return false;
+      return true;
    }
 
    /**
