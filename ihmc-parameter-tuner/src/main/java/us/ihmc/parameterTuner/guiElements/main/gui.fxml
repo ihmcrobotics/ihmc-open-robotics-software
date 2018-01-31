@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import us.ihmc.parameterTuner.guiElements.tree.ParameterTree?>
+<?import us.ihmc.parameterTuner.guiElements.tuners.Tuner?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
+	fx:controller="us.ihmc.parameterTuner.guiElements.main.GuiController"
+	xmlns:fx="http://javafx.com/fxml">
+	<children>
+		<HBox spacing="20.0" AnchorPane.leftAnchor="10.0"
+			AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0"
+			AnchorPane.rightAnchor="10.0">
+			<children>
+				<VBox prefWidth="600.0" spacing="10.0" HBox.hgrow="ALWAYS">
+					<children>
+						<Label text="Parameters" styleClass="heading" />
+						<HBox spacing="10.0" alignment="CENTER_LEFT">
+							<children>
+								<Text text="Parameters" />
+								<TextField fx:id="searchFieldParameters" HBox.hgrow="ALWAYS" />
+								<Text text="Namespaces" />
+								<TextField fx:id="searchFieldNamespaces" HBox.hgrow="ALWAYS" />
+							</children>
+						</HBox>
+						<CheckBox text="Hide Namespaces" fx:id="hideNamespaces"
+							onAction="#handleNamespaceButton" />
+						<ParameterTree VBox.vgrow="ALWAYS" fx:id="tree" />
+						<StackPane fx:id="inputPane" />
+					</children>
+				</VBox>
+				<ScrollPane>
+					<content>
+						<VBox fx:id="tuningBox" prefWidth="730.0" spacing="10.0"
+							HBox.hgrow="ALWAYS" />
+					</content>
+				</ScrollPane>
+			</children>
+		</HBox>
+	</children>
+</AnchorPane>
