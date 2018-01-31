@@ -2,17 +2,56 @@
 <parameters>
     <registry name="DRCControllerThread">
         <registry name="DRCMomentumBasedController">
-            <registry name="HighLevelHumanoidControllerManager">
-                <registry name="MomentumBasedControllerFactory">
-                    <registry name="HighLevelControlManagerFactory">
-                        <registry name="FeetManager">
-                            <registry name="leftFootControlModule">
-<parameter name="leftFootSwingFinalHeightOffset" type="DoubleParameter" min="-0.01" max="0.005" value="0.0"/>
-                            </registry>
-                            <registry name="rightFootControlModule">
-<parameter name="rightFootSwingFinalHeightOffset" type="DoubleParameter" min="-0.01" max="0.005" value="0.0"/>
-                            </registry>
-                        </registry>
+            <registry name="HumanoidHighLevelControllerManager">
+                <registry name="HighLevelHumanoidControllerFactory">
+                    <registry name="MomentumOptimizationSettings">
+                        <parameter name="SpineYawJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
+                        <parameter name="SpinePitchJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="45.0"/>
+                        <parameter name="SpineRollJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="45.0"/>
+                        <parameter name="ArmsJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="NeckJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="SpineUserModeWeight" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="ArmsUserModeWeight" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                        <parameter name="NeckUserModeWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="ChestAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
+                        <parameter name="ChestAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                        <parameter name="ChestAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="HeadAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="HeadAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="HeadAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="PelvisAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="PelvisAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="PelvisAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="HandAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="HandAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="HandAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="FootAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="FootAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="FootAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="PelvisLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="PelvisLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="PelvisLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                        <parameter name="HandLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="HandLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="HandLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="FootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
+                        <parameter name="FootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
+                        <parameter name="FootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
+                        <parameter name="LoadedFootAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="LoadedFootAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="LoadedFootAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                        <parameter name="LoadedFootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                        <parameter name="LoadedFootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                        <parameter name="LoadedFootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                        <parameter name="DefaultLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="DefaultLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="DefaultLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                        <parameter name="DefaultAngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="DefaultAngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="DefaultAngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="HighLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="HighLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="HighLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                     </registry>
                 </registry>
             </registry>
