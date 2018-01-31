@@ -90,18 +90,15 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          imuToIndexMap.put(imuSensor, i);
 
          AlphaFilteredYoFrameVector angularVelocityBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "AngularVelocityBias", "", registry, alphaProvider, measurementFrame);
-         angularVelocityBias.update(0.0, 0.0, 0.0);
          angularVelocityBiases.add(angularVelocityBias);
 
          AlphaFilteredYoFrameVector linearAccelerationBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "LinearAccelerationBias", "", registry, alphaProvider, measurementFrame);
-         linearAccelerationBias.update(0.0, 0.0, 0.0);
          linearAccelerationBiases.add(linearAccelerationBias);
 
          YoFrameQuaternion rawOrientationBias = new YoFrameQuaternion("estimated" + sensorName + "RawQuaternionBias", measurementFrame, registry);
          rawOrientationBiases.add(rawOrientationBias);
 
          AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, alphaProvider, registry);
-         orientationBias.update();
          orientationBiases.add(orientationBias);
 
          angularVelocitiesInWorld.add(new YoFrameVector("unprocessed" + sensorName + "AngularVelocityInWorld", worldFrame, registry));
