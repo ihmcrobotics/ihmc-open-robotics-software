@@ -105,6 +105,9 @@ public class SupportState extends AbstractFootControlState
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
+   private Vector3DReadOnly angularWeight;
+   private Vector3DReadOnly linearWeight;
+
    public SupportState(FootControlHelper footControlHelper, YoPIDSE3Gains holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
@@ -283,6 +286,7 @@ public class SupportState extends AbstractFootControlState
       footAcceleration.setToZero(bodyFixedFrame, rootBody.getBodyFixedFrame(), controlFrame);
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       spatialAccelerationCommand.setSpatialAcceleration(controlFrame, footAcceleration);
+      spatialAccelerationCommand.setWeights(angularWeight, linearWeight);
 
       // assemble feedback command
       bodyFixedControlledPose.setToZero(controlFrame);
@@ -293,6 +297,7 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
       spatialFeedbackControlCommand.set(desiredCopPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
 
       // set selection matrices
       accelerationSelectionMatrix.resetSelection();
@@ -399,16 +404,10 @@ public class SupportState extends AbstractFootControlState
       return spatialFeedbackControlCommand;
    }
 
-   public void setWeight(double weight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      spatialAccelerationCommand.setWeight(weight);
-      spatialFeedbackControlCommand.setWeightForSolver(weight);
-   }
-
-   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
-   {
-      spatialAccelerationCommand.setWeights(angular, linear);
-      spatialFeedbackControlCommand.setWeightsForSolver(angular, linear);
+      this.angularWeight = angularWeight;
+      this.linearWeight = linearWeight;
    }
 
 }

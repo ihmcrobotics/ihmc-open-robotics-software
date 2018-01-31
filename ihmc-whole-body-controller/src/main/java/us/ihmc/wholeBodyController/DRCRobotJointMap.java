@@ -37,6 +37,10 @@ public interface DRCRobotJointMap extends HumanoidJointNameMap
 
    public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry);
 
+   public abstract String getHandName(RobotSide robotSide);
+
+   public abstract String getFootName(RobotSide robotSide);
+
    public default List<String> getNeckJointNamesAsStrings()
    {
       List<String> neckJointNames = new ArrayList<>();
@@ -115,5 +119,25 @@ public interface DRCRobotJointMap extends HumanoidJointNameMap
          jointNames.add(getArmJointName(side, armJointName));
       }
       return jointNames;
+   }
+
+   public default List<String> getHandNames()
+   {
+      List<String> names = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         names.add(getHandName(robotSide));
+      }
+      return names;
+   }
+
+   public default List<String> getFootNames()
+   {
+      List<String> names = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         names.add(getFootName(robotSide));
+      }
+      return names;
    }
 }

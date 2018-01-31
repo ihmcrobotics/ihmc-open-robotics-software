@@ -58,6 +58,9 @@ public class OnToesState extends AbstractFootControlState
 
    private final ReferenceFrame soleZUpFrame;
 
+   private Vector3DReadOnly angularWeight;
+   private Vector3DReadOnly linearWeight;
+
    public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
@@ -111,16 +114,10 @@ public class OnToesState extends AbstractFootControlState
       zeroAccelerationCommand.setSelectionMatrix(zeroAccelerationSelectionMatrix);
    }
 
-   public void setWeight(double weight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      feedbackControlCommand.setWeightForSolver(weight);
-      zeroAccelerationCommand.setWeight(weight);
-   }
-
-   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
-   {
-      feedbackControlCommand.setWeightsForSolver(angular, linear);
-      zeroAccelerationCommand.setWeights(angular, linear);
+      this.angularWeight = angularWeight;
+      this.linearWeight = linearWeight;
    }
 
    public void setUsePointContact(boolean usePointContact)
@@ -148,6 +145,9 @@ public class OnToesState extends AbstractFootControlState
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       zeroAccelerationCommand.setSpatialAccelerationToZero(toeOffFrame);
+
+      feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
+      zeroAccelerationCommand.setWeights(angularWeight, linearWeight);
 
       if (usePointContact.getBooleanValue())
       {

@@ -21,7 +21,6 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
@@ -32,6 +31,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Created by dstephen on 2/14/14.
@@ -41,6 +41,8 @@ public class BonoJointMap implements DRCRobotJointMap
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = null;
+
+   private static final SideDependentList<String> footNames = new SideDependentList<String>("l_foot", "r_foot");
 
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_ROLL, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_YAW };
    private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_ROLL, LegJointName.ANKLE_PITCH };
@@ -196,6 +198,18 @@ public class BonoJointMap implements DRCRobotJointMap
    public String getHeadName()
    {
       return headName;
+   }
+
+   @Override
+   public String getHandName(RobotSide robotSide)
+   {
+      return null;
+   }
+
+   @Override
+   public String getFootName(RobotSide robotSide)
+   {
+      return footNames.get(robotSide);
    }
 
    @Override
