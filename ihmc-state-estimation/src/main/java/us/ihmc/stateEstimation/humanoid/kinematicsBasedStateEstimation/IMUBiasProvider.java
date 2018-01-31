@@ -3,10 +3,12 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 
 public interface IMUBiasProvider
-{
-
+{  
+   BooleanProvider isAccelerationIncludingGravity();
+   
    void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, Vector3D angularVelocityBiasToPack);
 
    void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, FrameVector3D angularVelocityBiasToPack);
