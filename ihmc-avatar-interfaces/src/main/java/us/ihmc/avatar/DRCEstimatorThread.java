@@ -227,8 +227,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          }
          
       }
-      
-      ParameterLoaderHelper.loadParameters(this, wholeBodyControllerParameters.getWholeBodyControllerParametersFile(), estimatorRegistry);
+
+      ParameterLoaderHelper.loadParameters(this, wholeBodyControllerParameters, estimatorRegistry);
 
       if (robotVisualizer != null)
       {
