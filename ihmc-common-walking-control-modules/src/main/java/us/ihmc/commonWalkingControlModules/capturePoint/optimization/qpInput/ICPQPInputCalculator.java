@@ -15,20 +15,20 @@ public class ICPQPInputCalculator
    private boolean considerFeedbackInAdjustment = true;
 
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   public ICPQPIndexHandler indexHandler;
+   private final ICPQPIndexHandler indexHandler;
 
    private final DenseMatrix64F identity = CommonOps.identity(2, 2);
    private final DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F tmpScalar = new DenseMatrix64F(1, 1);
 
-   private final DenseMatrix64F feedbackJacobian = new DenseMatrix64F(2, 6);
+   final DenseMatrix64F feedbackJacobian = new DenseMatrix64F(2, 6);
+   final DenseMatrix64F feedbackObjective = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F feedbackJtW = new DenseMatrix64F(6, 2);
-   private final DenseMatrix64F feedbackObjective = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F feedbackObjtW = new DenseMatrix64F(1, 2);
 
-   private final DenseMatrix64F adjustmentJacobian = new DenseMatrix64F(2,6);
+   final DenseMatrix64F adjustmentJacobian = new DenseMatrix64F(2,6);
+   final DenseMatrix64F adjustmentObjective = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F adjustmentJtW = new DenseMatrix64F(6,2);
-   private final DenseMatrix64F adjustmentObjective = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F adjustmentObjtW = new DenseMatrix64F(1, 2);
 
    private final DenseMatrix64F invertedFeedbackGain = new DenseMatrix64F(2, 2);
@@ -180,50 +180,117 @@ public class ICPQPInputCalculator
       adjustmentObjective.zero();
       adjustmentObjtW.zero();
 
-      MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-      if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-
-      if (indexHandler.useStepAdjustment())
+      if (considerFeedbackInAdjustment && considerAngularMomentumInAdjustment)
       {
-         CommonOps.setIdentity(identity);
-         CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         if (considerFeedbackInAdjustment && (considerAngularMomentumInAdjustment || !indexHandler.useAngularMomentum()))
-         { // we only have one task, which is to use feedback and step adjustment
+         if (indexHandler.useAngularMomentum())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
+         if (indexHandler.useStepAdjustment())
+         {
+            CommonOps.setIdentity(identity);
+            CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
-
             MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+         }
+
+      }
+      else if (considerFeedbackInAdjustment)
+      {
+         if (!indexHandler.useAngularMomentum())
+         {
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
+            if (indexHandler.useStepAdjustment())
+            {
+               CommonOps.setIdentity(identity);
+               CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+
+               MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+               MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+            }
          }
          else
          {
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
+            if (indexHandler.useStepAdjustment())
+            {
+               CommonOps.setIdentity(identity);
+               CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+
+               MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+               MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+            }
+         }
+      }
+      else if (considerAngularMomentumInAdjustment)
+      {
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         if (indexHandler.useAngularMomentum())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
+         if (indexHandler.useStepAdjustment())
+         {
+            CommonOps.setIdentity(identity);
+            CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+
+            if (indexHandler.useAngularMomentum())
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
             MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
-            if (considerAngularMomentumInAdjustment && indexHandler.useAngularMomentum())
-               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
+            MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+         }
+      }
+      else
+      {
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         if (indexHandler.useAngularMomentum())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+
+         MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
+         if (indexHandler.useStepAdjustment())
+         {
+            CommonOps.setIdentity(identity);
+            CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
+
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
          }
       }
 
-      MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
+
 
       CommonOps.multTransA(feedbackJacobian, weight, feedbackJtW);
-      CommonOps.multTransA(adjustmentJacobian, weight, adjustmentJtW);
-
       CommonOps.multAdd(feedbackJtW, feedbackJacobian, icpQPInput.quadraticTerm);
-      CommonOps.multAdd(adjustmentJtW, adjustmentJacobian, icpQPInput.quadraticTerm);
-
       CommonOps.multAdd(feedbackJtW, feedbackObjective, icpQPInput.linearTerm);
-      CommonOps.multAdd(adjustmentJtW, adjustmentObjective, icpQPInput.linearTerm);
-
-
       CommonOps.multTransA(feedbackObjective, weight, feedbackObjtW);
-      CommonOps.multTransA(adjustmentObjective, weight, adjustmentObjtW);
-
       CommonOps.multAdd(0.5, feedbackObjtW, feedbackObjective, icpQPInput.residualCost);
+
+      CommonOps.multTransA(adjustmentJacobian, weight, adjustmentJtW);
+      CommonOps.multAdd(adjustmentJtW, adjustmentJacobian, icpQPInput.quadraticTerm);
+      CommonOps.multAdd(adjustmentJtW, adjustmentObjective, icpQPInput.linearTerm);
+      CommonOps.multTransA(adjustmentObjective, weight, adjustmentObjtW);
       CommonOps.multAdd(0.5, adjustmentObjtW, adjustmentObjective, icpQPInput.residualCost);
    }
 
@@ -233,15 +300,15 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term. Modified.
     * @param solverInput_h_ToPack full problem linear cost term. Modified.
-    * @param solverInputResidualCost full problem residual cost term.
+    * @param solverInputResidualCostToPack full problem residual cost term.
     */
    public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
-         DenseMatrix64F solverInputResidualCost)
+         DenseMatrix64F solverInputResidualCostToPack)
    {
       int feedbackCMPIndex = indexHandler.getFeedbackCMPIndex();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, feedbackCMPIndex, feedbackCMPIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, feedbackCMPIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
-      MatrixTools.addMatrixBlock(solverInputResidualCost, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 
    /**
@@ -250,7 +317,7 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term.
     * @param solverInput_h_ToPack full problem linear cost term.
-    * @param solverInputResidualCost full problem residual cost term.
+    * @param solverInputResidualCostToPack full problem residual cost term.
     */
    public void submitDynamicsTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
          DenseMatrix64F solverInputResidualCostToPack)
@@ -267,7 +334,7 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term.
     * @param solverInput_h_ToPack full problem linear cost term.
-    * @param solverInputResidualCost full problem residual cost term.
+    * @param solverInputResidualCostToPack full problem residual cost term.
     */
    public void submitAngularMomentumMinimizationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
          DenseMatrix64F solverInputResidualCostToPack)
@@ -284,7 +351,7 @@ public class ICPQPInputCalculator
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term.
     * @param solverInput_h_ToPack full problem linear cost term.
-    * @param solverInputResidualCost full problem residual cost term.
+    * @param solverInputResidualCostToPack full problem residual cost term.
     */
    public void submitFootstepTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
          DenseMatrix64F solverInputResidualCostToPack)
