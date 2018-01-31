@@ -26,7 +26,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -42,6 +41,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class HighLevelControlManagerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoVariableRegistry momentumRegistry = new YoVariableRegistry("MomentumOptimizationSettings");
 
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -69,11 +69,15 @@ public class HighLevelControlManagerFactory
    private final Map<String, Vector3DReadOnly> taskspaceLinearWeightMap = new HashMap<>();
    private Vector3DReadOnly loadedFootAngularWeight;
    private Vector3DReadOnly loadedFootLinearWeight;
+   private Vector3DReadOnly linearMomentumWeight;
+   private Vector3DReadOnly angularMomentumWeight;
+   private Vector3DReadOnly highLinearMomentumWeight;
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
       parentRegistry.addChild(registry);
+      parentRegistry.addChild(momentumRegistry);
    }
 
    public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -91,13 +95,17 @@ public class HighLevelControlManagerFactory
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
       ParameterTools.extract3DGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, registry);
       ParameterTools.extract3DGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, registry);
-      ParameterTools.extractJointWeightMap("JointspaceWeight", momentumOptimizationSettings.getJointspaceWeights(), jointspaceWeightMap, registry);
-      ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, registry);
-      ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, registry);
-      ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, registry);
+      ParameterTools.extractJointWeightMap("JointspaceWeight", momentumOptimizationSettings.getJointspaceWeights(), jointspaceWeightMap, momentumRegistry);
+      ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, momentumRegistry);
+      ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, momentumRegistry);
+      ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, momentumRegistry);
 
-      loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), registry);
-      loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), registry);
+      loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), momentumRegistry);
+      loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), momentumRegistry);
+
+      linearMomentumWeight = new ParameterVector3D("DefaultLinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), momentumRegistry);
+      angularMomentumWeight = new ParameterVector3D("DefaultAngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), momentumRegistry);
+      highLinearMomentumWeight = new ParameterVector3D("HighLinearMomentumRateWeight", momentumOptimizationSettings.getHighLinearMomentumWeightForRecovery(), momentumRegistry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -121,10 +129,8 @@ public class HighLevelControlManagerFactory
 
       balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
                                           registry);
-      Vector3D linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
-      Vector3D angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
       balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
-      balanceManager.setHighMomentumWeightForRecovery(momentumOptimizationSettings.getHighLinearMomentumWeightForRecovery());
+      balanceManager.setHighMomentumWeightForRecovery(highLinearMomentumWeight);
       return balanceManager;
    }
 
