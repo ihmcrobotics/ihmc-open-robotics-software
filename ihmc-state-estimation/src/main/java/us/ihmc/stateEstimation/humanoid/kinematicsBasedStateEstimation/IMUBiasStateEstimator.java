@@ -158,6 +158,10 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    {    
       for (int imuIndex = 0; imuIndex < imuProcessedOutputs.size(); imuIndex++)
       {
+         angularVelocityBiases.get(imuIndex).update(0.0, 0.0, 0.0);
+         linearAccelerationBiases.get(imuIndex).update(0.0, 0.0, 0.0);
+         orientationBiases.get(imuIndex).update();
+         
          rawOrientationBiases.get(imuIndex).setToZero();
          orientationBiases.get(imuIndex).setToZero();
          orientationBiasMagnitudes.get(imuIndex).set(0.0);
