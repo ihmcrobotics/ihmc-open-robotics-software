@@ -283,11 +283,13 @@ public class AtlasJointMap implements DRCRobotJointMap
       return headName;
    }
 
+   @Override
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
    }
 
+   @Override
    public String getFootName(RobotSide robotSide)
    {
       return footNames.get(robotSide);

@@ -32,6 +32,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -65,6 +67,8 @@ public class HighLevelControlManagerFactory
    private final Map<String, DoubleProvider> userModeWeightMap = new HashMap<>();
    private final Map<String, Vector3DReadOnly> taskspaceAngularWeightMap = new HashMap<>();
    private final Map<String, Vector3DReadOnly> taskspaceLinearWeightMap = new HashMap<>();
+   private Vector3DReadOnly loadedFootAngularWeight;
+   private Vector3DReadOnly loadedFootLinearWeight;
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -91,6 +95,9 @@ public class HighLevelControlManagerFactory
       ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, registry);
       ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, registry);
       ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, registry);
+
+      loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), registry);
+      loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -197,11 +204,21 @@ public class HighLevelControlManagerFactory
          return null;
 
       feetManager = new FeetManager(controllerToolbox, walkingControllerParameters, registry);
-      Vector3D highLinearFootWeight = momentumOptimizationSettings.getHighLinearFootWeight();
-      Vector3D highAngularFootWeight = momentumOptimizationSettings.getHighAngularFootWeight();
-      Vector3D defaultLinearFootWeight = momentumOptimizationSettings.getDefaultLinearFootWeight();
-      Vector3D defaultAngularFootWeight = momentumOptimizationSettings.getDefaultAngularFootWeight();
-      feetManager.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
+
+      String footName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.LEFT).getName();
+      Vector3DReadOnly angularWeight = taskspaceAngularWeightMap.get(footName);
+      Vector3DReadOnly linearWeight = taskspaceLinearWeightMap.get(footName);
+      if (angularWeight == null || linearWeight == null)
+      {
+         throw new RuntimeException("Not all weights defined for the foot control: " + footName + " needs weights.");
+      }
+      String otherFootName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.RIGHT).getName();
+      if (taskspaceAngularWeightMap.get(otherFootName) != angularWeight || taskspaceLinearWeightMap.get(otherFootName) != linearWeight)
+      {
+         throw new RuntimeException("There can only be one weight defined for both feet. Make sure they are in the same GroupParameter");
+      }
+      feetManager.setWeights(loadedFootAngularWeight, loadedFootLinearWeight, angularWeight, linearWeight);
+
       return feetManager;
    }
 
