@@ -768,10 +768,10 @@ public class ICPOptimizationQPSolver
     */
    private void addFeedbackTask()
    {
-      ICPQPInputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
+      ICPQPInputCalculator.computeCoPFeedbackTask(feedbackTaskInput, feedbackWeight);
 
       if (hasFeedbackRateTerm)
-         inputCalculator.computeFeedbackRateTask(feedbackTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution);
+         inputCalculator.computeCoPFeedbackRateTask(feedbackTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution);
 
       inputCalculator.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
@@ -781,8 +781,9 @@ public class ICPOptimizationQPSolver
     */
    private void addAngularMomentumMinimizationTask()
    {
-      ICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
-      inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
+      // TODO give this an angular momentum objective
+      inputCalculator.computeAngularMomentumRateTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
+      inputCalculator.submitAngularMomentumRateTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -799,7 +800,7 @@ public class ICPOptimizationQPSolver
       copLocationConstraint.formulateConstraint();
 
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCoPIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -819,8 +820,8 @@ public class ICPOptimizationQPSolver
       cmpLocationConstraint.formulateConstraint();
 
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCoPIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumRateIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -933,7 +934,7 @@ public class ICPOptimizationQPSolver
     */
    private void extractFeedbackDeltaSolution(DenseMatrix64F feedbackSolutionToPack)
    {
-      MatrixTools.setMatrixBlock(feedbackSolutionToPack, 0, 0, solution, indexHandler.getFeedbackCMPIndex(), 0, 2, 1, 1.0);
+      MatrixTools.setMatrixBlock(feedbackSolutionToPack, 0, 0, solution, indexHandler.getFeedbackCoPIndex(), 0, 2, 1, 1.0);
    }
 
    /**
@@ -944,7 +945,7 @@ public class ICPOptimizationQPSolver
    private void extractAngularMomentumSolution(DenseMatrix64F angularMomentumSolutionToPack)
    {
       if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(angularMomentumSolutionToPack, 0, 0, solution, indexHandler.getAngularMomentumIndex(), 0, 2, 1, 1.0);
+         MatrixTools.setMatrixBlock(angularMomentumSolutionToPack, 0, 0, solution, indexHandler.getAngularMomentumRateIndex(), 0, 2, 1, 1.0);
    }
 
    /**
