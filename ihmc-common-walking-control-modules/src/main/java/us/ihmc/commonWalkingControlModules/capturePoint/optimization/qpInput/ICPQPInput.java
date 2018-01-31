@@ -94,6 +94,4 @@ public class ICPQPInput
    {
       return MatrixFeatures.isEquals(quadraticTerm, other.quadraticTerm, tol) && MatrixFeatures.isEquals(linearTerm, other.linearTerm, tol) && MatrixFeatures.isEquals(residualCost, other.residualCost, tol);
    }
-
-
 }
