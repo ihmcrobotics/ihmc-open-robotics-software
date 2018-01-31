@@ -14,9 +14,9 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -66,19 +66,19 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final Vector3D zUpVector = new Vector3D();
 
    private BooleanProvider isAccelerationIncludingGravity;
-   private final double updateDT;
 
    public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
                                 double updateDT, YoVariableRegistry parentRegistry)
    {
       this.imuProcessedOutputs = imuProcessedOutputs;
-      this.updateDT = updateDT;
       this.feet = new ArrayList<>(feet);
 
 
       gravityVectorInWorld.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
       zUpVector.set(0.0, 0.0, 1.0);
 
+      
+      AlphaBasedOnBreakFrequencyProvider alphaProvider = new AlphaBasedOnBreakFrequencyProvider(() ->  biasFilterBreakFrequency.getValue(), updateDT);
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
          IMUSensorReadOnly imuSensor = imuProcessedOutputs.get(i);
@@ -89,18 +89,18 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
          imuToIndexMap.put(imuSensor, i);
 
-         AlphaFilteredYoFrameVector angularVelocityBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "AngularVelocityBias", "", registry, 0.0, measurementFrame);
+         AlphaFilteredYoFrameVector angularVelocityBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "AngularVelocityBias", "", registry, alphaProvider, measurementFrame);
          angularVelocityBias.update(0.0, 0.0, 0.0);
          angularVelocityBiases.add(angularVelocityBias);
 
-         AlphaFilteredYoFrameVector linearAccelerationBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "LinearAccelerationBias", "", registry, 0.0, measurementFrame);
+         AlphaFilteredYoFrameVector linearAccelerationBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "LinearAccelerationBias", "", registry, alphaProvider, measurementFrame);
          linearAccelerationBias.update(0.0, 0.0, 0.0);
          linearAccelerationBiases.add(linearAccelerationBias);
 
          YoFrameQuaternion rawOrientationBias = new YoFrameQuaternion("estimated" + sensorName + "RawQuaternionBias", measurementFrame, registry);
          rawOrientationBiases.add(rawOrientationBias);
 
-         AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, 0.0, registry);
+         AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, alphaProvider, registry);
          orientationBias.update();
          orientationBiases.add(orientationBias);
 
@@ -123,17 +123,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       parentRegistry.addChild(registry);
    }
 
-   private void updateAlphaValues()
-   {
-      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency.getValue(), updateDT);
-      for(int i = 0; i < imuProcessedOutputs.size(); i++)
-      {
-         angularVelocityBiases.get(i).setAlpha(alpha);
-         linearAccelerationBiases.get(i).setAlpha(alpha);
-         orientationBiases.get(i).setAlpha(alpha);
-      }
-   }
-   
    
    public void configureModuleParameters(StateEstimatorParameters stateEstimatorParameters)
    {
@@ -169,9 +158,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
    
    public void initialize()
-   {
-      updateAlphaValues();
-      
+   {    
       for (int imuIndex = 0; imuIndex < imuProcessedOutputs.size(); imuIndex++)
       {
          rawOrientationBiases.get(imuIndex).setToZero();
@@ -200,7 +187,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
    public void compute(List<RigidBody> trustedFeet)
    {
-      updateAlphaValues();
       checkIfBiasEstimationPossible(trustedFeet);
       estimateBiases();
    }

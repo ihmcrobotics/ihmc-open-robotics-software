@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -10,7 +11,8 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements ProcessingYoVariable
 {
    private final YoFrameQuaternion unfilteredQuaternion;
-   private final YoDouble alpha;
+   private final YoDouble yoAlpha;
+   private final DoubleProvider alpha;
    private final YoBoolean hasBeenCalled;
    private final Quaternion qMeasured = new Quaternion();
    private final Quaternion qPreviousFiltered = new Quaternion();
@@ -29,18 +31,26 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
       this(namePrefix, nameSuffix, null, alpha, referenceFrame, registry);
    }
 
-   public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, YoDouble alpha,
+   public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, DoubleProvider alpha,
          YoVariableRegistry registry)
    {
       this(namePrefix, nameSuffix, unfilteredQuaternion, alpha, unfilteredQuaternion.getReferenceFrame(), registry);
    }
 
-   private AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, YoDouble alpha,
+   private AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, DoubleProvider alpha,
          ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
       this.unfilteredQuaternion = unfilteredQuaternion;
       this.alpha = alpha;
+      if(alpha instanceof YoDouble)
+      {
+         yoAlpha = (YoDouble) alpha;
+      }
+      else
+      {
+         yoAlpha = null;
+      }
       this.hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
    }
 
@@ -63,7 +73,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
       {
          qPreviousFiltered.set(this);
 
-         qNewFiltered.interpolate(qMeasured, qPreviousFiltered, alpha.getDoubleValue()); // qPreviousFiltered 'gets multiplied by alpha'
+         qNewFiltered.interpolate(qMeasured, qPreviousFiltered, alpha.getValue()); // qPreviousFiltered 'gets multiplied by alpha'
          set(qNewFiltered);
       }
       else
@@ -75,12 +85,16 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
 
    public void setAlpha(double alpha)
    {
-      this.alpha.set(alpha);
+      if(yoAlpha == null)
+      {
+         throw new RuntimeException("This AlphaFilteredYoFrameVector is not backed by a yoVariable");
+      }
+      this.yoAlpha.set(alpha);
    }
 
    public void setBreakFrequency(double breakFrequencyHertz, double dt)
    {
-      this.alpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyHertz, dt));
+      setAlpha(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyHertz, dt));
    }
 
    public void reset()

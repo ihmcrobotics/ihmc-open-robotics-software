@@ -3,10 +3,11 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFilteredYoFramePoint extends YoFramePoint
 {
@@ -63,7 +64,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
 
 
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           YoDouble alpha, YoFramePoint unfilteredPoint)
+           DoubleProvider alpha, YoFramePoint unfilteredPoint)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoX());
@@ -89,7 +90,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
    }
    
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-         YoDouble alphaX, YoDouble alphaY, YoDouble alphaZ, YoFramePoint unfilteredPoint)
+         DoubleProvider alphaX, DoubleProvider alphaY, DoubleProvider alphaZ, YoFramePoint unfilteredPoint)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alphaX, unfilteredPoint.getYoX());
