@@ -129,8 +129,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          imusToUse.addAll(imuProcessedOutputs);
       }
 
-      boolean isAccelerationIncludingGravity = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
-      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, isAccelerationIncludingGravity, estimatorDT, registry);
+      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, estimatorDT, registry);
       imuBiasStateEstimator.configureModuleParameters(stateEstimatorParameters);
       imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, estimatorDT, registry);
       imuYawDriftEstimator.configureModuleParameters(stateEstimatorParameters);
