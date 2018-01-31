@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -29,7 +30,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVariable
 {
-   private final YoDouble alphaVariable;
+   private final YoDouble yoAlphaVariable;
+   private final DoubleProvider alphaVariable;
 
    private final YoDouble position;
    protected final YoBoolean hasBeenCalled;
@@ -43,38 +45,46 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
    {
       super(name,registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
-      this.alphaVariable = new YoDouble(name + "AlphaVariable", registry);
-      this.alphaVariable.set(alpha);
+      this.yoAlphaVariable = new YoDouble(name + "AlphaVariable", registry);
+      this.yoAlphaVariable.set(alpha);
+      this.alphaVariable = yoAlphaVariable;
       this.position = positionVariable;
       reset();
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable)
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleProvider alphaVariable)
    {
       this(name, "", registry, alphaVariable, null);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, YoDouble alphaVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleProvider alphaVariable)
    {
       this(name, description, registry, alphaVariable, null);
    }
 
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable)
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
    {
       this(name, "", registry, alphaVariable, positionVariable);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", description, registry);
       this.position = positionVariable;
       this.alphaVariable = alphaVariable;
-
+      if(alphaVariable instanceof YoDouble)
+      {
+         this.yoAlphaVariable = (YoDouble) alphaVariable;
+      }
+      else
+      {
+         this.yoAlphaVariable = null;         
+      }
+      
       reset();
    }
-
 
    public void reset()
    {
@@ -101,13 +111,17 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
       }
 
 
-      set(alphaVariable.getDoubleValue() * getDoubleValue() + (1.0 - alphaVariable.getDoubleValue()) * currentPosition);
+      set(alphaVariable.getValue() * getDoubleValue() + (1.0 - alphaVariable.getValue()) * currentPosition);
 
    }
 
    public void setAlpha(double alpha)
    {
-      this.alphaVariable.set(alpha);
+      if(this.yoAlphaVariable == null)
+      {
+         throw new RuntimeException("Cannot set alpha, this filter is not backed by a yoVariable");
+      }
+      this.yoAlphaVariable.set(alpha);
    }
 
    /**

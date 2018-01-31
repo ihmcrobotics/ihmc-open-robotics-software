@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,7 +31,7 @@ public class AlphaFusedYoVariable extends YoDouble
 {
    private final double alpha;
 
-   private final YoDouble alphaVariable;
+   private final DoubleProvider alphaVariable;
 
    private final YoDouble slowSignal;
    private final YoDouble fastSignal;
@@ -121,7 +122,7 @@ public class AlphaFusedYoVariable extends YoDouble
       }
       else
       {
-         alphaValue = alphaVariable.getDoubleValue();
+         alphaValue = alphaVariable.getValue();
       }
 
       steadyStateOffset.set(steadyStateOffset.getDoubleValue() + alphaValue * (getDoubleValue() - slowSignalVal));
