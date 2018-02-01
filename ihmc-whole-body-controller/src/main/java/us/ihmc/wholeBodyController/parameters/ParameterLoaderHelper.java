@@ -11,6 +11,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterLoaderHelper
 {
+   private static final boolean debugLoading = false;
+
    public static void loadParameters(Object caller, WholeBodyControllerParameters controllerParameters, YoVariableRegistry registry)
    {
       InputStream parameterFile = controllerParameters.getWholeBodyControllerParametersFile();
@@ -36,17 +38,39 @@ public class ParameterLoaderHelper
          XmlParameterReader reader;
          try
          {
-            reader = new XmlParameterReader(parameterFile);
+            reader = new XmlParameterReader(debugLoading, parameterFile);
             if (overwriteFile != null)
             {
                reader.overwrite(overwriteFile);
             }
-            reader.readParametersInRegistry(registry);
+            checkLoadStatistics(registry, reader);
          }
          catch (IOException e)
          {
             throw new RuntimeException("Cannot read parameters.", e);
          }
+      }
+   }
+
+   /**
+    * This will check some statistics about the loading of the parameters and print
+    * information if not everything went as expected. If that is the case consider
+    * turning on the debug flag {@link ParameterLoaderHelper#debugLoading} to see
+    * what parameters were not specified in the XML file.
+    */
+   private static void checkLoadStatistics(YoVariableRegistry registry, XmlParameterReader reader)
+   {
+      int defaults = reader.readParametersInRegistry(registry);
+      int parametersInXML = reader.getNumberOfParameters();
+      int parametersInRegistry = registry.getAllParameters().size();
+      int loadedParameters = parametersInRegistry - defaults;
+      int parametersInXMLWithoutMatch = parametersInXML - loadedParameters;
+      if (defaults != 0 || parametersInXMLWithoutMatch != 0)
+      {
+         PrintTools.error("There might be something wrong with your parameter file:");
+         System.err.println("   Number of parameters in registry: " + parametersInRegistry);
+         System.err.println("   Number of parameters using their default value: " + defaults);
+         System.err.println("   Number of parameters in XML with no match: " + parametersInXMLWithoutMatch);
       }
    }
 }
