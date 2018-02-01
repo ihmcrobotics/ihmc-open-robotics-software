@@ -42,10 +42,10 @@ testDependencies {
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
+   compile ihmc.sourceSetProject("test")
 
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "source"
    compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: "source"
 }
