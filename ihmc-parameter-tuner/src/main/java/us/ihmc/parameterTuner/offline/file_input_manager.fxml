@@ -6,8 +6,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<fx:root type="HBox" spacing="10.0" maxHeight="-Infinity"
-	maxWidth="-Infinity" alignment="CENTER_LEFT" xmlns:fx="http://javafx.com/fxml">
+<fx:root type="HBox" spacing="10.0" maxWidth="Infinity"
+	alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" xmlns:fx="http://javafx.com/fxml">
 	<padding>
 		<Insets top="0" right="0" bottom="0" left="0" />
 	</padding>
@@ -15,5 +15,6 @@
 		<Button text="Open" fx:id="open" onAction="#handleOpen" />
 		<Button text="Save" fx:id="save" onAction="#handleSave" />
 		<Button text="Save as..." fx:id="saveAs" onAction="#handleSaveAs" />
+		<Text fx:id="fileName" />
 	</children>
 </fx:root>
