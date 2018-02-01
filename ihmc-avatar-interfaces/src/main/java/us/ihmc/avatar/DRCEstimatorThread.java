@@ -111,7 +111,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
-   
+
    private final JointDesiredOutputWriter outputWriter;
 
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters, WholeBodyControllerParameters wholeBodyControllerParameters,
@@ -208,14 +208,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          poseCommunicator = null;
       }
-      
+
 
       firstTick.set(true);
       outputWriterInitialized.set(false);
       controllerDataValid.set(false);
-      
+
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
-      
+
       this.outputWriter = outputWriter;
       if(this.outputWriter != null)
       {
@@ -223,9 +223,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          this.outputWriter.setJointDesiredOutputList(estimatorDesiredJointDataHolder);
          if(this.outputWriter.getYoVariableRegistry() != null)
          {
-            estimatorRegistry.addChild(this.outputWriter.getYoVariableRegistry());            
+            estimatorRegistry.addChild(this.outputWriter.getYoVariableRegistry());
          }
-         
+
       }
 
       ParameterLoaderHelper.loadParameters(this, wholeBodyControllerParameters, estimatorRegistry);
@@ -262,7 +262,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          startClockTime.set(currentClockTime);
 
          controllerDataValid.set(threadDataSynchronizer.receiveControllerDataForEstimator());
-         
+
          if(outputWriter != null)
          {
             if(controllerDataValid.getBooleanValue())
@@ -276,7 +276,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                outputWriter.writeBefore(currentClockTime);
             }
          }
-         
+
          sensorReader.read();
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
@@ -333,8 +333,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                outputWriter.writeAfter();
             }
          }
-         
-         
+
+
          long startTimestamp = estimatorTime.getLongValue();
          threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
          if (robotVisualizer != null)
@@ -479,7 +479,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    /**
-    * used primarily for unit tests, but could be useful. 
+    * used primarily for unit tests, but could be useful.
     */
    public void addRobotController(RobotController controller)
    {
