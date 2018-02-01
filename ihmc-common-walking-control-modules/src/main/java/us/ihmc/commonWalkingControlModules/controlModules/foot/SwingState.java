@@ -568,7 +568,7 @@ public class SwingState extends AbstractUnconstrainedState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
-         rateLimitedAdjustedPose.getFramePose(adjustedFootstepPose);
+         adjustedFootstepPose.setIncludingFrame(rateLimitedAdjustedPose);
          blendedSwingTrajectory.blendFinalConstraint(adjustedFootstepPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();

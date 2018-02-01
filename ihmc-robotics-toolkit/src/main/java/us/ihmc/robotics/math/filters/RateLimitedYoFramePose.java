@@ -1,70 +1,63 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RateLimitedYoFramePose extends YoFramePose
+public class RateLimitedYoFramePose extends YoFramePoseUsingQuaternions
 {
    private final RateLimitedYoFrameVector position;
-   private final RateLimitedYoFrameOrientation orientation;
+   private final RateLimitedYoFrameQuaternion orientation;
 
-   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
-                                 YoFramePose rawPose)
+   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   {
+      YoDouble maxRate = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
+      maxRate.set(initialValue);
+      return maxRate;
+   }
+
+   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+                                 FramePose3DReadOnly rawPose)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawPose, rawPose.getReferenceFrame());
    }
 
-   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
+   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
                                  ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
    }
 
-   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, YoFramePose rawPose)
+   public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, FramePose3DReadOnly rawPose)
    {
-      this(namePrefix, nameSuffix, registry, null, dt, rawPose, rawPose.getReferenceFrame());
-      setMaxRate(maxRate);
+      this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawPose, rawPose.getReferenceFrame());
    }
 
    public RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
    {
-      this(namePrefix, nameSuffix, registry, null, dt, null, referenceFrame);
-      setMaxRate(maxRate);
+      this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, null, referenceFrame);
    }
 
-   private RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
-                                  YoFramePose rawPose, ReferenceFrame referenceFrame)
+   private RateLimitedYoFramePose(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+                                  FramePose3DReadOnly rawPose, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
 
       if (rawPose != null)
       {
          this.position = new RateLimitedYoFrameVector(namePrefix, "Position" + nameSuffix, registry, maxRate, dt, rawPose.getPosition());
-         this.orientation = new RateLimitedYoFrameOrientation(namePrefix, "Orientation" + nameSuffix, registry, maxRate, dt, rawPose.getOrientation());
+         this.orientation = new RateLimitedYoFrameQuaternion(namePrefix, "Orientation" + nameSuffix, registry, maxRate, dt, rawPose.getOrientation());
       }
       else
       {
          this.position = new RateLimitedYoFrameVector(namePrefix, "Position" + nameSuffix, registry, maxRate, dt, referenceFrame);
-         this.orientation = new RateLimitedYoFrameOrientation(namePrefix, "Orientation" + nameSuffix, registry, maxRate, dt, referenceFrame);
+         this.orientation = new RateLimitedYoFrameQuaternion(namePrefix, "Orientation" + nameSuffix, registry, maxRate, dt, referenceFrame);
       }
 
-
       reset();
-   }
-
-   public void setMaxRate(double maxRate)
-   {
-      this.position.setMaxRate(maxRate);
-      this.orientation.setMaxRate(maxRate);
    }
 
    public void reset()
@@ -78,8 +71,7 @@ public class RateLimitedYoFramePose extends YoFramePose
       position.update();
       orientation.update();
 
-      setPosition(position);
-      setOrientation(orientation.getFrameOrientation());
+      set(position, orientation);
    }
 
    public void update(FramePose3DReadOnly framePoseUnfiltered)
@@ -88,7 +80,6 @@ public class RateLimitedYoFramePose extends YoFramePose
       position.update(framePoseUnfiltered.getPosition());
       orientation.update(framePoseUnfiltered.getOrientation());
 
-      setPosition(position);
-      setOrientation(orientation.getFrameOrientation());
+      set(position, orientation);
    }
 }
