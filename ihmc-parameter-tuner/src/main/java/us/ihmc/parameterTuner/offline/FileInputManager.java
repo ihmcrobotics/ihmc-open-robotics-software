@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
@@ -32,6 +33,8 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
    private Button save;
    @FXML
    private Button open;
+   @FXML
+   private Text fileName;
 
    private boolean reloadAll;
    private File originalFile;
@@ -41,12 +44,18 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
 
    public FileInputManager()
    {
+      this(null);
+   }
+
+   public FileInputManager(File defaultFile)
+   {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
       loader.setRoot(this);
       loader.setController(this);
       try
       {
          loader.load();
+         openFile(defaultFile);
       }
       catch (IOException e)
       {
@@ -100,10 +109,20 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
       FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
       fileChooser.getExtensionFilters().add(extFilter);
       fileChooser.setTitle("Select Parameter File");
+      if (originalFile != null)
+      {
+         fileChooser.setInitialDirectory(originalFile.getParentFile());
+      }
       File file = fileChooser.showOpenDialog(open.getScene().getWindow());
 
+      openFile(file);
+   }
+
+   private void openFile(File file) throws IOException
+   {
       if (file != null)
       {
+         fileName.setText(file.getName());
          originalFile = file;
          List<Registry> xmlRegistries = ParameterTuningTools.getParameters(originalFile);
          localRegistry = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
@@ -151,6 +170,10 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
       FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
       fileChooser.getExtensionFilters().add(extFilter);
       fileChooser.setTitle("Select Parameter File");
+      if (originalFile != null)
+      {
+         fileChooser.setInitialDirectory(originalFile.getParentFile());
+      }
       File file = fileChooser.showSaveDialog(saveAs.getScene().getWindow());
 
       if (file != null)
@@ -158,6 +181,7 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
          List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistryFromGui(localRegistry);
          ParameterTuningTools.save(xmlRegistries, file);
          originalFile = file;
+         fileName.setText(file.getName());
       }
    }
 
