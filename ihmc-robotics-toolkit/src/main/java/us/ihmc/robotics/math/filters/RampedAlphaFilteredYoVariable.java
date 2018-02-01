@@ -1,29 +1,45 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * <p>Title: </p>
+ * <p>
+ * Title:
+ * </p>
  *
- * <p>Description: </p>
+ * <p>
+ * Description:
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: </p>
+ * <p>
+ * Company:
+ * </p>
  *
  * @author not attributable
  * @version 1.0
  */
-public class RampedAlphaFilteredYoVariable extends AlphaFilteredYoVariable
+public class RampedAlphaFilteredYoVariable extends YoDouble
 {
    private final YoDouble time, startTime;
 
+   private final YoDouble alphaVariable;
    private final YoDouble startAlpha, endAlpha, rampTime;
+
+   private final YoDouble position;
+   protected final YoBoolean hasBeenCalled;
 
    public RampedAlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble positionVariable, YoDouble time)
    {
-      super(name, registry, 0.0, positionVariable);
+      super(name, registry);
+      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
+      this.alphaVariable = new YoDouble(name + "AlphaVariable", registry);
+      this.position = positionVariable;
 
       this.time = time;
 
@@ -31,6 +47,13 @@ public class RampedAlphaFilteredYoVariable extends AlphaFilteredYoVariable
       this.endAlpha = new YoDouble(name + "RampEndAlpha", registry);
       this.rampTime = new YoDouble(name + "RampTime", registry);
       this.startTime = new YoDouble(name + "RampStartTime", registry);
+
+      reset();
+   }
+
+   public void reset()
+   {
+      hasBeenCalled.set(false);
    }
 
    public void resetFilter()
@@ -42,7 +65,7 @@ public class RampedAlphaFilteredYoVariable extends AlphaFilteredYoVariable
    {
       if (rampTime.getDoubleValue() < 1e-7)
       {
-         this.setAlpha(endAlpha.getDoubleValue());
+         this.alphaVariable.set(endAlpha.getDoubleValue());
       }
 
       else
@@ -54,10 +77,16 @@ public class RampedAlphaFilteredYoVariable extends AlphaFilteredYoVariable
          if (percent > 1.0)
             percent = 1.0;
 
-         this.setAlpha(startAlpha.getDoubleValue() + percent * (endAlpha.getDoubleValue() - startAlpha.getDoubleValue()));
+         this.alphaVariable.set(startAlpha.getDoubleValue() + percent * (endAlpha.getDoubleValue() - startAlpha.getDoubleValue()));
       }
 
-      super.update();
+      if (!hasBeenCalled.getBooleanValue())
+      {
+         hasBeenCalled.set(true);
+         set(position.getDoubleValue());
+      }
+
+      set(alphaVariable.getDoubleValue() * getDoubleValue() + (1.0 - alphaVariable.getDoubleValue()) * position.getDoubleValue());
    }
 
    public void setStartAlpha(double startAlpha)
