@@ -20,7 +20,7 @@ public class RateLimitedYoFrameOrientationTest
 {
    private static final double EPSILON = 1.0e-11;
 
-   @Test
+   @Test(timeout = 10000)
    public void testConvergenceWithConstantInput() throws Exception
    {
       Random random = new Random(46363);
