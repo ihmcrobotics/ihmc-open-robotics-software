@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -58,18 +59,6 @@ public class YoFrameQuaternion implements FixedFrameQuaternionBasics
       this.referenceFrame = referenceFrame;
    }
 
-   public final FrameQuaternion getFrameOrientation()
-   {
-      putYoValuesIntoFrameOrientation();
-      return frameOrientation;
-   }
-
-   public void set(double yaw, double pitch, double roll)
-   {
-      frameOrientation.setYawPitchRoll(yaw, pitch, roll);
-      getYoValuesFromFrameOrientation();
-   }
-
    @Override
    public void setUnsafe(double qx, double qy, double qz, double qs)
    {
@@ -91,6 +80,7 @@ public class YoFrameQuaternion implements FixedFrameQuaternionBasics
     *
     * @param referenceFrame
     */
+   @Override
    public void setFromReferenceFrame(ReferenceFrame referenceFrame)
    {
       frameOrientation.setToZero(referenceFrame);
@@ -142,34 +132,10 @@ public class YoFrameQuaternion implements FixedFrameQuaternionBasics
       return qs.getDoubleValue();
    }
 
-   public void checkQuaternionIsUnitMagnitude()
-   {
-      putYoValuesIntoFrameOrientation();
-      frameOrientation.checkIfUnitary();
-   }
-
    @Override
    public ReferenceFrame getReferenceFrame()
    {
       return referenceFrame;
-   }
-
-   private void getYoValuesFromFrameOrientation()
-   {
-      getYoValuesFromFrameOrientation(true);
-   }
-
-   private void getYoValuesFromFrameOrientation(boolean notifyListeners)
-   {
-      qx.set(frameOrientation.getX(), notifyListeners);
-      qy.set(frameOrientation.getY(), notifyListeners);
-      qz.set(frameOrientation.getZ(), notifyListeners);
-      qs.set(frameOrientation.getS(), notifyListeners);
-   }
-
-   private void putYoValuesIntoFrameOrientation()
-   {
-      frameOrientation.setIncludingFrame(getReferenceFrame(), qx.getDoubleValue(), qy.getDoubleValue(), qz.getDoubleValue(), qs.getDoubleValue());
    }
 
    public void attachVariableChangedListener(VariableChangedListener variableChangedListener)
@@ -190,7 +156,7 @@ public class YoFrameQuaternion implements FixedFrameQuaternionBasics
    @Override
    public String toString()
    {
-      return "(" + qx.getDoubleValue() + ", " + qy.getDoubleValue() + ", " + qz.getDoubleValue() + ", " + qs.getDoubleValue() + ")-" + getReferenceFrame();
+      return EuclidCoreIOTools.getTuple4DString(this) + "-" + getReferenceFrame();
    }
 
    public String getNamePrefix()

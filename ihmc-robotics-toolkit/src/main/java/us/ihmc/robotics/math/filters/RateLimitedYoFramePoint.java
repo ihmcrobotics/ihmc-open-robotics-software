@@ -4,13 +4,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RateLimitedYoFrameVector extends YoFrameVector
+public class RateLimitedYoFramePoint extends YoFramePoint
 {
    private final DoubleProvider maxRateVariable;
 
@@ -28,32 +28,32 @@ public class RateLimitedYoFrameVector extends YoFrameVector
       return maxRate;
    }
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
-                                   FrameTuple3DReadOnly rawPosition)
+   public RateLimitedYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+                                  FrameTuple3DReadOnly rawPosition)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawPosition, rawPosition.getReferenceFrame());
    }
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
-                                   ReferenceFrame referenceFrame)
+   public RateLimitedYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+                                  ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, null, referenceFrame);
    }
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
-                                   FrameTuple3DReadOnly rawPosition)
+   public RateLimitedYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+                                  FrameTuple3DReadOnly rawPosition)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawPosition,
            rawPosition.getReferenceFrame());
    }
 
-   public RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
+   public RateLimitedYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, null, referenceFrame);
    }
 
-   private RateLimitedYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
-                                    FrameTuple3DReadOnly rawPosition, ReferenceFrame referenceFrame)
+   private RateLimitedYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+                                   FrameTuple3DReadOnly rawPosition, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
 
