@@ -463,6 +463,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       closeableAndDisposableRegistry.closeAndDispose();
    }
-   
+
 
 }

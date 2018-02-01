@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
    compile group: 'org.georegression', name: 'georegression', version: '0.11'
@@ -40,17 +40,17 @@ mainDependencies {
    compile group: "org.jmonkeyengine", name: "jme3-core", version: "3.2.0-171208"
    compile "org.boofcv:geo:0.19"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "source"
 }
