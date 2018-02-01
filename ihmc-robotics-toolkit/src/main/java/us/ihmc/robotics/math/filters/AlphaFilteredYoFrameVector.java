@@ -124,11 +124,4 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
       y.reset();
       z.reset();
    }
-   
-   public void setAlpha(double alpha)
-   {
-      x.setAlpha(alpha);
-      y.setAlpha(alpha);
-      z.setAlpha(alpha);
-   }
 }
