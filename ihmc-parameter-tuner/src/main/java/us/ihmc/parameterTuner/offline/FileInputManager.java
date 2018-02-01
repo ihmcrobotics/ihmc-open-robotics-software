@@ -166,7 +166,6 @@ public class FileInputManager extends HBox implements ParameterGuiInterface
          return;
       }
 
-
       FileChooser fileChooser = new FileChooser();
       FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
       fileChooser.getExtensionFilters().add(extFilter);
