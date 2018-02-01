@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
    compile group: 'org.ejml', name: 'core', version: '0.30'
