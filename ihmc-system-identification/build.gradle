@@ -24,7 +24,7 @@ testSuites {
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
    compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "source"

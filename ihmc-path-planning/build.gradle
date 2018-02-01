@@ -30,7 +30,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "source"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
    compile group: 'us.ihmc', name: 'robot-environment-awareness', version: "source"
 }
 

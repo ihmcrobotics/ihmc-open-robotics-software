@@ -25,7 +25,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
