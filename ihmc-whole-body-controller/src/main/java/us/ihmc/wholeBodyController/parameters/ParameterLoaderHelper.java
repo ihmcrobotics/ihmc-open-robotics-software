@@ -43,7 +43,7 @@ public class ParameterLoaderHelper
             {
                reader.overwrite(overwriteFile);
             }
-            checkLoadStatistics(registry, reader);
+            loadAndCheckStatistics(registry, reader);
          }
          catch (IOException e)
          {
@@ -58,7 +58,7 @@ public class ParameterLoaderHelper
     * turning on the debug flag {@link ParameterLoaderHelper#debugLoading} to see
     * what parameters were not specified in the XML file.
     */
-   private static void checkLoadStatistics(YoVariableRegistry registry, XmlParameterReader reader)
+   private static void loadAndCheckStatistics(YoVariableRegistry registry, XmlParameterReader reader)
    {
       int defaults = reader.readParametersInRegistry(registry);
       int parametersInXML = reader.getNumberOfParameters();
