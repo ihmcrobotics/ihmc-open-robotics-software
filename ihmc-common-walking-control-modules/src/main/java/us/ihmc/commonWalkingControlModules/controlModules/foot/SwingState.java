@@ -52,8 +52,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private static final boolean USE_RATE_LIMIT_FOR_ADJUSTED_FOOTSTEP = false;
-   
    private final YoBoolean replanTrajectory;
    private final YoBoolean footstepWasAdjusted;
 
@@ -352,10 +350,14 @@ public class SwingState extends AbstractUnconstrainedState
    protected void computeAndPackTrajectory()
    {
       currentTime.set(getTimeInCurrentState());
-      if (USE_RATE_LIMIT_FOR_ADJUSTED_FOOTSTEP)
+
+      if (footstepWasAdjusted.getBooleanValue())
+      {
+         if (!rateLimitedAdjustedPose.geometricallyEquals(adjustedFootstepPose, 1.0e-7))
+            replanTrajectory.set(true); // As long as the rate-limited pose has not reached the adjusted pose, we'll have to replan the swing.
+
          rateLimitedAdjustedPose.update(adjustedFootstepPose);
-      else
-         rateLimitedAdjustedPose.set(adjustedFootstepPose);
+      }
 
       double time;
       if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
@@ -568,8 +570,7 @@ public class SwingState extends AbstractUnconstrainedState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
-         adjustedFootstepPose.setIncludingFrame(rateLimitedAdjustedPose);
-         blendedSwingTrajectory.blendFinalConstraint(adjustedFootstepPose, swingDuration, swingDuration);
+         blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();
    }
