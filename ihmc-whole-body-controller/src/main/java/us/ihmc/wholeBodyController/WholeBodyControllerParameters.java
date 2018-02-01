@@ -40,16 +40,5 @@ public interface WholeBodyControllerParameters
     * @return new InputStream with the controller parameters
     */
    public InputStream getWholeBodyControllerParametersFile();
-
-   /**
-    * Allows to overwrite parameters specified in the {@link #getWholeBodyControllerParametersFile()}
-    * XML file. This is useful in unit tests when parameters need to be modified.
-    *
-    * @return InputStream with the parameters that need to be overwritten.
-    */
-   public default InputStream getParameterOverwrites()
-   {
-      return null;
-   }
 }
 
