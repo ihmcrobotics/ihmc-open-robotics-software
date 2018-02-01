@@ -90,7 +90,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       initialOrientationProvider.getOrientation(tempInitialOrientation);      
       tempInitialOrientation.changeFrame(initialOrientation.getReferenceFrame());
       initialOrientation.set(tempInitialOrientation);
-      initialOrientation.checkQuaternionIsUnitMagnitude();
+      initialOrientation.checkIfUnitary();
    }
 
    private void updateFinalOrientation()
@@ -98,7 +98,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       finalOrientationProvider.getOrientation(tempFinalOrientation);
       tempFinalOrientation.changeFrame(finalOrientation.getReferenceFrame());
       finalOrientation.set(tempFinalOrientation);
-      finalOrientation.checkQuaternionIsUnitMagnitude();
+      finalOrientation.checkIfUnitary();
    }
 
    public void compute(double time)
