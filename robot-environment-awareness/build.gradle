@@ -32,17 +32,17 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
    
-   compile group: 'us.ihmc', name: 'ihmc-communication', version: groupDependencyVersion
-   compile group: 'us.ihmc', name: 'ihmc-robotics-toolkit', version: groupDependencyVersion
-   compile group: 'us.ihmc', name: 'ihmc-javafx-toolkit', version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'ihmc-communication', version: "source"
+   compile group: 'us.ihmc', name: 'ihmc-robotics-toolkit', version: "source"
+   compile group: 'us.ihmc', name: 'ihmc-javafx-toolkit', version: "source"
 }
 
 applicationDependencies {
    compile ihmc.sourceSetProject("main")
-   compile group: 'us.ihmc', name: 'ihmc-ros-tools', version: groupDependencyVersion
-   compile group: 'us.ihmc', name: 'ihmc-jmonkey-engine-toolkit', version: groupDependencyVersion
-   compile group: 'us.ihmc', name: 'simulation-construction-set', version: groupDependencyVersion
-   compile group: 'us.ihmc', name: 'simulation-construction-set-tools', version: groupDependencyVersion
+   compile group: 'us.ihmc', name: 'ihmc-ros-tools', version: "source"
+   compile group: 'us.ihmc', name: 'ihmc-jmonkey-engine-toolkit', version: "source"
+   compile group: 'us.ihmc', name: 'simulation-construction-set', version: "source"
+   compile group: 'us.ihmc', name: 'simulation-construction-set-tools', version: "source"
 }
 
 
