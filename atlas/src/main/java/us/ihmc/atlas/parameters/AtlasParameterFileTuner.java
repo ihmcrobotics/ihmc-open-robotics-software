@@ -1,8 +1,9 @@
 package us.ihmc.atlas.parameters;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.commons.io.FilenameUtils;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
@@ -14,16 +15,9 @@ public class AtlasParameterFileTuner extends ParameterTuningApplication
    @Override
    protected ParameterGuiInterface createInputManager()
    {
-      URL parameterFile = AtlasRobotModel.class.getResource(AtlasRobotModel.getParameterFilePath());
-
-      try
-      {
-         return new FileInputManager(new File(parameterFile.toURI()));
-      }
-      catch (URISyntaxException e)
-      {
-         throw new RuntimeException(e);
-      }
+      String relativeFilePath = FilenameUtils.separatorsToSystem(AtlasRobotModel.getParameterResourceName());
+      Path filePath = Paths.get("src", "main", "resources", relativeFilePath);
+      return new FileInputManager(filePath.toFile());
    }
 
    public static void main(String[] args)
