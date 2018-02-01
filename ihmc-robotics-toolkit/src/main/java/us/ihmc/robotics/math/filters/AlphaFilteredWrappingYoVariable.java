@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -11,7 +12,7 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
    private double previousUnfilteredVariable;
    private final YoDouble unfilteredVariable;
    private final YoDouble unfilteredInRangeVariable;
-   private final YoDouble alphaVariable;
+   private final DoubleProvider alphaVariable;
    
    private final YoDouble temporaryOutputVariable;
    private final YoDouble error;
@@ -21,7 +22,7 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
    
    //wrap the values in [lowerLimit ; upperLimit[
    
-   public AlphaFilteredWrappingYoVariable(String name, String description, YoVariableRegistry registry, final YoDouble unfilteredVariable, YoDouble alphaVariable, double lowerLimit, double upperLimit)
+   public AlphaFilteredWrappingYoVariable(String name, String description, YoVariableRegistry registry, final YoDouble unfilteredVariable, DoubleProvider alphaVariable, double lowerLimit, double upperLimit)
    {
       super(name, description, registry, alphaVariable);
       this.alphaVariable = alphaVariable;
@@ -96,7 +97,7 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
             }
          }
          
-         temporaryOutputVariable.set(alphaVariable.getDoubleValue() * temporaryOutputVariable.getDoubleValue() + (1.0 - alphaVariable.getDoubleValue())
+         temporaryOutputVariable.set(alphaVariable.getValue() * temporaryOutputVariable.getDoubleValue() + (1.0 - alphaVariable.getValue())
                * unfilteredInRangeVariable.getDoubleValue());
 
          if (temporaryOutputVariable.getDoubleValue() > upperLimit + EPSILON)

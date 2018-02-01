@@ -3,11 +3,11 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AlphaFilteredYoFrameVector extends YoFrameVector implements ProcessingYoVariable
 {
@@ -36,7 +36,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
    }
 
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           YoDouble alpha, ReferenceFrame referenceFrame)
+           DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
       // alpha is a double
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha);
@@ -64,7 +64,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
 
 
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           YoDouble alpha, YoFrameVector unfilteredVector)
+                                                                             DoubleProvider alpha, YoFrameVector unfilteredVector)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredVector.getYoX());
@@ -77,7 +77,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
    }
 
    public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           YoDouble alpha, YoFramePoint unfilteredPosition)
+                                                                             DoubleProvider alpha, YoFramePoint unfilteredPosition)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPosition.getYoX());
