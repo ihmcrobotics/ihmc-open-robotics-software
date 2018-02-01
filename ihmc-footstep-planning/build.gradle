@@ -26,26 +26,26 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.6'
    compile "org.ejml:core:0.30"
    compile "org.ejml:dense64:0.30"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-path-planning", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
+   compile group: "us.ihmc", name: "ihmc-path-planning", version: "source"
 }
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
 }
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
-   compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "source"
+   compile group: 'us.ihmc', name: 'robot-environment-awareness-application', version: "source"
+   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
+   compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: "source"
 }

@@ -32,18 +32,18 @@ mainDependencies {
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-state-estimation", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
+   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
+   compile group: "us.ihmc", name: "ihmc-state-estimation", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "source"
 }
 
 testDependencies {
@@ -51,9 +51,9 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
    compile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "source"
+   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: "source"
 }

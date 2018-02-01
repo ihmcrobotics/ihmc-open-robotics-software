@@ -53,15 +53,15 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.3'
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-parameter-optimization", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-swing-plotting", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-geometry", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-parameter-optimization", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "source"
+   compile group: "us.ihmc", name: "ihmc-swing-plotting", version: "source"
+   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+   compile group: "us.ihmc", name: "ihmc-geometry", version: "source"
 }
 
 testDependencies {
@@ -69,7 +69,7 @@ testDependencies {
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
 
 distributions {
