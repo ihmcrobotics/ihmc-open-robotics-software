@@ -2,6 +2,9 @@ package us.ihmc.parameterTuner.guiElements.tuners;
 
 import org.apache.commons.math3.util.Precision;
 
+import javafx.geometry.Side;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 
 public abstract class NumericSlider<T extends Number> extends Slider
@@ -10,6 +13,25 @@ public abstract class NumericSlider<T extends Number> extends Slider
    {
       setShowTickMarks(true);
       setShowTickLabels(true);
+
+      // Sets up a context menu that will show the current value while the slider is dragged.
+      ContextMenu contextMenu = new ContextMenu();
+      MenuItem tooltip = new MenuItem();
+      contextMenu.getItems().add(tooltip);
+      valueProperty().addListener((observable, oldValue, newValue) -> tooltip.setText(Double.toString(roundToPrecision(getValue()))));
+      valueChangingProperty().addListener((observable, oldValue, newValue) -> {
+         if (newValue)
+         {
+            if (!contextMenu.isShowing())
+            {
+               contextMenu.show(NumericSlider.this, Side.BOTTOM, 0.0, 0.0);
+            }
+         }
+         else
+         {
+            contextMenu.hide();
+         }
+      });
    }
 
    public void updateSlider(T value, T min, T max)
