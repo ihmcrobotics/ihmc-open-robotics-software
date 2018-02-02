@@ -47,7 +47,11 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
       this.unfilteredQuaternion = unfilteredQuaternion;
+
+      if (alpha == null)
+         alpha = createAlphaYoDouble(namePrefix, 0.0, registry);
       this.alpha = alpha;
+
       this.hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
    }
 
