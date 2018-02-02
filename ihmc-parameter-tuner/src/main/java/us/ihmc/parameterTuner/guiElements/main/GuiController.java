@@ -3,12 +3,14 @@ package us.ihmc.parameterTuner.guiElements.main;
 import java.util.HashMap;
 import java.util.List;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.ClipboardContent;
@@ -55,32 +57,28 @@ public class GuiController
       searchFieldNamespaces.textProperty().addListener(observable -> updateTree());
       tuningBoxManager = new TuningBoxManager(tuningBox);
 
+      tree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
       tree.setOnMouseClicked(new EventHandler<MouseEvent>()
       {
          @Override
          public void handle(MouseEvent mouseEvent)
          {
-            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
-            if (selectedItem == null || selectedItem.getValue().isRegistry() || mouseEvent.getClickCount() < 2)
+            if (mouseEvent.getClickCount() >= 2)
             {
-               return;
+               addSelectedParametersToTuner();
             }
-            GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
-            tuningBoxManager.handleNewParameter(parameter);
          }
+
       });
       tree.setOnKeyPressed(new EventHandler<KeyEvent>()
       {
          @Override
          public void handle(KeyEvent event)
          {
-            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
-            if (selectedItem == null || selectedItem.getValue().isRegistry() || event.getCode() != KeyCode.ENTER)
+            if (event.getCode() == KeyCode.ENTER)
             {
-               return;
+               addSelectedParametersToTuner();
             }
-            GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
-            tuningBoxManager.handleNewParameter(parameter);
          }
       });
       tree.setOnDragDetected(new EventHandler<MouseEvent>()
@@ -88,16 +86,10 @@ public class GuiController
          @Override
          public void handle(MouseEvent event)
          {
-            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
-            if (selectedItem == null || selectedItem.getValue().isRegistry())
-            {
-               return;
-            }
             Dragboard dragboard = tree.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent clipboardContent = new ClipboardContent();
             clipboardContent.putString("");
             dragboard.setContent(clipboardContent);
-            event.consume();
          }
       });
       scrollPane.setOnDragOver(new EventHandler<DragEvent>()
@@ -106,7 +98,6 @@ public class GuiController
          public void handle(DragEvent event)
          {
             event.acceptTransferModes(TransferMode.MOVE);
-            event.consume();
          }
       });
       scrollPane.setOnDragDropped(new EventHandler<DragEvent>()
@@ -114,12 +105,22 @@ public class GuiController
          @Override
          public void handle(DragEvent event)
          {
-            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
-            GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
-            tuningBoxManager.handleNewParameter(parameter);
-            event.consume();
+            addSelectedParametersToTuner();
          }
       });
+   }
+
+   private void addSelectedParametersToTuner()
+   {
+      ObservableList<TreeItem<ParameterTreeValue>> selectedItems = tree.getSelectionModel().getSelectedItems();
+      for (TreeItem<ParameterTreeValue> selectedItem : selectedItems)
+      {
+         if (selectedItem != null && !selectedItem.getValue().isRegistry())
+         {
+            GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
+            tuningBoxManager.handleNewParameter(parameter);
+         }
+      }
    }
 
    @FXML
