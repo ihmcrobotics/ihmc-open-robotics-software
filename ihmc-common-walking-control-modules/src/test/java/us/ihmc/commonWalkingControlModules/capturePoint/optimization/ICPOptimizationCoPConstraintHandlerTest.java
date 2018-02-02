@@ -61,7 +61,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setCopSafeDistanceToEdge(0.01);
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
-      solver.setAngularMomentumConditions(10.0, true);
+      solver.setCMPFeedbackConditions(10.0, true);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
       try
@@ -125,7 +125,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       solver.setCopSafeDistanceToEdge(0.01);
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
-      solver.setAngularMomentumConditions(10.0, true);
+      solver.setCMPFeedbackConditions(10.0, true);
       FrameVector2D currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       FramePoint2D perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid());
       try
@@ -170,7 +170,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       // test right support
       constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT, solver);
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
-      solver.setAngularMomentumConditions(10.0, true);
+      solver.setCMPFeedbackConditions(10.0, true);
       currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
       perfectCMP = new FramePoint2D(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT).getCentroid());
       try
