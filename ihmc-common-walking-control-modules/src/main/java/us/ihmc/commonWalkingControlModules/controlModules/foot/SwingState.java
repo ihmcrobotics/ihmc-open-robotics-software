@@ -556,6 +556,8 @@ public class SwingState extends AbstractUnconstrainedState
       touchdownTrajectory.setOrientation(finalOrientation);
       touchdownTrajectory.initialize();
 
+      blendedSwingTrajectory.initializeTrajectory();
+
       fillAndInitializeBlendedTrajectory();
    }
 

@@ -461,7 +461,31 @@ public class ICPOptimizationQPSolver
     * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
     * @param weight weight on tracking the reference footstep location in the solver.
     */
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, FramePoint3D referenceFootstepLocation)
+   {
+      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, 1.0, referenceFootstepLocation);
+   }
+
+   /**
+    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
+    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
+    *
+    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
+    * @param weight weight on tracking the reference footstep location in the solver.
+    */
    public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, double safetyFactor, FramePoint2D referenceFootstepLocation)
+   {
+      this.setFootstepAdjustmentConditions(recursionMultiplier, weight, weight, safetyFactor, referenceFootstepLocation);
+   }
+
+   /**
+    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
+    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
+    *
+    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
+    * @param weight weight on tracking the reference footstep location in the solver.
+    */
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double weight, double safetyFactor, FramePoint3D referenceFootstepLocation)
    {
       this.setFootstepAdjustmentConditions(recursionMultiplier, weight, weight, safetyFactor, referenceFootstepLocation);
    }
@@ -477,6 +501,28 @@ public class ICPOptimizationQPSolver
     */
    public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint2D referenceFootstepLocation)
    {
+      referenceFootstepLocation.changeFrame(worldFrame);
+      setFootstepAdjustmentConditions(recursionMultiplier, xWeight, yWeight, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
+   }
+
+   /**
+    * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
+    * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
+    *
+    * @param recursionMultiplier recursion multiplier for the footstep for the ICP dynamics.
+    * @param xWeight weight on tracking the reference footstep location in the solver in the Cartesian x coordinate.
+    * @param yWeight weight on tracking the reference footstep location in the solver in the Cartesian y coordinate.
+    * @param referenceFootstepLocation location of the desired reference footstep.
+    */
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, FramePoint3D referenceFootstepLocation)
+   {
+      referenceFootstepLocation.changeFrame(worldFrame);
+      setFootstepAdjustmentConditions(recursionMultiplier, xWeight, yWeight, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
+   }
+
+   private void setFootstepAdjustmentConditions(double recursionMultiplier, double xWeight, double yWeight, double safetyFactor, double referenceXPositionInWorld,
+                                                double referenceYPositionInWorld)
+   {
       footstepRecursionMultiplier = recursionMultiplier;
       footstepAdjustmentSafetyFactor = safetyFactor;
 
@@ -487,9 +533,8 @@ public class ICPOptimizationQPSolver
       footstepWeight.set(0, 0, xWeight);
       footstepWeight.set(1, 1, yWeight);
 
-      referenceFootstepLocation.changeFrame(worldFrame);
-      this.referenceFootstepLocation.set(0, 0, referenceFootstepLocation.getX());
-      this.referenceFootstepLocation.set(1, 0, referenceFootstepLocation.getY());
+      this.referenceFootstepLocation.set(0, 0, referenceXPositionInWorld);
+      this.referenceFootstepLocation.set(1, 0, referenceYPositionInWorld);
 
       indexHandler.registerFootstep();
    }

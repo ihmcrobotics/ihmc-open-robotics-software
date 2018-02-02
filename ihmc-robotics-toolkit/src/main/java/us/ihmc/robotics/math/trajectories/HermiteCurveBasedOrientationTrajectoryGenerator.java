@@ -212,25 +212,13 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       this.numberOfRevolutions.set(numberOfRevolutions);
    }
 
-   public void setInitialConditions(FrameQuaternion initialOrientation, FrameVector3D initialAngularVelocity)
+   public void setInitialConditions(FrameQuaternionReadOnly initialOrientation, FrameVector3DReadOnly initialAngularVelocity)
    {
       setInitialOrientation(initialOrientation);
       setInitialAngularVelocity(initialAngularVelocity);
    }
 
-   public void setInitialConditions(YoFrameQuaternion initialOrientation, YoFrameVector initialAngularVelocity)
-   {
-      setInitialOrientation(initialOrientation);
-      setInitialAngularVelocity(initialAngularVelocity);
-   }
-
-   public void setFinalConditions(FrameQuaternion finalOrientation, FrameVector3D finalAngularVelocity)
-   {
-      setFinalOrientation(finalOrientation);
-      setFinalAngularVelocity(finalAngularVelocity);
-   }
-
-   public void setFinalConditions(YoFrameQuaternion finalOrientation, YoFrameVector finalAngularVelocity)
+   public void setFinalConditions(FrameQuaternionReadOnly finalOrientation, FrameVector3DReadOnly finalAngularVelocity)
    {
       setFinalOrientation(finalOrientation);
       setFinalAngularVelocity(finalAngularVelocity);
