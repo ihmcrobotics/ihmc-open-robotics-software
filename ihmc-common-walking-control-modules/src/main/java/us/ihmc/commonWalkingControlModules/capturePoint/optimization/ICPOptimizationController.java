@@ -557,7 +557,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       submitFeedbackTaskConditionsToSolver();
-      submitAngularMomentumTaskConditionsToSolver();
+      submitCMPFeedbackTaskConditionsToSolver();
    }
 
    private void submitFeedbackTaskConditionsToSolver()
@@ -577,12 +577,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFeedbackRateWeight(copFeedbackRateWeight.getDoubleValue() / controlDT);
    }
 
-   private void submitAngularMomentumTaskConditionsToSolver()
+   private void submitCMPFeedbackTaskConditionsToSolver()
    {
-      double angularMomentumMinimizationWeight = this.scaledCMPFeedbackWeight.getDoubleValue();
+      double cmpFeedbackWeight = this.scaledCMPFeedbackWeight.getDoubleValue();
 
       solver.resetCMPFeedbackConditions();
-      solver.setCMPFeedbackConditions(angularMomentumMinimizationWeight, useAngularMomentum.getBooleanValue());
+      solver.setCMPFeedbackConditions(cmpFeedbackWeight, useAngularMomentum.getBooleanValue());
    }
 
    private void submitFootstepTaskConditionsToSolver(double omega0, boolean includeFootsteps)
@@ -752,9 +752,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          return;
       }
 
-      double angularMomentumMagnitude = feedbackCMPDelta.length();
+      double angularMomentumFeedbackMagnitude = feedbackCMPDelta.length() - desiredCMPOffset.length();
 
-      double cumulativeAngularMomentumAfterLeak = angularMomentumMagnitude * controlDT +
+      double cumulativeAngularMomentumAfterLeak = angularMomentumFeedbackMagnitude * controlDT +
             angularMomentumIntegratorLeakRatio.getDoubleValue() * cumulativeAngularMomentum.getDoubleValue();
       cumulativeAngularMomentum.set(cumulativeAngularMomentumAfterLeak);
 
