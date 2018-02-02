@@ -6,14 +6,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisIMUBasedLinearStateCalculator
 {
@@ -21,7 +22,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoBoolean cancelGravityFromAccelerationMeasurement = new YoBoolean("cancelGravityFromAccelerationMeasurement", registry);
+   private final BooleanProvider cancelGravityFromAccelerationMeasurement;// = new YoBoolean("cancelGravityFromAccelerationMeasurement", registry);
 
    private final FrameVector3D accelerationBias = new FrameVector3D(worldFrame);
    private final FrameVector3D gravityVector = new FrameVector3D();
@@ -54,12 +55,15 @@ public class PelvisIMUBasedLinearStateCalculator
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
 
-   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double estimatorDT,
-         double gravitationalAcceleration, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                              IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, double estimatorDT,
+                                              double gravitationalAcceleration, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
       this.estimatorDT = estimatorDT;
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
+      this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
 
       gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
 
@@ -102,11 +106,6 @@ public class PelvisIMUBasedLinearStateCalculator
          imuBasedStateEstimationEnabled.set(enable);
    }
 
-   public void cancelGravityFromAccelerationMeasurement(boolean cancel)
-   {
-      cancelGravityFromAccelerationMeasurement.set(cancel);
-   }
-
    public boolean isEstimationEnabled()
    {
       return imuBasedStateEstimationEnabled.getBooleanValue();
@@ -127,7 +126,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
       // Update acceleration in world (minus gravity)
       linearAccelerationMeasurement.changeFrame(worldFrame);
-      if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
+      if (cancelGravityFromAccelerationMeasurement.getValue())
       {
          tempVector.setIncludingFrame(gravityVector);
          tempVector.changeFrame(linearAccelerationMeasurement.getReferenceFrame());
@@ -140,7 +139,7 @@ public class PelvisIMUBasedLinearStateCalculator
       imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement);
       linearAccelerationMeasurement.sub(accelerationBias);
 
-      if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
+      if (cancelGravityFromAccelerationMeasurement.getValue())
       {
          tempVector.setIncludingFrame(gravityVector);
          tempVector.changeFrame(linearAccelerationMeasurement.getReferenceFrame());
