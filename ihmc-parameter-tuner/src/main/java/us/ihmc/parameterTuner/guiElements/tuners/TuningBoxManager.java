@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -28,11 +29,13 @@ public class TuningBoxManager
       String parameterName = parameter.getName();
       if (parametersBeingTuned.contains(parameterName))
       {
-         Alert alert = new Alert(AlertType.INFORMATION);
-         alert.setTitle("Information Dialog");
-         alert.setHeaderText("Can not add parameter");
-         alert.setContentText("A parameter with the same name is being tuned.");
-         alert.showAndWait();
+         Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Information Dialog");
+            alert.setHeaderText("Can not add parameter");
+            alert.setContentText("A parameter with the same name is being tuned.");
+            alert.showAndWait();
+         });
          return;
       }
 

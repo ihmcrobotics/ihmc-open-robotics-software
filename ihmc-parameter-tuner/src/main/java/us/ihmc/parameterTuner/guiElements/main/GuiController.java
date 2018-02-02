@@ -8,11 +8,16 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import us.ihmc.commons.PrintTools;
@@ -33,6 +38,8 @@ public class GuiController
    private CheckBox hideNamespaces;
    @FXML
    private ParameterTree tree;
+   @FXML
+   private ScrollPane scrollPane;
    @FXML
    private VBox tuningBox;
    @FXML
@@ -74,6 +81,43 @@ public class GuiController
             }
             GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
             tuningBoxManager.handleNewParameter(parameter);
+         }
+      });
+      tree.setOnDragDetected(new EventHandler<MouseEvent>()
+      {
+         @Override
+         public void handle(MouseEvent event)
+         {
+            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
+            if (selectedItem == null || selectedItem.getValue().isRegistry())
+            {
+               return;
+            }
+            Dragboard dragboard = tree.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent clipboardContent = new ClipboardContent();
+            clipboardContent.putString("");
+            dragboard.setContent(clipboardContent);
+            event.consume();
+         }
+      });
+      scrollPane.setOnDragOver(new EventHandler<DragEvent>()
+      {
+         @Override
+         public void handle(DragEvent event)
+         {
+            event.acceptTransferModes(TransferMode.MOVE);
+            event.consume();
+         }
+      });
+      scrollPane.setOnDragDropped(new EventHandler<DragEvent>()
+      {
+         @Override
+         public void handle(DragEvent event)
+         {
+            TreeItem<ParameterTreeValue> selectedItem = tree.getSelectionModel().getSelectedItem();
+            GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
+            tuningBoxManager.handleNewParameter(parameter);
+            event.consume();
          }
       });
    }

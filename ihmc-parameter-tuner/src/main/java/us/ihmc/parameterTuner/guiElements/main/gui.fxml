@@ -33,7 +33,7 @@
 						<StackPane fx:id="inputPane" />
 					</children>
 				</VBox>
-				<ScrollPane>
+				<ScrollPane fx:id="scrollPane">
 					<content>
 						<VBox fx:id="tuningBox" prefWidth="730.0" spacing="10.0"
 							HBox.hgrow="ALWAYS" />
