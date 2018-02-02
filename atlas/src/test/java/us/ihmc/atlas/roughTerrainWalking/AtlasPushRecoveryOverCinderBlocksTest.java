@@ -1,23 +1,23 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
+import java.io.InputStream;
+
 import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
-import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
 import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverCinderBlocksTest;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -162,22 +162,13 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
                      }
                   };
                }
-
-               @Override
-               public MomentumOptimizationSettings getMomentumOptimizationSettings()
-               {
-                  return new AtlasMomentumOptimizationSettings(getJointMap(), getContactPointParameters().getNumberOfContactableBodies())
-                  {
-                     @Override
-                     public Vector3D getDefaultLinearFootWeight()
-                     {
-                        return new Vector3D(40.0, 40.0, 40.0);
-                     }
-
-                  };
-               }
             };
+         }
 
+         @Override
+         public InputStream getParameterOverwrites()
+         {
+            return getClass().getClassLoader().getResourceAsStream("atlasPushRecoveryOverCinderBlocksTest.xml");
          }
       };
 

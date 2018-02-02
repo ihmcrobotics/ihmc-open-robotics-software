@@ -23,17 +23,17 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private static final boolean useWarmStartInSolver = true;
    private static final boolean disableRhosWhenNotInContact = true;
 
-   private final Vector3D linearMomentumWeight = new Vector3D(0.05, 0.05, 0.01);
-   private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
-   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.0);
+   private final Vector3D linearMomentumWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D angularMomentumWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
 
-   private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
-   private final Vector3D footLinearWeight = new Vector3D(30.0, 30.0, 30.0);
-   private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
+   private final Vector3D footAngularWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D footLinearWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D highAngularFootWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D highLinearFootWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
 
-   private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 50.0);
+   private final Vector3D pelvisAngularWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D pelvisLinearWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = AtlasContactPointParameters.USE_SIX_CONTACT_POINTS ? 6 : 4;
@@ -51,24 +51,24 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final double rhoRateDefaultWeight;
    private final double rhoRateHighWeight;
 
-   private final double neckJointspaceWeight = 1.0;
-   private final double spineJointspaceWeightYaw = 15.0;
-   private final double spineJointspaceWeightPitch = 45.0;
-   private final double spineJointspaceWeightRoll = 45.0;
-   private final double armJointspaceWeight = 1.0;
+   private final double neckJointspaceWeight = Double.NaN; // do not tune here
+   private final double spineJointspaceWeightYaw = Double.NaN; // do not tune here
+   private final double spineJointspaceWeightPitch = Double.NaN; // do not tune here
+   private final double spineJointspaceWeightRoll = Double.NaN; // do not tune here
+   private final double armJointspaceWeight = Double.NaN; // do not tune here
    private final List<GroupParameter<Double>> jointspaceWeights = new ArrayList<>();
 
-   private final double neckUserModeWeight = 1.0;
-   private final double spineUserModeWeight = 200.0;
-   private final double armUserModeWeight = 50.0;
+   private final double neckUserModeWeight = Double.NaN; // do not tune here
+   private final double spineUserModeWeight = Double.NaN; // do not tune here
+   private final double armUserModeWeight = Double.NaN; // do not tune here
    private final List<GroupParameter<Double>> userModeWeights = new ArrayList<>();
 
-   private final Vector3D headAngularWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
-   private final Vector3D handAngularWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Vector3D headAngularWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D chestAngularWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
+   private final Vector3D handAngularWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceAngularWeights = new ArrayList<>();
 
-   private final Vector3D handLinearWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Vector3D handLinearWeight = new Vector3D(Double.NaN, Double.NaN, Double.NaN); // do not tune here
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeights = new ArrayList<>();
 
    public AtlasMomentumOptimizationSettings(DRCRobotJointMap jointMap, int numberOfContactableBodies)
@@ -106,7 +106,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       taskspaceAngularWeights.add(new GroupParameter<>("Hand", handAngularWeight, handNames));
       taskspaceLinearWeights.add(new GroupParameter<>("Hand", handLinearWeight, handNames));
       taskspaceAngularWeights.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
-      taskspaceLinearWeights.add(new GroupParameter<>("Foot", getDefaultLinearFootWeight(), footNames));
+      taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
 
       this.nContactableBodies = numberOfContactableBodies;
    }
@@ -115,14 +115,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    {
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), names));
-   }
-
-   /**
-    * Can be overwritten in a unit test to change the foot weight.
-    */
-   public Vector3D getDefaultLinearFootWeight()
-   {
-      return footLinearWeight;
    }
 
    /** @inheritDoc */
