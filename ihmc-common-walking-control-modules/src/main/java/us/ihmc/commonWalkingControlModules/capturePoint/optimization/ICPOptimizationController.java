@@ -20,10 +20,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.math.frames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -81,9 +78,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
-   private final YoFramePose footstepSolution = new YoFramePose(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+   private final YoFramePoseUsingQuaternions upcomingFootstepLocation = new YoFramePoseUsingQuaternions(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+   private final YoFramePoseUsingQuaternions footstepSolution = new YoFramePoseUsingQuaternions(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
    private final YoFramePoint2d footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
-   private final YoFramePoint upcomingFootstepLocation = new YoFramePoint(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
    private final YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
    private final YoDouble footstepAdjustmentSafetyFactor = new YoDouble(yoNamePrefix + "FootstepAdjustmentSafetyFactor", registry);
@@ -147,7 +144,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FramePose3D tmpPose = new FramePose3D();
    private final FramePoint3D tempPoint3d = new FramePoint3D();
    private final FramePoint3D projectedTempPoint3d = new FramePoint3D();
-   private final FramePoint2D tempPoint2d = new FramePoint2D();
    private final FrameVector2D tempVector2d = new FrameVector2D();
 
    private final FramePoint2D currentICP = new FramePoint2D();
@@ -315,11 +311,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          {
             if (upcomingFootsteps.size() == 0)
             {
-               footstep.getPosition(tempPoint3d);
                footstep.getPose(tmpPose);
-               upcomingFootstepLocation.set(tempPoint3d);
-               unclippedFootstepSolution.set(tempPoint3d);
+               tmpPose.changeFrame(worldFrame);
+               upcomingFootstepLocation.set(tmpPose);
                footstepSolution.set(tmpPose);
+               unclippedFootstepSolution.set(tmpPose.getPosition());
 
                swingDuration.set(timing.getSwingTime());
                transferDuration.set(timing.getTransferTime());
@@ -450,8 +446,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    @Override
    public void getFootstepSolution(Footstep footstepSolutionToPack)
    {
-      footstepSolution.getFramePose(tmpPose);
-      footstepSolutionToPack.setPose(tmpPose);
+      footstepSolutionToPack.setPose(footstepSolution);
    }
 
    @Override
@@ -486,8 +481,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);
-
-      //updateYoFootsteps();
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
@@ -592,15 +585,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
          predictedEndOfStateICP.add(perfectCMP);
 
-         tempPoint3d.set(upcomingFootstepLocation);
          if (useICPControlPolygons.getBooleanValue())
-            icpControlPlane.projectPointOntoControlPlane(worldFrame, tempPoint3d, projectedTempPoint3d);
+            icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstepLocation.getPosition(), projectedTempPoint3d);
          else
-            projectedTempPoint3d.set(tempPoint3d);
-         tempPoint2d.set(projectedTempPoint3d);
+            projectedTempPoint3d.set(upcomingFootstepLocation.getPosition());
 
-         footstepLocationSubmitted.set(tempPoint2d);
-         solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), tempPoint2d);
+         footstepLocationSubmitted.set(projectedTempPoint3d);
+         solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), projectedTempPoint3d);
       }
 
       if (useFootstepRate)
@@ -641,16 +632,18 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
          if (localUseStepAdjustment && includeFootsteps)
          {
-            PlanarRegion activePlanarRegion;
             if (planarRegionConstraintProvider != null)
-               activePlanarRegion = planarRegionConstraintProvider.getActivePlanarRegion();
+            {
+               PlanarRegion activePlanarRegion = planarRegionConstraintProvider.getActivePlanarRegion();
+               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
+               boolean footstepWasAdjustedBySnapper = planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
+               solutionHandler.setFootstepWasAdjustedBySnapper(footstepWasAdjustedBySnapper);
+            }
             else
-               activePlanarRegion = null;
-
-            solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), activePlanarRegion, solver);
-
-            boolean footstepWasAdjustedBySnapper = planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
-            solutionHandler.setFootstepWasAdjustedBySnapper(footstepWasAdjustedBySnapper);
+            {
+               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), null, solver);
+               solutionHandler.setFootstepWasAdjustedBySnapper(false);
+            }
          }
 
          if (isInDoubleSupport.getBooleanValue())
