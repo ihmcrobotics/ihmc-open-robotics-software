@@ -69,6 +69,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoFrameVector2d icpError = new YoFrameVector2d(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2d feedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFramePoint2d yoPerfectCoP = new YoFramePoint2d(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d(yoNamePrefix + "PerfectCMP", worldFrame, registry);
    private final YoFramePoint2d predictedEndOfStateICP = new YoFramePoint2d(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
 
@@ -146,10 +147,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FramePoint3D projectedTempPoint3d = new FramePoint3D();
    private final FrameVector2D tempVector2d = new FrameVector2D();
 
-   private final FramePoint2D currentICP = new FramePoint2D();
    private final FramePoint2D desiredICP = new FramePoint2D();
-   private final FramePoint2D perfectCMP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FrameVector2D desiredCMPOffset = new FrameVector2D();
+   private final FramePoint2D currentICP = new FramePoint2D();
 
    private final double controlDT;
    private final double dynamicsObjectiveDoubleSupportWeightModifier;
@@ -461,23 +464,38 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       return useAngularMomentum.getBooleanValue();
    }
 
+   private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
    @Override
-   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCMP,
+   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly desiredCoP,
+
                        FramePoint2DReadOnly currentICP, double omega0)
+   {
+      desiredCMPOffsetToThrowAway.setToZero(worldFrame);
+      compute(currentTime, desiredICP, desiredICPVelocity, desiredCoP, desiredCMPOffsetToThrowAway, currentICP, omega0);
+   }
+
+   @Override
+   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly desiredCoP,
+                       FrameVector2DReadOnly desiredCMPOffset, FramePoint2DReadOnly currentICP, double omega0)
    {
       controllerTimer.startMeasurement();
 
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
-      this.perfectCMP.set(perfectCMP);
+      this.desiredCoP.set(desiredCoP);
+      this.desiredCMPOffset.set(desiredCoP);
       this.currentICP.set(currentICP);
 
       this.desiredICP.changeFrame(worldFrame);
       this.desiredICPVelocity.changeFrame(worldFrame);
-      this.perfectCMP.changeFrame(worldFrame);
+      this.desiredCoP.changeFrame(worldFrame);
+      this.desiredCMPOffset.changeFrame(worldFrame);
       this.currentICP.changeFrame(worldFrame);
+      this.desiredCMP.set(this.desiredCoP);
+      this.desiredCMP.add(this.desiredCMPOffset);
 
-      this.yoPerfectCMP.set(this.perfectCMP);
+      this.yoPerfectCoP.set(this.desiredCoP);
+      this.yoPerfectCMP.set(this.desiredCMP);
 
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);
@@ -579,11 +597,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
-         perfectCMP.set(yoPerfectCMP);
+         desiredCMP.set(yoPerfectCMP);
          predictedEndOfStateICP.set(desiredICP);
-         predictedEndOfStateICP.sub(perfectCMP);
+         predictedEndOfStateICP.sub(desiredCMP);
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
-         predictedEndOfStateICP.add(perfectCMP);
+         predictedEndOfStateICP.add(desiredCMP);
 
          if (useICPControlPolygons.getBooleanValue())
             icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstepLocation.getPosition(), projectedTempPoint3d);
@@ -603,8 +621,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       NoConvergenceException noConvergenceException = null;
       try
       {
-         perfectCMP.set(yoPerfectCMP);
-         solver.compute(icpError, perfectCMP);
+         desiredCoP.set(yoPerfectCoP);
+         solver.compute(icpError, desiredCoP);
       }
       catch (NoConvergenceException e)
       {
@@ -664,8 +682,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       feedbackCMPDelta.set(feedbackCoPDelta);
       feedbackCMPDelta.add(cmpCoPDifferenceSolution);
 
-      perfectCMP.set(yoPerfectCMP);
-      feedbackCMP.set(perfectCMP);
+      desiredCoP.set(yoPerfectCoP);
+      feedbackCMP.set(desiredCoP);
       feedbackCMP.add(feedbackCMPDelta);
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
