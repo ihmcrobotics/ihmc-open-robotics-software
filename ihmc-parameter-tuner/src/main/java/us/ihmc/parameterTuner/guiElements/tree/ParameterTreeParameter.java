@@ -3,6 +3,7 @@ package us.ihmc.parameterTuner.guiElements.tree;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
@@ -63,6 +64,11 @@ public class ParameterTreeParameter implements ParameterTreeValue
          parameter.addChangedListener(p -> value.setText(parameter.getCurrentValue()));
          name.setText(parameter.getName());
          value.setText(parameter.getCurrentValue());
+
+         Tooltip tooltip = new Tooltip();
+         tooltip.setText(parameter.getCurrentDescription());
+         parameter.addChangedListener(p -> tooltip.setText(parameter.getCurrentDescription()));
+         Tooltip.install(this, tooltip);
       }
    }
 }
