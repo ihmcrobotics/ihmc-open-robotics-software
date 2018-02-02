@@ -67,10 +67,10 @@ public class ParameterLoaderHelper
       int parametersInXMLWithoutMatch = parametersInXML - loadedParameters;
       if (defaults != 0 || parametersInXMLWithoutMatch != 0)
       {
-         PrintTools.error("There might be something wrong with your parameter file:");
-         System.err.println("   Number of parameters in registry: " + parametersInRegistry);
-         System.err.println("   Number of parameters using their default value: " + defaults);
-         System.err.println("   Number of parameters in XML with no match: " + parametersInXMLWithoutMatch);
+         PrintTools.warn("There might be something wrong with your parameter file:\n"
+               + "   Number of parameters in registry: " + parametersInRegistry + "\n"
+               + "   Number of parameters using their default value: " + defaults + "\n"
+               + "   Number of parameters in XML with no match: " + parametersInXMLWithoutMatch);
       }
    }
 }
