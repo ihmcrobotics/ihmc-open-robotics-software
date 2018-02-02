@@ -163,8 +163,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       lastEstimatorStartTime.set(Long.MIN_VALUE);
       expectedEstimatorTick.set(estimatorDTInNS);
-      
-      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), registry);
+
+      ParameterLoaderHelper.loadParameters(this, robotModel, registry);
 
       if (robotVisualizer != null)
       {
@@ -463,6 +463,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       closeableAndDisposableRegistry.closeAndDispose();
    }
-   
+
 
 }
