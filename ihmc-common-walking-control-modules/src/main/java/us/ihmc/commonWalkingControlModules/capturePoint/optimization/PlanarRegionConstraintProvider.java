@@ -398,18 +398,12 @@ public class PlanarRegionConstraintProvider
       footstepPose.set(footPoseToPack);
       footstepXYPosition.set(footstepPose.getPosition());
 
-      // get the original yaw
+      // get the rotation needed for the footstep
       footstepPose.changeFrame(worldFrame);
-      footstepPose.getRotationVector(footstepNormal);
-
-      activePlanarRegion.getTransformToWorld(planeTransformToWorld);
-      planeReferenceFrame.update();
-
-      planarRegionNormal.setToZero(planeReferenceFrame);
+      footstepNormal.set(0.0, 0.0, 1.0);
+      footstepPose.getOrientation().transform(footstepNormal);
       activePlanarRegion.getNormal(planarRegionNormal);
-      planarRegionNormal.changeFrame(worldFrame);
-
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(planarRegionNormal, footstepNormal, rotation);
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(footstepNormal, planarRegionNormal, rotation);
 
       // get the height
       footstepXYPosition.changeFrameAndProjectToXYPlane(worldFrame);
