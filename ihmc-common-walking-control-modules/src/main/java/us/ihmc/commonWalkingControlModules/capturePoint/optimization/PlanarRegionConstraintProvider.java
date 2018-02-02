@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -385,8 +386,8 @@ public class PlanarRegionConstraintProvider
    private final FramePose3D footstepPose = new FramePose3D();
    private final FramePoint2D footstepXYPosition = new FramePoint2D();
 
-   private final Vector3D footstepNormal = new Vector3D();
-   private final Vector3D planarRegionNormal = new Vector3D();
+   private final FrameVector3D footstepNormal = new FrameVector3D();
+   private final FrameVector3D planarRegionNormal = new FrameVector3D();
    private final AxisAngle rotation = new AxisAngle();
 
    public boolean snapFootPoseToActivePlanarRegion(FixedFramePose3DBasics footPoseToPack)
@@ -400,8 +401,15 @@ public class PlanarRegionConstraintProvider
       // get the original yaw
       footstepPose.changeFrame(worldFrame);
       footstepPose.getRotationVector(footstepNormal);
+
+      activePlanarRegion.getTransformToWorld(planeTransformToWorld);
+      planeReferenceFrame.update();
+
+      planarRegionNormal.setToZero(planeReferenceFrame);
       activePlanarRegion.getNormal(planarRegionNormal);
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(footstepNormal, planarRegionNormal, rotation);
+      planarRegionNormal.changeFrame(worldFrame);
+
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(planarRegionNormal, footstepNormal, rotation);
 
       // get the height
       footstepXYPosition.changeFrameAndProjectToXYPlane(worldFrame);
