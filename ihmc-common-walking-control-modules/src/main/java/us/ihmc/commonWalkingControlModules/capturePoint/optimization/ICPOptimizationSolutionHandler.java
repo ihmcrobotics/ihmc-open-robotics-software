@@ -34,9 +34,9 @@ public class ICPOptimizationSolutionHandler
    private final YoDouble residualCostToGo;
    private final YoDouble costToGo;
    private final YoDouble footstepCostToGo;
-   private final YoDouble feedbackCostToGo;
+   private final YoDouble copFeedbackCostToGo;
+   private final YoDouble cmpFeedbackCostToGo;
    private final YoDouble dynamicRelaxationCostToGo;
-   private final YoDouble angularMomentumMinimizationCostToGo;
 
    private final YoFramePoint2d adjustedICPReferenceLocation;
    private final YoFramePoint2d footstepSolutionInControlPlane;
@@ -52,8 +52,6 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint3D referenceLocation = new FramePoint3D();
    private final FramePoint3D previousLocation = new FramePoint3D();
    private final FrameVector3D solutionAdjustment = new FrameVector3D();
-
-   private final FramePose3D tmpPose = new FramePose3D();
 
    private final FrameVector3D tempVector = new FrameVector3D();
 
@@ -84,18 +82,18 @@ public class ICPOptimizationSolutionHandler
          residualCostToGo = new YoDouble(yoNamePrefix + "ResidualCostToGo", registry);
          costToGo = new YoDouble(yoNamePrefix + "CostToGo", registry);
          footstepCostToGo = new YoDouble(yoNamePrefix + "FootstepCostToGo", registry);
-         feedbackCostToGo = new YoDouble(yoNamePrefix + "FeedbackCostToGo", registry);
+         copFeedbackCostToGo = new YoDouble(yoNamePrefix + "CoPFeedbackCostToGo", registry);
+         cmpFeedbackCostToGo = new YoDouble(yoNamePrefix + "CMPFeedbackCostToGo", registry);
          dynamicRelaxationCostToGo = new YoDouble(yoNamePrefix + "DynamicRelaxationCostToGo", registry);
-         angularMomentumMinimizationCostToGo = new YoDouble(yoNamePrefix + "AngularMomentumMinimizationCostToGo", registry);
       }
       else
       {
          residualCostToGo = null;
          costToGo = null;
          footstepCostToGo = null;
-         feedbackCostToGo = null;
+         copFeedbackCostToGo = null;
          dynamicRelaxationCostToGo = null;
-         angularMomentumMinimizationCostToGo = null;
+         cmpFeedbackCostToGo = null;
       }
 
       footstepDeadband = new YoDouble(yoNamePrefix + "FootstepDeadband", registry);
@@ -130,8 +128,8 @@ public class ICPOptimizationSolutionHandler
          residualCostToGo.set(solver.getCostToGo());
          costToGo.set(solver.getCostToGo());
          footstepCostToGo.set(solver.getFootstepCostToGo());
-         feedbackCostToGo.set(solver.getFeedbackCostToGo());
-         angularMomentumMinimizationCostToGo.set(solver.getAngularMomentumMinimizationCostToGo());
+         copFeedbackCostToGo.set(solver.getCoPFeedbackCostToGo());
+         cmpFeedbackCostToGo.set(solver.getCMPFeedbackCostToGo());
       }
    }
 
