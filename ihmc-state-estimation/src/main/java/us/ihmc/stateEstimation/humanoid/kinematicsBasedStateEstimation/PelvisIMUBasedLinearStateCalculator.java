@@ -55,13 +55,15 @@ public class PelvisIMUBasedLinearStateCalculator
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
 
-   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double estimatorDT,
-         double gravitationalAcceleration, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                              IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, double estimatorDT,
+                                              double gravitationalAcceleration, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
       this.estimatorDT = estimatorDT;
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
-      this.cancelGravityFromAccelerationMeasurement = imuBiasProvider.isAccelerationIncludingGravity();
+      this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
 
       gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
 
