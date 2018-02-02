@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -401,6 +402,47 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          System.out.println("maxVelocityRecorded    : " + maxVelocityRecorded);
          System.out.println("maxAccelerationRecorded: " + maxAccelerationRecorded);
          System.out.println("maxJerkRecorded        : " + maxJerkRecorded);
+      }
+   }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @Test(timeout = 30000)
+   public void testMostBasicTrajectory() throws Exception
+   {
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      Random random = new Random(5165165161L);
+      double dt = 1.0e-5;
+      double trajectoryTime = 3.0;
+      double startIntegrationTime = 1.0;
+      double endIntegrationTime = 2.0;
+
+      FrameQuaternion currentOrientation = new FrameQuaternion();
+      FrameVector3D currentAngularVelocity = new FrameVector3D();
+      FrameVector3D currentAngularAcceleration = new FrameVector3D();
+
+      HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
+                                                                                                                 new YoVariableRegistry("null"));
+      traj.setTrajectoryTime(trajectoryTime);
+
+      for (int i = 0; i < 5; i++)
+      {
+         FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+         FrameVector3D angularVelocity = new FrameVector3D(worldFrame);
+
+         traj.setInitialConditions(initialOrientation, angularVelocity);
+         traj.setFinalConditions(initialOrientation, angularVelocity);
+         traj.initialize();
+
+         for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
+         {
+            traj.compute(time);
+            traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+
+            EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, currentOrientation, 1.0e-2);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity, currentAngularVelocity, 1.0e-2);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity, currentAngularAcceleration, 1.0e-2);
+         }
       }
    }
 
