@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.tools.string;
 
 import java.util.StringTokenizer;
 import java.util.regex.PatternSyntaxException;

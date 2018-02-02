@@ -1,0 +1,32 @@
+.tree-cell:is-registry {
+	-fx-font-weight: bold;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.heading {
+    -fx-font-weight: bold;
+    -fx-font-size: 20.0;
+}
+
+#parameter-value-in-tree-view {
+	-fx-text-fill: -fx-text-inner-color;
+	-fx-text-inner-color: gray;
+	-fx-font-weight: bold;
+}
+
+#parameter-name-in-tree-view {
+	-fx-fill: black;
+}
+
+#parameter-name-in-tuner {
+	-fx-text-fill: -fx-text-inner-color;
+	-fx-font-weight: bold;
+}
+
+#tuner-window {
+	-fx-border-color: gray;
+	-fx-border-radius: 5;
+}

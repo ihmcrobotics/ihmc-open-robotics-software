@@ -1,11 +1,13 @@
 package us.ihmc.exampleSimulations.stickRobot;
 
+import static us.ihmc.exampleSimulations.stickRobot.StickRobotOrderedJointMap.jointNames;
+
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import static us.ihmc.exampleSimulations.stickRobot.StickRobotOrderedJointMap.jointNames;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -255,9 +257,16 @@ public class StickRobotJointMap implements DRCRobotJointMap
       return headName;
    }
    
+   @Override
    public String getHandName(RobotSide robotSide)
    {
       return handNames.get(robotSide);
+   }
+
+   @Override
+   public String getFootName(RobotSide robotSide)
+   {
+      return null;
    }
 
    @Override

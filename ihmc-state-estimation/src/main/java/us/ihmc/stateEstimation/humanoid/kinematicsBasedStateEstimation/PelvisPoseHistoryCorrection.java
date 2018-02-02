@@ -173,7 +173,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationTranslationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);
-            interpolationTranslationAlphaFilter.setAlpha(alpha);
+            interpolationTranslationAlphaFilterAlphaValue.set(alpha);
          }
       });
       interpolationTranslationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
@@ -186,7 +186,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationRotationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);
-            interpolationRotationAlphaFilter.setAlpha(alpha);
+            interpolationRotationAlphaFilterAlphaValue.set(alpha);
          }
       });
       interpolationRotationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);

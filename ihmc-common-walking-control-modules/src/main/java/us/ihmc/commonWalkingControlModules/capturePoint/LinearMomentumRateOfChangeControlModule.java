@@ -33,9 +33,9 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    protected final YoVariableRegistry registry;
 
-   private final YoFrameVector defaultLinearMomentumRateWeight;
-   private final YoFrameVector defaultAngularMomentumRateWeight;
-   private final YoFrameVector highLinearMomentumRateWeight;
+   private Vector3DReadOnly defaultLinearMomentumRateWeight;
+   private Vector3DReadOnly defaultAngularMomentumRateWeight;
+   private Vector3DReadOnly highLinearMomentumRateWeight;
    private final YoFrameVector angularMomentumRateWeight;
    private final YoFrameVector linearMomentumRateWeight;
 
@@ -101,9 +101,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       controlledCoMAcceleration = new YoFrameVector(namePrefix + "ControlledCoMAcceleration", "", centerOfMassFrame, registry);
 
-      defaultLinearMomentumRateWeight = new YoFrameVector(namePrefix + "DefaultLinearMomentumRateWeight", worldFrame, registry);
-      defaultAngularMomentumRateWeight = new YoFrameVector(namePrefix + "DefaultAngularMomentumRateWeight", worldFrame, registry);
-      highLinearMomentumRateWeight = new YoFrameVector(namePrefix + "HighLinearMomentumRateWeight", worldFrame, registry);
       angularMomentumRateWeight = new YoFrameVector(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight = new YoFrameVector(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
@@ -123,9 +120,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       linearXYAndAngularZSelectionMatrix.setToLinearSelectionOnly();
       linearXYAndAngularZSelectionMatrix.selectLinearZ(false); // remove height
       linearXYAndAngularZSelectionMatrix.selectAngularZ(true);
-
-      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
-      linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
 
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
 
@@ -151,23 +145,13 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    public void setMomentumWeight(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      defaultLinearMomentumRateWeight.set(linearWeight);
-      defaultAngularMomentumRateWeight.set(angularWeight);
-   }
-
-   public void setMomentumWeight(Vector3DReadOnly linearWeight)
-   {
-      defaultLinearMomentumRateWeight.set(linearWeight);
-   }
-
-   public void setAngularMomentumWeight(Vector3DReadOnly angularWeight)
-   {
-      defaultAngularMomentumRateWeight.set(angularWeight);
+      defaultLinearMomentumRateWeight = linearWeight;
+      defaultAngularMomentumRateWeight = angularWeight;
    }
 
    public void setHighMomentumWeightForRecovery(Vector3DReadOnly highLinearWeight)
    {
-      highLinearMomentumRateWeight.set(highLinearWeight);
+      highLinearMomentumRateWeight = highLinearWeight;
    }
 
 

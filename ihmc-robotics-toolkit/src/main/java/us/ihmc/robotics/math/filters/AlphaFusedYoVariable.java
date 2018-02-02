@@ -71,7 +71,7 @@ public class AlphaFusedYoVariable extends YoDouble
       reset();
    }
 
-   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, YoDouble alphaVariable, YoDouble slowSignal,
+   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, DoubleProvider alphaVariable, YoDouble slowSignal,
          YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);
