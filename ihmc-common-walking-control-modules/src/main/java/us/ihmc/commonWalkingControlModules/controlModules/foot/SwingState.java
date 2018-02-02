@@ -20,11 +20,12 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -51,8 +52,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private static final boolean USE_RATE_LIMIT_FOR_ADJUSTED_FOOTSTEP = false;
-   
    private final YoBoolean replanTrajectory;
    private final YoBoolean footstepWasAdjusted;
 
@@ -73,8 +72,6 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final YoFrameVector yoTouchdownAcceleration;
    private final YoFrameVector yoTouchdownVelocity;
-
-   private final YoFrameVector unscaledLinearWeight;
 
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
@@ -157,8 +154,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameVector yoDesiredSoleLinearVelocity;
    private final YoFrameVector yoDesiredSoleAngularVelocity;
 
-   public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
-         YoPIDSE3Gains gains, YoVariableRegistry registry)
+   public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration, PIDSE3GainsReadOnly gains,
+                     YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
 
@@ -280,8 +277,6 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
-
-      unscaledLinearWeight = new YoFrameVector(namePrefix + "UnscaledLinearWeight", worldFrame, registry);
    }
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
@@ -296,21 +291,6 @@ public class SwingState extends AbstractUnconstrainedState
 
       transformFromToeToAnkle.setTranslation(toeContactPoint);
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame, transformFromToeToAnkle);
-   }
-
-   @Override
-   public void setWeight(double weight)
-   {
-      super.setWeight(weight);
-      unscaledLinearWeight.set(1.0, 1.0, 1.0);
-      unscaledLinearWeight.scale(weight);
-   }
-
-   @Override
-   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
-   {
-      super.setWeights(angularWeight, linearWeight);
-      unscaledLinearWeight.set(linearWeight);
    }
 
    @Override
@@ -370,10 +350,14 @@ public class SwingState extends AbstractUnconstrainedState
    protected void computeAndPackTrajectory()
    {
       currentTime.set(getTimeInCurrentState());
-      if (USE_RATE_LIMIT_FOR_ADJUSTED_FOOTSTEP)
+
+      if (footstepWasAdjusted.getBooleanValue())
+      {
+         if (!rateLimitedAdjustedPose.geometricallyEquals(adjustedFootstepPose, 1.0e-7))
+            replanTrajectory.set(true); // As long as the rate-limited pose has not reached the adjusted pose, we'll have to replan the swing.
+
          rateLimitedAdjustedPose.update(adjustedFootstepPose);
-      else
-         rateLimitedAdjustedPose.set(adjustedFootstepPose);
+      }
 
       double time;
       if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
@@ -411,7 +395,6 @@ public class SwingState extends AbstractUnconstrainedState
       activeTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       leapOfFaithModule.compute(time);
-      leapOfFaithModule.scaleFootWeight(unscaledLinearWeight, linearWeight);
 
       if (footstepWasAdjusted)
       {
@@ -587,8 +570,7 @@ public class SwingState extends AbstractUnconstrainedState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
-         rateLimitedAdjustedPose.getFramePose(adjustedFootstepPose);
-         blendedSwingTrajectory.blendFinalConstraint(adjustedFootstepPose, swingDuration, swingDuration);
+         blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();
    }
@@ -637,6 +619,14 @@ public class SwingState extends AbstractUnconstrainedState
       swingTrajectoryOptimizer.initialize();
    }
 
+
+   @Override
+   protected void computeCurrentWeights(Vector3DReadOnly nominalAngularWeight, Vector3DReadOnly nominalLinearWeight, Vector3DBasics currentAngularWeightToPack,
+                                        Vector3DBasics currentLinearWeightToPack)
+   {
+      currentAngularWeightToPack.set(nominalAngularWeight);
+      leapOfFaithModule.scaleFootWeight(nominalLinearWeight, currentLinearWeightToPack);
+   }
 
    private void transformDesiredsFromSoleFrameToControlFrame()
    {

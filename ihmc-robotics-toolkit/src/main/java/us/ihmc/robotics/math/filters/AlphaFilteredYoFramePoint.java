@@ -7,7 +7,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFilteredYoFramePoint extends YoFramePoint
 {
@@ -36,7 +35,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
    }
 
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           YoDouble alpha, ReferenceFrame referenceFrame)
+                                                                           DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
       // alpha is a double
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha);
@@ -64,7 +63,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
 
 
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-           DoubleProvider alpha, YoFramePoint unfilteredPoint)
+                                                                           DoubleProvider alpha, YoFramePoint unfilteredPoint)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alpha, unfilteredPoint.getYoX());
@@ -90,7 +89,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
    }
    
    public static AlphaFilteredYoFramePoint createAlphaFilteredYoFramePoint(String namePrefix, String nameSuffix, YoVariableRegistry registry,
-         DoubleProvider alphaX, DoubleProvider alphaY, DoubleProvider alphaZ, YoFramePoint unfilteredPoint)
+                                                                           DoubleProvider alphaX, DoubleProvider alphaY, DoubleProvider alphaZ, YoFramePoint unfilteredPoint)
    {
       // alpha is a YoVariable
       AlphaFilteredYoVariable x = new AlphaFilteredYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, alphaX, unfilteredPoint.getYoX());

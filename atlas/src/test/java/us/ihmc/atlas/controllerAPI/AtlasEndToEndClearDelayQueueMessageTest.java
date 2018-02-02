@@ -16,7 +16,7 @@ public class AtlasEndToEndClearDelayQueueMessageTest extends EndToEndClearDelayQ
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000)
    @Override
    public void testClearingQueue() throws SimulationExceededMaximumTimeException
    {

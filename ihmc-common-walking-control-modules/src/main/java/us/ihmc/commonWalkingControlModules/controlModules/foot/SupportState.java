@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -105,9 +105,17 @@ public class SupportState extends AbstractFootControlState
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public SupportState(FootControlHelper footControlHelper, YoPIDSE3Gains holdPositionGains, YoVariableRegistry parentRegistry)
+   private Vector3DReadOnly angularWeight;
+   private Vector3DReadOnly linearWeight;
+
+   private final PIDSE3GainsReadOnly gains;
+
+   public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
+
+      this.gains = holdPositionGains;
+
       String prefix = footControlHelper.getRobotSide().getLowerCaseName() + "Foot";
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -138,7 +146,6 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
-      spatialFeedbackControlCommand.setGains(holdPositionGains);
 
       desiredLinearVelocity.setToZero(worldFrame);
       desiredAngularVelocity.setToZero(worldFrame);
@@ -283,6 +290,7 @@ public class SupportState extends AbstractFootControlState
       footAcceleration.setToZero(bodyFixedFrame, rootBody.getBodyFixedFrame(), controlFrame);
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       spatialAccelerationCommand.setSpatialAcceleration(controlFrame, footAcceleration);
+      spatialAccelerationCommand.setWeights(angularWeight, linearWeight);
 
       // assemble feedback command
       bodyFixedControlledPose.setToZero(controlFrame);
@@ -293,6 +301,8 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
       spatialFeedbackControlCommand.set(desiredCopPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
+      spatialFeedbackControlCommand.setGains(gains);
 
       // set selection matrices
       accelerationSelectionMatrix.resetSelection();
@@ -399,16 +409,10 @@ public class SupportState extends AbstractFootControlState
       return spatialFeedbackControlCommand;
    }
 
-   public void setWeight(double weight)
+   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      spatialAccelerationCommand.setWeight(weight);
-      spatialFeedbackControlCommand.setWeightForSolver(weight);
-   }
-
-   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
-   {
-      spatialAccelerationCommand.setWeights(angular, linear);
-      spatialFeedbackControlCommand.setWeightsForSolver(angular, linear);
+      this.angularWeight = angularWeight;
+      this.linearWeight = linearWeight;
    }
 
 }

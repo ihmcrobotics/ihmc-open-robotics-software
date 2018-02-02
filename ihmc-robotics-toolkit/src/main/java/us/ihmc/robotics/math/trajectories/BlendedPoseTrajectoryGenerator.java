@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -42,13 +43,13 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedOrientationTrajectory.clearFinalConstraint();
    }
 
-   public void blendInitialConstraint(FramePose3D initialPose, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePose3DReadOnly initialPose, double initialTime, double blendDuration)
    {
       blendedPositionTrajectory.blendInitialConstraint(initialPose.getPosition(), initialTime, blendDuration);
       blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), initialTime, blendDuration);
    }
 
-   public void blendInitialConstraint(FramePose3D initialPose, Twist initialTwist, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePose3DReadOnly initialPose, Twist initialTwist, double initialTime, double blendDuration)
    {
       initialTwist.getLinearPart(tempVelocity);
       initialTwist.getAngularPart(tempAngularVelocity);
@@ -56,13 +57,13 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedOrientationTrajectory.blendInitialConstraint(initialPose.getOrientation(), tempAngularVelocity, initialTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePose3D finalPose, double finalTime, double blendDuration)
+   public void blendFinalConstraint(FramePose3DReadOnly finalPose, double finalTime, double blendDuration)
    {
       blendedPositionTrajectory.blendFinalConstraint(finalPose.getPosition(), finalTime, blendDuration);
       blendedOrientationTrajectory.blendFinalConstraint(finalPose.getOrientation(), finalTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePose3D finalPose, Twist finalTwist, double finalTime, double blendDuration)
+   public void blendFinalConstraint(FramePose3DReadOnly finalPose, Twist finalTwist, double finalTime, double blendDuration)
    {
       finalTwist.getLinearPart(tempVelocity);
       finalTwist.getAngularPart(tempAngularVelocity);
