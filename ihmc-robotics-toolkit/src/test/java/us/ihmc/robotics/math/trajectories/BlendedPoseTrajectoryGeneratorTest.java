@@ -13,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -347,6 +349,114 @@ public class BlendedPoseTrajectoryGeneratorTest
             PoseTrajectoryState stateB = new PoseTrajectoryState(blendedTrajectory, time, bodyFrame, worldFrame, worldFrame);
             assertTrue(stateA.epsilonEquals(stateB, EPSILON));
          }
+      }
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testTroublingDataSet1WithBlending()
+   {
+      int numberOfSamples = 100;
+      double trajectoryDuration = 0.6;
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("Swing", 4 + 2, registry);
+      BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", swingTrajectory, worldFrame, registry);
+
+      swingTrajectory.clear(worldFrame);
+
+      FramePoint3D initialPosition = new FramePoint3D(worldFrame, -7.212, -0.636, 0.302);
+      FrameVector3D initialVelocity = new FrameVector3D(worldFrame, -0.0, -0.0, -0.002);
+      FrameQuaternion initialOrientation = new FrameQuaternion(worldFrame, 0.0, -0.0, 1.0, 0.00);
+
+      swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialVelocity);
+      swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, new FrameVector3D());
+
+      FrameEuclideanTrajectoryPoint firstWaypoint = new FrameEuclideanTrajectoryPoint(0.2, new FramePoint3D(worldFrame, -7.293, -0.623, 0.402),
+                                                                                      new FrameVector3D(worldFrame, -1.372, 0.219, 0.475));
+      FrameEuclideanTrajectoryPoint secondWaypoint = new FrameEuclideanTrajectoryPoint(0.4, new FramePoint3D(worldFrame, -7.669, -0.563, 0.40),
+                                                                                       new FrameVector3D(worldFrame, -1.372, 0.219, 0.425));
+
+      swingTrajectory.appendPositionWaypoint(firstWaypoint);
+      swingTrajectory.appendPositionWaypoint(secondWaypoint);
+
+
+      FramePoint3D finalPosition = new FramePoint3D(worldFrame, -7.75, -0.550, 0.30);
+      FrameVector3D finalVelocity = new FrameVector3D(worldFrame, -0.0, -0.0, -0.3);
+      FrameQuaternion finalOrientation = new FrameQuaternion(worldFrame, 0.0, -0.0, 1.0, 0.00);
+
+      swingTrajectory.appendPositionWaypoint(trajectoryDuration, finalPosition, finalVelocity);
+      swingTrajectory.appendOrientationWaypoint(trajectoryDuration, finalOrientation, new FrameVector3D());
+
+      FramePose3D finalPoseToBlend = new FramePose3D(worldFrame, new FramePoint3D(worldFrame, -7.75, -0.550, 0.3), new FrameQuaternion(worldFrame, 0.0, 0.0, 1.0, 0.0));
+      blendedTrajectory.blendFinalConstraint(finalPoseToBlend, 0.6, 0.6);
+      blendedTrajectory.initialize();
+
+
+      FrameQuaternion orientation = new FrameQuaternion(worldFrame);
+      for (int i = 0; i < numberOfSamples; i++)
+      {
+         double time = i * trajectoryDuration / (numberOfSamples - 1);
+
+         blendedTrajectory.compute(time);
+         blendedTrajectory.getOrientation(orientation); // this doesn't change throughout the trajectory
+
+         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, orientation, 1e-1);
+      }
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testTroublingDataSet1WithoutBlending()
+   {
+      int numberOfSamples = 100;
+      double trajectoryDuration = 0.6;
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("Swing", 4 + 2, registry);
+      BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", swingTrajectory, worldFrame, registry);
+
+      swingTrajectory.clear(worldFrame);
+
+      FramePoint3D initialPosition = new FramePoint3D(worldFrame, -7.212, -0.636, 0.302);
+      FrameVector3D initialVelocity = new FrameVector3D(worldFrame, -0.0, -0.0, -0.002);
+      FrameQuaternion initialOrientation = new FrameQuaternion(worldFrame, 0.0, -0.0, 1.0, 0.005);
+
+      swingTrajectory.appendPositionWaypoint(0.0, initialPosition, initialVelocity);
+      swingTrajectory.appendOrientationWaypoint(0.0, initialOrientation, new FrameVector3D());
+
+      FrameEuclideanTrajectoryPoint firstWaypoint = new FrameEuclideanTrajectoryPoint(0.2, new FramePoint3D(worldFrame, -7.293, -0.623, 0.402),
+                                                                                      new FrameVector3D(worldFrame, -1.372, 0.219, 0.475));
+      FrameEuclideanTrajectoryPoint secondWaypoint = new FrameEuclideanTrajectoryPoint(0.4, new FramePoint3D(worldFrame, -7.669, -0.563, 0.40),
+                                                                                       new FrameVector3D(worldFrame, -1.372, 0.219, 0.425));
+
+      swingTrajectory.appendPositionWaypoint(firstWaypoint);
+      swingTrajectory.appendPositionWaypoint(secondWaypoint);
+
+
+      FramePoint3D finalPosition = new FramePoint3D(worldFrame, -7.75, -0.550, 0.30);
+      FrameVector3D finalVelocity = new FrameVector3D(worldFrame, -0.0, -0.0, -0.3);
+      FrameQuaternion finalOrientation = new FrameQuaternion(worldFrame, 0.0, -0.0, 1.0, 0.00);
+
+      swingTrajectory.appendPositionWaypoint(trajectoryDuration, finalPosition, finalVelocity);
+      swingTrajectory.appendOrientationWaypoint(trajectoryDuration, finalOrientation, new FrameVector3D());
+
+      blendedTrajectory.initialize();
+
+
+      FrameQuaternion orientation = new FrameQuaternion(worldFrame);
+      for (int i = 0; i < numberOfSamples; i++)
+      {
+         double time = i * trajectoryDuration / (numberOfSamples - 1);
+
+         blendedTrajectory.compute(time);
+         blendedTrajectory.getOrientation(orientation); // this doesn't change throughout the trajectory
+
+         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, orientation, 1e-1);
       }
    }
 }
