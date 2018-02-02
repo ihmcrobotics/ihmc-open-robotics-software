@@ -49,9 +49,10 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<YoFrameVector> linearAccelerationsInWorld = new ArrayList<>();
    private final List<YoDouble> linearAccelerationMagnitudes = new ArrayList<>();
 
-   private BooleanProvider enableIMUBiasCompensation;
-   private DoubleProvider imuBiasEstimationThreshold;
-   private DoubleProvider biasFilterBreakFrequency;
+   private final BooleanProvider isAccelerationIncludingGravity;
+   private final BooleanProvider enableIMUBiasCompensation;
+   private final DoubleProvider imuBiasEstimationThreshold;
+   private final DoubleProvider biasFilterBreakFrequency;
 
    private final List<YoDouble> feetToIMUAngularVelocityMagnitudes = new ArrayList<>();
    private final List<YoDouble> feetToIMULinearVelocityMagnitudes = new ArrayList<>();
@@ -65,10 +66,16 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final Vector3D gravityVectorInWorld = new Vector3D();
    private final Vector3D zUpVector = new Vector3D();
 
-   private BooleanProvider isAccelerationIncludingGravity;
 
    public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
-                                double updateDT, YoVariableRegistry parentRegistry)
+                                BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, YoVariableRegistry parentRegistry)
+   {
+      this(imuProcessedOutputs, feet, gravitationalAcceleration, cancelGravityFromAccelerationMeasurement, updateDT, null, parentRegistry);
+   }
+   
+   public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBody> feet, double gravitationalAcceleration,
+                                BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, StateEstimatorParameters stateEstimatorParameters,
+                                YoVariableRegistry parentRegistry)
    {
       this.imuProcessedOutputs = imuProcessedOutputs;
       this.feet = new ArrayList<>(feet);
@@ -77,6 +84,21 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       gravityVectorInWorld.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
       zUpVector.set(0.0, 0.0, 1.0);
 
+      isAccelerationIncludingGravity = cancelGravityFromAccelerationMeasurement;
+      if(stateEstimatorParameters != null)
+      {
+         enableIMUBiasCompensation = new BooleanParameter("enableIMUBiasCompensation", registry, stateEstimatorParameters.enableIMUBiasCompensation());
+         biasFilterBreakFrequency = new DoubleParameter("biasFilterBreakFrequency", registry, stateEstimatorParameters.getIMUBiasFilterFreqInHertz());
+         imuBiasEstimationThreshold = new DoubleParameter("imuBiasEstimationThreshold", registry, stateEstimatorParameters.getIMUBiasVelocityThreshold());
+      }
+      else
+      {
+         enableIMUBiasCompensation = new BooleanParameter("enableIMUBiasCompensation", registry);
+         biasFilterBreakFrequency = new DoubleParameter("biasFilterBreakFrequency", registry);
+         imuBiasEstimationThreshold = new DoubleParameter("imuBiasEstimationThreshold", registry);
+      }
+
+      
       
       AlphaBasedOnBreakFrequencyProvider alphaProvider = new AlphaBasedOnBreakFrequencyProvider(() ->  biasFilterBreakFrequency.getValue(), updateDT);
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
@@ -118,40 +140,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       }
 
       parentRegistry.addChild(registry);
-   }
-
-   
-   public void configureModuleParameters(StateEstimatorParameters stateEstimatorParameters)
-   {
-      BooleanProvider isAccelerationIncludingGravity = () -> stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
-      
-      YoBoolean enableIMUBiasCompensation = new YoBoolean("enableIMUBiasCompensation", registry);
-      enableIMUBiasCompensation.set(stateEstimatorParameters.enableIMUBiasCompensation());
-      YoDouble biasFilterBreakFrequency = new YoDouble("biasFilterBreakFrequency", registry);
-      biasFilterBreakFrequency.set(stateEstimatorParameters.getIMUBiasFilterFreqInHertz());
-      YoDouble imuBiasEstimationThreshold = new YoDouble("imuBiasEstimationThreshold", registry);
-      imuBiasEstimationThreshold.set(stateEstimatorParameters.getIMUBiasVelocityThreshold());
-      
-      configureModuleParameters(isAccelerationIncludingGravity, enableIMUBiasCompensation, biasFilterBreakFrequency, imuBiasEstimationThreshold);
-   }
-   
-   public void createModuleParameters()
-   {
-      
-      BooleanProvider isAccelerationIncludingGravity = new BooleanParameter("isAccelerationIncludingGravity", registry);
-      BooleanProvider enableIMUBiasCompensation = new BooleanParameter("enableIMUBiasCompensation", registry);
-      DoubleProvider biasFilterBreakFrequency = new DoubleParameter("biasFilterBreakFrequency", registry);
-      DoubleProvider imuBiasEstimationThreshhold = new DoubleParameter("imuBiasEstimationThreshold", registry);
-      
-      configureModuleParameters(isAccelerationIncludingGravity, enableIMUBiasCompensation, biasFilterBreakFrequency, imuBiasEstimationThreshhold);
-   }
-
-   private void configureModuleParameters(BooleanProvider isAccelerationIncludingGravity, BooleanProvider enableIMUBiasCompensation, DoubleProvider biasFilterBreakFrequency, DoubleProvider imuBiasEstimationThreshold)
-   {
-      this.isAccelerationIncludingGravity = isAccelerationIncludingGravity;
-      this.enableIMUBiasCompensation = enableIMUBiasCompensation;
-      this.biasFilterBreakFrequency = biasFilterBreakFrequency;
-      this.imuBiasEstimationThreshold = imuBiasEstimationThreshold;
    }
    
    public void initialize()
@@ -382,11 +370,5 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          linearAccelerationBiasToPack.setToZero(worldFrame);
       else
          linearAccelerationBiasToPack.setIncludingFrame(linearAccelerationBiasesInWorld.get(imuIndex.intValue()));
-   }
-
-   @Override
-   public BooleanProvider isAccelerationIncludingGravity()
-   {
-      return isAccelerationIncludingGravity;
    }
 }
