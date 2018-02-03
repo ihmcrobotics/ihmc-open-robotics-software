@@ -132,8 +132,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       referenceLocation.changeFrame(worldFrame);
       adjustedLocation.changeFrame(worldFrame);
 
-      adjustmentDirection.set(adjustedLocation);
-      adjustmentDirection.sub(referenceLocation);
+      adjustmentDirection.sub(adjustedLocation, referenceLocation);
       EuclidGeometryTools.perpendicularVector2D(adjustmentDirection, adjustmentDirection);
 
       motionLine.setPoint(adjustedLocation);
