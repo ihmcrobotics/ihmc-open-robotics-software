@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -1072,6 +1073,18 @@ public class ICPOptimizationQPSolver
    public void getCoPFeedbackDifference(FrameVector2D cmpFeedbackDifferenceToPack)
    {
       cmpFeedbackDifferenceToPack.setToZero(worldFrame);
+      getCoPFeedbackDifference(cmpFeedbackDifferenceToPack);
+   }
+
+
+   /**
+    * Gets the CMP Feedback difference solution for the ICP Proportional feedback problem.
+    *
+    * @param cmpFeedbackDifferenceToPack difference between the nominal CMP and the desired CMP.
+    */
+   public void getCoPFeedbackDifference(FixedFrameVector2DBasics cmpFeedbackDifferenceToPack)
+   {
+      cmpFeedbackDifferenceToPack.checkReferenceFrameMatch(worldFrame);
       cmpFeedbackDifferenceToPack.setX(copDeltaSolution.get(0, 0));
       cmpFeedbackDifferenceToPack.setY(copDeltaSolution.get(1, 0));
    }
@@ -1085,6 +1098,18 @@ public class ICPOptimizationQPSolver
    public void getCMPFeedbackDifference(FrameVector2D differenceToPack)
    {
       differenceToPack.setToZero(worldFrame);
+      getCMPFeedbackDifference(differenceToPack);
+   }
+
+   /**
+    * Gets the difference between the CMP and the desired CoP. This is equivalent to a scaled version of
+    * the angular momentum of the system.
+    *
+    * @param differenceToPack difference between the two points. Modified.
+    */
+   public void getCMPFeedbackDifference(FixedFrameVector2DBasics differenceToPack)
+   {
+      differenceToPack.checkReferenceFrameMatch(worldFrame);
       differenceToPack.setX(cmpDeltaSolution.get(0, 0));
       differenceToPack.setY(cmpDeltaSolution.get(1, 0));
    }

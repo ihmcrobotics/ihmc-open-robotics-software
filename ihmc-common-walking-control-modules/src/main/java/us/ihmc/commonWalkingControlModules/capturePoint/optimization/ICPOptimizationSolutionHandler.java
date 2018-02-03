@@ -36,7 +36,6 @@ public class ICPOptimizationSolutionHandler
    private final YoDouble footstepCostToGo;
    private final YoDouble copFeedbackCostToGo;
    private final YoDouble cmpFeedbackCostToGo;
-   private final YoDouble dynamicRelaxationCostToGo;
 
    private final YoFramePoint2d adjustedICPReferenceLocation;
    private final YoFramePoint2d footstepSolutionInControlPlane;
@@ -63,12 +62,6 @@ public class ICPOptimizationSolutionHandler
       this(null, icpOptimizationParameters, useICPControlPolygons, false, yoNamePrefix, registry);
    }
 
-   public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, YoBoolean useICPControlPolygons, boolean debug,
-                                         String yoNamePrefix, YoVariableRegistry registry)
-   {
-      this(null, icpOptimizationParameters, useICPControlPolygons, debug, yoNamePrefix, registry);
-   }
-
    public ICPOptimizationSolutionHandler(ICPControlPlane icpControlPlane, ICPOptimizationParameters icpOptimizationParameters, YoBoolean useICPControlPolygons,
                                          boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
@@ -84,7 +77,6 @@ public class ICPOptimizationSolutionHandler
          footstepCostToGo = new YoDouble(yoNamePrefix + "FootstepCostToGo", registry);
          copFeedbackCostToGo = new YoDouble(yoNamePrefix + "CoPFeedbackCostToGo", registry);
          cmpFeedbackCostToGo = new YoDouble(yoNamePrefix + "CMPFeedbackCostToGo", registry);
-         dynamicRelaxationCostToGo = new YoDouble(yoNamePrefix + "DynamicRelaxationCostToGo", registry);
       }
       else
       {
@@ -92,7 +84,6 @@ public class ICPOptimizationSolutionHandler
          costToGo = null;
          footstepCostToGo = null;
          copFeedbackCostToGo = null;
-         dynamicRelaxationCostToGo = null;
          cmpFeedbackCostToGo = null;
       }
 
@@ -158,8 +149,7 @@ public class ICPOptimizationSolutionHandler
 
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
-      clippedFootstepAdjustment.set(clippedLocationSolution);
-      clippedFootstepAdjustment.sub(referenceFootstepLocation2D);
+      clippedFootstepAdjustment.sub(clippedLocationSolution, referenceFootstepLocation2D);
 
       footstepSolutionToPack.setPosition(clippedLocationSolution);
       unclippedFootstepSolutionToPack.set(locationSolution);
@@ -197,8 +187,7 @@ public class ICPOptimizationSolutionHandler
 
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);
-      clippedFootstepAdjustment.set(clippedLocationSolution);
-      clippedFootstepAdjustment.sub(referenceFootstepLocation2D);
+      clippedFootstepAdjustment.sub(clippedLocationSolution, referenceFootstepLocation2D);
 
       footstepSolutionToPack.setPosition(clippedLocationSolution);
       unclippedFootstepSolutionToPack.set(locationSolution);
@@ -215,15 +204,13 @@ public class ICPOptimizationSolutionHandler
 
    public void updateVisualizers(FramePoint2DReadOnly desiredICP, double footstepMultiplier)
    {
-      adjustedICPReferenceLocation.set(clippedFootstepAdjustment);
-      adjustedICPReferenceLocation.scale(footstepMultiplier);
-      adjustedICPReferenceLocation.add(desiredICP);
+      adjustedICPReferenceLocation.scaleAdd(footstepMultiplier, clippedFootstepAdjustment, desiredICP);
    }
 
-   private boolean applyLocationDeadband(FramePoint2D solutionLocationToPack, FramePoint2DReadOnly currentSolutionLocation, FramePoint2DReadOnly referenceLocation2d,
+   private boolean applyLocationDeadband(FramePoint2D solutionLocationToModify, FramePoint2DReadOnly currentSolutionLocation, FramePoint2DReadOnly referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
    {
-      solutionLocation.setIncludingFrame(solutionLocationToPack, 0.0);
+      solutionLocation.setIncludingFrame(solutionLocationToModify, 0.0);
       referenceLocation.setIncludingFrame(referenceLocation2d, 0.0);
       previousLocation.setIncludingFrame(currentSolutionLocation, 0.0);
 
@@ -232,18 +219,15 @@ public class ICPOptimizationSolutionHandler
       previousLocation.changeFrame(worldFrame);
 
       solutionAdjustment.setToZero(worldFrame);
-      solutionAdjustment.set(solutionLocation);
-      solutionAdjustment.sub(referenceLocation);
-
+      solutionAdjustment.sub(solutionLocation, referenceLocation);
       solutionAdjustment.changeFrame(deadbandFrame);
 
       boolean wasAdjusted = false;
 
       if (solutionAdjustment.length() < deadband)
       {
-         solutionLocation.set(referenceLocation);
-         solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
-         solutionLocationToPack.set(solutionLocation);
+         referenceLocation.changeFrame(solutionLocationToModify.getReferenceFrame());
+         solutionLocationToModify.set(referenceLocation);
 
          return false;
       }
@@ -259,8 +243,7 @@ public class ICPOptimizationSolutionHandler
 
       solutionLocation.changeFrame(worldFrame);
       tempVector.setToZero(worldFrame);
-      tempVector.set(solutionLocation);
-      tempVector.sub(previousLocation);
+      tempVector.sub(solutionLocation, previousLocation);
       tempVector.changeFrame(deadbandFrame);
 
       if (tempVector.length() < deadbandResolution)
@@ -268,8 +251,8 @@ public class ICPOptimizationSolutionHandler
       else
          wasAdjusted = true;
 
-      solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
-      solutionLocationToPack.set(solutionLocation);
+      solutionLocation.changeFrame(solutionLocationToModify.getReferenceFrame());
+      solutionLocationToModify.set(solutionLocation);
 
       return wasAdjusted;
    }
@@ -282,7 +265,7 @@ public class ICPOptimizationSolutionHandler
    public void setFootstepWasAdjustedBySnapper(boolean footstepWasAdjusted)
    {
       if (footstepWasAdjusted)
-         this.footstepWasAdjusted.set(footstepWasAdjusted);
+         this.footstepWasAdjusted.set(true);
    }
 
    public FrameVector2DReadOnly getFootstepAdjustment()
@@ -293,11 +276,6 @@ public class ICPOptimizationSolutionHandler
    public FrameVector2DReadOnly getClippedFootstepAdjustment()
    {
       return clippedFootstepAdjustment;
-   }
-
-   public YoDouble getFootstepDeadband()
-   {
-      return footstepDeadband;
    }
 }
 
