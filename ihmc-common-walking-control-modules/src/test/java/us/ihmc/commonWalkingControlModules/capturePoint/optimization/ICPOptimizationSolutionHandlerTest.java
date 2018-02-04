@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;

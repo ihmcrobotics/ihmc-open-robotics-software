@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import java.util.ArrayList;
 import java.util.List;

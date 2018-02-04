@@ -17,9 +17,9 @@ public class ICPQPIndexHandler
    /** Index for the start of the footstep variables. */
    private int footstepStartingIndex;
    /** Index for the CoP Feedback action term. */
-   private int feedbackCoPIndex;
-   /** Index for the angular momentum term. */
-   private int angularMomentumRateIndex;
+   private int copFeedbackIndex;
+   /** Index for the CMP feedback term. */
+   private int cmpFeedbackIndex;
 
    /** Whether or not to use step adjustment in the optimization. If {@link #numberOfFootstepsToConsider} is 0, this term should be false */
    private boolean useStepAdjustment;
@@ -88,12 +88,12 @@ public class ICPQPIndexHandler
     */
    public void computeProblemSize()
    {
-      feedbackCoPIndex = 0;
-      angularMomentumRateIndex = feedbackCoPIndex + 2;
+      copFeedbackIndex = 0;
+      cmpFeedbackIndex = copFeedbackIndex + 2;
       if (useAngularMomentum)
-         footstepStartingIndex = angularMomentumRateIndex + 2;
+         footstepStartingIndex = cmpFeedbackIndex + 2;
       else
-         footstepStartingIndex = feedbackCoPIndex + 2;
+         footstepStartingIndex = copFeedbackIndex + 2;
 
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
       numberOfFreeVariables = 2; // the CMP delta
@@ -129,19 +129,19 @@ public class ICPQPIndexHandler
     *
     * @return cmp feedback action index.
     */
-   public int getFeedbackCoPIndex()
+   public int getCoPFeedbackIndex()
    {
-      return feedbackCoPIndex;
+      return copFeedbackIndex;
    }
 
    /**
-    * Gets the index of the angular momentum term.
+    * Gets the index of the cmp feedback term.
     *
-    * @return angular momentum rate index.
+    * @return cmp feedback index.
     */
-   public int getAngularMomentumRateIndex()
+   public int getCMPFeedbackIndex()
    {
-      return angularMomentumRateIndex;
+      return cmpFeedbackIndex;
    }
 
    /**

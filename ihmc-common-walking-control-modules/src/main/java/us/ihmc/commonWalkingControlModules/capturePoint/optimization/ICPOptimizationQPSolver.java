@@ -71,7 +71,7 @@ public class ICPOptimizationQPSolver
    private final ICPQPInput copFeedbackTaskInput;
    /** QP Objective to minimize the amount of step adjustment. Also contains step adjustment. */
    private final ICPQPInput footstepTaskInput;
-   /** QP Objective to minimize the angular momentum magnitude. */
+   /** QP Objective to minimize the cmp feedback magnitude. */
    private final ICPQPInput cmpFeedbackTaskInput;
    /** QP Objective to minimize the difference between the dynamics */
    private final ICPQPInput dynamicsTaskInput;
@@ -613,13 +613,13 @@ public class ICPOptimizationQPSolver
     * the nominal CMP location and the one used to control the ICP dynamics. The dynamic relaxation allows the ICP recursive dynamics to be violated by a
     * small magnitude, which is critical to not overconstraining the problem.
     *
-    * @param feedbackWeight weight on the minimization of the feedback action for the solver.
+    * @param copFeedbackWeight weight on the minimization of the CoP feedback action for the solver.
     * @param feedbackGain ICP controller proportional gain.
     * @param dynamicsWeight weight on the minimization of the dynamic relaxation for the solver.
     */
-   public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double dynamicsWeight)
+   public void setFeedbackConditions(double copFeedbackWeight, double feedbackGain, double dynamicsWeight)
    {
-      this.setFeedbackConditions(feedbackWeight, feedbackWeight, feedbackGain, feedbackGain, dynamicsWeight);
+      this.setFeedbackConditions(copFeedbackWeight, copFeedbackWeight, feedbackGain, feedbackGain, dynamicsWeight);
    }
 
    /**
@@ -627,20 +627,20 @@ public class ICPOptimizationQPSolver
     * the nominal CMP location and the one used to control the ICP dynamics. The dynamic relaxation allows the ICP recursive dynamics to be violated by a
     * small magnitude, which is critical to not overconstraining the problem.
     *
-    * @param feedbackXWeight weight on the minimization of the feedback action for the solver in the Cartesian x coordinate direction.
-    * @param feedbackYWeight weight on the minimization of the feedback action for the solver in the Cartesian y coordinate direction.
+    * @param copFeedbackXWeight weight on the minimization of the CoP feedback action for the solver in the Cartesian x coordinate direction.
+    * @param copFeedbackYWeight weight on the minimization of the CoP feedback action for the solver in the Cartesian y coordinate direction.
     * @param feedbackXGain ICP controller proportional gain in the Cartesian x coordinate direction.
     * @param feedbackYGain ICP controller proportional gain in the Cartesian y coordinate direction.
     * @param dynamicsWeight weight on the minimization of the dynamic relaxation for the solver.
     */
-   public void setFeedbackConditions(double feedbackXWeight, double feedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicsWeight)
+   public void setFeedbackConditions(double copFeedbackXWeight, double copFeedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicsWeight)
    {
-      feedbackXWeight = Math.max(feedbackXWeight, minimumFeedbackWeight);
-      feedbackYWeight = Math.max(feedbackYWeight, minimumFeedbackWeight);
+      copFeedbackXWeight = Math.max(copFeedbackXWeight, minimumFeedbackWeight);
+      copFeedbackYWeight = Math.max(copFeedbackYWeight, minimumFeedbackWeight);
 
       this.copFeedbackWeight.zero();
-      this.copFeedbackWeight.set(0, 0, feedbackXWeight);
-      this.copFeedbackWeight.set(1, 1, feedbackYWeight);
+      this.copFeedbackWeight.set(0, 0, copFeedbackXWeight);
+      this.copFeedbackWeight.set(1, 1, copFeedbackYWeight);
 
       this.feedbackGain.zero();
       this.feedbackGain.set(0, 0, feedbackXGain);
@@ -651,8 +651,8 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Enables the use of feedback rate in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
-    * amount of CMP feedback to stabilize the ICP dynamics.
+    * Enables the use of cop feedback rate in the solver, and also sets the weight on it. This task minimizes the differences between solutions of the
+    * amount of CoP feedback to stabilize the ICP dynamics.
     *
     * @param rateWeight weight placed on changes in the CMP feedback solution.
     */
@@ -795,7 +795,7 @@ public class ICPOptimizationQPSolver
       if (hasCoPFeedbackRateTerm)
          inputCalculator.computeCoPFeedbackRateTask(copFeedbackTaskInput, copFeedbackRateWeight, previousFeedbackDeltaSolution);
 
-      inputCalculator.submitFeedbackTask(copFeedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
+      inputCalculator.submitCoPFeedbackTask(copFeedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -803,8 +803,8 @@ public class ICPOptimizationQPSolver
     */
    private void addCMPFeedbackTask()
    {
-      inputCalculator.computeAngularMomentumRateTask(cmpFeedbackTaskInput, cmpFeedbackWeight, desiredCMPOffset);
-      inputCalculator.submitAngularMomentumRateTask(cmpFeedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
+      inputCalculator.computeCMPFeedbackTask(cmpFeedbackTaskInput, cmpFeedbackWeight, desiredCMPOffset);
+      inputCalculator.submitCMPFeedbackTask(cmpFeedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -821,7 +821,7 @@ public class ICPOptimizationQPSolver
       copLocationConstraint.formulateConstraint();
 
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCoPIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), copLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -841,8 +841,8 @@ public class ICPOptimizationQPSolver
       cmpLocationConstraint.formulateConstraint();
 
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getFeedbackCoPIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getAngularMomentumRateIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCMPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0, constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -955,7 +955,7 @@ public class ICPOptimizationQPSolver
     */
    private void extractCoPFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolutionToPack)
    {
-      MatrixTools.setMatrixBlock(copFeedbackSolutionToPack, 0, 0, solution, indexHandler.getFeedbackCoPIndex(), 0, 2, 1, 1.0);
+      MatrixTools.setMatrixBlock(copFeedbackSolutionToPack, 0, 0, solution, indexHandler.getCoPFeedbackIndex(), 0, 2, 1, 1.0);
    }
 
    /**
@@ -966,7 +966,7 @@ public class ICPOptimizationQPSolver
    private void extractCMPDeltaSolution(DenseMatrix64F cmpDeltaSolutionToPack)
    {
       if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(cmpDeltaSolutionToPack, 0, 0, solution, indexHandler.getAngularMomentumRateIndex(), 0, 2, 1, 1.0);
+         MatrixTools.setMatrixBlock(cmpDeltaSolutionToPack, 0, 0, solution, indexHandler.getCMPFeedbackIndex(), 0, 2, 1, 1.0);
    }
 
    /**
@@ -1042,7 +1042,7 @@ public class ICPOptimizationQPSolver
       }
 
       if (indexHandler.useAngularMomentum())
-      { // angular momentum cost:
+      { // cmp feedback cost:
          CommonOps.mult(cmpFeedbackTaskInput.quadraticTerm, cmpDeltaSolution, tmpFeedbackCost);
          CommonOps.multTransA(cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
          CommonOps.scale(0.5, cmpFeedbackCostToGo);
@@ -1091,7 +1091,7 @@ public class ICPOptimizationQPSolver
 
    /**
     * Gets the difference between the CMP and the desired CoP. This is equivalent to a scaled version of
-    * the angular momentum of the system.
+    * the cmp feedback of the system.
     *
     * @param differenceToPack difference between the two points. Modified.
     */
@@ -1103,7 +1103,7 @@ public class ICPOptimizationQPSolver
 
    /**
     * Gets the difference between the CMP and the desired CoP. This is equivalent to a scaled version of
-    * the angular momentum of the system.
+    * the cmp feedback of the system.
     *
     * @param differenceToPack difference between the two points. Modified.
     */
