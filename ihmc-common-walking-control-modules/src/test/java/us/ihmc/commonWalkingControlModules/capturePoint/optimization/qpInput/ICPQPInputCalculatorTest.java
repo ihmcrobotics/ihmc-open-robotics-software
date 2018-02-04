@@ -320,7 +320,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test just feedback
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -365,7 +365,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and step adjustment
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -416,7 +416,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and angular momentum
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -466,7 +466,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and angular momentum and step adjustment
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -559,7 +559,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test just feedback
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -609,7 +609,7 @@ public class ICPQPInputCalculatorTest
 
       // ONLY THE FEEDBACK ONE IS ENOUGH
       // test feedback and step adjustment
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -661,7 +661,7 @@ public class ICPQPInputCalculatorTest
 
       // ONLY THE FEEDBACK ONE IS ENOUGH
       // test feedback and angular momentum
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -707,7 +707,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and angular momentum and step adjustment
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -805,7 +805,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test just feedback
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -849,7 +849,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and step adjustment
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -906,7 +906,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and angular momentum
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -952,7 +952,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and angular momentum and step adjustment
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -1055,7 +1055,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test just feedback
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -1095,7 +1095,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and step adjustment
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -1150,7 +1150,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and angular momentum
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.computeProblemSize();
 
@@ -1196,7 +1196,7 @@ public class ICPQPInputCalculatorTest
 
 
       // test feedback and angular momentum and step adjustment
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.resetFootsteps();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -1312,7 +1312,7 @@ public class ICPQPInputCalculatorTest
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
       inputCalculator.setConsiderAngularMomentumInAdjustment(true);
@@ -1369,7 +1369,7 @@ public class ICPQPInputCalculatorTest
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.computeProblemSize();
 
       ICPQPInput angularMomentumTask = new ICPQPInput(2);
@@ -1491,7 +1491,7 @@ public class ICPQPInputCalculatorTest
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.computeProblemSize();
 
       ICPQPInput feedbackTask = new ICPQPInput(2);
@@ -1542,7 +1542,7 @@ public class ICPQPInputCalculatorTest
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
       inputCalculator.setConsiderAngularMomentumInAdjustment(true);
@@ -1614,7 +1614,7 @@ public class ICPQPInputCalculatorTest
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       indexHandler.registerFootstep();
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.computeProblemSize();
 
       ICPQPInput feedbackTask = new ICPQPInput(2);
@@ -1685,7 +1685,7 @@ public class ICPQPInputCalculatorTest
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
       inputCalculator.setConsiderAngularMomentumInAdjustment(true);
@@ -1788,7 +1788,7 @@ public class ICPQPInputCalculatorTest
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
       ICPQPInputCalculator inputCalculator = new ICPQPInputCalculator(indexHandler);
 
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
       inputCalculator.setConsiderAngularMomentumInAdjustment(true);

@@ -23,8 +23,8 @@ public class ICPQPIndexHandler
 
    /** Whether or not to use step adjustment in the optimization. If {@link #numberOfFootstepsToConsider} is 0, this term should be false */
    private boolean useStepAdjustment;
-   /** Whether or not to use angular momentum in the optimization. */
-   private boolean useAngularMomentum = false;
+   /** Whether or not to include cmp feedback task in the optimization. */
+   private boolean hasCMPFeedbackTask = false;
 
    /**
     * Resets the number of footsteps for the controller to consider.
@@ -65,22 +65,22 @@ public class ICPQPIndexHandler
    }
 
    /**
-    * Sets whether or not to use angular momentum in the optimization.
-    * @param useAngularMomentum whether or not to use angular momentum
+    * Sets whether or not to use CMP feedback in the optimization.
+    * @param hasCMPFeedbackTask whether or not to use angular momentum
     */
-   public void setUseAngularMomentum(boolean useAngularMomentum)
+   public void setHasCMPFeedbackTask(boolean hasCMPFeedbackTask)
    {
-      this.useAngularMomentum = useAngularMomentum;
+      this.hasCMPFeedbackTask = hasCMPFeedbackTask;
    }
 
    /**
-    * Whether or not the solver should include the use of angular momentum.
+    * Whether or not the solver should include the CMP feedback.
     *
-    * @return whether or not to angular momentum.
+    * @return whether or not to has CMP feedback task.
     */
-   public boolean useAngularMomentum()
+   public boolean hasCMPFeedbackTask()
    {
-      return useAngularMomentum;
+      return hasCMPFeedbackTask;
    }
 
    /**
@@ -90,7 +90,7 @@ public class ICPQPIndexHandler
    {
       copFeedbackIndex = 0;
       cmpFeedbackIndex = copFeedbackIndex + 2;
-      if (useAngularMomentum)
+      if (hasCMPFeedbackTask)
          footstepStartingIndex = cmpFeedbackIndex + 2;
       else
          footstepStartingIndex = copFeedbackIndex + 2;
@@ -99,7 +99,7 @@ public class ICPQPIndexHandler
       numberOfFreeVariables = 2; // the CMP delta
       if (useStepAdjustment)
          numberOfFreeVariables += numberOfFootstepVariables; // all the footstep locations
-      if (useAngularMomentum)
+      if (hasCMPFeedbackTask)
          numberOfFreeVariables += 2;
    }
 

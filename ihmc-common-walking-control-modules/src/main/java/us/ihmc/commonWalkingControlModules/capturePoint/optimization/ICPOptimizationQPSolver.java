@@ -384,7 +384,7 @@ public class ICPOptimizationQPSolver
          if (hasPlanarRegionConstraint)
             numberOfInequalityConstraints += planarRegionConstraint.getInequalityConstraintSize();
       }
-      if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
+      if (indexHandler.hasCMPFeedbackTask() && Double.isFinite(cmpSafeDistanceFromEdge))
          numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
       solverInput_H.reshape(problemSize, problemSize);
@@ -417,13 +417,13 @@ public class ICPOptimizationQPSolver
    }
 
    /**
-    * Resets the controller conditions for the minimization of cmp feedback task, and also sets it so that the controller will not attempt to utilize
+    * Resets the controller conditions for the minimization of CMP feedback task, and also sets it so that the controller will not attempt to utilize
     * angular momentum to stabilize the ICP dynamics.
     */
    public void resetCMPFeedbackConditions()
    {
       cmpFeedbackWeight.zero();
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
    }
 
    /**
@@ -552,7 +552,8 @@ public class ICPOptimizationQPSolver
       CommonOps.setIdentity(identity);
 
       MatrixTools.setMatrixBlock(this.cmpFeedbackWeight, 0, 0, identity, 0, 0, 2, 2, cmpFeedbackWeight);
-      indexHandler.setUseAngularMomentum(useAngularMomentum);
+      indexHandler.setHasCMPFeedbackTask(true);
+      //indexHandler.setUseAngularMomentum(useAngularMomentum);
    }
 
    /**
@@ -715,7 +716,7 @@ public class ICPOptimizationQPSolver
       if (indexHandler.useStepAdjustment())
          addStepAdjustmentTask();
 
-      if (indexHandler.useAngularMomentum())
+      if (indexHandler.hasCMPFeedbackTask())
          addCMPFeedbackTask();
 
       addDynamicConstraintTask();
@@ -723,7 +724,7 @@ public class ICPOptimizationQPSolver
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
 
-      if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.useAngularMomentum() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
+      if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.hasCMPFeedbackTask() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
       if (indexHandler.useStepAdjustment())
@@ -965,7 +966,7 @@ public class ICPOptimizationQPSolver
     */
    private void extractCMPDeltaSolution(DenseMatrix64F cmpDeltaSolutionToPack)
    {
-      if (indexHandler.useAngularMomentum())
+      if (indexHandler.hasCMPFeedbackTask())
          MatrixTools.setMatrixBlock(cmpDeltaSolutionToPack, 0, 0, solution, indexHandler.getCMPFeedbackIndex(), 0, 2, 1, 1.0);
    }
 
@@ -1041,7 +1042,7 @@ public class ICPOptimizationQPSolver
          CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
       }
 
-      if (indexHandler.useAngularMomentum())
+      if (indexHandler.hasCMPFeedbackTask())
       { // cmp feedback cost:
          CommonOps.mult(cmpFeedbackTaskInput.quadraticTerm, cmpDeltaSolution, tmpFeedbackCost);
          CommonOps.multTransA(cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);

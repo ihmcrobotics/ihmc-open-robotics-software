@@ -28,7 +28,7 @@ public class ICPQPIndexHandlerTest
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
 
       Assert.assertEquals(0, indexHandler.getCoPFeedbackIndex());
-      Assert.assertFalse(indexHandler.useAngularMomentum());
+      Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
       Assert.assertFalse(indexHandler.useStepAdjustment());
 
       indexHandler.computeProblemSize();
@@ -40,7 +40,7 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(2, indexHandler.getNumberOfFreeVariables());
-      Assert.assertFalse(indexHandler.useAngularMomentum());
+      Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
       Assert.assertFalse(indexHandler.useStepAdjustment());
 
       indexHandler.resetFootsteps();
@@ -52,7 +52,7 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(2, indexHandler.getNumberOfFreeVariables());
-      Assert.assertFalse(indexHandler.useAngularMomentum());
+      Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
       Assert.assertFalse(indexHandler.useStepAdjustment());
 
       indexHandler.registerFootstep();
@@ -64,7 +64,7 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(1, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(2, indexHandler.getNumberOfFreeVariables());
-      Assert.assertFalse(indexHandler.useAngularMomentum());
+      Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
       Assert.assertTrue(indexHandler.useStepAdjustment());
 
       indexHandler.computeProblemSize();
@@ -76,7 +76,7 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(1, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(4, indexHandler.getNumberOfFreeVariables());
-      Assert.assertFalse(indexHandler.useAngularMomentum());
+      Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
       Assert.assertTrue(indexHandler.useStepAdjustment());
 
       indexHandler.resetFootsteps();
@@ -88,10 +88,10 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(4, indexHandler.getNumberOfFreeVariables());
-      Assert.assertFalse(indexHandler.useAngularMomentum());
+      Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
       Assert.assertFalse(indexHandler.useStepAdjustment());
 
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
 
       Assert.assertEquals(0, indexHandler.getCoPFeedbackIndex());
       Assert.assertEquals(2, indexHandler.getCMPFeedbackIndex());
@@ -100,7 +100,7 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(4, indexHandler.getNumberOfFreeVariables());
-      Assert.assertTrue(indexHandler.useAngularMomentum());
+      Assert.assertTrue(indexHandler.hasCMPFeedbackTask());
       Assert.assertFalse(indexHandler.useStepAdjustment());
 
       indexHandler.computeProblemSize();
@@ -112,7 +112,7 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(4, indexHandler.getNumberOfFreeVariables());
-      Assert.assertTrue(indexHandler.useAngularMomentum());
+      Assert.assertTrue(indexHandler.hasCMPFeedbackTask());
       Assert.assertFalse(indexHandler.useStepAdjustment());
 
       indexHandler.resetFootsteps();
@@ -126,11 +126,11 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(1, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(6, indexHandler.getNumberOfFreeVariables());
-      Assert.assertTrue(indexHandler.useAngularMomentum());
+      Assert.assertTrue(indexHandler.hasCMPFeedbackTask());
       Assert.assertTrue(indexHandler.useStepAdjustment());
 
       indexHandler.resetFootsteps();
-      indexHandler.setUseAngularMomentum(false);
+      indexHandler.setHasCMPFeedbackTask(false);
       indexHandler.registerFootstep();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -142,11 +142,11 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(4, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(6, indexHandler.getNumberOfFreeVariables());
-      Assert.assertFalse(indexHandler.useAngularMomentum());
+      Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
       Assert.assertTrue(indexHandler.useStepAdjustment());
 
       indexHandler.resetFootsteps();
-      indexHandler.setUseAngularMomentum(true);
+      indexHandler.setHasCMPFeedbackTask(true);
       indexHandler.registerFootstep();
       indexHandler.registerFootstep();
       indexHandler.computeProblemSize();
@@ -158,7 +158,7 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(4, indexHandler.getNumberOfFootstepVariables());
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepsToConsider());
       Assert.assertEquals(8, indexHandler.getNumberOfFreeVariables());
-      Assert.assertTrue(indexHandler.useAngularMomentum());
+      Assert.assertTrue(indexHandler.hasCMPFeedbackTask());
       Assert.assertTrue(indexHandler.useStepAdjustment());
    }
 }
