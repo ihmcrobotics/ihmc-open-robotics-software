@@ -276,6 +276,34 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
+   public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressurePosition(desiredCenterOfPressurePositionToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressurePosition(desiredCenterOfPressurePositionToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressureVelocity(desiredCenterOfPressureVelocityToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
+   {
+      icpPlanner.getDesiredCenterOfPressureVelocity(desiredCenterOfPressureVelocityToPack);
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public double getTimeInCurrentState()
    {
       return icpPlanner.getTimeInCurrentState();
