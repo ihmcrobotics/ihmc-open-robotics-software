@@ -1070,35 +1070,11 @@ public class ICPOptimizationQPSolver
     *
     * @param cmpFeedbackDifferenceToPack difference between the nominal CMP and the desired CMP.
     */
-   public void getCoPFeedbackDifference(FrameVector2D cmpFeedbackDifferenceToPack)
-   {
-      cmpFeedbackDifferenceToPack.setToZero(worldFrame);
-      getCoPFeedbackDifference(cmpFeedbackDifferenceToPack);
-   }
-
-
-   /**
-    * Gets the CMP Feedback difference solution for the ICP Proportional feedback problem.
-    *
-    * @param cmpFeedbackDifferenceToPack difference between the nominal CMP and the desired CMP.
-    */
    public void getCoPFeedbackDifference(FixedFrameVector2DBasics cmpFeedbackDifferenceToPack)
    {
       cmpFeedbackDifferenceToPack.checkReferenceFrameMatch(worldFrame);
       cmpFeedbackDifferenceToPack.setX(copDeltaSolution.get(0, 0));
       cmpFeedbackDifferenceToPack.setY(copDeltaSolution.get(1, 0));
-   }
-
-   /**
-    * Gets the difference between the CMP and the desired CoP. This is equivalent to a scaled version of
-    * the cmp feedback of the system.
-    *
-    * @param differenceToPack difference between the two points. Modified.
-    */
-   public void getCMPFeedbackDifference(FrameVector2D differenceToPack)
-   {
-      differenceToPack.setToZero(worldFrame);
-      getCMPFeedbackDifference(differenceToPack);
    }
 
    /**
