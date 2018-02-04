@@ -872,36 +872,48 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    }
 
    /**
+    * <p> {@inheritDoc} </p>
     * <p>
-    *  {@inheritDoc}
+    * In the continuous planner, the CoP is not considered. This method will return NaN.
     * </p>
-    * <p>
-    * In the continuous planner, the CoP is not considered. This will return NaN
-    * </p>
-    * */
-
+    */
    @Override
    public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
    {
       desiredCenterOfPressurePositionToPack.setToNaN();
    }
 
+   /**
+    * <p> {@inheritDoc} </p>
+    * <p>
+    * In the continuous planner, the CoP is not considered. This method will return NaN.
+    * </p>
+    */
    @Override
-   /** {@inheritDoc} */
    public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
    {
       desiredCenterOfPressurePositionToPack.setToNaN();
    }
 
+   /**
+    * <p> {@inheritDoc} </p>
+    * <p>
+    * In the continuous planner, the CoP is not considered. This method will return NaN.
+    * </p>
+    */
    @Override
-   /** {@inheritDoc} */
    public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
    {
       desiredCenterOfPressureVelocityToPack.setToNaN();
    }
 
+   /**
+    * <p> {@inheritDoc} </p>
+    * <p>
+    * In the continuous planner, the CoP is not considered. This method will return NaN.
+    * </p>
+    */
    @Override
-   /** {@inheritDoc} */
    public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
    {
       desiredCenterOfPressureVelocityToPack.setToNaN();
