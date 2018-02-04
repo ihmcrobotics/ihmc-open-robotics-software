@@ -370,7 +370,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       return comDesiredInitialPositions;
    }
 
-   public List<? extends FramePoint3D> getCoMPositionDesiredFinalList()
+   public List<? extends FramePoint3DReadOnly> getCoMPositionDesiredFinalList()
    {
       return comDesiredFinalPositions;
    }
@@ -380,17 +380,17 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       return comDesiredInitialVelocities;
    }
 
-   public List<? extends FrameVector3D> getCoMVelocityDesiredFinalList()
+   public List<? extends FrameVector3DReadOnly> getCoMVelocityDesiredFinalList()
    {
       return comDesiredFinalVelocities;
    }
 
-   public List<? extends FrameVector3D> getCoMAccelerationDesiredInitialList()
+   public List<? extends FrameVector3DReadOnly> getCoMAccelerationDesiredInitialList()
    {
       return comDesiredInitialAccelerations;
    }
 
-   public List<? extends FrameVector3D> getCoMAccelerationDesiredFinalList()
+   public List<? extends FrameVector3DReadOnly> getCoMAccelerationDesiredFinalList()
    {
       return comDesiredFinalAccelerations;
    }

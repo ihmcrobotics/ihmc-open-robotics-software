@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -334,9 +335,9 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public void getDesiredAngularMomentum(FixedFrameVector3DBasics desiredAngMomToPack, FixedFrameVector3DBasics desiredTorqueToPack)
+   public void getDesiredAngularMomentum(FixedFrameVector3DBasics desiredAngularMomentumToPack, FixedFrameVector3DBasics desiredTorqueToPack)
    {
-      desiredAngMomToPack.set(desiredAngularMomentum);
+      desiredAngularMomentumToPack.set(desiredAngularMomentum);
       desiredTorqueToPack.set(desiredTorque);
    }
 
@@ -577,7 +578,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       TrajectoryMathTools.scale(mass, momentumTrajectoryToPack);
    }
 
-   public void getPredictedCenterOfMassPosition(YoFramePoint pointToPack, double time)
+   public void getPredictedCenterOfMassPosition(FixedFramePoint3DBasics pointToPack, double time)
    {
       if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
       {
@@ -606,7 +607,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   public void getPredictedFootPosition(YoFramePoint pointToPack, double time)
+   public void getPredictedFootPosition(FixedFramePoint3DBasics pointToPack, double time)
    {
       if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
       {
