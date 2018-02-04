@@ -481,7 +481,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
       this.perfectCoP.set(perfectCoP);
-      this.perfectCMPOffset.set(perfectCoP);
+      this.perfectCMPOffset.set(perfectCMPOffset);
       this.currentICP.set(currentICP);
 
       this.desiredICP.changeFrame(worldFrame);
