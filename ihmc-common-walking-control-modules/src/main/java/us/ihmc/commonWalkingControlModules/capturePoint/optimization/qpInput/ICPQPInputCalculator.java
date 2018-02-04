@@ -169,7 +169,7 @@ public class ICPQPInputCalculator
       DiagonalMatrixTools.invertDiagonalMatrix(feedbackGain, invertedFeedbackGain);
 
       int size = 2;
-      if (indexHandler.useAngularMomentum())
+      if (indexHandler.hasCMPFeedbackTask())
          size += 2;
       if (indexHandler.useStepAdjustment())
          size += 2;
@@ -194,7 +194,7 @@ public class ICPQPInputCalculator
       {
          MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         if (indexHandler.useAngularMomentum())
+         if (indexHandler.hasCMPFeedbackTask())
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -211,7 +211,7 @@ public class ICPQPInputCalculator
       }
       else if (considerFeedbackInAdjustment)
       {
-         if (!indexHandler.useAngularMomentum())
+         if (!indexHandler.hasCMPFeedbackTask())
          {
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
             MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -248,7 +248,7 @@ public class ICPQPInputCalculator
       {
          MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         if (indexHandler.useAngularMomentum())
+         if (indexHandler.hasCMPFeedbackTask())
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -258,7 +258,7 @@ public class ICPQPInputCalculator
             CommonOps.setIdentity(identity);
             CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
 
-            if (indexHandler.useAngularMomentum())
+            if (indexHandler.hasCMPFeedbackTask())
                MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
             MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
@@ -271,7 +271,7 @@ public class ICPQPInputCalculator
       {
          MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         if (indexHandler.useAngularMomentum())
+         if (indexHandler.hasCMPFeedbackTask())
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
