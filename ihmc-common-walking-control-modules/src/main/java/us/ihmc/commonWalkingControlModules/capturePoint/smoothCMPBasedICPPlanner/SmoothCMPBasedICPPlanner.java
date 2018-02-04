@@ -543,22 +543,22 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       finalDesiredCapturePointPositionToPack.set(tempFinalICP);
    }
 
-   public List<FramePoint3D> getInitialDesiredCapturePointPositions()
+   public List<? extends FramePoint3DReadOnly> getInitialDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredInitialList();
    }
 
-   public List<FramePoint3D> getFinalDesiredCapturePointPositions()
+   public List<? extends FramePoint3DReadOnly> getFinalDesiredCapturePointPositions()
    {
       return referenceICPGenerator.getICPPositionDesiredFinalList();
    }
 
-   public List<FramePoint3D> getInitialDesiredCenterOfMassPositions()
+   public List<? extends FramePoint3DReadOnly> getInitialDesiredCenterOfMassPositions()
    {
       return referenceCoMGenerator.getCoMPositionDesiredInitialList();
    }
 
-   public List<FramePoint3D> getFinalDesiredCenterOfMassPositions()
+   public List<? extends FramePoint3DReadOnly> getFinalDesiredCenterOfMassPositions()
    {
       return referenceCoMGenerator.getCoMPositionDesiredFinalList();
    }
