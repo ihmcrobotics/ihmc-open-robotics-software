@@ -89,7 +89,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.setIdentity(icpQPInputExpected.quadraticTerm);
       CommonOps.scale(2.0, icpQPInputExpected.quadraticTerm);
 
-      inputCalculator.computeAngularMomentumRateTask(icpQPInputToTest, minimizationWeight);
+      inputCalculator.computeCMPFeedbackTask(icpQPInputToTest, minimizationWeight);
 
       Assert.assertTrue(icpQPInputExpected.equals(icpQPInputToTest, epsilon));
 
@@ -1289,8 +1289,8 @@ public class ICPQPInputCalculatorTest
       DenseMatrix64F linearExpected = new DenseMatrix64F(2, 1);
       DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
 
-      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
-      inputCalculator.submitFeedbackTask(feedbackRateTask, quadratic, linear, scalar);
+      inputCalculator.submitCoPFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitCoPFeedbackTask(feedbackRateTask, quadratic, linear, scalar);
 
       quadraticExpected.set(feedbackTask.quadraticTerm);
       linearExpected.set(feedbackTask.linearTerm);
@@ -1378,7 +1378,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.setIdentity(angularMomentumWeight);
       CommonOps.scale(2.0, angularMomentumWeight);
 
-      inputCalculator.computeAngularMomentumRateTask(angularMomentumTask, angularMomentumWeight);
+      inputCalculator.computeCMPFeedbackTask(angularMomentumTask, angularMomentumWeight);
 
       DenseMatrix64F quadratic = new DenseMatrix64F(4, 4);
       DenseMatrix64F linear = new DenseMatrix64F(4, 1);
@@ -1388,7 +1388,7 @@ public class ICPQPInputCalculatorTest
       DenseMatrix64F linearExpected = new DenseMatrix64F(4, 1);
       DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
 
-      inputCalculator.submitAngularMomentumRateTask(angularMomentumTask, quadratic, linear, scalar);
+      inputCalculator.submitCMPFeedbackTask(angularMomentumTask, quadratic, linear, scalar);
 
       MatrixTools.setMatrixBlock(quadraticExpected, 2, 2, angularMomentumTask.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.setMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
@@ -1508,7 +1508,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.setIdentity(angularMomentumWeight);
       CommonOps.scale(2.0, angularMomentumWeight);
 
-      inputCalculator.computeAngularMomentumRateTask(angularMomentumTask, angularMomentumWeight);
+      inputCalculator.computeCMPFeedbackTask(angularMomentumTask, angularMomentumWeight);
 
 
       DenseMatrix64F quadratic = new DenseMatrix64F(4, 4);
@@ -1519,8 +1519,8 @@ public class ICPQPInputCalculatorTest
       DenseMatrix64F linearExpected = new DenseMatrix64F(4, 1);
       DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
 
-      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
-      inputCalculator.submitAngularMomentumRateTask(angularMomentumTask, quadratic, linear, scalar);
+      inputCalculator.submitCoPFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitCMPFeedbackTask(angularMomentumTask, quadratic, linear, scalar);
 
       MatrixTools.setMatrixBlock(quadraticExpected, 0, 0, feedbackTask.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.setMatrixBlock(linearExpected, 0, 0, feedbackTask.linearTerm, 0, 0, 2, 1, 1.0);
@@ -1591,7 +1591,7 @@ public class ICPQPInputCalculatorTest
       DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
 
       inputCalculator.submitDynamicsTask(dynamicsTask, quadratic, linear, scalar);
-      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitCoPFeedbackTask(feedbackTask, quadratic, linear, scalar);
 
       MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, dynamicsTask.quadraticTerm, 0, 0, 6, 6, 1.0);
       MatrixTools.addMatrixBlock(linearExpected, 0, 0, dynamicsTask.linearTerm, 0, 0, 6, 1, 1.0);
@@ -1658,7 +1658,7 @@ public class ICPQPInputCalculatorTest
 
       inputCalculator.submitFootstepTask(footstepTask, quadratic, linear, scalar);
       inputCalculator.submitFootstepTask(footstepRateTask, quadratic, linear, scalar);
-      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitCoPFeedbackTask(feedbackTask, quadratic, linear, scalar);
 
       MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, feedbackTask.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(linearExpected, 0, 0, feedbackTask.linearTerm, 0, 0, 2, 1, 1.0);
@@ -1756,7 +1756,7 @@ public class ICPQPInputCalculatorTest
       DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
 
       inputCalculator.submitDynamicsTask(dynamicsTask, quadratic, linear, scalar);
-      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitCoPFeedbackTask(feedbackTask, quadratic, linear, scalar);
       inputCalculator.submitFootstepTask(footstepTask, quadratic, linear, scalar);
       inputCalculator.submitFootstepTask(footstepRateTask, quadratic, linear, scalar);
 
@@ -1857,7 +1857,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.setIdentity(angularMomentumWeight);
       CommonOps.scale(2.0, angularMomentumWeight);
 
-      inputCalculator.computeAngularMomentumRateTask(angularMomentumTask, angularMomentumWeight);
+      inputCalculator.computeCMPFeedbackTask(angularMomentumTask, angularMomentumWeight);
 
 
 
@@ -1870,10 +1870,10 @@ public class ICPQPInputCalculatorTest
       DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
 
       inputCalculator.submitDynamicsTask(dynamicsTask, quadratic, linear, scalar);
-      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitCoPFeedbackTask(feedbackTask, quadratic, linear, scalar);
       inputCalculator.submitFootstepTask(footstepTask, quadratic, linear, scalar);
       inputCalculator.submitFootstepTask(footstepRateTask, quadratic, linear, scalar);
-      inputCalculator.submitAngularMomentumRateTask(angularMomentumTask, quadratic, linear, scalar);
+      inputCalculator.submitCMPFeedbackTask(angularMomentumTask, quadratic, linear, scalar);
 
       MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, dynamicsTask.quadraticTerm, 0, 0, 6, 6, 1.0);
       MatrixTools.addMatrixBlock(linearExpected, 0, 0, dynamicsTask.linearTerm, 0, 0, 6, 1, 1.0);
