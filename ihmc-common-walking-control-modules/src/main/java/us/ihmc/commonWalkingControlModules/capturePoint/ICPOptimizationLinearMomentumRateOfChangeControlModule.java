@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -32,7 +33,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
    private final YoBoolean desiredCMPinSafeArea;
 
-   
+   private final FrameVector2D perfectCMPDelta = new FrameVector2D();
+
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
@@ -111,7 +113,17 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
    @Override
    public void computeCMPInternal(FramePoint2DReadOnly desiredCMPPreviousValue)
    {
-      icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, omega0);
+      if (perfectCoP.containsNaN())
+      {
+         perfectCMPDelta.setToZero();
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, omega0);
+      }
+      else
+      {
+         perfectCMPDelta.sub(perfectCMP, perfectCoP);
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, omega0);
+      }
+
       icpOptimizationController.getDesiredCMP(desiredCMP);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
