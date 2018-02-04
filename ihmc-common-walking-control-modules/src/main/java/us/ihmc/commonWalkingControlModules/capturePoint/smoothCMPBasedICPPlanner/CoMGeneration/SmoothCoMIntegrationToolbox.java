@@ -9,8 +9,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -41,12 +40,16 @@ public class SmoothCoMIntegrationToolbox
       this.icpToolbox = smoothCapturePointToolbox;
    }
 
-   public void computeDesiredCenterOfMassCornerData(List<FramePoint3D> exitICPCornerPoints,
-                                                    List<FramePoint3D> entryCoMCornerPointsToPack, List<FramePoint3D> exitCoMCornerPointsToPack,
-                                                    List<FrameVector3D> entryCoMCornerVelocitiesToPack, List<FrameVector3D> exitCoMCornerVelocitiesToPack,
-                                                    List<FrameVector3D> entryCoMCornerAccelerationsToPack, List<FrameVector3D> exitCoMCornerAccelerationsToPack,
-                                                    List<FrameTrajectory3D> cmpPolynomials3D, FramePoint3D initialCenterOfMassPosition,
-                                                    FrameVector3D initialCenterOfMassVelocity, FrameVector3D initialCenterOfMassAcceleration, double omega0)
+   public void computeDesiredCenterOfMassCornerData(List<? extends FramePoint3DReadOnly> exitICPCornerPoints,
+                                                    List<? extends FixedFramePoint3DBasics> entryCoMCornerPointsToPack,
+                                                    List<? extends FixedFramePoint3DBasics> exitCoMCornerPointsToPack,
+                                                    List<? extends FixedFrameVector3DBasics> entryCoMCornerVelocitiesToPack,
+                                                    List<? extends FixedFrameVector3DBasics> exitCoMCornerVelocitiesToPack,
+                                                    List<? extends FixedFrameVector3DBasics> entryCoMCornerAccelerationsToPack,
+                                                    List<? extends FixedFrameVector3DBasics> exitCoMCornerAccelerationsToPack,
+                                                    List<FrameTrajectory3D> cmpPolynomials3D, FramePoint3DReadOnly initialCenterOfMassPosition,
+                                                    FrameVector3DReadOnly initialCenterOfMassVelocity, FrameVector3DReadOnly initialCenterOfMassAcceleration,
+                                                    double omega0)
    {
       computeDesiredCenterOfMassCornerPoints(exitICPCornerPoints, entryCoMCornerPointsToPack, exitCoMCornerPointsToPack, cmpPolynomials3D,
                                              initialCenterOfMassPosition, omega0);
@@ -57,21 +60,23 @@ public class SmoothCoMIntegrationToolbox
    }
 
    //TODO: implement validity checks
-   public void computeDesiredCenterOfMassCornerPoints(List<FramePoint3D> exitICPCornerPoints, List<FramePoint3D> entryCoMCornerPointsToPack,
-                                                      List<FramePoint3D> exitCoMCornerPointsToPack, List<FrameTrajectory3D> cmpPolynomials3D,
-                                                      FramePoint3D initialCenterOfMass, double omega0)
+   public void computeDesiredCenterOfMassCornerPoints(List<? extends FramePoint3DReadOnly> exitICPCornerPoints,
+                                                      List<? extends FixedFramePoint3DBasics> entryCoMCornerPointsToPack,
+                                                      List<? extends FixedFramePoint3DBasics> exitCoMCornerPointsToPack,
+                                                      List<FrameTrajectory3D> cmpPolynomials3D,
+                                                      FramePoint3DReadOnly initialCenterOfMass, double omega0)
    {
       FrameTrajectory3D cmpPolynomial3D;
-      FramePoint3D previousExitCoMCornerPoint = initialCenterOfMass;
+      FramePoint3DReadOnly previousExitCoMCornerPoint = initialCenterOfMass;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
       {
          cmpPolynomial3D = cmpPolynomials3D.get(i);
 
-         FramePoint3D exitCornerPoint = exitICPCornerPoints.get(i);
+         FramePoint3DReadOnly exitCornerPoint = exitICPCornerPoints.get(i);
 
-         FramePoint3D entryCoMCornerPoint = entryCoMCornerPointsToPack.get(i);
-         FramePoint3D exitCoMCornerPoint = exitCoMCornerPointsToPack.get(i);
+         FixedFramePoint3DBasics entryCoMCornerPoint = entryCoMCornerPointsToPack.get(i);
+         FixedFramePoint3DBasics exitCoMCornerPoint = exitCoMCornerPointsToPack.get(i);
 
          entryCoMCornerPoint.set(previousExitCoMCornerPoint);
 
@@ -80,22 +85,24 @@ public class SmoothCoMIntegrationToolbox
       }
    }
 
-   public void computeDesiredCenterOfMassCornerVelocities(List<FramePoint3D> exitICPCornerPoints, List<FramePoint3D> entryCoMCornerPoints,
-                                                          List<FrameVector3D> entryCoMCornerVelocitiesToPack, List<FrameVector3D> exitCoMCornerVelocitiesToPack,
-                                                          List<FrameTrajectory3D> cmpPolynomials3D, FrameVector3D initialCenterOfMassVelocity, double omega0)
+   public void computeDesiredCenterOfMassCornerVelocities(List<? extends FramePoint3DReadOnly> exitICPCornerPoints,
+                                                          List<? extends FramePoint3DReadOnly> entryCoMCornerPoints,
+                                                          List<? extends FixedFrameVector3DBasics> entryCoMCornerVelocitiesToPack,
+                                                          List<? extends FixedFrameVector3DBasics> exitCoMCornerVelocitiesToPack,
+                                                          List<FrameTrajectory3D> cmpPolynomials3D, FrameVector3DReadOnly initialCenterOfMassVelocity, double omega0)
    {
       FrameTrajectory3D cmpPolynomial3D;
-      FrameVector3D previousExitCoMCornerVelocity = initialCenterOfMassVelocity;
+      FrameVector3DReadOnly previousExitCoMCornerVelocity = initialCenterOfMassVelocity;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
       {
          cmpPolynomial3D = cmpPolynomials3D.get(i);
 
-         FramePoint3D exitICPCornerPoint = exitICPCornerPoints.get(i);
-         FramePoint3D entryCoMCornerPoint = entryCoMCornerPoints.get(i);
+         FramePoint3DReadOnly exitICPCornerPoint = exitICPCornerPoints.get(i);
+         FramePoint3DReadOnly entryCoMCornerPoint = entryCoMCornerPoints.get(i);
 
-         FrameVector3D entryCoMCornerVelocity = entryCoMCornerVelocitiesToPack.get(i);
-         FrameVector3D exitCoMCornerVelocity = exitCoMCornerVelocitiesToPack.get(i);
+         FixedFrameVector3DBasics entryCoMCornerVelocity = entryCoMCornerVelocitiesToPack.get(i);
+         FixedFrameVector3DBasics exitCoMCornerVelocity = exitCoMCornerVelocitiesToPack.get(i);
          entryCoMCornerVelocity.set(previousExitCoMCornerVelocity);
 
          computeDesiredCenterOfMassVelocity(omega0, cmpPolynomial3D.getFinalTime(), exitICPCornerPoint, entryCoMCornerPoint, cmpPolynomial3D,
@@ -104,22 +111,25 @@ public class SmoothCoMIntegrationToolbox
       }
    }
 
-   public void computeDesiredCenterOfMassCornerAccelerations(List<FramePoint3D> exitICPCornerPoints, List<FramePoint3D> entryCoMCornerPoints,
-                                                             List<FrameVector3D> entryCoMCornerAccelerationsToPack, List<FrameVector3D> exitCoMCornerAccelerationsToPack,
-                                                             List<FrameTrajectory3D> cmpPolynomials3D, FrameVector3D initialCenterOfMassAcceleration, double omega0)
+   public void computeDesiredCenterOfMassCornerAccelerations(List<? extends FramePoint3DReadOnly> exitICPCornerPoints,
+                                                             List<? extends FramePoint3DReadOnly> entryCoMCornerPoints,
+                                                             List<? extends FixedFrameVector3DBasics> entryCoMCornerAccelerationsToPack,
+                                                             List<? extends FixedFrameVector3DBasics> exitCoMCornerAccelerationsToPack,
+                                                             List<FrameTrajectory3D> cmpPolynomials3D, FrameVector3DReadOnly initialCenterOfMassAcceleration,
+                                                             double omega0)
    {
       FrameTrajectory3D cmpPolynomial3D;
-      FrameVector3D previousExitCoMCornerAcceleration = initialCenterOfMassAcceleration;
+      FrameVector3DReadOnly previousExitCoMCornerAcceleration = initialCenterOfMassAcceleration;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
       {
          cmpPolynomial3D = cmpPolynomials3D.get(i);
 
-         FramePoint3D exitICPCornerPoint = exitICPCornerPoints.get(i);
-         FramePoint3D entryCoMCornerPoint = entryCoMCornerPoints.get(i);
+         FramePoint3DReadOnly exitICPCornerPoint = exitICPCornerPoints.get(i);
+         FramePoint3DReadOnly entryCoMCornerPoint = entryCoMCornerPoints.get(i);
 
-         FrameVector3D entryCoMCornerAcceleration = entryCoMCornerAccelerationsToPack.get(i);
-         FrameVector3D exitCoMCornerAcceleration = exitCoMCornerAccelerationsToPack.get(i);
+         FixedFrameVector3DBasics entryCoMCornerAcceleration = entryCoMCornerAccelerationsToPack.get(i);
+         FixedFrameVector3DBasics exitCoMCornerAcceleration = exitCoMCornerAccelerationsToPack.get(i);
          entryCoMCornerAcceleration.set(previousExitCoMCornerAcceleration);
 
          computeDesiredCenterOfMassAcceleration(omega0, cmpPolynomial3D.getFinalTime(), exitICPCornerPoint, entryCoMCornerPoint, cmpPolynomial3D,
@@ -128,22 +138,22 @@ public class SmoothCoMIntegrationToolbox
       }
    }
 
-   public void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass,
-                                                  FrameTrajectory3D cmpPolynomial3D, FramePoint3D desiredCenterOfMassPositionToPack)
+   public void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint3DReadOnly finalCapturePoint, FramePoint3DReadOnly initialCenterOfMass,
+                                                  FrameTrajectory3D cmpPolynomial3D, FixedFramePoint3DBasics desiredCenterOfMassPositionToPack)
    {
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass,
                                                            desiredCenterOfMassPositionToPack);
    }
 
-   public void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass,
-                                                  FrameTrajectory3D cmpPolynomial3D, FrameVector3D desiredCenterOfMassVelocityToPack)
+   public void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint3DReadOnly finalCapturePoint, FramePoint3DReadOnly initialCenterOfMass,
+                                                  FrameTrajectory3D cmpPolynomial3D, FixedFrameVector3DBasics desiredCenterOfMassVelocityToPack)
    {
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass,
                                                            desiredCenterOfMassVelocityToPack);
    }
 
-   public void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass,
-                                                      FrameTrajectory3D cmpPolynomial3D, FrameVector3D desiredCenterOfMassAccelerationToPack)
+   public void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint3DReadOnly finalCapturePoint, FramePoint3DReadOnly initialCenterOfMass,
+                                                      FrameTrajectory3D cmpPolynomial3D, FixedFrameVector3DBasics desiredCenterOfMassAccelerationToPack)
    {
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass,
                                                            desiredCenterOfMassAccelerationToPack);
@@ -153,7 +163,7 @@ public class SmoothCoMIntegrationToolbox
                                                                            FrameTrajectory3D cmpPolynomial3D, 
                                                                            FrameTuple3DReadOnly icpPositionDesiredFinal, 
                                                                            FrameTuple3DReadOnly comPositionDesiredInitial, 
-                                                                           FrameTuple3DBasics comQuantityDesired)
+                                                                           FixedFrameTuple3DBasics comQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if (numberOfCoefficients < 0)
@@ -198,13 +208,13 @@ public class SmoothCoMIntegrationToolbox
     * @param polynomialCoefficientCombinedVector = p<sub>&phi;</sub>
     * @param icpPositionDesiredFinal = &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
     * @param comPositionDesiredInitial = x<sub>ref,&phi;</sub>(t<sub>0,&phi;</sub>)
-    * @param comQuantityDesired = x<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
+    * @param comQuantityDesiredToPack = x<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
     */
    // FIXME this can probably be more efficient
    public void calculateCoMQuantity3D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, double generalizedGammaCoMPrime,
                                       double generalizedDeltaCoMPrime, DenseMatrix64F generalizedAlphaPrimeTerminalMatrix,
                                       DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3DReadOnly icpPositionDesiredFinal,
-                                      FrameTuple3DReadOnly comPositionDesiredInitial, FrameTuple3DBasics comQuantityDesired)
+                                      FrameTuple3DReadOnly comPositionDesiredInitial, FixedFrameTuple3DBasics comQuantityDesiredToPack)
    {
       int numRows = generalizedAlphaBetaCoMPrimeMatrix.getNumRows();
       M1.reshape(numRows, 1);
@@ -226,7 +236,7 @@ public class SmoothCoMIntegrationToolbox
       CommonOps.addEquals(M1, M2);
       CommonOps.addEquals(M1, generalizedDeltaCoMPrime, M3);
 
-      comQuantityDesired.set(M1.get(0), M1.get(1), M1.get(2));
+      comQuantityDesiredToPack.set(M1.get(0), M1.get(1), M1.get(2));
    }
 
    // FIXME this can probably be more efficient
@@ -257,12 +267,6 @@ public class SmoothCoMIntegrationToolbox
     * <P>
     * &alpha;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>k=0</sub><sup>n</sup> &Sigma;<sub>j=k</sub><sup>n</sup> (-1)<sup>k</sup> * &omega;<sub>0</sub><sup>-j</sup> *
     * t<sup>(j+i)<sup>T</sup></sup> (t<sub>&phi;</sub>)
-    * 
-    * @param omega0
-    * @param time
-    * @param generalizedAlphaCoMPrime
-    * @param alphaCoMDerivativeOrder
-    * @param cmpPolynomial3D
     */
    public void calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaCoMPrime, 
                                                                       int alphaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
@@ -301,15 +305,9 @@ public class SmoothCoMIntegrationToolbox
     * <P>
     * &beta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = &Sigma;<sub>k=0</sub><sup>n</sup> &Sigma;<sub>j=k</sub><sup>n</sup> (-1)<sup>k+i</sup> * &omega;<sub>0</sub><sup>-j+i</sup> *
     * t<sup>(j)<sup>T</sup></sup> (T<sub>&phi;</sub>) * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
-    * 
-    * @param omega0
-    * @param time
-    * @param generalizedBetaCoMPrime
-    * @param betaCoMDerivativeOrder
-    * @param cmpPolynomial3D
     */
-   public void calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrime, 
-                                                                     int betaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+   public void calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrime,
+                                                              int betaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {                  
       for(Axis dir : Axis.values)
       {
@@ -346,11 +344,6 @@ public class SmoothCoMIntegrationToolbox
     * <P>
     * &gamma;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = (-1)<sup>i</sup> * &omega;<sub>0</sub><sup>i</sup> * 
     * e<sup>&omega;<sub>0</sub>(t<sub>0,&phi;</sub>-t<sub>&phi;</sub>)</sup>
-    * 
-    * @param omega0
-    * @param time
-    * @param gammaCoMDerivativeOrder
-    * @param cmpPolynomial3D
     *
     * @return generalizedGammaCoMPrime
     */
@@ -365,12 +358,6 @@ public class SmoothCoMIntegrationToolbox
     * <P>
     * &delta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>) = 0.5 * e<sup>&omega;<sub>0</sub>(t<sub>0,&phi;</sub>-T<sub>&phi;</sub>)</sup> * (&omega;<sub>0</sub><sup>i</sup> * 
     * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-t<sub>0,&phi;</sub>)</sup> - (-1)<sup>i</sup> * &omega;<sub>0</sub><sup>i</sup> * e<sup>&omega;<sub>0</sub>(t<sub>0,&phi;</sub>-t<sub>&phi;</sub>)</sup>)
-    * 
-    * @param omega0
-    * @param time
-    * @param generalizedDeltaCoMPrime
-    * @param deltaCoMDerivativeOrder
-    * @param cmpPolynomial3D
     */
    public double calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(double omega0, double time, int deltaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {                  

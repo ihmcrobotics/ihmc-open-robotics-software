@@ -7,6 +7,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -509,12 +510,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       return false;
    }
 
-   public List<FramePoint3D> getICPPositionDesiredInitialList()
+   public List<? extends FramePoint3DReadOnly> getICPPositionDesiredInitialList()
    {
       return icpDesiredInitialPositions;
    }
 
-   public List<FramePoint3D> getICPPositionDesiredFinalList()
+   public List<? extends FramePoint3DReadOnly> getICPPositionDesiredFinalList()
    {
       return icpDesiredFinalPositions;
    }

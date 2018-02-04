@@ -10,6 +10,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
@@ -77,12 +79,12 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private AngularMomentumTrajectoryInterface activeTrajectory;
    private double initialTime;
 
-   private List<FramePoint3D> comInitialPositions;
-   private List<FramePoint3D> comFinalPositions;
-   private List<FrameVector3D> comInitialVelocities;
-   private List<FrameVector3D> comFinalVelocities;
-   private List<FrameVector3D> comInitialAccelerations;
-   private List<FrameVector3D> comFinalAccelerations;
+   private List<? extends FramePoint3DReadOnly> comInitialPositions;
+   private List<? extends FramePoint3DReadOnly> comFinalPositions;
+   private List<? extends FrameVector3DReadOnly> comInitialVelocities;
+   private List<? extends FrameVector3DReadOnly> comFinalVelocities;
+   private List<? extends FrameVector3DReadOnly> comInitialAccelerations;
+   private List<? extends FrameVector3DReadOnly> comFinalAccelerations;
 
    private final FramePoint3D tempFramePoint1 = new FramePoint3D();
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();
@@ -300,9 +302,10 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   public void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations, List<FramePoint3D> comInitialPositions, List<FramePoint3D> comFinalPositions,
-                                     List<FrameVector3D> comInitialVelocities, List<FrameVector3D> comFinalVelocities,
-                                     List<FrameVector3D> comInitialAccelerations, List<FrameVector3D> comFinalAccelerations, int numberOfRegisteredFootsteps)
+   public void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations, List<? extends FramePoint3DReadOnly> comInitialPositions,
+                                     List<? extends FramePoint3DReadOnly> comFinalPositions, List<? extends FrameVector3DReadOnly> comInitialVelocities,
+                                     List<? extends FrameVector3DReadOnly> comFinalVelocities, List<? extends FrameVector3DReadOnly> comInitialAccelerations,
+                                     List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
    {
       for (int i = 0; i < copLocations.size(); i++)
          upcomingCoPsInFootsteps.get(i).setIncludingFrame(copLocations.get(i));
