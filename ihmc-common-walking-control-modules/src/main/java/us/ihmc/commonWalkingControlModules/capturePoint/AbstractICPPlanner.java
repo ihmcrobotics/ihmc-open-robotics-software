@@ -43,14 +43,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
-   /** Desired position for the Center of Pressure (CoP) */
-   protected final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCoPPosition", worldFrame, registry);
-   /** Desired velocity for the Center of Pressure (CoP) */
-   protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
-   /** Desired Centroidal Angular Momentum (CAM) */
-   protected final YoFrameVector desiredCentroidalAngularMomentum = new YoFrameVector(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
-   /** Desired Centroidal Torque (CT) */
-   protected final YoFrameVector desiredCentroidalTorque = new YoFrameVector(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
    /** Desired position for the Centroidal Momentum Pivot (CMP) */
    protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCMPPosition", worldFrame, registry);
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
@@ -63,10 +55,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredICPAcceleration", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM)*/
    protected final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
-   /** Desired velocity for the Center of Mass (CoM) */
-   protected final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
-   /** Desired acceleration for the Center of Mass (CoM) */
-   protected final YoFrameVector desiredCoMAcceleration = new YoFrameVector(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
@@ -159,12 +147,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
     *           {@link ReferenceCentroidalMomentumPivotLocationsCalculator} to adapt the ICP plan to
     *           available support polygon. The reference to this parameter is saved internally and
     *           it will be accessed to access up-to-date information.
-    * @param contactableFeet it is used to get the set of default contact points for each foot.
-    * @param icpPlannerParameters configuration class used to initialized the constant parameters of
-    *           the ICP plan.
-    * @param parentRegistry registry to which the ICP planner's registry is attached to.
-    * @param yoGraphicsListRegistry registry to which the visualization for the planner should be
-    *           added to.
     */
    public AbstractICPPlanner(BipedSupportPolygons bipedSupportPolygons, int numberOfFootstepsToConsider)
    {
@@ -419,25 +401,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
    }
    
-   public void getDesiredCenterOfMassVelocity(YoFrameVector desiredCenterOfMassVelocityToPack)
-   {
-      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
-   }
-   
-   public void getDesiredCenterOfMassVelocity(FrameVector3D desiredCenterOfMassVelocityToPack)
-   {
-      desiredCenterOfMassVelocityToPack.setIncludingFrame(desiredCoMVelocity);
-   }
-   
-   public void getDesiredCenterOfMassAcceleration(YoFrameVector desiredCenterOfMassAccelerationToPack)
-   {
-      desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
-   }
-
-   public void getDesiredCenterOfMassAcceleration(FrameVector3D desiredCenterOfMassAccelerationToPack)
-   {
-      desiredCenterOfMassAccelerationToPack.setIncludingFrame(desiredCoMAcceleration);
-   }
 
    @Override
    /** {@inheritDoc} */
@@ -505,57 +468,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public void getDesiredCentroidalMomentumPivotVelocity(YoFrameVector desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCentroidalMomentumPivotVelocityToPack.set(desiredCMPVelocity);
-   }
-
-   @Override
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
-   {
-      desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
-   }
-
-   @Override
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
-   {
-      desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
-   }
-
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(YoFramePoint desiredCenterOfPressurePositionToPack)
-   {
-      desiredCenterOfPressurePositionToPack.set(desiredCoPPosition);
-   }
-   @Override
-
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
-   {
-      desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
-   }
-
-   @Override
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
-   {
-      desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
-   }
-
-   /** {@inheritDoc} */
-   public void getDesiredCentroidalAngularMomentum(FrameVector3D desiredCentroidalAngularMomentumToPack)
-   {
-      desiredCentroidalAngularMomentumToPack.setIncludingFrame(desiredCentroidalAngularMomentum);
-   }
-   
-   /** {@inheritDoc} */
-   public void getDesiredCentroidalTorque(YoFrameVector desiredCentroidalTorqueToPack)
-   {
-      desiredCentroidalTorqueToPack.set(desiredCentroidalTorque);
-   }
-   
-   public void getDesiredCentroidalTorque(FrameVector3D desiredCentroidalTorqueToPack)
-   {
-      desiredCentroidalTorqueToPack.setIncludingFrame(desiredCentroidalTorque);
    }
 
    @Override
@@ -718,12 +630,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       return isInitialTransfer.getBooleanValue();
    }
 
-   // This is a hack. Please remove in case of any issues.
-   public void setInInitialTransfer(boolean isInitialTransfer)
-   {
-      this.isInitialTransfer.set(isInitialTransfer);
-   }
-   
    @Override
    /** {@inheritDoc} */
    public boolean isDone()
