@@ -16,8 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -33,6 +32,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -48,6 +48,20 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private static final boolean adjustICPForSingleSupport = true;
    private static final boolean adjustICPForDoubleSupport = true;
+
+   /** Desired velocity for the Center of Mass (CoM) */
+   private final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
+   /** Desired acceleration for the Center of Mass (CoM) */
+   private final YoFrameVector desiredCoMAcceleration = new YoFrameVector(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
+   /** Desired position for the Center of Pressure (CoP) */
+   private final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCoPPosition", worldFrame, registry);
+   /** Desired velocity for the Center of Pressure (CoP) */
+   private final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
+
+   /** Desired Centroidal Angular Momentum (CAM) */
+   private final YoFrameVector desiredCentroidalAngularMomentum = new YoFrameVector(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
+   /** Desired Centroidal Torque (CT) */
+   private final YoFrameVector desiredCentroidalTorque = new YoFrameVector(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
 
    private final ReferenceCoPTrajectoryGenerator referenceCoPGenerator;
    private final ReferenceCMPTrajectoryGenerator referenceCMPGenerator;
@@ -642,5 +656,73 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void setDefaultPhaseTimes(double defaultSwingTime, double defaultTransferTime)
    {
       referenceCoPGenerator.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
+   }
+
+   public void getDesiredCenterOfMassVelocity(YoFrameVector desiredCenterOfMassVelocityToPack)
+   {
+      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
+   }
+
+   public void getDesiredCenterOfMassVelocity(FrameVector3D desiredCenterOfMassVelocityToPack)
+   {
+      desiredCenterOfMassVelocityToPack.setIncludingFrame(desiredCoMVelocity);
+   }
+
+   public void getDesiredCenterOfMassAcceleration(YoFrameVector desiredCenterOfMassAccelerationToPack)
+   {
+      desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
+   }
+
+   public void getDesiredCenterOfMassAcceleration(FrameVector3D desiredCenterOfMassAccelerationToPack)
+   {
+      desiredCenterOfMassAccelerationToPack.setIncludingFrame(desiredCoMAcceleration);
+   }
+
+   @Override
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
+   {
+      desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
+   }
+
+   @Override
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
+   {
+      desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
+   }
+
+   public void getDesiredCenterOfPressurePosition(YoFramePoint desiredCenterOfPressurePositionToPack)
+   {
+      desiredCenterOfPressurePositionToPack.set(desiredCoPPosition);
+   }
+
+   @Override
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
+   {
+      desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
+   }
+
+   @Override
+   /** {@inheritDoc} */
+   public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
+   {
+      desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
+   }
+
+   public void getDesiredCentroidalAngularMomentum(FrameVector3D desiredCentroidalAngularMomentumToPack)
+   {
+      desiredCentroidalAngularMomentumToPack.setIncludingFrame(desiredCentroidalAngularMomentum);
+   }
+
+   public void getDesiredCentroidalTorque(YoFrameVector desiredCentroidalTorqueToPack)
+   {
+      desiredCentroidalTorqueToPack.set(desiredCentroidalTorque);
+   }
+
+   public void getDesiredCentroidalTorque(FrameVector3D desiredCentroidalTorqueToPack)
+   {
+      desiredCentroidalTorqueToPack.setIncludingFrame(desiredCentroidalTorque);
    }
 }
