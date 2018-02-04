@@ -213,8 +213,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void clearPlan()
    {
       referenceCoPGenerator.clear();
@@ -241,8 +241,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       angularMomentumGenerator.clear();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       if (footstep == null)
@@ -275,9 +275,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
       finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
    }
-   
-   @Override
+
    /** {@inheritDoc} */
+   @Override
    public void initializeForStanding(double initialTime)
    {
       clearPlan();
@@ -292,8 +292,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       updateTransferPlan();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void initializeForTransfer(double initialTime)
    {
       this.initialTime.set(initialTime);
@@ -307,16 +307,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       updateTransferPlan();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void computeFinalCoMPositionInTransfer()
    {
       referenceCoMGenerator.getFinalCoMPositionInTransfer(singleSupportFinalCoM);
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void initializeForSingleSupport(double initialTime)
    {
       this.initialTime.set(initialTime);
@@ -333,16 +333,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       updateSingleSupportPlan();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void computeFinalCoMPositionInSwing()
    {
       referenceCoMGenerator.getFinalCoMPositionInSwing(singleSupportFinalCoM);
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    protected void updateTransferPlan()
    {
       clearPlanWithoutClearingPlannedFootsteps();
@@ -392,8 +392,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       // TODO implement is done walking
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    protected void updateSingleSupportPlan()
    {
       clearPlanWithoutClearingPlannedFootsteps();
@@ -450,8 +450,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       PrintTools.debug(transferCoPTrajectory.get(referenceCoPGenerator.getNumberOfFootstepsRegistered()).toString());
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void compute(double time)
    {
       if(referenceCoPGenerator.getIsPlanAvailable())
@@ -500,13 +500,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   /** {@inheritDoc} */
    public void updateListeners()
    {
       referenceCoPGenerator.updateListeners();
    }
 
-   /** {@inheritDoc} */
    public List<CoPPointsInFoot> getCoPWaypoints()
    {
       return referenceCoPGenerator.getWaypoints();
@@ -514,8 +512,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final FramePoint3D tempFinalICP = new FramePoint3D();
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
@@ -537,8 +535,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
       getFinalDesiredCapturePointPosition(tempFinalICP);
@@ -567,8 +565,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final FramePoint3D tempFinalCoM = new FramePoint3D();
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
    {
       if (isStanding.getBooleanValue())
@@ -585,8 +583,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getNextExitCMP(FramePoint3D exitCMPToPack)
    {
       //CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
@@ -597,22 +595,22 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       copPointsInFoot.get(copPointsInFoot.getCoPPointList().size() - 1).getPosition(exitCMPToPack);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public boolean isOnExitCMP()
    {
       return referenceCoPGenerator.isOnExitCoP();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public int getNumberOfFootstepsToConsider()
    {
       return numberFootstepsToConsider.getIntegerValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public int getNumberOfFootstepsRegistered()
    {
       return referenceCoPGenerator.getNumberOfFootstepsRegistered();
@@ -633,8 +631,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return referenceICPGenerator.getTotalNumberOfSegments();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void holdCurrentICP(FramePoint3D icpPositionToHold)
    {
       super.holdCurrentICP(icpPositionToHold);
@@ -678,15 +676,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       desiredCenterOfMassAccelerationToPack.setIncludingFrame(desiredCoMAcceleration);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
    {
       desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
    {
       desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
@@ -697,15 +695,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       desiredCenterOfPressurePositionToPack.set(desiredCoPPosition);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
    {
       desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
    {
       desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
