@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
@@ -33,12 +34,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       putYoValuesIntoFrameWaypoint();
    }
 
-   public FramePoint3DReadOnly getFrameTuple()
-   {
-      return yoFramePointInWorld;
-   }
-
-   public boolean epsilonEquals(FramePoint2D point, double threshold)
+   public boolean epsilonEquals(FramePoint2DReadOnly point, double threshold)
    {
       getPosition().checkReferenceFrameMatch(point);
       if (!MathTools.epsilonEquals(getPosition().getX(), point.getX(), threshold))

@@ -28,6 +28,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -474,10 +475,10 @@ public class SmoothCMPBasedICPPlannerTest
    private void testForPlanningConsistency(boolean isDoubleSupport, int stepNumber)
    {
       List<CoPPointsInFoot> copWaypointsFromPlanner = planner.getCoPWaypoints();
-      List<FramePoint3D> icpInitialCornerPointsFromPlanner = planner.getInitialDesiredCapturePointPositions();
-      List<FramePoint3D> icpFinalCornerPointsFromPlanner = planner.getFinalDesiredCapturePointPositions();
-      List<FramePoint3D> comInitialCornerPointsFromPlanner = planner.getInitialDesiredCenterOfMassPositions();
-      List<FramePoint3D> comFinalCornerPointsFromPlanner = planner.getFinalDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner = planner.getInitialDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner = planner.getFinalDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner = planner.getInitialDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner = planner.getFinalDesiredCenterOfMassPositions();
 
       if (!newTestStartConsistency)
       {
@@ -496,8 +497,8 @@ public class SmoothCMPBasedICPPlannerTest
       updateCoMsForConsistencyCheck(isDoubleSupport, comInitialCornerPointsFromPlanner, comFinalCornerPointsFromPlanner);
    }
 
-   private void updateICPsForConsistencyCheck(boolean isDoubleSupport, List<FramePoint3D> icpInitialCornerPointsFromPlanner,
-                                              List<FramePoint3D> icpFinalCornerPointsFromPlanner)
+   private void updateICPsForConsistencyCheck(boolean isDoubleSupport, List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner,
+                                              List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner)
    {
       int indexDifference = isDoubleSupport ? plannerParameters.getTransferCoPPointsToPlan().length : (plannerParameters.getSwingCoPPointsToPlan().length + 1);
       icpCornerPointsFromPreviousPlan.get(0).set(icpInitialCornerPointsFromPlanner.get(indexDifference));
@@ -507,8 +508,8 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   private void updateCoMsForConsistencyCheck(boolean isDoubleSupport, List<FramePoint3D> comInitialCornerPointsFromPlanner,
-                                              List<FramePoint3D> comFinalCornerPointsFromPlanner)
+   private void updateCoMsForConsistencyCheck(boolean isDoubleSupport, List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner,
+                                              List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner)
    {
       int indexDifference = isDoubleSupport ? plannerParameters.getTransferCoPPointsToPlan().length : (plannerParameters.getSwingCoPPointsToPlan().length + 1);
       comCornerPointsFromPreviousPlan.get(0).set(comInitialCornerPointsFromPlanner.get(indexDifference));
@@ -518,8 +519,8 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   private void testICPConsistency(int stepNumber, List<FramePoint3D> icpInitialCornerPointsFromPlanner, List<FramePoint3D> icpFinalCornerPointsFromPlanner,
-                                   int numberOfStepsToCheck)
+   private void testICPConsistency(int stepNumber, List<? extends FramePoint3DReadOnly> icpInitialCornerPointsFromPlanner,
+                                   List<? extends FramePoint3DReadOnly> icpFinalCornerPointsFromPlanner, int numberOfStepsToCheck)
    {
       assertTrueLocal("Plan number: " + stepNumber + " " + 0 + " Required: " + icpCornerPointsFromPreviousPlan.get(0).toString() + " Got: "
             + icpInitialCornerPointsFromPlanner.get(0).toString(),
@@ -542,8 +543,8 @@ public class SmoothCMPBasedICPPlannerTest
                                                                     spatialEpsilonForPlanningConsistency));
    }
 
-   private void testCoMConsistency(int stepNumber, List<FramePoint3D> comInitialCornerPointsFromPlanner, List<FramePoint3D> comFinalCornerPointsFromPlanner,
-                                   int numberOfStepsToCheck)
+   private void testCoMConsistency(int stepNumber, List<? extends FramePoint3DReadOnly> comInitialCornerPointsFromPlanner,
+                                   List<? extends FramePoint3DReadOnly> comFinalCornerPointsFromPlanner, int numberOfStepsToCheck)
    {
       assertTrueLocal("Plan number: " + stepNumber + " " + 0 + " Required: " + comCornerPointsFromPreviousPlan.get(0).toString() + " Got: "
             + comInitialCornerPointsFromPlanner.get(0).toString(),
@@ -728,8 +729,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoMCornerPoints()
    {
-      List<FramePoint3D> comInitialDesiredPositions = planner.getInitialDesiredCenterOfMassPositions();
-      List<FramePoint3D> comFinalDesiredPositions = planner.getFinalDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comInitialDesiredPositions = planner.getInitialDesiredCenterOfMassPositions();
+      List<? extends FramePoint3DReadOnly> comFinalDesiredPositions = planner.getFinalDesiredCenterOfMassPositions();
       comInitialCornerPoints.reset();
       for (int i = 0; i < comInitialDesiredPositions.size(); i++)
       {
@@ -744,8 +745,8 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateICPCornerPoints()
    {
-      List<FramePoint3D> icpInitialDesiredPositions = planner.getInitialDesiredCapturePointPositions();
-      List<FramePoint3D> icpFinalDesiredPositions = planner.getFinalDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpInitialDesiredPositions = planner.getInitialDesiredCapturePointPositions();
+      List<? extends FramePoint3DReadOnly> icpFinalDesiredPositions = planner.getFinalDesiredCapturePointPositions();
       icpInitialCornerPoints.reset();
       for (int i = 0; i < icpInitialDesiredPositions.size(); i++)
       {

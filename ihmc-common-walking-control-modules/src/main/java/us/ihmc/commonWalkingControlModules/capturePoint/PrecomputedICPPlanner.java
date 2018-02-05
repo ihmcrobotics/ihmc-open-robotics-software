@@ -9,6 +9,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -92,14 +94,15 @@ public class PrecomputedICPPlanner
       yoDesiredCoMPosition.set(desiredCoMPosition);
    }
 
-   public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack, FramePoint2D desiredCMPToPack)
+   public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack,
+                       FixedFramePoint2DBasics desiredCoP2DToPack)
    {
       if (isWithinInterval(time))
       {
          compute(time);
          desiredCapturePoint2dToPack.setIncludingFrame(yoDesiredICPPosition);
          desiredCapturePointVelocity2dToPack.setIncludingFrame(yoDesiredICPVelocity);
-         desiredCMPToPack.setIncludingFrame(yoDesiredCMPPosition);
+         // TODO desired CoP
       }
       else
       {
@@ -108,7 +111,8 @@ public class PrecomputedICPPlanner
       currentlyBlendingICPTrajectories.set(false);
    }
 
-   public void computeAndBlend(double time, FramePoint2D desiredCapturePoint2d, FrameVector2D desiredCapturePointVelocity2d, FramePoint2D desiredCMP)
+   public void computeAndBlend(double time, FixedFramePoint2DBasics desiredCapturePoint2dToPack, FixedFrameVector2DBasics desiredCapturePointVelocity2dToPack,
+                               FixedFramePoint2DBasics desiredCenterOfPressure2dToPack)
    {
       if (isWithinInterval(time))
       {
@@ -123,9 +127,9 @@ public class PrecomputedICPPlanner
          isBlending.set(alpha < 1.0);
          alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
-         desiredCapturePoint2d.interpolate(desiredCapturePoint2d, precomputedDesiredCapturePoint2d, alpha);
-         desiredCapturePointVelocity2d.interpolate(desiredCapturePointVelocity2d, precomputedDesiredCapturePointVelocity2d, alpha);
-         computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0.getDoubleValue(), desiredCMP);
+         desiredCapturePoint2dToPack.interpolate(desiredCapturePoint2dToPack, precomputedDesiredCapturePoint2d, alpha);
+         desiredCapturePointVelocity2dToPack.interpolate(desiredCapturePointVelocity2dToPack, precomputedDesiredCapturePointVelocity2d, alpha);
+         // TODO center of pressure
       }
       else
       {

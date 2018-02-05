@@ -38,7 +38,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
-public class ReferenceCenterOfPressureWaypointCalculatorTest
+public class ReferenceCoPTrajectoryGeneratorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final int numberOfContactPoints = 4;
