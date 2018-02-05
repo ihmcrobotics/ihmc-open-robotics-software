@@ -53,33 +53,33 @@
                         <parameter name="HighLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                         <parameter name="HighLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                     </registry>
-                    <registry name="JointGains">
-                        <parameter name="kp_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
-                        <parameter name="zeta_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
-                        <parameter name="maximumFeedback_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-                        <parameter name="maximumFeedbackRate_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                        <parameter name="positionDeadband_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="ki_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="maxIntegralError_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="integralLeakRatio_SpineJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="kp_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
-                        <parameter name="zeta_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001"/>
-                        <parameter name="maximumFeedback_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
-                        <parameter name="maximumFeedbackRate_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
-                        <parameter name="positionDeadband_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="ki_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="maxIntegralError_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="integralLeakRatio_NeckJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="kp_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
-                        <parameter name="zeta_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
-                        <parameter name="maximumFeedback_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
-                        <parameter name="maximumFeedbackRate_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                        <parameter name="positionDeadband_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="ki_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="maxIntegralError_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="integralLeakRatio_ArmJointGains" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <registry name="JointspaceGains">
+                        <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                        <parameter name="zetaSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
+                        <parameter name="maximumFeedbackSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                        <parameter name="maximumFeedbackRateSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="positionDeadbandSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kiSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maxIntegralErrorSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="integralLeakRatioSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kpNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001"/>
+                        <parameter name="maximumFeedbackNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
+                        <parameter name="maximumFeedbackRateNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
+                        <parameter name="positionDeadbandNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kiNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maxIntegralErrorNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="integralLeakRatioNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kpArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
+                        <parameter name="maximumFeedbackArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+                        <parameter name="maximumFeedbackRateArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="positionDeadbandArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kiArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maxIntegralErrorArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="integralLeakRatioArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                     </registry>
-                    <registry name="BodyGains">
+                    <registry name="RigidBodyGains">
                         <parameter name="kpXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
                         <parameter name="kpZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
                         <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
