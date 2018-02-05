@@ -104,8 +104,16 @@ public class ParameterTools
       for (GroupParameter<Double> jointGroupParameter : jointspaceWeights)
       {
          String name = jointGroupParameter.getGroupName() + suffix;
-         Double defaultWeight = jointGroupParameter.getParameter();
-         DoubleParameter tunableWeight = new DoubleParameter(name, registry, defaultWeight.doubleValue());
+         DoubleParameter tunableWeight;
+         if (jointGroupParameter.hasParameter())
+         {
+            Double defaultWeight = jointGroupParameter.getParameter();
+            tunableWeight = new DoubleParameter(name, registry, defaultWeight.doubleValue());
+         }
+         else
+         {
+            tunableWeight = new DoubleParameter(name, registry);
+         }
 
          for (String jointName : jointGroupParameter.getMemberNames())
          {
