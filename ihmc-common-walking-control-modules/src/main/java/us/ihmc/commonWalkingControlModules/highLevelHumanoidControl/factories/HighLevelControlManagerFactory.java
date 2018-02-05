@@ -31,6 +31,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -42,6 +44,9 @@ public class HighLevelControlManagerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableRegistry momentumRegistry = new YoVariableRegistry("MomentumOptimizationSettings");
+   private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry("JointGains");
+   private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry("BodyGains");
+   private final YoVariableRegistry footGainRegistry = new YoVariableRegistry("FootGains");
 
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -72,12 +77,18 @@ public class HighLevelControlManagerFactory
    private Vector3DReadOnly linearMomentumWeight;
    private Vector3DReadOnly angularMomentumWeight;
    private Vector3DReadOnly highLinearMomentumWeight;
+   private PIDSE3GainsReadOnly swingFootGains;
+   private PIDSE3GainsReadOnly holdFootGains;
+   private PIDSE3GainsReadOnly toeOffFootGains;
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
       parentRegistry.addChild(registry);
       parentRegistry.addChild(momentumRegistry);
+      parentRegistry.addChild(jointGainRegistry);
+      parentRegistry.addChild(bodyGainRegistry);
+      parentRegistry.addChild(footGainRegistry);
    }
 
    public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -92,9 +103,9 @@ public class HighLevelControlManagerFactory
       angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
       // Transform weights and gains to their parametrized versions.
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
-      ParameterTools.extract3DGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, registry);
-      ParameterTools.extract3DGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, registry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
+      ParameterTools.extract3DGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, bodyGainRegistry);
+      ParameterTools.extract3DGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, bodyGainRegistry);
       ParameterTools.extractJointWeightMap("JointspaceWeight", momentumOptimizationSettings.getJointspaceWeights(), jointspaceWeightMap, momentumRegistry);
       ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, momentumRegistry);
       ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, momentumRegistry);
@@ -106,6 +117,10 @@ public class HighLevelControlManagerFactory
       linearMomentumWeight = new ParameterVector3D("DefaultLinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), momentumRegistry);
       angularMomentumWeight = new ParameterVector3D("DefaultAngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), momentumRegistry);
       highLinearMomentumWeight = new ParameterVector3D("HighLinearMomentumRateWeight", momentumOptimizationSettings.getHighLinearMomentumWeightForRecovery(), momentumRegistry);
+
+      swingFootGains = new ParameterizedPIDSE3Gains("SwingFoot", walkingControllerParameters.getSwingFootControlGains(), footGainRegistry);
+      holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
+      toeOffFootGains = new ParameterizedPIDSE3Gains("ToeOffFoot", walkingControllerParameters.getToeOffFootControlGains(), footGainRegistry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -209,7 +224,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
 
-      feetManager = new FeetManager(controllerToolbox, walkingControllerParameters, registry);
+      feetManager = new FeetManager(controllerToolbox, walkingControllerParameters, swingFootGains, holdFootGains, toeOffFootGains, registry);
 
       String footName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.LEFT).getName();
       Vector3DReadOnly angularWeight = taskspaceAngularWeightMap.get(footName);
