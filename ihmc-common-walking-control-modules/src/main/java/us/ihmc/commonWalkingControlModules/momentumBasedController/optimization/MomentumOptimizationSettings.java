@@ -3,30 +3,49 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public abstract class MomentumOptimizationSettings implements ControllerCoreOptimizationSettings
 {
-   public abstract Vector3D getLinearMomentumWeight();
+   @Deprecated // will be removed when all robots use parameters
+   public Vector3DReadOnly getLinearMomentumWeight()
+   {
+      return null;
+   }
 
-   public abstract Vector3D getHighLinearMomentumWeightForRecovery();
+   @Deprecated // will be removed when all robots use parameters
+   public Vector3DReadOnly getHighLinearMomentumWeightForRecovery()
+   {
+      return null;
+   }
 
-   public abstract Vector3D getAngularMomentumWeight();
+   @Deprecated // will be removed when all robots use parameters
+   public Vector3DReadOnly getAngularMomentumWeight()
+   {
+      return null;
+   }
 
    /**
     * Returns the optimization weight for the linear objective of the foot whenever the foot is
     * in support (loaded). When the foot is not loaded the default weight from
     * {@link #getTaskspaceLinearWeights()} will be used.
     */
-   public abstract Vector3DReadOnly getLoadedFootLinearWeight();
+   @Deprecated // will be removed when all robots use parameters
+   public Vector3DReadOnly getLoadedFootLinearWeight()
+   {
+      return null;
+   }
 
    /**
     * Returns the optimization weight for the angular objective of the foot whenever the foot is
     * in support (loaded).When the foot is not loaded the default weight from
     * {@link #getTaskspaceAngularWeights()} will be used.
     */
-   public abstract Vector3DReadOnly getLoadedFootAngularWeight();
+   @Deprecated // will be removed when all robots use parameters
+   public Vector3DReadOnly getLoadedFootAngularWeight()
+   {
+      return null;
+   }
 
    /**
     * The map returned contains all optimization weights for jointspace objectives. The key of the map
