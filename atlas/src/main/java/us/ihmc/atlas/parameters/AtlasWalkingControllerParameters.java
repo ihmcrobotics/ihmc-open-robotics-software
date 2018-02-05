@@ -29,11 +29,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
-import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -259,75 +256,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
-      PIDGains spineGains = createSpineControlGains();
-      PIDGains neckGains = createNeckControlGains();
-      PIDGains armGains = createArmControlGains();
-
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", spineGains, jointMap.getSpineJointNamesAsStrings()));
-      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", neckGains, jointMap.getNeckJointNamesAsStrings()));
-      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", armGains, jointMap.getArmJointNamesAsStrings()));
-
+      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", null, jointMap.getSpineJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", null, jointMap.getNeckJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", null, jointMap.getArmJointNamesAsStrings()));
       return jointspaceGains;
-   }
-
-   private PIDGains createSpineControlGains()
-   {
-      PIDGains spineGains = new PIDGains();
-
-      double kp = 50.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      spineGains.setKp(kp);
-      spineGains.setZeta(zeta);
-      spineGains.setKi(ki);
-      spineGains.setMaxIntegralError(maxIntegralError);
-      spineGains.setMaximumFeedback(maxAccel);
-      spineGains.setMaximumFeedbackRate(maxJerk);
-
-      return spineGains;
-   }
-
-   private PIDGains createNeckControlGains()
-   {
-      PIDGains gains = new PIDGains();
-
-      double kp = 40.0;
-      double zeta = runningOnRealRobot ? 0.4 : 0.8;
-      double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
-      double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
-
-      gains.setKp(kp);
-      gains.setZeta(zeta);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
-
-      return gains;
-   }
-
-   private PIDGains createArmControlGains()
-   {
-      PIDGains armGains = new PIDGains();
-
-      double kp = runningOnRealRobot ? 40.0 : 80.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.6;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      armGains.setKp(kp);
-      armGains.setZeta(zeta);
-      armGains.setKi(ki);
-      armGains.setMaxIntegralError(maxIntegralError);
-      armGains.setMaximumFeedback(maxAccel);
-      armGains.setMaximumFeedbackRate(maxJerk);
-
-      return armGains;
    }
 
    /** {@inheritDoc} */
@@ -364,69 +297,22 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private PID3DConfiguration createPelvisOrientationControlGains()
    {
-      double kpXY = 40.0;
-      double kpZ = 40.0;
-      double zetaXY = runningOnRealRobot ? 0.2 : 0.8;
-      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;
-      double maxAccel = runningOnRealRobot ? 12.0 : 36.0;
-      double maxJerk = runningOnRealRobot ? 180.0 : 540.0;
-
-      DefaultPID3DGains gains = new DefaultPID3DGains();
-      gains.setProportionalGains(kpXY, kpXY, kpZ);
-      gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
-      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return new PID3DConfiguration(GainCoupling.XY, false, gains);
+      return new PID3DConfiguration(GainCoupling.XY, false);
    }
 
    private PID3DConfiguration createHeadOrientationControlGains()
    {
-      double kp = 40.0;
-      double zeta = runningOnRealRobot ? 0.4 : 0.8;
-      double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
-      double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
-
-      DefaultPID3DGains gains = new DefaultPID3DGains();
-      gains.setProportionalGains(kp);
-      gains.setDampingRatios(zeta);
-      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
+      return new PID3DConfiguration(GainCoupling.XYZ, false);
    }
 
    private PID3DConfiguration createChestOrientationControlGains()
    {
-      double kpXY = 40.0;
-      double kpZ = 40.0;
-      double zetaXY = runningOnRealRobot ? 0.5 : 0.8;
-      double zetaZ = runningOnRealRobot ? 0.22 : 0.8;
-      double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
-      double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
-      double maxProportionalError = 10.0 * Math.PI/180.0;
-
-      DefaultPID3DGains gains = new DefaultPID3DGains();
-      gains.setProportionalGains(kpXY, kpXY, kpZ);
-      gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
-      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-      gains.setMaxProportionalError(maxProportionalError);
-
-      return new PID3DConfiguration(GainCoupling.XY, false, gains);
+      return new PID3DConfiguration(GainCoupling.XY, false);
    }
 
    private PID3DConfiguration createHandOrientationControlGains()
    {
-      double kp = runningOnRealRobot ? 40.0 :100.0;
-      // When doing position control, the damping here seems to result into some kind of spring.
-      double zeta = runningOnRealRobot ? 0.0 : 1.0;
-      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      DefaultPID3DGains gains = new DefaultPID3DGains();
-      gains.setProportionalGains(kp);
-      gains.setDampingRatios(zeta);
-      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
+      return new PID3DConfiguration(GainCoupling.XYZ, false);
    }
 
    /** {@inheritDoc} */
@@ -448,18 +334,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private PID3DConfiguration createHandPositionControlGains()
    {
-      double kp = runningOnRealRobot ? 40.0 :100.0;
-      // When doing position control, the damping here seems to result into some kind of spring.
-      double zeta = runningOnRealRobot ? 0.0 : 1.0;
-      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      DefaultPID3DGains gains = new DefaultPID3DGains();
-      gains.setProportionalGains(kp);
-      gains.setDampingRatios(zeta);
-      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
+      return new PID3DConfiguration(GainCoupling.XYZ, false);
    }
 
    /** {@inheritDoc} */
@@ -518,84 +393,19 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public PIDSE3Configuration getSwingFootControlGains()
    {
-      double kpXY = 150.0;
-      double kpZ = 200.0;
-      double zetaXYZ = runningOnRealRobot ? 0.7 : 0.7;
-
-      double kpXYOrientation = 200.0;
-      double kpZOrientation = 200.0;
-      double zetaOrientation = 0.7;
-
-      // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
-      double maxPositionAcceleration = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
-//      double maxPositionAcceleration = runningOnRealRobot ? 30.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = runningOnRealRobot ? 300.0 : Double.POSITIVE_INFINITY;
-      double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
-      gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
-      gains.setPositionDampingRatios(zetaXYZ);
-      gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatios(zetaOrientation);
-      gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
-
-      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
+      return new PIDSE3Configuration(GainCoupling.XY, false);
    }
 
    @Override
    public PIDSE3Configuration getHoldPositionFootControlGains()
    {
-      double kpXY = 100.0;
-      double kpZ = 0.0;
-      double zetaXYZ = runningOnRealRobot ? 0.2 : 1.0;
-      double kpXYOrientation = runningOnRealRobot ? 100.0 : 175.0;
-      double kpZOrientation = runningOnRealRobot ? 100.0 : 200.0;
-      double zetaOrientation = runningOnRealRobot ? 0.2 : 1.0;
-      // Reduce maxPositionAcceleration from 10 to 6 to prevent too high acceleration when hitting joint limits.
-      double maxLinearAcceleration = runningOnRealRobot ? 6.0 : Double.POSITIVE_INFINITY;
-//      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
-      gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
-      gains.setPositionDampingRatios(zetaXYZ);
-      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatios(zetaOrientation);
-      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-
-      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
+      return new PIDSE3Configuration(GainCoupling.XY, false);
    }
 
    @Override
    public PIDSE3Configuration getToeOffFootControlGains()
    {
-      double kpXY = 100.0;
-      double kpZ = 100.0;
-      double zetaXYZ = runningOnRealRobot ? 0.4 : 0.4;
-      double kpXYOrientation = runningOnRealRobot ? 200.0 : 200.0;
-      double kpZOrientation = runningOnRealRobot ? 200.0 : 200.0;
-      double zetaOrientation = runningOnRealRobot ? 0.4 : 0.4;
-      // Reduce maxPositionAcceleration from 10 to 6 to prevent too high acceleration when hitting joint limits.
-      double maxLinearAcceleration = runningOnRealRobot ? 6.0 : Double.POSITIVE_INFINITY;
-//      double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
-      double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-      double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
-      gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
-      gains.setPositionDampingRatios(zetaXYZ);
-      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatios(zetaOrientation);
-      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
-
-      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
+      return new PIDSE3Configuration(GainCoupling.XY, false);
    }
 
    public double getSwingMaxHeightForPushRecoveryTrajectory()
