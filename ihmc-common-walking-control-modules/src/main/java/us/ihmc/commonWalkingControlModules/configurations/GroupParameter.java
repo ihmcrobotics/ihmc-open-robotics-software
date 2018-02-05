@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,11 +22,39 @@ public class GroupParameter<T>
    private final String groupName;
    private final List<String> memberNames;
 
+   public GroupParameter(String groupAndMemberName)
+   {
+      this(groupAndMemberName, groupAndMemberName);
+   }
+
+   public GroupParameter(String groupName, String memberName)
+   {
+      this(groupName, Collections.singletonList(memberName));
+   }
+
+   public GroupParameter(String groupName, List<String> memberNames)
+   {
+      this(groupName, null, memberNames);
+   }
+
+   public GroupParameter(String groupName, T parameter, String memberName)
+   {
+      this(groupName, parameter, Collections.singletonList(memberName));
+   }
+
    public GroupParameter(String groupName, T parameter, List<String> memberNames)
    {
       this.groupName = groupName;
       this.parameter = parameter;
       this.memberNames = memberNames;
+   }
+
+   /**
+    * Whether this {@link #GroupParameter} was created with a parameter.
+    */
+   public boolean hasParameter()
+   {
+      return parameter != null;
    }
 
    /**

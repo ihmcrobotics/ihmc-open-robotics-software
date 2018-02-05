@@ -397,7 +397,7 @@ public class BalanceManager
       icpPlanner.getDesiredCenterOfPressurePosition(perfectCoP2d);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
-      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d);
+      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
 
       double omega0 = controllerToolbox.getOmega0();
       if (supportLeg == null)
@@ -741,6 +741,7 @@ public class BalanceManager
       yoCenterOfMass.setAndMatchFrame(centerOfMassPosition);
       double omega0 = controllerToolbox.getOmega0();
       CapturePointTools.computeDesiredCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
+      yoPerfectCoP.set(yoPerfectCMP);
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 

@@ -24,7 +24,7 @@ public class ICPQPIndexHandler
    /** Whether or not to use step adjustment in the optimization. If {@link #numberOfFootstepsToConsider} is 0, this term should be false */
    private boolean useStepAdjustment;
    /** Whether or not to include cmp feedback task in the optimization. */
-   private boolean hasCMPFeedbackTask = true;
+   private boolean hasCMPFeedbackTask = false;
    /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
    private boolean useAngularMomentum = false;
 
