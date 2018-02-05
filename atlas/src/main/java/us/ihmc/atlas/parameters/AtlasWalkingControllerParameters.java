@@ -1,12 +1,9 @@
 package us.ihmc.atlas.parameters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
@@ -24,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -66,8 +62,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
-   private ArrayList<String> positionControlledJoints = null;
-   private List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final LegConfigurationParameters legConfigurationParameters;
@@ -265,25 +259,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
-      List<String> spineNames = new ArrayList<>();
-      List<String> neckNames = new ArrayList<>();
-      List<String> armNames = new ArrayList<>();
-
-      Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
-      Arrays.stream(jointMap.getNeckJointNames()).forEach(n -> neckNames.add(jointMap.getNeckJointName(n)));
-      for (RobotSide side : RobotSide.values)
-      {
-         Arrays.stream(jointMap.getArmJointNames()).forEach(n -> armNames.add(jointMap.getArmJointName(side, n)));
-      }
-
       PIDGains spineGains = createSpineControlGains();
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
 
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", spineGains, spineNames));
-      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", neckGains, neckNames));
-      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", armGains, armNames));
+      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", spineGains, jointMap.getSpineJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", neckGains, jointMap.getNeckJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", armGains, jointMap.getArmJointNamesAsStrings()));
 
       return jointspaceGains;
    }
