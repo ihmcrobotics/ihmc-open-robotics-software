@@ -12,7 +12,7 @@ public class PIDSE3Configuration
 
    public PIDSE3Configuration(GainCoupling gainCoupling, boolean useIntegrator)
    {
-      this(gainCoupling, useIntegrator, null);
+      this(gainCoupling, useIntegrator, null, null);
    }
 
    public PIDSE3Configuration(GainCoupling gainCoupling, boolean useIntegrator, PIDSE3GainsReadOnly gains)
