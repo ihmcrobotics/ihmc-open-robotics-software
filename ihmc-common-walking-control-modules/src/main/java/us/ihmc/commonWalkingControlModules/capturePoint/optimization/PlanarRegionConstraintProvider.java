@@ -4,10 +4,15 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -193,7 +198,8 @@ public class PlanarRegionConstraintProvider
    }
 
 
-   public void updatePlanarRegionConstraintForSingleSupport(Footstep footstep, double swingTimeRemaining, FramePoint2D currentICP, double omega0, ICPOptimizationQPSolver solver)
+   public void updatePlanarRegionConstraintForSingleSupport(Footstep footstep, double swingTimeRemaining, FramePoint2DReadOnly currentICP, double omega0,
+                                                            ICPOptimizationQPSolver solver)
    {
       captureRegionCalculator.calculateCaptureRegion(footstep.getRobotSide(), swingTimeRemaining, currentICP, omega0,
                                                      bipedSupportPolygons.getFootPolygonInWorldFrame(footstep.getRobotSide().getOppositeSide()));
@@ -380,23 +386,32 @@ public class PlanarRegionConstraintProvider
    private final FramePose3D footstepPose = new FramePose3D();
    private final FramePoint2D footstepXYPosition = new FramePoint2D();
 
-   public boolean snapFootPoseToActivePlanarRegion(YoFramePose footPoseToPack)
+   private final FrameVector3D footstepNormal = new FrameVector3D();
+   private final FrameVector3D planarRegionNormal = new FrameVector3D();
+   private final AxisAngle rotation = new AxisAngle();
+
+   public boolean snapFootPoseToActivePlanarRegion(FixedFramePose3DBasics footPoseToPack)
    {
       if (activePlanarRegion == null)
          return false;
 
-      footPoseToPack.getFramePose(footstepPose);
+      footstepPose.set(footPoseToPack);
       footstepXYPosition.set(footstepPose.getPosition());
 
-      // get the orientation of the foot
-      footstepPose.setToZero(planeReferenceFrame);
+      // get the rotation needed for the footstep
+      footstepPose.changeFrame(worldFrame);
+      footstepNormal.set(0.0, 0.0, 1.0);
+      footstepPose.getOrientation().transform(footstepNormal);
+      activePlanarRegion.getNormal(planarRegionNormal);
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(footstepNormal, planarRegionNormal, rotation);
 
       // get the height
       footstepXYPosition.changeFrameAndProjectToXYPlane(worldFrame);
       double zPosition = activePlanarRegion.getPlaneZGivenXY(footstepXYPosition.getX(), footstepXYPosition.getY());
 
       // change the foot pose to be correct
-      footstepPose.changeFrame(worldFrame);
+      footstepPose.prependRotation(rotation);
+
       footstepPose.setPosition(footstepXYPosition);
       footstepPose.setZ(zPosition);
 

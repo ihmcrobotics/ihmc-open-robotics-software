@@ -4,7 +4,10 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -17,12 +20,11 @@ import java.util.List;
 
 public interface ReferenceCoPTrajectoryGeneratorInterface
 {
-
    void updateListeners();
 
    void initializeParameters(SmoothCMPPlannerParameters parameters);
 
-   void setSymmetricCoPConstantOffsets(CoPPointName name, Vector2D copOffset);
+   void setSymmetricCoPConstantOffsets(CoPPointName name, Vector2DReadOnly copOffset);
 
    void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList);
 
@@ -38,13 +40,8 @@ public interface ReferenceCoPTrajectoryGeneratorInterface
 
    void update(double currentTime);
 
-   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack);
-
-   void getDesiredCenterOfPressure(FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack);
-
-   void getDesiredCenterOfPressure(YoFramePoint desiredCoPToPack);
-
-   void getDesiredCenterOfPressure(YoFramePoint desiredCoPToPack, YoFrameVector desiredCoPVelocityToPack);
+   void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack);
+   void getDesiredCenterOfPressure(FixedFramePoint3DBasics desiredCoPToPack, FixedFrameVector3DBasics desiredCoPVelocityToPack);
 
    void initializeForTransfer(double currentTime);
 

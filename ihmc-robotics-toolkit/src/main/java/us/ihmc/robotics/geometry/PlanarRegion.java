@@ -666,7 +666,7 @@ public class PlanarRegion
    }
 
    /**
-    * Retrieves and returns a copy of the normal of this planar region.
+    * Retrieves and returns a copy of the normal in world frame of this planar region.
     */
    public Vector3D getNormal()
    {
@@ -676,7 +676,7 @@ public class PlanarRegion
    }
 
    /**
-    * Retrieves the normal of this planar region and stores it in the given {@link Vector3D}.
+    * Retrieves the normal of this planar region in the world frame and stores it in the given {@link Vector3D}.
     *
     * @param normalToPack used to store the normal of this planar region.
     */
