@@ -11,8 +11,10 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
@@ -23,8 +25,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -32,14 +32,13 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -350,21 +349,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspaceOrientationControlGains()
    {
-      List<GroupParameter<PID3DGainsReadOnly>> taskspaceAngularGains = new ArrayList<>();
+      List<GroupParameter<PID3DConfiguration>> taskspaceAngularGains = new ArrayList<>();
 
-      PID3DGains chestAngularGains = createChestOrientationControlGains();
+      PID3DConfiguration chestAngularGains = createChestOrientationControlGains();
       List<String> chestGainBodies = new ArrayList<>();
       chestGainBodies.add(jointMap.getChestName());
       taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, chestGainBodies));
 
-      PID3DGains headAngularGains = createHeadOrientationControlGains();
+      PID3DConfiguration headAngularGains = createHeadOrientationControlGains();
       List<String> headGainBodies = new ArrayList<>();
       headGainBodies.add(jointMap.getHeadName());
       taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, headGainBodies));
 
-      PID3DGains handAngularGains = createHandOrientationControlGains();
+      PID3DConfiguration handAngularGains = createHandOrientationControlGains();
       List<String> handGainBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -372,7 +371,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       }
       taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, handGainBodies));
 
-      PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
+      PID3DConfiguration pelvisAngularGains = createPelvisOrientationControlGains();
       List<String> pelvisGainBodies = new ArrayList<>();
       pelvisGainBodies.add(jointMap.getPelvisName());
       taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
@@ -380,7 +379,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return taskspaceAngularGains;
    }
 
-   private PID3DGains createPelvisOrientationControlGains()
+   private PID3DConfiguration createPelvisOrientationControlGains()
    {
       double kpXY = 40.0;
       double kpZ = 40.0;
@@ -389,30 +388,30 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxAccel = runningOnRealRobot ? 12.0 : 36.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 540.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XY, false, gains);
    }
 
-   private PID3DGains createHeadOrientationControlGains()
+   private PID3DConfiguration createHeadOrientationControlGains()
    {
       double kp = 40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
       double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
       double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
-   private PID3DGains createChestOrientationControlGains()
+   private PID3DConfiguration createChestOrientationControlGains()
    {
       double kpXY = 40.0;
       double kpZ = 40.0;
@@ -422,16 +421,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
       double maxProportionalError = 10.0 * Math.PI/180.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
       gains.setMaxProportionalError(maxProportionalError);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XY, false, gains);
    }
 
-   private PID3DGains createHandOrientationControlGains()
+   private PID3DConfiguration createHandOrientationControlGains()
    {
       double kp = runningOnRealRobot ? 40.0 :100.0;
       // When doing position control, the damping here seems to result into some kind of spring.
@@ -439,21 +438,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
-      List<GroupParameter<PID3DGainsReadOnly>> taskspaceLinearGains = new ArrayList<>();
+      List<GroupParameter<PID3DConfiguration>> taskspaceLinearGains = new ArrayList<>();
 
-      PID3DGains handLinearGains = createHandPositionControlGains();
+      PID3DConfiguration handLinearGains = createHandPositionControlGains();
       List<String> handGainBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -464,7 +463,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return taskspaceLinearGains;
    }
 
-   private PID3DGains createHandPositionControlGains()
+   private PID3DConfiguration createHandPositionControlGains()
    {
       double kp = runningOnRealRobot ? 40.0 :100.0;
       // When doing position control, the damping here seems to result into some kind of spring.
@@ -472,12 +471,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
    /** {@inheritDoc} */
@@ -534,7 +533,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public PIDSE3Gains getSwingFootControlGains()
+   public PIDSE3Configuration getSwingFootControlGains()
    {
       double kpXY = 150.0;
       double kpZ = 200.0;
@@ -551,7 +550,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
@@ -559,11 +558,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    @Override
-   public PIDSE3Gains getHoldPositionFootControlGains()
+   public PIDSE3Configuration getHoldPositionFootControlGains()
    {
       double kpXY = 100.0;
       double kpZ = 0.0;
@@ -578,7 +577,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
@@ -586,11 +585,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    @Override
-   public PIDSE3Gains getToeOffFootControlGains()
+   public PIDSE3Configuration getToeOffFootControlGains()
    {
       double kpXY = 100.0;
       double kpZ = 100.0;
@@ -605,7 +604,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
@@ -613,7 +612,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    public double getSwingMaxHeightForPushRecoveryTrajectory()
