@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
@@ -28,7 +28,7 @@ public class ICPOptimizationQPSolverTest
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
-      solver.setAngularMomentumConditions(10.0, true);
+      solver.setCMPFeedbackConditions(10.0, true);
       solver.setFeedbackConditions(0.1, 3.0, 500.0);
 
       FrameVector2D icpError = new FrameVector2D();
@@ -39,7 +39,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
 
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
@@ -55,7 +55,7 @@ public class ICPOptimizationQPSolverTest
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
-      solver.setAngularMomentumConditions(1000.0, true);
+      solver.setCMPFeedbackConditions(1000.0, true);
       solver.setFeedbackConditions(0.1, 0.1, 3.0, 3.0, 100000.0);
 
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.05, 0.10);
@@ -66,7 +66,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
 
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
@@ -95,7 +95,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
 
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
@@ -130,7 +130,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
 
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
@@ -162,7 +162,7 @@ public class ICPOptimizationQPSolverTest
       FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
 
       solver.setFeedbackConditions(0.1, 3.0, 10000.0);
-      solver.setAngularMomentumConditions(10.0, true);
+      solver.setCMPFeedbackConditions(10.0, true);
       solver.addSupportPolygon(supportPolygon);
 
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
@@ -173,7 +173,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
 
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
@@ -227,7 +227,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedback = new FrameVector2D();
       FramePoint2D footstepLocation = new FramePoint2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
       solver.getFootstepSolutionLocation(0, footstepLocation);
 
@@ -273,7 +273,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedback = new FrameVector2D();
       FramePoint2D footstepLocation = new FramePoint2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
       solver.getFootstepSolutionLocation(0, footstepLocation);
 
@@ -302,7 +302,7 @@ public class ICPOptimizationQPSolverTest
       double footstepWeight = 0.1;
 
       solver.setFeedbackConditions(feedbackWeight, feedbackGain, 10000.0);
-      solver.setAngularMomentumConditions(10.0 * feedbackWeight, true);
+      solver.setCMPFeedbackConditions(10.0 * feedbackWeight, true);
 
       double timeRemainingInState = 1.0;
       double omega = 1.0;
@@ -319,7 +319,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedback = new FrameVector2D();
       FramePoint2D footstepLocation = new FramePoint2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
       solver.getFootstepSolutionLocation(0, footstepLocation);
 
@@ -364,7 +364,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedback = new FrameVector2D();
       FramePoint2D footstepLocation = new FramePoint2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
       solver.getFootstepSolutionLocation(0, footstepLocation);
 
@@ -418,7 +418,7 @@ public class ICPOptimizationQPSolverTest
       double footstepWeight = 0.1;
 
       solver.setFeedbackConditions(feedbackWeight, feedbackGain, 10000.0);
-      solver.setAngularMomentumConditions(100.0, true);
+      solver.setCMPFeedbackConditions(100.0, true);
 
       double timeRemainingInState = 1.0;
       double omega = 1.0;
@@ -435,7 +435,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedback = new FrameVector2D();
       FramePoint2D footstepLocation = new FramePoint2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
       solver.getFootstepSolutionLocation(0, footstepLocation);
 
@@ -509,7 +509,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedback = new FrameVector2D();
       FramePoint2D footstepLocation = new FramePoint2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
       solver.getFootstepSolutionLocation(0, footstepLocation);
 
@@ -566,7 +566,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D copFeedback = new FrameVector2D();
       FramePoint2D footstepLocation = new FramePoint2D();
 
-      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
       solver.getFootstepSolutionLocation(0, footstepLocation);
 
@@ -637,15 +637,15 @@ public class ICPOptimizationQPSolverTest
          FramePoint2D scaledFeedbackWeight = new FramePoint2D(worldFrame, 0.2826586940121205, 0.2826586940121205);
          double feedbackGainX = 3.61466302555;
          double feedbackGainY = 3.88533697445;
-         solver.resetFeedbackConditions();
+         solver.resetCoPFeedbackConditions();
          solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 10000.0);
          solver.setMaxCMPDistanceFromEdge(0.06);
          solver.setCopSafeDistanceToEdge(0.002);
          solver.setFeedbackRateWeight(0.0025);
 
          // angular momentum
-         solver.resetAngularMomentumConditions();
-         solver.setAngularMomentumConditions(10.769105592072197, true);
+         solver.resetCMPFeedbackConditions();
+         solver.setCMPFeedbackConditions(10.769105592072197, true);
 
          // footstep
          FramePoint2D footstepLocation = new FramePoint2D(worldFrame, 0.29744601815922606, -0.6204387201028974);
@@ -704,15 +704,15 @@ public class ICPOptimizationQPSolverTest
       FramePoint2D scaledFeedbackWeight = new FramePoint2D(worldFrame, 0.283, 0.283);
       double feedbackGainX = 3.5;
       double feedbackGainY = 4.0;
-      solver.resetFeedbackConditions();
+      solver.resetCoPFeedbackConditions();
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 100000.0);
       solver.setMaxCMPDistanceFromEdge(0.06);
       solver.setCopSafeDistanceToEdge(0.002);
       solver.setFeedbackRateWeight(0.0025);
 
       // angular momentum
-      solver.resetAngularMomentumConditions();
-      solver.setAngularMomentumConditions(10.77, true);
+      solver.resetCMPFeedbackConditions();
+      solver.setCMPFeedbackConditions(10.77, true);
 
       // footstep
       FramePoint2D footstepLocation = new FramePoint2D(worldFrame, 0.297, -0.620);

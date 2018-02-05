@@ -43,14 +43,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
-   /** Desired position for the Center of Pressure (CoP) */
-   protected final YoFramePoint desiredCoPPosition = new YoFramePoint(namePrefix + "DesiredCoPPosition", worldFrame, registry);
-   /** Desired velocity for the Center of Pressure (CoP) */
-   protected final YoFrameVector desiredCoPVelocity = new YoFrameVector(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
-   /** Desired Centroidal Angular Momentum (CAM) */
-   protected final YoFrameVector desiredCentroidalAngularMomentum = new YoFrameVector(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
-   /** Desired Centroidal Torque (CT) */
-   protected final YoFrameVector desiredCentroidalTorque = new YoFrameVector(namePrefix + "DesiredCentroidalTorque", worldFrame, registry);
    /** Desired position for the Centroidal Momentum Pivot (CMP) */
    protected final YoFramePoint desiredCMPPosition = new YoFramePoint(namePrefix + "DesiredCMPPosition", worldFrame, registry);
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
@@ -63,10 +55,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoFrameVector desiredICPAcceleration = new YoFrameVector(namePrefix + "DesiredICPAcceleration", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM)*/
    protected final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
-   /** Desired velocity for the Center of Mass (CoM) */
-   protected final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
-   /** Desired acceleration for the Center of Mass (CoM) */
-   protected final YoFrameVector desiredCoMAcceleration = new YoFrameVector(namePrefix + "DesiredCoMAcceleration", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
@@ -159,12 +147,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
     *           {@link ReferenceCentroidalMomentumPivotLocationsCalculator} to adapt the ICP plan to
     *           available support polygon. The reference to this parameter is saved internally and
     *           it will be accessed to access up-to-date information.
-    * @param contactableFeet it is used to get the set of default contact points for each foot.
-    * @param icpPlannerParameters configuration class used to initialized the constant parameters of
-    *           the ICP plan.
-    * @param parentRegistry registry to which the ICP planner's registry is attached to.
-    * @param yoGraphicsListRegistry registry to which the visualization for the planner should be
-    *           added to.
     */
    public AbstractICPPlanner(BipedSupportPolygons bipedSupportPolygons, int numberOfFootstepsToConsider)
    {
@@ -227,38 +209,38 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       velocityReductionFactor.set(Double.NaN);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setSupportLeg(RobotSide robotSide)
    {
       supportSide.set(robotSide);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setTransferToSide(RobotSide robotSide)
    {
       transferToSide.set(robotSide);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setTransferFromSide(RobotSide robotSide)
    {
       if (robotSide != null)
          transferToSide.set(robotSide.getOppositeSide());
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void holdCurrentICP(FramePoint3D icpPositionToHold)
    {
       this.icpPositionToHold.set(icpPositionToHold);
       requestedHoldPosition.set(true);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void updateCurrentPlan()
    {
       if (isDoubleSupport.getBooleanValue())
@@ -273,8 +255,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       }
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition)
    {
       if (isDone())
@@ -312,36 +294,36 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       }
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract void compute(double time);
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack);
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack);
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack);
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract void getNextExitCMP(FramePoint3D entryCMPToPack);
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract boolean isOnExitCMP();
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract int getNumberOfFootstepsToConsider();
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public abstract int getNumberOfFootstepsRegistered();
 
    protected abstract void updateTransferPlan();
@@ -385,197 +367,124 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          return Math.log(distanceRatio) / omega0.getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCapturePointPosition(FramePoint3D desiredCapturePointPositionToPack)
    {
       desiredCapturePointPositionToPack.setIncludingFrame(desiredICPPosition);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack)
    {
       desiredCapturePointPositionToPack.setIncludingFrame(desiredICPPosition);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCapturePointPosition(YoFramePoint desiredCapturePointPositionToPack)
    {
       desiredCapturePointPositionToPack.set(desiredICPPosition);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCenterOfMassPosition(FramePoint3D desiredCenterOfMassPositionToPack)
    {
       desiredCenterOfMassPositionToPack.setIncludingFrame(desiredCoMPosition);
    }
 
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
    {
       desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
    }
-   
-   public void getDesiredCenterOfMassVelocity(YoFrameVector desiredCenterOfMassVelocityToPack)
-   {
-      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
-   }
-   
-   public void getDesiredCenterOfMassVelocity(FrameVector3D desiredCenterOfMassVelocityToPack)
-   {
-      desiredCenterOfMassVelocityToPack.setIncludingFrame(desiredCoMVelocity);
-   }
-   
-   public void getDesiredCenterOfMassAcceleration(YoFrameVector desiredCenterOfMassAccelerationToPack)
-   {
-      desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
-   }
 
-   public void getDesiredCenterOfMassAcceleration(FrameVector3D desiredCenterOfMassAccelerationToPack)
-   {
-      desiredCenterOfMassAccelerationToPack.setIncludingFrame(desiredCoMAcceleration);
-   }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.setIncludingFrame(desiredICPVelocity);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.setIncludingFrame(desiredICPVelocity);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.set(desiredICPVelocity);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCapturePointAcceleration(FrameVector3D desiredCapturePointAccelerationToPack)
    {
       desiredCapturePointAccelerationToPack.set(desiredICPAcceleration);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(desiredCMPPosition);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCentroidalMomentumPivotPositionToPack.setIncludingFrame(desiredCMPPosition);
    }
    
-   /** {@inheritDoc} */
    public void getDesiredCentroidalMomentumPivotPosition(YoFramePoint desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCentroidalMomentumPivotPositionToPack.set(desiredCMPPosition);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCentroidalMomentumPivotVelocityToPack.setIncludingFrame(desiredCMPVelocity);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCentroidalMomentumPivotVelocityToPack.setIncludingFrame(desiredCMPVelocity);
    }
-   
-   /** {@inheritDoc} */
+
    public void getDesiredCentroidalMomentumPivotVelocity(YoFrameVector desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCentroidalMomentumPivotVelocityToPack.set(desiredCMPVelocity);
    }
-   
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack)
-   {
-      desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
-   }
 
    /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack)
-   {
-      desiredCenterOfPressurePositionToPack.setIncludingFrame(desiredCoPPosition);
-   }
-
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressurePosition(YoFramePoint desiredCenterOfPressurePositionToPack)
-   {
-      desiredCenterOfPressurePositionToPack.set(desiredCoPPosition);
-   }
-   
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack)
-   {
-      desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
-   }
-
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack)
-   {
-      desiredCenterOfPressureVelocityToPack.setIncludingFrame(desiredCoPVelocity);
-   }
-
-   /** {@inheritDoc} */
-   public void getDesiredCenterOfPressureVelocity(YoFrameVector desiredCenterOfPressureVelocityToPack)
-   {
-      desiredCenterOfPressureVelocityToPack.set(desiredCoPVelocity);
-   }
-   
-   /** {@inheritDoc} */
-   public void getDesiredCentroidalAngularMomentum(FrameVector3D desiredCentroidalAngularMomentumToPack)
-   {
-      desiredCentroidalAngularMomentumToPack.setIncludingFrame(desiredCentroidalAngularMomentum);
-   }
-   
-   /** {@inheritDoc} */
-   public void getDesiredCentroidalTorque(YoFrameVector desiredCentroidalTorqueToPack)
-   {
-      desiredCentroidalTorqueToPack.set(desiredCentroidalTorque);
-   }
-   
-   public void getDesiredCentroidalTorque(FrameVector3D desiredCentroidalTorqueToPack)
-   {
-      desiredCentroidalTorqueToPack.setIncludingFrame(desiredCentroidalTorque);
-   }
-
    @Override
-   /** {@inheritDoc} */
    public double getTimeInCurrentState()
    {
       return timeInCurrentState.getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getTimeInCurrentStateRemaining()
    {
       return timeInCurrentStateRemaining.getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getCurrentStateDuration()
    {
       if (isDoubleSupport.getBooleanValue())
@@ -584,49 +493,50 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          return getSwingDuration(0);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setTransferDuration(int stepNumber, double duration)
    {
       transferDurations.get(stepNumber).set(duration);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setSwingDuration(int stepNumber, double duration)
    {
       swingDurations.get(stepNumber).set(duration);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setTouchdownDuration(int stepNumber, double duration)
    {
       touchdownDurations.get(stepNumber).set(duration);
    }
-   
+
+   /** {@inheritDoc} */
     @Override
    public double getTouchdownDuration(int stepNumber)
    {
        return touchdownDurations.get(stepNumber).getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getTransferDuration(int stepNumber)
    {
       return transferDurations.get(stepNumber).getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getSwingDuration(int stepNumber)
    {
       return swingDurations.get(stepNumber).getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setFinalTransferDuration(double duration)
    {
       if(duration < Epsilons.ONE_HUNDREDTH)
@@ -634,100 +544,92 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       defaultFinalTransferDuration.set(duration);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setFinalTransferDurationAlpha(double durationAlpha)
    {
       finalTransferDurationAlpha.set(durationAlpha);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setTransferDurationAlpha(int stepNumber, double transferDurationAlpha)
    {
       transferDurationAlphas.get(stepNumber).set(transferDurationAlpha);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setSwingDurationAlpha(int stepNumber, double swingDurationAlpha)
    {
       swingDurationAlphas.get(stepNumber).set(swingDurationAlpha);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getTransferDurationAlpha(int stepNumber)
    {
       return transferDurationAlphas.get(stepNumber).getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getSwingDurationAlpha(int stepNumber)
    {
       return swingDurationAlphas.get(stepNumber).getDoubleValue();
    }
 
-
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getInitialTime()
    {
       return initialTime.getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public void setOmega0(double omega0)
    {
       this.omega0.set(omega0);
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public double getOmega0()
    {
       return omega0.getDoubleValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public RobotSide getTransferToSide()
    {
       return transferToSide.getEnumValue();
    }
 
-
-   @Override
    /** {@inheritDoc} */
+   @Override
    public boolean isInDoubleSupport()
    {
       return isDoubleSupport.getBooleanValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public boolean isInStanding()
    {
       return isStanding.getBooleanValue();
    }
 
-   @Override
    /** {@inheritDoc} */
+   @Override
    public boolean isInInitialTransfer()
    {
       return isInitialTransfer.getBooleanValue();
    }
 
-   // This is a hack. Please remove in case of any issues.
-   public void setInInitialTransfer(boolean isInitialTransfer)
-   {
-      this.isInitialTransfer.set(isInitialTransfer);
-   }
-   
-   @Override
    /** {@inheritDoc} */
+   @Override
    public boolean isDone()
    {
       return timeInCurrentStateRemaining.getDoubleValue() <= 0.0;

@@ -34,7 +34,7 @@ public class TorqueTrajectoryTest
    {
       int numberOfSegments = minSegments + (int) Math.floor(Math.random() * (maxSegments - minSegments));
       int numberOfCoefficients = minCoefficients + (int) Math.floor(Math.random() * (maxCoefficients - minCoefficients));
-      angularMomentumTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSegments, numberOfCoefficients);
+      angularMomentumTrajectory = new AngularMomentumTrajectory(numberOfSegments, numberOfCoefficients);
       torqueTrajectory = new TorqueTrajectory(numberOfSegments, numberOfCoefficients);
       generateRandomAngularMomentumTrajectory(angularMomentumTrajectory);
       torqueTrajectory.setNext(angularMomentumTrajectory);

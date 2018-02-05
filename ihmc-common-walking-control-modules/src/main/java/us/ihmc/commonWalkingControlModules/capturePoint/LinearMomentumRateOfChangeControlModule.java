@@ -63,6 +63,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
 
    protected final FramePoint2D perfectCMP = new FramePoint2D();
+   protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
 
 
@@ -138,6 +139,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
          //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoProjectionArea);
       }
       yoUnprojectedDesiredCMP.setToNaN();
+
+      perfectCoP.setToNaN();
 
       parentRegistry.addChild(registry);
    }
@@ -312,6 +315,11 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
    {
       this.perfectCMP.setIncludingFrame(perfectCMP);
+   }
+
+   public void setPerfectCoP(FramePoint2DReadOnly perfectCoP)
+   {
+      this.perfectCoP.setIncludingFrame(perfectCoP);
    }
 
    /**

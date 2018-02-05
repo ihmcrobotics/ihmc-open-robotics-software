@@ -63,46 +63,64 @@ public class ICPQPInputCalculator
    }
 
    /**
-    * Computes the CMP feedback minimization task. This simply tries to minimize the total feedback magnitude.
+    * Computes the CoP feedback minimization task. This simply tries to minimize the total CoP feedback magnitude.
     * Has the form<br>
     *    &delta;<sup>T</sup> Q &delta;<br>
-    * where &delta; is the CMP feedback.
+    * where &delta; is the CoP feedback.
     *
-    * @param icpQPInputToPack QP input to store the CMP feedback minimization task. Modified.
-    * @param feedbackWeight weight attached to minimizing the CMP feedback.
+    * @param icpQPInputToPack QP input to store the CoP feedback minimization task. Modified.
+    * @param feedbackWeight weight attached to minimizing the CoP feedback.
     */
-   public static void computeFeedbackTask(ICPQPInput icpQPInputToPack, DenseMatrix64F feedbackWeight)
+   public static void computeCoPFeedbackTask(ICPQPInput icpQPInputToPack, DenseMatrix64F feedbackWeight)
    {
       MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, 0, 0, feedbackWeight, 0, 0, 2, 2, 1.0);
    }
 
    /**
-    * Computes the CMP feedback rate task. This tries to minimize the distance of the current solution
+    * Computes the CoP feedback rate task. This tries to minimize the distance of the current solution
     * from the previous solution. Has the form<br>
     *    (&delta; - &delta;<sub>prev</sub>)<sup>T</sup> Q (&delta; - &delta;<sub>prev</sub>)<br>
-    * where &delta; is the CMP feedback and &delta;<sub>prev</sub> is the previous solution.
+    * where &delta; is the CoP feedback and &delta;<sub>prev</sub> is the previous solution.
     *
-    * @param icpQPInputToPack QP input to store the CMP feedback rate task. Modified.
-    * @param rateWeight weight attached to rate the CMP feedback.
+    * @param icpQPInputToPack QP input to store the CoP feedback rate task. Modified.
+    * @param rateWeight weight attached to rate the CoP feedback.
     * @param objective the previous solution value, &delta;<sub>prev</sub>
     */
-   public void computeFeedbackRateTask(ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
+   public void computeCoPFeedbackRateTask(ICPQPInput icpQPInputToPack, DenseMatrix64F rateWeight, DenseMatrix64F objective)
    {
-      computeQuadraticTask(0, icpQPInputToPack, rateWeight, objective);
+      computeQuadraticTask(indexHandler.getCoPFeedbackIndex(), icpQPInputToPack, rateWeight, objective);
    }
 
    /**
-    * Computes the angular momentum minimization task. This simply tries to minimize the angular momentum.
+    * Computes the angular momentum rate task in the form of the CoP-CMP difference objective.
+    * This simply tries to achieve the desired CoP-CMP difference.
     * Has the form<br>
     *    &kappa;<sup>T</sup> Q &kappa;<br>
+    * where &kappa; is the difference of the CMP from the CoP.
+    *
+    * @param icpQPInputToPack QP input to store the angular momentum minimization task. Modified.
+    * @param cmpFeedbackWeight weight attached to minimizing the angular momentum rate.
+    */
+   public void computeCMPFeedbackTask(ICPQPInput icpQPInputToPack, DenseMatrix64F cmpFeedbackWeight)
+   {
+      tmpObjective.zero();
+      computeCMPFeedbackTask(icpQPInputToPack, cmpFeedbackWeight, tmpObjective);
+   }
+
+   /**
+    * Computes the angular momentum minimization task in the form of the CoP-CMP difference objective.
+    * This simply tries to achieve the desired CoP-CMP difference.
+    * Has the form<br>
+    *    (&kappa; - &kappa;<sub>d</sub>)<sup>T</sup> Q (&kappa; - &kappa;<sub>d</sub>)<br>
     * where &kappa; is the angular momentum.
     *
     * @param icpQPInputToPack QP input to store the angular momentum minimization task. Modified.
-    * @param angularMomentumMinimizationWeight weight attached to minimizing the angular momentum.
+    * @param cmpFeedbackWeight weight attached to minimizing the angular momentum rate.
+    * @param differenceObjective desired difference between the CoP and CMP.
     */
-   public static void computeAngularMomentumMinimizationTask(ICPQPInput icpQPInputToPack, DenseMatrix64F angularMomentumMinimizationWeight)
+   public void computeCMPFeedbackTask(ICPQPInput icpQPInputToPack, DenseMatrix64F cmpFeedbackWeight, DenseMatrix64F differenceObjective)
    {
-      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, 0, 0, angularMomentumMinimizationWeight, 0, 0, 2, 2, 1.0);
+      computeQuadraticTask(0, icpQPInputToPack, cmpFeedbackWeight, differenceObjective);
    }
 
    /**
@@ -141,18 +159,9 @@ public class ICPQPInputCalculator
       computeQuadraticTask(footstepIndex, icpQPInputToPack, rateWeight, objective);
    }
 
-   private void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective)
-   {
-      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, startIndex, startIndex, weight, 0, 0, 2, 2, 1.0);
-
-      CommonOps.mult(weight, objective, tmpObjective);
-
-      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, startIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
-
-      CommonOps.multTransA(0.5, objective, tmpObjective, tmpScalar);
-      CommonOps.addEquals(icpQPInputToPack.residualCost, tmpScalar);
-   }
-
+   /**
+    * Computes the task to enforce the feedback dynamics in the controller
+    */
    public void computeDynamicsTask(ICPQPInput icpQPInput, DenseMatrix64F currentICPError, DenseMatrix64F referenceFootstepLocation,
          DenseMatrix64F feedbackGain, DenseMatrix64F weight, double footstepRecursionMultiplier, double footstepAdjustmentSafetyFactor)
    {
@@ -160,7 +169,7 @@ public class ICPQPInputCalculator
       DiagonalMatrixTools.invertDiagonalMatrix(feedbackGain, invertedFeedbackGain);
 
       int size = 2;
-      if (indexHandler.useAngularMomentum())
+      if (indexHandler.hasCMPFeedbackTask())
          size += 2;
       if (indexHandler.useStepAdjustment())
          size += 2;
@@ -183,10 +192,10 @@ public class ICPQPInputCalculator
 
       if (considerFeedbackInAdjustment && considerAngularMomentumInAdjustment)
       {
-         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         if (indexHandler.useAngularMomentum())
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+         if (indexHandler.hasCMPFeedbackTask())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
@@ -202,9 +211,9 @@ public class ICPQPInputCalculator
       }
       else if (considerFeedbackInAdjustment)
       {
-         if (!indexHandler.useAngularMomentum())
+         if (!indexHandler.hasCMPFeedbackTask())
          {
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
             MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
             if (indexHandler.useStepAdjustment())
@@ -218,8 +227,8 @@ public class ICPQPInputCalculator
          }
          else
          {
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
             MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
             if (indexHandler.useStepAdjustment())
@@ -227,7 +236,7 @@ public class ICPQPInputCalculator
                CommonOps.setIdentity(identity);
                CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
 
-               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
                MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
                MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
@@ -237,10 +246,10 @@ public class ICPQPInputCalculator
       }
       else if (considerAngularMomentumInAdjustment)
       {
-         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         if (indexHandler.useAngularMomentum())
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+         if (indexHandler.hasCMPFeedbackTask())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
@@ -249,8 +258,8 @@ public class ICPQPInputCalculator
             CommonOps.setIdentity(identity);
             CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
 
-            if (indexHandler.useAngularMomentum())
-               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+            if (indexHandler.hasCMPFeedbackTask())
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
             MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
@@ -260,10 +269,10 @@ public class ICPQPInputCalculator
       }
       else
       {
-         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-         if (indexHandler.useAngularMomentum())
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
+         if (indexHandler.hasCMPFeedbackTask())
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
          MatrixTools.setMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
@@ -295,19 +304,19 @@ public class ICPQPInputCalculator
    }
 
    /**
-    * Submits the CMP feedback action task to the total quadratic program cost terms.
+    * Submits the CoP feedback action task to the total quadratic program cost terms.
     *
     * @param icpQPInput QP Input that stores the data.
     * @param solverInput_H_ToPack full problem quadratic cost term. Modified.
     * @param solverInput_h_ToPack full problem linear cost term. Modified.
     * @param solverInputResidualCostToPack full problem residual cost term.
     */
-   public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
-         DenseMatrix64F solverInputResidualCostToPack)
+   public void submitCoPFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
+                                     DenseMatrix64F solverInputResidualCostToPack)
    {
-      int feedbackCMPIndex = indexHandler.getFeedbackCMPIndex();
-      MatrixTools.addMatrixBlock(solverInput_H_ToPack, feedbackCMPIndex, feedbackCMPIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h_ToPack, feedbackCMPIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+      int feedbackCoPIndex = indexHandler.getCoPFeedbackIndex();
+      MatrixTools.addMatrixBlock(solverInput_H_ToPack, feedbackCoPIndex, feedbackCoPIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h_ToPack, feedbackCoPIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
 
@@ -320,7 +329,7 @@ public class ICPQPInputCalculator
     * @param solverInputResidualCostToPack full problem residual cost term.
     */
    public void submitDynamicsTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
-         DenseMatrix64F solverInputResidualCostToPack)
+                                  DenseMatrix64F solverInputResidualCostToPack)
    {
       int size = icpQPInput.linearTerm.getNumRows();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, 0, 0, icpQPInput.quadraticTerm, 0, 0, size, size, 1.0);
@@ -336,10 +345,10 @@ public class ICPQPInputCalculator
     * @param solverInput_h_ToPack full problem linear cost term.
     * @param solverInputResidualCostToPack full problem residual cost term.
     */
-   public void submitAngularMomentumMinimizationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
-         DenseMatrix64F solverInputResidualCostToPack)
+   public void submitCMPFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
+                                     DenseMatrix64F solverInputResidualCostToPack)
    {
-      int angularMomentumIndex = indexHandler.getAngularMomentumIndex();
+      int angularMomentumIndex = indexHandler.getCMPFeedbackIndex();
       MatrixTools.addMatrixBlock(solverInput_H_ToPack, angularMomentumIndex, angularMomentumIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, angularMomentumIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
@@ -354,7 +363,7 @@ public class ICPQPInputCalculator
     * @param solverInputResidualCostToPack full problem residual cost term.
     */
    public void submitFootstepTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H_ToPack, DenseMatrix64F solverInput_h_ToPack,
-         DenseMatrix64F solverInputResidualCostToPack)
+                                  DenseMatrix64F solverInputResidualCostToPack)
    {
       int numberOfFootstepVariables = indexHandler.getNumberOfFootstepVariables();
 
@@ -363,4 +372,17 @@ public class ICPQPInputCalculator
       MatrixTools.addMatrixBlock(solverInput_h_ToPack, footstepStartIndex, 0, icpQPInput.linearTerm, 0, 0, numberOfFootstepVariables, 1, 1.0);
       MatrixTools.addMatrixBlock(solverInputResidualCostToPack, 0, 0, icpQPInput.residualCost, 0, 0, 1, 1, 1.0);
    }
+
+   private void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective)
+   {
+      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, startIndex, startIndex, weight, 0, 0, 2, 2, 1.0);
+
+      CommonOps.mult(weight, objective, tmpObjective);
+
+      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, startIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+
+      CommonOps.multTransA(0.5, objective, tmpObjective, tmpScalar);
+      CommonOps.addEquals(icpQPInputToPack.residualCost, tmpScalar);
+   }
+
 }
