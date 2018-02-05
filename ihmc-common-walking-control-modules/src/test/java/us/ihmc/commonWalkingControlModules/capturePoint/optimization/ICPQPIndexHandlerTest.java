@@ -29,6 +29,7 @@ public class ICPQPIndexHandlerTest
 
       Assert.assertEquals(0, indexHandler.getCoPFeedbackIndex());
       Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
+      Assert.assertFalse(indexHandler.useAngularMomentum());
       Assert.assertFalse(indexHandler.useStepAdjustment());
 
       indexHandler.computeProblemSize();
