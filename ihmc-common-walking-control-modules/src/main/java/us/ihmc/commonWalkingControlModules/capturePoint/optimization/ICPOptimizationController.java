@@ -129,6 +129,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
    private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
+   private final YoDouble thresholdForMoving = new YoDouble(yoNamePrefix + "ThresholdForMoving", registry);
    private final YoDouble integralGainWhenStuck = new YoDouble(yoNamePrefix + "IntegralGainWhenStuck", registry);
    private final YoDouble integralBleedOffRate = new YoDouble(yoNamePrefix + "IntegralBleedOffRate", registry);
    private final YoDouble maxIntegralFeedback = new YoDouble(yoNamePrefix + "MaxIntegralFeedback", registry);
@@ -235,9 +236,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
-      thresholdForStuck.set(0.001);
-      integralGainWhenStuck.set(0.1);
-      integralBleedOffRate.set(0.95);
+      thresholdForStuck.set(0.01);
+      thresholdForMoving.set(0.02);
+      integralGainWhenStuck.set(1.0);
+      integralBleedOffRate.set(1.0);
       maxIntegralFeedback.set(0.05);
 
 
@@ -385,6 +387,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       this.transferToSide.set(transferToSide);
       isInDoubleSupport.set(true);
+      isStanding.set(false);
       isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
@@ -705,7 +708,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
             solutionHandler.updateCostsToGo(solver);
       }
 
-      computeIsStuck();
+      isICPStuck.set(computeIsStuck());
       computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
@@ -794,7 +797,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (isICPStuck.getBooleanValue())
          return true;
 
-      if (Math.max(currentICPVelocity.length(), desiredICPVelocity.length()) < thresholdForStuck.getDoubleValue())
+      if ((currentICPVelocity.length() < thresholdForStuck.getDoubleValue()) && desiredICPVelocity.length() > thresholdForMoving.getDoubleValue())
          return true;
 
       return false;
