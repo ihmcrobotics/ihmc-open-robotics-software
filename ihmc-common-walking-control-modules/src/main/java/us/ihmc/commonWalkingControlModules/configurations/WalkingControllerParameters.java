@@ -6,20 +6,20 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
@@ -178,7 +178,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspaceOrientationControlGains()
    {
       return new ArrayList<>();
    }
@@ -198,7 +198,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing position PID gains and the corresponding rigid bodies
     */
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
       return new ArrayList<>();
    }
@@ -251,20 +251,20 @@ public abstract class WalkingControllerParameters
    /**
     * Returns the gains used for the foot pose when in swing.
     */
-   public abstract PIDSE3Gains getSwingFootControlGains();
+   public abstract PIDSE3Configuration getSwingFootControlGains();
 
    /**
     * Returns the gains used for the foot when in support. Note that these gains are only used when the foot
     * is not loaded or close to tipping. Of that is not the case the foot pose when in support is not controlled
     * using a feedback controller.
     */
-   public abstract PIDSE3Gains getHoldPositionFootControlGains();
+   public abstract PIDSE3Configuration getHoldPositionFootControlGains();
 
    /**
     * Returns the gains used for the foot when in the toe off state. Note that some parts of the foot orientation
     * will not use these gains. The foot pitch for example is usually not controlled explicitly during tow off.
     */
-   public abstract PIDSE3Gains getToeOffFootControlGains();
+   public abstract PIDSE3Configuration getToeOffFootControlGains();
 
    /**
     * Specifies if the arm controller should be switching
