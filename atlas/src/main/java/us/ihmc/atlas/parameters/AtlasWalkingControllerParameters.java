@@ -257,9 +257,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new GroupParameter<>("SpineJoints", null, jointMap.getSpineJointNamesAsStrings()));
-      jointspaceGains.add(new GroupParameter<>("NeckJoints", null, jointMap.getNeckJointNamesAsStrings()));
-      jointspaceGains.add(new GroupParameter<>("ArmJoints", null, jointMap.getArmJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("SpineJoints", jointMap.getSpineJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("NeckJoints", jointMap.getNeckJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("ArmJoints", jointMap.getArmJointNamesAsStrings()));
       return jointspaceGains;
    }
 
@@ -270,27 +270,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       List<GroupParameter<PID3DConfiguration>> taskspaceAngularGains = new ArrayList<>();
 
       PID3DConfiguration chestAngularGains = createChestOrientationControlGains();
-      List<String> chestGainBodies = new ArrayList<>();
-      chestGainBodies.add(jointMap.getChestName());
-      taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, chestGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, jointMap.getChestName()));
 
       PID3DConfiguration headAngularGains = createHeadOrientationControlGains();
-      List<String> headGainBodies = new ArrayList<>();
-      headGainBodies.add(jointMap.getHeadName());
-      taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, headGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, jointMap.getHeadName()));
 
       PID3DConfiguration handAngularGains = createHandOrientationControlGains();
-      List<String> handGainBodies = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handGainBodies.add(jointMap.getHandName(robotSide));
-      }
-      taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, handGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, jointMap.getHandNames()));
 
       PID3DConfiguration pelvisAngularGains = createPelvisOrientationControlGains();
-      List<String> pelvisGainBodies = new ArrayList<>();
-      pelvisGainBodies.add(jointMap.getPelvisName());
-      taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
+      taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, jointMap.getPelvisName()));
 
       return taskspaceAngularGains;
    }
@@ -322,12 +311,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       List<GroupParameter<PID3DConfiguration>> taskspaceLinearGains = new ArrayList<>();
 
       PID3DConfiguration handLinearGains = createHandPositionControlGains();
-      List<String> handGainBodies = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handGainBodies.add(jointMap.getHandName(robotSide));
-      }
-      taskspaceLinearGains.add(new GroupParameter<>("Hand", handLinearGains, handGainBodies));
+      taskspaceLinearGains.add(new GroupParameter<>("Hand", handLinearGains, jointMap.getHandNames()));
 
       return taskspaceLinearGains;
    }
