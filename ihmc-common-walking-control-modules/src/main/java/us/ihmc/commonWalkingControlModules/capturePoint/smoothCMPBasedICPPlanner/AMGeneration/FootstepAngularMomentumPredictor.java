@@ -9,6 +9,10 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
@@ -76,12 +80,12 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private AngularMomentumTrajectoryInterface activeTrajectory;
    private double initialTime;
 
-   private List<FramePoint3D> comInitialPositions;
-   private List<FramePoint3D> comFinalPositions;
-   private List<FrameVector3D> comInitialVelocities;
-   private List<FrameVector3D> comFinalVelocities;
-   private List<FrameVector3D> comInitialAccelerations;
-   private List<FrameVector3D> comFinalAccelerations;
+   private List<? extends FramePoint3DReadOnly> comInitialPositions;
+   private List<? extends FramePoint3DReadOnly> comFinalPositions;
+   private List<? extends FrameVector3DReadOnly> comInitialVelocities;
+   private List<? extends FrameVector3DReadOnly> comFinalVelocities;
+   private List<? extends FrameVector3DReadOnly> comInitialAccelerations;
+   private List<? extends FrameVector3DReadOnly> comFinalAccelerations;
 
    private final FramePoint3D tempFramePoint1 = new FramePoint3D();
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();
@@ -170,10 +174,10 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       ReferenceFrame[] referenceFrames = {worldFrame};
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
-         AngularMomentumTrajectory swingTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSwingSegments, 2 * maxNumberOfTrajectoryCoefficients);
+         AngularMomentumTrajectory swingTrajectory = new AngularMomentumTrajectory(numberOfSwingSegments, 2 * maxNumberOfTrajectoryCoefficients);
          swingAngularMomentumTrajectories.add(swingTrajectory);
 
-         AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
+         AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
          transferAngularMomentumTrajectories.add(transferTrajectory);
 
          CoPPointsInFoot copLocations = new CoPPointsInFoot(fullPrefix, i, referenceFrames, registry);
@@ -204,7 +208,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       upcomingCoPsInFootsteps.add(new CoPPointsInFoot(fullPrefix, maxNumberOfFootstepsToConsider, referenceFrames, registry));
       upcomingCoPsInFootsteps.add(new CoPPointsInFoot(fullPrefix, maxNumberOfFootstepsToConsider + 1, referenceFrames, registry));
 
-      AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
+      AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
       transferAngularMomentumTrajectories.add(transferTrajectory);
 
       if (DEBUG)
@@ -269,16 +273,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public void updateListeners()
-   {
-   }
-
-   @Override
-   public void createVisualizerForConstantAngularMomentum(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
-   {
-   }
-
-   @Override
    public void clear()
    {
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
@@ -309,9 +303,10 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   public void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations, List<FramePoint3D> comInitialPositions, List<FramePoint3D> comFinalPositions,
-                                     List<FrameVector3D> comInitialVelocities, List<FrameVector3D> comFinalVelocities,
-                                     List<FrameVector3D> comInitialAccelerations, List<FrameVector3D> comFinalAccelerations, int numberOfRegisteredFootsteps)
+   public void addFootstepCoPsToPlan(List<CoPPointsInFoot> copLocations, List<? extends FramePoint3DReadOnly> comInitialPositions,
+                                     List<? extends FramePoint3DReadOnly> comFinalPositions, List<? extends FrameVector3DReadOnly> comInitialVelocities,
+                                     List<? extends FrameVector3DReadOnly> comFinalVelocities, List<? extends FrameVector3DReadOnly> comInitialAccelerations,
+                                     List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
    {
       for (int i = 0; i < copLocations.size(); i++)
          upcomingCoPsInFootsteps.get(i).setIncludingFrame(copLocations.get(i));
@@ -340,43 +335,10 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack)
+   public void getDesiredAngularMomentum(FixedFrameVector3DBasics desiredAngularMomentumToPack, FixedFrameVector3DBasics desiredTorqueToPack)
    {
-      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
-   }
-
-   @Override
-   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack)
-   {
-      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
-      desiredTorqueToPack.setIncludingFrame(desiredTorque);
-   }
-
-   public void getDesiredAngularMomentum(FrameVector3D desiredAngMomToPack, FrameVector3D desiredTorqueToPack, FrameVector3D desiredRotatumToPack)
-   {
-      desiredAngMomToPack.setIncludingFrame(desiredAngularMomentum);
-      desiredTorqueToPack.setIncludingFrame(desiredTorque);
-      desiredRotatumToPack.setIncludingFrame(desiredRotatum);
-   }
-
-   @Override
-   public void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack)
-   {
-      desiredAngMomToPack.set(desiredAngularMomentum);
-   }
-
-   @Override
-   public void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack, YoFrameVector desiredTorqueToPack)
-   {
-      desiredAngMomToPack.set(desiredAngularMomentum);
+      desiredAngularMomentumToPack.set(desiredAngularMomentum);
       desiredTorqueToPack.set(desiredTorque);
-   }
-
-   public void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack, YoFrameVector desiredTorqueToPack, YoFrameVector desiredRotatumToPack)
-   {
-      desiredAngMomToPack.set(desiredAngularMomentum);
-      desiredTorqueToPack.set(desiredTorque);
-      desiredRotatumToPack.set(desiredRotatum);
    }
 
    @Override
@@ -616,7 +578,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       TrajectoryMathTools.scale(mass, momentumTrajectoryToPack);
    }
 
-   public void getPredictedCenterOfMassPosition(YoFramePoint pointToPack, double time)
+   public void getPredictedCenterOfMassPosition(FixedFramePoint3DBasics pointToPack, double time)
    {
       if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
       {
@@ -645,7 +607,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   public void getPredictedFootPosition(YoFramePoint pointToPack, double time)
+   public void getPredictedFootPosition(FixedFramePoint3DBasics pointToPack, double time)
    {
       if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
       {
@@ -710,7 +672,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    private class TrajectoryDebug extends YoSegmentedFrameTrajectory3D
    {
-
       public TrajectoryDebug(String name, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
       {
          super(name, maxNumberOfSegments, maxNumberOfCoefficients, registry);
@@ -720,15 +681,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          segments.get(getNumberOfSegments()).set(trajToCopy);
          numberOfSegments.increment();
-      }
-   }
-
-   private class AngularMomentumTrajectoryBuilder extends GenericTypeBuilder<AngularMomentumTrajectory>
-   {
-      @Override
-      public AngularMomentumTrajectory newInstance()
-      {
-         return new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
       }
    }
 }

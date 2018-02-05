@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -138,7 +139,7 @@ public class OneStepCaptureRegionCalculator
    private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameConvexPolygon2d rawCaptureRegion = new FrameConvexPolygon2d(worldFrame);
 
-   public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2D icp, double omega0, FrameConvexPolygon2d footPolygon)
+   public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2DReadOnly icp, double omega0, FrameConvexPolygon2d footPolygon)
    {
       globalTimer.startMeasurement();
 

@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -325,17 +326,17 @@ public class Footstep implements Settable<Footstep>
       footstepPose.set(transformFromSoleToWorldFrame);
    }
 
-   public void setPose(FramePose3D footstepPose)
+   public void setPose(FramePose3DReadOnly footstepPose)
    {
       this.footstepPose.setIncludingFrame(footstepPose);
    }
 
-   public void setPose(FramePoint3D position, FrameQuaternion orientation)
+   public void setPose(FrameTuple3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       footstepPose.setIncludingFrame(position, orientation);
    }
 
-   public void setPositionChangeOnlyXY(FramePoint2D position2d)
+   public void setPositionChangeOnlyXY(FramePoint2DReadOnly position2d)
    {
       position2d.checkReferenceFrameMatch(footstepPose);
       setX(position2d.getX());

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.capturePoint.optimization.simpleController;
+package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -152,7 +153,7 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      YoFramePose foostepSolution = new YoFramePose("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingQuaternions foostepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D foostepPose = new FramePose3D();
       FramePoint2D foostepXYSolution = new FramePoint2D();
@@ -186,7 +187,7 @@ public class ICPOptimizationSolutionHandlerTest
       FrameVector2D adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize, 0.0);
 
-      foostepSolution.getFramePose(foostepPose);
+      foostepPose.set(foostepSolution);
       foostepXYSolution.set(foostepPose.getPosition());
 
       assertTrue(foostepXYSolution.epsilonEquals(expectedClippedSolution, 1e-3));
@@ -210,7 +211,7 @@ public class ICPOptimizationSolutionHandlerTest
       adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize + 0.5 * deadbandResolution, 0.0);
 
-      foostepSolution.getFramePose(foostepPose);
+      foostepPose.set(foostepSolution);
       foostepXYSolution.set(foostepPose.getPosition());
 
       assertTrue(foostepXYSolution.epsilonEquals(expectedClippedSolution, 1e-3));
@@ -238,7 +239,7 @@ public class ICPOptimizationSolutionHandlerTest
       double stepLength = 0.5;
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
-      YoFramePose foostepSolution = new YoFramePose("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingQuaternions foostepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D footstepPose = new FramePose3D();
       FramePoint2D footstepXYSolution = new FramePoint2D();
@@ -272,7 +273,7 @@ public class ICPOptimizationSolutionHandlerTest
       FrameVector2D adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize, 0.0);
 
-      foostepSolution.getFramePose(footstepPose);
+      footstepPose.set(foostepSolution);
       footstepXYSolution.set(footstepPose.getPosition());
 
       assertTrue(footstepXYSolution.epsilonEquals(expectedClippedSolution, 1e-3));
@@ -298,7 +299,7 @@ public class ICPOptimizationSolutionHandlerTest
       clippedAdjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize + 1.5 * deadbandResolution - deadbandSize, 0.0);
       expectedClippedSolution.add(clippedAdjustment);
 
-      foostepSolution.getFramePose(footstepPose);
+      footstepPose.set(foostepSolution);
       footstepXYSolution.set(footstepPose.getPosition());
 
       assertTrue(footstepXYSolution.epsilonEquals(expectedClippedSolution, 1e-3));
@@ -322,7 +323,7 @@ public class ICPOptimizationSolutionHandlerTest
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
 
-      YoFramePose footstepSolution = new YoFramePose("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingQuaternions footstepSolution = new YoFramePoseUsingQuaternions("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       FramePose3D footstepPose = new FramePose3D();
       FramePoint2D footstepXYSolution = new FramePoint2D();
@@ -365,7 +366,7 @@ public class ICPOptimizationSolutionHandlerTest
       FrameVector2D adjustment = new FrameVector2D();
       adjustment.set(scale * deadbandSize, 0.0);
 
-      footstepSolution.getFramePose(footstepPose);
+      footstepPose.set(footstepSolution);
       footstepXYSolution.set(footstepPose.getPosition());
 
       assertTrue(footstepXYSolution.epsilonEquals(expectedClippedSolution, 1e-3));

@@ -7,6 +7,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
@@ -77,33 +79,17 @@ public class ReferenceCMPTrajectoryGenerator
          activeTrajectory.update(timeInState, desiredCMP, desiredCMPVelocity);
    }
 
-   public void getPosition(FramePoint3D desiredCMPToPack)
-   {
-      desiredCMPToPack.setIncludingFrame(desiredCMP);
-   }
-
-   public void getPosition(YoFramePoint desiredCMPToPack)
+   public void getPosition(FixedFramePoint3DBasics desiredCMPToPack)
    {
       desiredCMPToPack.set(desiredCMP);
    }
 
-   public void getVelocity(FrameVector3D desiredCMPVelocityToPack)
-   {
-      desiredCMPVelocityToPack.setIncludingFrame(desiredCMPVelocity);
-   }
-
-   public void getVelocity(YoFrameVector desiredCMPVelocityToPack)
+   public void getVelocity(FixedFrameVector3DBasics desiredCMPVelocityToPack)
    {
       desiredCMPVelocityToPack.set(desiredCMPVelocity);
    }
 
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-   }
-
-   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack)
+   public void getLinearData(FixedFramePoint3DBasics positionToPack, FixedFrameVector3DBasics velocityToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
