@@ -1,7 +1,6 @@
 package us.ihmc.robotics.controllers.pidGains;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 
 /**
  * Read-only interface for PID gains in three dimensions.
@@ -68,31 +67,6 @@ public interface PID3DGainsReadOnly
     * @return the maximum output rate.
     */
    public abstract double getMaximumFeedbackRate();
-
-   /**
-    * Returns the type of gain coupling for the three dimensions.
-    * <p>
-    * The gain coupling determines whether all axis should use different
-    * gains or if some axis (e.g. the X and Y axis for {@link GainCoupling#XY})
-    * should use the same controller gains. This is useful when using the
-    * YoVariable implementation of this class {@link DefaultYoPID3DGains} since
-    * it will cause the creation of different set of tuning variables.
-    * </p>
-    * @return the coupling of the controller gains for the three axes.
-    */
-   public abstract GainCoupling getGainCoupling();
-
-   /**
-    * Returns whether the PID controller used an I gain or not (if this
-    * returns {@code false} the controller will behave as a PD controller).
-    * <p>
-    * This is especially useful when using the YoVariable implementation of
-    * this class {@link DefaultYoPID3DGains} is used since is will avoid
-    * creating the YoVariables for tuning the integration.
-    * </p>
-    * @return whether the gains include integrator gains.
-    */
-   public abstract boolean isUseIntegrator();
 
    /**
     * Will pack the proportional gain matrix. The matrix will be a diagonal
