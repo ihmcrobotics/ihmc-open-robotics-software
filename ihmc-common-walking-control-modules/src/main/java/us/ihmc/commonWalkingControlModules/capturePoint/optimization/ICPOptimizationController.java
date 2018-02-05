@@ -44,6 +44,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoBoolean allowStepAdjustment = new YoBoolean(yoNamePrefix + "AllowStepAdjustment", registry);
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
+   private final YoBoolean useCMPFeedback = new YoBoolean(yoNamePrefix + "UseCMPFeedback", registry);
    private final YoBoolean useAngularMomentum = new YoBoolean(yoNamePrefix + "UseAngularMomentum", registry);
 
    private final YoBoolean scaleStepRateWeightWithTime = new YoBoolean(yoNamePrefix + "ScaleStepRateWeightWithTime", registry);
@@ -185,6 +186,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       useFeedbackRate = icpOptimizationParameters.useFeedbackRate();
 
       allowStepAdjustment.set(icpOptimizationParameters.allowStepAdjustment());
+      useCMPFeedback.set(icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum.set(icpOptimizationParameters.useAngularMomentum());
 
       scaleStepRateWeightWithTime.set(icpOptimizationParameters.scaleStepRateWeightWithTime());
@@ -257,13 +259,15 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
                                                                        YoGraphicPosition.GraphicType.BALL);
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution.getYoX(), this.footstepSolution.getYoY(), 0.005,
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution.getPosition(), 0.005,
                                                                         YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.BALL);
-      solutionHandler.setupVisualizers(artifactList);
+      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP", this.feedbackCoP, 0.005, YoAppearance.Darkorange(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
       artifactList.add(predictedEndOfStateICP.createArtifact());
       artifactList.add(clippedFootstepSolution.createArtifact());
+      artifactList.add(feedbackCoP.createArtifact());
 
+      solutionHandler.setupVisualizers(artifactList);
       artifactList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -552,7 +556,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       submitCoPFeedbackTaskConditionsToSolver();
-      submitCMPFeedbackTaskConditionsToSolver();
+      if (useCMPFeedback.getBooleanValue())
+         submitCMPFeedbackTaskConditionsToSolver();
    }
 
    private void submitCoPFeedbackTaskConditionsToSolver()

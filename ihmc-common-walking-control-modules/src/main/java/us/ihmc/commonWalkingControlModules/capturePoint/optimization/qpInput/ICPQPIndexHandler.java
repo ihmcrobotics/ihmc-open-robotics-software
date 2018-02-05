@@ -24,7 +24,9 @@ public class ICPQPIndexHandler
    /** Whether or not to use step adjustment in the optimization. If {@link #numberOfFootstepsToConsider} is 0, this term should be false */
    private boolean useStepAdjustment;
    /** Whether or not to include cmp feedback task in the optimization. */
-   private boolean hasCMPFeedbackTask = false;
+   private boolean hasCMPFeedbackTask = true;
+   /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
+   private boolean useAngularMomentum = false;
 
    /**
     * Resets the number of footsteps for the controller to consider.
@@ -66,7 +68,7 @@ public class ICPQPIndexHandler
 
    /**
     * Sets whether or not to use CMP feedback in the optimization.
-    * @param hasCMPFeedbackTask whether or not to use angular momentum
+    * @param hasCMPFeedbackTask whether or not to use CMP feedback
     */
    public void setHasCMPFeedbackTask(boolean hasCMPFeedbackTask)
    {
@@ -74,13 +76,30 @@ public class ICPQPIndexHandler
    }
 
    /**
+    * Sets whether or not to use angular momentum in the optimization.
+    * @param useAngularMomentum whether or not to use angular momentum
+    */
+   public void setUseAngularMomentum(boolean useAngularMomentum)
+   {
+      this.useAngularMomentum = useAngularMomentum;
+   }
+
+   /**
     * Whether or not the solver should include the CMP feedback.
-    *
     * @return whether or not to has CMP feedback task.
     */
    public boolean hasCMPFeedbackTask()
    {
       return hasCMPFeedbackTask;
+   }
+
+   /**
+    * Whether or not the solver should use angular momentum with feedback.
+    * @return whether or not use angular momentum.
+    */
+   public boolean useAngularMomentum()
+   {
+      return useAngularMomentum;
    }
 
    /**

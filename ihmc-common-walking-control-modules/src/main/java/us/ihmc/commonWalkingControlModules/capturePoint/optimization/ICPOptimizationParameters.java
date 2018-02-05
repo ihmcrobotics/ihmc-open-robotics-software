@@ -107,6 +107,14 @@ public abstract class ICPOptimizationParameters
    public abstract boolean allowStepAdjustment();
 
    /**
+    * Enabling this boolean allows modifying the CMP offset from the CoP in the optimization.
+    */
+   public boolean useCMPFeedback()
+   {
+      return true;
+   }
+
+   /**
     * Enabling this boolean allows the CMP to exit the support polygon.
     * The CoP will still be constrained to lie inside the support polygon, however.
     */

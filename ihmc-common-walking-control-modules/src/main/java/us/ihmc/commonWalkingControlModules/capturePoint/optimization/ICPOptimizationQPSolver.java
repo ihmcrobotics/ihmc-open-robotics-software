@@ -14,11 +14,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
@@ -384,8 +382,11 @@ public class ICPOptimizationQPSolver
          if (hasPlanarRegionConstraint)
             numberOfInequalityConstraints += planarRegionConstraint.getInequalityConstraintSize();
       }
-      if (indexHandler.hasCMPFeedbackTask() && Double.isFinite(cmpSafeDistanceFromEdge))
-         numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
+      if (indexHandler.hasCMPFeedbackTask())
+      {
+         if (!indexHandler.useAngularMomentum() || Double.isFinite(cmpSafeDistanceFromEdge))
+            numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
+      }
 
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
@@ -553,7 +554,7 @@ public class ICPOptimizationQPSolver
 
       MatrixTools.setMatrixBlock(this.cmpFeedbackWeight, 0, 0, identity, 0, 0, 2, 2, cmpFeedbackWeight);
       indexHandler.setHasCMPFeedbackTask(true);
-      //indexHandler.setUseAngularMomentum(useAngularMomentum);
+      indexHandler.setUseAngularMomentum(useAngularMomentum);
    }
 
    /**
@@ -724,7 +725,7 @@ public class ICPOptimizationQPSolver
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
 
-      if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.hasCMPFeedbackTask() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
+      if (indexHandler.hasCMPFeedbackTask() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
       if (indexHandler.useStepAdjustment())
@@ -837,8 +838,17 @@ public class ICPOptimizationQPSolver
     */
    private void addCMPLocationConstraint()
    {
+      double cmpConstraintBound;
+      if (indexHandler.useAngularMomentum())
+         cmpConstraintBound = -cmpSafeDistanceFromEdge;
+      else
+         cmpConstraintBound = copSafeDistanceToEdge;
+
+      if (!Double.isFinite(cmpConstraintBound))
+         return;
+
       cmpLocationConstraint.setPositionOffset(desiredCoP);
-      cmpLocationConstraint.setDeltaInside(-cmpSafeDistanceFromEdge);
+      cmpLocationConstraint.setDeltaInside(cmpConstraintBound);
       cmpLocationConstraint.formulateConstraint();
 
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();

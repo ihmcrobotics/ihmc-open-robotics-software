@@ -128,6 +128,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
 
+      // FIXME this projection should be taken care of already
       // do projection here:
       if (!areaToProjectInto.isEmpty())
       {
