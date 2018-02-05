@@ -257,9 +257,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", null, jointMap.getSpineJointNamesAsStrings()));
-      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", null, jointMap.getNeckJointNamesAsStrings()));
-      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", null, jointMap.getArmJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("SpineJoints", null, jointMap.getSpineJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("NeckJoints", null, jointMap.getNeckJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("ArmJoints", null, jointMap.getArmJointNamesAsStrings()));
       return jointspaceGains;
    }
 

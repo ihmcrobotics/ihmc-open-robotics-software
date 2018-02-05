@@ -44,8 +44,8 @@ public class HighLevelControlManagerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableRegistry momentumRegistry = new YoVariableRegistry("MomentumOptimizationSettings");
-   private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry("JointGains");
-   private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry("BodyGains");
+   private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry("JointspaceGains");
+   private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry("RigidBodyGains");
    private final YoVariableRegistry footGainRegistry = new YoVariableRegistry("FootGains");
 
    private final StatusMessageOutputManager statusOutputManager;
