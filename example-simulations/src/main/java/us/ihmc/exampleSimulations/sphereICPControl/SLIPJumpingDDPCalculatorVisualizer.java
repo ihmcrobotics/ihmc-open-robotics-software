@@ -61,7 +61,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private static final double nominalComHeight = 1.0;
    private static final double length = 1.5;
    private static final double gravityZ = 9.81;
-   private static final double height = 0.3;
+   private static final double height = 0.1;
 
    private static final double mass = 150.0;
 
@@ -224,6 +224,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
             double heightChange = endPoint.getZ() - startPoint.getZ();
             double flightDuration = Math.sqrt(2.0 * (heightChange + jumpLength * Math.tan(landingAngle)) / gravityZ);
             double apexHeight = 0.5 * Math.pow(jumpLength * Math.tan(landingAngle), 2.0) / (flightDuration * flightDuration * gravityZ);
+            apexHeight += heightChange;
 
             apexPoint.interpolate(startPoint, endPoint, 0.5);
             apexPoint.setZ(apexHeight + nominalComHeight);
