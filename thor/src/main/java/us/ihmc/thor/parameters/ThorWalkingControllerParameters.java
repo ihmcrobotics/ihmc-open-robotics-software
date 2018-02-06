@@ -1,32 +1,30 @@
 package us.ihmc.thor.parameters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -206,25 +204,14 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
-      List<String> spineNames = new ArrayList<>();
-      List<String> neckNames = new ArrayList<>();
-      List<String> armNames = new ArrayList<>();
-
-      Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
-      Arrays.stream(jointMap.getNeckJointNames()).forEach(n -> neckNames.add(jointMap.getNeckJointName(n)));
-      for (RobotSide side : RobotSide.values)
-      {
-         Arrays.stream(jointMap.getArmJointNames()).forEach(n -> armNames.add(jointMap.getArmJointName(side, n)));
-      }
-
       PIDGains spineGains = createSpineControlGains();
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
 
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
-      jointspaceGains.add(new GroupParameter<>("_SpineJointGains", spineGains, spineNames));
-      jointspaceGains.add(new GroupParameter<>("_NeckJointGains", neckGains, neckNames));
-      jointspaceGains.add(new GroupParameter<>("_ArmJointGains", armGains, armNames));
+      jointspaceGains.add(new GroupParameter<>("SpineJoints", spineGains, jointMap.getSpineJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("NeckJoints", neckGains, jointMap.getNeckJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("ArmJoints", armGains, jointMap.getArmJointNamesAsStrings()));
 
       return jointspaceGains;
    }
@@ -292,37 +279,26 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspaceOrientationControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspaceOrientationControlGains()
    {
-      List<GroupParameter<PID3DGainsReadOnly>> taskspaceAngularGains = new ArrayList<>();
+      List<GroupParameter<PID3DConfiguration>> taskspaceAngularGains = new ArrayList<>();
 
-      PID3DGains chestAngularGains = createChestOrientationControlGains();
-      List<String> chestGainBodies = new ArrayList<>();
-      chestGainBodies.add(jointMap.getChestName());
-      taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, chestGainBodies));
+      PID3DConfiguration chestAngularGains = createChestOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Chest", chestAngularGains, jointMap.getChestName()));
 
-      PID3DGains headAngularGains = createHeadOrientationControlGains();
-      List<String> headGainBodies = new ArrayList<>();
-      headGainBodies.add(jointMap.getHeadName());
-      taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, headGainBodies));
+      PID3DConfiguration headAngularGains = createHeadOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Head", headAngularGains, jointMap.getHeadName()));
 
-      PID3DGains handAngularGains = createHandOrientationControlGains();
-      List<String> handGainBodies = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handGainBodies.add(jointMap.getHandName(robotSide));
-      }
-      taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, handGainBodies));
+      PID3DConfiguration handAngularGains = createHandOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Hand", handAngularGains, jointMap.getHandNames()));
 
-      PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
-      List<String> pelvisGainBodies = new ArrayList<>();
-      pelvisGainBodies.add(jointMap.getPelvisName());
-      taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
+      PID3DConfiguration pelvisAngularGains = createPelvisOrientationControlGains();
+      taskspaceAngularGains.add(new GroupParameter<>("Pelvis", pelvisAngularGains, jointMap.getPelvisName()));
 
       return taskspaceAngularGains;
    }
 
-   private PID3DGains createPelvisOrientationControlGains()
+   private PID3DConfiguration createPelvisOrientationControlGains()
    {
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
       double kpXY = 80.0;
@@ -331,15 +307,15 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxAccel = realRobot ? 12.0 : 36.0;
       double maxJerk = realRobot ? 180.0 : 540.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XY, false, gains);
    }
 
-   private PID3DGains createHeadOrientationControlGains()
+   private PID3DConfiguration createHeadOrientationControlGains()
    {
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
       double kp = 40.0;
@@ -347,15 +323,15 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxAccel = realRobot ? 6.0 : 36.0;
       double maxJerk = realRobot ? 60.0 : 540.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
-   private PID3DGains createChestOrientationControlGains()
+   private PID3DConfiguration createChestOrientationControlGains()
    {
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
       double kpXY = 40.0;
@@ -366,16 +342,16 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxJerk = realRobot ? 60.0 : 540.0;
       double maxProportionalError = 10.0 * Math.PI/180.0;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
       gains.setMaxProportionalError(maxProportionalError);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XY, false, gains);
    }
 
-   private PID3DGains createHandOrientationControlGains()
+   private PID3DConfiguration createHandOrientationControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       double kp = 100.0;
@@ -385,33 +361,28 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setIntegralGains(ki, maxIntegralError);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PID3DGainsReadOnly>> getTaskspacePositionControlGains()
+   public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
-      List<GroupParameter<PID3DGainsReadOnly>> taskspaceLinearGains = new ArrayList<>();
+      List<GroupParameter<PID3DConfiguration>> taskspaceLinearGains = new ArrayList<>();
 
-      PID3DGains handLinearGains = createHandPositionControlGains();
-      List<String> handGainBodies = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handGainBodies.add(jointMap.getHandName(robotSide));
-      }
-      taskspaceLinearGains.add(new GroupParameter<>("Hand", handLinearGains, handGainBodies));
+      PID3DConfiguration handLinearGains = createHandPositionControlGains();
+      taskspaceLinearGains.add(new GroupParameter<>("Hand", handLinearGains, jointMap.getHandNames()));
 
       return taskspaceLinearGains;
    }
 
-   private PID3DGains createHandPositionControlGains()
+   private PID3DConfiguration createHandPositionControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -420,12 +391,12 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
       gains.setDampingRatios(zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return gains;
+      return new PID3DConfiguration(GainCoupling.XYZ, false, gains);
    }
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
@@ -459,7 +430,7 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public PIDSE3Gains getSwingFootControlGains()
+   public PIDSE3Configuration getSwingFootControlGains()
    {
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -478,7 +449,7 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
@@ -486,11 +457,11 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    @Override
-   public PIDSE3Gains getHoldPositionFootControlGains()
+   public PIDSE3Configuration getHoldPositionFootControlGains()
    {
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -507,7 +478,7 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxAngularAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
@@ -515,11 +486,11 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    @Override
-   public PIDSE3Gains getToeOffFootControlGains()
+   public PIDSE3Configuration getToeOffFootControlGains()
    {
       boolean realRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -536,7 +507,7 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       double maxAngularAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
       gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
@@ -544,7 +515,7 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new PIDSE3Configuration(GainCoupling.XY, false, gains);
    }
 
    public double getSwingMaxHeightForPushRecoveryTrajectory()
