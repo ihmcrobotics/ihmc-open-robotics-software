@@ -54,7 +54,7 @@ public class ICPProportionalController
       captureKpParallelToMotion = gains.getYoKpParallelToMotion();
       captureKpOrthogonalToMotion = gains.getYoKpOrthogonalToMotion();
       captureKi = gains.getYoKi();
-      captureKiBleedoff = gains.getYoKiBleedOff();
+      captureKiBleedoff = gains.getYoIntegralLeakRatio();
 
       feedbackPartMaxRate = gains.getFeedbackPartMaxRate();
       rateLimitFeedbackPart = feedbackPartMaxRate != null;

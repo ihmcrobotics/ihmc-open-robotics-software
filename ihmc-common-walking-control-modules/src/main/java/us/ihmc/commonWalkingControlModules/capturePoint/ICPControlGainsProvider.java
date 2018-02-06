@@ -11,7 +11,9 @@ public interface ICPControlGainsProvider
 
    DoubleProvider getYoKi();
 
-   DoubleProvider getYoKiBleedOff();
+   DoubleProvider getYoIntegralLeakRatio();
+
+   DoubleProvider getYoMaxIntegralError();
 
    DoubleProvider getFeedbackPartMaxRate();
 
