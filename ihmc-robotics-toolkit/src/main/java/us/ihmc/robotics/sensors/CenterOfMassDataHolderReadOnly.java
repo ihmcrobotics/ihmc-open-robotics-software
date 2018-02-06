@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 
 public interface CenterOfMassDataHolderReadOnly
 {
-   public abstract void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack);
+   void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack);
 
+   void getCenterOfMassAcceleration(FrameVector3D centerOfMassAccelerationToPack);
 }

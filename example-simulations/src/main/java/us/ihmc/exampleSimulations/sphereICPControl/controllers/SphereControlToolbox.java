@@ -49,9 +49,7 @@ import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -81,11 +79,11 @@ public class SphereControlToolbox
    private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", worldFrame, registry);
 
    private final YoFramePoint icp = new YoFramePoint("icp", worldFrame, registry);
+   private final YoFrameVector icpVelocity = new YoFrameVector("icpVelocity", worldFrame, registry);
 
    private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
    private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("centerOfMassVelocity", worldFrame, registry);
-   private final YoFramePoint2d yoCenterOfMass2d = new YoFramePoint2d("centerOfMass2d", worldFrame, registry);
-   private final YoFrameVector2d yoCenterOfMassVelocity2d = new YoFrameVector2d("centerOfMassVelocity2d", worldFrame, registry);
+   private final YoFrameVector yoCenterOfMassAcceleration = new YoFrameVector("centerOfMassAcceleration", worldFrame, registry);
 
    private final YoBoolean sendFootsteps = new YoBoolean("sendFootsteps", registry);
    private final YoBoolean hasFootsteps = new YoBoolean("hasFootsteps", registry);
@@ -100,6 +98,8 @@ public class SphereControlToolbox
 
    private final TwistCalculator twistCalculator;
    private final CenterOfMassJacobian centerOfMassJacobian;
+   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
+   private final CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator;
 
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
@@ -207,6 +207,8 @@ public class SphereControlToolbox
 
       twistCalculator = new TwistCalculator(worldFrame, sphereRobotModel.getRootJoint().getSuccessor());
       centerOfMassJacobian = new CenterOfMassJacobian(elevator);
+      spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, gravity, false);
+      centerOfMassAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       capturePointPlannerParameters = createICPPlannerParameters();
       smoothICPPlannerParameters = createNewICPPlannerParameters();
@@ -401,6 +403,11 @@ public class SphereControlToolbox
       return icp;
    }
 
+   public YoFrameVector getICPVelocity()
+   {
+      return icpVelocity;
+   }
+
    public FramePoint2D getCapturePoint2d()
    {
       return capturePoint2d;
@@ -412,6 +419,7 @@ public class SphereControlToolbox
 
       twistCalculator.compute();
       centerOfMassJacobian.compute();
+      spatialAccelerationCalculator.compute();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       icpControlPolygons.updateUsingContactStates(contactStates);
 
@@ -553,34 +561,41 @@ public class SphereControlToolbox
 
    private final FramePoint3D centerOfMass = new FramePoint3D();
    private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
+   private final FrameVector3D centerOfMassAcceleration = new FrameVector3D();
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
    private final FrameVector2D centerOfMassVelocity2d = new FrameVector2D();
+   private final FrameVector2D centerOfMassAcceleration2d = new FrameVector2D();
    public void computeCenterOfMass()
    {
       centerOfMass.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
+      centerOfMassAcceleration.changeFrame(worldFrame);
 
       centerOfMass2d.setIncludingFrame(centerOfMass);
       centerOfMassVelocity2d.setIncludingFrame(centerOfMassVelocity);
+      centerOfMassAcceleration2d.setIncludingFrame(centerOfMassAcceleration);
 
       yoCenterOfMass.set(centerOfMass);
       yoCenterOfMassVelocity.set(centerOfMassVelocity);
-
-      yoCenterOfMass2d.set(centerOfMass2d);
-      yoCenterOfMassVelocity2d.set(centerOfMassVelocity2d);
+      yoCenterOfMassAcceleration.set(centerOfMassAcceleration);
    }
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FrameVector2D capturePointVelocity2d = new FrameVector2D();
 
    public void computeCapturePoint()
    {
       centerOfMass.setToZero(centerOfMassFrame);
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassAccelerationCalculator.getCoMAcceleration(centerOfMassAcceleration);
 
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMass2d, centerOfMassVelocity2d, omega0.getDoubleValue());
+      CapturePointCalculator.computeCapturePointVelocity(capturePointVelocity2d, centerOfMassVelocity2d, centerOfMassAcceleration2d, omega0.getDoubleValue());
 
       capturePoint2d.changeFrame(icp.getReferenceFrame());
+      capturePointVelocity2d.changeFrame(icpVelocity.getReferenceFrame());
       icp.set(capturePoint2d, 0.0);
+      icpVelocity.set(capturePointVelocity2d, 0.0);
    }
 
    private ContinuousCMPICPPlannerParameters createICPPlannerParameters()

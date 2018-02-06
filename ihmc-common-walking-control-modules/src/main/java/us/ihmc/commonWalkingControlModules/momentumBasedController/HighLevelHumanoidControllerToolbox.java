@@ -419,6 +419,7 @@ public class HighLevelHumanoidControllerToolbox
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
+   @Deprecated
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       throw new RuntimeException("Sylvain was there.");
@@ -493,13 +494,9 @@ public class HighLevelHumanoidControllerToolbox
       centerOfMassPosition.setToZero(centerOfMassFrame);
 
       if (centerOfMassDataHolder != null)
-      {
          centerOfMassDataHolder.getCenterOfMassVelocity(centerOfMassVelocity);
-      }
       else
-      {
          centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
-      }
 
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
