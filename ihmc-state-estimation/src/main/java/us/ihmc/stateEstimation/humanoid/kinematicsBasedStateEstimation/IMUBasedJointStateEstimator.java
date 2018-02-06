@@ -3,14 +3,6 @@
  */
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -18,6 +10,11 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Creates an alpha filter defined by:
@@ -33,34 +30,26 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
  */
 public class IMUBasedJointStateEstimator
 {
+   private final IMUBasedJointVelocityEstimator velocityEstimator;
    private final YoDouble alphaVelocity;
    private final YoDouble alphaPosition;
    private final GeometricJacobian jacobian;
-   private final IMUSensorReadOnly pelvisIMU;
-   private final IMUSensorReadOnly chestIMU;
    private final SensorOutputMapReadOnly sensorMap;
    private final YoDouble slopTime;
    private final Map<OneDoFJoint, BacklashProcessingYoVariable> jointVelocities = new LinkedHashMap<>();
-   private final Map<OneDoFJoint, YoDouble> jointVelocitiesFromIMUOnly = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointPositions = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointPositionsFromIMUOnly = new LinkedHashMap<>();
    private final OneDoFJoint[] joints;
    private final FrameVector3D chestAngularVelocity = new FrameVector3D();
    private final FrameVector3D pelvisAngularVelocity = new FrameVector3D();
 
-   private final DenseMatrix64F jacobianAngularPart64F = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F inverseAngularJacobian64F = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F omega = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F qd_estimated = new DenseMatrix64F(3, 1);
-   
    private final double estimatorDT;
 
    public IMUBasedJointStateEstimator(IMUSensorReadOnly pelvisIMU, IMUSensorReadOnly chestIMU, SensorOutputMapReadOnly sensorMap,
                                       double estimatorDT, double slopTime, YoVariableRegistry registry)
    {
       this.sensorMap = sensorMap;
-      this.pelvisIMU = pelvisIMU;
-      this.chestIMU = chestIMU;
+      this.velocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, registry);
       jacobian = new GeometricJacobian(pelvisIMU.getMeasurementLink(), chestIMU.getMeasurementLink(), chestIMU.getMeasurementLink().getBodyFixedFrame());
       joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
 
@@ -76,7 +65,6 @@ public class IMUBasedJointStateEstimator
 
       for (OneDoFJoint joint : joints)
       {
-         jointVelocitiesFromIMUOnly.put(joint, new YoDouble("qd_" + joint.getName() + "_IMUBased", registry));
          jointVelocities.put(joint, new BacklashProcessingYoVariable("qd_" + joint.getName() + "_FusedWithIMU", "", estimatorDT, this.slopTime, registry));
 
          jointPositionsFromIMUOnly.put(joint, new YoDouble("q_" + joint.getName() + "_IMUBased", registry));
@@ -92,33 +80,16 @@ public class IMUBasedJointStateEstimator
 
    public void compute()
    {
-      jacobian.compute();
-      CommonOps.extract(jacobian.getJacobianMatrix(), 0, 3, 0, 3, jacobianAngularPart64F, 0, 0);
-      if (Math.abs(CommonOps.det(jacobianAngularPart64F)) < 1e-5)
-         return;
-      CommonOps.invert(jacobianAngularPart64F, inverseAngularJacobian64F);
-
-      chestAngularVelocity.setToZero(chestIMU.getMeasurementFrame());
-      chestIMU.getAngularVelocityMeasurement(chestAngularVelocity);
-      chestAngularVelocity.changeFrame(jacobian.getJacobianFrame());
-
-      pelvisAngularVelocity.setToZero(pelvisIMU.getMeasurementFrame());
-      pelvisIMU.getAngularVelocityMeasurement(pelvisAngularVelocity);
-      pelvisAngularVelocity.changeFrame(jacobian.getJacobianFrame());
-      chestAngularVelocity.sub(pelvisAngularVelocity);
-
-      chestAngularVelocity.get(omega);
-      CommonOps.mult(inverseAngularJacobian64F, omega, qd_estimated);
+      velocityEstimator.compute();
 
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint joint = joints[i];
 
          double qd_sensorMap = sensorMap.getJointVelocityProcessedOutput(joint);
-         double qd_IMU = qd_estimated.get(i, 0);
+         double qd_IMU = velocityEstimator.getEstimatedJointVelocitiy(joint);
          double qd_fused = (1.0 - alphaVelocity.getDoubleValue()) * qd_sensorMap + alphaVelocity.getDoubleValue() * qd_IMU;
 
-         jointVelocitiesFromIMUOnly.get(joint).set(qd_IMU);
          jointVelocities.get(joint).update(qd_fused);
 
          double q_sensorMap = sensorMap.getJointPositionProcessedOutput(joint);
