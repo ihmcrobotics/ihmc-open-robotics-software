@@ -1,5 +1,6 @@
 /**
- * Author: Will Rifenburgh 4:30:29 PM Nov 18, 2014
+ * Author: Patrick Hammer
+ *         2018-02-06
  */
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
@@ -17,16 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Creates an alpha filter defined by:
- * 
- * qdFiltered = alpha*qd_from_IMU_estimate + (1-alpha)*qdFromEncoders
- * 
- * In which qdFiltered is defined as the filtered version of:
- * 
- * qdFromEncoders = {qd_WaistRotator, qd_WaistExtensor, qd_WaistLateralExtensor}
- *
- * call getEncoderVelocityEstimates for output of the filter.
- * 
+ * Calculates velocity for a group of joints that connect two IMUs
  */
 public class IMUBasedJointVelocityEstimator
 {
@@ -63,6 +55,9 @@ public class IMUBasedJointVelocityEstimator
       }
    }
 
+   /**
+    * Calculate the joint velocities and store results in YoVariables
+    */
    public void compute()
    {
       jacobian.compute();
