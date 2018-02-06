@@ -126,6 +126,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble angularMomentumIntegratorGain = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorGain", registry);
    private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
 
+   private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
+   private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
+   private final YoDouble thresholdForMoving = new YoDouble(yoNamePrefix + "ThresholdForMoving", registry);
+   private final YoDouble integralGainWhenStuck = new YoDouble(yoNamePrefix + "IntegralGainWhenStuck", registry);
+   private final YoDouble integralBleedOffRate = new YoDouble(yoNamePrefix + "IntegralBleedOffRate", registry);
+   private final YoDouble maxIntegralFeedback = new YoDouble(yoNamePrefix + "MaxIntegralFeedback", registry);
+   private final YoFrameVector2d feedbackCMPIntegral = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
+
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final PlanarRegionConstraintProvider planarRegionConstraintProvider;
@@ -227,6 +235,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          maxAllowedDistanceCMPSupport.setToNaN();
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
+
+      thresholdForStuck.set(0.01);
+      thresholdForMoving.set(0.02);
+      integralGainWhenStuck.set(1.0);
+      integralBleedOffRate.set(Math.pow(0.97, controlDT));
+      maxIntegralFeedback.set(0.05);
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -350,6 +364,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.initialTime.set(initialTime);
       isStanding.set(true);
       isInDoubleSupport.set(true);
+      isICPStuck.set(false);
 
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
 
@@ -371,6 +386,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       this.transferToSide.set(transferToSide);
       isInDoubleSupport.set(true);
+      isStanding.set(false);
+      isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
@@ -392,6 +409,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.supportSide.set(supportSide);
       isStanding.set(false);
       isInDoubleSupport.set(false);
+      isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
@@ -676,8 +694,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
             solutionHandler.updateCostsToGo(solver);
       }
 
+      isICPStuck.set(computeIsStuck());
+      computeICPIntegralTerm();
+
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
       feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
+      feedbackCMP.add(feedbackCMPIntegral);
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
          updateReachabilityRegionFromAdjustment();
@@ -751,6 +773,43 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       double multiplier = 1.0 + angularMomentumIntegratorGain.getDoubleValue() * cumulativeAngularMomentumAfterLeak;
 
       scaledCMPFeedbackWeight.set(multiplier * cmpFeedbackWeight);
+   }
+
+   private boolean computeIsStuck()
+   {
+      if (!isInDoubleSupport.getBooleanValue() || isStanding.getBooleanValue())
+         return false;
+
+      if (isICPStuck.getBooleanValue())
+         return true;
+
+      if ((currentICPVelocity.length() < thresholdForStuck.getDoubleValue()) && (desiredICPVelocity.length() > thresholdForMoving.getDoubleValue()))
+         return true;
+
+      return false;
+   }
+
+   private void computeICPIntegralTerm()
+   {
+      if (isICPStuck.getBooleanValue())
+      {
+         tempVector2d.set(icpError);
+         tempVector2d.scale(controlDT * integralGainWhenStuck.getDoubleValue());
+
+         feedbackCMPIntegral.scale(integralBleedOffRate.getDoubleValue());
+         feedbackCMPIntegral.add(tempVector2d);
+
+         double length = feedbackCMPIntegral.length();
+         double maxLength = maxIntegralFeedback.getDoubleValue();
+         if (length > maxLength)
+            feedbackCMPIntegral.scale(maxLength / length);
+         if (Math.abs(integralGainWhenStuck.getDoubleValue()) < 1e-10)
+            feedbackCMPIntegral.setToZero();
+      }
+      else
+      {
+         feedbackCMPIntegral.setToZero();
+      }
    }
 
    @Override
