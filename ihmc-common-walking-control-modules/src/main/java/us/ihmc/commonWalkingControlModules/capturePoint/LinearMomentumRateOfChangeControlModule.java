@@ -58,6 +58,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
    protected final FramePoint2D capturePoint = new FramePoint2D();
+   protected final FrameVector2D capturePointVelocity = new FrameVector2D();
    protected final FramePoint2D desiredCapturePoint = new FramePoint2D();
    protected final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
    protected final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
@@ -166,9 +167,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.omega0 = omega0;
    }
 
-   public void setCapturePoint(FramePoint2DReadOnly capturePoint)
+   public void setCapturePoint(FramePoint2DReadOnly capturePoint, FrameVector2DReadOnly capturePointVelocity)
    {
       this.capturePoint.setIncludingFrame(capturePoint);
+      this.capturePointVelocity.setIncludingFrame(capturePointVelocity);
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)

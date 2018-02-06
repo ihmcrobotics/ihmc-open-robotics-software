@@ -153,6 +153,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FramePoint2D perfectCoP = new FramePoint2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
+   private final FrameVector2D currentICPVelocity = new FrameVector2D();
 
    private final double controlDT;
    private final double dynamicsObjectiveDoubleSupportWeightModifier;
@@ -471,15 +472,15 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
-                       FramePoint2DReadOnly currentICP, double omega0)
+                       FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, omega0);
+      compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity, omega0);
    }
 
    @Override
    public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
-                       FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, double omega0)
+                       FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       controllerTimer.startMeasurement();
 
@@ -488,12 +489,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       this.perfectCoP.set(perfectCoP);
       this.perfectCMPOffset.set(perfectCMPOffset);
       this.currentICP.set(currentICP);
+      this.currentICPVelocity.set(currentICPVelocity);
 
       this.desiredICP.changeFrame(worldFrame);
       this.desiredICPVelocity.changeFrame(worldFrame);
       this.perfectCoP.changeFrame(worldFrame);
       this.perfectCMPOffset.changeFrame(worldFrame);
       this.currentICP.changeFrame(worldFrame);
+      this.currentICPVelocity.changeFrame(worldFrame);
 
       this.yoPerfectCoP.set(this.perfectCoP);
       this.yoPerfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
