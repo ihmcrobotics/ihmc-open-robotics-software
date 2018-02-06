@@ -156,9 +156,9 @@ public class MovingWalkingReferenceFrameTest
 
             angularVelocity.setToZero(parentFrame);
             angularVelocity.add(yawPitchRollDot[2], 0.0, 0.0);
-            pitch.transform(angularVelocity.getVector());
+            pitch.transform(angularVelocity);
             angularVelocity.add(0.0, yawPitchRollDot[1], 0.0);
-            yaw.transform(angularVelocity.getVector());
+            yaw.transform(angularVelocity);
             angularVelocity.add(0.0, 0.0, yawPitchRollDot[0]);
 
             transformToParent.setTranslation(position);

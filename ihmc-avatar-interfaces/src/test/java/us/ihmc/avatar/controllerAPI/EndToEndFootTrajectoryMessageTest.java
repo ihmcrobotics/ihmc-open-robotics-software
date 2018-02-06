@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -40,7 +41,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -111,10 +111,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = new Quaternion();
       double timeToPickupFoot = 1.0;
 
-      FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
+      FramePose3D footPoseCloseToActual = new FramePose3D(foot.getBodyFixedFrame());
       footPoseCloseToActual.setPosition(0.0, 0.0, getLiftOffHeight());
       footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-      footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
+      footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, timeToPickupFoot, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -123,7 +123,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    }
    
    //Put the foot back on the ground, this doesn't have any special ground checks, it's just easier to read this way
-   private boolean putFootOnGround(RobotSide robotSide, RigidBody foot, FramePose desiredPose) throws SimulationExceededMaximumTimeException
+   private boolean putFootOnGround(RobotSide robotSide, RigidBody foot, FramePose3D desiredPose) throws SimulationExceededMaximumTimeException
    {
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
@@ -131,7 +131,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       
       desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredPose.setZ(getDesiredTouchDownHeightInWorld());
-      desiredPose.getPose(desiredPosition, desiredOrientation);
+      desiredPose.get(desiredPosition, desiredOrientation);
       
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -148,12 +148,12 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 1.0;
       String bodyName = foot.getName();
       
-      FramePose desiredRandomFootPose = new FramePose(foot.getBodyFixedFrame());
+      FramePose3D desiredRandomFootPose = new FramePose3D(foot.getBodyFixedFrame());
       desiredRandomFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
       desiredRandomFootPose.setPosition(getRandomPositionInSphere(random, robotSide));
       desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      desiredRandomFootPose.getPose(desiredPosition, desiredOrientation);
+      desiredRandomFootPose.get(desiredPosition, desiredOrientation);
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
 
       drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -189,7 +189,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         FramePose initialFootPosition = new FramePose(foot.getBodyFixedFrame());
+         FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
          
          // First need to pick up the foot:
          assertTrue(pickupFoot(robotSide, foot));
@@ -225,7 +225,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         FramePose initialFootPosition = new FramePose(foot.getBodyFixedFrame());
+         FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
          
          // First need to pick up the foot:
          assertTrue(pickupFoot(robotSide, foot));
@@ -261,7 +261,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       {
          fullRobotModel.updateFrames();
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         FramePose initialFootPosition = new FramePose(foot.getBodyFixedFrame());
+         FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
          
          // First need to pick up the foot:
@@ -353,7 +353,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       scs.addStaticLinkGraphics(controlFrameGraphics);
 
       ReferenceFrame trajectoryFrame = referenceFrames.getSoleFrame(robotSide.getOppositeSide());
-      FramePose desiredPose = new FramePose(controlFrame);
+      FramePose3D desiredPose = new FramePose3D(controlFrame);
       desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredPose.setZ(desiredPose.getZ() + getLiftOffHeight());
       desiredPose.changeFrame(trajectoryFrame);
@@ -470,8 +470,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String varnameOrientationDesired = footName + Type.DESIRED.getName() + Space.ORIENTATION.getName();
       Quaternion currentDesiredOrientation = findQuat4d(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
 
-      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), currentDesiredPosition, 0.001);
-      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), currentDesiredOrientation, 0.001);
+      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), currentDesiredPosition, 0.001);
+      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), currentDesiredOrientation, 0.001);
       
       drcSimulationTestHelper.createVideo(robotModel.getSimpleRobotName(), 2);
    }
@@ -553,7 +553,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         FramePose initialFootPosition = new FramePose(foot.getBodyFixedFrame());
+         FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
          
          // First need to pick up the foot:
@@ -626,7 +626,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                      circleRadius.getZ() * Math.sin(2.0 * angle) * Math.cos(rot));
             tempPoint.add(circleCenter);
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
       }
 
@@ -659,7 +659,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
-         FramePose initialFootPosition = new FramePose(foot.getBodyFixedFrame());
+         FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
          
          // First need to pick up the foot:

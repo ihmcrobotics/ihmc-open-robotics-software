@@ -17,8 +17,8 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
    private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
    private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.0);
 
-   private final Vector3D defaultAngularFootWeight = new Vector3D(0.5, 0.5, 0.5);
-   private final Vector3D defaultLinearFootWeight = new Vector3D(30.0, 30.0, 30.0);
+   private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
+   private final Vector3D footLinearWeight = new Vector3D(30.0, 30.0, 30.0);
    private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
@@ -70,6 +70,10 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
 
       taskspaceAngularWeights.add(new GroupParameter<>("Pelvis", pelvisAngularWeight, Collections.singletonList(jointMap.getPelvisName())));
       taskspaceLinearWeights.add(new GroupParameter<>("Pelvis", pelvisLinearWeight, Collections.singletonList(jointMap.getPelvisName())));
+
+      List<String> footNames = jointMap.getFootNames();
+      taskspaceAngularWeights.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
+      taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
    }
 
    /** @inheritDoc */
@@ -158,28 +162,14 @@ public class BonoMomentumOptimizationSettings extends MomentumOptimizationSettin
 
    /** @inheritDoc */
    @Override
-   public Vector3D getDefaultLinearFootWeight()
-   {
-      return defaultLinearFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getDefaultAngularFootWeight()
-   {
-      return defaultAngularFootWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHighLinearFootWeight()
+   public Vector3D getLoadedFootLinearWeight()
    {
       return highLinearFootWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3D getHighAngularFootWeight()
+   public Vector3D getLoadedFootAngularWeight()
    {
       return highAngularFootWeight;
    }

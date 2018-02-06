@@ -9,6 +9,7 @@ import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -265,7 +266,7 @@ public class QuadrupedVirtualModelController
          yoSolePosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
          for (int i = 0; i < legJointNames.length; i++)
          {
-            yoJointTorques.get(robotQuadrant)[i].setWithoutChecks(jointTorques.get(robotQuadrant)[i]);
+            yoJointTorques.get(robotQuadrant)[i].set((Tuple3DReadOnly) jointTorques.get(robotQuadrant)[i]);
          }
       }
 

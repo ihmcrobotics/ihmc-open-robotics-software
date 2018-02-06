@@ -162,19 +162,19 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    @Override
    public void getPosition(FramePoint3D positionToPack)
    {
-      desiredPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredPosition);
    }
 
    @Override
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(desiredVelocity);
    }
 
    @Override
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(desiredAcceleration);
    }
 
    @Override

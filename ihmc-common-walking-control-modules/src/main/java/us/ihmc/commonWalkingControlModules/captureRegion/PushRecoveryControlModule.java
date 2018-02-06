@@ -59,6 +59,7 @@ public class PushRecoveryControlModule
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
+   private final double controlDT;
    private double omega0;
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -69,6 +70,7 @@ public class PushRecoveryControlModule
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
+      controlDT = controllerToolbox.getControlDT();
       this.bipedSupportPolygon = bipedSupportPolygons;
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       feet = controllerToolbox.getContactableFeet();
@@ -204,6 +206,9 @@ public class PushRecoveryControlModule
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
+      if (swingTimeRemaining <= controlDT)
+         return swingTimeRemaining;
+
       // If there is no capture region for the given swing time we reduce it.
       for (; preferredSwingTime >= 0.0; preferredSwingTime -= swingTimeRemaining / 10.0)
       {
@@ -294,6 +299,7 @@ public class PushRecoveryControlModule
    {
       footstepToPack.setRobotSide(robotSide);
       footstepToPack.setTrustHeight(true);
+      footstepToPack.setIsAdjustable(true);
       footstepToPack.getFootstepPose().setToZero(soleFrames.get(robotSide));
       footstepToPack.getFootstepPose().changeFrame(worldFrame);
    }

@@ -97,8 +97,8 @@ public class DefaultCollisionVisualizer implements CollisionHandlerListener
       //      System.out.println("Visualizing Collision. forceB.getYoPosition() = " + forceB.getYoPosition());
       //      System.out.println("Visualizing Collision. forceB.getYoImpulse() = " + forceB.getYoImpulse());
 
-      collisionPositionsVizOne.setBallLoop(forceA.getYoPosition().getFrameTuple());
-      collisionPositionsVizTwo.setBallLoop(forceB.getYoPosition().getFrameTuple());
+      collisionPositionsVizOne.setBallLoop(forceA.getYoPosition());
+      collisionPositionsVizTwo.setBallLoop(forceB.getYoPosition());
 
       yoGraphicVectorA.set(forceA.getYoPosition(), forceA.getYoImpulse());
       yoGraphicVectorB.set(forceB.getYoPosition(), forceB.getYoImpulse());

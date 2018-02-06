@@ -16,13 +16,16 @@ import org.ejml.ops.MatrixIO;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -31,7 +34,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 
@@ -815,7 +817,7 @@ public class MatrixTools
       tuple3d.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
-   public static void extractFrameTupleFromEJMLVector(FrameTuple3D<?, ?> frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
+   public static void extractFrameTupleFromEJMLVector(FrameTuple3DBasics frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
    {
       frameTuple.setToZero(desiredFrame);
       frameTuple.setX(ejmlVector.get(startIndex + 0, 0));
@@ -823,7 +825,7 @@ public class MatrixTools
       frameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
-   public static void extractYoFrameTupleFromEJMLVector(YoFrameTuple<?, ?> yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   public static void extractYoFrameTupleFromEJMLVector(YoFrameTuple yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
    {
       yoFrameTuple.setX(ejmlVector.get(startIndex + 0, 0));
       yoFrameTuple.setY(ejmlVector.get(startIndex + 1, 0));
@@ -857,30 +859,14 @@ public class MatrixTools
       ejmlVector.set(indices[2], 0, tuple3d.getZ());
    }
 
-   public static void insertFrameTupleIntoEJMLVector(FrameTuple3D<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   public static void insertFrameTupleIntoEJMLVector(FrameTuple3DReadOnly frameTuple, DenseMatrix64F ejmlVector, int startIndex)
    {
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());
       ejmlVector.set(startIndex + 2, 0, frameTuple.getZ());
    }
 
-   public static void insertYoFrameTupleIntoEJMLVector(YoFrameTuple<?, ?> yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
-   {
-      ejmlVector.set(startIndex + 0, 0, yoFrameTuple.getX());
-      ejmlVector.set(startIndex + 1, 0, yoFrameTuple.getY());
-      ejmlVector.set(startIndex + 2, 0, yoFrameTuple.getZ());
-   }
-
-   public static void insertYoFrameQuaternionIntoEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      matrix.set(index++, 0, yoFrameQuaternion.getQx());
-      matrix.set(index++, 0, yoFrameQuaternion.getQy());
-      matrix.set(index++, 0, yoFrameQuaternion.getQz());
-      matrix.set(index++, 0, yoFrameQuaternion.getQs());
-   }
-
-   public static void insertFrameOrientationIntoEJMLVector(FrameQuaternion frameOrientation, DenseMatrix64F matrix, int rowStart)
+   public static void insertFrameQuaternionIntoEJMLVector(FrameQuaternionReadOnly frameOrientation, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
       matrix.set(index++, 0, frameOrientation.getX());

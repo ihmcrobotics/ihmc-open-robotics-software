@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -17,7 +18,7 @@ public class SimpleToeOffCalculator implements ToeOffCalculator
    private final SideDependentList<ContactableFoot> feet;
 
    private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
-   private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
+   private final FrameLineSegment2D toeOffContactLine2d = new FrameLineSegment2D();
 
    private final YoBoolean hasComputedToeOffContactPoint;
    private final YoBoolean hasComputedToeOffContactLine;
@@ -74,7 +75,7 @@ public class SimpleToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg)
+   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactLine.getBooleanValue())
          computeToeOffContactLine(null, trailingLeg);

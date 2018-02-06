@@ -7,8 +7,12 @@ import java.util.ArrayList;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
@@ -101,25 +105,25 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       switchTrajectoryFrame(referenceFrame);
    }
 
-   public void appendWaypoint(double timeAtWaypoint, Quaternion orientation, Vector3D angularVelocity)
+   public void appendWaypoint(double timeAtWaypoint, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, orientation, angularVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, Quaternion orientation, Vector3D angularVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, orientation, angularVelocity);
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(double timeAtWaypoint, FrameQuaternion orientation, FrameVector3D angularVelocity)
+   public void appendWaypoint(double timeAtWaypoint, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, orientation, angularVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, FrameQuaternion orientation, FrameVector3D angularVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, orientation, angularVelocity);
       numberOfWaypoints.increment();
@@ -151,7 +155,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, Quaternion[] orientations, Vector3D[] angularVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, QuaternionReadOnly[] orientations, Vector3DReadOnly[] angularVelocities)
    {
       if (timeAtWaypoints.length != orientations.length || angularVelocities != null && orientations.length != angularVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");
@@ -162,7 +166,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
          appendWaypointUnsafe(timeAtWaypoints[i], orientations[i], angularVelocities[i]);
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, FrameQuaternion[] orientations, FrameVector3D[] angularVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, FrameQuaternionReadOnly[] orientations, FrameVector3DReadOnly[] angularVelocities)
    {
       if (timeAtWaypoints.length != orientations.length || orientations.length != angularVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");

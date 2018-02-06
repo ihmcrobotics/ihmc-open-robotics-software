@@ -91,7 +91,7 @@ public class BasicPlanarController
 
    public void getPlanarForces(Point2D forces)
    {
-      forces.set(planarForces.getPoint2dCopy());
+      forces.set(planarForces);
    }
 
 }

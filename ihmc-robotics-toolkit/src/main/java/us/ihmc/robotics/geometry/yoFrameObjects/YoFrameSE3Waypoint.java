@@ -117,25 +117,25 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
    @Override
    public void getPosition(Point3DBasics positionToPack)
    {
-      position.get(positionToPack);
+      positionToPack.set(position);
    }
 
    @Override
    public void getOrientation(QuaternionBasics orientationToPack)
    {
-      orientation.get(orientationToPack);
+      orientationToPack.set(orientation);
    }
 
    @Override
    public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
-      linearVelocity.get(linearVelocityToPack);
+      linearVelocityToPack.set(linearVelocity);
    }
 
    @Override
    public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
-      angularVelocity.get(angularVelocityToPack);
+      angularVelocityToPack.set(angularVelocity);
    }
 
    @Override
@@ -145,8 +145,8 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
       EuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
       SO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
 
-      euclideanWaypoint.set(position.getFrameTuple().getPoint(), linearVelocity.getFrameTuple().getVector());
-      so3Waypoint.set(orientation.getFrameOrientation().getQuaternion(), angularVelocity.getFrameTuple().getVector());
+      euclideanWaypoint.set(position, linearVelocity);
+      so3Waypoint.set(orientation, angularVelocity);
    }
 
    @Override

@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class Momentum extends SpatialForceVector
 {
@@ -36,7 +36,7 @@ public class Momentum extends SpatialForceVector
     * @param linearPart linear momentum
     * @param angularPart angular momentum
     */
-   public Momentum(ReferenceFrame expressedInFrame, Vector3D linearPart, Vector3D angularPart)
+   public Momentum(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
    {
       super(expressedInFrame, linearPart, angularPart);
    }

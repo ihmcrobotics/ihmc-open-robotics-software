@@ -1,15 +1,26 @@
 package us.ihmc.pathPlanning.visibilityGraphs.visualizer;
 
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.CurrentDatasetPath;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalEditModeEnabled;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalPosition;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.InterRegionVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NextDatasetRequest;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PlanarRegionData;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PreviousDatasetRequest;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ReloadDatasetRequest;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowBodyPath;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterConnections;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowLocalGraphs;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowPlanarRegions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartEditModeEnabled;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartPosition;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartVisibilityMap;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,6 +41,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -40,10 +52,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopic
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionInnerVizMapMeshViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionsInterConnectionViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityGraphStartGoalViewer;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VizGraphsPlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityMapHolderViewer;
 
 public class VisibilityGraphsTestVisualizer
 {
@@ -51,12 +63,15 @@ public class VisibilityGraphsTestVisualizer
 
    private final Stage primaryStage;
    private final SimpleUIMessager messager;
-   private final VizGraphsPlanarRegionViewer planarRegionViewer;
-   private final VisibilityGraphStartGoalViewer startGoalViewer;
+   private final PlanarRegionViewer planarRegionViewer;
+   private final PlanarRegionViewer planarRegionShadowViewer;
+   private final StartGoalPositionViewer startGoalViewer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
-   private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
-   private final NavigableRegionsInterConnectionViewer navigableRegionsInterConnectionViewer;
+   private final NavigableRegionViewer navigableRegionMeshViewer;
+   private final VisibilityMapHolderViewer interRegionConnectionsViewer;
+   private final VisibilityMapHolderViewer startMapViewer;
+   private final VisibilityMapHolderViewer goalMapViewer;
    private final WalkerCollisionsViewer walkerCollisionsViewer;
 
    @FXML
@@ -64,20 +79,18 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private TextField startTextField, goalTextField;
    @FXML
-   private TextField currentDatasetTextField;
-   @FXML
-   private ToggleButton previousDatasetButton, nextDatasetButton;
+   private ToggleButton previousDatasetButton, reloadDatasetButton, nextDatasetButton, stopWalkingToggleButton;
 
    @FXML
-   private ToggleButton showClusterRawPointsButton;
+   private ToggleButton showBodyPathToggleButton;
    @FXML
-   private ToggleButton showClusterNavigableExtrusionsButton;
+   private ToggleButton showPlanarRegionsToggleButton;
    @FXML
-   private ToggleButton showClusterNonNavigableExtrusionsButton;
+   private ToggleButton showClusterRawPointsToggleButton, showClusterNavigableExtrusionsToggleButton, showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private ToggleButton showRegionInnerConnectionsButton;
+   private ToggleButton showInnerRegionMapsToggleButton, showInterRegionMapToggleButton;
    @FXML
-   private ToggleButton showRegionInterConnectionsButton;
+   private ToggleButton showStartMapToggleButton, showGoalMapToggleButton;
    @FXML
    private ListView<String> datasetsListView;
 
@@ -91,28 +104,44 @@ public class VisibilityGraphsTestVisualizer
       Pane root = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
+      view3dFactory.addCameraController(0.05, 150.0, true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
 
       bindUIControls();
 
-      planarRegionViewer = new VizGraphsPlanarRegionViewer(messager);
-      startGoalViewer = new VisibilityGraphStartGoalViewer(messager);
+      planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
+      planarRegionShadowViewer = new PlanarRegionViewer(messager, UIVisibilityGraphsTopics.ShadowPlanarRegionData, ShowPlanarRegions);
+      planarRegionShadowViewer.setOpacity(0.);
+      startGoalViewer = new StartGoalPositionViewer(messager, StartEditModeEnabled, GoalEditModeEnabled, StartPosition, GoalPosition);
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager, executorService);
-      navigableRegionsInterConnectionViewer = new NavigableRegionsInterConnectionViewer(messager, executorService);
+      navigableRegionMeshViewer = new NavigableRegionViewer(messager, executorService);
       walkerCollisionsViewer = new WalkerCollisionsViewer(messager);
 
+      interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
+      interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);
+      interRegionConnectionsViewer.setTopics(ShowInterRegionVisibilityMap, InterRegionVisibilityMap);
+
+      startMapViewer = new VisibilityMapHolderViewer(messager);
+      startMapViewer.setCustomColor(Color.YELLOW);
+      startMapViewer.setTopics(ShowStartVisibilityMap, StartVisibilityMap);
+
+      goalMapViewer = new VisibilityMapHolderViewer(messager);
+      goalMapViewer.setCustomColor(Color.CORNFLOWERBLUE);
+      goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
+
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(planarRegionShadowViewer.getRoot());
       view3dFactory.addNodeToView(startGoalViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(clusterMeshViewer.getRoot());
-      view3dFactory.addNodeToView(navigableRegionInnerVizMapMeshViewer.getRoot());
-      view3dFactory.addNodeToView(navigableRegionsInterConnectionViewer.getRoot());
+      view3dFactory.addNodeToView(navigableRegionMeshViewer.getRoot());
+      view3dFactory.addNodeToView(interRegionConnectionsViewer.getRoot());
       view3dFactory.addNodeToView(walkerCollisionsViewer.getRoot());
+      view3dFactory.addNodeToView(startMapViewer.getRoot());
+      view3dFactory.addNodeToView(goalMapViewer.getRoot());
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
@@ -125,14 +154,26 @@ public class VisibilityGraphsTestVisualizer
    private void bindUIControls()
    {
       messager.bindBidirectional(PreviousDatasetRequest, previousDatasetButton.selectedProperty(), false);
+      messager.bindBidirectional(ReloadDatasetRequest, reloadDatasetButton.selectedProperty(), false);
       messager.bindBidirectional(NextDatasetRequest, nextDatasetButton.selectedProperty(), false);
 
       previousDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      previousDatasetButton.disableProperty().bind(reloadDatasetButton.selectedProperty());
       previousDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+
+      reloadDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      reloadDatasetButton.disableProperty().bind(reloadDatasetButton.selectedProperty());
+      reloadDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
+
       nextDatasetButton.disableProperty().bind(previousDatasetButton.selectedProperty());
+      nextDatasetButton.disableProperty().bind(reloadDatasetButton.selectedProperty());
       nextDatasetButton.disableProperty().bind(nextDatasetButton.selectedProperty());
 
-      messager.registerJavaFXSyncedTopicListener(CurrentDatasetPath, path -> currentDatasetTextField.setText(path == null ? "null" : path));
+      datasetsListView.disableProperty().bind(previousDatasetButton.selectedProperty());
+      datasetsListView.disableProperty().bind(reloadDatasetButton.selectedProperty());
+      datasetsListView.disableProperty().bind(nextDatasetButton.selectedProperty());
+
+      messager.bindBidirectional(UIVisibilityGraphsTopics.StopWalker, stopWalkingToggleButton.selectedProperty(), false);
 
       Point3DProperty startProperty = new Point3DProperty(this, "startProperty", new Point3D(Double.NaN, Double.NaN, Double.NaN));
       Point3DProperty goalProperty = new Point3DProperty(this, "goalProperty", new Point3D(Double.NaN, Double.NaN, Double.NaN));
@@ -143,11 +184,16 @@ public class VisibilityGraphsTestVisualizer
       messager.bindPropertyToTopic(StartPosition, startProperty);
       messager.bindPropertyToTopic(GoalPosition, goalProperty);
 
-      messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsButton.selectedProperty(), false);
-      messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsButton.selectedProperty(), false);
-      messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsButton.selectedProperty(), false);
-      messager.bindBidirectional(ShowLocalGraphs, showRegionInnerConnectionsButton.selectedProperty(), false);
-      messager.bindBidirectional(ShowInterConnections, showRegionInterConnectionsButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
+
+      messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
 
       messager.registerJavaFXSyncedTopicListener(UIVisibilityGraphsTopics.AllDatasetPaths, this::showDatasets);
       messager.registerJavaFXSyncedTopicListener(CurrentDatasetPath, path -> datasetsListView.getSelectionModel().select(path));
@@ -179,24 +225,30 @@ public class VisibilityGraphsTestVisualizer
    {
       primaryStage.show();
       planarRegionViewer.start();
+      planarRegionShadowViewer.start();
       startGoalViewer.start();
       bodyPathMeshViewer.start();
       clusterMeshViewer.start();
-      navigableRegionInnerVizMapMeshViewer.start();
-      navigableRegionsInterConnectionViewer.start();
+      navigableRegionMeshViewer.start();
+      interRegionConnectionsViewer.start();
       walkerCollisionsViewer.start();
+      startMapViewer.start();
+      goalMapViewer.start();
    }
 
    public void stop()
    {
       planarRegionViewer.stop();
+      planarRegionShadowViewer.stop();
       startGoalViewer.stop();
       bodyPathMeshViewer.stop();
       clusterMeshViewer.stop();
-      navigableRegionInnerVizMapMeshViewer.stop();
-      navigableRegionsInterConnectionViewer.stop();
+      navigableRegionMeshViewer.stop();
+      interRegionConnectionsViewer.stop();
       walkerCollisionsViewer.stop();
       messager.closeMessager();
+      startMapViewer.stop();
+      goalMapViewer.stop();
       Platform.exit();
    }
 }

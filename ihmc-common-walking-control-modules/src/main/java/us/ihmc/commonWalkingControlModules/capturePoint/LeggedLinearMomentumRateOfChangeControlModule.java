@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -46,7 +49,7 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
    }
    
    @Override
-   public void compute(FramePoint2D desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
+   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
    {
       super.compute(desiredCMPPreviousValue, desiredCMPToPack);
       supportLegPreviousTick.set(supportSide);
@@ -68,8 +71,7 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
 
    public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 
-   public abstract ICPOptimizationController getICPOptimizationController();
+   public abstract ICPOptimizationControllerInterface getICPOptimizationController();
 
-   public abstract double getOptimizedTimeRemaining();
-
+   public abstract void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
 }

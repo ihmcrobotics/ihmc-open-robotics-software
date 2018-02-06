@@ -17,8 +17,8 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.communication.REAMessager;
@@ -39,9 +39,9 @@ public class ClusterMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> resetRequested;
    private final AtomicReference<Boolean> showRawPoints;
    private final AtomicReference<Boolean> showNavigableExtrusions;
-   private final AtomicReference<Boolean> closeNavigableExtrusions;
    private final AtomicReference<Boolean> showNonNavigableExtrusions;
-   private final AtomicReference<Boolean> closeNonNavigableExtrusions;
+
+   private final AtomicReference<List<NavigableRegion>> newRequestReference;
 
    public ClusterMeshViewer(REAMessager messager)
    {
@@ -60,10 +60,8 @@ public class ClusterMeshViewer extends AnimationTimer
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       showRawPoints = messager.createInput(UIVisibilityGraphsTopics.ShowClusterRawPoints, false);
       showNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions, false);
-      closeNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.CloseClusterNavigableExtrusions, false);
       showNonNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, false);
-      closeNonNavigableExtrusions = messager.createInput(UIVisibilityGraphsTopics.CloseClusterNonNavigableExtrusions, false);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.NavigableRegionData, this::processNavigableRegionsOnThread);
+      newRequestReference = messager.createInput(UIVisibilityGraphsTopics.NavigableRegionData, null);
       root.setMouseTransparent(true);
       root.getChildren().addAll(rawPointsGroup, navigableExtrusionsGroup, nonNavigableExtrusionsGroup);
    }
@@ -111,6 +109,14 @@ public class ClusterMeshViewer extends AnimationTimer
          if (showNonNavigableExtrusions.get())
             nonNavigableExtrusionsGroup.getChildren().addAll(nonNavigableExtrusionsRender.values());
       }
+
+      if (showRawPoints.get() || showNavigableExtrusions.get() || showNonNavigableExtrusions.get())
+      {
+         List<NavigableRegion> newRequest = newRequestReference.getAndSet(null);
+
+         if (newRequest != null)
+            processNavigableRegionsOnThread(newRequest);
+      }
    }
 
    private void processNavigableRegionsOnThread(List<NavigableRegion> navigableRegionLocalPlanners)
@@ -127,7 +133,7 @@ public class ClusterMeshViewer extends AnimationTimer
 
       for (NavigableRegion navigableRegionLocalPlanner : navigableRegionLocalPlanners)
       {
-         int regionId = navigableRegionLocalPlanner.getRegionId();
+         int regionId = navigableRegionLocalPlanner.getMapId();
          JavaFXMeshBuilder rawPointsMeshBuilder = getOrCreate(rawPointsMeshBuilders, regionId);
          JavaFXMeshBuilder navigableExtrusionsMeshBuilder = getOrCreate(navigableExtrusionsMeshBuilders, regionId);
          JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder = getOrCreate(nonNavigableExtrusionsMeshBuilders, regionId);
@@ -138,9 +144,9 @@ public class ClusterMeshViewer extends AnimationTimer
             for (Point3D rawPoint : cluster.getRawPointsInWorld3D())
                rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
             navigableExtrusionsMeshBuilder.addMultiLine(cluster.getNavigableExtrusionsInWorld3D(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS,
-                                                        closeNavigableExtrusions.get());
+                                                        false);
             nonNavigableExtrusionsMeshBuilder.addMultiLine(cluster.getNonNavigableExtrusionsInWorld3D(),
-                                                           VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, closeNonNavigableExtrusions.get());
+                                                           VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, false);
          }
 
          materials.put(regionId, new PhongMaterial(getLineColor(regionId)));
@@ -183,7 +189,7 @@ public class ClusterMeshViewer extends AnimationTimer
 
    private Color getLineColor(int regionId)
    {
-      return VizGraphsPlanarRegionViewer.getRegionColor(regionId).darker();
+      return PlanarRegionViewer.getRegionColor(regionId).darker();
    }
 
    @Override

@@ -296,7 +296,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       FrameVector3D tempAngularVelocity = new FrameVector3D(imuSensor.getMeasurementFrame());
-      imuSensor.getAngularVelocityMeasurement(tempAngularVelocity.getVector());
+      imuSensor.getAngularVelocityMeasurement(tempAngularVelocity);
       imuAngularVelocityInPelvis.setAndMatchFrame(tempAngularVelocity);
 
       // Really hackish, but it should work.
@@ -330,7 +330,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       }
 
       double referenceSignalCurrentPosition = meanOfJointVelocities.get(currentAxis).getDoubleValue();
-      double delayedSignalCurrentPosition = imuAngularVelocityInPelvis.get(currentAxis);
+      double delayedSignalCurrentPosition = imuAngularVelocityInPelvis.getElement(currentAxis.ordinal());
       delayEstimator.update(referenceSignalCurrentPosition, delayedSignalCurrentPosition);
 
       if (delayEstimator.isEstimatingDelay())

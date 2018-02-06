@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import static us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePositionTrajectoryGenerator.defaultLeaveTimeInPercentOfTrajectoryTime;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 
@@ -71,20 +71,16 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       orientationTrajectoryGenerator.switchTrajectoryFrame(referenceFrame);
    }
 
-   public void setInitialPose(FramePose initialPose)
+   public void setInitialPose(FramePose3D initialPose)
    {
-      initialPose.getPositionIncludingFrame(tempPosition);
-      initialPose.getOrientationIncludingFrame(tempOrientation);
-      positionTrajectoryGenerator.setInitialPosition(tempPosition);
-      orientationTrajectoryGenerator.setInitialOrientation(tempOrientation);
+      positionTrajectoryGenerator.setInitialPosition(initialPose.getPosition());
+      orientationTrajectoryGenerator.setInitialOrientation(initialPose.getOrientation());
    }
 
-   public void setFinalPose(FramePose finalPose)
+   public void setFinalPose(FramePose3D finalPose)
    {
-      finalPose.getPositionIncludingFrame(tempPosition);
-      finalPose.getOrientationIncludingFrame(tempOrientation);
-      positionTrajectoryGenerator.setFinalPosition(tempPosition);
-      orientationTrajectoryGenerator.setFinalOrientation(tempOrientation);
+      positionTrajectoryGenerator.setFinalPosition(finalPose.getPosition());
+      orientationTrajectoryGenerator.setFinalOrientation(finalPose.getOrientation());
    }
 
    public void setInitialClearance(FrameVector3D initialDirection, double leaveDistance)
@@ -171,7 +167,7 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());

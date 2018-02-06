@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -29,10 +30,17 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVariable
 {
-   private final YoDouble alphaVariable;
+   private final DoubleProvider alphaVariable;
 
    private final YoDouble position;
    protected final YoBoolean hasBeenCalled;
+
+   private static DoubleProvider createAlphaYoDouble(String namePrefix, double initialValue, YoVariableRegistry registry)
+   {
+      YoDouble maxRate = new YoDouble(namePrefix + "AlphaVariable", registry);
+      maxRate.set(initialValue);
+      return maxRate;
+   }
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha)
    {
@@ -41,40 +49,36 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, YoDouble positionVariable)
    {
-      super(name,registry);
-      this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
-      this.alphaVariable = new YoDouble(name + "AlphaVariable", registry);
-      this.alphaVariable.set(alpha);
-      this.position = positionVariable;
-      reset();
+      this(name, "", registry, createAlphaYoDouble(name, alpha, registry), positionVariable);
    }
 
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable)
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleProvider alphaVariable)
    {
       this(name, "", registry, alphaVariable, null);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, YoDouble alphaVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleProvider alphaVariable)
    {
       this(name, description, registry, alphaVariable, null);
    }
 
-
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable)
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
    {
       this(name, "", registry, alphaVariable, positionVariable);
    }
 
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable)
+   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", description, registry);
       this.position = positionVariable;
+
+      if (alphaVariable == null)
+         alphaVariable = createAlphaYoDouble(name, 0.0, registry);
       this.alphaVariable = alphaVariable;
 
       reset();
    }
-
 
    public void reset()
    {
@@ -100,14 +104,8 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
          set(currentPosition);
       }
 
-
-      set(alphaVariable.getDoubleValue() * getDoubleValue() + (1.0 - alphaVariable.getDoubleValue()) * currentPosition);
-
-   }
-
-   public void setAlpha(double alpha)
-   {
-      this.alphaVariable.set(alpha);
+      double alpha = alphaVariable.getValue();
+      set(alpha * getDoubleValue() + (1.0 - alpha) * currentPosition);
    }
 
    /**
@@ -151,7 +149,7 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
    {
       double dt = 1 / 1e3;
 
-      for (double i = 2; i < 1.0/dt; i = i * 1.2)
+      for (double i = 2; i < 1.0 / dt; i = i * 1.2)
       {
          double alpha = computeAlphaGivenBreakFrequency(i, dt);
          double alphaProperly = computeAlphaGivenBreakFrequencyProperly(i, dt);
@@ -162,10 +160,10 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
       System.out.println(computeAlphaGivenBreakFrequencyProperly(20, 0.006));
       System.out.println(computeAlphaGivenBreakFrequencyProperly(20, 0.003));
    }
-   
+
    public boolean getHasBeenCalled()
    {
-      return hasBeenCalled.getBooleanValue(); 
+      return hasBeenCalled.getBooleanValue();
    }
 
 }

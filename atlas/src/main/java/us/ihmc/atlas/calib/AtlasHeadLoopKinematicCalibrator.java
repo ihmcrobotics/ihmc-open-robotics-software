@@ -43,6 +43,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -51,7 +52,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.LimbName;
@@ -201,7 +201,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
             constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
-      FramePose poseLeftCamera = new FramePose(cameraImageFrame);
+      FramePose3D poseLeftCamera = new FramePose3D(cameraImageFrame);
       poseLeftCamera.changeFrame(CalibUtil.world);
       yposeLeftCamera.set(poseLeftCamera);
 
@@ -211,7 +211,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      System.out.println("Original Rot\n"+targetToCamera);
 
       //update
-      FramePose poseRightCamera = new FramePose(cameraImageFrame, targetToCamera);
+      FramePose3D poseRightCamera = new FramePose3D(cameraImageFrame, targetToCamera);
       poseRightCamera.changeFrame(CalibUtil.world);
       yposeBoard.set(poseRightCamera);
 //      System.out.println("Index: "+ index);
@@ -236,7 +236,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       FramePoint3D activeArmEEtoCamera = new FramePoint3D(fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM), 0, magicNumber, 0); // todo look at this later
       activeArmEEtoCamera.changeFrame(cameraImageFrame);
-      Point3D activeArmEEinImageFrame = activeArmEEtoCamera.getPoint();
+      Point3D activeArmEEinImageFrame = new Point3D(activeArmEEtoCamera);
 
       Point2D_F64 norm = new Point2D_F64(activeArmEEinImageFrame.getX() / activeArmEEinImageFrame.getZ(), activeArmEEinImageFrame.getY() / activeArmEEinImageFrame.getZ());
       Point2D_F64 pixel = new Point2D_F64();

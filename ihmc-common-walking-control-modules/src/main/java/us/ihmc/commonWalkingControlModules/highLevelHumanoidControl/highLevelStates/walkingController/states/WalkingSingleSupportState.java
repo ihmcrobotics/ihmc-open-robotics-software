@@ -12,11 +12,11 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -35,8 +35,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final Footstep[] footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
 
-   private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
-   private final FramePose desiredFootPoseInWorld = new FramePose(worldFrame);
+   private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
+   private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -104,13 +104,14 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (walkingMessageHandler.hasRequestedFootstepAdjustment())
       {
          boolean footstepHasBeenAdjusted = walkingMessageHandler.pollRequestedFootstepAdjustment(nextFootstep);
+
          if (footstepHasBeenAdjusted)
          {
             walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             balanceManager.updateCurrentICPPlan();
          }
@@ -127,7 +128,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
@@ -143,7 +144,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, false);
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
@@ -347,17 +348,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
 
-      double remainingTime;
-      if (balanceManager.useICPTimingOptimization())
-      {
-         remainingTime = balanceManager.getOptimizedTimeRemaining();
-         optimizedRemainingSwingTime.set(remainingTime);
-      }
-      else
-      {
-         remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
-         estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
-      }
+      double remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
+      estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
 
       if (remainingTime > 1.0e-3)
       {

@@ -4,6 +4,7 @@ import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -16,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
@@ -173,14 +174,14 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("rotate Valve");
             sendPacket(p1);
-            FramePose point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
+            FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
 
-            point.rotatePoseAboutAxis(valvePose, Axis.Z, degrees);
+            GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
 
-            sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
+            sendPacketToUI(new UIPositionCheckerPacket(point.getPosition()));
 
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-                  point.getFrameOrientationCopy().getQuaternion(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
+                  point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
             handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
 
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
@@ -198,13 +199,13 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       //      referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);
 
       //      1.607778783110418,1.442441289823466,-3.1298946145335043`
-      FramePose point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
+      FramePose3D point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
       //      System.out.println("-orient.x,orient.y, orient.z " + (-orient.x) + "," + orient.y + "," + orient.z);
 
-      sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
+      sendPacketToUI(new UIPositionCheckerPacket(point.getPosition()));
 
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-            point.getFrameOrientationCopy().getQuaternion(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
+            point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
@@ -235,14 +236,14 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       return pipeLine.isDone();
    }
 
-   private FramePose offsetPointFromValveInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
+   private FramePose3D offsetPointFromValveInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
    {
       FramePoint3D point1 = new FramePoint3D(valvePose, x, y, z);
       point1.changeFrame(ReferenceFrame.getWorldFrame());
       FrameQuaternion orient = new FrameQuaternion(valvePose, yaw, pitch, roll);
       orient.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose pose = new FramePose(point1, orient);
+      FramePose3D pose = new FramePose3D(point1, orient);
 
       return pose;
    }

@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
@@ -102,25 +104,25 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       switchTrajectoryFrame(referenceFrame);
    }
 
-   public void appendWaypoint(double timeAtWaypoint, Point3D position, Vector3D linearVelocity)
+   public void appendWaypoint(double timeAtWaypoint, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, position, linearVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, Point3D position, Vector3D linearVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, position, linearVelocity);
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(double timeAtWaypoint, FramePoint3D position, FrameVector3D linearVelocity)
+   public void appendWaypoint(double timeAtWaypoint, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, position, linearVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, FramePoint3D position, FrameVector3D linearVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, position, linearVelocity);
       numberOfWaypoints.increment();
@@ -152,7 +154,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, FramePoint3D[] positions, FrameVector3D[] linearVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, FramePoint3DReadOnly[] positions, FrameVector3DReadOnly[] linearVelocities)
    {
       if (timeAtWaypoints.length != positions.length || linearVelocities != null && positions.length != linearVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");
@@ -163,7 +165,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], linearVelocities[i]);
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, Point3D[] positions, Vector3D[] linearVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, Point3DReadOnly[] positions, Vector3DReadOnly[] linearVelocities)
    {
       if (timeAtWaypoints.length != positions.length || positions.length != linearVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");

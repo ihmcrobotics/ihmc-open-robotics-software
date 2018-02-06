@@ -5,9 +5,12 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalTorque;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -660,7 +663,7 @@ public abstract class JointPhysics< J extends Joint>
     * The collision frame is aligned with the z axis normal to the collision point.
     * @return Matrix3d Ki, which represents the half of the collision matrix.
     */
-   public Matrix3D computeKiCollision(Vector3D offsetFromCOM, RotationMatrix Rk_coll)
+   public Matrix3D computeKiCollision(Vector3DReadOnly offsetFromCOM, RotationMatrixReadOnly Rk_coll)
    {
       tempVector.set(offsetFromCOM);
       tempVector.scale(-1.0);
@@ -685,7 +688,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param mu The coefficent of friction.
     * @param p_coll Spatial collision impulse
     */
-   public void integrateCollision(Matrix3D Ki, Vector3D u_coll, double epsilon, double mu, Vector3D p_coll)
+   public void integrateCollision(Matrix3DReadOnly Ki, Vector3DReadOnly u_coll, double epsilon, double mu, Vector3DBasics p_coll)
    {
       // Integrate the collision (Mirtich p. 146, step D.):
 
@@ -701,7 +704,7 @@ public abstract class JointPhysics< J extends Joint>
     *
     * @param p_coll Vector3d the impulse applied in reaction to the collision event.
     */
-   public void applyImpulse(Vector3D p_coll)
+   public void applyImpulse(Vector3DReadOnly p_coll)
    {
       /*
        * if(p_coll.z < 0.0)
@@ -748,7 +751,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param mu The coefficent of friction.
     * @param p_coll Vector to store the collision impulse once it has been calculated.
     */
-   public void resolveCollision(Vector3D offsetFromCOM, RotationMatrix Rk_coll, Vector3D u_coll, double epsilon, double mu, Vector3D p_coll)
+   public void resolveCollision(Vector3DReadOnly offsetFromCOM, RotationMatrixReadOnly Rk_coll, Vector3DReadOnly u_coll, double epsilon, double mu, Vector3DBasics p_coll)
    {
       computeKiCollision(offsetFromCOM, Rk_coll);
       integrateCollision(Ki, u_coll, epsilon, mu, p_coll);
@@ -773,8 +776,8 @@ public abstract class JointPhysics< J extends Joint>
     * @param mu The coefficent of friction.
     * @param p_coll Vector3d in which the impulse will be stored.
     */
-   public void resolveMicroCollision(double penetrationSquared, Vector3D offsetFromCOM, RotationMatrix Rk_coll, Vector3D u_coll, double epsilon, double mu,
-                                     Vector3D p_coll)
+   public void resolveMicroCollision(double penetrationSquared, Vector3DReadOnly offsetFromCOM, RotationMatrixReadOnly Rk_coll, Vector3DReadOnly u_coll, double epsilon, double mu,
+                                     Vector3DBasics p_coll)
    {
       //TODO: Commented out microcollisions for time being and replaced with penetration-based
       // epsilon increase. Need to make test cases and figure out exactly how we are going to 
@@ -810,8 +813,8 @@ public abstract class JointPhysics< J extends Joint>
 
    }
    
-   private void resolveMicroCollisionWithSpringyEpsilon(double penetrationSquared, Vector3D offsetFromCOM, RotationMatrix Rk_coll, Vector3D u_coll, double epsilon, double mu,
-                                                        Vector3D p_coll)
+   private void resolveMicroCollisionWithSpringyEpsilon(double penetrationSquared, Vector3DReadOnly offsetFromCOM, RotationMatrixReadOnly Rk_coll, Vector3DReadOnly u_coll, double epsilon, double mu,
+                                                        Vector3DBasics p_coll)
    {
    // +++JEP: Adjust epsilon based on penetration...
       epsilon = epsilon + 1000000.0 * penetrationSquared;

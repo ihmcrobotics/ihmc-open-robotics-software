@@ -100,7 +100,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
 
       endEffectorPosition.setToZero(endEffectorFrame); //set(targetPosition.getFrameTuple());  //
 
-      errorVector.setIncludingFrame(targetPosition.getFrameTuple());
+      errorVector.setIncludingFrame(targetPosition);
       errorVector.sub(endEffectorPosition);
       errorVector.changeFrame(endEffectorFrame);
 
@@ -131,7 +131,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    {
       // --- NOT READY!!!
       computeComAndICP(com, comVelocity, icp, angularMomentum);
-      skippy.computeFootContactForce(actualGroundReaction.getVector());
+      skippy.computeFootContactForce(actualGroundReaction);
       footLocation.set(skippy.computeFootLocation());
       cmpFromIcpDynamics(icp, footLocation, desiredCMP);
       desiredGroundReaction.sub(com, desiredCMP);

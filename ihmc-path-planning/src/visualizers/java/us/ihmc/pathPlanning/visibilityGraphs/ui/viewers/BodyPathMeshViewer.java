@@ -55,6 +55,8 @@ public class BodyPathMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> show, resetRequested;
    private final AtomicReference<Vector3D> walkerSize;
    private final AtomicReference<Double> walkerOffsetHeight;
+   private final AtomicReference<Point3D> walkerPosition;
+   private final AtomicReference<Boolean> enableWalkerAnimation;
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
    public BodyPathMeshViewer(REAMessager messager)
@@ -84,6 +86,9 @@ public class BodyPathMeshViewer extends AnimationTimer
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       show = messager.createInput(UIVisibilityGraphsTopics.ShowBodyPath, true);
       messager.registerTopicListener(UIVisibilityGraphsTopics.BodyPathData, this::processBodyPathOnThread);
+
+      walkerPosition = messager.createInput(UIVisibilityGraphsTopics.WalkerPosition, null);
+      enableWalkerAnimation = messager.createInput(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
 
       root.getChildren().addAll(bodyPathMeshView, walker);
    }
@@ -120,27 +125,46 @@ public class BodyPathMeshViewer extends AnimationTimer
          bodyPathMeshView.setMaterial(newMesh.getValue());
       }
 
-      List<Point3DReadOnly> bodyPath = activeBodyPathReference.get();
+      walker.setScaleX(walkerSize.get().getX());
+      walker.setScaleY(walkerSize.get().getY());
+      walker.setScaleZ(walkerSize.get().getZ());
 
-      if (bodyPath != null)
+      if (enableWalkerAnimation.get())
       {
-         if (show.get() && ! root.getChildren().contains(walker))
-            root.getChildren().add(walker);
+         List<Point3DReadOnly> bodyPath = activeBodyPathReference.get();
 
-         walker.setScaleX(walkerSize.get().getX());
-         walker.setScaleY(walkerSize.get().getY());
-         walker.setScaleZ(walkerSize.get().getZ());
+         if (bodyPath != null)
+         {
+            if (show.get() && !root.getChildren().contains(walker))
+               root.getChildren().add(walker);
 
-         double distance = currentWalkerDistanceInPath.getAndAdd(WALKER_SPEED);
-         setWalkerPosition(PathTools.getPointAlongPathGivenDistanceFromStart(bodyPath, distance));
+            double distance = currentWalkerDistanceInPath.getAndAdd(WALKER_SPEED);
+            setWalkerPosition(PathTools.getPointAlongPathGivenDistanceFromStart(bodyPath, distance));
 
-         if (currentWalkerDistanceInPath.get() > PathTools.computePathLength(bodyPath))
-            currentWalkerDistanceInPath.set(0.0);
+            if (currentWalkerDistanceInPath.get() > PathTools.computePathLength(bodyPath))
+               currentWalkerDistanceInPath.set(0.0);
+         }
+         else
+         {
+            root.getChildren().remove(walker);
+         }
       }
       else
       {
-         root.getChildren().remove(walker);
+         Point3D position = walkerPosition.get();
+         if (position != null)
+         {
+            if (show.get() && !root.getChildren().contains(walker))
+               root.getChildren().add(walker);
+
+            setWalkerPosition(position);
+         }
+         else
+         {
+            root.getChildren().remove(walker);
+         }
       }
+
    }
 
    private void setWalkerPosition(Point3DReadOnly position)
@@ -163,6 +187,8 @@ public class BodyPathMeshViewer extends AnimationTimer
       {
          bodyPathMeshToRender.set(new Pair<>(null, null));
          activeBodyPathReference.set(null);
+         PrintTools.warn("Received body path that is null.");
+         return;
       }
 
       // First let's make a deep copy for later usage.

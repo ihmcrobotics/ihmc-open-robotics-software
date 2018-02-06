@@ -98,7 +98,7 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
    
    public void getSurfaceNormalInWorld(Vector3D surfaceNormalInWorldToPack)
    {
-      this.surfaceNormalInJointFrame.get(surfaceNormalInWorldToPack);
+      surfaceNormalInWorldToPack.set(this.surfaceNormalInJointFrame);
       parentJoint.getTransformToWorld(tempTransform);
       tempTransform.transform(surfaceNormalInWorldToPack);
    }

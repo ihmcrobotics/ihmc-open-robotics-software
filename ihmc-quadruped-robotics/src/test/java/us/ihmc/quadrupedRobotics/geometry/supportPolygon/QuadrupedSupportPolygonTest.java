@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -82,8 +83,7 @@ public class QuadrupedSupportPolygonTest
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         Point3D tuple3dToPack = new Point3D();
-         quadrupedSupportPolygon.getFootstep(robotQuadrant).get(tuple3dToPack);
+         Point3D tuple3dToPack = new Point3D(quadrupedSupportPolygon.getFootstep(robotQuadrant));
          assertEquals("Point not equal", footPoints.get(robotQuadrant), tuple3dToPack);
       }
       
@@ -548,11 +548,11 @@ public class QuadrupedSupportPolygonTest
       
       polygon.yawAboutCentroid(-Math.PI / 2);
       
-      String message = "not equal expected: " + bottomRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_LEFT).getPoint();
+      String message = "not equal expected: " + bottomRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_LEFT);
       assertTrue(message, polygon.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(bottomRight, 1e-7));
-      String message2 = "not equal expected: " + topRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_RIGHT).getPoint();
+      String message2 = "not equal expected: " + topRight + " actual " + polygon.getFootstep(RobotQuadrant.HIND_RIGHT);
       assertTrue(message2, polygon.getFootstep(RobotQuadrant.HIND_RIGHT).epsilonEquals(topRight, 1e-7));
-      String message3 = "not equal expected: " + origin + " actual " + polygon.getFootstep(RobotQuadrant.FRONT_LEFT).getPoint();
+      String message3 = "not equal expected: " + origin + " actual " + polygon.getFootstep(RobotQuadrant.FRONT_LEFT);
       assertTrue(message3, polygon.getFootstep(RobotQuadrant.FRONT_LEFT).epsilonEquals(origin, 1e-7));
       
       polygon.removeFootstep(RobotQuadrant.FRONT_RIGHT);
@@ -691,13 +691,13 @@ public class QuadrupedSupportPolygonTest
       FramePoint3D actual;
       actual = poly3.getFootstep(RobotQuadrant.HIND_LEFT);
       expected = new Vector3D(0.24142, 0.1, 0.0);
-      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      assertTrue("not common expected: " + expected + " actual: " + actual, actual.epsilonEquals(expected, 1e-5));
       actual = poly3.getFootstep(RobotQuadrant.HIND_RIGHT);
       expected = new Vector3D(0.75858, 0.1, 0.0);
-      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      assertTrue("not common expected: " + expected + " actual: " + actual, actual.epsilonEquals(expected, 1e-5));
       actual = poly3.getFootstep(RobotQuadrant.FRONT_RIGHT);
       expected = new Vector3D(0.5, 0.35858, 0.0);
-      assertTrue("not common expected: " + expected + " actual: " + actual.getPoint(), actual.epsilonEquals(expected, 1e-5));
+      assertTrue("not common expected: " + expected + " actual: " + actual, actual.epsilonEquals(expected, 1e-5));
       
       poly1 = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
       poly2 = createPolygonWithoutLeg(RobotQuadrant.HIND_LEFT);
@@ -1180,7 +1180,7 @@ public class QuadrupedSupportPolygonTest
             quadrantDependentList.get(robotQuadrant).set(framePoint);
             
             assertTrue("orig not equal poly", framePoint.epsilonEquals(quadrupedSupportPolygon.getFootstep(robotQuadrant), 1e-7));
-            assertTrue("orig not equal list", framePoint.epsilonEquals(quadrantDependentList.get(robotQuadrant).getFrameTuple(), 1e-7));
+            assertTrue("orig not equal list", framePoint.epsilonEquals(quadrantDependentList.get(robotQuadrant), 1e-7));
             assertTrue("poly not equal list", quadrupedSupportPolygon.getFootstep(robotQuadrant).epsilonEquals(quadrupedSupportPolygon.getFootstep(robotQuadrant), 1e-7));
          }
       }
@@ -1197,7 +1197,7 @@ public class QuadrupedSupportPolygonTest
       for (int i = 0; i < 4; i++)
       {
          FramePoint3D polyPoint = poly.getFootstep(RobotQuadrant.getQuadrantNameFromOrdinal(i));
-         FramePoint2D convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
          polyPoint.checkReferenceFrameMatch(convexPoint);
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getX(), convexPoint.getX(), 1e-7));
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getY(), convexPoint.getY(), 1e-7));
@@ -1220,7 +1220,7 @@ public class QuadrupedSupportPolygonTest
 
       for (int i = 0; i < 3; i++)
       {
-         FramePoint2D convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
          FramePoint2D polyPoint = new FramePoint2D();
          expected.getFrameVertex(i, polyPoint);
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, polyPoint.epsilonEquals(convexPoint, 1e-7));

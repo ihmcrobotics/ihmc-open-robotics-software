@@ -11,9 +11,9 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class Pose2dReferenceFrameTest
@@ -147,7 +147,7 @@ public class Pose2dReferenceFrameTest
    {
 
       Point2D randomPoint2d = RandomGeometry.nextPoint2D(random, 1234, 1234);
-      FramePose2d framePose = new FramePose2d(poseReferenceFrame.getParent(), randomPoint2d,random.nextGaussian());
+      FramePose2D framePose = new FramePose2D(poseReferenceFrame.getParent(), randomPoint2d,random.nextGaussian());
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }
    

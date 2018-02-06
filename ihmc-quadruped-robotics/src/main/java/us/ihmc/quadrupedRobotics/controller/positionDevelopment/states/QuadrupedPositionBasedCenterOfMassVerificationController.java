@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -29,7 +30,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -90,7 +90,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final YoFramePoint desiredCenterOfMassPosition = new YoFramePoint("desiredCenterOfMassPosition", worldFrame, registry);
    private final YoFrameOrientation desiredCenterOfMassOrientation = new YoFrameOrientation("desiredCenterOfMassOrientation", worldFrame, registry);
    private final YoFramePose desiredCenterOfMassPose = new YoFramePose(desiredCenterOfMassPosition, desiredCenterOfMassOrientation);
-   private final FramePose desiredCenterOfMassPoseForPacking = new FramePose(worldFrame);
+   private final FramePose3D desiredCenterOfMassPoseForPacking = new FramePose3D(worldFrame);
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", desiredCenterOfMassPoseForPacking);
 
    private final ConvexPolygon2D supportPolygonHolder = new ConvexPolygon2D();
@@ -284,7 +284,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
          // Use the desired foot locations instead of the actual locations
          YoFramePoint desiredFootLocation = desiredFeetLocations.get(robotQuadrant);
-         fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation.getFrameTuple());
+         fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootLocation);
       }
    }
 
@@ -318,13 +318,13 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
 
          //get the pose from desired feet to the desired center of mass
-         desiredFootPosition.setIncludingFrame(desiredFeetLocations.get(robotQuadrant).getFrameTuple());
+         desiredFootPosition.setIncludingFrame(desiredFeetLocations.get(robotQuadrant));
          desiredFootPosition.changeFrame(desiredCoMPoseReferenceFrame);
 
-         desiredFootPositionInLegAttachmentFrame.setIncludingFrame(centerOfMassFrame, desiredFootPosition.getPoint());
+         desiredFootPositionInLegAttachmentFrame.setIncludingFrame(centerOfMassFrame, desiredFootPosition);
          desiredFootPositionInLegAttachmentFrame.changeFrame(legAttachmentFrame);
 
-         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInLegAttachmentFrame.getPoint());
+         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInLegAttachmentFrame);
       }
    }
 
@@ -334,7 +334,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).get(desiredFootPositionForInverseKinematics);
+         desiredFootPositionForInverseKinematics.set(desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant));
          inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, desiredFootPositionForInverseKinematics, fullRobotModel);
       }
    }
@@ -505,7 +505,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          super(COM_ESTIMATE_STATES.MOVE_COM_AROUND);
          frameToIncrementOver.set(TrotPair.NONE);
          intialCenterOfMass.changeFrame(worldFrame);
-         desiredCenterOfMassPosition.getFrameTuple(intialCenterOfMass);
+         intialCenterOfMass.set(desiredCenterOfMassPosition);
          intialCenterOfMassReferenceFrame.updateTranslation(intialCenterOfMass);
 
          totalMass = fullRobotModel.getTotalMass();

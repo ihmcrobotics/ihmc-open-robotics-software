@@ -27,11 +27,10 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 
    public DifferentialIDMassMatrixCalculator(ReferenceFrame inertialFrame, RigidBody rootBody)
    {
-      LinkedHashMap<RigidBody, Wrench> zeroExternalWrench = new LinkedHashMap<RigidBody, Wrench>();
       ArrayList<InverseDynamicsJoint> zeroJointToIgnore = new ArrayList<InverseDynamicsJoint>();
       SpatialAccelerationVector zeroRootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(rootBody, 0.0);
       
-      idCalculator = new InverseDynamicsCalculator(rootBody, zeroRootAcceleration, zeroExternalWrench, zeroJointToIgnore, false, true);
+      idCalculator = new InverseDynamicsCalculator(rootBody, zeroRootAcceleration, zeroJointToIgnore, false, true);
       jointsInOrder = ScrewTools.computeSubtreeJoints(rootBody);
       totalNumberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       massMatrix = new DenseMatrix64F(totalNumberOfDoFs, totalNumberOfDoFs);

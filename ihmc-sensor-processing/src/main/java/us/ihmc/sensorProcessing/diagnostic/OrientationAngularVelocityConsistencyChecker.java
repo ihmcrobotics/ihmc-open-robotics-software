@@ -76,11 +76,11 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    public void update()
    {
       localVelocityFromFD.update();
-      localVelocityFromFD.getFrameTupleIncludingFrame(tempAngularVelocity);
+      tempAngularVelocity.setIncludingFrame(localVelocityFromFD);
       tempAngularVelocity.changeFrame(referenceFrameUsedForComparison);
       localVelocityFiltered.update(tempAngularVelocity);
 
-      angularVelocityToCheck.getFrameTupleIncludingFrame(tempAngularVelocity);
+      tempAngularVelocity.setIncludingFrame(angularVelocityToCheck);
       tempAngularVelocity.changeFrame(referenceFrameUsedForComparison);
       filteredVelocityToCheck.update(tempAngularVelocity);
 

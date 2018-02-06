@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,7 +24,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -95,7 +95,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final RecyclingArrayDeque<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(maxPoints, FrameSE3TrajectoryPoint.class);
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
 
-   private final FramePose initialPose = new FramePose();
+   private final FramePose3D initialPose = new FramePose3D();
 
    private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
@@ -103,7 +103,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final PoseReferenceFrame controlFrame;
    private ReferenceFrame trajectoryFrame;
 
-   private final FramePose controlFramePose = new FramePose();
+   private final FramePose3D controlFramePose = new FramePose3D();
 
    private final FramePoint3D controlPoint = new FramePoint3D();
    private final YoFramePoint yoControlPoint;
@@ -354,7 +354,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       startTracking();
    }
 
-   public void goToPoseFromCurrent(FramePose homePose, double trajectoryTime)
+   public void goToPoseFromCurrent(FramePose3D homePose, double trajectoryTime)
    {
       clear();
       setWeightsToDefaults();
@@ -373,7 +373,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       startTracking();
    }
 
-   public void goToPose(FramePose desiredPose, FramePose initialPose, double trajectoryTime)
+   public void goToPose(FramePose3D desiredPose, FramePose3D initialPose, double trajectoryTime)
    {
       clear();
       setWeightsToDefaults();
@@ -427,7 +427,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void setControlFramePose(RigidBodyTransform controlFrameTransform)
    {
-      controlFramePose.setPoseIncludingFrame(bodyFrame, controlFrameTransform);
+      controlFramePose.setIncludingFrame(bodyFrame, controlFrameTransform);
       this.controlFrame.setPoseAndUpdate(controlFramePose);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
    }
@@ -442,7 +442,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return controlFrame;
    }
 
-   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FramePose initialPose)
+   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
@@ -519,7 +519,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose initialPose,
+   public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose,
                                               JointspaceTrajectoryCommand<?, ?> jointspaceCommand, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
@@ -547,7 +547,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose initialPose)
+   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
@@ -638,7 +638,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand<?, ?> command, FramePose initialPose)
+   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
@@ -735,11 +735,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public void getDesiredPose(FramePose desiredPoseToPack)
+   public void getDesiredPose(FramePose3D desiredPoseToPack)
    {
       orientationTrajectoryGenerator.getOrientation(desiredOrientation);
       positionTrajectoryGenerator.getPosition(desiredPosition);
-      desiredPoseToPack.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+      desiredPoseToPack.setIncludingFrame(desiredPosition, desiredOrientation);
    }
 
    public void getDesiredOrientation(FrameQuaternion desiredOrientationToPack)
@@ -866,7 +866,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   private void queueInitialPoint(FramePose initialPose)
+   private void queueInitialPoint(FramePose3D initialPose)
    {
       initialPose.changeFrame(trajectoryFrame);
       FrameSE3TrajectoryPoint initialPoint = pointQueue.addLast();

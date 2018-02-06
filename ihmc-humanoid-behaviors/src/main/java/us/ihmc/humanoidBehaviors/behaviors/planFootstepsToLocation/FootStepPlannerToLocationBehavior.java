@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -28,7 +29,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,9 +43,9 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private final HumanoidReferenceFrames referenceFrames;
 
-   private final FramePose tempStanceFootPose = new FramePose();
-   private final FramePose tempLeftFootPose = new FramePose();
-   private final FramePose tempRightFootPose = new FramePose();
+   private final FramePose3D tempStanceFootPose = new FramePose3D();
+   private final FramePose3D tempLeftFootPose = new FramePose3D();
+   private final FramePose3D tempRightFootPose = new FramePose3D();
 
    private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
@@ -67,12 +67,12 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private final Stopwatch footstepSentTimer;
 
-   private final FramePose tempFirstFootstepPose = new FramePose();
+   private final FramePose3D tempFirstFootstepPose = new FramePose3D();
    private final us.ihmc.euclid.tuple3D.Point3D tempFootstepPosePosition = new us.ihmc.euclid.tuple3D.Point3D();
    private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
 
    private FootstepPlanner planner;
-   private final FramePose tempFootstepPlannerGoalPose = new FramePose();
+   private final FramePose3D tempFootstepPlannerGoalPose = new FramePose3D();
 
    private final FootstepPlannerGoal footstepPlannerGoal;
    private FootstepPlanningResult footstepPlanningResult;
@@ -138,7 +138,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       footstepSentTimer.reset();
    }
 
-   private void setGoalAndInitialFootClosestToGoal(FramePose goalPose)
+   private void setGoalAndInitialFootClosestToGoal(FramePose3D goalPose)
    {
       tempLeftFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.LEFT));
       tempRightFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.RIGHT));
@@ -149,13 +149,13 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       us.ihmc.euclid.tuple3D.Point3D pointBetweenFeet = new us.ihmc.euclid.tuple3D.Point3D();
       us.ihmc.euclid.tuple3D.Vector3D vectorFromFeetToGoal = new us.ihmc.euclid.tuple3D.Vector3D();
 
-      tempLeftFootPose.getPosition(temp);
+      temp.set(tempLeftFootPose.getPosition());
       pointBetweenFeet.set(temp);
-      tempLeftFootPose.getPosition(temp);
+      temp.set(tempLeftFootPose.getPosition());
       pointBetweenFeet.add(temp);
       pointBetweenFeet.scale(0.5);
 
-      goalPose.getPosition(vectorFromFeetToGoal);
+      vectorFromFeetToGoal.set(goalPose.getPosition());
       vectorFromFeetToGoal.sub(pointBetweenFeet);
 
       double headingFromFeetToGoal = Math.atan2(vectorFromFeetToGoal.getY(), vectorFromFeetToGoal.getX());
@@ -282,8 +282,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       {
          SimpleFootstep footstep = plan.getFootstep(i);
          footstep.getSoleFramePose(tempFirstFootstepPose);
-         tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
-         tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
+         tempFootstepPosePosition.set(tempFirstFootstepPose.getPosition());
+         tempFirstFootstepPoseOrientation.set(tempFirstFootstepPose.getOrientation());
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 

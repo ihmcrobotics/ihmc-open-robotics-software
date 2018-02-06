@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPQPOptimizationSolver;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 
 /**
- * Class intended to manage the indices of all components used in the {@link ICPQPOptimizationSolver}.
+ * Class intended to manage the indices of all components used in the {@link ICPOptimizationQPSolver}.
  */
 public class ICPQPIndexHandler
 {
@@ -14,21 +14,18 @@ public class ICPQPIndexHandler
    /** Number of footstep variables registered with the solver. Should be two times {@link #numberOfFootstepsToConsider} */
    private int numberOfFootstepVariables = 0;
 
-   /** Number of equality constraints in the optimization. Only the dynamics in this formulation. */
-   private final static int numberOfEqualityConstraints = 2; // these are the dynamics
-
    /** Index for the start of the footstep variables. */
-   private final int footstepStartingIndex = 0;
-   /** Index for the CMP Feedback action term. */
-   private int feedbackCMPIndex;
-   /** Index for the dynamic relaxation term. */
-   private int dynamicRelaxationIndex;
-   /** Index for the angular momentum term. */
-   private int angularMomentumIndex;
+   private int footstepStartingIndex;
+   /** Index for the CoP Feedback action term. */
+   private int copFeedbackIndex;
+   /** Index for the CMP feedback term. */
+   private int cmpFeedbackIndex;
 
    /** Whether or not to use step adjustment in the optimization. If {@link #numberOfFootstepsToConsider} is 0, this term should be false */
    private boolean useStepAdjustment;
-   /** Whether or not to use angular momentum in the optimization. */
+   /** Whether or not to include cmp feedback task in the optimization. */
+   private boolean hasCMPFeedbackTask = false;
+   /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
    private boolean useAngularMomentum = false;
 
    /**
@@ -70,6 +67,15 @@ public class ICPQPIndexHandler
    }
 
    /**
+    * Sets whether or not to use CMP feedback in the optimization.
+    * @param hasCMPFeedbackTask whether or not to use CMP feedback
+    */
+   public void setHasCMPFeedbackTask(boolean hasCMPFeedbackTask)
+   {
+      this.hasCMPFeedbackTask = hasCMPFeedbackTask;
+   }
+
+   /**
     * Sets whether or not to use angular momentum in the optimization.
     * @param useAngularMomentum whether or not to use angular momentum
     */
@@ -79,9 +85,17 @@ public class ICPQPIndexHandler
    }
 
    /**
-    * Whether or not the solver should include the use of angular momentum.
-    *
-    * @return whether or not to angular momentum.
+    * Whether or not the solver should include the CMP feedback.
+    * @return whether or not to has CMP feedback task.
+    */
+   public boolean hasCMPFeedbackTask()
+   {
+      return hasCMPFeedbackTask;
+   }
+
+   /**
+    * Whether or not the solver should use angular momentum with feedback.
+    * @return whether or not use angular momentum.
     */
    public boolean useAngularMomentum()
    {
@@ -93,27 +107,19 @@ public class ICPQPIndexHandler
     */
    public void computeProblemSize()
    {
+      copFeedbackIndex = 0;
+      cmpFeedbackIndex = copFeedbackIndex + 2;
+      if (hasCMPFeedbackTask)
+         footstepStartingIndex = cmpFeedbackIndex + 2;
+      else
+         footstepStartingIndex = copFeedbackIndex + 2;
+
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
-      numberOfFreeVariables = 4; // all the footstep locations, the CMP delta, and the dynamic relaxation
+      numberOfFreeVariables = 2; // the CMP delta
       if (useStepAdjustment)
-         numberOfFreeVariables += numberOfFootstepVariables;
-      if (useAngularMomentum)
+         numberOfFreeVariables += numberOfFootstepVariables; // all the footstep locations
+      if (hasCMPFeedbackTask)
          numberOfFreeVariables += 2;
-
-      feedbackCMPIndex = footstepStartingIndex + numberOfFootstepVariables; // this variable is stored after the footsteps
-
-      dynamicRelaxationIndex = feedbackCMPIndex + 2; // this variable is stored after the feedback value
-      angularMomentumIndex = dynamicRelaxationIndex + 2; // this variable is stored after the dynamic relaxation index
-   }
-
-   /**
-    * Gets the total number of equality constraints for the optimization to use.
-    *
-    * @return number of equality constraints.
-    */
-   public int getNumberOfEqualityConstraints()
-   {
-      return numberOfEqualityConstraints;
    }
 
    /**
@@ -123,7 +129,7 @@ public class ICPQPIndexHandler
     */
    public int getFootstepStartIndex()
    {
-      return 0;
+      return footstepStartingIndex;
    }
 
    /**
@@ -138,33 +144,23 @@ public class ICPQPIndexHandler
    }
 
    /**
-    * Gets the index of the CMP feedback action term.
+    * Gets the index of the CoP feedback action term.
     *
     * @return cmp feedback action index.
     */
-   public int getFeedbackCMPIndex()
+   public int getCoPFeedbackIndex()
    {
-      return feedbackCMPIndex;
+      return copFeedbackIndex;
    }
 
    /**
-    * Gets the index of the dynamic relaxation term.
+    * Gets the index of the cmp feedback term.
     *
-    * @return dynamic relaxation index.
+    * @return cmp feedback index.
     */
-   public int getDynamicRelaxationIndex()
+   public int getCMPFeedbackIndex()
    {
-      return dynamicRelaxationIndex;
-   }
-
-   /**
-    * Gets the index of the angular momentum term.
-    *
-    * @return angular momentum index.
-    */
-   public int getAngularMomentumIndex()
-   {
-      return angularMomentumIndex;
+      return cmpFeedbackIndex;
    }
 
    /**

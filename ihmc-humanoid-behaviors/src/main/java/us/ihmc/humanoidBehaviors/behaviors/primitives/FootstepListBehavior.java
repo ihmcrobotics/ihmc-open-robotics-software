@@ -79,7 +79,7 @@ public class FootstepListBehavior extends AbstractBehavior
          footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation.getQuaternion());
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position, orientation);
          footstepDataList.add(footstepData);
       }
       set(footstepDataList);

@@ -24,11 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -41,6 +36,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class OneStepCaptureRegionCalculatorTest
 {
@@ -197,7 +197,7 @@ public class OneStepCaptureRegionCalculatorTest
       {
          FramePoint2D closestVertex = captureRegion.getClosestVertexCopy(expectedPointsOnBorder.get(i));
          closestVertex.checkReferenceFrameMatch(expectedPointsOnBorder.get(i));
-         EuclidCoreTestTools.assertTuple2DEquals(closestVertex.getPoint(), expectedPointsOnBorder.get(i).getPoint(), 1.0e-6);
+         EuclidCoreTestTools.assertTuple2DEquals(closestVertex, expectedPointsOnBorder.get(i), 1.0e-6);
          assertTrue(closestVertex.epsilonEquals(expectedPointsOnBorder.get(i), 10e-7));
       }
 
@@ -476,7 +476,7 @@ public class OneStepCaptureRegionCalculatorTest
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            FramePoint2D icp = yoICP.getFramePoint2dCopy();
+            FramePoint2D icp = new FramePoint2D(yoICP);
             RobotSide supportSide = yoSupportSide.getEnumValue();
             yoFootPolygons.get(supportSide.getOppositeSide()).hide();
             footPolygons.get(supportSide).changeFrame(worldFrame);

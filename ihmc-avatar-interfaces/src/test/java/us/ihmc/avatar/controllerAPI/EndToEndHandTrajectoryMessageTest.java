@@ -28,6 +28,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -49,7 +50,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -138,13 +138,13 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
 
          RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
-         FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
+         FramePose3D desiredRandomHandPose = new FramePose3D(handClone.getBodyFixedFrame());
          humanoidReferenceFrames.updateFrames();
          desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
@@ -162,7 +162,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          humanoidReferenceFrames.updateFrames();
          desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
 
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertSingleWaypointExecuted(handName, desiredPosition, desiredOrientation, scs);
@@ -226,7 +226,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          ReferenceFrame handBodyFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
          FrameVector3D frameFramePosition = new FrameVector3D(handBodyFrame, framePosition);
          frameFramePosition.changeFrame(worldFrame);
-         position.add(frameFramePosition.getVector());
+         position.add(frameFramePosition);
 
          handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, position, orientation, new Vector3D(), new Vector3D(), worldFrame);
 
@@ -300,7 +300,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, 0.0, radius * Math.cos(angle), radius * Math.sin(angle));
             tempPoint.add(circleCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
@@ -508,7 +508,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          tempPoint.setIncludingFrame(chestBodyFixedFrame, pointsOnSphere[i]);
          tempPoint.add(sphereCenter);
          tempPoint.changeFrame(worldFrame);
-         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
       }
 
       euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
@@ -632,8 +632,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = findQuat4d(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
 
       lastPoint.changeFrame(worldFrame);
-      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), desiredPosition, 0.001);
-      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), desiredOrientation, 0.001);
+      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), desiredPosition, 0.001);
+      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), desiredOrientation, 0.001);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -693,7 +693,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
@@ -812,7 +812,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
          }
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
@@ -861,7 +861,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       double overrideTrajectoryTime = 1.0;
-      SideDependentList<FramePose> overridingPoses = new SideDependentList<>();
+      SideDependentList<FramePose3D> overridingPoses = new SideDependentList<>();
       fullRobotModel.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -869,12 +869,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          fullRobotModel.updateFrames();
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         FramePose desiredHandPose = new FramePose(handControlFrame);
+         FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
          desiredHandPose.changeFrame(worldFrame);
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         desiredHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredHandPose.get(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
 
@@ -899,7 +899,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose desiredPose = overridingPoses.get(robotSide);
+         FramePose3D desiredPose = overridingPoses.get(robotSide);
          desiredPose.changeFrame(worldFrame);
 
          String handName = fullRobotModel.getHand(robotSide).getName();
@@ -922,15 +922,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       ReferenceFrame handFrame = hand.getBodyFixedFrame();
       Twist desiredTwist = new Twist(handFrame, chestFrame, handControlFrame);
-      FramePose desiredPose = new FramePose(desiredPosition.getReferenceFrame());
+      FramePose3D desiredPose = new FramePose3D(desiredPosition.getReferenceFrame());
       desiredPose.setPosition(desiredPosition);
       desiredPose.changeFrame(chestFrame);
       for (int i = 0; i < numberOfIterations; i++)
          taskspaceToJointspaceCalculator.compute(desiredPose, desiredTwist);
       taskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredPose, ReferenceFrame.getWorldFrame());
 
-      FrameQuaternion tempOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
-      desiredPose.getOrientationIncludingFrame(tempOrientation);
+      FrameQuaternion tempOrientation = new FrameQuaternion(desiredPose.getOrientation());
       return tempOrientation;
    }
 
@@ -976,14 +975,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
 
-         FramePose desiredRandomHandPose = new FramePose(fullRobotModel.getHandControlFrame(robotSide));
+         FramePose3D desiredRandomHandPose = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          desiredRandomHandPose.changeFrame(worldFrame);
          desiredRandomHandPose.prependTranslation(RandomGeometry.nextVector3D(random, 0.2));
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);

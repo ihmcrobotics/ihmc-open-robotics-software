@@ -199,7 +199,7 @@ public class CapturePointUpdatable implements Updatable
 
    private void updateCapturePointDistanceToSupportPolygon()
    {
-      yoCapturePoint.get(icp);
+      icp.set(yoCapturePoint);
 
       ConvexPolygon2D supportPolygon = yoSupportPolygon.getConvexPolygon2d();
 

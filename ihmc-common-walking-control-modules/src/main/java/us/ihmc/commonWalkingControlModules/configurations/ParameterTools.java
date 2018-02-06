@@ -50,7 +50,7 @@ public class ParameterTools
       {
          String name = jointGroupParameter.getGroupName();
          JointAccelerationIntegrationParametersReadOnly defaultParameters = jointGroupParameter.getParameter();
-         TunableJointAccelerationIntegrationParameters parameterizedParameters = new TunableJointAccelerationIntegrationParameters(name + prefix, registry, defaultParameters);
+         TunableJointAccelerationIntegrationParameters parameterizedParameters = new TunableJointAccelerationIntegrationParameters(prefix + name, registry, defaultParameters);
 
          for (String jointName : jointGroupParameter.getMemberNames())
          {
@@ -104,8 +104,16 @@ public class ParameterTools
       for (GroupParameter<Double> jointGroupParameter : jointspaceWeights)
       {
          String name = jointGroupParameter.getGroupName() + suffix;
-         Double defaultWeight = jointGroupParameter.getParameter();
-         DoubleParameter tunableWeight = new DoubleParameter(name, registry, defaultWeight.doubleValue());
+         DoubleParameter tunableWeight;
+         if (jointGroupParameter.hasParameter())
+         {
+            Double defaultWeight = jointGroupParameter.getParameter();
+            tunableWeight = new DoubleParameter(name, registry, defaultWeight.doubleValue());
+         }
+         else
+         {
+            tunableWeight = new DoubleParameter(name, registry);
+         }
 
          for (String jointName : jointGroupParameter.getMemberNames())
          {

@@ -10,13 +10,13 @@ import org.ejml.ops.NormOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
@@ -48,7 +48,7 @@ public class TaskspaceToJointspaceCalculator
    };
 
    private final RigidBodyTransform desiredControlFrameTransform = new RigidBodyTransform();
-   private final FramePose desiredControlFramePose = new FramePose();
+   private final FramePose3D desiredControlFramePose = new FramePose3D();
    private final Twist desiredControlFrameTwist = new Twist();
 
    private final OneDoFJoint[] originalJoints;
@@ -123,7 +123,7 @@ public class TaskspaceToJointspaceCalculator
    private final DenseMatrix64F desiredJointVelocities;
    private final DenseMatrix64F desiredJointAccelerations;
 
-   private final FramePose originalBasePose = new FramePose();
+   private final FramePose3D originalBasePose = new FramePose3D();
 
    private final double controlDT;
 
@@ -397,34 +397,34 @@ public class TaskspaceToJointspaceCalculator
 
    public void compute(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
-      desiredControlFramePose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+      desiredControlFramePose.setIncludingFrame(desiredPosition, desiredOrientation);
       desiredControlFrameTwist.set(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredLinearVelocity, desiredAngularVelocity);
 
       compute(desiredControlFramePose, desiredControlFrameTwist);
    }
 
-   public void compute(FramePose desiredPose, Twist desiredTwist)
+   public void compute(FramePose3D desiredPose, Twist desiredTwist)
    {
       jacobian.compute();
 
-      desiredControlFramePose.setPoseIncludingFrame(desiredPose);
+      desiredControlFramePose.setIncludingFrame(desiredPose);
       desiredControlFrameTwist.set(desiredTwist);
       computeJointAnglesAndVelocities(desiredControlFramePose, desiredControlFrameTwist);
    }
    
    private final AxisAngle tempAxisAngle = new AxisAngle();
    
-   public boolean computeIteratively(FramePose desiredPose, Twist desiredTwist, double maxIterations, double epsilon)
+   public boolean computeIteratively(FramePose3D desiredPose, Twist desiredTwist, double maxIterations, double epsilon)
    {
       for(int i = 0; i < maxIterations; i++)
       {
          compute(desiredPose, desiredTwist);
          
-         desiredPose.getPositionIncludingFrame(tempPoint);
+         tempPoint.setIncludingFrame(desiredPose.getPosition());
          tempPoint.changeFrame(localControlFrame);
          double translationDistance = tempPoint.distanceFromOrigin();
          
-         desiredPose.getOrientationIncludingFrame(tempOrientation);
+         tempOrientation.setIncludingFrame(desiredPose.getOrientation());
          tempOrientation.changeFrame(localControlFrame);
          tempAxisAngle.set(tempOrientation);
          double angle = Math.abs(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
@@ -438,7 +438,7 @@ public class TaskspaceToJointspaceCalculator
       return false;
    }
 
-   private void computeJointAnglesAndVelocities(FramePose desiredControlFramePose, Twist desiredControlFrameTwist)
+   private void computeJointAnglesAndVelocities(FramePose3D desiredControlFramePose, Twist desiredControlFrameTwist)
    {
       if (enableFeedbackControl.getBooleanValue())
          setLocalJointAnglesToCurrentJointAngles();
@@ -453,17 +453,17 @@ public class TaskspaceToJointspaceCalculator
       ReferenceFrame localControlledWithRespectToFrame = originalToLocalFramesMap.get(originalControlledWithRespectToFrame);
       if (localControlledWithRespectToFrame != null)
       {
-         desiredControlFramePose.getPose(desiredControlFrameTransform);
-         desiredControlFramePose.setPoseIncludingFrame(localControlledWithRespectToFrame, desiredControlFrameTransform);
+         desiredControlFramePose.get(desiredControlFrameTransform);
+         desiredControlFramePose.setIncludingFrame(localControlledWithRespectToFrame, desiredControlFrameTransform);
       }
 
       desiredControlFramePose.changeFrame(localControlFrame);
 
-      desiredControlFramePose.getOrientation(errorAxisAngle);
+      errorAxisAngle.set(desiredControlFramePose.getOrientation());
       errorRotationVector.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotationVector.scale(errorAxisAngle.getAngle());
 
-      desiredControlFramePose.getPosition(errorTranslationVector);
+      errorTranslationVector.set(desiredControlFramePose.getPosition());
 
       yoErrorRotation.set(errorRotationVector);
       yoErrorTranslation.set(errorTranslationVector);
@@ -525,15 +525,15 @@ public class TaskspaceToJointspaceCalculator
       originalBasePose.setToZero(originalBaseParentJointFrame);
       originalBasePose.changeFrame(worldFrame);
 
-      originalBasePose.getPoseIncludingFrame(baseParentJointFramePosition, baseParentJointFrameOrientation);
+      originalBasePose.get(baseParentJointFramePosition, baseParentJointFrameOrientation);
       yoBaseParentJointFrameOrientation.set(baseParentJointFrameOrientation);
       yoBaseParentJointFramePosition.set(baseParentJointFramePosition);
 
       yoBaseParentJointFrameOrientationFiltered.update();
       yoBaseParentJointFramePositionFiltered.update();
 
-      yoBaseParentJointFrameOrientationFiltered.getFrameOrientationIncludingFrame(baseParentJointFrameOrientation);
-      yoBaseParentJointFramePositionFiltered.getFrameTupleIncludingFrame(baseParentJointFramePosition);
+      baseParentJointFrameOrientation.setIncludingFrame(yoBaseParentJointFrameOrientationFiltered);
+      baseParentJointFramePosition.setIncludingFrame(yoBaseParentJointFramePositionFiltered);
 
       localBaseParentJointFrame.setPoseAndUpdate(baseParentJointFramePosition, baseParentJointFrameOrientation);
       updateFrames();
@@ -627,8 +627,8 @@ public class TaskspaceToJointspaceCalculator
 
    private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, YoFrameVector yoAngularPart, YoFrameVector yoLinearPart)
    {
-      yoAngularPart.getFrameTupleIncludingFrame(angularPart);
-      yoLinearPart.getFrameTupleIncludingFrame(linearPart);
+      angularPart.setIncludingFrame(yoAngularPart);
+      linearPart.setIncludingFrame(yoLinearPart);
       MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, spatialVectorToPack, 0);
       MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, spatialVectorToPack, 3);
    }
@@ -790,7 +790,7 @@ public class TaskspaceToJointspaceCalculator
       return inverseJacobianSolver.getLastComputedDeterminant();
    }
 
-   public void getDesiredEndEffectorPoseFromQDesireds(FramePose desiredPose, ReferenceFrame desiredFrame)
+   public void getDesiredEndEffectorPoseFromQDesireds(FramePose3D desiredPose, ReferenceFrame desiredFrame)
    {
       desiredPose.setToZero(localControlFrame);
       desiredPose.changeFrame(desiredFrame);

@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SimplexPolytope;
@@ -467,8 +468,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             SupportingVertexHolder descriptionTwo, double smoothingRadiusTwo, CollisionDetectionResult result)
       {
       descriptionOne.getLineSegment(tempLineSegment);
-      final Point3D tempSegmentPointOne = tempLineSegment.getFirstEndpoint();
-      final Point3D tempSegmentPointTwo = tempLineSegment.getSecondEndpoint();
+      final Point3DBasics tempSegmentPointOne = tempLineSegment.getFirstEndpoint();
+      final Point3DBasics tempSegmentPointTwo = tempLineSegment.getSecondEndpoint();
 
       double capsuleRadius = descriptionOne.getRadius();
 
@@ -485,9 +486,9 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             double dotTwo = tempSegmentPointVector.dot(supportDirection);
 
             if (dotOne > dotTwo)
-               return tempSegmentPointOne;
+               return new Point3D(tempSegmentPointOne);
             else
-               return tempSegmentPointTwo;
+               return new Point3D(tempSegmentPointTwo);
          }
       };
 
@@ -714,10 +715,10 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    public void getClosestPointsOnLineSegments(LineSegment3D segmentOne, LineSegment3D segmentTwo, Point3D closestPointOnOneToPack,
          Point3D closestPointOnTwoToPack)
    {
-      Point3D p0 = segmentOne.getFirstEndpoint();
-      Point3D p1 = segmentOne.getSecondEndpoint();
-      Point3D q0 = segmentTwo.getFirstEndpoint();
-      Point3D q1 = segmentTwo.getSecondEndpoint();
+      Point3DBasics p0 = segmentOne.getFirstEndpoint();
+      Point3DBasics p1 = segmentOne.getSecondEndpoint();
+      Point3DBasics q0 = segmentTwo.getFirstEndpoint();
+      Point3DBasics q1 = segmentTwo.getSecondEndpoint();
 
       uVector.sub(p1, p0);
       vVector.sub(q1, q0);

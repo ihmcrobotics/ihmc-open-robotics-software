@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -117,8 +116,8 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.location = location.getPoint();
-      this.orientation = new Quaternion(orientation.getQuaternion());
+      this.location = new Point3D(location);
+      this.orientation = new Quaternion(orientation);
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)

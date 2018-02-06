@@ -55,8 +55,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
-   private static final boolean USE_SIMPLE_ICP_OPTIMIZATION = true;
-
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;// = 0.625;
    private double       nominalHeightAboveGround;// = 0.705;
@@ -102,10 +100,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       steppingParameters = new AtlasSteppingParameters(jointMap);
       leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
-      if (USE_SIMPLE_ICP_OPTIMIZATION)
-         icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
-      else
-         icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
+      icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -771,7 +766,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean useOptimizationBasedICPController()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */

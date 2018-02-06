@@ -263,7 +263,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       orientation.changeFrame(worldFrame);
 
       footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(orientation.getQuaternion());
+      footstepData.setOrientation(orientation);
       footstepData.setRobotSide(robotSide);
 
       return footstepData;

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,18 +8,18 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -42,7 +42,7 @@ public class CapturePointToolsTest
       int nFootsteps = 2;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -51,7 +51,7 @@ public class CapturePointToolsTest
       }
       for (int i = 0; i < nFootsteps; i++)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          poseReferenceFrame.setPoseAndUpdate(pose);
@@ -76,7 +76,7 @@ public class CapturePointToolsTest
 
       for (int i = 0; i < footstepList.size(); i++)
       {
-         EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), pointBetweenFeet, 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i), pointBetweenFeet, 1e-10);
       }
    }
 
@@ -87,7 +87,7 @@ public class CapturePointToolsTest
       int nFootsteps = 2;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 4;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -96,7 +96,7 @@ public class CapturePointToolsTest
       }
       for (int i = 0; i < nFootsteps; i++)
       {
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+         FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          poseReferenceFrame.setPoseAndUpdate(pose);
@@ -119,11 +119,11 @@ public class CapturePointToolsTest
       pointBetweenFeet.add(new Point3D(footstepList.get(1)));
       pointBetweenFeet.scale(0.5);
 
-      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(footstepList.get(0)), arrayToPack.get(0).getPoint3dCopy(), 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(footstepList.get(0)), arrayToPack.get(0), 1e-10);
 
       for (int i = 1; i < footstepList.size(); i++)
       {
-         EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), pointBetweenFeet, 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i), pointBetweenFeet, 1e-10);
       }
    }
 
@@ -134,7 +134,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -146,7 +146,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -163,7 +163,7 @@ public class CapturePointToolsTest
 
          for (int i = 0; i < arrayToPack.size(); i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -175,7 +175,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -187,7 +187,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -209,10 +209,10 @@ public class CapturePointToolsTest
          copPos1.set(new Point3D(footstepList.get(0)));
          copPos1.add(new Point3D(footstepList.get(1)));
          copPos1.scale(0.5);
-         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0), 1e-10);
          for (int i = 1; i < arrayToPack.size() - 1; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -224,7 +224,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -236,7 +236,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -258,10 +258,10 @@ public class CapturePointToolsTest
          copPos1.set(new Point3D(footstepList.get(numberFootstepsToConsider - 1)));
          copPos1.add(new Point3D(footstepList.get(numberFootstepsToConsider - 2)));
          copPos1.scale(0.5);
-         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1), 1e-10);
          for (int i = 0; i < arrayToPack.size() - 2; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -273,7 +273,7 @@ public class CapturePointToolsTest
       int nFootsteps = 10;
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> arrayToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
 
       int numberFootstepsToConsider = 3;
       for (int i = 0; i < numberFootstepsToConsider; i++)
@@ -285,7 +285,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -307,16 +307,16 @@ public class CapturePointToolsTest
          copPos1.set(new Point3D(footstepList.get(numberFootstepsToConsider - 1)));
          copPos1.add(new Point3D(footstepList.get(numberFootstepsToConsider - 2)));
          copPos1.scale(0.5);
-         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1), 1e-10);
 
          copPos1.set(new Point3D(footstepList.get(0)));
          copPos1.add(new Point3D(footstepList.get(1)));
          copPos1.scale(0.5);
-         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0), 1e-10);
 
          for (int i = 1; i < arrayToPack.size() - 2; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -330,7 +330,7 @@ public class CapturePointToolsTest
       ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
       YoFramePoint icpToCheck = new YoFramePoint("icpToCheck", ReferenceFrame.getWorldFrame(), registry);
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
       FramePoint2D p1 = new FramePoint2D();
       FramePoint2D p2 = new FramePoint2D();
 
@@ -349,7 +349,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < numberFootstepsToConsider; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -373,15 +373,15 @@ public class CapturePointToolsTest
          CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), constantCentersOfPressures.get(0), icpToCheck);
 
          
-         EuclidFrameTestTools.assertFrameTuple3DEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(capturePointsToPack.get(0), icpToCheck, 1e-8);
 
          for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
          {
-            p1.set(constantCentersOfPressures.get(i).getFramePoint2dCopy());
-            p2.set(capturePointsToPack.get(i).getFramePoint2dCopy());
+            p1.set(constantCentersOfPressures.get(i));
+            p2.set(capturePointsToPack.get(i));
             Line2D line = new Line2D(p1, p2);
-            p1.set(capturePointsToPack.get(i + 1).getFramePoint2dCopy());
-            boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
+            p1.set(capturePointsToPack.get(i + 1));
+            boolean isPointOnLine = line.isPointOnLine(p1);
             assertTrue(isPointOnLine);
          }
       }
@@ -395,7 +395,7 @@ public class CapturePointToolsTest
       FrameTupleArrayList<FramePoint3D> footstepList = FrameTupleArrayList.createFramePointArrayList(nFootsteps);
       ArrayList<YoFramePoint> constantCentersOfPressures = new ArrayList<YoFramePoint>();
       ArrayList<YoFramePoint> capturePointsToPack = new ArrayList<YoFramePoint>();
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose());
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", new FramePose3D());
       FramePoint2D p1 = new FramePoint2D();
       FramePoint2D p2 = new FramePoint2D();
       YoFramePoint desiredICP = new YoFramePoint("", ReferenceFrame.getWorldFrame(), registry);
@@ -414,7 +414,7 @@ public class CapturePointToolsTest
       {
          for (int i = 0; i < nFootsteps; i++)
          {
-            FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
+            FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble()),
                   new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
             poseReferenceFrame.setPoseAndUpdate(pose);
@@ -442,11 +442,11 @@ public class CapturePointToolsTest
             CapturePointTools.computeDesiredCapturePointPosition(omega0, timeIntoStep, capturePointsToPack.get(i), constantCentersOfPressures.get(i),
                   desiredICP);
 
-            p1.set(constantCentersOfPressures.get(i).getFramePoint2dCopy());
-            p2.set(capturePointsToPack.get(i).getFramePoint2dCopy());
+            p1.set(constantCentersOfPressures.get(i));
+            p2.set(capturePointsToPack.get(i));
             Line2D line = new Line2D(p1, p2);
-            p1.set(desiredICP.getFramePoint2dCopy());
-            boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
+            p1.set(desiredICP);
+            boolean isPointOnLine = line.isPointOnLine(p1);
             assertTrue(isPointOnLine);
          }
       }
@@ -483,7 +483,7 @@ public class CapturePointToolsTest
          CapturePointTools.computeDesiredCapturePointVelocity(omega0, time + deltaT, initialCapturePointPosition, initialCenterOfPressure,
                computedCapturePointVelocity);
 
-         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity.getPoint3dCopy(), differentiatedCapturePointPosition.getPoint3dCopy(), 1e-3);
+         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, differentiatedCapturePointPosition, 1e-3);
       }
    }
 
@@ -509,13 +509,13 @@ public class CapturePointToolsTest
                desiredCapturePointAcceleration);
          computedCapturePointVelocity.scale(omega0);
 
-         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity.getPoint3dCopy(), desiredCapturePointAcceleration.getPoint3dCopy(), 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, desiredCapturePointAcceleration, 1e-10);
 
          computedCapturePointVelocity.scale(1 / omega0);
          CapturePointTools.computeDesiredCapturePointAcceleration(omega0, computedCapturePointVelocity, desiredCapturePointAcceleration);
          computedCapturePointVelocity.scale(omega0);
 
-         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity.getPoint3dCopy(), desiredCapturePointAcceleration.getPoint3dCopy(), 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, desiredCapturePointAcceleration, 1e-10);
       }
    }
 
@@ -539,11 +539,11 @@ public class CapturePointToolsTest
 
          CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCenterOfPressure, finalDesiredICP, initialICP, omega0, time);
 
-         p1.set(initialICP.getFramePoint2dCopy());
-         p2.set(finalDesiredICP.getFramePoint2dCopy());
+         p1.set(initialICP);
+         p2.set(finalDesiredICP);
          Line2D line = new Line2D(p1, p2);
-         p1.set(constantCenterOfPressure.getFramePoint2dCopy());
-         boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
+         p1.set(constantCenterOfPressure);
+         boolean isPointOnLine = line.isPointOnLine(p1);
          assertTrue(isPointOnLine);
       }
    }

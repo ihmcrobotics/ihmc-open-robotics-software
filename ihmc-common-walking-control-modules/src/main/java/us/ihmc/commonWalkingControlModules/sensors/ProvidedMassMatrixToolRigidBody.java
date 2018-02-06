@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -105,7 +104,7 @@ public class ProvidedMassMatrixToolRigidBody
       jointsToIgnore.addAll(ScrewTools.getRootBody(toolBody).getChildrenJoints());
       jointsToIgnore.remove(toolJoint);
 
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore, spatialAccelerationCalculator);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(jointsToIgnore, spatialAccelerationCalculator);
    }
 
    private final FramePoint3D toolFramePoint = new FramePoint3D();
@@ -114,7 +113,7 @@ public class ProvidedMassMatrixToolRigidBody
    {
       toolBody.getInertia().setMass(objectMass.getDoubleValue());
 
-      temporaryPoint.setIncludingFrame(objectCenterOfMass.getFrameTuple());
+      temporaryPoint.setIncludingFrame(objectCenterOfMass);
       temporaryPoint.changeFrame(toolBody.getBodyFixedFrame());
       toolBody.setCoMOffset(temporaryPoint);
 

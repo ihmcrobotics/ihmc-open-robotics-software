@@ -3,6 +3,8 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -23,13 +25,13 @@ public class SteeringWheelInformationPacket extends Packet<SteeringWheelInformat
    {
    }
 
-   public SteeringWheelInformationPacket(RobotSide robotSide, Point3D steeringWheelCenter, Vector3D steeringWheelRotationAxis, Vector3D steeringWheelZeroAxis,
+   public SteeringWheelInformationPacket(RobotSide robotSide, Point3DReadOnly steeringWheelCenter, Vector3DReadOnly steeringWheelRotationAxis, Vector3DReadOnly steeringWheelZeroAxis,
          double steeringWheelRadius, double graspOffsetFromControlFrame, double desiredSteeringSpeed, int steeringWheelId)
    {
       this.robotSide = robotSide;
-      this.steeringWheelCenter = steeringWheelCenter;
-      this.steeringWheelRotationAxis = steeringWheelRotationAxis;
-      this.steeringWheelZeroAxis = steeringWheelZeroAxis;
+      this.steeringWheelCenter = new Point3D(steeringWheelCenter);
+      this.steeringWheelRotationAxis = new Vector3D(steeringWheelRotationAxis);
+      this.steeringWheelZeroAxis = new Vector3D(steeringWheelZeroAxis);
       this.steeringWheelRadius = steeringWheelRadius;
       this.graspOffsetFromControlFrame = graspOffsetFromControlFrame;
       this.desiredSteeringSpeed = desiredSteeringSpeed;

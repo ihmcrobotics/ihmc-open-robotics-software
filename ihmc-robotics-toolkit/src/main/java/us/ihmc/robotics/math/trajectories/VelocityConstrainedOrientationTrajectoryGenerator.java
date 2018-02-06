@@ -1,8 +1,11 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -10,7 +13,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -166,59 +168,27 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       trajectoryTime.set(duration);
    }
 
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
-
-   public void setInitialOrientation(FrameQuaternion initialOrientation)
+   public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
-      tempOrientation.setIncludingFrame(initialOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.initialOrientation.set(tempOrientation);
+      this.initialOrientation.setAndMatchFrame(initialOrientation);
    }
 
-   public void setInitialOrientation(YoFrameQuaternion initialOrientation)
+   public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
-      initialOrientation.getFrameOrientationIncludingFrame(tempOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.initialOrientation.set(tempOrientation);
+      this.finalOrientation.setAndMatchFrame(finalOrientation);
    }
 
-   public void setFinalOrientation(FrameQuaternion finalOrientation)
+   public void setFinalOrientation(FramePose3D finalPose)
    {
-      tempOrientation.setIncludingFrame(finalOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.finalOrientation.set(tempOrientation);
+      this.finalOrientation.setAndMatchFrame(finalPose.getOrientation());
    }
 
-   public void setFinalOrientation(FramePose finalPose)
-   {
-      finalPose.getOrientationIncludingFrame(tempOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.finalOrientation.set(tempOrientation);
-   }
-
-   public void setFinalOrientation(YoFrameQuaternion finalOrientation)
-   {
-      finalOrientation.getFrameOrientationIncludingFrame(tempOrientation);
-      tempOrientation.changeFrame(trajectoryFrame);
-      this.finalOrientation.set(tempOrientation);
-   }
-
-   public void setInitialAngularVelocity(FrameVector3D initialAngularVelocity)
+   public void setInitialAngularVelocity(FrameVector3DReadOnly initialAngularVelocity)
    {
       this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
    }
 
-   public void setInitialAngularVelocity(YoFrameVector initialAngularVelocity)
-   {
-      this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
-   }
-
-   public void setFinalAngularVelocity(FrameVector3D finalAngularVelocity)
-   {
-      this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
-   }
-
-   public void setFinalAngularVelocity(YoFrameVector finalAngularVelocity)
+   public void setFinalAngularVelocity(FrameVector3DReadOnly finalAngularVelocity)
    {
       this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
    }
@@ -370,8 +340,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
          computeDrift(finalDriftIntegrationTime, alphaDecay, finalAngularVelocity, finalDrift);
       }
 
-      initialOrientation.get(initialQuaternionDriftedToPack);
-      finalOrientation.get(finalQuaternionDriftedToPack);
+      initialQuaternionDriftedToPack.set(initialOrientation);
+      finalQuaternionDriftedToPack.set(finalOrientation);
       quaternionCalculus.interpolate(alpha, initialQuaternionDriftedToPack, finalQuaternionDriftedToPack, qInterpolated, true);
       quaternionCalculus.interpolate(alpha, initialDrift, finalDrift, interpolatedDrift, false);
       qInterpolated.multiply(interpolatedDrift, qInterpolated);
@@ -384,14 +354,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    private void computeDrift(double time, double alphaDecay, YoFrameVector angularVelocity, Quaternion driftToPack)
    {
-      angularVelocity.get(tempAngularVelocityForDrift);
+      tempAngularVelocityForDrift.set(angularVelocity);
       tempAngularVelocity.scale(alphaDecay);
       RotationTools.integrateAngularVelocity(tempAngularVelocityForDrift, time, driftToPack);
    }
 
    private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector angularVelocity, YoDouble angularVelocityMagnitude, Quaternion driftToPack)
    {
-      angularVelocity.get(tempAngularVelocityForDrift);
+      tempAngularVelocityForDrift.set(angularVelocity);
 
       double maxTime = Math.signum(time) * PI / angularVelocityMagnitude.getDoubleValue() - 1.0e-5;
       time = alphaSaturation * maxTime + (1.0 - alphaSaturation) * time;
@@ -401,12 +371,12 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    public void getInitialOrientationDrifted(FrameQuaternion initialOrientationDriftedToPack)
    {
-      initialOrientationDrifted.getFrameOrientationIncludingFrame(initialOrientationDriftedToPack);
+      initialOrientationDriftedToPack.setIncludingFrame(initialOrientationDrifted);
    }
 
    public void getFinalOrientationDrifted(FrameQuaternion finalOrientationDriftedToPack)
    {
-      finalOrientationDrifted.getFrameOrientationIncludingFrame(finalOrientationDriftedToPack);
+      finalOrientationDriftedToPack.setIncludingFrame(finalOrientationDrifted);
    }
 
    @Override
@@ -418,19 +388,19 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
    @Override
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(currentOrientation);
    }
 
    @Override
    public void getAngularVelocity(FrameVector3D velocityToPack)
    {
-      currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
    @Override
    public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
-      currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(currentAngularAcceleration);
    }
 
    @Override

@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -24,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -97,8 +97,8 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                   {
                      Quaternion orientation = new Quaternion();
                      Pose3D nextFootstepPose = findNextFootstepPose(scs);
-                     nextFootstepPose.getPosition(adjustedLocation);
-                     nextFootstepPose.getOrientation(orientation);
+                     adjustedLocation.set(nextFootstepPose.getPosition());
+                     orientation.set(nextFootstepPose.getOrientation());
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
                      adjustedLocation.setY(adjustedLocation.getY() - 0.15);
                      AdjustFootstepMessage adjustFootstepMessage = new AdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);
@@ -161,8 +161,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       for (int i = 0; i < numberOfFootsteps; i++)
       {
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
-         Point3D position = new Point3D();
-         framePosition.get(position);
+         Point3D position = new Point3D(framePosition);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepDataListMessage.add(new FootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();
@@ -175,10 +174,9 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    {
       String sidePrefix = findUpcomingFootstepSide(0, scs).getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Footstep0Pose";
-      FramePose framePose = new FramePose();
+      FramePose3D framePose = new FramePose3D();
       findYoFramePose(FootstepListVisualizer.class.getSimpleName(), namePrefix, scs).getFramePose(framePose);
-      Pose3D pose = new Pose3D();
-      framePose.get(pose);
+      Pose3D pose = new Pose3D(framePose);
       return pose;
    }
 

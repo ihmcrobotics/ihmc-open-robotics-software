@@ -2,12 +2,13 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.AbstractICPOptimizationController;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -43,7 +44,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
 
    }
 
-   public void computeCMPInternal(FramePoint2D desiredCMPPreviousValue)
+   public void computeCMPInternal(FramePoint2DReadOnly desiredCMPPreviousValue)
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
@@ -99,17 +100,16 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LeggedLinea
    }
 
    @Override
-   public AbstractICPOptimizationController getICPOptimizationController()
+   public ICPOptimizationControllerInterface getICPOptimizationController()
    {
       return null;
    }
 
    @Override
-   public double getOptimizedTimeRemaining()
-   {
-      throw new RuntimeException("This method is not implemented in planner based momentum control module.");
-   }
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {}
 
    @Override
-   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity) {}
+   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   {}
 }

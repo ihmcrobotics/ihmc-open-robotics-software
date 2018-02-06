@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPQPOptimizationSolver;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 
 /**
- * Class that represents any objective task that is submitted to the {@link ICPQPOptimizationSolver}.
+ * Class that represents any objective task that is submitted to the {@link ICPOptimizationQPSolver}.
  * The intended use is to store the quadratic cost objective, linear cost objective, and scalar cost
  * of a given objective for minimization. This is then added to the full problem quadratic, linear,
  * and scalar costs.
@@ -94,6 +94,4 @@ public class ICPQPInput
    {
       return MatrixFeatures.isEquals(quadraticTerm, other.quadraticTerm, tol) && MatrixFeatures.isEquals(linearTerm, other.linearTerm, tol) && MatrixFeatures.isEquals(residualCost, other.residualCost, tol);
    }
-
-
 }

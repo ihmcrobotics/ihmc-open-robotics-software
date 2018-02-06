@@ -1,10 +1,13 @@
 package us.ihmc.communication.packets;
 
-public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegionsListMessage>
+import us.ihmc.euclid.geometry.BoundingBox3D;
+
+public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
 {
    public enum RequestType {SINGLE_UPDATE, CONTINUOUS_UPDATE, STOP_UPDATE, CLEAR};
 
    public RequestType requestType;
+   public BoundingBox3D boundingBoxInWorldForRequest;
 
    public RequestPlanarRegionsListMessage()
    {
@@ -12,23 +15,52 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
 
    public RequestPlanarRegionsListMessage(RequestType requestType)
    {
-      this.requestType = requestType;
+      this(requestType, null, null);
+   }
+
+   public RequestPlanarRegionsListMessage(RequestType requestType, BoundingBox3D boundingBoxInWorldForRequest)
+   {
+      this(requestType, boundingBoxInWorldForRequest, null);
    }
 
    public RequestPlanarRegionsListMessage(RequestType requestType, PacketDestination destination)
    {
-      this.requestType = requestType;
-      setDestination(destination);
+      this(requestType, null, destination);
    }
 
-   public RequestType getRequesType()
+   public RequestPlanarRegionsListMessage(RequestType requestType, BoundingBox3D boundingBoxInWorldForRequest, PacketDestination destination)
+   {
+      this.requestType = requestType;
+      this.boundingBoxInWorldForRequest = boundingBoxInWorldForRequest;
+      if (destination != null)
+         setDestination(destination);
+   }
+
+   public void set(RequestPlanarRegionsListMessage other)
+   {
+      this.requestType = other.requestType;
+      this.boundingBoxInWorldForRequest = other.boundingBoxInWorldForRequest;
+      setDestination(other.getDestination());
+   }
+
+   public RequestType getRequestType()
    {
       return requestType;
    }
 
-   public void setRequesType(RequestType requesType)
+   public void setRequestType(RequestType requestType)
    {
-      this.requestType = requesType;
+      this.requestType = requestType;
+   }
+
+   public boolean hasBoundingBox()
+   {
+      return boundingBoxInWorldForRequest != null;
+   }
+
+   public BoundingBox3D getBoundingBoxInWorldForRequest()
+   {
+      return boundingBoxInWorldForRequest;
    }
 
    @Override

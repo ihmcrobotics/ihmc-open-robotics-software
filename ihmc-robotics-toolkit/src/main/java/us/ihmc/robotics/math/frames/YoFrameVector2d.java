@@ -1,76 +1,62 @@
 package us.ihmc.robotics.math.frames;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
-//since they contain YoVariables.
-public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector2D>
+public class YoFrameVector2d extends YoFrameTuple2d implements FixedFrameVector2DBasics
 {
-   public YoFrameVector2d(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
+   /** Only for some garbage-free operations and reducing number of operations on the YoDoubles. */
+   private final FrameVector2D frameVector2D = new FrameVector2D();
+
+   /**
+    * Creates a new yo frame vector using the given yo variables and sets its reference frame to
+    * {@code referenceFrame}.
+    *
+    * @param xVariable an existing variable representing the x value of this yo frame vector.
+    * @param yVariable an existing variable representing the y value of this yo frame vector.
+    * @param referenceFrame the reference frame for this yo frame vector.
+    */
+   public YoFrameVector2d(YoDouble xVariable, YoDouble yVariable, ReferenceFrame referenceFrame)
    {
-      this(namePrefix, "", frame, registry);
+      super(xVariable, yVariable, referenceFrame);
    }
 
-   public YoFrameVector2d(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
+   /**
+    * Creates a new yo frame vector, initializes its coordinates to zero and its reference frame to
+    * {@code referenceFrame}, and registers variables to {@code registry}.
+    *
+    * @param namePrefix a unique name string to use as the prefix for child variable names.
+    * @param referenceFrame the reference frame for this yo frame vector.
+    * @param registry the registry to register child variables to.
+    */
+   public YoFrameVector2d(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super(namePrefix, nameSuffix, frame, registry);
+      super(namePrefix, "", referenceFrame, registry);
    }
 
-   public YoFrameVector2d(String namePrefix, String nameSuffix, String description, ReferenceFrame frame, YoVariableRegistry registry)
+   /**
+    * Creates a new yo frame vector using the given yo variables and sets its reference frame to
+    * {@code referenceFrame}.
+    *
+    * @param namePrefix a unique name string to use as the prefix for child variable names.
+    * @param nameSuffix a string to use as the suffix for child variable names.
+    * @param referenceFrame the reference frame for this yo frame vector.
+    * @param registry the registry to register child variables to.
+    */
+   public YoFrameVector2d(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
-      super(namePrefix, nameSuffix, description, frame, registry);
+      super(namePrefix, nameSuffix, referenceFrame, registry);
    }
 
-   public YoFrameVector2d(YoDouble xVariable, YoDouble yVariable, ReferenceFrame frame)
+   @Override
+   public void setAndMatchFrame(FrameTuple2DReadOnly frameTuple2DReadOnly)
    {
-      super(xVariable, yVariable, frame);
-   }
-
-   protected FrameVector2D createEmptyFrameTuple2d()
-   {
-      return new FrameVector2D();
-   }
-
-   public double length()
-   {
-      return getFrameTuple2d().length();
-   }
-
-   public double lengthSquared()
-   {
-      return getFrameTuple2d().lengthSquared();
-   }
-
-   public double dot(FrameVector2D vector)
-   {
-      return getFrameTuple2d().dot(vector);
-   }
-
-   public double dot(YoFrameVector2d yoFrameVector)
-   {
-      return dot(yoFrameVector.getFrameTuple2d());
-   }
-
-   public double cross(FrameVector2D frameVector)
-   {
-      checkReferenceFrameMatch(frameVector);
-
-      return getFrameTuple2d().cross(frameVector);
-   }
-
-   public double cross(YoFrameVector2d yoFrameVector)
-   {
-      checkReferenceFrameMatch(yoFrameVector);
-
-      return cross(yoFrameVector.getFrameTuple2d());
-   }
-
-   public void normalize()
-   {
-      getFrameTuple2d().normalize();
-      getYoValuesFromFrameTuple2d();
+      frameVector2D.setIncludingFrame(frameTuple2DReadOnly);
+      frameVector2D.changeFrame(getReferenceFrame());
+      set(frameVector2D);
    }
 }

@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,7 +28,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -271,7 +271,7 @@ public class MovingBaseRobotArmController implements RobotController
 
    public void updateHandFeedbackCommands()
    {
-      FramePose controlFramePose = new FramePose(robotArm.getHandControlFrame());
+      FramePose3D controlFramePose = new FramePose3D(robotArm.getHandControlFrame());
       controlFramePose.changeFrame(robotArm.getHand().getBodyFixedFrame());
 
       trajectory.getAngularData(orientation, angularVelocity, angularAcceleration);
@@ -296,9 +296,8 @@ public class MovingBaseRobotArmController implements RobotController
          FrameQuaternion initialOrientation = new FrameQuaternion(robotArm.getHandControlFrame());
          initialOrientation.changeFrame(worldFrame);
          trajectory.setInitialPose(initialPosition, initialOrientation);
-         FramePoint3D finalPosition = new FramePoint3D();
+         FramePoint3D finalPosition = new FramePoint3D(handTargetPosition);
          FrameQuaternion finalOrientation = new FrameQuaternion();
-         handTargetPosition.getFrameTupleIncludingFrame(finalPosition);
          handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);
          trajectory.setFinalPose(finalPosition, finalOrientation);
          trajectory.setTrajectoryTime(trajectoryDuration.getDoubleValue());

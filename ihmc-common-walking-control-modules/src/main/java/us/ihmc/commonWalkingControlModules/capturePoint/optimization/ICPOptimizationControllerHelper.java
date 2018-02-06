@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPOptimizationControllerHelper
 {
@@ -22,12 +22,7 @@ public class ICPOptimizationControllerHelper
    private final RotationMatrix rotation = new RotationMatrix();
    private final RotationMatrix rotationTranspose = new RotationMatrix();
 
-   public void transformFromDynamicsFrame(FrameVector2D feedbackGainsToPack, FrameVector2D desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
-   {
-      transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain.getDoubleValue(), orthogonalGain.getDoubleValue());
-   }
-
-   public void transformFromDynamicsFrame(FrameVector2D feedbackGainsToPack, FrameVector2D desiredICPVelocity, double parallelGain, double orthogonalGain)
+   public void transformFromDynamicsFrame(FixedFrameVector2DBasics feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain, double orthogonalGain)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -40,18 +35,18 @@ public class ICPOptimizationControllerHelper
       }
       else
       {
-         feedbackGainsToPack.setToZero(worldFrame);
+         feedbackGainsToPack.setToZero();
          feedbackGainsToPack.set(1.0 + orthogonalGain, 1.0 + orthogonalGain);
       }
    }
 
 
-   public void transformToWorldFrame(FrameVector2D weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
+   public void transformToWorldFrame(FixedFrameVector2DBasics weightsToPack, double xValue, double yValue, ReferenceFrame frame)
    {
-      transformValues(weightsToPack, xWeight.getValue(), yWeight.getValue(), frame.getTransformToWorldFrame());
+      transformValues(weightsToPack, xValue, yValue, frame.getTransformToWorldFrame());
    }
 
-   private void transformValues(FrameTuple2D valuesToPack, double xValue, double yValue, RigidBodyTransform transformToDesiredFrame)
+   private void transformValues(FixedFrameVector2DBasics valuesToPack, double xValue, double yValue, RigidBodyTransform transformToDesiredFrame)
    {
       transformToDesiredFrame.getRotation(rotation);
       rotationTranspose.set(rotation);
@@ -66,7 +61,7 @@ public class ICPOptimizationControllerHelper
       matrixTransformed.multiply(matrix);
       matrixTransformed.multiply(rotationTranspose);
 
-      valuesToPack.setToZero(worldFrame);
+      valuesToPack.setToZero();
       valuesToPack.setX(matrixTransformed.getElement(0, 0));
       valuesToPack.setY(matrixTransformed.getElement(1, 1));
    }
@@ -85,7 +80,7 @@ public class ICPOptimizationControllerHelper
          xAxis = new FrameVector2D(parentFrame);
       }
 
-      public void setXAxis(FrameVector2D xAxis)
+      public void setXAxis(FixedFrameTuple2DBasics xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
          this.xAxis.changeFrame(parentFrame);

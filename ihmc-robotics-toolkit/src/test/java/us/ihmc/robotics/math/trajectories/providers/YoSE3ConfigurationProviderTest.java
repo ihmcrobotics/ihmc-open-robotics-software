@@ -9,10 +9,10 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class YoSE3ConfigurationProviderTest
 {
@@ -66,10 +66,10 @@ public class YoSE3ConfigurationProviderTest
    public void testSetPose()
    {
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, registry);
-      FramePose framePose;
+      FramePose3D framePose;
       try
       {
-         framePose = new FramePose();
+         framePose = new FramePose3D();
          provider.setPose(framePose);
          fail();
       }
@@ -77,7 +77,7 @@ public class YoSE3ConfigurationProviderTest
       {
       }
 
-      framePose = new FramePose(referenceFrame);
+      framePose = new FramePose3D(referenceFrame);
 
       provider.setPose(framePose);
    }

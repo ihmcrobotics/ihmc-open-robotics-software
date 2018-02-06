@@ -67,7 +67,7 @@ public class HeatmapWindow
       Container contentPane = frame.getContentPane();
       rootPanel = new JPanel();
       contentPane.add(rootPanel);
-      frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("running-man-32x32-Sim.png")).getImage());
+      frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("Icon-v6.png")).getImage());
       frame.setVisible(true);
    }
 

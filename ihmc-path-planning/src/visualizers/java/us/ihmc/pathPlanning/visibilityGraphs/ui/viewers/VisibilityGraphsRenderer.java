@@ -1,5 +1,15 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.BodyPathData;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.GoalVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.InterRegionVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionData;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartVisibilityMap;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -7,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -35,8 +46,10 @@ public class VisibilityGraphsRenderer
 
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final ClusterMeshViewer clusterMeshViewer;
-   private final NavigableRegionInnerVizMapMeshViewer navigableRegionInnerVizMapMeshViewer;
-   private final NavigableRegionsInterConnectionViewer navigableRegionsInterConnectionViewer;
+   private final VisibilityMapHolderViewer startMapViewer;
+   private final VisibilityMapHolderViewer goalMapViewer;
+   private final NavigableRegionViewer navigableRegionViewer;
+   private final VisibilityMapHolderViewer interRegionConnectionsViewer;
 
    private final REAMessager messager;
 
@@ -48,14 +61,24 @@ public class VisibilityGraphsRenderer
       goalPositionReference = messager.createInput(UIVisibilityGraphsTopics.GoalPosition);
       parameters = messager.createInput(UIVisibilityGraphsTopics.VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
 
-      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePath, request -> computePathOnThread());
+      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePath, request -> computePathOnThread(false));
+      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsComputePathWithOcclusions, request -> computePathOnThread(true));
 
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      navigableRegionInnerVizMapMeshViewer = new NavigableRegionInnerVizMapMeshViewer(messager, executorService);
-      navigableRegionsInterConnectionViewer = new NavigableRegionsInterConnectionViewer(messager, executorService);
+      startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
+      startMapViewer.setCustomColor(Color.YELLOW);
+      startMapViewer.setTopics(ShowStartVisibilityMap, StartVisibilityMap);
+      goalMapViewer = new VisibilityMapHolderViewer(messager, executorService);
+      goalMapViewer.setCustomColor(Color.CORNFLOWERBLUE);
+      goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
+      navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
+      interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
+      interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);
+      interRegionConnectionsViewer.setTopics(ShowInterRegionVisibilityMap, InterRegionVisibilityMap);
 
-      root.getChildren().addAll(bodyPathMeshViewer.getRoot(), navigableRegionInnerVizMapMeshViewer.getRoot(), navigableRegionsInterConnectionViewer.getRoot(), clusterMeshViewer.getRoot());
+      root.getChildren().addAll(bodyPathMeshViewer.getRoot(), clusterMeshViewer.getRoot(), startMapViewer.getRoot(), goalMapViewer.getRoot(),
+                                navigableRegionViewer.getRoot(), interRegionConnectionsViewer.getRoot());
    }
 
    public void clear()
@@ -69,25 +92,29 @@ public class VisibilityGraphsRenderer
    {
       bodyPathMeshViewer.start();
       clusterMeshViewer.start();
-      navigableRegionInnerVizMapMeshViewer.start();
-      navigableRegionsInterConnectionViewer.start();
+      startMapViewer.start();
+      goalMapViewer.start();
+      navigableRegionViewer.start();
+      interRegionConnectionsViewer.start();
    }
 
    public void stop()
    {
       bodyPathMeshViewer.stop();
       clusterMeshViewer.stop();
-      navigableRegionInnerVizMapMeshViewer.start();
-      navigableRegionsInterConnectionViewer.stop();
+      startMapViewer.stop();
+      goalMapViewer.stop();
+      navigableRegionViewer.start();
+      interRegionConnectionsViewer.stop();
       executorService.shutdownNow();
    }
 
-   private void computePathOnThread()
+   private void computePathOnThread(boolean computePathWithOcclusions)
    {
-      executorService.submit(this::computePath);
+      executorService.submit(() -> computePath(computePathWithOcclusions));
    }
 
-   private void computePath()
+   private void computePath(boolean computePathWithOcclusions)
    {
       PlanarRegionsList planarRegionsList = planarRegionsReference.get();
 
@@ -113,11 +140,23 @@ public class VisibilityGraphsRenderer
 
          NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters.get());
          navigableRegionsManager.setPlanarRegions(planarRegions);
-         List<Point3DReadOnly> bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
 
-         messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, bodyPath);
-         messager.submitMessage(UIVisibilityGraphsTopics.NavigableRegionData, navigableRegionsManager.getListOfLocalPlanners());
-         messager.submitMessage(UIVisibilityGraphsTopics.InterRegionConnectionData, navigableRegionsManager.getConnectionPoints());
+         List<Point3DReadOnly> bodyPath;
+         if (computePathWithOcclusions)
+         {
+            bodyPath = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+         }
+         else
+         {
+            bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
+         }
+
+         messager.submitMessage(BodyPathData, bodyPath);
+         messager.submitMessage(StartVisibilityMap, navigableRegionsManager.getStartMap());
+         messager.submitMessage(GoalVisibilityMap, navigableRegionsManager.getGoalMap());
+         messager.submitMessage(NavigableRegionVisibilityMap, navigableRegionsManager.getNavigableRegions());
+         messager.submitMessage(InterRegionVisibilityMap, navigableRegionsManager.getInterRegionConnections());
+         messager.submitMessage(NavigableRegionData, navigableRegionsManager.getNavigableRegions());
       }
       catch (Exception e)
       {

@@ -136,7 +136,7 @@ public class SelectionMatrix3DTest
                selectionMatrix3D.applySelection(actualVector);
 
                assertEquals(expectedVector.getReferenceFrame(), actualVector.getReferenceFrame());
-               EuclidCoreTestTools.assertTuple3DEquals(expectedVector.getGeometryObject(), actualVector.getGeometryObject(), 1.0e-12);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, 1.0e-12);
             }
          }
       }

@@ -350,7 +350,7 @@ public class RotationTools
    public static void integrateAngularVelocity(FrameVector3D angularVelocityToIntegrate, double integrationTime, FrameQuaternion orientationResultToPack)
    {
       AxisAngle axisAngleResult = axisAngleForIntegrator.get();
-      integrateAngularVelocity(angularVelocityToIntegrate.getVector(), integrationTime, axisAngleResult);
+      integrateAngularVelocity(angularVelocityToIntegrate, integrationTime, axisAngleResult);
       orientationResultToPack.setIncludingFrame(angularVelocityToIntegrate.getReferenceFrame(), axisAngleResult);
    }
 

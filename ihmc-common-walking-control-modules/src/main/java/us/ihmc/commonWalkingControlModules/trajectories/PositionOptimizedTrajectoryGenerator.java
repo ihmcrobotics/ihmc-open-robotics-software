@@ -352,9 +352,9 @@ public class PositionOptimizedTrajectoryGenerator
 
       if (isDone())
       {
-         desiredPosition.setToZero(true);
-         desiredVelocity.setToZero(true);
-         desiredAcceleration.setToZero(true);
+         desiredPosition.setToZero();
+         desiredVelocity.setToZero();
+         desiredAcceleration.setToZero();
          return;
       }
 
@@ -416,17 +416,17 @@ public class PositionOptimizedTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      desiredPosition.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(desiredPosition);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
    {
-      desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      velocityToPack.setIncludingFrame(desiredVelocity);
    }
 
    public void getAcceleration(FrameVector3D accelerationToPack)
    {
-      desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      accelerationToPack.setIncludingFrame(desiredAcceleration);
    }
 
    public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
@@ -438,9 +438,9 @@ public class PositionOptimizedTrajectoryGenerator
 
    public void informDone()
    {
-      desiredPosition.setToZero(true);
-      desiredVelocity.setToZero(true);
-      desiredAcceleration.setToZero(true);
+      desiredPosition.setToZero();
+      desiredVelocity.setToZero();
+      desiredAcceleration.setToZero();
    }
 
    public void showVisualization()

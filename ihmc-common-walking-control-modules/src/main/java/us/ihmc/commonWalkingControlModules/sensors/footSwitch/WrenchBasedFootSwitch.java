@@ -230,7 +230,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       readSensorData(footWrench);
 
-      yoFootForceInFoot.getFrameTupleIncludingFrame(footForce);
+      footForce.setIncludingFrame(yoFootForceInFoot);
 
       footForce.clipToMinMax(0.0, Double.MAX_VALUE);
 

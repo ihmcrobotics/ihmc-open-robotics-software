@@ -486,7 +486,7 @@ public class Step7WalkingController implements RobotController
       // Update swing trajectory
       private void updateSwingTrajectory(RobotSide robotSide)
       {
-         yoFootPositions.get(robotSide.getOppositeSide()).getFrameTuple(finalDesiredPositionToPack);  //TODO oppositeSide?
+         finalDesiredPositionToPack.set(yoFootPositions.get(robotSide.getOppositeSide()));  //TODO oppositeSide?
          finalDesiredPositionToPack.changeFrame(worldFrame);
 
          double dx = defaultStepLength.getDoubleValue(); 
@@ -515,7 +515,7 @@ public class Step7WalkingController implements RobotController
       public void doTransitionIntoAction()
       {
          nTicksSinceTrajectoryIsDone = 0;
-         yoDesiredCoP.setByProjectionOntoXYPlane(yoFootPositions.get(robotSide.getOppositeSide()));
+         yoDesiredCoP.set(yoFootPositions.get(robotSide.getOppositeSide()));
          initialPosition.setToZero(soleFrame);
          initialPosition.changeFrame(worldFrame);
          

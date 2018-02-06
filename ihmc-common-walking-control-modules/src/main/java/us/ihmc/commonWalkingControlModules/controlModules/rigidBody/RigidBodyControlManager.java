@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -25,7 +26,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -55,8 +55,8 @@ public class RigidBodyControlManager
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private final double[] initialJointPositions;
-   private final FramePose initialPose = new FramePose();
-   private final FramePose homePose;
+   private final FramePose3D initialPose = new FramePose3D();
+   private final FramePose3D homePose;
 
    private final OneDoFJoint[] jointsToControl;
 
@@ -96,7 +96,7 @@ public class RigidBodyControlManager
          loadBearingControlState = null;
 
       if (homePose != null)
-         this.homePose = new FramePose(baseFrame, homePose);
+         this.homePose = new FramePose3D(baseFrame, homePose);
       else
          this.homePose = null;
 
@@ -152,7 +152,7 @@ public class RigidBodyControlManager
          loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
-   private static void checkDefaultControlMode(RigidBodyControlMode defaultControlMode, FramePose homePose, String bodyName)
+   private static void checkDefaultControlMode(RigidBodyControlMode defaultControlMode, FramePose3D homePose, String bodyName)
    {
       if (defaultControlMode == null)
       {
@@ -450,7 +450,7 @@ public class RigidBodyControlManager
       }
    }
 
-   private void computeDesiredPose(FramePose poseToPack)
+   private void computeDesiredPose(FramePose3D poseToPack)
    {
       if (stateMachine.getCurrentStateEnum() == taskspaceControlState.getStateEnum())
       {

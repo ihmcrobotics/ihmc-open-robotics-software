@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 
 import us.ihmc.robotics.partNames.LegJointName;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 {
-   private final QuadrantDependentList<FramePose> footPoses = new QuadrantDependentList<FramePose>();
+   private final QuadrantDependentList<FramePose3D> footPoses = new QuadrantDependentList<FramePose3D>();
    private final QuadrantDependentList<PoseReferenceFrame> soleFrames = new QuadrantDependentList<PoseReferenceFrame>();
    private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
    private final EndDependentList<ReferenceFrame> endDependentMidFeetZUpFrames = new EndDependentList<ReferenceFrame>();
@@ -25,7 +25,7 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         footPoses.set(robotQuadrant, new FramePose(ReferenceFrame.getWorldFrame()));
+         footPoses.set(robotQuadrant, new FramePose3D(ReferenceFrame.getWorldFrame()));
          soleFrames.set(robotQuadrant,
                new PoseReferenceFrame(robotQuadrant.getCamelCaseNameForStartOfExpression() + "soleFrame", footPoses.get(robotQuadrant)));
       }
@@ -57,8 +57,8 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePose footPose = footPoses.get(robotQuadrant);
-         footPose.setPosition(yoFootPositions.get(robotQuadrant).getFramePointCopy());
+         FramePose3D footPose = footPoses.get(robotQuadrant);
+         footPose.setPosition(yoFootPositions.get(robotQuadrant));
          soleFrames.get(robotQuadrant).setPoseAndUpdate(footPose);
       }
       for (RobotEnd robotEnd : RobotEnd.values)

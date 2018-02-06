@@ -6,8 +6,6 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.visualization.GainControllerSliderBoard;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataLogger.Announcement;
@@ -26,12 +24,8 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 
    public enum AtlasSliderBoardType {GAIN_CONTROLLER, JOINT_ANGLE_OFFSET, WALK_CONTROLLER}
 
-   private final DRCRobotModel drcRobotModel;
-
-   public RemoteAtlasVisualizer(int bufferSize, DRCRobotModel drcRobotModel, int displayOneInNPacketsFactor)
+   public RemoteAtlasVisualizer(int bufferSize, int displayOneInNPacketsFactor)
    {
-      this.drcRobotModel = drcRobotModel;
-
       SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
       scsVisualizer.setDisplayOneInNPackets(displayOneInNPacketsFactor);
       scsVisualizer.addSCSVisualizerStateListener(this);
@@ -88,9 +82,6 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 
       try
       {
-        RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? RobotTarget.REAL_ROBOT : RobotTarget.SCS;
-        DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
-
         int oneInNPacketsValue = DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ;
 
          if (config.contains("displayOneInNPackets"))
@@ -98,7 +89,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
             oneInNPacketsValue = config.getInt("displayOneInNPackets");
          }
 
-         new RemoteAtlasVisualizer(bufferSize, model, oneInNPacketsValue);
+         new RemoteAtlasVisualizer(bufferSize, oneInNPacketsValue);
       }
       catch(IllegalArgumentException e)
       {
