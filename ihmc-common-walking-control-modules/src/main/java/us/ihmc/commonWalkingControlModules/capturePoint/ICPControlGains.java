@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-public class ICPControlGains
+import us.ihmc.robotics.controllers.pidGains.implementations.IntegratorGains;
+
+public class ICPControlGains extends IntegratorGains
 {
    private double kpParallelToMotion;
    private double kpOrthogonalToMotion;
-   private double ki;
-   private double kiBleedOff;
+
    private double feedbackPartMaxRate;
 
    public double getKpParallelToMotion()
@@ -26,26 +27,6 @@ public class ICPControlGains
    public void setKpOrthogonalToMotion(double kpOrthogonalToMotion)
    {
       this.kpOrthogonalToMotion = kpOrthogonalToMotion;
-   }
-
-   public double getKi()
-   {
-      return ki;
-   }
-
-   public void setKi(double ki)
-   {
-      this.ki = ki;
-   }
-
-   public double getKiBleedOff()
-   {
-      return kiBleedOff;
-   }
-
-   public void setKiBleedOff(double kiBleedOff)
-   {
-      this.kiBleedOff = kiBleedOff;
    }
 
    public double getFeedbackPartMaxRate()
