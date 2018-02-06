@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -57,15 +58,13 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpParallelToMotion(feedbackGain);
+            gains.setKpOrthogonalToMotion(feedbackGain);
 
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            return gains;
          }
 
          @Override
@@ -130,15 +129,13 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpParallelToMotion(feedbackGain);
+            gains.setKpOrthogonalToMotion(feedbackGain);
 
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            return gains;
          }
 
          @Override
@@ -203,15 +200,13 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpParallelToMotion(feedbackGain);
+            gains.setKpOrthogonalToMotion(feedbackGain);
 
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            return gains;
          }
 
          @Override
@@ -286,15 +281,12 @@ public class ICPOptimizationControllerTest
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
       {
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return feedbackGain;
-         }
-
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return feedbackGain;
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpOrthogonalToMotion(feedbackGain);
+            gains.setKpParallelToMotion(feedbackGain);
+            return gains;
          }
 
          @Override
@@ -458,17 +450,14 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getFeedbackParallelGain()
+      public ICPControlGainsReadOnly getICPFeedbackGains()
       {
-         return 3.0;
-      }
+         ICPControlGains gains = new ICPControlGains();
+         gains.setKpParallelToMotion(3.0);
+         gains.setKpOrthogonalToMotion(2.5);
 
-      @Override
-      public double getFeedbackOrthogonalGain()
-      {
-         return 2.5;
+         return gains;
       }
-
       @Override
       public double getDynamicsObjectiveWeight()
       {

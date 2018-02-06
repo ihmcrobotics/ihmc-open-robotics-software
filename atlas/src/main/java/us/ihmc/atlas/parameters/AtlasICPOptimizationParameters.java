@@ -1,5 +1,7 @@
 package us.ihmc.atlas.parameters;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 
 /** {@inheritDoc} */
@@ -58,16 +60,17 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackParallelGain()
+   public ICPControlGainsReadOnly getICPFeedbackGains()
    {
-      return runningOnRealRobot ? 2.5 : 2.5;
-   }
+      ICPControlGains gains = new ICPControlGains();
+      gains.setKpOrthogonalToMotion(1.5);
+      gains.setKpParallelToMotion(2.5);
 
-   /** {@inheritDoc} */
-   @Override
-   public double getFeedbackOrthogonalGain()
-   {
-      return runningOnRealRobot ? 1.5 : 1.5;
+      gains.setIntegralLeakRatio(0.97);
+      gains.setMaxIntegralError(0.05);
+      gains.setKi(1.0);
+
+      return gains;
    }
 
    /** {@inheritDoc} */

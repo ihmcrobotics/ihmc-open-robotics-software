@@ -7,6 +7,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
@@ -749,15 +751,12 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return 3.0;
-         }
-
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return 2.5;
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpOrthogonalToMotion(2.5);
+            gains.setKpParallelToMotion(3.0);
+            return gains;
          }
 
          @Override

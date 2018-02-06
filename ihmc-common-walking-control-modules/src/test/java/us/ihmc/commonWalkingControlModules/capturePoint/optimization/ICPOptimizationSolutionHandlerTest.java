@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationSolutionHandler;
@@ -447,14 +449,14 @@ public class ICPOptimizationSolutionHandlerTest
          return 0.0001;
       }
 
-      @Override public double getFeedbackParallelGain()
+      @Override
+      public ICPControlGainsReadOnly getICPFeedbackGains()
       {
-         return 2.0;
-      }
+         ICPControlGains gains = new ICPControlGains();
+         gains.setKpParallelToMotion(2.0);
+         gains.setKpOrthogonalToMotion(3.0);
 
-      @Override public double getFeedbackOrthogonalGain()
-      {
-         return 3.0;
+         return gains;
       }
 
       @Override public double getDynamicsObjectiveWeight()

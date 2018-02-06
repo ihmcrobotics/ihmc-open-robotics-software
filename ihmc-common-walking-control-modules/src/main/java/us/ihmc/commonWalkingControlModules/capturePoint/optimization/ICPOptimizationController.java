@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -110,6 +111,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoBoolean useICPControlPolygons = new YoBoolean(yoNamePrefix + "UseICPControlPolygons", registry);
 
+   private final YoICPControlGains feedbackGains = new YoICPControlGains("", registry);
    private final YoDouble feedbackOrthogonalGain = new YoDouble(yoNamePrefix + "FeedbackOrthogonalGain", registry);
    private final YoDouble feedbackParallelGain = new YoDouble(yoNamePrefix + "FeedbackParallelGain", registry);
 
@@ -129,9 +131,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
    private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
    private final YoDouble thresholdForMoving = new YoDouble(yoNamePrefix + "ThresholdForMoving", registry);
-   private final YoDouble integralGainWhenStuck = new YoDouble(yoNamePrefix + "IntegralGainWhenStuck", registry);
-   private final YoDouble integralBleedOffRate = new YoDouble(yoNamePrefix + "IntegralBleedOffRate", registry);
-   private final YoDouble maxIntegralFeedback = new YoDouble(yoNamePrefix + "MaxIntegralFeedback", registry);
    private final YoFrameVector2d feedbackCMPIntegral = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
 
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
@@ -209,8 +208,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copFeedbackForwardWeight.set(icpOptimizationParameters.getFeedbackForwardWeight());
       copFeedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
       copFeedbackRateWeight.set(icpOptimizationParameters.getFeedbackRateWeight());
-      feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
-      feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
+      feedbackGains.set(icpOptimizationParameters.getICPFeedbackGains());
+      thresholdForStuck.set(0.01);
+      thresholdForMoving.set(0.02);
 
       dynamicsObjectiveWeight.set(icpOptimizationParameters.getDynamicsObjectiveWeight());
       swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -235,12 +235,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          maxAllowedDistanceCMPSupport.setToNaN();
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
-
-      thresholdForStuck.set(0.01);
-      thresholdForMoving.set(0.02);
-      integralGainWhenStuck.set(1.0);
-      integralBleedOffRate.set(Math.pow(0.97, controlDT));
-      maxIntegralFeedback.set(0.05);
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -794,16 +788,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (isICPStuck.getBooleanValue())
       {
          tempVector2d.set(icpError);
-         tempVector2d.scale(controlDT * integralGainWhenStuck.getDoubleValue());
+         tempVector2d.scale(controlDT * feedbackGains.getKi());
 
-         feedbackCMPIntegral.scale(integralBleedOffRate.getDoubleValue());
+         feedbackCMPIntegral.scale(Math.pow(feedbackGains.getIntegralLeakRatio(), controlDT));
          feedbackCMPIntegral.add(tempVector2d);
 
          double length = feedbackCMPIntegral.length();
-         double maxLength = maxIntegralFeedback.getDoubleValue();
+         double maxLength = feedbackGains.getMaxInteralError();
          if (length > maxLength)
             feedbackCMPIntegral.scale(maxLength / length);
-         if (Math.abs(integralGainWhenStuck.getDoubleValue()) < 1e-10)
+         if (Math.abs(feedbackGains.getKi()) < 1e-10)
             feedbackCMPIntegral.setToZero();
       }
       else

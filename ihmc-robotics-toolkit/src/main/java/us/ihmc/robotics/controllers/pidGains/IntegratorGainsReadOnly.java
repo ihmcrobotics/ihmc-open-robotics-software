@@ -6,7 +6,10 @@ public interface IntegratorGainsReadOnly
     * Get the integral gain, as in a PID controller.
     * @return the integral gain
     */
-   double getKi();
+   default double getKi()
+   {
+      return 0.0;
+   }
 
    /**
     * Get the maximum total integral error. This can be used to limit the
@@ -16,7 +19,10 @@ public interface IntegratorGainsReadOnly
     * </p>
     * @return the maximum integral error
     */
-   double getMaxIntegralError();
+   default double getMaxIntegralError()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 
    /**
     * Get the leak ratio of an integrator. If using a leaking integrator
@@ -27,5 +33,8 @@ public interface IntegratorGainsReadOnly
     * </p>
     * @return the integrator leak rate
     */
-   double getIntegralLeakRatio();
+   default double getIntegralLeakRatio()
+   {
+      return 1.0;
+   }
 }
