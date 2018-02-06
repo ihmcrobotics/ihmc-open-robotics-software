@@ -31,7 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
  * call getEncoderVelocityEstimates for output of the filter.
  * 
  */
-public class IMUBasedJointVelocityEstimator
+public class IMUBasedJointStateEstimator
 {
    private final YoDouble alphaVelocity;
    private final YoDouble alphaPosition;
@@ -55,8 +55,8 @@ public class IMUBasedJointVelocityEstimator
    
    private final double estimatorDT;
 
-   public IMUBasedJointVelocityEstimator(IMUSensorReadOnly pelvisIMU, IMUSensorReadOnly chestIMU, SensorOutputMapReadOnly sensorMap,
-         double estimatorDT, double slopTime, YoVariableRegistry registry)
+   public IMUBasedJointStateEstimator(IMUSensorReadOnly pelvisIMU, IMUSensorReadOnly chestIMU, SensorOutputMapReadOnly sensorMap,
+                                      double estimatorDT, double slopTime, YoVariableRegistry registry)
    {
       this.sensorMap = sensorMap;
       this.pelvisIMU = pelvisIMU;
