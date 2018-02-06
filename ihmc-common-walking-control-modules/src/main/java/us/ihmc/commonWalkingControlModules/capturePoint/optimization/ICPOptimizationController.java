@@ -126,7 +126,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble angularMomentumIntegratorGain = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorGain", registry);
    private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
 
-   private final YoBoolean useSmartICPIntegrator = new YoBoolean("useSmartICPIntegratro", registry);
+   private final YoBoolean useSmartICPIntegrator = new YoBoolean("useSmartICPIntegrator", registry);
    private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
    private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
    private final YoDouble thresholdForMoving = new YoDouble(yoNamePrefix + "ThresholdForMoving", registry);
