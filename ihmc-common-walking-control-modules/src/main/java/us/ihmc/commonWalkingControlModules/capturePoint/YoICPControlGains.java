@@ -116,7 +116,7 @@ public class YoICPControlGains implements ICPControlGainsProvider
       return maxIntegralError.getDoubleValue();
    }
 
-   public void set(ICPControlGains icpControlGains)
+   public void set(ICPControlGainsReadOnly icpControlGains)
    {
       setKpParallelToMotion(icpControlGains.getKpParallelToMotion());
       setKpOrthogonalToMotion(icpControlGains.getKpOrthogonalToMotion());
