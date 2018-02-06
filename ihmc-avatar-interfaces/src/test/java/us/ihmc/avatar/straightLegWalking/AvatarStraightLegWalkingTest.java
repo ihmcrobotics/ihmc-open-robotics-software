@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules;
+package us.ihmc.avatar.straightLegWalking;
 
 import static org.junit.Assert.*;
 
