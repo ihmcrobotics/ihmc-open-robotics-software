@@ -204,6 +204,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
 
       dynamicsObjectiveWeight.set(icpOptimizationParameters.getDynamicsObjectiveWeight());
+      swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       cmpFeedbackWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
       scaledCMPFeedbackWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
