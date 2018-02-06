@@ -41,13 +41,14 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean debug = false;
+   private static final boolean VISUALIZE = true;
+   private static final boolean debug = true;
 
    private static final double ZERO_TIME = 0.0;
 
-   private static final boolean adjustICPForSingleSupport = true;
-   private static final boolean adjustICPForDoubleSupport = true;
+   private static final boolean adjustICPForSingleSupport = false;
+   private static final boolean adjustICPForInitialDoubleSupport = true;
+   private static final boolean adjustICPForEachDoubleSupport = false;
 
    /** Desired velocity for the Center of Mass (CoM) */
    private final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
@@ -357,7 +358,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       referenceCoPGenerator.initializeForTransfer(ZERO_TIME);
       referenceICPGenerator.initializeForTransferFromCoPs(referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
-      if(adjustICPForDoubleSupport)
+      if((adjustICPForInitialDoubleSupport && isStanding.getBooleanValue()) || adjustICPForEachDoubleSupport)
          referenceICPGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
 
       referenceCoMGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
