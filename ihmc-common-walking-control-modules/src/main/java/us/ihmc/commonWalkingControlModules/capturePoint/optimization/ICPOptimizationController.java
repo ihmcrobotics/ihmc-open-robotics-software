@@ -112,8 +112,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean useICPControlPolygons = new YoBoolean(yoNamePrefix + "UseICPControlPolygons", registry);
 
    private final YoICPControlGains feedbackGains = new YoICPControlGains("", registry);
-   private final YoDouble feedbackOrthogonalGain = new YoDouble(yoNamePrefix + "FeedbackOrthogonalGain", registry);
-   private final YoDouble feedbackParallelGain = new YoDouble(yoNamePrefix + "FeedbackParallelGain", registry);
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
@@ -578,7 +576,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void submitCoPFeedbackTaskConditionsToSolver()
    {
-      helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
+      helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackGains.getKpParallelToMotion(), feedbackGains.getKpOrthogonalToMotion());
 
       double dynamicsObjectiveWeight = this.dynamicsObjectiveWeight.getDoubleValue();
       if (isInDoubleSupport.getBooleanValue())
@@ -743,7 +741,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
-         helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
+         helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackGains.getKpParallelToMotion(), feedbackGains.getKpOrthogonalToMotion());
          scaledCoPFeedbackWeight.scale(1.0 / tempVector2d.length());
       }
    }
