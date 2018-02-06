@@ -126,6 +126,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble angularMomentumIntegratorGain = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorGain", registry);
    private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
 
+   private final YoBoolean useSmartICPIntegrator = new YoBoolean("useSmartICPIntegratro", registry);
    private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
    private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
    private final YoDouble thresholdForMoving = new YoDouble(yoNamePrefix + "ThresholdForMoving", registry);
@@ -207,11 +208,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       copFeedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
       copFeedbackRateWeight.set(icpOptimizationParameters.getFeedbackRateWeight());
       feedbackGains.set(icpOptimizationParameters.getICPFeedbackGains());
-      thresholdForStuck.set(0.01);
-      thresholdForMoving.set(0.02);
+      useSmartICPIntegrator.set(icpOptimizationParameters.useSmartICPIntegrator());
+      thresholdForStuck.set(icpOptimizationParameters.getICPVelocityThresholdForStuck());
+      thresholdForMoving.set(icpOptimizationParameters.getICPVelocityThresholdForMoving());
 
       dynamicsObjectiveWeight.set(icpOptimizationParameters.getDynamicsObjectiveWeight());
-      swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+      if (walkingControllerParameters != null)
+         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
       cmpFeedbackWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
       scaledCMPFeedbackWeight.set(icpOptimizationParameters.getAngularMomentumMinimizationWeight());
@@ -687,7 +690,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       isICPStuck.set(computeIsStuck());
-      computeICPIntegralTerm();
+      if (useSmartICPIntegrator.getBooleanValue())
+         computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
       feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
