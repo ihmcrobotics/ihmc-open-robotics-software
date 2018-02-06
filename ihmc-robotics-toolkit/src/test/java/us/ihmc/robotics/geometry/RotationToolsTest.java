@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -20,6 +21,7 @@ import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class RotationToolsTest
 {
    private Random random = new Random(100L);

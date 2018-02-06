@@ -6,17 +6,18 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
@@ -50,7 +51,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
 
-      instruction = graphics3dObject.addPolygon(appearance, pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy());
+      instruction = graphics3dObject.addPolygon(appearance, pointOne, pointTwo, pointThree);
 
       VariableChangedListener listener = new VariableChangedListener()
       {
@@ -85,7 +86,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       {
          if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
          {
-            instruction.setMesh(MeshDataGenerator.Polygon(new Point3D[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+            instruction.setMesh(MeshDataGenerator.Polygon(new Point3DReadOnly[] { pointOne, pointTwo, pointThree }));
          }
          else
          {

@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -14,7 +15,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
 
@@ -57,7 +57,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       ReferenceFrame rightSoleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
       FramePoint3D rightFoot = new FramePoint3D(rightSoleFrame);
       rightFoot.changeFrame(leftSoleFrame);
-      FramePose stepPose = new FramePose(leftSoleFrame);
+      FramePose3D stepPose = new FramePose3D(leftSoleFrame);
       stepPose.setY(-0.25);
 
       if (Math.abs(rightFoot.getX()) > 0.1)
@@ -78,7 +78,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       Point3D location = new Point3D();
       Quaternion orientation = new Quaternion();
-      stepPose.getPose(location, orientation);
+      stepPose.get(location, orientation);
 
       FootstepDataMessage footstepData = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footsteps.add(footstepData);

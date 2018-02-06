@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -27,17 +26,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
@@ -125,7 +119,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName("Ghost");
-      recursivelyModyfyGraphics(robotDescription.getChildrenJoints().get(0));
+      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -514,41 +508,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       };
    }
 
-   private static void recursivelyModyfyGraphics(JointDescription joint)
-   {
-      if (joint == null)
-         return;
-      LinkDescription link = joint.getLink();
-      if (link == null)
-         return;
-      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
-      if (linkGraphics == null)
-         return;
-
-      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
-
-      if (graphics3dInstructions == null)
-         return;
-
-      for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
-      {
-         if (primitive instanceof Graphics3DAddModelFileInstruction)
-         {
-            Graphics3DAddModelFileInstruction modelInstruction = (Graphics3DAddModelFileInstruction) primitive;
-            modelInstruction.setAppearance(ghostApperance);
-         }
-      }
-
-      if (joint.getChildrenJoints() == null)
-         return;
-
-      for (JointDescription child : joint.getChildrenJoints())
-      {
-         recursivelyModyfyGraphics(child);
-      }
-   }
-
-   private RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
+   public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
    {
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData(joints, new ForceSensorDefinition[0], null, new IMUDefinition[0]);
@@ -558,7 +518,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       return robotConfigurationData;
    }
 
-   private CapturabilityBasedStatus createCapturabilityBasedStatus(boolean isLeftFootInSupport, boolean isRightFootInSupport)
+   public static CapturabilityBasedStatus createCapturabilityBasedStatus(boolean isLeftFootInSupport, boolean isRightFootInSupport)
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
       capturabilityBasedStatus.leftFootSupportPolygonLength = isLeftFootInSupport ? 1 : 0;

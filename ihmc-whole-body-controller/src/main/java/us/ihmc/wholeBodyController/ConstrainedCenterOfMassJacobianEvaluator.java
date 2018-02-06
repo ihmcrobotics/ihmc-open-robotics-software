@@ -15,8 +15,6 @@ import com.google.common.primitives.Doubles;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.ColumnSpaceProjector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -30,6 +28,8 @@ import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * See: L. Sentis. Synthesis and Control of Whole-Body Behaviors in Humanoid Systems (2007)
@@ -175,8 +175,8 @@ public class ConstrainedCenterOfMassJacobianEvaluator implements RobotController
 
       projector.setA(constrainedCentroidalMomentumMatrix);
       DenseMatrix64F centroidalMomentumPlusDenseMatrix = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
-      Momentum centroidalMomentum = new Momentum(centerOfMassFrame, centroidalLinearMomentum.getFrameVectorCopy().getVector(),
-                                       centroidalAngularMomentum.getFrameVectorCopy().getVector());
+      Momentum centroidalMomentum = new Momentum(centerOfMassFrame, centroidalLinearMomentum,
+                                       centroidalAngularMomentum);
       DenseMatrix64F centroidalMomentumSelection = new DenseMatrix64F(momentumSelectionMatrix.getNumRows(), 1);
       CommonOps.mult(momentumSelectionMatrix, centroidalMomentum.toDenseMatrix(), centroidalMomentumSelection);
       projector.project(centroidalMomentumSelection, centroidalMomentumPlusDenseMatrix);

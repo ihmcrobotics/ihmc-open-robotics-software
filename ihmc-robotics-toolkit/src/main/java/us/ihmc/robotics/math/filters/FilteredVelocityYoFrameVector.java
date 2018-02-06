@@ -1,14 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>FilteredVelocityYoFrameVector </p>
@@ -95,27 +94,19 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector
       zDot.update();
    }
 
-   public void update(Tuple3DBasics tuple)
+   public void update(Tuple3DReadOnly tuple)
    {
       xDot.update(tuple.getX());
       yDot.update(tuple.getY());
       zDot.update(tuple.getZ());
    }
 
-   public void update(FrameTuple3D<?, ?> frameTuple)
+   public void update(FrameTuple3DReadOnly frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
       xDot.update(frameTuple.getX());
       yDot.update(frameTuple.getY());
       zDot.update(frameTuple.getZ());
-   }
-
-   public void update(YoFrameTuple<?, ?> yoFrameTuple)
-   {
-      checkReferenceFrameMatch(yoFrameTuple.getReferenceFrame());
-      xDot.update(yoFrameTuple.getX());
-      yDot.update(yoFrameTuple.getY());
-      zDot.update(yoFrameTuple.getZ());
    }
 
    public void reset()

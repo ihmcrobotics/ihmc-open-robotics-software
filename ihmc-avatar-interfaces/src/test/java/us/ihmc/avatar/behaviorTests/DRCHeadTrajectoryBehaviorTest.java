@@ -15,6 +15,7 @@ import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -22,7 +23,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
@@ -166,25 +166,25 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       headTrajectoryBehavior.setInput(headTrajectoryMessage);
       assertTrue(headTrajectoryBehavior.hasInputBeenSet());
 
-      FramePose initialHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
+      FramePose3D initialHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(headTrajectoryBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
-      FramePose finalHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
+      FramePose3D finalHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
 
       if (DEBUG)
       {
          PrintTools.debug(this, " initial Head Pose :\n" + initialHeadPose);
       }
 
-      FramePose desiredHeadPose = new FramePose();
-      desiredHeadPose.setPose(initialHeadPose.getFramePointCopy().getPoint(), headTrajectoryMessage.getLastTrajectoryPoint().orientation);
+      FramePose3D desiredHeadPose = new FramePose3D();
+      desiredHeadPose.set(initialHeadPose.getPosition(), headTrajectoryMessage.getLastTrajectoryPoint().orientation);
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
       assertTrue(headTrajectoryBehavior.isDone());
    }
 
-   private FramePose getCurrentHeadPose(FullRobotModel fullRobotModel)
+   private FramePose3D getCurrentHeadPose(FullRobotModel fullRobotModel)
    {
-      FramePose ret = new FramePose();
+      FramePose3D ret = new FramePose3D();
 
       fullRobotModel.updateFrames();
       ReferenceFrame headFrame = fullRobotModel.getHead().getBodyFixedFrame();
@@ -195,7 +195,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       return ret;
    }
 
-   private void assertPosesAreWithinThresholds(FramePose framePose1, FramePose framePose2)
+   private void assertPosesAreWithinThresholds(FramePose3D framePose1, FramePose3D framePose2)
    {
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);

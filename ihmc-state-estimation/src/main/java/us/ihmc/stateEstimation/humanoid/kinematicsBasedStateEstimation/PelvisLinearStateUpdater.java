@@ -1,6 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.math.filters.AlphaFilteredYoVariable.*;
+import static us.ihmc.robotics.math.filters.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -19,10 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -38,6 +34,14 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * PelvisLinearUpdater estimates the pelvis position and linear velocity using leg kinematics and IMU acceleration data.
@@ -135,10 +139,10 @@ public class PelvisLinearStateUpdater
    private final double gravitationalAcceleration;
    
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         IMUBiasProvider imuBiasProvider, Map<RigidBody, FootSwitchInterface> footSwitches, 
+         IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBody, FootSwitchInterface> footSwitches, 
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, YoDouble yoTime,
-         StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, StateEstimatorParameters stateEstimatorParameters,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
@@ -194,10 +198,9 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
       kinematicsBasedLinearStateCalculator.setCorrectTrustedFeetPositions(stateEstimatorParameters.correctTrustedFeetPositions());
 
-      imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, imuBiasProvider, estimatorDT,
+      
+      imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, imuBiasProvider, cancelGravityFromAccelerationMeasurement, estimatorDT,
             gravitationalAcceleration, yoGraphicsListRegistry, registry);
-      boolean cancelGravityFromAccelerationMeasurement = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
-      imuBasedLinearStateCalculator.cancelGravityFromAccelerationMeasurement(cancelGravityFromAccelerationMeasurement);
       imuBasedLinearStateCalculator.enableEstimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
 
       alphaIMUAgainstKinematicsForVelocity
@@ -311,7 +314,7 @@ public class PelvisLinearStateUpdater
    public void updateForFrozenState()
    {
       // Keep setting the position so the localization updater works properly.
-      yoRootJointPosition.get(tempRootJointTranslation);
+      tempRootJointTranslation.set(yoRootJointPosition);
       rootJoint.setPosition(tempRootJointTranslation);
 
       // Set the rootJoint twist to zero.
@@ -351,14 +354,14 @@ public class PelvisLinearStateUpdater
       {
          if (trustImuWhenNoFeetAreInContact.getBooleanValue())
          {
-            yoRootJointPosition.getFrameTuple(rootJointPosition);
+            rootJointPosition.set(yoRootJointPosition);
             kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(rootJointPosition);
 
             imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(rootJointVelocity);
             yoRootJointVelocity.set(rootJointVelocity);
             imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
 
-            yoRootJointPosition.getFrameTuple(rootJointPosition);
+            rootJointPosition.set(yoRootJointPosition);
             imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
             rootJointPosition.set(pelvisPositionIMUPart);
             yoRootJointPosition.set(rootJointPosition);
@@ -369,7 +372,7 @@ public class PelvisLinearStateUpdater
       else if (numberOfEndEffectorsTrusted.getIntegerValue() > 0)
       {
          updateTrustedFeetLists();
-         yoRootJointPosition.getFrameTuple(rootJointPosition);
+         rootJointPosition.set(yoRootJointPosition);
          kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
 
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
@@ -378,7 +381,7 @@ public class PelvisLinearStateUpdater
          }
          else
          {
-            yoRootJointPosition.getFrameTuple(rootJointPosition);
+            rootJointPosition.set(yoRootJointPosition);
             kinematicsBasedLinearStateCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
             yoRootJointPosition.set(rootJointPosition);
             yoRootJointVelocity.set(rootJointVelocity);
@@ -399,7 +402,7 @@ public class PelvisLinearStateUpdater
 
    private void updateRootJoint()
    {
-      yoRootJointPosition.get(tempRootJointTranslation);
+      tempRootJointTranslation.set(yoRootJointPosition);
       rootJoint.setPosition(tempRootJointTranslation);
 
       tempVelocity.setIncludingFrame(rootJointVelocity);
@@ -544,7 +547,7 @@ public class PelvisLinearStateUpdater
 
    private void computePositionFromMergingMeasurements()
    {
-      yoRootJointPosition.getFrameTuple(rootJointPosition);
+      rootJointPosition.set(yoRootJointPosition);
       imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
       kinematicsBasedLinearStateCalculator.getPelvisPosition(pelvisPositionKinPart);
 
@@ -587,8 +590,8 @@ public class PelvisLinearStateUpdater
          comAcceleration.scale(estimatorDT);
          yoCenterOfMassVelocityIntegrateGRF.add(comAcceleration);
 
-         comVelocityGRFPart.set(yoCenterOfMassVelocity.getFrameTuple());
-         comVelocityGRFPart.add(comAcceleration.getFrameTuple());
+         comVelocityGRFPart.set(yoCenterOfMassVelocity);
+         comVelocityGRFPart.add(comAcceleration);
          comAcceleration.scale(1.0/estimatorDT);
 
          comVelocityPelvisAndKinPart.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
@@ -604,7 +607,7 @@ public class PelvisLinearStateUpdater
          yoCenterOfMassVelocity.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
       }
       
-      if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity.getFrameTuple());
+      if (estimatorCenterOfMassDataHolderToUpdate != null) estimatorCenterOfMassDataHolderToUpdate.setCenterOfMassVelocity(yoCenterOfMassVelocity);
    }
 
 
@@ -626,7 +629,7 @@ public class PelvisLinearStateUpdater
          totalGroundReactionForce.add(tempFootForce);
       }
 
-      totalGroundReactionForce.getFrameTuple(tempCoMAcceleration);
+      tempCoMAcceleration.set(totalGroundReactionForce);
       comAcceleration.set(tempCoMAcceleration);
       comAcceleration.setZ(comAcceleration.getZ() - robotMass.getDoubleValue() * gravitationalAcceleration);
    }
@@ -662,22 +665,22 @@ public class PelvisLinearStateUpdater
 
    public void getEstimatedPelvisPosition(FramePoint3D pelvisPositionToPack)
    {
-      yoRootJointPosition.getFrameTupleIncludingFrame(pelvisPositionToPack);
+      pelvisPositionToPack.setIncludingFrame(yoRootJointPosition);
    }
 
    public void getEstimatedPelvisLinearVelocity(FrameVector3D pelvisLinearVelocityToPack)
    {
-      yoRootJointVelocity.getFrameTupleIncludingFrame(pelvisLinearVelocityToPack);
+      pelvisLinearVelocityToPack.setIncludingFrame(yoRootJointVelocity);
    }
 
    public void getEstimatedCoMPosition(FramePoint3D comPositionToPack)
    {
-      yoCenterOfMassPosition.getFrameTupleIncludingFrame(comPositionToPack);
+      comPositionToPack.setIncludingFrame(yoCenterOfMassPosition);
    }
 
    public void getEstimatedCoMVelocity(FrameVector3D comVelocityToPack)
    {
-      yoCenterOfMassVelocity.getFrameTupleIncludingFrame(comVelocityToPack);
+      comVelocityToPack.setIncludingFrame(yoCenterOfMassVelocity);
    }
 
    public List<RigidBody> getCurrentListOfTrustedFeet()

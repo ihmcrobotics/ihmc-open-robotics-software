@@ -111,7 +111,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       {
          solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
          solePositionSetpoint.changeFrame(referenceFrames.getBodyFrame());
-         quadrupedSoleWaypointList.get(quadrant).get(0).set(solePositionSetpoint.getPoint(), zeroVelocity, 0.0);
+         quadrupedSoleWaypointList.get(quadrant).get(0).set(solePositionSetpoint, zeroVelocity, 0.0);
          switch (fallBehaviorType.getEnumValue())
          {
          case GO_HOME_XYZ:
@@ -129,7 +129,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
             updateGains();
             break;
          }
-         quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
+         quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.get());
       }
       quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains, taskSpaceEstimates, false);
 

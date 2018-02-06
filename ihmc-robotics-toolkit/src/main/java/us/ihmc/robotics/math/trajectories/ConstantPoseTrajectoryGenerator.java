@@ -3,17 +3,16 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
 public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -109,11 +108,11 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
          throw new RuntimeException("Must set allowMultipleFrames to true in the constructor if you ever want to register a new frame.");
    }
 
-   public void setConstantPose(FramePose constantPose)
+   public void setConstantPose(FramePose3D constantPose)
    {
       position.checkReferenceFrameMatch(constantPose);
       position.set(constantPose.getX(), constantPose.getY(), constantPose.getZ());
-      orientation.set(constantPose.getYaw(), constantPose.getPitch(), constantPose.getRoll());
+      orientation.setYawPitchRoll(constantPose.getYaw(), constantPose.getPitch(), constantPose.getRoll());
    }
 
    public void setConstantPose(FramePoint3D constantPosition, FrameQuaternion constantOrientation)
@@ -139,7 +138,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getPosition(FramePoint3D positionToPack)
    {
-      position.getFrameTupleIncludingFrame(positionToPack);
+      positionToPack.setIncludingFrame(position);
    }
 
    public void getVelocity(FrameVector3D velocityToPack)
@@ -161,7 +160,7 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      orientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(orientation);
    }
 
    public void getAngularVelocity(FrameVector3D angularVelocityToPack)
@@ -181,15 +180,11 @@ public class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   private final Quaternion temp = new Quaternion();
-   
-   public void getPose(FramePose framePoseToPack)
+   public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(position.getReferenceFrame());
-      framePoseToPack.setPosition(position.getFrameTuple());
-      
-      orientation.get(temp);
-      framePoseToPack.setOrientation(temp);
+      framePoseToPack.setPosition(position);
+      framePoseToPack.setOrientation(orientation);
    }
    
    public String toString()

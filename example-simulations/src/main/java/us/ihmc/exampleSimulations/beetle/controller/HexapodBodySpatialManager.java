@@ -99,10 +99,10 @@ public class HexapodBodySpatialManager
       filteredBodyHeight.update();
       yoDesiredBodyPosition.setZ(filteredBodyHeight.getDoubleValue());
 
-      yoDesiredBodyPosition.getFrameTupleIncludingFrame(desiredPosition);
-      yoDesiredBodyLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
+      desiredPosition.setIncludingFrame(yoDesiredBodyPosition);
+      desiredLinearVelocity.setIncludingFrame(yoDesiredBodyLinearVelocity);
       yoDesiredBodyOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
-      yoDesiredBodyAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
+      desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
 
       spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
@@ -113,7 +113,7 @@ public class HexapodBodySpatialManager
     */
    private void updateDesiredOrientationBasedOnDesiredAngularVelocity()
    {
-      yoDesiredBodyAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
+      desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
       desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       desiredAngularVelocity.scale(controllerDt);
       double deltaYaw = desiredAngularVelocity.getZ();
@@ -125,7 +125,7 @@ public class HexapodBodySpatialManager
     */
    private void updateDesiredPositionBasedOnDesiredLinearVelocity()
    {
-      yoDesiredBodyLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
+      desiredLinearVelocity.setIncludingFrame(yoDesiredBodyLinearVelocity);
       desiredLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       desiredLinearVelocity.scale(controllerDt);
       yoDesiredBodyPosition.add(desiredLinearVelocity);
@@ -154,12 +154,12 @@ public class HexapodBodySpatialManager
 
    public void getDesiredLinearVelocity(FrameVector3D desiredLinearVelocityToPack)
    {
-      yoDesiredBodyLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocityToPack);
+      desiredLinearVelocityToPack.setIncludingFrame(yoDesiredBodyLinearVelocity);
    }
 
    public void getDesiredAngularVelocity(FrameVector3D desiredAngularVelocityToPack)
    {
-      yoDesiredBodyAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocityToPack);
+      desiredAngularVelocityToPack.setIncludingFrame(yoDesiredBodyAngularVelocity);
       desiredAngularVelocityToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 }

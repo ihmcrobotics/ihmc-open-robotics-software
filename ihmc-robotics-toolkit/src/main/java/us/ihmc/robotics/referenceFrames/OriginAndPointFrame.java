@@ -35,8 +35,8 @@ public class OriginAndPointFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      originVector.set(origin.getPoint());
-      positionToPointAt.get(xAxis);
+      originVector.set(origin);
+      xAxis.set(positionToPointAt);
       xAxis.sub(originVector);
       double norm = xAxis.length();
       if (norm > 1e-12)

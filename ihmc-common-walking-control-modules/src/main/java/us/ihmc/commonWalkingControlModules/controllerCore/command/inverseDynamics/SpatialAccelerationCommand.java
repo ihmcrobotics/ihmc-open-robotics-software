@@ -9,13 +9,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -45,7 +45,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 public class SpatialAccelerationCommand implements InverseDynamicsCommand<SpatialAccelerationCommand>
 {
    /** Defines the reference frame of interest. It is attached to the end-effector. */
-   private final FramePose controlFramePose = new FramePose();
+   private final FramePose3D controlFramePose = new FramePose3D();
 
    /**
     * It defines the desired linear acceleration of the origin of the control frame, with respect to
@@ -132,7 +132,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
 
-      controlFramePose.setPoseIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
+      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularAcceleration.set(other.desiredAngularAcceleration);
       desiredLinearAcceleration.set(other.desiredLinearAcceleration);
    }
@@ -297,8 +297,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredAngularAcceleration.get(this.desiredAngularAcceleration);
-      desiredLinearAcceleration.get(this.desiredLinearAcceleration);
+      this.desiredAngularAcceleration.set(desiredAngularAcceleration);
+      this.desiredLinearAcceleration.set(desiredLinearAcceleration);
    }
 
    /**
@@ -332,7 +332,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
 
-      desiredAngularAcceleration.get(this.desiredAngularAcceleration);
+      this.desiredAngularAcceleration.set(desiredAngularAcceleration);
       desiredLinearAcceleration.setToZero();
    }
 
@@ -367,7 +367,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
 
-      desiredLinearAcceleration.get(this.desiredLinearAcceleration);
+      this.desiredLinearAcceleration.set(desiredLinearAcceleration);
       desiredAngularAcceleration.setToZero();
    }
 
@@ -743,7 +743,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @param controlFramePoseToPack the pose of the control frame. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePose controlFramePoseToPack)
+   public void getControlFramePoseIncludingFrame(FramePose3D controlFramePoseToPack)
    {
       controlFramePoseToPack.setIncludingFrame(controlFramePose);
    }
@@ -757,8 +757,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
    {
-      controlFramePose.getPositionIncludingFrame(positionToPack);
-      controlFramePose.getOrientationIncludingFrame(orientationToPack);
+      positionToPack.setIncludingFrame(controlFramePose.getPosition());
+      orientationToPack.setIncludingFrame(controlFramePose.getOrientation());
    }
 
    /**

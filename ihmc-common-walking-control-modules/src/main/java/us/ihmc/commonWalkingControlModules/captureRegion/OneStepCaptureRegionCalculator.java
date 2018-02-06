@@ -2,10 +2,12 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.util.ArrayList;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -45,11 +47,44 @@ public class OneStepCaptureRegionCalculator
       this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
             - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
            walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           referenceFrames.getAnkleZUpReferenceFrames(), parentRegistry, yoGraphicsListRegistry);
+           referenceFrames.getAnkleZUpReferenceFrames(), "", parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
+                                         String suffix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
+                 - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
+           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getAnkleZUpReferenceFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(BipedSupportPolygons referenceFrames, WalkingControllerParameters walkingControllerParameters,
+                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
+                 - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
+           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getAnkleZUpFrames(), "", parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(BipedSupportPolygons referenceFrames, WalkingControllerParameters walkingControllerParameters, String suffix,
+                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(walkingControllerParameters.getSteppingParameters().getFootForwardOffset()
+                 - walkingControllerParameters.getSteppingParameters().getFootLength() / 2.0,
+           walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           referenceFrames.getAnkleZUpFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
-         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(midFootAnkleXOffset, footWidth, kinematicStepRange, ankleZUpFrames, "", parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
+         SideDependentList<? extends ReferenceFrame> ankleZUpFrames, String suffix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -63,7 +98,7 @@ public class OneStepCaptureRegionCalculator
       parentRegistry.addChild(registry);
       if (yoGraphicsListRegistry != null && VISUALIZE)
       {
-         captureRegionVisualizer = new CaptureRegionVisualizer(this, yoGraphicsListRegistry, registry);
+         captureRegionVisualizer = new CaptureRegionVisualizer(this, suffix, yoGraphicsListRegistry, registry);
       }
    }
 
@@ -104,7 +139,7 @@ public class OneStepCaptureRegionCalculator
    private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameConvexPolygon2d rawCaptureRegion = new FrameConvexPolygon2d(worldFrame);
 
-   public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2D icp, double omega0, FrameConvexPolygon2d footPolygon)
+   public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2DReadOnly icp, double omega0, FrameConvexPolygon2d footPolygon)
    {
       globalTimer.startMeasurement();
 

@@ -4,13 +4,13 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -59,7 +59,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    private PoseReferenceFrame buttonFrame;
 
    private RigidBodyTransform originalButtonTransform;
-   private FramePose buttonPoseInWorld;
+   private FramePose3D buttonPoseInWorld;
 
    public ContactableButtonRobot(String name, RigidBodyTransform rootTransform, Vector3D pushVector)
    {
@@ -77,11 +77,11 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       this.rootJointTransform = rootTransform;
       this.buttonPushVector = new Vector3D(pushVector);
       this.buttonPushVector.normalize();
-      buttonPoseInWorld = new FramePose();
+      buttonPoseInWorld = new FramePose3D();
       originalButtonTransform = new RigidBodyTransform(rootJointTransform); 
       
       // Initialize original button pose to rootJointTransform
-      buttonPoseInWorld.setPose(originalButtonTransform);
+      buttonPoseInWorld.set(originalButtonTransform);
       
       // Create a new reference frame attached to the button
       buttonFrame =  new PoseReferenceFrame("buttonFrame", buttonPoseInWorld);

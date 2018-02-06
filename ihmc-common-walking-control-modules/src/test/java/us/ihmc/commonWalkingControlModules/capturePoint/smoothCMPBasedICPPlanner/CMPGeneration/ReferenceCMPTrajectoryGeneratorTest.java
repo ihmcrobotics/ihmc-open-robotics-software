@@ -69,7 +69,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
    private void generateRandomQuinticSegmentedTrajectory(List<AngularMomentumTrajectory> trajectoriesList, int numberOfSegments, double[] segmentTimes,
                                                          int numberOfCoefficients)
    {
-      AngularMomentumTrajectory angularMomentumTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSegments, numberOfCoefficients);
+      AngularMomentumTrajectory angularMomentumTrajectory = new AngularMomentumTrajectory(numberOfSegments, numberOfCoefficients);
       angularMomentumTrajectory.reset();
       for (int j = 0; j < numberOfSegments; j++)
       {

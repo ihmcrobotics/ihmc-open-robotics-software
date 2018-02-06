@@ -28,18 +28,18 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesPanel;
 import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
-import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.YoEntryBox;
 import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
+import us.ihmc.tools.string.RegularExpression;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableSearchPanel extends JPanel implements ChangeListener
 {
@@ -55,7 +55,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
    private final YoEntryBox entryBox;
    private final SelectedVariableHolder holder;
    private JLabel label;
-   
+
    private boolean showOnlyParameters = false;
 
    public YoVariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel,
@@ -95,7 +95,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
          bookMarkScrollPane.getVerticalScrollBar().setBlockIncrement(SCROLL_PANE_INCREMENT);
          bookMarkScrollPane.setPreferredSize(new Dimension(60, 40));
          bookMarkScrollPane.setBorder(new EtchedBorder());
-   
+
          splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, searchResultScrollPane, bookMarkScrollPane);
          splitPane.setResizeWeight(1);
          splitPane.setBorder(null);
@@ -193,13 +193,13 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       entryBox.updateActiveContainer();
    }
 
-   
+
    public void setShowOnlyParameters(boolean showOnlyParameters)
    {
       if(this.showOnlyParameters != showOnlyParameters)
       {
          this.showOnlyParameters = showOnlyParameters;
-         
+
          SwingUtilities.invokeLater(() -> {
             if (variableSearchBox.hasSearched())
             {
@@ -208,7 +208,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
          });
       }
    }
-   
+
    @Override
    public void stateChanged(ChangeEvent e)
    {
@@ -284,7 +284,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       {
          return searched;
       }
-      
+
       @Override
       public void actionPerformed(ActionEvent e)
       {
@@ -294,7 +294,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       public void findMatchingVariablesRegularExpression()
       {
          searched = true;
-         
+
          if (searcher != null)
          {
             searcher.stopSearch();
@@ -302,7 +302,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
 
          searcher = new Searcher(searchTextField.getText().toString());
          searchExecutor.execute(searcher);
-         
+
       }
 
       public class Searcher implements Runnable
@@ -354,7 +354,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
                {
                   match = entry.getVariable().isParameter();
                }
-               
+
                if (match)
                {
                   ret.add(entry.getVariable());

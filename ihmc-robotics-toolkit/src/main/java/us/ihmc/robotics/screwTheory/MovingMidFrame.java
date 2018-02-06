@@ -1,9 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePose;
 
 /**
  * {@code MovingMidFrame} represents a the average of two given reference frames.
@@ -12,9 +12,9 @@ import us.ihmc.robotics.geometry.FramePose;
 public class MovingMidFrame extends MovingReferenceFrame
 {
    private final MovingReferenceFrame frameOne, frameTwo;
-   private final FramePose pose = new FramePose();
-   private final FramePose poseOne = new FramePose();
-   private final FramePose poseTwo = new FramePose();
+   private final FramePose3D pose = new FramePose3D();
+   private final FramePose3D poseOne = new FramePose3D();
+   private final FramePose3D poseTwo = new FramePose3D();
 
    public MovingMidFrame(String name, MovingReferenceFrame frameOne, MovingReferenceFrame frameTwo)
    {
@@ -39,7 +39,7 @@ public class MovingMidFrame extends MovingReferenceFrame
 
       pose.setToZero(parentFrame);
       pose.interpolate(poseOne, poseTwo, 0.5);
-      pose.getPose(transformToParent);
+      pose.get(transformToParent);
    }
 
    private final FrameVector3D linearVelocity = new FrameVector3D();
@@ -123,8 +123,8 @@ public class MovingMidFrame extends MovingReferenceFrame
       angularVelocityOne.scale(integrationDT);
       angularVelocityTwo.scale(integrationDT);
 
-      quaternionFutureOne.set(angularVelocityOne.getVector());
-      quaternionFutureTwo.set(angularVelocityTwo.getVector());
+      quaternionFutureOne.set(angularVelocityOne);
+      quaternionFutureTwo.set(angularVelocityTwo);
 
       quaternionFutureOne.preMultiply(poseOne.getOrientation());
       quaternionFutureTwo.preMultiply(poseTwo.getOrientation());
@@ -132,7 +132,7 @@ public class MovingMidFrame extends MovingReferenceFrame
       quaternionFuture.interpolate(quaternionFutureOne, quaternionFutureTwo, 0.5);
       difference.difference(pose.getOrientation(), quaternionFuture);
       angularVelocity.setToZero(this);
-      difference.get(angularVelocity.getVector());
+      difference.get(angularVelocity);
       angularVelocity.scale(1.0 / integrationDT);
    }
 }

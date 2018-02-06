@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,8 +23,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -80,13 +80,14 @@ public class FootControlModule
    private final YoBoolean requestExploration;
    private final YoBoolean resetFootPolygon;
    
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D desiredPose = new FramePose3D();
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
-         YoPIDSE3Gains swingFootControlGains, YoPIDSE3Gains holdPositionFootControlGains, YoPIDSE3Gains toeOffFootControlGains,
-         HighLevelHumanoidControllerToolbox controllerToolbox, ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
+                            PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
+                            PIDSE3GainsReadOnly toeOffFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox,
+                            ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -181,19 +182,19 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
-   public void setWeights(Vector3DReadOnly highAngularFootWeight, Vector3DReadOnly highLinearFootWeight, Vector3DReadOnly defaultAngularFootWeight,
-                          Vector3DReadOnly defaultLinearFootWeight)
+   public void setWeights(Vector3DReadOnly loadedFootAngularWeight, Vector3DReadOnly loadedFootLinearWeight, Vector3DReadOnly footAngularWeight,
+                          Vector3DReadOnly footLinearWeight)
    {
-      swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      touchdownState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      swingState.setWeights(footAngularWeight, footLinearWeight);
+      moveViaWaypointsState.setWeights(footAngularWeight, footLinearWeight);
+      touchdownState.setWeights(footAngularWeight, footLinearWeight);
+      onToesState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
+      supportState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
    }
 
-   public void replanTrajectory(Footstep footstep, double swingTime, boolean continuousReplan)
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
    {
-      swingState.replanTrajectory(footstep, swingTime, continuousReplan);
+      swingState.setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
    }
 
    public void requestTouchdownForDisturbanceRecovery()

@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.recursiveController.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,7 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -65,7 +65,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final SideDependentList<YoPlaneContactState> contactStates;
    private final SideDependentList<FootSpoof> contactableFeet;
-   private final SideDependentList<FramePose> footPosesAtTouchdown;
+   private final SideDependentList<FramePose3D> footPosesAtTouchdown;
 
    private final YoFramePoint icp;
    private final YoFramePoint desiredICP;
@@ -73,7 +73,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final YoFramePoint yoDesiredCMP;
 
-   private final ICPOptimizationController icpOptimizationController;
+   private final ICPOptimizationControllerInterface icpOptimizationController;
    private final YoICPControlGains icpGains;
    private final YoDouble omega0 = new YoDouble("omega0", registry);
    private final double totalMass;
@@ -115,9 +115,8 @@ public class SphereICPOptimizationController implements GenericSphereController
       icpGains.setKpOrthogonalToMotion(3.0);
       icpGains.setKpParallelToMotion(2.0);
 
-      icpOptimizationController = new ICPAdjustmentOptimizationController(controlToolbox.getCapturePointPlannerParameters(), controlToolbox.getICPOptimizationParameters(),
-                                                                          null, controlToolbox.getBipedSupportPolygons(),
-                                                                          controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
+      icpOptimizationController = new ICPOptimizationController(null, controlToolbox.getICPOptimizationParameters(), controlToolbox.getBipedSupportPolygons(),
+                                                                controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
 
       stateMachine = new StateMachine<>("supportStateMachine", "supportStateTime", SupportState.class, controlToolbox.getYoTime(), registry);
       StandingState standingState = new StandingState();
@@ -165,7 +164,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
       controlToolbox.update();
 
-      icp.getFrameTuple2d(capturePoint2d);
+      capturePoint2d.set(icp);
       icpPlanner.compute(yoTime.getDoubleValue());
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity);
@@ -177,18 +176,18 @@ public class SphereICPOptimizationController implements GenericSphereController
       desiredCapturePointVelocity2d.set(desiredCapturePointVelocity);
       finalDesiredCapturePoint2d.set(finalDesiredCapturePoint);
 
-      FramePoint2D desiredCMP = yoDesiredCMP.getFramePoint2dCopy();
+      FramePoint2D desiredCMP = new FramePoint2D(yoDesiredCMP);
 
       double fZ = heightController.getVerticalForce();
       FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);
       reactionForces.changeFrame(worldFrame);
-      planarForces.setByProjectionOntoXYPlane(reactionForces);
+      planarForces.set(reactionForces);
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
-         icpReferenceTrack.setBallLoop(desiredICP.getFramePointCopy());
-         icpTrack.setBallLoop(icp.getFramePointCopy());
-         cmpTrack.setBallLoop(yoDesiredCMP.getFramePointCopy());
+         icpReferenceTrack.setBallLoop(desiredICP);
+         icpTrack.setBallLoop(icp);
+         cmpTrack.setBallLoop(yoDesiredCMP);
          comTrack.setBallLoop(centerOfMass);
       }
    }
@@ -199,7 +198,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       desiredForces.setY(planarForces.getY());
       desiredForces.setZ(heightController.getVerticalForce());
 
-      return desiredForces.getVector3dCopy();
+      return new Vector3D(desiredForces);
    }
 
    private final FramePoint3D cmp3d = new FramePoint3D();
@@ -229,7 +228,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       {
          RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
          FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
-         FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
+         FramePose3D nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
          nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
          nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
          footSpoof.setSoleFrame(nextSupportPose);
@@ -259,7 +258,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       {
          nextFootsteps.clear();
 
-         desiredICP.getFrameTuple(desiredCapturePoint);
+         desiredCapturePoint.set(desiredICP);
 
          icpPlanner.clearPlan();
          icpPlanner.holdCurrentICP(desiredCapturePoint);
@@ -281,7 +280,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final FootstepTiming timing = new FootstepTiming();
    private class SingleSupportState extends State<SupportState>
    {
-      private final FramePose footstepPose = new FramePose();
+      private final FramePose3D footstepPose = new FramePose3D();
       private final FramePoint2D footstepPositionSolution = new FramePoint2D();
       private final FramePoint2D desiredCMP = new FramePoint2D();
 
@@ -296,16 +295,13 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpOptimizationController.getDesiredCMP(desiredCMP);
          yoDesiredCMP.set(desiredCMP, 0.0);
 
-         for (int i = 0; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
+         if (icpOptimizationController.useStepAdjustment())
          {
-            Footstep footstep = nextFootsteps.get(i);
+            Footstep footstep = nextFootsteps.get(0);
 
             if (footstep != null)
             {
-               footstep.getPose(footstepPose);
-               icpOptimizationController.getFootstepSolution(i, footstepPositionSolution);
-               footstepPose.setXYFromPosition2d(footstepPositionSolution);
-               footstep.setPose(footstepPose);
+               icpOptimizationController.getFootstepSolution(footstep);
             }
          }
 
@@ -327,9 +323,6 @@ public class SphereICPOptimizationController implements GenericSphereController
          nextFootsteps.add(nextNextFootstep);
          nextFootsteps.add(nextNextNextFootstep);
 
-         for (int i = 3; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
-            nextFootsteps.add(controlToolbox.peekAtFootstep(i - 1));
-
          timing.setTimings(controlToolbox.getDoubleSupportDuration(), controlToolbox.getSingleSupportDuration());
          icpPlanner.addFootstepToPlan(nextFootstep, timing);
          icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
@@ -347,7 +340,7 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
 
          FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
-         FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
+         FramePose3D nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
          nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
          nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
          footSpoof.setSoleFrame(nextSupportPose);
@@ -368,7 +361,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private class DoubleSupportState extends State<SupportState>
    {
-      private final FramePose footstepPose = new FramePose();
+      private final FramePose3D footstepPose = new FramePose3D();
       private final FramePoint2D footstepPositionSolution = new FramePoint2D();
       private final FramePoint2D desiredCMP = new FramePoint2D();
 
@@ -388,16 +381,13 @@ public class SphereICPOptimizationController implements GenericSphereController
 
          if (getPreviousState().getStateEnum() != SupportState.STANDING)
          {
-            for (int i = 0; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
+            if (icpOptimizationController.useStepAdjustment())
             {
-               Footstep footstep = nextFootsteps.get(i);
+               Footstep footstep = nextFootsteps.get(0);
 
                if (footstep != null)
                {
-                  footstep.getPose(footstepPose);
-                  icpOptimizationController.getFootstepSolution(i, footstepPositionSolution);
-                  footstepPose.setXYFromPosition2d(footstepPositionSolution);
-                  footstep.setPose(footstepPose);
+                  icpOptimizationController.getFootstepSolution(footstep);
                }
             }
          }
@@ -423,9 +413,6 @@ public class SphereICPOptimizationController implements GenericSphereController
          nextFootsteps.add(nextFootstep);
          nextFootsteps.add(nextNextFootstep);
          nextFootsteps.add(nextNextNextFootstep);
-
-         for (int i = 3; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
-            nextFootsteps.add(controlToolbox.peekAtFootstep(i - 1));
 
          controlToolbox.updateUpcomingFootstepsViz(nextFootstep, nextNextFootstep, nextNextNextFootstep);
 

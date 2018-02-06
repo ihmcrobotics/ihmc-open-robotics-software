@@ -11,7 +11,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
@@ -30,9 +33,9 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    protected final YoVariableRegistry registry;
 
-   private final YoFrameVector defaultLinearMomentumRateWeight;
-   private final YoFrameVector defaultAngularMomentumRateWeight;
-   private final YoFrameVector highLinearMomentumRateWeight;
+   private Vector3DReadOnly defaultLinearMomentumRateWeight;
+   private Vector3DReadOnly defaultAngularMomentumRateWeight;
+   private Vector3DReadOnly highLinearMomentumRateWeight;
    private final YoFrameVector angularMomentumRateWeight;
    private final YoFrameVector linearMomentumRateWeight;
 
@@ -60,6 +63,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
 
    protected final FramePoint2D perfectCMP = new FramePoint2D();
+   protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
 
 
@@ -98,9 +102,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       controlledCoMAcceleration = new YoFrameVector(namePrefix + "ControlledCoMAcceleration", "", centerOfMassFrame, registry);
 
-      defaultLinearMomentumRateWeight = new YoFrameVector(namePrefix + "DefaultLinearMomentumRateWeight", worldFrame, registry);
-      defaultAngularMomentumRateWeight = new YoFrameVector(namePrefix + "DefaultAngularMomentumRateWeight", worldFrame, registry);
-      highLinearMomentumRateWeight = new YoFrameVector(namePrefix + "HighLinearMomentumRateWeight", worldFrame, registry);
       angularMomentumRateWeight = new YoFrameVector(namePrefix + "AngularMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight = new YoFrameVector(namePrefix + "LinearMomentumRateWeight", worldFrame, registry);
 
@@ -121,9 +122,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       linearXYAndAngularZSelectionMatrix.selectLinearZ(false); // remove height
       linearXYAndAngularZSelectionMatrix.selectAngularZ(true);
 
-      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
-      linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
-
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
 
       if (yoGraphicsListRegistry != null)
@@ -142,29 +140,21 @@ public abstract class LinearMomentumRateOfChangeControlModule
       }
       yoUnprojectedDesiredCMP.setToNaN();
 
+      perfectCoP.setToNaN();
+
       parentRegistry.addChild(registry);
    }
 
 
-   public void setMomentumWeight(Vector3D angularWeight, Vector3D linearWeight)
+   public void setMomentumWeight(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      defaultLinearMomentumRateWeight.set(linearWeight);
-      defaultAngularMomentumRateWeight.set(angularWeight);
+      defaultLinearMomentumRateWeight = linearWeight;
+      defaultAngularMomentumRateWeight = angularWeight;
    }
 
-   public void setMomentumWeight(Vector3D linearWeight)
+   public void setHighMomentumWeightForRecovery(Vector3DReadOnly highLinearWeight)
    {
-      defaultLinearMomentumRateWeight.set(linearWeight);
-   }
-
-   public void setAngularMomentumWeight(Vector3D angularWeight)
-   {
-      defaultAngularMomentumRateWeight.set(angularWeight);
-   }
-
-   public void setHighMomentumWeightForRecovery(Vector3D highLinearWeight)
-   {
-      highLinearMomentumRateWeight.set(highLinearWeight);
+      highLinearMomentumRateWeight = highLinearWeight;
    }
 
 
@@ -176,17 +166,17 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.omega0 = omega0;
    }
 
-   public void setCapturePoint(FramePoint2D capturePoint)
+   public void setCapturePoint(FramePoint2DReadOnly capturePoint)
    {
       this.capturePoint.setIncludingFrame(capturePoint);
    }
 
-   public void setDesiredCapturePoint(FramePoint2D desiredCapturePoint)
+   public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
    {
       this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
    }
 
-   public void setDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocity)
+   public void setDesiredCapturePointVelocity(FrameVector2DReadOnly desiredCapturePointVelocity)
    {
       this.desiredCapturePointVelocity.setIncludingFrame(desiredCapturePointVelocity);
    }
@@ -213,7 +203,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       return momentumRateCommand;
    }
 
-   public void computeAchievedCMP(FrameVector3D achievedLinearMomentumRate, FramePoint2D achievedCMPToPack)
+   public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate, FramePoint2D achievedCMPToPack)
    {
       if (achievedLinearMomentumRate.containsNaN())
          return;
@@ -233,7 +223,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final FramePoint3D cmp3d = new FramePoint3D();
    private final FrameVector3D groundReactionForce = new FrameVector3D();
 
-   protected FrameVector3D computeGroundReactionForce(FramePoint2D cmp2d, double fZ)
+   protected FrameVector3D computeGroundReactionForce(FramePoint2DReadOnly cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, omega0);
@@ -247,7 +237,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
    private boolean desiredCMPcontainedNaN = false;
 
-   public void compute(FramePoint2D desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
+   public void compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
    {
       computeCMPInternal(desiredCMPPreviousValue);
 
@@ -311,21 +301,25 @@ public abstract class LinearMomentumRateOfChangeControlModule
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
 
-   public abstract void computeCMPInternal(FramePoint2D desiredCMPPreviousValue);
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
       minimizeAngularMomentumRateZ.set(enable);
    }
 
-   public void setFinalDesiredCapturePoint(FramePoint2D finalDesiredCapturePoint)
+   public void setFinalDesiredCapturePoint(FramePoint2DReadOnly finalDesiredCapturePoint)
    {
       this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
    }
 
-   public void setPerfectCMP(FramePoint2D perfectCMP)
+   public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
    {
       this.perfectCMP.setIncludingFrame(perfectCMP);
+   }
+
+   public void setPerfectCoP(FramePoint2DReadOnly perfectCoP)
+   {
+      this.perfectCoP.setIncludingFrame(perfectCoP);
    }
 
    /**
@@ -338,6 +332,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
 
+   public abstract void computeCMPInternal(FramePoint2DReadOnly desiredCMPPreviousValue);
 
-   public abstract void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
+   public abstract void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
 }

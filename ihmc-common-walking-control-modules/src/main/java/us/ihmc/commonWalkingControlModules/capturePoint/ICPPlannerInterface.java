@@ -334,6 +334,50 @@ public interface ICPPlannerInterface
    void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack);
 
    /**
+    * Gets the current CoP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressurePositionToPack the current CoP position. Modified.
+    */
+   void getDesiredCenterOfPressurePosition(FramePoint3D desiredCenterOfPressurePositionToPack);
+
+   /**
+    * Gets the current CoP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressurePositionToPack the current CoP position. Modified.
+    */
+   void getDesiredCenterOfPressurePosition(FramePoint2D desiredCenterOfPressurePositionToPack);
+
+   /**
+    * Gets the current CoP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressureVelocityToPack the current CoP velocity. Modified.
+    */
+   void getDesiredCenterOfPressureVelocity(FrameVector3D desiredCenterOfPressureVelocityToPack);
+
+   /**
+    * Gets the current CoP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfPressureVelocityToPack the current CoP velocity. Modified.
+    */
+   void getDesiredCenterOfPressureVelocity(FrameVector2D desiredCenterOfPressureVelocityToPack);
+
+   /**
     * Gets the time relative to the beginning of the current state.
     * 
     * @return the time spent in the current state.

@@ -19,7 +19,7 @@ public class SimulateAction extends AbstractAction
       super("Simulate");
       this.executor = listener;
 
-      String iconFilename = "icons/YoSimulate32.gif";
+      String iconFilename = "icons/Simulate.png";
       int shortKey = KeyEvent.VK_S;
       String longDescription = "Start simulating.";
       String shortDescription = "Simulate";

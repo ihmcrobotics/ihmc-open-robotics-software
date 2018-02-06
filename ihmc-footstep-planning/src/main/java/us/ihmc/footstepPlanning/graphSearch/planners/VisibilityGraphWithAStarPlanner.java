@@ -5,14 +5,18 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.layout.VBox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -42,7 +46,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -74,8 +77,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final FootstepPlanner footstepPlanner;
 
    private PlanarRegionsList planarRegionsList;
-   private final FramePose bodyStartPose = new FramePose();
-   private final FramePose bodyGoalPose = new FramePose();
+   private final FramePose3D bodyStartPose = new FramePose3D();
+   private final FramePose3D bodyGoalPose = new FramePose3D();
    private final List<Point2D> waypoints = new ArrayList<>();
 
    private final boolean visualizing;
@@ -122,7 +125,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    }
 
    @Override
-   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
+   public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side)
    {
       double defaultStepWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);
@@ -196,15 +199,25 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
          try
          {
-            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+            List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
 
-            if (path == null || path.size() < 2)
+            if (path.size() < 2)
             {
-               double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
-               timeSpentBeforeFootstepPlanner.set(seconds);
-               timeSpentInFootstepPlanner.set(0.0);
-               yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
-               return yoResult.getEnumValue();
+               if(parameters.getReturnBestEffortPlan())
+               {
+                  Vector2D goalDirection = new Vector2D(bodyGoalPose.getX(), bodyGoalPose.getY());
+                  goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
+                  goalDirection.scale(planningHorizon / goalDirection.length());
+                  waypoints.add(new Point2D(goalDirection.getX() + bodyStartPose.getX(), goalDirection.getY() + bodyStartPose.getY()));
+               }
+               else
+               {
+                  double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+                  timeSpentBeforeFootstepPlanner.set(seconds);
+                  timeSpentInFootstepPlanner.set(0.0);
+                  yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
+                  return yoResult.getEnumValue();
+               }
             }
 
             for (Point3DReadOnly waypoint3d : path)
@@ -237,9 +250,9 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       bodyPath.getPointAlongPath(alpha, goalPose2d);
       heuristics.setGoalAlpha(alpha);
 
-      FramePose footstepPlannerGoal = new FramePose();
+      FramePose3D footstepPlannerGoal = new FramePose3D();
       footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
-      footstepPlannerGoal.setYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+      footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);

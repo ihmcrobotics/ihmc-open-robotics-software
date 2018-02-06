@@ -3,10 +3,10 @@ package us.ihmc.avatar.polaris;
 import java.util.EnumMap;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class VehicleModelObjects
 {
@@ -287,12 +287,12 @@ public class VehicleModelObjects
       return new RigidBodyTransform(objectTransforms.get(vehicleObject));
    }
 
-   public FramePose getFramePose(ReferenceFrame vehicleReferenceFrame, VehicleObject vehicleObject)
+   public FramePose3D getFramePose(ReferenceFrame vehicleReferenceFrame, VehicleObject vehicleObject)
    {
-      FramePose framePose = new FramePose(vehicleReferenceFrame);
+      FramePose3D framePose = new FramePose3D(vehicleReferenceFrame);
       RigidBodyTransform transform3D = getTransform(vehicleObject);
 
-      framePose.setPoseIncludingFrame(vehicleReferenceFrame, transform3D);
+      framePose.setIncludingFrame(vehicleReferenceFrame, transform3D);
 
       return framePose;
    }

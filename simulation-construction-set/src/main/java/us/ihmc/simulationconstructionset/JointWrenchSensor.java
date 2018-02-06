@@ -29,12 +29,12 @@ public class JointWrenchSensor
 
    public void getJointForce(Tuple3DBasics forceToPack)
    {
-      jointWrenchForce.get(forceToPack);
+      forceToPack.set(jointWrenchForce);
    }
 
    public void getJointTorque(Tuple3DBasics torqueToPack)
    {
-      jointWrenchTorque.get(torqueToPack);
+      torqueToPack.set(jointWrenchTorque);
    }
 
    private final Vector3D tempVector = new Vector3D();

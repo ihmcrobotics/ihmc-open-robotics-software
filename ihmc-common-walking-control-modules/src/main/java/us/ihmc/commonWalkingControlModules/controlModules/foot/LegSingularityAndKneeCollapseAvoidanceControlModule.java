@@ -289,10 +289,10 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), hipPitchRotationToParentFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
-            hipPitchPosition.get(hipPitchToParentFrame);
+            hipPitchToParentFrame.set(hipPitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(hipPitchRotationToParentFrame);
             transformToParent.setTranslation(hipPitchToParentFrame);
@@ -314,10 +314,10 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), anklePitchRotationToParentFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
-            anklePitchPosition.get(anklePitchToParentFrame);
+            anklePitchToParentFrame.set(anklePitchPosition);
 
             transformToParent.setRotationAndZeroTranslation(anklePitchRotationToParentFrame);
             transformToParent.setTranslation(anklePitchToParentFrame);

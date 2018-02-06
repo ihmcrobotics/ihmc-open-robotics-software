@@ -94,7 +94,7 @@ public class YoArtifactPosition extends YoArtifact
    @Override
    public void draw(Graphics2DAdapter graphics)
    {
-      point.get(tempPoint);
+      tempPoint.set(point);
       drawLocal(graphics);
    }
 

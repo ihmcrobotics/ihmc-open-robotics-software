@@ -33,7 +33,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 40000)
+   @Test(timeout = 60000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       super.testMultipleTrajectoryPoints();
@@ -73,7 +73,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 40000)
+   @Test(timeout = 60000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

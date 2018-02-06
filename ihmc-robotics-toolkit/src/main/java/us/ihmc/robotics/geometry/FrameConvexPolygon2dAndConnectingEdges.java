@@ -2,13 +2,14 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class FrameConvexPolygon2dAndConnectingEdges
 {
    private final FrameConvexPolygon2d originalPolygon1, originalPolygon2;
    private final FrameConvexPolygon2d combinedPolygon;
-   private final FrameLineSegment2d connectingEdge1, connectingEdge2;
+   private final FrameLineSegment2D connectingEdge1, connectingEdge2;
 
    public FrameConvexPolygon2dAndConnectingEdges()
    {
@@ -16,11 +17,11 @@ public class FrameConvexPolygon2dAndConnectingEdges
       this.originalPolygon2 = new FrameConvexPolygon2d();
 
       this.combinedPolygon = new FrameConvexPolygon2d();
-      this.connectingEdge1 = new FrameLineSegment2d();
-      this.connectingEdge2 = new FrameLineSegment2d();
+      this.connectingEdge1 = new FrameLineSegment2D();
+      this.connectingEdge2 = new FrameLineSegment2D();
    }
 
-   public FrameConvexPolygon2dAndConnectingEdges(FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2, FrameConvexPolygon2d polygon, FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2)
+   public FrameConvexPolygon2dAndConnectingEdges(FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2, FrameConvexPolygon2d polygon, FrameLineSegment2D connectingEdge1, FrameLineSegment2D connectingEdge2)
    {
       this.originalPolygon1 = originalPolygon1;
       this.originalPolygon2 = originalPolygon2;
@@ -35,12 +36,12 @@ public class FrameConvexPolygon2dAndConnectingEdges
       return combinedPolygon;
    }
 
-   public FrameLineSegment2d getConnectingEdge1()
+   public FrameLineSegment2D getConnectingEdge1()
    {
       return connectingEdge1;
    }
 
-   public FrameLineSegment2d getConnectingEdge2()
+   public FrameLineSegment2D getConnectingEdge2()
    {
       return connectingEdge2;
    }
@@ -55,8 +56,8 @@ public class FrameConvexPolygon2dAndConnectingEdges
       return originalPolygon2;
    }
 
-   public void setIncludingFrameAndUpdate(FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2, FrameConvexPolygon2d combinedPolygon, FrameLineSegment2d connectingEdge1,
-         FrameLineSegment2d connectingEdge2)
+   public void setIncludingFrameAndUpdate(FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2, FrameConvexPolygon2d combinedPolygon, FrameLineSegment2D connectingEdge1,
+         FrameLineSegment2D connectingEdge2)
    {
       this.originalPolygon1.setIncludingFrameAndUpdate(originalPolygon1);
       this.originalPolygon2.setIncludingFrameAndUpdate(originalPolygon2);

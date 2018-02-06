@@ -10,8 +10,17 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.RepeatedlyWalkFootstepListBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.debug.TestGarbageGenerationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
@@ -22,7 +31,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PushAndWalkBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -209,7 +217,8 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.FIRE_FIGHTING,
             new FireFighterStanceBehavior("fireFighting", yoTime,behaviorCommunicationBridge, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
-      
+
+
       dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
             new PickUpBallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
@@ -226,9 +235,13 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS,
             new PartialFootholdBehavior(behaviorCommunicationBridge));
 
+
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION,
             new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
-      
+
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_GC_GENERATION,
+                             new TestGarbageGenerationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
+
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_SMOOTH_ICP_PLANNER,
                              new TestSmoothICPPlannerBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
@@ -243,18 +256,13 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(behaviorCommunicationBridge, fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel, referenceFrames,
-                                                                                                             fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR, new CleaningMotionStateMachineBehavior(behaviorCommunicationBridge, yoTime, robotModelFactory, fullRobotModel, referenceFrames));
+      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames));
 
       if (objectDetectorBehaviorService != null)
       {
          dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(behaviorCommunicationBridge, objectDetectorBehaviorService));
          dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE,
                                 new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, objectDetectorBehaviorService));
-         dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN_TO_VALVE,
-                                new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel,
-                                                                        referenceFrames, objectDetectorBehaviorService));
       }
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE,
@@ -281,8 +289,7 @@ public class IHMCHumanoidBehaviorManager
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, referenceFrames, walkingControllerParameters, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
-      RepeatedlyWalkFootstepListBehavior repeatedlyWalkFootstepListBehavior = new RepeatedlyWalkFootstepListBehavior(behaviorCommunicationBridge, walkingControllerParameters,
-            yoTime, registry);
+      RepeatedlyWalkFootstepListBehavior repeatedlyWalkFootstepListBehavior = new RepeatedlyWalkFootstepListBehavior(behaviorCommunicationBridge, referenceFrames, registry);
       dispatcher.addBehavior(HumanoidBehaviorType.REPEATEDLY_WALK_FOOTSTEP_LIST, repeatedlyWalkFootstepListBehavior);
    }
 

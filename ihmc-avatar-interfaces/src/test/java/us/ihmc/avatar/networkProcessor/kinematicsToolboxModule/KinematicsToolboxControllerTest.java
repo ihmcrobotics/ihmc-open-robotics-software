@@ -22,6 +22,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
@@ -106,7 +107,7 @@ public class KinematicsToolboxControllerTest
 
       RobotDescription ghostRobotDescription = new KinematicsToolboxControllerTestRobots.SevenDoFArm();
       ghostRobotDescription.setName("Ghost");
-      recursivelyModyfyGraphics(ghostRobotDescription.getChildrenJoints().get(0));
+      recursivelyModifyGraphics(ghostRobotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = new RobotFromDescription(ghostRobotDescription);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -356,7 +357,7 @@ public class KinematicsToolboxControllerTest
       };
    }
 
-   private static void recursivelyModyfyGraphics(JointDescription joint)
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
    {
       if (joint == null)
          return;
@@ -387,7 +388,7 @@ public class KinematicsToolboxControllerTest
 
       for (JointDescription child : joint.getChildrenJoints())
       {
-         recursivelyModyfyGraphics(child);
+         recursivelyModifyGraphics(child, ghostApperance);
       }
    }
 

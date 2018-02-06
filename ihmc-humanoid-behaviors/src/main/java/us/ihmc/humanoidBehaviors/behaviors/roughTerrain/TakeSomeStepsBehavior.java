@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -20,7 +21,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -49,11 +49,11 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private final YoFramePose footstepPlannerInitialStepPose;
    private final YoFramePose footstepPlannerGoalPose;
 
-   private final FramePose tempFootstepPlannerGoalPose = new FramePose();
-   private final FramePose leftFootPose = new FramePose();
-   private final FramePose rightFootPose = new FramePose();
-   private final FramePose tempStanceFootPose = new FramePose();
-   private final FramePose tempFirstFootstepPose = new FramePose();
+   private final FramePose3D tempFootstepPlannerGoalPose = new FramePose3D();
+   private final FramePose3D leftFootPose = new FramePose3D();
+   private final FramePose3D rightFootPose = new FramePose3D();
+   private final FramePose3D tempStanceFootPose = new FramePose3D();
+   private final FramePose3D tempFirstFootstepPose = new FramePose3D();
    private final Point3D tempFootstepPosePosition = new Point3D();
    private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
    private final YoStopwatch footstepSentTimer;
@@ -224,8 +224,8 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
       {
          SimpleFootstep footstep = plan.getFootstep(i);
          footstep.getSoleFramePose(tempFirstFootstepPose);
-         tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
-         tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
+         tempFootstepPosePosition.set(tempFirstFootstepPose.getPosition());
+         tempFirstFootstepPoseOrientation.set(tempFirstFootstepPose.getOrientation());
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 

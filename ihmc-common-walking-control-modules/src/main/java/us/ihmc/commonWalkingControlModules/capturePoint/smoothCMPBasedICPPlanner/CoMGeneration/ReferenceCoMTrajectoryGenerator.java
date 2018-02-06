@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -35,7 +38,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final List<FrameTrajectory3D> cmpTrajectories = new ArrayList<>(defaultSize);
 
-   private List<FramePoint3D> icpDesiredFinalPositions = new ArrayList<>(defaultSize);
+   private List<? extends FramePoint3DReadOnly> icpDesiredFinalPositions = new ArrayList<>(defaultSize);
 
    private final FramePoint3D comPositionDesiredCurrent = new FramePoint3D();
    private final FrameVector3D comVelocityDesiredCurrent = new FrameVector3D();
@@ -101,7 +104,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    }
 
    public void initializeForTransfer(double initialTime, List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
-                                     List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<FramePoint3D> icpDesiredFinalPositions)
+                                     List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<? extends FramePoint3DReadOnly> icpDesiredFinalPositions)
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
@@ -148,7 +151,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    }
 
    public void initializeForSwing(double initialTime, List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
-                                  List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<FramePoint3D> icpDesiredFinalPositions)
+                                  List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<? extends FramePoint3DReadOnly> icpDesiredFinalPositions)
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
@@ -257,22 +260,22 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       return currentSegmentIndex;
    }
 
-   public void getICPPositionDesiredFinalFromSegment(FramePoint3D icpPositionDesiredFinal, int segment)
+   public void getICPPositionDesiredFinalFromSegment(FixedFramePoint3DBasics icpPositionDesiredFinal, int segment)
    {
       icpPositionDesiredFinal.set(icpDesiredFinalPositions.get(segment));
    }
 
-   public void getPositionDesiredInitialFromSegment(FramePoint3D comPositionDesiredInitial, int segment)
+   public void getPositionDesiredInitialFromSegment(FixedFramePoint3DBasics comPositionDesiredInitial, int segment)
    {
       comPositionDesiredInitial.set(comDesiredInitialPositions.get(segment));
    }
 
-   public void getPositionDesiredFinalFromSegment(FramePoint3D comPositionDesiredFinal, int segment)
+   public void getPositionDesiredFinalFromSegment(FixedFramePoint3DBasics comPositionDesiredFinal, int segment)
    {
       comPositionDesiredFinal.set(comDesiredFinalPositions.get(segment));
    }
 
-   public void getFinalCoMPositionInSwing(FramePoint3D comPositionDesiredFinalToPack)
+   public void getFinalCoMPositionInSwing(FixedFramePoint3DBasics comPositionDesiredFinalToPack)
    {
       if (isDoubleSupport.getBooleanValue())
       {
@@ -284,7 +287,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       }
    }
 
-   public void getFinalCoMPositionInTransfer(FramePoint3D comPositionDesiredFinalToPack)
+   public void getFinalCoMPositionInTransfer(FixedFramePoint3DBasics comPositionDesiredFinalToPack)
    {
       if (isDoubleSupport.getBooleanValue())
       {
@@ -362,38 +365,33 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       return false;
    }
 
-   public List<FramePoint3D> getCoMPositionDesiredInitialList()
+   public List<? extends FramePoint3DReadOnly> getCoMPositionDesiredInitialList()
    {
       return comDesiredInitialPositions;
    }
 
-   public List<FramePoint3D> getCoMPositionDesiredFinalList()
+   public List<? extends FramePoint3DReadOnly> getCoMPositionDesiredFinalList()
    {
       return comDesiredFinalPositions;
    }
 
-   public List<FrameVector3D> getCoMVelocityDesiredInitialList()
+   public List<? extends FrameVector3DReadOnly> getCoMVelocityDesiredInitialList()
    {
       return comDesiredInitialVelocities;
    }
 
-   public List<FrameVector3D> getCoMVelocityDesiredFinalList()
+   public List<? extends FrameVector3DReadOnly> getCoMVelocityDesiredFinalList()
    {
       return comDesiredFinalVelocities;
    }
 
-   public List<FrameVector3D> getCoMAccelerationDesiredInitialList()
+   public List<? extends FrameVector3DReadOnly> getCoMAccelerationDesiredInitialList()
    {
       return comDesiredInitialAccelerations;
    }
 
-   public List<FrameVector3D> getCoMAccelerationDesiredFinalList()
+   public List<? extends FrameVector3DReadOnly> getCoMAccelerationDesiredFinalList()
    {
       return comDesiredFinalAccelerations;
-   }
-
-   public int getTotalNumberOfSegments()
-   {
-      return totalNumberOfCMPSegments.getIntegerValue();
    }
 }

@@ -1,16 +1,16 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalculator
 {
@@ -84,7 +84,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    }
 
    @Override
-   public double calculateCost(FramePose stanceFoot, FramePose swingStartFoot, FramePose idealFootstep, FramePose candidateFootstep, double percentageOfFoothold)
+   public double calculateCost(FramePose3D stanceFoot, FramePose3D swingStartFoot, FramePose3D idealFootstep, FramePose3D candidateFootstep, double percentageOfFoothold)
    {
       double cost = footstepBaseCost.getDoubleValue();
 
@@ -123,7 +123,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    private double penalizeCandidateFootstep(YoFrameVector penalizationVector, double penalizationWeight)
    {
       // TODO sqrt??
-      double dotProduct = idealToCandidateVector.dot(penalizationVector.getFrameTuple());
+      double dotProduct = idealToCandidateVector.dot(penalizationVector);
       dotProduct = Math.max(0.0, dotProduct);
       return penalizationWeight * dotProduct;
    }
@@ -138,39 +138,37 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private double dot3dVectorWith2dVector(YoFrameVector vector3d, YoFrameVector2d vector2d)
    {
-      tempFrameVectorForDot.setIncludingFrame(vector2d.getFrameTuple2d(), 0.0);
+      tempFrameVectorForDot.setIncludingFrame(vector2d, 0.0);
       return vector3d.dot(tempFrameVectorForDot);
    }
 
-   private void setOrientationFromPoseToPose(YoFrameOrientation frameOrientationToPack, FramePose fromPose, FramePose toPose)
+   private void setOrientationFromPoseToPose(YoFrameOrientation frameOrientationToPack, FramePose3D fromPose, FramePose3D toPose)
    {
-      FrameQuaternion toOrientation = toPose.getFrameOrientationCopy();
-      FrameQuaternion fromOrientation = fromPose.getFrameOrientationCopy();
-      frameOrientationToPack.getFrameOrientation().difference(toOrientation, fromOrientation);
+      frameOrientationToPack.getFrameOrientation().difference(toPose.getOrientation(), fromPose.getOrientation());
    }
 
-   private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose fromPose, FramePose toPose)
+   private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose3D fromPose, FramePose3D toPose)
    {
-      frameVectorToPack.set(toPose.getFramePointCopy());
-      FrameVector3D frameTuple = frameVectorToPack.getFrameTuple();
-      frameTuple.sub(fromPose.getFramePointCopy());
-      frameVectorToPack.setWithoutChecks(frameTuple);
+      frameVectorToPack.set(toPose.getPosition());
+      FrameVector3D frameTuple = new FrameVector3D(frameVectorToPack);
+      frameTuple.sub(fromPose.getPosition());
+      frameVectorToPack.set(frameTuple);
    }
 
-   private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose fromPose, FramePose toPose)
+   private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose3D fromPose, FramePose3D toPose)
    {
-      if (fromPose.epsilonEquals(toPose, 1e-7, Double.MAX_VALUE))
+      if (fromPose.getPosition().epsilonEquals(toPose.getPosition(), 1e-7))
       {
          vectorToPack.set(fromPose.getReferenceFrame(), 0.0, 0.0);
       }
       else
       {
-         FrameVector2D frameTuple2d = vectorToPack.getFrameTuple2d();
-         frameTuple2d.set(toPose.getFramePointCopy());
+         FrameVector2D frameTuple2d = new FrameVector2D(vectorToPack);
+         frameTuple2d.set(toPose.getPosition());
          fromPose.checkReferenceFrameMatch(vectorToPack);
          frameTuple2d.sub(fromPose.getX(), fromPose.getY());
          frameTuple2d.normalize();
-         vectorToPack.setWithoutChecks(frameTuple2d);
+         vectorToPack.set((Tuple2DReadOnly) frameTuple2d);
       }
    }
 

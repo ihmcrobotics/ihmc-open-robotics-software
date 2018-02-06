@@ -73,4 +73,10 @@ public enum NeckJointName
    {
       return getPascalCaseName();
    }
+
+   @Override
+   public String toString()
+   {
+      return getPascalCaseName();
+   }
 }

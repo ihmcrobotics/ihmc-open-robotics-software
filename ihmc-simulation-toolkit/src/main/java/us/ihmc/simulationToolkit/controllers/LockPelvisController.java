@@ -89,7 +89,7 @@ public class LockPelvisController implements RobotController
       robot.update();
       for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
       {
-         externalForcePoints.get(i).getYoPosition().get(initialPositions.get(i));
+         initialPositions.get(i).set(externalForcePoints.get(i).getYoPosition());
          desiredHeight.add(initialPositions.get(i).getZ() / initialPositions.size());
          efp_positionViz.get(i).update();
       }
@@ -112,12 +112,12 @@ public class LockPelvisController implements RobotController
          initialPositions.get(i).setZ(desiredHeight.getDoubleValue());
 
          ExternalForcePoint efp = externalForcePoints.get(i);
-         efp.getYoPosition().get(proportionalTerm);
+         proportionalTerm.set(efp.getYoPosition());
          proportionalTerm.sub(initialPositions.get(i));
          proportionalTerm.scale(-holdPelvisKp.getDoubleValue());
 //         proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
 
-         efp.getYoVelocity().get(derivativeTerm);
+         derivativeTerm.set(efp.getYoVelocity());
          derivativeTerm.scale(-holdPelvisKv.getDoubleValue());
 
          pdControlOutput.add(proportionalTerm, derivativeTerm);

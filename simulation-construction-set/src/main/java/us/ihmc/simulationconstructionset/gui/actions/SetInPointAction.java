@@ -19,7 +19,7 @@ public class SetInPointAction extends AbstractAction
       super("Set In Point");
       this.executor = executor;
 
-      String iconFilename = "icons/YoSetInPoint24.gif";
+      String iconFilename = "icons/SetInPoint.png";
       int shortKey = KeyEvent.VK_N;
       String longDescription = "Set In Point";
       String shortDescription = "Set In Point";

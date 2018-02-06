@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -149,7 +150,7 @@ public class DynamicReachabilityCalculator
    private final TimeAdjustmentSolver solver;
 
    private final ICPPlannerInterface icpPlanner;
-   private final ICPOptimizationController icpOptimizationController;
+   private final ICPOptimizationControllerInterface icpOptimizationController;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final TDoubleArrayList originalTransferDurations = new TDoubleArrayList();
@@ -157,7 +158,7 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalTransferAlphas = new TDoubleArrayList();
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
-   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, ICPOptimizationController icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
+   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, ICPOptimizationControllerInterface icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
                                         ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -258,13 +259,13 @@ public class DynamicReachabilityCalculator
          {
             predictedCoMPosition.changeFrame(worldFrame);
             predictedPelvisOrientation.changeFrame(worldFrame);
-            transformToParent.setTranslation(predictedCoMPosition.getPoint());
-            transformToParent.setRotation(predictedPelvisOrientation.getQuaternion());
+            transformToParent.setTranslation(predictedCoMPosition);
+            transformToParent.setRotation(predictedPelvisOrientation);
          }
       };
 
       predictedPelvisFrame = new TranslationReferenceFrame("Predicted Pelvis Frame", predictedCoMFrame);
-      predictedPelvisFrame.updateTranslation(translationToCoM.getVector());
+      predictedPelvisFrame.updateTranslation((Vector3DReadOnly) translationToCoM);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -276,7 +277,7 @@ public class DynamicReachabilityCalculator
          translationToPelvis.sub(pelvisCenter);
          TranslationReferenceFrame predictedHipFrame = new TranslationReferenceFrame(robotSide.getShortLowerCaseName() + " Predicted Hip Frame",
                predictedPelvisFrame);
-         predictedHipFrame.updateTranslation(translationToPelvis.getVector());
+         predictedHipFrame.updateTranslation((Vector3DReadOnly) translationToPelvis);
          predictedHipFrames.put(robotSide, predictedHipFrame);
 
          Vector2dZUpFrame stepDirectionFrame = new Vector2dZUpFrame(robotSide.getShortLowerCaseName() + "Step Direction Frame", worldFrame);
@@ -958,32 +959,19 @@ public class DynamicReachabilityCalculator
 
       int numberOfFootstepsRegistered = icpPlanner.getNumberOfFootstepsRegistered();
 
-      icpOptimizationController.setTransferDuration(0, originalTransferDurations.get(0) + currentTransferAdjustment.getDoubleValue());
-      icpOptimizationController.setTransferSplitFraction(0, currentTransferAlpha.getDoubleValue());
-
-      icpOptimizationController.setSwingDuration(0, originalSwingDurations.get(0) + currentSwingAdjustment.getDoubleValue());
-      icpOptimizationController.setSwingSplitFraction(0, currentSwingAlpha.getDoubleValue());
+      icpOptimizationController.setTransferDuration(originalTransferDurations.get(0) + currentTransferAdjustment.getDoubleValue());
+      icpOptimizationController.setSwingDuration(originalSwingDurations.get(0) + currentSwingAdjustment.getDoubleValue());
 
       boolean isThisTheFinalTransfer = (numberOfFootstepsRegistered == 1);
 
       double adjustedTransferDuration = originalTransferDurations.get(1) + nextTransferAdjustment.getDoubleValue();
       if (isThisTheFinalTransfer)
-      {
          icpOptimizationController.setFinalTransferDuration(adjustedTransferDuration);
-         icpOptimizationController.setFinalTransferSplitFraction(nextTransferAlpha.getDoubleValue());
-      }
       else
-      {
-         icpOptimizationController.setTransferDuration(1, adjustedTransferDuration);
-         icpOptimizationController.setTransferSplitFraction(1, nextTransferAlpha.getDoubleValue());
-      }
+         icpOptimizationController.setNextTransferDuration(adjustedTransferDuration);
 
       for (int i = 0; i < numberOfHigherSteps; i++)
       {
-         double swingDuration = originalSwingDurations.get(i + 1);
-         double swingAdjustment = higherSwingAdjustments.get(i).getDoubleValue();
-         icpOptimizationController.setSwingDuration(i + 1, swingDuration + swingAdjustment);
-
          int transferIndex = i + 2;
          double transferDuration = originalTransferDurations.get(transferIndex);
          double transferAdjustment = higherTransferAdjustments.get(i).getDoubleValue();
@@ -991,8 +979,6 @@ public class DynamicReachabilityCalculator
          isThisTheFinalTransfer = (numberOfFootstepsRegistered == transferIndex);
          if (isThisTheFinalTransfer)
             icpOptimizationController.setFinalTransferDuration(transferDuration + transferAdjustment);
-         else
-            icpOptimizationController.setTransferDuration(transferIndex, transferDuration + transferAdjustment);
       }
    }
 

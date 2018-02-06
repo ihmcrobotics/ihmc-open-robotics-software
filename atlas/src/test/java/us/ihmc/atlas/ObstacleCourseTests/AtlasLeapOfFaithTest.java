@@ -120,13 +120,13 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
       @Override
       public double nominalHeightAboveAnkle()
       {
-         return 0.79;
+         return 0.74;
       }
 
       @Override
       public double maximumHeightAboveAnkle()
       {
-         return 0.88;
+         return 0.85;
       }
 
       @Override

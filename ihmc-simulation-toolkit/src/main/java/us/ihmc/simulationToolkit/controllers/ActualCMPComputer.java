@@ -72,7 +72,7 @@ public class ActualCMPComputer extends SimpleRobotController
       simulatedRobot.getRootJoint().physics.recursiveComputeLinearMomentum(linearMomentum);
       yoLinearMomentum.set(linearMomentum);
       momentumChange.update();
-      momentumChange.get(linearMomentumRate);
+      linearMomentumRate.set(momentumChange);
 
       // get mass and COM position from the robot
       double totalMass = simulatedRobot.computeCenterOfMass(comPosition);

@@ -20,12 +20,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -76,8 +76,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
-   private final FramePose currentPose = new FramePose();
-   private final FramePose desiredPose = new FramePose();
+   private final FramePose3D currentPose = new FramePose3D();
+   private final FramePose3D desiredPose = new FramePose3D();
 
    private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
 
@@ -219,7 +219,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
       yoDesiredPose.setAndMatchFrame(desiredPosition, desiredOrientation);
-      yoDesiredRotationVector.setAsRotationVector(yoDesiredPose.getOrientation());
+      yoDesiredPose.getOrientation().get(yoDesiredRotationVector);
       yoDesiredVelocity.setAndMatchFrame(desiredLinearVelocity, desiredAngularVelocity);
 
       if (yoFeedForwardVelocity != null)
@@ -369,14 +369,14 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentPose.setToZero(controlFrame);
       currentPose.changeFrame(worldFrame);
       yoCurrentPose.set(currentPose);
-      yoCurrentRotationVector.setAsRotationVector(yoCurrentPose.getOrientation());
+      yoCurrentPose.getOrientation().get(yoCurrentRotationVector);
 
-      yoDesiredPose.getFramePoseIncludingFrame(desiredPose);
+      desiredPose.setIncludingFrame(yoDesiredPose);
       desiredPose.changeFrame(controlFrame);
 
       desiredPose.normalizeQuaternionAndLimitToPi();
-      desiredPose.getPositionIncludingFrame(linearFeedbackTermToPack);
-      desiredPose.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
+      linearFeedbackTermToPack.setIncludingFrame(desiredPose.getPosition());
+      desiredPose.getRotationVector(angularFeedbackTermToPack);
 
       selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
       selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
@@ -385,7 +385,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumProportionalError());
 
       yoErrorVector.setAndMatchFrame(linearFeedbackTermToPack, angularFeedbackTermToPack);
-      yoErrorOrientation.setRotationVector(yoErrorVector.getYoAngularPart());
+      yoErrorOrientation.set(yoErrorVector.getYoAngularPart());
 
       if (linearGainsFrame != null)
          linearFeedbackTermToPack.changeFrame(linearGainsFrame);
@@ -398,10 +398,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.changeFrame(controlFrame);
 
       positionGains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(linearFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(linearFeedbackTermToPack);
 
       orientationGains.getProportionalGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(angularFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(angularFeedbackTermToPack);
 
       linearFeedbackTermToPack.changeFrame(controlFrame);
       angularFeedbackTermToPack.changeFrame(controlFrame);
@@ -460,10 +460,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.changeFrame(controlFrame);
 
       positionGains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(linearFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(linearFeedbackTermToPack);
 
       orientationGains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(angularFeedbackTermToPack.getVector());
+      tempGainMatrix.transform(angularFeedbackTermToPack);
 
       linearFeedbackTermToPack.changeFrame(controlFrame);
       angularFeedbackTermToPack.changeFrame(controlFrame);
@@ -502,7 +502,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoErrorVector.getLinearPartIncludingFrame(linearFeedbackTermToPack);
          linearFeedbackTermToPack.scale(dt);
-         linearFeedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+         linearFeedbackTermToPack.add(yoErrorPositionIntegrated);
          selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
          linearFeedbackTermToPack.clipToMaxLength(maximumLinearIntegralError);
          yoErrorPositionIntegrated.set(linearFeedbackTermToPack);
@@ -513,7 +513,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             linearFeedbackTermToPack.changeFrame(controlFrame);
 
          positionGains.getIntegralGainMatrix(tempGainMatrix);
-         tempGainMatrix.transform(linearFeedbackTermToPack.getVector());
+         tempGainMatrix.transform(linearFeedbackTermToPack);
 
          linearFeedbackTermToPack.changeFrame(controlFrame);
       }
@@ -528,8 +528,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       }
       else
       {
-         yoErrorOrientationCumulated.getFrameOrientationIncludingFrame(errorOrientationCumulated);
-         errorOrientationCumulated.multiply(yoErrorOrientation.getFrameOrientation());
+         errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
+         errorOrientationCumulated.multiply(yoErrorOrientation);
          yoErrorOrientationCumulated.set(errorOrientationCumulated);
          errorOrientationCumulated.normalizeAndLimitToPi();
 
@@ -545,7 +545,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             angularFeedbackTermToPack.changeFrame(controlFrame);
 
          orientationGains.getIntegralGainMatrix(tempGainMatrix);
-         tempGainMatrix.transform(angularFeedbackTermToPack.getVector());
+         tempGainMatrix.transform(angularFeedbackTermToPack);
 
          angularFeedbackTermToPack.changeFrame(controlFrame);
       }

@@ -139,7 +139,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
          if (doubleSupport && shouldWalk && !walking.getBooleanValue())
          {
             Vector2D direction = new Vector2D();
-            direction.sub(capturePoint.getPoint(), desiredCapturePoint.getPoint());
+            direction.sub(capturePoint, desiredCapturePoint);
             direction.normalize();
             takeSteps(direction);
          }
@@ -209,7 +209,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      FootstepDataMessage footstep = new FootstepDataMessage(swingSide, location.getPoint(), orientation.getQuaternion());
+      FootstepDataMessage footstep = new FootstepDataMessage(swingSide, location, orientation);
       footsteps.add(footstep);
       sendPacketToController(footsteps);
    }

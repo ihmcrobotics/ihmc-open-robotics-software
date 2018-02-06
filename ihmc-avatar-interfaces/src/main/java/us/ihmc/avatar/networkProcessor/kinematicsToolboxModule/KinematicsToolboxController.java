@@ -426,10 +426,11 @@ public class KinematicsToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
 
+      inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
+      inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
+
       if (tickCount++ == numberOfTicksToSendSolution)
       { // Packing and sending the solution every N control ticks, with N = numberOfTicksToSendSolution.
-         inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
-         inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
          reportMessage(inverseKinematicsSolution);
          tickCount = 0;
       }
@@ -562,7 +563,7 @@ public class KinematicsToolboxController extends ToolboxController
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
 
-   void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }

@@ -7,23 +7,13 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
  */
 public abstract class ICPOptimizationParameters
 {
-   public abstract boolean useSimpleOptimization();
-
    /**
-    * The maximum number of footsteps that can be considered by the controller. The variable {@link #numberOfFootstepsToConsider()} is clipped to this value.
-    * It is also used to instantiate all the yo variable lists.
+    * Specifies a scaling factor on the amount of footstep adjustment. By increasing this past 1.0, the footstep will be adjusted more than explicitly necessary.
     */
-   public int getMaximumNumberOfFootstepsToConsider()
+   public double getFootstepAdjustmentSafetyFactor()
    {
-      return 5;
+      return 1.0;
    }
-
-   /**
-    * How many footsteps the optimization considers for adjustment.
-    * 1 footstep seems to be good.
-    * With a penalization on the dynamics themselves, future steps show little effect on the current dynamics.
-    */
-   public abstract int numberOfFootstepsToConsider();
 
    /**
     * The weight for tracking the desired footsteps.
@@ -41,7 +31,7 @@ public abstract class ICPOptimizationParameters
     * Penalization on changes in the footstep location solution between control ticks.
     * This weight is normalized by the control DT.
     */
-   public abstract double getFootstepRegularizationWeight();
+   public abstract double getFootstepRateWeight();
 
    /**
     * The weight for tracking the nominal desired CMP.
@@ -61,7 +51,7 @@ public abstract class ICPOptimizationParameters
     * Penalization on changes feedback CMP between control ticks.
     * This weight is normalized by the control DT.
     */
-   public abstract double getFeedbackRegularizationWeight();
+   public abstract double getFeedbackRateWeight();
 
    /**
     * Feedback gain for ICP error parallel to the desired ICP dynamics.
@@ -79,14 +69,13 @@ public abstract class ICPOptimizationParameters
     * This slack variable is required for the CoP to be constrained inside the support polygon when not using step adjustment,
     * and the step lengths to be constrained when allowing step adjustment.
     */
-   public abstract double getDynamicRelaxationWeight();
-
+   public abstract double getDynamicsObjectiveWeight();
 
    /**
     * Modifier to reduce the dynamic relaxation penalization when in double support.
     * This is introduced to improve the problem feasibility when switching between contact states.
     */
-   public abstract double getDynamicRelaxationDoubleSupportWeightModifier();
+   public abstract double getDynamicsObjectiveDoubleSupportWeightModifier();
 
    /**
     * Weight on the use of angular momentum minimization.
@@ -95,10 +84,10 @@ public abstract class ICPOptimizationParameters
    public abstract double getAngularMomentumMinimizationWeight();
 
    /**
-    * Enabling this boolean causes the {@link #getFootstepRegularizationWeight()} to be increased when approaching the end of the step.
+    * Enabling this boolean causes the {@link #getFootstepRateWeight()} to be increased when approaching the end of the step.
     * This acts as a way to cause the solution to "lock in" near the step end.
     */
-   public abstract boolean scaleStepRegularizationWeightWithTime();
+   public abstract boolean scaleStepRateWeightWithTime();
 
    /**
     * Enabling this boolean causes the {@link #getFeedbackForwardWeight()} and {@link #getFeedbackLateralWeight()} to be decreased
@@ -108,20 +97,22 @@ public abstract class ICPOptimizationParameters
    public abstract boolean scaleFeedbackWeightWithGain();
 
    /**
-    * Enabling this boolean causes {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be decreased
-    * sequentially for upcoming steps. Using this increases the likelihood of adjusting future steps, as well.
+    * Enabling this boolean enables the use of feedback rate, found in {@link #getFeedbackRateWeight()}.
     */
-   public abstract boolean scaleUpcomingStepWeights();
-
-   /**
-    * Enabling this boolean enables the use of feedback regularization, found in {@link #getFeedbackRegularizationWeight()}.
-    */
-   public abstract boolean useFeedbackRegularization();
+   public abstract boolean useFeedbackRate();
 
    /**
     * Enabling this boolean enables the use step adjustment for stabilization.
     */
-   public abstract boolean useStepAdjustment();
+   public abstract boolean allowStepAdjustment();
+
+   /**
+    * Enabling this boolean allows modifying the CMP offset from the CoP in the optimization.
+    */
+   public boolean useCMPFeedback()
+   {
+      return true;
+   }
 
    /**
     * Enabling this boolean allows the CMP to exit the support polygon.
@@ -129,12 +120,10 @@ public abstract class ICPOptimizationParameters
     */
    public abstract boolean useAngularMomentum();
 
-   public abstract boolean useTimingOptimization();
-
    /**
-    * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
+    * Enabling this boolean enables the use of step adjustment rate, found in {@link #getFootstepRateWeight()}.
     */
-   public abstract boolean useFootstepRegularization();
+   public abstract boolean useFootstepRate();
 
    /**
     * The minimum value to allow the footstep weight {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be set to.
@@ -162,44 +151,8 @@ public abstract class ICPOptimizationParameters
    public abstract double getAdjustmentDeadband();
 
    /**
-    * Represents the amount of adjustment to define as big
-    */
-   public boolean useDifferentSplitRatioForBigAdjustment()
-   {
-      return false;
-   }
-
-   /**
-    * Represents the amount of adjustment to define as big
-    */
-   public double getMagnitudeForBigAdjustment()
-   {
-      return 0.2;
-   }
-
-   /**
-    * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
-    * The returned value should be between 0.0 and 1.0:
-    * <li> 0.0 is equivalent to spend the entire double support on the initial CMP (last entry CMP if using one CMP per support, last exit CMP otherwise), </li>
-    * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
-    * <p> A value close to 0.5 is preferable. </p>
-    */
-   public double getDoubleSupportSplitFractionForBigAdjustment()
-   {
-      return 0.5;
-   }
-
-   /**
-    * Represents the minimum time in transfer before reaching the next entry CMP.
-    */
-   public double getMinimumTimeOnInitialCMPForBigAdjustment()
-   {
-      return 0.15;
-   }
-
-   /**
     * This method sets what the minimum change in the current footstep is allowed to be.
-    * Works in tandem with the footstep regularization parameter.
+    * Works in tandem with the footstep rate parameter.
     */
    public double getFootstepSolutionResolution()
    {
@@ -255,114 +208,83 @@ public abstract class ICPOptimizationParameters
       return false;
    }
 
-
-   public boolean getLimitReachabilityFromAdjustment()
+   /**
+    * Specifies whether or not to use the ICP control polygon for the CMP, rather than the actual support polygon.
+    */
+   public boolean getUseICPControlPolygons()
    {
       return true;
    }
 
-
    /**
-    * This is the size used to vary the QP duration by, and allow us to compute the gradient of the cost with respect to the
-    * swing time duration. This is only used if {@link #useTimingOptimization()} returns true.
-    *
-    * @return variation size
+    * Limits the reachability polygon constraint so that the foot cannot be retracted once it has started adjusting.
     */
-   public double getVariationSizeToComputeTimingGradient()
+   public boolean getLimitReachabilityFromAdjustment()
    {
-      return 0.001;
+      return false;
    }
 
    /**
-    * This is the weight assigned to adjusting the swing time duration when {@link #useTimingOptimization()} returns true.
-    * It is used to compute the cost of adjusting the swing time duration, and is added to the cost to go of the
-    * quadratic program to compute the total cost to go.
-    *
-    * @return weight
+    * Specifies whether or not to increase the cost of using angular momentum based on the amount of angular momentum used.
     */
-   public double getTimingAdjustmentGradientDescentWeight()
+   public boolean getUseAngularMomentumIntegrator()
    {
-      return 0.1;
+      return true;
    }
 
    /**
-    * This is the weight assigned to adjusting the swing time duration when {@link #useTimingOptimization()} returns true.
-    * It is used to compute the cost of adjusting the swing time duration, and is added to the cost to go of the
-    * quadratic program to compute the total cost to go.
-    *
-    * @return weight
+    * Defines the integral gain for the angular momentum integrator, as used in {@link #getUseAngularMomentumIntegrator()}.
     */
-   public double getTimingAdjustmentGradientDescentRegularizationWeight()
+   public double getAngularMomentumIntegratorGain()
    {
-      return 0.001;
+      return 50.0;
    }
 
    /**
-    * This is the gradient threshold at which the gradient descent algorithm is terminated. Once the gradient falls below
-    * a certain value, we know that the cost is near a minimum. This value defines how close we have to be to the minimum
-    * to terminate the algorithm.
-    *
-    * @return gradient threshold
+    * Defines the integral leak ratio for the angular momentum integrator, as used in {@link #getUseAngularMomentumIntegrator()}.
     */
-   public double getGradientThresholdForTimingAdjustment()
+   public double getAngularMomentumIntegratorLeakRatio()
    {
-      return 0.1;
+      return 0.92;
    }
 
    /**
-    * This is the gain used in the gradient descent algorithm. It multiplies the current gradient estimate, and adds this
-    * value to the current duration.
-    *
-    * @return gradient gain
+    * Specifies the transfer split fraction to use for the ICP value recursion multiplier.
     */
-   public double getGradientDescentGain()
+   public double getTransferSplitFraction()
    {
-      return 0.035;
+      return 0.3;
    }
 
    /**
-    * If, after the gradient descent update, the cost increased instead of decreased, we know we overshot the actual minimum location.
-    * This variable is then used to scale the duration adjustment that was just used in an attempt to not overshoot the minimum.
-    *
-    * @return scaling factor
+    * Sets whether or not to account for the used angular momentum when computing the amount of step adjustment.
     */
-   public double getTimingAdjustmentAttenuation()
+   public boolean considerAngularMomentumInAdjustment()
    {
-      return 0.5;
+      return false;
    }
 
    /**
-    * <p>
-    * This is the maximum allowable solve duration for the entire gradient descent algorithm. Once it has surpassed this duration, the
-    * algorithm is terminated. On the next control tick, the algorithm resumes attempting to solve at this point.
-    * </p>
-    * <p>
-    * This should be used to set the control deadlines to ensure the algorithm does not take too long on every tick.
-    * </p>
-    * @return duration
+    * Sets whether or not to account for the used CoP feedback when computing the amount of step adjustment.
     */
-   public double getMaximumDurationForOptimization()
+   public boolean considerFeedbackInAdjustment()
    {
-      return 0.0008;
+      return true;
    }
 
    /**
-    * This is the maximum number of total iterations allowed by the gradient descent algorithm before terminating the current control tick.
-    * This includes the number of attenuation iterations, as well as total loops.
-    * @return number of iterations
+    * Sets whether or not the ICP optimization algorithm will consider planar regions.
     */
-   public int getMaximumNumberOfGradientIterations()
+   public boolean usePlanarRegionConstraints()
    {
-      return 15;
+      return false;
    }
 
    /**
-    * This is the maximum number of times the gradient will attempt to reduce its adjustment due to overshoot before continuing to the next gradient
-    * descent iteration.
-    * @return number of iterations
+    * Sets whether or not the ICP optimization algorithm will switch the planar region if it starts to lose balance.
     */
-   public int getMaximumNumberOfGradientReductions()
+   public boolean switchPlanarRegionConstraintsAutomatically()
    {
-      return 5;
+      return true;
    }
 }
