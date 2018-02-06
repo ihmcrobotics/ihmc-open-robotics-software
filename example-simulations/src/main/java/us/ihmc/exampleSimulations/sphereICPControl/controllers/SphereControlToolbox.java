@@ -38,6 +38,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -81,6 +82,8 @@ public class SphereControlToolbox
    private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", worldFrame, registry);
 
    private final YoFramePoint icp = new YoFramePoint("icp", worldFrame, registry);
+   private final FilteredVelocityYoFrameVector icpVelocity;
+   private final YoDouble capturePointVelocityAlpha = new YoDouble("capturePointVelocityAlpha", registry);
 
    private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
    private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("centerOfMassVelocity", worldFrame, registry);
@@ -154,6 +157,9 @@ public class SphereControlToolbox
       omega0.set(omega);
 
       setupFeetFrames(gravity, yoGraphicsListRegistry);
+
+      capturePointVelocityAlpha.set(0.5);
+      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -399,6 +405,11 @@ public class SphereControlToolbox
    public YoFramePoint getICP()
    {
       return icp;
+   }
+
+   public YoFrameVector getICPVelocity()
+   {
+      return icpVelocity;
    }
 
    public FramePoint2D getCapturePoint2d()
