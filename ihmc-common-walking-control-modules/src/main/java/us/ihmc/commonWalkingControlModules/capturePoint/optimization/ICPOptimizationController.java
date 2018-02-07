@@ -51,7 +51,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean scaleStepRateWeightWithTime = new YoBoolean(yoNamePrefix + "ScaleStepRateWeightWithTime", registry);
    private final YoBoolean scaleFeedbackWeightWithGain = new YoBoolean(yoNamePrefix + "ScaleFeedbackWeightWithGain", registry);
 
-   private final YoBoolean isStanding = new YoBoolean(yoNamePrefix + "IsStanding", registry);
+   private final YoBoolean isStationary = new YoBoolean(yoNamePrefix + "IsStationary", registry);
    private final YoBoolean isInDoubleSupport = new YoBoolean(yoNamePrefix + "IsInDoubleSupport", registry);
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
@@ -129,7 +129,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean useSmartICPIntegrator = new YoBoolean("useSmartICPIntegrator", registry);
    private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
    private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
-   private final YoDouble thresholdForMoving = new YoDouble(yoNamePrefix + "ThresholdForMoving", registry);
    private final YoFrameVector2d feedbackCMPIntegral = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
 
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
@@ -210,7 +209,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       feedbackGains.set(icpOptimizationParameters.getICPFeedbackGains());
       useSmartICPIntegrator.set(icpOptimizationParameters.useSmartICPIntegrator());
       thresholdForStuck.set(icpOptimizationParameters.getICPVelocityThresholdForStuck());
-      thresholdForMoving.set(icpOptimizationParameters.getICPVelocityThresholdForMoving());
 
       dynamicsObjectiveWeight.set(icpOptimizationParameters.getDynamicsObjectiveWeight());
       if (walkingControllerParameters != null)
@@ -357,7 +355,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    public void initializeForStanding(double initialTime)
    {
       this.initialTime.set(initialTime);
-      isStanding.set(true);
+      isStationary.set(true);
       isInDoubleSupport.set(true);
       isICPStuck.set(false);
 
@@ -381,7 +379,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    {
       this.transferToSide.set(transferToSide);
       isInDoubleSupport.set(true);
-      isStanding.set(false);
+      isStationary.set(false);
       isICPStuck.set(false);
 
       if (upcomingFootsteps.size() < 2)
@@ -402,7 +400,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0)
    {
       this.supportSide.set(supportSide);
-      isStanding.set(false);
+      isStationary.set(false);
       isInDoubleSupport.set(false);
       isICPStuck.set(false);
 
@@ -446,7 +444,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private boolean computeWhetherToIncludeFootsteps()
    {
-      if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStanding.getBooleanValue())
+      if (!localUseStepAdjustment || isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
          return false;
 
       return upcomingFootsteps.size() > 0;
@@ -712,7 +710,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void computeTimeRemainingInState()
    {
-      if (isStanding.getBooleanValue())
+      if (isStationary.getBooleanValue())
       {
          timeRemainingInState.set(0.0);
       }
@@ -772,13 +770,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private boolean computeIsStuck()
    {
-      if (!isInDoubleSupport.getBooleanValue() || isStanding.getBooleanValue())
+      if (!isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue())
          return false;
 
       if (isICPStuck.getBooleanValue())
          return true;
 
-      if ((currentICPVelocity.length() < thresholdForStuck.getDoubleValue()) && (desiredICPVelocity.length() > thresholdForMoving.getDoubleValue()))
+      if ((currentICPVelocity.length() < thresholdForStuck.getDoubleValue()) && (timeRemainingInState.getDoubleValue() <= minimumTimeRemaining.getDoubleValue()))
          return true;
 
       return false;
