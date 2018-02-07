@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -19,7 +19,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 {
 
    public ChestTrajectoryMessage chestTrajectoryMessage;
-   public AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage;
+   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
    public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
@@ -37,7 +37,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
     */
    public ChestHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(new ChestTrajectoryMessage(random), new AbstractJointspaceTrajectoryMessage(random));
+      this(new ChestTrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
    }
 
    /**
@@ -57,7 +57,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
     * @param taskspaceTrajectoryMessage
     * @param jointspaceTrajectoryMessage
     */
-   public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestTrajectoryMessage taskspaceTrajectoryMessage, AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestTrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       if (!taskspaceTrajectoryMessage.getQueueingProperties().epsilonEquals(jointspaceTrajectoryMessage.getQueueingProperties(), 0.0))
          throw new IllegalArgumentException("The trajectory messages should have the same queueing properties.");
@@ -78,12 +78,12 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
       this.chestTrajectoryMessage = chestTrajectoryMessage;
    }
 
-   public AbstractJointspaceTrajectoryMessage getSpineTrajectoryMessage()
+   public JointspaceTrajectoryMessage getSpineTrajectoryMessage()
    {
       return jointspaceTrajectoryMessage;
    }
 
-   public void setJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public void setJointspaceTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
    }

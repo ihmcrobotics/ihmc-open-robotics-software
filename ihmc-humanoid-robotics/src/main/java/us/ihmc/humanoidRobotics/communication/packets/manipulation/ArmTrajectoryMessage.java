@@ -8,7 +8,7 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -25,7 +25,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public AbstractJointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory;
 
    /**
     * Empty constructor for serialization.
@@ -42,14 +42,14 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
     */
    public ArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(armTrajectoryMessage.jointspaceTrajectory);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(armTrajectoryMessage.jointspaceTrajectory);
       robotSide = armTrajectoryMessage.robotSide;
       setUniqueId(armTrajectoryMessage.getUniqueId());
    }
 
-   public ArmTrajectoryMessage(RobotSide robotSide, AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public ArmTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       this.robotSide = robotSide;
       setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
    }
@@ -63,7 +63,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
     */
    public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -78,7 +78,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
     */
    public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -91,7 +91,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
     */
    public ArmTrajectoryMessage(RobotSide robotSide, OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(jointTrajectory1DListMessages);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointTrajectory1DListMessages);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -105,7 +105,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
     */
    public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(numberOfJoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -120,14 +120,14 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
     */
    public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints, int numberOfTrajectoryPoints)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public ArmTrajectoryMessage(Random random)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(random);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
       this.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -145,7 +145,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
       return robotSide;
    }
 
-   public AbstractJointspaceTrajectoryMessage getJointspaceTrajectory()
+   public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspaceTrajectory;
    }
