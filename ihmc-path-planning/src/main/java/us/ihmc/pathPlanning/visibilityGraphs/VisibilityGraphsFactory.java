@@ -17,13 +17,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibility
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.*;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
@@ -271,6 +265,35 @@ public class VisibilityGraphsFactory
 
          return new SingleSourceVisibilityMap(sourceInworld, mapId, connections);
       }
+   }
+
+   public static SingleSourceVisibilityMap connectToVisiblePoints(ConnectionPoint3D source, int maximumNumberOfConnections, List<NavigableRegion> navigableRegions, int mapId)
+   {
+      List<Connection> allConnections = new ArrayList<>();
+
+      for (int i = 0; i < navigableRegions.size(); i++)
+      {
+         VisibilityMap targetMap = navigableRegions.get(i).getVisibilityMapInWorld();
+         Set<ConnectionPoint3D> targetPoints = targetMap.getVertices();
+
+         for (ConnectionPoint3D targetPoint : targetPoints)
+         {
+            allConnections.add(new Connection(source, targetPoint));
+         }
+      }
+
+      Collections.sort(allConnections, (c1, c2) ->
+      {
+         double c1LengthSquared = c1.lengthSquared();
+         double c2LengthSquared = c2.lengthSquared();
+
+         return c1LengthSquared < c2LengthSquared ? -1 : 1;
+      });
+
+      HashSet<Connection> connections = new HashSet<>();
+      connections.addAll(allConnections.subList(0, maximumNumberOfConnections));
+
+      return new SingleSourceVisibilityMap(source, mapId, connections);
    }
 
    public static InterRegionVisibilityMap createInterRegionVisibilityMap(List<NavigableRegion> navigableRegions, InterRegionConnectionFilter filter)
