@@ -34,7 +34,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "IHMCPubSub", version: "0.3.4.2"
+   compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.4.0"
    compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.2.0"
 }
 
