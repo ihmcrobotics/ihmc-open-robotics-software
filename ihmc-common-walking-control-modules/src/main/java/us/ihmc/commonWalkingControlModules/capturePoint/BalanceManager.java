@@ -93,6 +93,7 @@ public class BalanceManager
    private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FrameVector2D capturePointVelocity2d = new FrameVector2D();
    private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
@@ -385,6 +386,7 @@ public class BalanceManager
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
       controllerToolbox.getCoP(copEstimate);
 
       icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
@@ -454,7 +456,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
       linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
       linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-      linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
+      linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
       linearMomentumRateOfChangeControlModule.setOmega0(omega0);
       linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
