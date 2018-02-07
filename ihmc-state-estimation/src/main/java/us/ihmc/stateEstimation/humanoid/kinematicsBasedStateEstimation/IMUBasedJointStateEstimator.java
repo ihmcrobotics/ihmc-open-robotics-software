@@ -3,7 +3,6 @@
  */
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -15,6 +14,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 
 /**
  * Creates an alpha filter defined by:
@@ -40,8 +40,6 @@ public class IMUBasedJointStateEstimator
    private final Map<OneDoFJoint, YoDouble> jointPositions = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointPositionsFromIMUOnly = new LinkedHashMap<>();
    private final OneDoFJoint[] joints;
-   private final FrameVector3D chestAngularVelocity = new FrameVector3D();
-   private final FrameVector3D pelvisAngularVelocity = new FrameVector3D();
 
    private final double estimatorDT;
 
@@ -49,9 +47,9 @@ public class IMUBasedJointStateEstimator
                                       double estimatorDT, double slopTime, YoVariableRegistry registry)
    {
       this.sensorMap = sensorMap;
-      this.velocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, registry);
       jacobian = new GeometricJacobian(pelvisIMU.getMeasurementLink(), chestIMU.getMeasurementLink(), chestIMU.getMeasurementLink().getBodyFixedFrame());
       joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
+      this.velocityEstimator = new IMUBasedJointVelocityEstimator(jacobian, pelvisIMU, chestIMU, registry);
 
       String namePrefix = "imuBasedJointVelocityEstimator";
       alphaVelocity = new YoDouble(namePrefix + "AlphaFuseVelocity", registry);
@@ -87,7 +85,7 @@ public class IMUBasedJointStateEstimator
          OneDoFJoint joint = joints[i];
 
          double qd_sensorMap = sensorMap.getJointVelocityProcessedOutput(joint);
-         double qd_IMU = velocityEstimator.getEstimatedJointVelocitiy(joint);
+         double qd_IMU = velocityEstimator.getEstimatedJointVelocity(joint);
          double qd_fused = (1.0 - alphaVelocity.getDoubleValue()) * qd_sensorMap + alphaVelocity.getDoubleValue() * qd_IMU;
 
          jointVelocities.get(joint).update(qd_fused);

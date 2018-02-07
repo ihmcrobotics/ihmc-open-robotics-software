@@ -37,11 +37,12 @@ public class IMUBasedJointVelocityEstimator
    private final DenseMatrix64F inverse;
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(1, 1);
 
-   public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoVariableRegistry registry)
+   public IMUBasedJointVelocityEstimator(GeometricJacobian jacobian, IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoVariableRegistry registry)
    {
       this.parentIMU = parentIMU;
       this.childIMU = childIMU;
-      jacobian = new GeometricJacobian(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink(), childIMU.getMeasurementLink().getBodyFixedFrame());
+      this.jacobian = jacobian;
+
       joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
 
       jacobianAngularPart64F = new DenseMatrix64F(3, joints.length);
@@ -53,6 +54,12 @@ public class IMUBasedJointVelocityEstimator
       {
          jointVelocitiesFromIMU.put(joint, new YoDouble("qd_" + joint.getName() + "_IMUBased", registry));
       }
+   }
+
+   public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoVariableRegistry registry)
+   {
+      this(new GeometricJacobian(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink(), childIMU.getMeasurementLink().getBodyFixedFrame()), parentIMU,
+           childIMU, registry);
    }
 
    /**
@@ -98,14 +105,12 @@ public class IMUBasedJointVelocityEstimator
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint joint = joints[i];
-
-         double qd_sensorMap = joint.getQd();//sensorMap.getJointVelocityProcessedOutput(joint);
          double qd_IMU = qd_estimated.get(i, 0);
          jointVelocitiesFromIMU.get(joint).set(qd_IMU);
       }
    }
 
-   public double getEstimatedJointVelocitiy(OneDoFJoint joint)
+   public double getEstimatedJointVelocity(OneDoFJoint joint)
    {
       YoDouble estimatedJointVelocity = jointVelocitiesFromIMU.get(joint);
       if (estimatedJointVelocity != null)
