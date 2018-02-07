@@ -78,14 +78,6 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
-    * Sets the minimum ICP velocity for it to be considered "moving".
-    */
-   public double getICPVelocityThresholdForMoving()
-   {
-      return 0.02;
-   }
-
-   /**
     * Weight on the slack variable introduced for the ICP dynamics.
     * This slack variable is required for the CoP to be constrained inside the support polygon when not using step adjustment,
     * and the step lengths to be constrained when allowing step adjustment.
