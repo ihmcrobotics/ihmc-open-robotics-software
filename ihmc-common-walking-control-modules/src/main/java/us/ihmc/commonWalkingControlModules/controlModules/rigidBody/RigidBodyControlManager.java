@@ -250,7 +250,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleJointspaceTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command)
+   public void handleJointspaceTrajectoryCommand(JointspaceTrajectoryCommand command)
    {
       computeDesiredJointPositions(initialJointPositions);
 
@@ -265,7 +265,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointSpaceCommand)
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
    {
       if (taskspaceCommand.useCustomControlFrame())
       {
@@ -291,7 +291,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
+   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand jointspaceCommand)
    {
       throw new RuntimeException("Should not send these messages anymore. Switch to SE3 message with selection matrix.");
 //      if (taskspaceCommand.useCustomControlFrame())
@@ -395,7 +395,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
+   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command, JointspaceTrajectoryCommand jointspaceCommand)
    {
       if (loadBearingControlState == null)
       {

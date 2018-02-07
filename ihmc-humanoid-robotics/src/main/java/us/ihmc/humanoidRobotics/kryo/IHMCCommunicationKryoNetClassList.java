@@ -24,6 +24,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestStereoPointCloudMessage;
@@ -50,6 +51,7 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
@@ -309,6 +311,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(CenterOfMassTrajectoryMessage.class);
 
       // Trajectory message fields
+      registerPacketField(AbstractJointspaceTrajectoryMessage.class);
+      registerPacketField(QueueableMessage.class);
       registerPacketClass(ExecutionMode.class);
       registerPacketClass(ExecutionTiming.class);
       registerPacketClass(OneDoFJointTrajectoryMessage.class);

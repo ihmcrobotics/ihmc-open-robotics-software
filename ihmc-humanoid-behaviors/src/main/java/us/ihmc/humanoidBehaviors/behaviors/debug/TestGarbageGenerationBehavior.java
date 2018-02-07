@@ -56,7 +56,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
          double percent = i / (double) (trajectoryPoints - 1);
          for (int jointIdx = 0; jointIdx < leftArmHome.length; jointIdx++)
          {
-            armTrajectory.setTrajectoryPoint(jointIdx, i, percent, leftArmHome[jointIdx], 0.0);
+            armTrajectory.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, i, percent, leftArmHome[jointIdx], 0.0);
          }
       }
 

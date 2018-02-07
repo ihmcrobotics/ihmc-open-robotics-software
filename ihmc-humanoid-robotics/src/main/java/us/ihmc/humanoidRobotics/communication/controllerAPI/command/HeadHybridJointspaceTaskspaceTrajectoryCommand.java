@@ -1,34 +1,33 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.Random;
+
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-import java.util.Random;
-
 public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       extends QueueableCommand<HeadHybridJointspaceTaskspaceTrajectoryCommand, HeadHybridJointspaceTaskspaceTrajectoryMessage>
       implements FrameBasedCommand<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
-   private final NeckTrajectoryCommand jointspaceTrajectoryCommand = new NeckTrajectoryCommand();
+   private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final HeadTrajectoryCommand taskspaceTrajectoryCommand = new HeadTrajectoryCommand();
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
 
-   public HeadHybridJointspaceTaskspaceTrajectoryCommand(HeadTrajectoryCommand taskspaceTrajectoryCommand, NeckTrajectoryCommand jointspaceTrajectoryCommand)
+   public HeadHybridJointspaceTaskspaceTrajectoryCommand(HeadTrajectoryCommand taskspaceTrajectoryCommand, JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
-      super();
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(new HeadTrajectoryCommand(random), new NeckTrajectoryCommand(random));
+      this(new HeadTrajectoryCommand(random), new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -47,7 +46,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHeadTrajectoryMessage());
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
@@ -55,7 +54,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getHeadTrajectoryMessage());
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
@@ -81,7 +80,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.addTimeOffset(timeOffset);
    }
 
-   public NeckTrajectoryCommand getJointspaceTrajectoryCommand()
+   public JointspaceTrajectoryCommand getJointspaceTrajectoryCommand()
    {
       return jointspaceTrajectoryCommand;
    }
