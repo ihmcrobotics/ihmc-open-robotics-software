@@ -43,7 +43,7 @@ public class FootControlModule
    {
       FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN;
 
-      public boolean isLoaded()
+      public boolean isLoadBearing()
       {
          switch (this)
          {
