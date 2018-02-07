@@ -42,11 +42,16 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HighLevelControlManagerFactory
 {
+   public static final String weightRegistryName = "MomentumOptimizationSettings";
+   public static final String jointspaceGainRegistryName = "JointspaceGains";
+   public static final String rigidBodyGainRegistryName = "RigidBodyGains";
+   public static final String footGainRegistryName = "FootGains";
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoVariableRegistry momentumRegistry = new YoVariableRegistry("MomentumOptimizationSettings");
-   private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry("JointspaceGains");
-   private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry("RigidBodyGains");
-   private final YoVariableRegistry footGainRegistry = new YoVariableRegistry("FootGains");
+   private final YoVariableRegistry momentumRegistry = new YoVariableRegistry(weightRegistryName);
+   private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry(jointspaceGainRegistryName);
+   private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry(rigidBodyGainRegistryName);
+   private final YoVariableRegistry footGainRegistry = new YoVariableRegistry(footGainRegistryName);
 
    private final StatusMessageOutputManager statusOutputManager;
 
