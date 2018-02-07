@@ -527,7 +527,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          handTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            handTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
          id++;
          double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 
@@ -716,7 +716,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                if (messageIndex == numberOfMessages - 1)
                   previousMessageId = id + 100; // Bad ID
 
-               handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
+               handTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
             }
             id++;
             double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
@@ -829,7 +829,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             handTrajectoryMessage.setUniqueId(id);
 
             if (messageIndex > 0)
-               handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+               handTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
             double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 

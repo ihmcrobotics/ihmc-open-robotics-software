@@ -15,10 +15,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMess
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_head_trajectory")
-public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
+public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
 {
    public HeadTrajectoryMessage headTrajectoryMessage;
    public NeckTrajectoryMessage neckTrajectoryMessage;
+   public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
     * Empty constructor for serialization.
@@ -45,7 +46,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getNeckTrajectoryMessage());
-      setExecutionDelayTime(hybridJointspaceTaskspaceMessage.getExecutionDelayTime());
+      queueingProperties.set(hybridJointspaceTaskspaceMessage.queueingProperties);
    }
 
    /**
@@ -85,5 +86,22 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public FrameInformation getFrameInformation()
    {
       return headTrajectoryMessage.getFrameInformation();
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
+   }
+
+   @Override
+   public boolean epsilonEquals(HeadHybridJointspaceTaskspaceTrajectoryMessage other, double epsilon)
+   {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+         return false;
+      if (!headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
+         return false;
+      if (!neckTrajectoryMessage.epsilonEquals(other.neckTrajectoryMessage, epsilon))
+         return false;
+      return true;
    }
 }

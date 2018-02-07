@@ -49,7 +49,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
-      setQueueableCommandVariables(message);
+      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
 
    @Override
@@ -57,7 +57,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getHandTrajectoryMessage());
-      setQueueableCommandVariables(message);
+      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
 
    @Override
@@ -92,12 +92,12 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public void setQueueableCommandVariables(QueueableMessage<?> message)
+   public void setQueueableCommandVariables(long messageId, QueueableMessage messageQueueingProperties)
    {
       // this override is needed to correctly store queuing information into the sub-messages
-      super.setQueueableCommandVariables(message);
-      jointspaceTrajectoryCommand.setQueueableCommandVariables(message);
-      taskspaceTrajectoryCommand.setQueueableCommandVariables(message);
+      super.setQueueableCommandVariables(messageId, messageQueueingProperties);
+      jointspaceTrajectoryCommand.setQueueableCommandVariables(messageId, messageQueueingProperties);
+      taskspaceTrajectoryCommand.setQueueableCommandVariables(messageId, messageQueueingProperties);
    }
 
    @Override

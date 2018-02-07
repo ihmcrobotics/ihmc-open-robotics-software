@@ -153,7 +153,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    {
       planningResult = other.planningResult;
       footstepDataList.destination = other.footstepDataList.destination;
-      footstepDataList.executionMode = other.footstepDataList.executionMode;
+      footstepDataList.getQueueingProperties().set(other.footstepDataList.getQueueingProperties());
       footstepDataList.footstepDataList = new ArrayList<>();
       for (FootstepDataMessage footstepData : other.footstepDataList)
          footstepDataList.footstepDataList.add(new FootstepDataMessage(footstepData));

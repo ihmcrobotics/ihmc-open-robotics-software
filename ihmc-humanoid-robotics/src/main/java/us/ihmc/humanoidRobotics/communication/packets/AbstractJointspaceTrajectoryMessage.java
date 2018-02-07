@@ -7,10 +7,12 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
-public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJointspaceTrajectoryMessage<T>> extends QueueableMessage<T>
+public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJointspaceTrajectoryMessage<T>> extends Packet<T>
 {
    @RosExportedField(documentation = "List of points in the trajectory.")
    public OneDoFJointTrajectoryMessage[] jointTrajectoryMessages;
+   @RosExportedField(documentation = "Properties for queueing trajectories.")
+   public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
     * Empty constructor for serialization.
@@ -29,6 +31,7 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
    {
       setUniqueId(trajectoryMessage.getUniqueId());
       setDestination(trajectoryMessage.getDestination());
+      queueingProperties.set(trajectoryMessage.queueingProperties);
       jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[trajectoryMessage.getNumberOfJoints()];
 
       for (int i = 0; i < getNumberOfJoints(); i++)
@@ -38,9 +41,6 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
             jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(trajectoryMessage.jointTrajectoryMessages[i]);
          }
       }
-
-      setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
-      setExecutionDelayTime(trajectoryMessage.getExecutionDelayTime());
    }
 
    /**
@@ -117,7 +117,7 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
 
    public AbstractJointspaceTrajectoryMessage(Random random)
    {
-      super(random);
+      queueingProperties = new QueueableMessage(random);
       jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[random.nextInt(10) + 1];
       for (int i = 0; i < getNumberOfJoints(); i++)
          setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
@@ -204,6 +204,11 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
       return trajectoryTime;
    }
 
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
+   }
+
    private void rangeCheck(int jointIndex)
    {
       if (jointIndex >= getNumberOfJoints() || jointIndex < 0)
@@ -220,6 +225,9 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+         return false;
+
       if (this.jointTrajectoryMessages.length != other.jointTrajectoryMessages.length)
       {
          return false;
@@ -233,6 +241,6 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
          }
       }
 
-      return super.epsilonEquals(other, epsilon);
+      return true;
    }
 }

@@ -294,7 +294,7 @@ public class RigidBodyControlManagerTest
 
          SE3Message message = new SE3Message(1, worldFrame);
          message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
-         message.setExecutionMode(ExecutionMode.OVERRIDE, -1);
+         message.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE, -1);
 
          SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
          boolean angularXSelected = random.nextBoolean();

@@ -486,7 +486,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, numberOfTrajectoryPointsPerMessage);
          footTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            footTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            footTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
          id++;
          double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 
@@ -570,7 +570,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 5);
          footTrajectoryMessage.setUniqueId(100);
-         footTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, 500); //not the right ID
+         footTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, 500); //not the right ID
          for(int i = 0; i < 5; i++)
          {
             footTrajectoryMessage.setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
