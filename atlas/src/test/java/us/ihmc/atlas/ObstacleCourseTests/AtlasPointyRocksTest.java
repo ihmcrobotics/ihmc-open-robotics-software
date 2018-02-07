@@ -29,7 +29,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
     * Hard test: Atlas walks forward and steps on unknown contacts including lines that need to be explored.
     */
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 115.0)
+   @ContinuousIntegrationTest(estimatedDuration = 115.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 230000)
    public void testWalkingForwardWithHalfFootContactChangesStopBetweenSteps() throws SimulationExceededMaximumTimeException
    {
