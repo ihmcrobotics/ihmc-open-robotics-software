@@ -277,7 +277,7 @@ public class PartialFootholdControlModule
       boolean areaBigEnough = unsafeArea.getDoubleValue() >= minAreaToConsider.getDoubleValue();
       unsafeAreaAboveThreshold.set(areaBigEnough);
 
-      boolean desiredCopInPolygon = unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3);
+      boolean desiredCopInPolygon = desiredCenterOfPressure.containsNaN() || unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3);
 
       if (desiredCopInPolygon && !wasCoPInThatRegion && areaBigEnough)
       {
