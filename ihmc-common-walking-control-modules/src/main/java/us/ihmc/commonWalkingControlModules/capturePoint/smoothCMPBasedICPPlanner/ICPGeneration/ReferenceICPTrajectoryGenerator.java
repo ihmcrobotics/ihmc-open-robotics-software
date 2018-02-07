@@ -15,7 +15,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -377,14 +376,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    public void adjustDesiredTrajectoriesForInitialSmoothing()
    {
-      // isDoubleSupport.getBooleanValue() && 
       if ((isInitialTransfer.getBooleanValue() || (continuouslyAdjustForICPContinuity.getBooleanValue())) && copTrajectories.size() > 1)
       {
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing3D(omega0.getDoubleValue(), copTrajectories, icpQuantitySetInitialConditionList,
                                                                              icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs);
 
       }
-      //reset();
    }
 
    @Override
