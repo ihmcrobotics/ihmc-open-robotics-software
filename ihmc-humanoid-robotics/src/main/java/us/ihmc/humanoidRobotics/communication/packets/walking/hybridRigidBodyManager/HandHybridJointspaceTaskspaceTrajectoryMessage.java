@@ -3,13 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMa
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -23,7 +22,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    public RobotSide robotSide;
    public HandTrajectoryMessage handTrajectoryMessage;
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
-   public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
     * Empty constructor for serialization.
@@ -53,7 +51,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       robotSide = hybridJointspaceTaskspaceMessage.robotSide;
       handTrajectoryMessage = new HandTrajectoryMessage(hybridJointspaceTaskspaceMessage.getHandTrajectoryMessage());
       jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(hybridJointspaceTaskspaceMessage.jointspaceTrajectoryMessage);
-      queueingProperties.set(hybridJointspaceTaskspaceMessage.queueingProperties);
       setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
 
@@ -71,8 +68,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       robotSide = taskspaceTrajectoryMessage.robotSide;
       this.handTrajectoryMessage = new HandTrajectoryMessage(taskspaceTrajectoryMessage);
       this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
-      queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
-      setUniqueId(taskspaceTrajectoryMessage.getUniqueId());
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandTrajectoryMessage getHandTrajectoryMessage()
@@ -106,16 +102,9 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       return robotSide;
    }
 
-   public QueueableMessage getQueueingProperties()
-   {
-      return queueingProperties;
-   }
-
    @Override
    public boolean epsilonEquals(HandHybridJointspaceTaskspaceTrajectoryMessage other, double epsilon)
    {
-      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
-         return false;
       if (!handTrajectoryMessage.epsilonEquals(other.handTrajectoryMessage, epsilon))
          return false;
       if (!jointspaceTrajectoryMessage.epsilonEquals(other.jointspaceTrajectoryMessage, epsilon))

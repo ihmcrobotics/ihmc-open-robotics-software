@@ -3,12 +3,11 @@ package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMa
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -19,7 +18,6 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
 {
    public HeadTrajectoryMessage headTrajectoryMessage;
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
-   public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
     * Empty constructor for serialization.
@@ -46,7 +44,6 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getJointspaceTrajectoryMessage());
-      queueingProperties.set(hybridJointspaceTaskspaceMessage.queueingProperties);
       setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
 
@@ -60,8 +57,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
    {
       this.headTrajectoryMessage = taskspaceTrajectoryMessage;
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
-      queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
-      setUniqueId(taskspaceTrajectoryMessage.getUniqueId());
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HeadTrajectoryMessage getHeadTrajectoryMessage()
@@ -90,16 +86,9 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
       return headTrajectoryMessage.getFrameInformation();
    }
 
-   public QueueableMessage getQueueingProperties()
-   {
-      return queueingProperties;
-   }
-
    @Override
    public boolean epsilonEquals(HeadHybridJointspaceTaskspaceTrajectoryMessage other, double epsilon)
    {
-      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
-         return false;
       if (!headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
          return false;
       if (!jointspaceTrajectoryMessage.epsilonEquals(other.jointspaceTrajectoryMessage, epsilon))
