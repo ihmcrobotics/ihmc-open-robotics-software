@@ -15,6 +15,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
@@ -26,6 +27,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegionsManager
 {
    final static boolean debug = false;
+   final static boolean useCustomDijkstraSearch = true;
 
    final static int START_GOAL_ID = 0;
 
@@ -127,7 +129,19 @@ public class NavigableRegionsManager
 
       ConnectionPoint3D startConnection = new ConnectionPoint3D(start, START_GOAL_ID);
       ConnectionPoint3D goalConnection = new ConnectionPoint3D(goal, START_GOAL_ID);
-      List<Point3DReadOnly> path = JGraphTools.calculatePathOnVisibilityGraph(startConnection, goalConnection, visibilityMapHolders);
+
+      List<Point3DReadOnly> path;
+      if(useCustomDijkstraSearch)
+      {
+         DijkstraVisibilityGraphPlanner planner = new DijkstraVisibilityGraphPlanner();
+         planner.setVisibilityMap(visibilityMapHolders);
+         planner.initialize(startConnection, goalConnection);
+         path = planner.plan();
+      }
+      else
+      {
+         path = JGraphTools.calculatePathOnVisibilityGraph(startConnection, goalConnection, visibilityMapHolders);
+      }
 
       if (debug)
       {

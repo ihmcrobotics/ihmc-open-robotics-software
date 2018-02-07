@@ -32,8 +32,8 @@ public class DijkstraVisibilityGraphPlanner
             connectionData.connection = connection;
             connectionData.edgeWeight = visibilityMapHolder.getConnectionWeight(connection);
 
-            this.visibilityMap.putIfAbsent(connection.getSourcePoint(), new HashSet<>()).add(connectionData);
-            this.visibilityMap.putIfAbsent(connection.getTargetPoint(), new HashSet<>()).add(connectionData);
+            this.visibilityMap.computeIfAbsent(connection.getSourcePoint(), (p) -> new HashSet<>()).add(connectionData);
+            this.visibilityMap.computeIfAbsent(connection.getTargetPoint(), (p) -> new HashSet<>()).add(connectionData);
          }
       }
    }
@@ -45,18 +45,16 @@ public class DijkstraVisibilityGraphPlanner
 
       closestPointToGoal = startPoint;
       nodeCosts.put(startPoint, 0.0);
-      closestPointToGoal = null;
       stack = new PriorityQueue<>(new ConnectionPointComparator(nodeCosts));
       stack.add(startPoint);
    }
 
    /**
     * Plans a path over the visibility maps given by {@link #setVisibilityMap}
-    * @param startPoint
-    * @param goalPoint
-    * @return if the planner succeeded in finding a complete path
+    * @return shortest path to the goal if one exists. Otherwise it will return a path to the
+    * closest possible node to the goal
     */
-   public boolean plan(ConnectionPoint3D startPoint, ConnectionPoint3D goalPoint)
+   public List<Point3DReadOnly> plan()
    {
       while(!stack.isEmpty())
       {
@@ -84,15 +82,22 @@ public class DijkstraVisibilityGraphPlanner
          }
       }
 
-      return nodeCosts.containsKey(goalPoint);
+      if(nodeCosts.containsKey(goalPoint))
+      {
+         return getPathToPoint(goalPoint);
+      }
+      else
+      {
+         return getPathToPoint(closestPointToGoal);
+      }
    }
 
-   public List<Point3DReadOnly> getPath()
+   public List<Point3DReadOnly> getPathToPoint(ConnectionPoint3D point)
    {
       List<Point3DReadOnly> path = new ArrayList<>();
-      path.add(goalPoint);
+      path.add(point);
 
-      Connection incomingEdge = incomingBestEdge.get(goalPoint).connection;
+      Connection incomingEdge = incomingBestEdge.get(point).connection;
       while(incomingEdge != null)
       {
          ConnectionPoint3D sourcePoint = incomingEdge.getSourcePoint();
@@ -102,10 +107,5 @@ public class DijkstraVisibilityGraphPlanner
 
       Collections.reverse(path);
       return path;
-   }
-
-   public ConnectionPoint3D getClosestPointToGoal()
-   {
-      return closestPointToGoal;
    }
 }
