@@ -183,7 +183,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
-      gains.setKiBleedOff(kiBleedOff);
+      gains.setIntegralLeakRatio(kiBleedOff);
 
       if (target == RobotTarget.REAL_ROBOT)
          gains.setFeedbackPartMaxRate(1.0);
