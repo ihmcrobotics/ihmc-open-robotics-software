@@ -3,12 +3,13 @@ package us.ihmc.pathPlanning.visibilityGraphs.dijkstra;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 import java.util.*;
 
-public class DijkstraVisibilityGraphPlanner
+public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanner
 {
    private final HashMap<ConnectionPoint3D, HashSet<ConnectionData>> visibilityMap = new HashMap<>();
    private final HashMap<ConnectionPoint3D, Double> nodeCosts = new HashMap<>();
@@ -18,7 +19,18 @@ public class DijkstraVisibilityGraphPlanner
    private ConnectionPoint3D closestPointToGoal;
    private ConnectionPoint3D startPoint, goalPoint;
 
-   public void setVisibilityMap(Collection<VisibilityMapHolder> visibilityMapHolders)
+   private void initialize(ConnectionPoint3D startPoint, ConnectionPoint3D goalPoint)
+   {
+      this.startPoint = startPoint;
+      this.goalPoint = goalPoint;
+
+      closestPointToGoal = startPoint;
+      nodeCosts.put(startPoint, 0.0);
+      stack = new PriorityQueue<>(new ConnectionPointComparator(nodeCosts));
+      stack.add(startPoint);
+   }
+
+   private void buildVisibilityMap(Collection<VisibilityMapHolder> visibilityMapHolders)
    {
       visibilityMap.clear();
       nodeCosts.clear();
@@ -38,24 +50,16 @@ public class DijkstraVisibilityGraphPlanner
       }
    }
 
-   public void initialize(ConnectionPoint3D startPoint, ConnectionPoint3D goalPoint)
-   {
-      this.startPoint = startPoint;
-      this.goalPoint = goalPoint;
-
-      closestPointToGoal = startPoint;
-      nodeCosts.put(startPoint, 0.0);
-      stack = new PriorityQueue<>(new ConnectionPointComparator(nodeCosts));
-      stack.add(startPoint);
-   }
-
    /**
-    * Plans a path over the visibility maps given by {@link #setVisibilityMap}
+    * Plans a path over the visibility maps
     * @return shortest path to the goal if one exists. Otherwise it will return a path to the
     * closest possible node to the goal
     */
-   public List<Point3DReadOnly> plan()
+   public List<Point3DReadOnly> calculatePath(ConnectionPoint3D startPoint, ConnectionPoint3D goalPoint, Collection<VisibilityMapHolder> visibilityMapHolders)
    {
+      buildVisibilityMap(visibilityMapHolders);
+      initialize(startPoint, goalPoint);
+
       stackLoop:
       while(!stack.isEmpty())
       {
