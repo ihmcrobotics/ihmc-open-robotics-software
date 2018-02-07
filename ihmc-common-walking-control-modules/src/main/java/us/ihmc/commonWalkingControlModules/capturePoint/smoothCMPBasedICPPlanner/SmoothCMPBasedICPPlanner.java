@@ -81,6 +81,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final double robotMass;
    private final double gravityZ;
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
+
    private final YoFramePoint yoSingleSupportFinalCoM;
    private final FramePoint3D singleSupportFinalCoM = new FramePoint3D();
 
@@ -394,7 +396,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       // TODO implement is done walking
    }
 
-   FramePoint3D tempPoint = new FramePoint3D();
    /** {@inheritDoc} */
    @Override
    protected void updateSingleSupportPlan()
@@ -515,7 +516,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
-      // FIXME this is probably wrong
       if (isStanding.getBooleanValue())
       {
          referenceCoPGenerator.getFinalCoPLocation(finalDesiredCapturePointPositionToPack);
@@ -586,9 +586,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    public void getNextExitCMP(FramePoint3D exitCMPToPack)
    {
-      //CMPTrajectory nextSwingTrajectory = referenceCMPGenerator.getSwingCMPTrajectories().get(0);
-      //nextSwingTrajectory.getExitCMPLocation(exitCMPToPack);
-
       List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
       CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
       copPointsInFoot.get(copPointsInFoot.getCoPPointList().size() - 1).getPosition(exitCMPToPack);
