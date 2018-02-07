@@ -112,14 +112,13 @@ public class NavigableRegionsManager
                startMap.addConnectionInWorld(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
             }
          }
-         else
-         {
-
-         }
       }
       else
       {
          startMap = VisibilityGraphsFactory.connectToFallbackMap(start, START_GOAL_ID, 1.0e-3, interRegionVisibilityMap.getVisibilityMapInLocal());
+
+         if(startMap == null)
+            startMap = VisibilityGraphsFactory.connectToVisiblePoints(new ConnectionPoint3D(start, START_GOAL_ID), 1, navigableRegions, START_GOAL_ID);
       }
 
       if (startMap == null)
