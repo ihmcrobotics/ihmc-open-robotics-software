@@ -6,6 +6,8 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -462,15 +464,13 @@ public class ICPOptimizationCoPConstraintHandlerTest
       }
 
       @Override
-      public double getFeedbackParallelGain()
+      public ICPControlGainsReadOnly getICPFeedbackGains()
       {
-         return 3.0;
-      }
+         ICPControlGains gains = new ICPControlGains();
+         gains.setKpParallelToMotion(3.0);
+         gains.setKpOrthogonalToMotion(2.5);
 
-      @Override
-      public double getFeedbackOrthogonalGain()
-      {
-         return 2.5;
+         return gains;
       }
 
       @Override

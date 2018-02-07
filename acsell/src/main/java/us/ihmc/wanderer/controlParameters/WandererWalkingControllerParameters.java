@@ -138,7 +138,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
-      gains.setKiBleedOff(kiBleedOff);
+      gains.setIntegralLeakRatio(kiBleedOff);
 
       return gains;
    }

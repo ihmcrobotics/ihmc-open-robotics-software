@@ -1,107 +1,67 @@
-package us.ihmc.atlas.commonWalkingControlModules;
-
-import java.util.EnumMap;
+package us.ihmc.atlas.straightLegWalking;
 
 import org.junit.Test;
-
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasLegConfigurationParameters;
-import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasToeOffParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.AvatarStraightLegWalkingTest;
-import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.avatar.straightLegWalking.AvatarStraightLegSingleStepTest;
+import us.ihmc.avatar.straightLegWalking.AvatarStraightLegWalkingTest;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
+import java.util.EnumMap;
+
+public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepTest
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
-   public void testForwardWalking() throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 30000)
+   public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
-      super.testForwardWalking();
+      double stepLength = 1.25;
+      double stepWidth = 0.25;
+
+      super.testForwardStep(stepLength, stepWidth);
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
-   public void testSlowerWalking() throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 30000)
+   public void testWideStep() throws SimulationExceededMaximumTimeException
    {
-      super.testSlowerWalking();
+      double stepWidth = 0.6;
+      double stanceWidth = 0.25;
+
+      super.testWideStep(stepWidth, stanceWidth);
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 200000)
-   public void testWalkingOverCinderBlockField() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 30000)
+   public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
-      super.testWalkingOverCinderBlockField();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
-   public void testWalkingOverStairs() throws Exception
-   {
-      super.testWalkingOverStairs();
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 200000)
-   public void testDropOffsWhileWalking() throws Exception
-   {
-      double stepDownHeight = 0.08;
-      super.testDropOffsWhileWalking(stepDownHeight);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
-   public void testSteppingDown() throws Exception
-   {
-      double stepDownHeight = 0.12;
-      super.testSteppingDown(stepDownHeight, 0.30, 1);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 200000)
-   public void testSteppingDownEveryTime() throws Exception
-   {
+      double stepDownHeight = 0.5;
       double stepLength = 0.35;
-      double stepDownHeight = 0.15;
-      super.testSteppingDown(stepDownHeight, stepLength, 0);
+      double stanceWidth = 0.25;
+      super.testSteppingDown(stepDownHeight, stepLength, stanceWidth);
    }
 
-   /*
-   @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 200000)
-   public void testRandomHeightField() throws Exception
+   @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 30000)
+   public void testSteppingDownWithClosing() throws SimulationExceededMaximumTimeException
    {
-      double maxStepIncrease = 0.07;
-      double maxStepHeight = 0.04;
-      double minStepHeight = -0.12;
-      super.testRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
+      double stepDownHeight = 0.5;
+      double stepLength = 0.35;
+      double stanceWidth = 0.25;
+      super.testSteppingDownWithClosing(stepDownHeight, stepLength, stanceWidth);
    }
-   */
+
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -411,11 +371,5 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
          return copOffsets;
       }
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testSteppingDown();
    }
 }

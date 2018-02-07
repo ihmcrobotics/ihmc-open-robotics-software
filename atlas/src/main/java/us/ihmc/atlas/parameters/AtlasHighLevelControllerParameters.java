@@ -127,7 +127,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersNoLoad()
+   public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParameters()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> integrationSettings = new ArrayList<>();
 

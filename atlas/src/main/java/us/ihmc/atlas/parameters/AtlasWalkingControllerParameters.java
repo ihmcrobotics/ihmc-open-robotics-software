@@ -228,7 +228,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
-      gains.setKiBleedOff(kiBleedOff);
+      gains.setIntegralLeakRatio(kiBleedOff);
 
 //      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
       return gains;

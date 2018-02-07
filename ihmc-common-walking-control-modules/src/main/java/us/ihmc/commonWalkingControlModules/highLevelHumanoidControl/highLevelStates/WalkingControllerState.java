@@ -183,9 +183,9 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public boolean isJointLoaded(String jointName)
+   public boolean isJointLoadBearing(String jointName)
    {
-      return walkingController.isJointLoaded(jointName);
+      return walkingController.isJointLoadBearing(jointName);
    }
 
    /**

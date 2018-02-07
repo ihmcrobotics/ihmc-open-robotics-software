@@ -7,6 +7,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
@@ -38,6 +40,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -81,6 +84,8 @@ public class SphereControlToolbox
    private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", worldFrame, registry);
 
    private final YoFramePoint icp = new YoFramePoint("icp", worldFrame, registry);
+   private final FilteredVelocityYoFrameVector icpVelocity;
+   private final YoDouble capturePointVelocityAlpha = new YoDouble("capturePointVelocityAlpha", registry);
 
    private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
    private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("centerOfMassVelocity", worldFrame, registry);
@@ -154,6 +159,9 @@ public class SphereControlToolbox
       omega0.set(omega);
 
       setupFeetFrames(gravity, yoGraphicsListRegistry);
+
+      capturePointVelocityAlpha.set(0.5);
+      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -399,6 +407,11 @@ public class SphereControlToolbox
    public YoFramePoint getICP()
    {
       return icp;
+   }
+
+   public YoFrameVector getICPVelocity()
+   {
+      return icpVelocity;
    }
 
    public FramePoint2D getCapturePoint2d()
@@ -738,15 +751,12 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getFeedbackParallelGain()
+         public ICPControlGainsReadOnly getICPFeedbackGains()
          {
-            return 3.0;
-         }
-
-         @Override
-         public double getFeedbackOrthogonalGain()
-         {
-            return 2.5;
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpOrthogonalToMotion(2.5);
+            gains.setKpParallelToMotion(3.0);
+            return gains;
          }
 
          @Override
