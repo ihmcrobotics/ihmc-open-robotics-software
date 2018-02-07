@@ -1,6 +1,7 @@
-package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
+package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 import java.util.Collection;
