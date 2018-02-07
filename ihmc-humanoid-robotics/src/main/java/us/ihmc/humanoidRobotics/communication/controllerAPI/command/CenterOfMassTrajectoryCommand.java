@@ -28,7 +28,7 @@ public class CenterOfMassTrajectoryCommand extends QueueableCommand<CenterOfMass
          TrajectoryPoint3D trajectoryPoint = comTrajectory.add();
          trajectoryPoint.set(message.getComTrajectoryPoint(i));
       }
-      setQueueableCommandVariables(message);
+      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
 
    @Override

@@ -28,7 +28,7 @@ public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajecto
          TrajectoryPoint3D trajectoryPoint = angularMomentumTrajectory.add();
          trajectoryPoint.set(message.getAngularMomentumTrajectoryPoint(i));
       }
-      setQueueableCommandVariables(message);
+      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
 
    @Override

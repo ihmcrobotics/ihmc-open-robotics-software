@@ -98,5 +98,4 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
    {
       super(numberOfJoints, numberOfTrajectoryPoints);
    }
-
 }

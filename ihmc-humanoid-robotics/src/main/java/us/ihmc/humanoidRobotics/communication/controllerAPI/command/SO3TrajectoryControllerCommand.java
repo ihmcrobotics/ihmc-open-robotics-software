@@ -99,7 +99,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    public void set(M message)
    {
       message.getTrajectoryPoints(trajectoryPointList);
-      setQueueableCommandVariables(message);
+      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
       message.getSelectionMatrix(selectionMatrix);
       message.getWeightMatrix(weightMatrix);
       useCustomControlFrame = message.useCustomControlFrame();

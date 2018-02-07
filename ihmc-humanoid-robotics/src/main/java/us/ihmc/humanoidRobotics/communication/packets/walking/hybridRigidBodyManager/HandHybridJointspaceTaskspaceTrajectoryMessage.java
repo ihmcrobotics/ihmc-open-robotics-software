@@ -15,11 +15,13 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_hand_trajectory")
-public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HandHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
+public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
 {
 
    public HandTrajectoryMessage handTrajectoryMessage;
    public ArmTrajectoryMessage armTrajectoryMessage;
+   public QueueableMessage queueingProperties = new QueueableMessage();
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -46,8 +48,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHandTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getArmTrajectoryMessage());
-      setExecutionMode(hybridJointspaceTaskspaceMessage.getExecutionMode(), hybridJointspaceTaskspaceMessage.previousMessageId);
-      setExecutionDelayTime(hybridJointspaceTaskspaceMessage.getExecutionDelayTime());
+      queueingProperties.set(hybridJointspaceTaskspaceMessage.queueingProperties);
    }
 
    /**
@@ -87,5 +88,22 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public FrameInformation getFrameInformation()
    {
       return handTrajectoryMessage.getFrameInformation();
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
+   }
+
+   @Override
+   public boolean epsilonEquals(HandHybridJointspaceTaskspaceTrajectoryMessage other, double epsilon)
+   {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+         return false;
+      if (!handTrajectoryMessage.epsilonEquals(other.handTrajectoryMessage, epsilon))
+         return false;
+      if (!armTrajectoryMessage.epsilonEquals(other.armTrajectoryMessage, epsilon))
+         return false;
+      return false;
    }
 }
