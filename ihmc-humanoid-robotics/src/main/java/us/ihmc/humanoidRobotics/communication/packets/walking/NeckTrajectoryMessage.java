@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> implements VisualizablePacket
 {
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public AbstractJointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory;
 
    /**
     * Empty constructor for serialization.
@@ -37,7 +37,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
     */
    public NeckTrajectoryMessage(Random random)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(random);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -47,13 +47,13 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
     */
    public NeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(neckTrajectoryMessage.jointspaceTrajectory);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(neckTrajectoryMessage.jointspaceTrajectory);
       setUniqueId(neckTrajectoryMessage.getUniqueId());
    }
 
-   public NeckTrajectoryMessage(AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public NeckTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
    }
 
@@ -65,7 +65,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
     */
    public NeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
    
@@ -78,7 +78,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
     */
    public NeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -89,7 +89,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
     */
    public NeckTrajectoryMessage(OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(jointTrajectory1DListMessages);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointTrajectory1DListMessages);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -101,7 +101,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
     */
    public NeckTrajectoryMessage(int numberOfJoints)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(numberOfJoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -114,7 +114,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
     */
    public NeckTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
    {
-      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -126,7 +126,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
          jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
-   public AbstractJointspaceTrajectoryMessage getJointspaceTrajectory()
+   public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspaceTrajectory;
    }

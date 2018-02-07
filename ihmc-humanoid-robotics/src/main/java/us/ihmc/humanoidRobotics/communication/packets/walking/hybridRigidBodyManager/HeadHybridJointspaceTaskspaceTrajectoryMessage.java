@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
 {
    public HeadTrajectoryMessage headTrajectoryMessage;
-   public AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage;
+   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
    public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
@@ -36,7 +36,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(new HeadTrajectoryMessage(random), new AbstractJointspaceTrajectoryMessage(random));
+      this(new HeadTrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
    }
 
    /**
@@ -56,7 +56,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     * @param taskspaceTrajectoryMessage
     * @param jointspaceTrajectoryMessage
     */
-   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadTrajectoryMessage taskspaceTrajectoryMessage, AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadTrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       this.headTrajectoryMessage = taskspaceTrajectoryMessage;
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
@@ -74,12 +74,12 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
       this.headTrajectoryMessage = headTrajectoryMessage;
    }
 
-   public AbstractJointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
+   public JointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
    {
       return jointspaceTrajectoryMessage;
    }
 
-   public void setJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public void setJointspaceTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
    }

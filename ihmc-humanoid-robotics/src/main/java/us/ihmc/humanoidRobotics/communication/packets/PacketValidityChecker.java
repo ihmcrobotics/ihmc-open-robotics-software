@@ -524,7 +524,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage message)
+   public static String validateJointspaceTrajectoryMessage(JointspaceTrajectoryMessage message)
    {
       String errorMessage = validatePacket(message, true);
       if (errorMessage != null)
