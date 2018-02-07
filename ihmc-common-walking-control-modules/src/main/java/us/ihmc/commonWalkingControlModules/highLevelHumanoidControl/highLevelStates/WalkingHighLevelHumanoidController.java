@@ -756,11 +756,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    }
 
    @Override
-   public boolean isJointLoaded(String jointName)
+   public boolean isJointLoadBearing(String jointName)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         boolean legLoaded = feetManager.getCurrentConstraintType(robotSide).isLoaded();
+         boolean legLoaded = feetManager.getCurrentConstraintType(robotSide).isLoadBearing();
          if (legLoaded && legJointNames.get(robotSide).contains(jointName))
          {
             return true;

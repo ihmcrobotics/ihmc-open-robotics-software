@@ -58,7 +58,7 @@ public abstract class HighLevelControllerState extends FinishableState<HighLevel
     * the joint behavior based on whether a joint is loaded or not.
     */
    @Override
-   public boolean isJointLoaded(String jointName)
+   public boolean isJointLoadBearing(String jointName)
    {
       return false;
    }

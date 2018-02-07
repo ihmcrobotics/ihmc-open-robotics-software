@@ -52,17 +52,17 @@ public class JointSettingsHelper
       // TODO: this is not state dependent
       // For now we can not load different parameters from a parameter class for different states.
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapNoLoad = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", parameters.getJointAccelerationIntegrationParametersNoLoad(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", parameters.getJointAccelerationIntegrationParameters(),
                                                                 parameterJointNameMapNoLoad, registry);
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapLoaded = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", parameters.getJointAccelerationIntegrationParametersLoaded(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", parameters.getJointAccelerationIntegrationParametersUnderLoad(),
                                                                 parameterJointNameMapLoaded, registry);
 
       // TODO: these use the same default values
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMapNoLoad = new HashMap<>();
       ParameterTools.extractJointBehaviorMap("NoLoad", parameters.getDesiredJointBehaviors(state), jointBehaviorMapNoLoad, registry);
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMapLoaded = new HashMap<>();
-      ParameterTools.extractJointBehaviorMap("Loaded", parameters.getDesiredJointBehaviors(state), jointBehaviorMapLoaded, registry);
+      ParameterTools.extractJointBehaviorMap("Loaded", parameters.getDesiredJointBehaviorsUnderLoad(state), jointBehaviorMapLoaded, registry);
 
       jointNames = new String[joints.length];
       jointsLoaded = new YoBoolean[joints.length];
@@ -118,7 +118,7 @@ public class JointSettingsHelper
       for (int jointIdx = 0; jointIdx < jointNames.length; jointIdx++)
       {
          JointDesiredOutput jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
-         boolean isLoaded = jointLoadStatusProvider.isJointLoaded(jointNames[jointIdx]);
+         boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
          jointsLoaded[jointIdx].set(isLoaded);
 
          JointAccelerationIntegrationParametersReadOnly integrationParametersNoLoad = accelerationIntegrationSettingsNoLoad[jointIdx];
