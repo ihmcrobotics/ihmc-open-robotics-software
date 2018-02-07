@@ -56,19 +56,19 @@ public class DijkstraVisibilityGraphPlanner
     */
    public List<Point3DReadOnly> plan()
    {
+      stackLoop:
       while(!stack.isEmpty())
       {
          ConnectionPoint3D sourcePoint = stack.poll();
-         HashSet<ConnectionData> connections = visibilityMap.getOrDefault(sourcePoint, new HashSet<>());
+
+         HashSet<ConnectionData> connections = visibilityMap.computeIfAbsent(sourcePoint, (p) -> new HashSet<>());
          if(sourcePoint.distance(goalPoint) < closestPointToGoal.distance(goalPoint))
             closestPointToGoal = sourcePoint;
 
          for (ConnectionData connectionData : connections)
          {
             Connection connection = connectionData.connection;
-            if(connection.getTargetPoint().equals(sourcePoint))
-               connection.flip();
-            ConnectionPoint3D targetPoint = connection.getTargetPoint();
+            ConnectionPoint3D targetPoint = connection.getOppositePoint(sourcePoint);
 
             double nodeCost = nodeCosts.get(sourcePoint) + connectionData.edgeWeight;
 
@@ -76,9 +76,16 @@ public class DijkstraVisibilityGraphPlanner
             {
                nodeCosts.put(targetPoint, nodeCost);
                incomingBestEdge.put(targetPoint, connectionData);
-            }
 
-            stack.add(targetPoint);
+               if(targetPoint.equals(goalPoint))
+               {
+                  break stackLoop;
+               }
+               else
+               {
+                  stack.add(targetPoint);
+               }
+            }
          }
       }
 
@@ -94,15 +101,19 @@ public class DijkstraVisibilityGraphPlanner
 
    public List<Point3DReadOnly> getPathToPoint(ConnectionPoint3D point)
    {
-      List<Point3DReadOnly> path = new ArrayList<>();
-      path.add(point);
+      List<Point3DReadOnly> path = new ArrayList<Point3DReadOnly>(){{add(point);}};
 
-      Connection incomingEdge = incomingBestEdge.get(point).connection;
+      ConnectionData incomingEdge = incomingBestEdge.get(point);
+      ConnectionPoint3D previousTargetPoint = new ConnectionPoint3D(point);
+
       while(incomingEdge != null)
       {
-         ConnectionPoint3D sourcePoint = incomingEdge.getSourcePoint();
-         path.add(sourcePoint);
-         incomingEdge = incomingBestEdge.get(sourcePoint).connection;
+         Connection connection = incomingEdge.connection;
+         ConnectionPoint3D targetPoint = connection.getOppositePoint(previousTargetPoint);
+         path.add(targetPoint);
+         incomingEdge = incomingBestEdge.get(targetPoint);
+
+         previousTargetPoint = targetPoint;
       }
 
       Collections.reverse(path);
