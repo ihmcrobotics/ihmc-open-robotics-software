@@ -174,7 +174,7 @@ public class ThorWalkingControllerParameters extends WalkingControllerParameters
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
-      gains.setKiBleedOff(kiBleedOff);
+      gains.setIntegralLeakRatio(kiBleedOff);
 
 //      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 //      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);

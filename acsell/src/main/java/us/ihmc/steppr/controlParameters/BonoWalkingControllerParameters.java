@@ -132,7 +132,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
-      gains.setKiBleedOff(kiBleedOff);
+      gains.setIntegralLeakRatio(kiBleedOff);
 
       return gains;
    }

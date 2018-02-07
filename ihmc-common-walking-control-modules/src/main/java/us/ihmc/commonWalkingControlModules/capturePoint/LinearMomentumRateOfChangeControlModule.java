@@ -39,7 +39,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final YoFrameVector angularMomentumRateWeight;
    private final YoFrameVector linearMomentumRateWeight;
 
-
    private final YoBoolean minimizeAngularMomentumRateZ;
 
    private final YoFrameVector controlledCoMAcceleration;
@@ -58,6 +57,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
    protected final FramePoint2D capturePoint = new FramePoint2D();
+   protected final FrameVector2D capturePointVelocity = new FrameVector2D();
    protected final FramePoint2D desiredCapturePoint = new FramePoint2D();
    protected final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
    protected final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
@@ -66,11 +66,9 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
 
-
-   protected final CMPProjector cmpProjector;   //TODO: Not used in this class, push down (?)
+   protected final CMPProjector cmpProjector; //TODO: Not used in this class, push down (?)
    protected final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
-
 
    private boolean controlHeightWithMomentum;
 
@@ -81,9 +79,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
    private double desiredCoMHeightAcceleration = 0.0;
 
-
-   public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ,
-         double totalMass, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
+   public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
+                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -107,7 +104,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-
       yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
       yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
       yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
@@ -127,7 +123,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
       if (yoGraphicsListRegistry != null)
       {
          String graphicListName = getClass().getSimpleName();
-         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(),
+                                                                            YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
          YoArtifactPosition artifact = unprojectedDesiredCMPViz.createArtifact();
          artifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, artifact);
@@ -145,7 +142,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
    }
 
-
    public void setMomentumWeight(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
       defaultLinearMomentumRateWeight = linearWeight;
@@ -157,8 +153,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       highLinearMomentumRateWeight = highLinearWeight;
    }
 
-
-
    public void setOmega0(double omega0)
    {
       if (Double.isNaN(omega0))
@@ -166,9 +160,38 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.omega0 = omega0;
    }
 
+   /**
+    * Sets the capture point position to be used for the next call of
+    * {@link #compute(FramePoint2DReadOnly, FramePoint2D)}.
+    * <p>
+    * Note that the internal value for the capture point velocity is set to {@link Double#NaN} when
+    * calling this method. If an actual value is to be passed for the velocity, call
+    * {@link #setCapturePoint(FramePoint2DReadOnly, FrameVector2DReadOnly)} instead.
+    * </p>
+    * 
+    * @param capturePoint the measured position of the capture point. Not modified.
+    */
    public void setCapturePoint(FramePoint2DReadOnly capturePoint)
    {
+      setCapturePoint(capturePoint, null);
+   }
+
+   /**
+    * Sets the capture point position and velocity to be used for the next call of
+    * {@link #compute(FramePoint2DReadOnly, FramePoint2D)}.
+    * 
+    * @param capturePoint the measured position of the capture point. Not modified.
+    * @param capturePointVelocity the measured velocity of the capture point. If
+    *           {@code capturePointVelocity == null}, the internal reference is then set to
+    *           {@link Double#NaN}. Not modified.
+    */
+   public void setCapturePoint(FramePoint2DReadOnly capturePoint, FrameVector2DReadOnly capturePointVelocity)
+   {
       this.capturePoint.setIncludingFrame(capturePoint);
+      if (capturePointVelocity != null)
+         this.capturePointVelocity.setIncludingFrame(capturePointVelocity);
+      else
+         this.capturePointVelocity.setToNaN();
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
@@ -258,7 +281,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       desiredCMPToPack.setIncludingFrame(desiredCMP);
       desiredCMPToPack.changeFrame(worldFrame);
 
-
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       FrameVector3D linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
       linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
@@ -289,7 +311,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       }
 
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
-            linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+                                     linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
 
    public void setCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
@@ -300,7 +322,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       yoSafeAreaPolygon.setFrameConvexPolygon2d(safeArea);
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
-
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
@@ -323,9 +344,12 @@ public abstract class LinearMomentumRateOfChangeControlModule
    }
 
    /**
-    * Sets whether or not to include the momentum rate of change in the vertical direction in the whole body optimization.
-    * If false, it will be controlled by attempting to drive the legs to a certain position in the null space
-    * @param controlHeightWithMomentum boolean variable on whether or not to control the height with momentum.
+    * Sets whether or not to include the momentum rate of change in the vertical direction in the
+    * whole body optimization. If false, it will be controlled by attempting to drive the legs to a
+    * certain position in the null space
+    * 
+    * @param controlHeightWithMomentum boolean variable on whether or not to control the height with
+    *           momentum.
     */
    public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
    {

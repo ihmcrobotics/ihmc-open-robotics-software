@@ -7,41 +7,51 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public abstract class MomentumOptimizationSettings implements ControllerCoreOptimizationSettings
 {
-   @Deprecated // will be removed when all robots use parameters
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    */
    public Vector3DReadOnly getLinearMomentumWeight()
    {
       return null;
    }
 
-   @Deprecated // will be removed when all robots use parameters
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    */
    public Vector3DReadOnly getHighLinearMomentumWeightForRecovery()
    {
       return null;
    }
 
-   @Deprecated // will be removed when all robots use parameters
+   /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    */
    public Vector3DReadOnly getAngularMomentumWeight()
    {
       return null;
    }
 
    /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    * <p>
     * Returns the optimization weight for the linear objective of the foot whenever the foot is
     * in support (loaded). When the foot is not loaded the default weight from
     * {@link #getTaskspaceLinearWeights()} will be used.
+    * </p>
     */
-   @Deprecated // will be removed when all robots use parameters
    public Vector3DReadOnly getLoadedFootLinearWeight()
    {
       return null;
    }
 
    /**
+    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
+    * <p>
     * Returns the optimization weight for the angular objective of the foot whenever the foot is
     * in support (loaded).When the foot is not loaded the default weight from
     * {@link #getTaskspaceAngularWeights()} will be used.
+    * </p>
     */
-   @Deprecated // will be removed when all robots use parameters
    public Vector3DReadOnly getLoadedFootAngularWeight()
    {
       return null;

@@ -116,12 +116,14 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, omega0);
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
+                                           capturePointVelocity, omega0);
       }
       else
       {
          perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, omega0);
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint,
+                                           capturePointVelocity, omega0);
       }
 
       icpOptimizationController.getDesiredCMP(desiredCMP);

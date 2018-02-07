@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
+
 /**
  * Parameters to tune the ICP Optimization based controller for each robot.
  * The ICP Optimization based controller encodes the ICP plan based on the upcoming footsteps, and can either do control
@@ -54,15 +56,26 @@ public abstract class ICPOptimizationParameters
    public abstract double getFeedbackRateWeight();
 
    /**
-    * Feedback gain for ICP error parallel to the desired ICP dynamics.
+    * Gains for the proportional ICP controller that is encoded into the optimization. Also includes gains for the smart
+    * integrator that is used when the controller is stuck.
     */
-   public abstract double getFeedbackParallelGain();
+   public abstract ICPControlGainsReadOnly getICPFeedbackGains();
 
    /**
-    * Feedback gain for ICP error orthogonal to the desired ICP dynamics.
-    * When the desired ICP dynamics are zero, this is the gain that is used for all directions.
+    * Sets whether the integration gains returned by {@link #getICPFeedbackGains()} is used to perform a smart integration when the robot is stuck.
     */
-   public abstract double getFeedbackOrthogonalGain();
+   public boolean useSmartICPIntegrator()
+   {
+      return false;
+   }
+
+   /**
+    * Sets the maximum ICP velocity for it to be considered "stuck".
+    */
+   public double getICPVelocityThresholdForStuck()
+   {
+      return 0.01;
+   }
 
    /**
     * Weight on the slack variable introduced for the ICP dynamics.

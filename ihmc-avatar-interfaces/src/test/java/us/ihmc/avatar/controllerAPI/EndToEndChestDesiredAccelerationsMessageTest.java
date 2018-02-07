@@ -34,8 +34,6 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.1)
-   @Test(timeout = 90000)
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -61,7 +59,11 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       SpineDesiredAccelerationsMessage desiredAccelerationsMessage = new SpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
+      RigidBodyControlMode defaultControlState = getRobotModel().getWalkingControllerParameters().getDefaultControlModesForRigidBodies().get(chest.getName());
+      if (defaultControlState == null)
+         defaultControlState = RigidBodyControlMode.JOINTSPACE;
+
+      assertEquals(defaultControlState, findControllerState(scs));
 
       drcSimulationTestHelper.send(desiredAccelerationsMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
@@ -76,7 +78,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
       assertTrue(success);
 
-      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
+      assertEquals(defaultControlState, findControllerState(scs));
    }
 
    @SuppressWarnings("unchecked")

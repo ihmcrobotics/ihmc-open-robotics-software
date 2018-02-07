@@ -62,7 +62,7 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                @Override
                public double getMinimumSwingTimeForDisturbanceRecovery()
                {
-                  return 0.5;
+                  return 0.55;
                }
 
                @Override
