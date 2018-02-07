@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.frames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -127,7 +128,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble angularMomentumIntegratorLeakRatio = new YoDouble(yoNamePrefix + "AngularMomentumIntegratorLeakRatio", registry);
 
    private final YoBoolean useSmartICPIntegrator = new YoBoolean("useSmartICPIntegrator", registry);
-   private final YoBoolean isICPStuck = new YoBoolean(yoNamePrefix + "IsICPStuck", registry);
+   private final GlitchFilteredYoBoolean isICPStuck;
    private final YoDouble thresholdForStuck = new YoDouble(yoNamePrefix + "ThresholdForStuck", registry);
    private final YoFrameVector2d feedbackCMPIntegral = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPIntegral", worldFrame, registry);
 
@@ -232,6 +233,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          maxAllowedDistanceCMPSupport.set(walkingControllerParameters.getMaxAllowedDistanceCMPSupport());
       else
          maxAllowedDistanceCMPSupport.setToNaN();
+
+      isICPStuck = new GlitchFilteredYoBoolean(yoNamePrefix + "IsICPStuck", registry, (int) (0.03 / controlDT));
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
@@ -687,7 +690,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
             solutionHandler.updateCostsToGo(solver);
       }
 
-      isICPStuck.set(computeIsStuck());
+      isICPStuck.update(computeIsStuck());
       computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
