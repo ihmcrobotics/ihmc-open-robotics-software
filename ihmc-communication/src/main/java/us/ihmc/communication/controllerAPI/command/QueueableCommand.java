@@ -55,8 +55,10 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
     */
    public void setQueueableCommandVariables(long messageId, QueueableMessage messageQueueingProperties)
    {
-      setExecutionDelayTime(messageQueueingProperties.getExecutionDelayTime());
       commandId = messageId;
+      if (messageQueueingProperties == null)
+         return;
+      setExecutionDelayTime(messageQueueingProperties.getExecutionDelayTime());
       executionMode = messageQueueingProperties.getExecutionMode();
       previousCommandId = messageQueueingProperties.getPreviousMessageId();
    }
