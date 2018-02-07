@@ -348,7 +348,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          desiredOrientation = new Quaternion();
          desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame);
-         handTrajectoryMessage.setExecutionDelayTime(5.0);
+         handTrajectoryMessage.getQueueingProperties().setExecutionDelayTime(5.0);
          messageOfMessages.addPacket(handTrajectoryMessage);
       }
 

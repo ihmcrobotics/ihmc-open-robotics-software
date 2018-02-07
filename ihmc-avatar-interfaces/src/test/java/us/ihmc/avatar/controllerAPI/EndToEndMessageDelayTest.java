@@ -90,22 +90,22 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
       ChestTrajectoryMessage lookStraightAheadMessage = new ChestTrajectoryMessage(trajectoryTime, lookStraightAhead, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookStraightAheadMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      lookStraightAheadMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
       ChestTrajectoryMessage lookLeftMessage = new ChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookLeftMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      lookLeftMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
       drcSimulationTestHelper.send(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
       ChestTrajectoryMessage lookRightMessage = new ChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookRightMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      lookRightMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
       drcSimulationTestHelper.send(lookRightMessage);
 
       SpineJointName[] spineJointNames = jointMap.getSpineJointNames();
       SpineTrajectoryMessage zeroSpineJointMessage = new SpineTrajectoryMessage(spineJointNames.length, 1);
-      zeroSpineJointMessage.setExecutionDelayTime(5.0);
+      zeroSpineJointMessage.getQueueingProperties().setExecutionDelayTime(5.0);
       for(int i = 0; i < spineJointNames.length; i++)
       {
          zeroSpineJointMessage.setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(1.0, 0.0));

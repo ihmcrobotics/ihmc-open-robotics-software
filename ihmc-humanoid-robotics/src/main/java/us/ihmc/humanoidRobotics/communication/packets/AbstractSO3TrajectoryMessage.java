@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
@@ -22,7 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T>
+public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends Packet<T>
       implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
@@ -43,6 +44,9 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
    public QuaternionBasedTransform controlFramePose;
 
+   @RosExportedField(documentation = "Properties for queueing trajectories.")
+   public QueueableMessage queueingProperties = new QueueableMessage();
+
    /**
     * Empty constructor for serialization.
     */
@@ -54,7 +58,6 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public AbstractSO3TrajectoryMessage(Random random)
    {
-      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
@@ -70,6 +73,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       useCustomControlFrame = random.nextBoolean();
 
       controlFramePose = new QuaternionBasedTransform(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      queueingProperties = new QueueableMessage(random);
    }
 
    public AbstractSO3TrajectoryMessage(AbstractSO3TrajectoryMessage<?> so3TrajectoryMessage)
@@ -77,12 +81,11 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[so3TrajectoryMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(so3TrajectoryMessage.taskspaceTrajectoryPoints[i]);
-      setExecutionMode(so3TrajectoryMessage.getExecutionMode(), so3TrajectoryMessage.getPreviousMessageId());
 
       setUniqueId(so3TrajectoryMessage.getUniqueId());
       setDestination(so3TrajectoryMessage.getDestination());
-      setExecutionDelayTime(so3TrajectoryMessage.getExecutionDelayTime());
       frameInformation.set(so3TrajectoryMessage);
+      queueingProperties.set(so3TrajectoryMessage.queueingProperties);
    }
 
    public AbstractSO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
@@ -125,9 +128,8 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
          throw new RuntimeException("Must the same number of waypoints.");
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
-      setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
-      setExecutionDelayTime(other.getExecutionDelayTime());
       frameInformation.set(other);
+      queueingProperties.set(other.queueingProperties);
    }
 
    /**
@@ -352,6 +354,9 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+         return false;
+
       if (!frameInformation.epsilonEquals(other.frameInformation, epsilon))
          return false;
 
@@ -364,7 +369,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
             return false;
       }
 
-      return super.epsilonEquals(other, epsilon);
+      return true;
    }
 
    public void setUseCustomControlFrame(boolean useCustomControlFrame)
@@ -397,5 +402,10 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
          controlFrameTransformToPack.setToNaN();
       else
          controlFrameTransformToPack.set(controlFramePose);
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
    }
 }

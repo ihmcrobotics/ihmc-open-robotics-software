@@ -12,13 +12,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
  * This message can be used to send a predefined angular momentum trajectory to the controller. This trajectory
  * will be used for ICP planning.
  */
-public class MomentumTrajectoryMessage extends QueueableMessage<MomentumTrajectoryMessage>
+public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
 {
    /**
     * List of angular momentum trajectory waypoints. Each waypoint contains the angular momentum and the
     * angular momentum rate at a given time.
     */
-   public final ArrayList<TrajectoryPoint3D> angularMomentumTrajectory;
+   public ArrayList<TrajectoryPoint3D> angularMomentumTrajectory;
+   public QueueableMessage queueingProperties = new QueueableMessage();
 
    public MomentumTrajectoryMessage()
    {
@@ -40,11 +41,14 @@ public class MomentumTrajectoryMessage extends QueueableMessage<MomentumTrajecto
          angularMomentumTrajectory.add(point);
          time += random.nextDouble();
       }
+      queueingProperties = new QueueableMessage(random);
    }
 
    @Override
    public boolean epsilonEquals(MomentumTrajectoryMessage other, double epsilon)
    {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+         return false;
       if (getNumberOfAngularMomentumTrajectoryPoints() != other.getNumberOfAngularMomentumTrajectoryPoints())
       {
          return false;
@@ -58,7 +62,7 @@ public class MomentumTrajectoryMessage extends QueueableMessage<MomentumTrajecto
          }
       }
 
-      return super.epsilonEquals(other, epsilon);
+      return true;
    }
 
    public void addAngularMomentumTrajectoryPoint(Tuple3DReadOnly position, Tuple3DReadOnly veclocity, double time)
@@ -74,5 +78,10 @@ public class MomentumTrajectoryMessage extends QueueableMessage<MomentumTrajecto
    public TrajectoryPoint3D getAngularMomentumTrajectoryPoint(int index)
    {
       return angularMomentumTrajectory.get(index);
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
    }
 }

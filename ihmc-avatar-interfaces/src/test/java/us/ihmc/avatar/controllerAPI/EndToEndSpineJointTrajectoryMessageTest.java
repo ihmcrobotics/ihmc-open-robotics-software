@@ -224,7 +224,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          message.setUniqueId(msgIdx + 1);
          if (msgIdx != 0)
-            message.setExecutionMode(ExecutionMode.QUEUE, msgIdx);
+            message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, msgIdx);
 
          messages[msgIdx] = message;
       }

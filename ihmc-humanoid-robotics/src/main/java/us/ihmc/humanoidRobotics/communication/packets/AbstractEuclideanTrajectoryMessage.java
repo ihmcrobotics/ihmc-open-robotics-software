@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
@@ -22,7 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEuclideanTrajectoryMessage<T>> extends QueueableMessage<T>
+public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEuclideanTrajectoryMessage<T>> extends Packet<T>
       implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
@@ -45,6 +46,9 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
    public QuaternionBasedTransform controlFramePose = new QuaternionBasedTransform();
 
+   @RosExportedField(documentation = "Properties for queueing trajectories.")
+   public QueueableMessage queueingProperties = new QueueableMessage();
+
    public AbstractEuclideanTrajectoryMessage()
    {
       super();
@@ -53,7 +57,6 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
    public AbstractEuclideanTrajectoryMessage(Random random)
    {
-      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
@@ -65,6 +68,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
       useCustomControlFrame = random.nextBoolean();
       controlFramePose.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      queueingProperties = new QueueableMessage(random);
    }
 
    public AbstractEuclideanTrajectoryMessage(T trajectoryMessage)
@@ -76,8 +80,6 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(trajectoryMessage.taskspaceTrajectoryPoints[i]);
       }
 
-      setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
-      setExecutionDelayTime(trajectoryMessage.getExecutionDelayTime());
       setUniqueId(trajectoryMessage.getUniqueId());
       setDestination(trajectoryMessage.getDestination());
       linearSelectionMatrix.set(trajectoryMessage.linearSelectionMatrix);
@@ -85,6 +87,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       linearWeightMatrix.set(trajectoryMessage.linearWeightMatrix);
       useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
       controlFramePose.set(trajectoryMessage.controlFramePose);
+      queueingProperties.set(trajectoryMessage.queueingProperties);
    }
 
    /**
@@ -138,8 +141,6 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
-      setExecutionDelayTime(other.getExecutionDelayTime());
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
       linearSelectionMatrix.set(other.linearSelectionMatrix);
@@ -147,6 +148,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       linearWeightMatrix.set(other.linearWeightMatrix);
       useCustomControlFrame = other.useCustomControlFrame;
       controlFramePose.set(other.controlFramePose);
+      queueingProperties.set(other.queueingProperties);
    }
 
    /**
@@ -383,6 +385,11 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+      {
+         return false;
+      }
+
       if (!frameInformation.epsilonEquals(other.frameInformation, epsilon))
       {
          return false;
@@ -417,7 +424,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
             return false;
       }
 
-      return super.epsilonEquals(other, epsilon);
+      return true;
    }
 
    public void setUseCustomControlFrame(boolean useCustomControlFrame)
@@ -450,5 +457,10 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          controlFrameTransformToPack.setToNaN();
       else
          controlFrameTransformToPack.set(controlFramePose);
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
    }
 }

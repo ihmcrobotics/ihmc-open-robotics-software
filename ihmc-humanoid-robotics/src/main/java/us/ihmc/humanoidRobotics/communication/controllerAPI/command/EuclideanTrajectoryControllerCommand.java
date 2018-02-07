@@ -81,7 +81,7 @@ public abstract class EuclideanTrajectoryControllerCommand<T extends EuclideanTr
    public void set(M message)
    {
       message.getTrajectoryPoints(trajectoryPointList);
-      setQueueableCommandVariables(message);
+      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
       message.getSelectionMatrix(selectionMatrix);
       message.getWeightMatrix(weightMatrix);
       useCustomControlFrame = message.useCustomControlFrame();

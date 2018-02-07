@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * A QueueableMessage is a {@link Packet} that can be queued for execution inside the controller. It implements command
@@ -13,7 +14,7 @@ import us.ihmc.communication.ros.generators.RosExportedField;
  *
  * @param <T> Type of the final implementation of this message.
  */
-public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Packet<T>
+public final class QueueableMessage implements EpsilonComparable<QueueableMessage>
 {
    @RosExportedField(documentation = "When OVERRIDE is chosen:"
          + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
@@ -27,7 +28,7 @@ public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Pa
          + " It is used by the controller to ensure that no message has been lost on the way."
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
          + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
-   public long previousMessageId = INVALID_MESSAGE_ID;
+   public long previousMessageId = Packet.INVALID_MESSAGE_ID;
    
    /** the time to delay this message on the controller side before being executed **/
    public double executionDelayTime;
@@ -46,6 +47,13 @@ public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Pa
    public QueueableMessage(Random random)
    {
       executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
+   }
+
+   public void set(QueueableMessage other)
+   {
+      executionMode = other.executionMode;
+      previousMessageId = other.previousMessageId;
+      executionDelayTime = other.executionDelayTime;
    }
 
    /**
@@ -91,7 +99,7 @@ public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Pa
 
    /** {@inheritDoc} */
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(QueueableMessage other, double epsilon)
    {
       if (executionMode != other.getExecutionMode())
          return false;

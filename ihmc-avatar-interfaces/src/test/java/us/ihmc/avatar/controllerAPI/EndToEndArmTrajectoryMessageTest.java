@@ -276,7 +276,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          ArmTrajectoryMessage trajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
          trajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            trajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            trajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
          id++;
 
          TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
@@ -403,7 +403,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                if (messageIndex == numberOfMessages - 1)
                   previousMessageId = id + 100; // Bad ID
 
-               armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
             }
             id++;
 
@@ -507,7 +507,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
             armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
-               armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
 
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();

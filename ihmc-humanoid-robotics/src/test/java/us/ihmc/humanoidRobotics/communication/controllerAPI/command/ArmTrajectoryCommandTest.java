@@ -83,8 +83,8 @@ public class ArmTrajectoryCommandTest
       ArmTrajectoryMessage message = new ArmTrajectoryMessage(random);
       armTrajectoryCommand.set(message);
 
-      assertEquals(message.getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
-      assertEquals(message.getExecutionMode(), armTrajectoryCommand.getExecutionMode());
+      assertEquals(message.getQueueingProperties().getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
+      assertEquals(message.getQueueingProperties().getExecutionMode(), armTrajectoryCommand.getExecutionMode());
       assertEquals(message.getNumberOfJoints(), armTrajectoryCommand.getNumberOfJoints());
 
       for (int i = 0; i < message.getNumberOfJoints(); i++)

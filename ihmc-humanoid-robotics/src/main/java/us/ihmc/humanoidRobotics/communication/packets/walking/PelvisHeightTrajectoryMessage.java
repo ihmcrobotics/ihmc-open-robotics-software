@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractEuclideanTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
@@ -40,7 +39,6 @@ public class PelvisHeightTrajectoryMessage extends AbstractEuclideanTrajectoryMe
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      executionMode = ExecutionMode.OVERRIDE;
       linearSelectionMatrix = new SelectionMatrix3DMessage();
       linearSelectionMatrix.setAxisSelection(false, false, true);
    }
@@ -49,7 +47,6 @@ public class PelvisHeightTrajectoryMessage extends AbstractEuclideanTrajectoryMe
    {
       super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      executionMode = ExecutionMode.OVERRIDE;
       linearSelectionMatrix = new SelectionMatrix3DMessage();
       linearSelectionMatrix.setAxisSelection(false, false, true);
    }
@@ -64,10 +61,9 @@ public class PelvisHeightTrajectoryMessage extends AbstractEuclideanTrajectoryMe
       setUniqueId(pelvisHeightTrajectoryMessage.getUniqueId());
       setDestination(pelvisHeightTrajectoryMessage.getDestination());
 
-      executionMode = pelvisHeightTrajectoryMessage.executionMode;
-      previousMessageId = pelvisHeightTrajectoryMessage.previousMessageId;
       enableUserPelvisControl = pelvisHeightTrajectoryMessage.enableUserPelvisControl;
       enableUserPelvisControlDuringWalking = pelvisHeightTrajectoryMessage.isEnableUserPelvisControlDuringWalking();
+      queueingProperties.set(pelvisHeightTrajectoryMessage.queueingProperties);
    }
 
    /**
@@ -83,7 +79,6 @@ public class PelvisHeightTrajectoryMessage extends AbstractEuclideanTrajectoryMe
       super(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),trajectoryReferenceFrame.getNameBasedHashCode());
       frameInformation.setDataReferenceFrame(dataReferenceFrame);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      executionMode = ExecutionMode.OVERRIDE;
       
       linearSelectionMatrix = new SelectionMatrix3DMessage();
       linearSelectionMatrix.setAxisSelection(false, false, true);
@@ -101,7 +96,6 @@ public class PelvisHeightTrajectoryMessage extends AbstractEuclideanTrajectoryMe
       super(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), ReferenceFrame.getWorldFrame());
       frameInformation.setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      executionMode = ExecutionMode.OVERRIDE;
       
       linearSelectionMatrix = new SelectionMatrix3DMessage();
       linearSelectionMatrix.setAxisSelection(false, false, true);
@@ -117,7 +111,6 @@ public class PelvisHeightTrajectoryMessage extends AbstractEuclideanTrajectoryMe
    {
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      executionMode = ExecutionMode.OVERRIDE;
       
       linearSelectionMatrix = new SelectionMatrix3DMessage();
       linearSelectionMatrix.setAxisSelection(false, false, true);

@@ -8,23 +8,27 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
-public class CenterOfMassTrajectoryMessage extends QueueableMessage<CenterOfMassTrajectoryMessage>
+public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectoryMessage>
 {
    /**
     * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and
     * velocity at a given time.
     */
-   public final ArrayList<TrajectoryPoint3D> comTrajectory;
+   public ArrayList<TrajectoryPoint3D> comTrajectory;
+
+   public QueueableMessage queueingProperties;
 
    public CenterOfMassTrajectoryMessage()
    {
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       comTrajectory = new ArrayList<>();
+      queueingProperties = new QueueableMessage();
    }
 
    public CenterOfMassTrajectoryMessage(Random random)
    {
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      queueingProperties = new QueueableMessage(random);
       comTrajectory = new ArrayList<>();
       double time = random.nextDouble();
       for (int i = 0; i < random.nextInt(10) + 1; i++)
@@ -41,6 +45,9 @@ public class CenterOfMassTrajectoryMessage extends QueueableMessage<CenterOfMass
    @Override
    public boolean epsilonEquals(CenterOfMassTrajectoryMessage other, double epsilon)
    {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+         return false;
+
       if (getNumberOfComTrajectoryPoints() != other.getNumberOfComTrajectoryPoints())
       {
          return false;
@@ -54,7 +61,7 @@ public class CenterOfMassTrajectoryMessage extends QueueableMessage<CenterOfMass
          }
       }
 
-      return super.epsilonEquals(other, epsilon);
+      return true;
    }
 
    public void addComTrajectoryPoint(Tuple3DReadOnly position, Tuple3DReadOnly veclocity, double time)
@@ -70,5 +77,10 @@ public class CenterOfMassTrajectoryMessage extends QueueableMessage<CenterOfMass
    public TrajectoryPoint3D getComTrajectoryPoint(int index)
    {
       return comTrajectory.get(index);
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
    }
 }
