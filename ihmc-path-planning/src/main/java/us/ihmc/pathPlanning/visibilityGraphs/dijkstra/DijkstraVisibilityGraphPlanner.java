@@ -3,7 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.dijkstra;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphPathPlanner;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
@@ -17,13 +17,9 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
 
    private PriorityQueue<ConnectionPoint3D> stack;
    private ConnectionPoint3D closestPointToGoal;
-   private ConnectionPoint3D startPoint, goalPoint;
 
-   private void initialize(ConnectionPoint3D startPoint, ConnectionPoint3D goalPoint)
+   private void initialize(ConnectionPoint3D startPoint)
    {
-      this.startPoint = startPoint;
-      this.goalPoint = goalPoint;
-
       closestPointToGoal = startPoint;
       nodeCosts.put(startPoint, 0.0);
       stack = new PriorityQueue<>(new ConnectionPointComparator(nodeCosts));
@@ -58,7 +54,7 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
    public List<Point3DReadOnly> calculatePath(ConnectionPoint3D startPoint, ConnectionPoint3D goalPoint, Collection<VisibilityMapHolder> visibilityMapHolders)
    {
       buildVisibilityMap(visibilityMapHolders);
-      initialize(startPoint, goalPoint);
+      initialize(startPoint);
 
       stackLoop:
       while(!stack.isEmpty())
@@ -103,7 +99,7 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
       }
    }
 
-   public List<Point3DReadOnly> getPathToPoint(ConnectionPoint3D point)
+   private List<Point3DReadOnly> getPathToPoint(ConnectionPoint3D point)
    {
       List<Point3DReadOnly> path = new ArrayList<Point3DReadOnly>(){{add(point);}};
 

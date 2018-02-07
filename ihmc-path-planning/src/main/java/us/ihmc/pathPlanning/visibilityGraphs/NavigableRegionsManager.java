@@ -112,6 +112,10 @@ public class NavigableRegionsManager
                startMap.addConnectionInWorld(new Connection(start, startMap.getMapId(), goal, goalMap.getMapId()));
             }
          }
+         else
+         {
+
+         }
       }
       else
       {
