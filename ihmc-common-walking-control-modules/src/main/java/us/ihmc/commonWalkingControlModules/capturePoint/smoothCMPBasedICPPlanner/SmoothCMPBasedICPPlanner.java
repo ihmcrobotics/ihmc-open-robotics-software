@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.AbstractICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration.FootstepAngularMomentumPredictor;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CMPGeneration.ReferenceCMPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.ReferenceCoMTrajectoryGenerator;
@@ -393,6 +394,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       // TODO implement is done walking
    }
 
+   FramePoint3D tempPoint = new FramePoint3D();
    /** {@inheritDoc} */
    @Override
    protected void updateSingleSupportPlan()
@@ -435,20 +437,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
       referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
+
+      singleSupportInitialICP.set(referenceICPGenerator.getICPPositionDesiredInitialList().get(0));
+      singleSupportFinalICP.set(referenceICPGenerator.getICPPositionDesiredFinalList().get(1));
+
+      referenceCMPGenerator.getSwingCMPTrajectories().get(0).getEntryCMPLocation(tempPoint);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), 0.0, singleSupportInitialICP, tempPoint, singleSupportInitialICPVelocity);
+      referenceCMPGenerator.getSwingCMPTrajectories().get(0).getExitCMPLocation(tempPoint);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), 0.0, singleSupportFinalICP, tempPoint, singleSupportFinalICPVelocity);
+
       updateListeners();
-   }
-
-   private void printCoPTrajectories()
-   {
-      List<? extends CoPTrajectory> transferCoPTrajectory = referenceCoPGenerator.getTransferCoPTrajectories();
-      List<? extends CoPTrajectory> swingCoPTrajectory = referenceCoPGenerator.getSwingCoPTrajectories();
-
-      for (int i = 0; i < referenceCoPGenerator.getNumberOfFootstepsRegistered(); i++)
-      {
-         PrintTools.debug(transferCoPTrajectory.get(i).toString());
-         PrintTools.debug(swingCoPTrajectory.get(i).toString());
-      }
-      PrintTools.debug(transferCoPTrajectory.get(referenceCoPGenerator.getNumberOfFootstepsRegistered()).toString());
    }
 
    /** {@inheritDoc} */
@@ -517,9 +515,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    @Override
    public void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack)
    {
+      // FIXME this is probably wrong
       if (isStanding.getBooleanValue())
       {
-         // TODO: replace by CMP generator
          referenceCoPGenerator.getFinalCoPLocation(finalDesiredCapturePointPositionToPack);
       }
       else if (!isInDoubleSupport())
