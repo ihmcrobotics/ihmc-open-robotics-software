@@ -401,6 +401,7 @@ public class SmoothCMPBasedICPPlannerTest
       this.planner.initializeParameters(plannerParameters);
       this.planner.setFinalTransferDuration(defaultFinalTransferTime);
       this.planner.setOmega0(omega);
+      this.planner.ensureContinuityEnteringEachTransfer(true);
    }
 
    // Variables for storing values 

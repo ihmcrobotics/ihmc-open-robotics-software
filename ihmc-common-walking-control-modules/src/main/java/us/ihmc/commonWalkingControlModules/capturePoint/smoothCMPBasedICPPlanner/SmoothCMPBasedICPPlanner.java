@@ -45,9 +45,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    private static final double ZERO_TIME = 0.0;
 
-   private static final boolean adjustICPForSingleSupport = false;
-   private static final boolean adjustICPForInitialDoubleSupport = true;
-   private static final boolean adjustICPForEachDoubleSupport = false;
+   private boolean adjustICPForSingleSupport = false;
+   private boolean adjustICPForInitialDoubleSupport = true;
+   private boolean adjustICPForEachDoubleSupport = false;
 
    /** Desired velocity for the Center of Mass (CoM) */
    private final YoFrameVector desiredCoMVelocity = new YoFrameVector(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
@@ -716,5 +716,21 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void getDesiredCentroidalTorque(FrameVector3D desiredCentroidalTorqueToPack)
    {
       desiredCentroidalTorqueToPack.setIncludingFrame(desiredCentroidalTorque);
+   }
+
+
+   void ensureContinuityEnteringSingleSupport(boolean ensureContinuity)
+   {
+      this.adjustICPForSingleSupport = ensureContinuity;
+   }
+
+   void ensureContinuityEnteringFirstTransfer(boolean ensureContinuity)
+   {
+      this.adjustICPForInitialDoubleSupport = ensureContinuity;
+   }
+
+   void ensureContinuityEnteringEachTransfer(boolean ensureContinuity)
+   {
+      this.adjustICPForEachDoubleSupport = ensureContinuity;
    }
 }
