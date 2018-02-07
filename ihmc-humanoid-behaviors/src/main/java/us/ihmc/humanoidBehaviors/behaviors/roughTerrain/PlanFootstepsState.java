@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -14,7 +15,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -23,6 +26,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkOverTerrainState>
 {
+   private static final boolean debug = true;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoInteger planId = new YoInteger("PlanId", registry);
@@ -33,77 +38,70 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus = new AtomicReference<>();
 
    private final YoEnum<RobotSide> nextSideToSwing = new YoEnum<>("nextSideToSwing", registry, RobotSide.class, false);
-   private final YoDouble swingTime = new YoDouble("swingTime", registry);
-   private final YoDouble transferTime = new YoDouble("transferTime", registry);
+   private final YoBoolean plannerRequestHasBeenSent = new YoBoolean("plannerRequestHasBeenSent", registry);
+   private final DoubleProvider swingTime;
+
    private final CommunicationBridge communicationBridge;
 
-   PlanFootstepsState(CommunicationBridge communicationBridge, SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry)
+   PlanFootstepsState(CommunicationBridge communicationBridge, SideDependentList<MovingReferenceFrame> soleFrames, DoubleProvider swingTime, YoVariableRegistry parentRegistry)
    {
       super(WalkOverTerrainStateMachineBehavior.WalkOverTerrainState.PLAN_FOOTSTEPS);
       this.soleFrames = soleFrames;
       this.communicationBridge = communicationBridge;
+      this.swingTime = swingTime;
 
+      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) ->
+      {
+         goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.position, packet.orientation));
+      });
       communicationBridge.attachListener(PlanarRegionsListMessage.class, planarRegionsListMessage::set);
       communicationBridge.attachListener(FootstepPlanningToolboxOutputStatus.class, plannerOutputStatus::set);
 
-      swingTime.set(1.5);
-      transferTime.set(0.3);
       nextSideToSwing.set(RobotSide.LEFT);
 
       parentRegistry.addChild(registry);
    }
 
-   public void setGoalPose(FramePose3D goalPose)
-   {
-      this.goalPose.set(goalPose);
-   }
-
-   public void setSwingTime(double swingTime)
-   {
-      this.swingTime.set(swingTime);
-   }
-
    @Override
    public void doTransitionIntoAction()
    {
-      if(goalPose.get() == null)
-      {
-         throw new RuntimeException("Goal pose must be set before executing this state");
-      }
+      if(debug)
+         PrintTools.info("Entering plan state");
 
-      ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
-      wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
-      communicationBridge.sendPacket(wakeUp);
-
-      FootstepPlanningRequestPacket planningRequestPacket = createPlanningRequestPacket();
-      planningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
-      communicationBridge.sendPacket(planningRequestPacket);
+      plannerRequestHasBeenSent.set(false);
+      plannerOutputStatus.set(null);
    }
 
    @Override
    public void doAction()
    {
+      if(goalPose.get() == null)
+      {
+         return;
+      }
+
+      if(!plannerRequestHasBeenSent.getBooleanValue())
+      {
+         ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
+         wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+         communicationBridge.sendPacket(wakeUp);
+
+         FootstepPlanningRequestPacket planningRequestPacket = createPlanningRequestPacket();
+         planningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+         communicationBridge.sendPacket(planningRequestPacket);
+
+         plannerRequestHasBeenSent.set(true);
+      }
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
-      FootstepDataListMessage footstepDataListMessage = plannerOutputStatus.get().footstepDataList;
-      footstepDataListMessage.setDefaultSwingDuration(swingTime.getDoubleValue());
-      footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
-
-      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
-      communicationBridge.sendPacket(footstepDataListMessage);
    }
 
-   boolean planHasBeenReceived()
+   FootstepPlanningToolboxOutputStatus getPlannerOutput()
    {
-      return plannerOutputStatus.get() != null;
-   }
-
-   boolean planIsValidForExecution()
-   {
-      return plannerOutputStatus.get().planningResult.validForExecution();
+      return plannerOutputStatus.get();
    }
 
    private FootstepPlanningRequestPacket createPlanningRequestPacket()
