@@ -43,6 +43,7 @@ public class DijkstraVisibilityGraphPlanner
       this.startPoint = startPoint;
       this.goalPoint = goalPoint;
 
+      closestPointToGoal = startPoint;
       nodeCosts.put(startPoint, 0.0);
       closestPointToGoal = null;
       stack = new PriorityQueue<>(new ConnectionPointComparator(nodeCosts));
@@ -61,6 +62,8 @@ public class DijkstraVisibilityGraphPlanner
       {
          ConnectionPoint3D sourcePoint = stack.poll();
          HashSet<ConnectionData> connections = visibilityMap.getOrDefault(sourcePoint, new HashSet<>());
+         if(sourcePoint.distance(goalPoint) < closestPointToGoal.distance(goalPoint))
+            closestPointToGoal = sourcePoint;
 
          for (ConnectionData connectionData : connections)
          {
@@ -99,5 +102,10 @@ public class DijkstraVisibilityGraphPlanner
 
       Collections.reverse(path);
       return path;
+   }
+
+   public ConnectionPoint3D getClosestPointToGoal()
+   {
+      return closestPointToGoal;
    }
 }
