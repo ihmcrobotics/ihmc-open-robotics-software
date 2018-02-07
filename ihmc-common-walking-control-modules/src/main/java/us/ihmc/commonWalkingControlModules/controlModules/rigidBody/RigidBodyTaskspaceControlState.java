@@ -520,7 +520,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    }
 
    public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose,
-                                              JointspaceTrajectoryCommand<?, ?> jointspaceCommand, double[] initialJointPositions)
+                                              JointspaceTrajectoryCommand jointspaceCommand, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
       {

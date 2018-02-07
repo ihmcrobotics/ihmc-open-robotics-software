@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
-public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJointspaceTrajectoryMessage<T>> extends Packet<T>
+public final class AbstractJointspaceTrajectoryMessage extends Packet<AbstractJointspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of points in the trajectory.")
    public OneDoFJointTrajectoryMessage[] jointTrajectoryMessages;
@@ -27,7 +27,7 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
     * Clone constructor.
     * @param trajectoryMessage message to clone.
     */
-   public AbstractJointspaceTrajectoryMessage(T trajectoryMessage)
+   public AbstractJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage trajectoryMessage)
    {
       setUniqueId(trajectoryMessage.getUniqueId());
       setDestination(trajectoryMessage.getDestination());
@@ -117,6 +117,7 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
 
    public AbstractJointspaceTrajectoryMessage(Random random)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       queueingProperties = new QueueableMessage(random);
       jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[random.nextInt(10) + 1];
       for (int i = 0; i < getNumberOfJoints(); i++)
@@ -223,7 +224,7 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(AbstractJointspaceTrajectoryMessage other, double epsilon)
    {
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
          return false;

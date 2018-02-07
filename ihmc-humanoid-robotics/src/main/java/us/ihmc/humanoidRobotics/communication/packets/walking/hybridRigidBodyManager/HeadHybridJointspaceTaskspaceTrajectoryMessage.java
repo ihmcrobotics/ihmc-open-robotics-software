@@ -6,10 +6,10 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMess
 public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
 {
    public HeadTrajectoryMessage headTrajectoryMessage;
-   public NeckTrajectoryMessage neckTrajectoryMessage;
+   public AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage;
    public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
@@ -36,7 +36,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(new HeadTrajectoryMessage(random), new NeckTrajectoryMessage(random));
+      this(new HeadTrajectoryMessage(random), new AbstractJointspaceTrajectoryMessage(random));
    }
 
    /**
@@ -45,21 +45,23 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
-      this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getNeckTrajectoryMessage());
+      this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getJointspaceTrajectoryMessage());
       queueingProperties.set(hybridJointspaceTaskspaceMessage.queueingProperties);
+      setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
 
    /**
     * Typical constructor to use, pack the two taskspace and joint space commands.
     * If these messages conflict, the qp weights and gains will dictate the desireds
-    * @param headTrajectoryMessage
-    * @param neckTrajectoryMessage
+    * @param taskspaceTrajectoryMessage
+    * @param jointspaceTrajectoryMessage
     */
-   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, NeckTrajectoryMessage neckTrajectoryMessage)
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadTrajectoryMessage taskspaceTrajectoryMessage, AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      this.headTrajectoryMessage = headTrajectoryMessage;
-      this.neckTrajectoryMessage = neckTrajectoryMessage;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      this.headTrajectoryMessage = taskspaceTrajectoryMessage;
+      this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
+      queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
+      setUniqueId(taskspaceTrajectoryMessage.getUniqueId());
    }
 
    public HeadTrajectoryMessage getHeadTrajectoryMessage()
@@ -72,14 +74,14 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
       this.headTrajectoryMessage = headTrajectoryMessage;
    }
 
-   public NeckTrajectoryMessage getNeckTrajectoryMessage()
+   public AbstractJointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
    {
-      return neckTrajectoryMessage;
+      return jointspaceTrajectoryMessage;
    }
 
-   public void setNeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
+   public void setJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      this.neckTrajectoryMessage = neckTrajectoryMessage;
+      this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
    }
 
    @Override
@@ -100,7 +102,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
          return false;
       if (!headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
          return false;
-      if (!neckTrajectoryMessage.epsilonEquals(other.neckTrajectoryMessage, epsilon))
+      if (!jointspaceTrajectoryMessage.epsilonEquals(other.jointspaceTrajectoryMessage, epsilon))
          return false;
       return true;
    }

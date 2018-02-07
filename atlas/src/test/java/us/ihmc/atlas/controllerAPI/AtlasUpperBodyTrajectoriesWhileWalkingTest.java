@@ -186,7 +186,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
                   SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-                  armTrajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+                  armTrajectoryMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
                         trajectoryPoint.getVelocity());
                }
             }

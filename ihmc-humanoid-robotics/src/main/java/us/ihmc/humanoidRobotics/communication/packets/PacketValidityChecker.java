@@ -445,6 +445,8 @@ public abstract class PacketValidityChecker
    public static String validateArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
       String errorMessage = validatePacket(armTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateJointspaceTrajectoryMessage(armTrajectoryMessage.getJointspaceTrajectory());
       if (errorMessage != null)
          return ArmTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
@@ -454,34 +456,6 @@ public abstract class PacketValidityChecker
          String messageClassName = armTrajectoryMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s robotSide field" + packetFieldErrorType.getMessage();
          return errorMessage;
-      }
-
-      if (armTrajectoryMessage.jointTrajectoryMessages == null)
-      {
-         String messageClassName = armTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s trajectory points are empty.";
-         return errorMessage;
-      }
-
-      int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
-      if (numberOfJoints == 0)
-      {
-         String messageClassName = armTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + " is empty.";
-         return errorMessage;
-      }
-
-      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
-      {
-         OneDoFJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         errorMessage = validateOneJointTrajectoryMessage(jointTrajectory1DMessage, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = armTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = messageClassName + ": Error with the " + jointIndex + " " + OneDoFJointTrajectoryMessage.class.getSimpleName() + " : "
-                  + errorMessage;
-            return errorMessage;
-         }
       }
 
       return null;
@@ -531,40 +505,26 @@ public abstract class PacketValidityChecker
    public static String validateNeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
    {
       String errorMessage = validatePacket(neckTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateJointspaceTrajectoryMessage(neckTrajectoryMessage.getJointspaceTrajectory());
       if (errorMessage != null)
          return NeckTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-
-      if (neckTrajectoryMessage.jointTrajectoryMessages == null)
-      {
-         String messageClassName = neckTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s trajectory points are empty.";
-         return errorMessage;
-      }
-
-      int numberOfJoints = neckTrajectoryMessage.getNumberOfJoints();
-      if (numberOfJoints == 0)
-      {
-         String messageClassName = neckTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + " is empty.";
-         return errorMessage;
-      }
-
-      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
-      {
-         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = neckTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = neckTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = messageClassName + " Error with the " + jointIndex + " " + OneDoFJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
-            return errorMessage;
-         }
-      }
 
       return null;
    }
 
-   public static String validateJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage<?> message)
+   public static String validateSpineTrajectoryMessage(SpineTrajectoryMessage spineTrajectoryMessage)
+   {
+      String errorMessage = validatePacket(spineTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateJointspaceTrajectoryMessage(spineTrajectoryMessage.getJointspaceTrajectory());
+      if (errorMessage != null)
+         return SpineTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+
+      return null;
+   }
+
+   public static String validateJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage message)
    {
       String errorMessage = validatePacket(message, true);
       if (errorMessage != null)

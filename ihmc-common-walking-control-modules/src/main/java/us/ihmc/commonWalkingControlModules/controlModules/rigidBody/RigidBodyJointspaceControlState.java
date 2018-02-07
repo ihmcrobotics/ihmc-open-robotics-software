@@ -109,7 +109,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       trajectoryDone.set(jointControlHelper.doAction(timeInTrajectory));
    }
 
-   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
       if (!handleCommandInternal(command))
       {

@@ -251,8 +251,8 @@ public class WalkingControllerTest
             OneDoFJoint joint = joints[jointIdx];
             double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
-            message.setTrajectoryPoint(jointIdx, 0, 0.5, angle1, 0.0);
-            message.setTrajectoryPoint(jointIdx, 1, 1.0, angle2, 0.0);
+            message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, 0, 0.5, angle1, 0.0);
+            message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, 1, 1.0, angle2, 0.0);
          }
          commandInputManager.submitMessage(message);
       }
