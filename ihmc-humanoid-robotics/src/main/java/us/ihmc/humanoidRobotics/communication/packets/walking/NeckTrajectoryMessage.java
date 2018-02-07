@@ -3,9 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -14,15 +17,18 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/neck_trajectory")
-public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<NeckTrajectoryMessage> implements VisualizablePacket
+public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> implements VisualizablePacket
 {
+   @RosExportedField(documentation = "Trajectories for each joint.")
+   public AbstractJointspaceTrajectoryMessage jointspaceTrajectory;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public NeckTrajectoryMessage()
    {
-      super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -31,7 +37,8 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
     */
    public NeckTrajectoryMessage(Random random)
    {
-      super(random);
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(random);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -40,7 +47,14 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
     */
    public NeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
    {
-      super(neckTrajectoryMessage);
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(neckTrajectoryMessage.jointspaceTrajectory);
+      setUniqueId(neckTrajectoryMessage.getUniqueId());
+   }
+
+   public NeckTrajectoryMessage(AbstractJointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   {
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
+      setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
    }
 
    /**
@@ -51,7 +65,8 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
     */
    public NeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
-      super(trajectoryTime, desiredJointPositions);
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
    
    /**
@@ -63,7 +78,8 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
     */
    public NeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
-      super(trajectoryTime, desiredJointPositions, weights);
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -73,7 +89,8 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
     */
    public NeckTrajectoryMessage(OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
-      super(jointTrajectory1DListMessages);
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(jointTrajectory1DListMessages);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -84,7 +101,8 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
     */
    public NeckTrajectoryMessage(int numberOfJoints)
    {
-      super(numberOfJoints);
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(numberOfJoints);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -96,6 +114,39 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
     */
    public NeckTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
    {
-      super(numberOfJoints, numberOfTrajectoryPoints);
+      jointspaceTrajectory = new AbstractJointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   @Override
+   public void setUniqueId(long uniqueId)
+   {
+      super.setUniqueId(uniqueId);
+      if (jointspaceTrajectory != null)
+         jointspaceTrajectory.setUniqueId(uniqueId);
+   }
+
+   public AbstractJointspaceTrajectoryMessage getJointspaceTrajectory()
+   {
+      return jointspaceTrajectory;
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return jointspaceTrajectory.getQueueingProperties();
+   }
+
+   @Override
+   public boolean epsilonEquals(NeckTrajectoryMessage other, double epsilon)
+   {
+      if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
+         return false;
+      return true;
+   }
+
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateNeckTrajectoryMessage(this);
    }
 }

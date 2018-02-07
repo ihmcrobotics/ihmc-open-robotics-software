@@ -259,7 +259,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
       {

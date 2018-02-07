@@ -1,25 +1,25 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.Random;
+
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-import java.util.Random;
-
 public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage>
       implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
-   private final SpineTrajectoryCommand jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
+   private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final ChestTrajectoryCommand taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
 
-   public ChestHybridJointspaceTaskspaceTrajectoryCommand(ChestTrajectoryCommand taskspaceTrajectoryCommand, SpineTrajectoryCommand jointspaceTrajectoryCommand)
+   public ChestHybridJointspaceTaskspaceTrajectoryCommand(ChestTrajectoryCommand taskspaceTrajectoryCommand, JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
       super();
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
@@ -28,7 +28,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(new ChestTrajectoryCommand(random), new SpineTrajectoryCommand(random));
+      this(new ChestTrajectoryCommand(random), new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -75,7 +75,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.addTimeOffset(timeOffset);
    }
 
-   public SpineTrajectoryCommand getJointspaceTrajectoryCommand()
+   public JointspaceTrajectoryCommand getJointspaceTrajectoryCommand()
    {
       return jointspaceTrajectoryCommand;
    }

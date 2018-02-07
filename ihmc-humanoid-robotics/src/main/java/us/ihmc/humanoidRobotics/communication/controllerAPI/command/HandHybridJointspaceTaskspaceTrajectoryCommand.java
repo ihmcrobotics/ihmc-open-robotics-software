@@ -1,34 +1,36 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.Random;
+
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
-
-import java.util.Random;
 
 public class HandHybridJointspaceTaskspaceTrajectoryCommand
       extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage>
       implements FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
-   private final ArmTrajectoryCommand jointspaceTrajectoryCommand = new ArmTrajectoryCommand();
+   private RobotSide robotSide;
+   private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final HandTrajectoryCommand taskspaceTrajectoryCommand = new HandTrajectoryCommand();
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
 
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(HandTrajectoryCommand taskspaceTrajectoryCommand, ArmTrajectoryCommand jointspaceTrajectoryCommand)
+   public HandHybridJointspaceTaskspaceTrajectoryCommand(HandTrajectoryCommand taskspaceTrajectoryCommand, JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
-      super();
+      robotSide = taskspaceTrajectoryCommand.getRobotSide();
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(new HandTrajectoryCommand(random), new ArmTrajectoryCommand(random));
+      this(new HandTrajectoryCommand(random), new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -40,6 +42,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void clear()
    {
+      robotSide = null;
       jointspaceTrajectoryCommand.clear();
       taskspaceTrajectoryCommand.clear();
    }
@@ -47,7 +50,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
+      robotSide = message.getRobotSide();
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
@@ -55,7 +59,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
+      robotSide = message.getRobotSide();
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getHandTrajectoryMessage());
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }
@@ -63,12 +68,13 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public boolean isCommandValid()
    {
-      return jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid();
+      return robotSide != null && jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid();
    }
 
    @Override
    public void set(HandHybridJointspaceTaskspaceTrajectoryCommand other)
    {
+      robotSide = other.robotSide;
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
       setQueueableCommandVariables(other);
@@ -81,7 +87,12 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.addTimeOffset(timeOffset);
    }
 
-   public ArmTrajectoryCommand getJointspaceTrajectoryCommand()
+   public RobotSide getRobotSide()
+   {
+      return robotSide;
+   }
+
+   public JointspaceTrajectoryCommand getJointspaceTrajectoryCommand()
    {
       return jointspaceTrajectoryCommand;
    }
