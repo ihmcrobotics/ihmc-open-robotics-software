@@ -690,8 +690,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       isICPStuck.set(computeIsStuck());
-      if (useSmartICPIntegrator.getBooleanValue())
-         computeICPIntegralTerm();
+      computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
       feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
@@ -787,7 +786,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void computeICPIntegralTerm()
    {
-      if (isICPStuck.getBooleanValue())
+      if (useSmartICPIntegrator.getBooleanValue() && isICPStuck.getBooleanValue())
       {
          tempVector2d.set(icpError);
          tempVector2d.scale(controlDT * feedbackGains.getKi());
