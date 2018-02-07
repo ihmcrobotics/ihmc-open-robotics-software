@@ -130,18 +130,7 @@ public class NavigableRegionsManager
       ConnectionPoint3D startConnection = new ConnectionPoint3D(start, START_GOAL_ID);
       ConnectionPoint3D goalConnection = new ConnectionPoint3D(goal, START_GOAL_ID);
 
-      List<Point3DReadOnly> path;
-      if(useCustomDijkstraSearch)
-      {
-         DijkstraVisibilityGraphPlanner planner = new DijkstraVisibilityGraphPlanner();
-         planner.setVisibilityMap(visibilityMapHolders);
-         planner.initialize(startConnection, goalConnection);
-         path = planner.plan();
-      }
-      else
-      {
-         path = JGraphTools.calculatePathOnVisibilityGraph(startConnection, goalConnection, visibilityMapHolders);
-      }
+      List<Point3DReadOnly> path = parameters.getPathPlanner().calculatePath(startConnection, goalConnection, visibilityMapHolders);
 
       if (debug)
       {

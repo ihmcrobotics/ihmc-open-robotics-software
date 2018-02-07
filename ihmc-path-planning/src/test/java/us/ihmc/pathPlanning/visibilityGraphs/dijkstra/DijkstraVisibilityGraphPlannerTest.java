@@ -17,7 +17,7 @@ import static junit.framework.TestCase.assertTrue;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class DijkstraVisibilityGraphPlannerTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 3000)
    public void testSimplePlanarGraph()
    {
@@ -58,10 +58,7 @@ public class DijkstraVisibilityGraphPlannerTest
       List<VisibilityMapHolder> visibilityMapHolders = new ArrayList<>();
       visibilityMapHolders.add(visibilityMapHolder);
 
-      planner.setVisibilityMap(visibilityMapHolders);
-      planner.initialize(p1, p5);
-
-      List<Point3DReadOnly> path = planner.plan();
+      List<Point3DReadOnly> path = planner.calculatePath(p1, p5, visibilityMapHolders);
 
       assertTrue(path.size() == 4);
       assertTrue(path.get(0).equals(p1));
