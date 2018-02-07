@@ -167,10 +167,18 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.omega0 = omega0;
    }
 
+   public void setCapturePoint(FramePoint2DReadOnly capturePoint)
+   {
+      setCapturePoint(capturePoint, null);
+   }
+
    public void setCapturePoint(FramePoint2DReadOnly capturePoint, FrameVector2DReadOnly capturePointVelocity)
    {
       this.capturePoint.setIncludingFrame(capturePoint);
-      this.capturePointVelocity.setIncludingFrame(capturePointVelocity);
+      if (capturePointVelocity != null)
+         this.capturePointVelocity.setIncludingFrame(capturePointVelocity);
+      else
+         this.capturePointVelocity.setToNaN();
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
