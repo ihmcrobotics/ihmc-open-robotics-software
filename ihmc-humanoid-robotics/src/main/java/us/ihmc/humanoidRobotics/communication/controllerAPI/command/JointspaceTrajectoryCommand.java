@@ -3,12 +3,12 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.Random;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 
-public final class JointspaceTrajectoryCommand extends QueueableCommand<JointspaceTrajectoryCommand, AbstractJointspaceTrajectoryMessage>
+public final class JointspaceTrajectoryCommand extends QueueableCommand<JointspaceTrajectoryCommand, JointspaceTrajectoryMessage>
 {
    private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
 
@@ -43,7 +43,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    }
 
    @Override
-   public void set(AbstractJointspaceTrajectoryMessage message)
+   public void set(JointspaceTrajectoryMessage message)
    {
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
       set(message.getTrajectoryPointLists());
@@ -135,8 +135,8 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    }
 
    @Override
-   public Class<AbstractJointspaceTrajectoryMessage> getMessageClass()
+   public Class<JointspaceTrajectoryMessage> getMessageClass()
    {
-      return AbstractJointspaceTrajectoryMessage.class;
+      return JointspaceTrajectoryMessage.class;
    }
 }
