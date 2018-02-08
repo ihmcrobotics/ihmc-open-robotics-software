@@ -716,16 +716,16 @@ public abstract class PacketValidityChecker
 
       EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
+      if (pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getNumberOfTrajectoryPoints() == 0)
       {
          String messageClassName = pelvisHeightTrajectoryMessage.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
 
-      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getNumberOfTrajectoryPoints(); i++)
       {
-         EuclideanTrajectoryPointMessage waypoint = pelvisHeightTrajectoryMessage.getTrajectoryPoint(i);
+         EuclideanTrajectoryPointMessage waypoint = pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getTrajectoryPoint(i);
          errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {

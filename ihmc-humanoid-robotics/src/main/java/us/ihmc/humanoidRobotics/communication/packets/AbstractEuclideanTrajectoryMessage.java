@@ -23,8 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEuclideanTrajectoryMessage<T>> extends Packet<T>
-      implements Transformable, FrameBasedMessage
+public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuclideanTrajectoryMessage> implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
    public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -71,7 +70,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       queueingProperties = new QueueableMessage(random);
    }
 
-   public AbstractEuclideanTrajectoryMessage(T trajectoryMessage)
+   public AbstractEuclideanTrajectoryMessage(AbstractEuclideanTrajectoryMessage trajectoryMessage)
    {
       int numberOfPoints = trajectoryMessage.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
@@ -130,7 +129,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * set this message to the have the same contents of the other message
     * @param other the other message
     */
-   public void set(T other)
+   public void set(AbstractEuclideanTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
@@ -383,7 +382,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(AbstractEuclideanTrajectoryMessage other, double epsilon)
    {
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
       {

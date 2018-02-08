@@ -638,7 +638,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
+   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
