@@ -23,8 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
-public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends Packet<T>
-      implements Transformable, FrameBasedMessage
+public final class AbstractSE3TrajectoryMessage extends Packet<AbstractSE3TrajectoryMessage> implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -71,7 +70,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       queueingProperties = new QueueableMessage(random);
    }
 
-   public AbstractSE3TrajectoryMessage(T se3TrajectoryMessage)
+   public AbstractSE3TrajectoryMessage(AbstractSE3TrajectoryMessage se3TrajectoryMessage)
    {
       int numberOfPoints = se3TrajectoryMessage.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfPoints];
@@ -82,15 +81,15 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
       setUniqueId(se3TrajectoryMessage.getUniqueId());
       setDestination(se3TrajectoryMessage.getDestination());
-      
+
       frameInformation.set(se3TrajectoryMessage);
-      
-      if(se3TrajectoryMessage.angularWeightMatrix != null)
+
+      if (se3TrajectoryMessage.angularWeightMatrix != null)
       {
          angularWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.angularWeightMatrix);
       }
-      
-      if(se3TrajectoryMessage.linearWeightMatrix != null)
+
+      if (se3TrajectoryMessage.linearWeightMatrix != null)
       {
          linearWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.linearWeightMatrix);
       }
@@ -104,7 +103,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       queueingProperties.set(se3TrajectoryMessage.queueingProperties);
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
+                                       long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -114,7 +114,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
+                                       ReferenceFrame trajectoryReferenceFrame)
    {
       this(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame.getNameBasedHashCode());
    }
@@ -125,7 +126,13 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfTrajectoryPoints];
    }
 
-   public void set(T other)
+   public AbstractSE3TrajectoryMessage(int numberOfPoints, ReferenceFrame trajectoryFrame)
+   {
+      this(numberOfPoints);
+      getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
+   }
+
+   public void set(AbstractSE3TrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
@@ -145,7 +152,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       {
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages[i];
          trajectoryPointListToPack.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation,
-               se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
+                                                      se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
       }
    }
 
@@ -164,8 +171,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is expressed in world frame.
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
-         Vector3DReadOnly angularVelocity, ReferenceFrame expressedInReferenceFrame)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, QuaternionReadOnly orientation,
+                                        Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity, ReferenceFrame expressedInReferenceFrame)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -187,8 +194,8 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
     *           point. It is expressed in world frame.
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
-         Vector3DReadOnly angularVelocity, long expressedInReferenceFrameId)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, QuaternionReadOnly orientation,
+                                        Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity, long expressedInReferenceFrameId)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -244,17 +251,17 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    /**
     * Sets the weight matrix to use for executing this message.
     * <p>
-    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the end-effector.
-    * When it is not provided, or when the weights are set to Double.NaN, the controller will use the default QP Weights
-    * set for each axis.
+    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the
+    * end-effector. When it is not provided, or when the weights are set to Double.NaN, the
+    * controller will use the default QP Weights set for each axis.
     * </p>
     * <p>
     * The selection frame coming along with the given weight matrix is used to determine to what
     * reference frame the weights are referring to.
     * </p>
     *
-    * @param weightMatrix the selection matrix to use when executing this trajectory message. parameter is not
-    *           modified.
+    * @param weightMatrix the selection matrix to use when executing this trajectory message.
+    *           parameter is not modified.
     */
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
@@ -406,12 +413,12 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException(
-               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
+               + getNumberOfTrajectoryPoints());
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(AbstractSE3TrajectoryMessage other, double epsilon)
    {
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
       {

@@ -14,23 +14,23 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
 {
    private RobotSide robotSide;
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
-   private final HandTrajectoryCommand taskspaceTrajectoryCommand = new HandTrajectoryCommand();
+   private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
 
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(HandTrajectoryCommand taskspaceTrajectoryCommand,
+   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
                                                          JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
-      robotSide = taskspaceTrajectoryCommand.getRobotSide();
+      this.robotSide = robotSide;
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(new HandTrajectoryCommand(random), new JointspaceTrajectoryCommand(random));
+      this(RobotSide.generateRandomRobotSide(random), new SE3TrajectoryControllerCommand(random), new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -52,7 +52,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       robotSide = message.getRobotSide();
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
@@ -60,7 +60,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       robotSide = message.getRobotSide();
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(resolver, message.getHandTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
@@ -87,7 +87,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       return jointspaceTrajectoryCommand;
    }
 
-   public HandTrajectoryCommand getTaskspaceTrajectoryCommand()
+   public SE3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
    }

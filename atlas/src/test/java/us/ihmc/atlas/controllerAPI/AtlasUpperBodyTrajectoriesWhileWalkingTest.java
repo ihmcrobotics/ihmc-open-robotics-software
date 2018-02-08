@@ -124,10 +124,10 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          Quaternion orientation = new Quaternion(handPosition.getOrientation());
 
          HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage(robotSide, 1);
-         handHoldMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
-         handHoldMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+         handHoldMessage.getSE3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
+         handHoldMessage.getSE3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
          Vector3D zeroVelocity = new Vector3D();
-         handHoldMessage.setTrajectoryPoint(0, 11.0, position, orientation, zeroVelocity, zeroVelocity, worldFrame);
+         handHoldMessage.getSE3Trajectory().setTrajectoryPoint(0, 11.0, position, orientation, zeroVelocity, zeroVelocity, worldFrame);
          drcSimulationTestHelper.send(handHoldMessage);
       }
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToCompleteWalking);

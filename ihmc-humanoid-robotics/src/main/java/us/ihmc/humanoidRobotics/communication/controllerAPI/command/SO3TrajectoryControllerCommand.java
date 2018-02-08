@@ -76,6 +76,16 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       other.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
+   public void set(SE3TrajectoryControllerCommand other)
+   {
+      trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
+      trajectoryFrame = other.getTrajectoryFrame();
+      useCustomControlFrame = other.useCustomControlFrame();
+      other.getControlFramePose(controlFramePoseInBodyFrame);
+      setQueueableCommandVariables(other);
+      selectionMatrix.set(other.getSelectionMatrix().getAngularPart());
+   }
+
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage message)
    {

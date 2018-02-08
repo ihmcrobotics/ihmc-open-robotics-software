@@ -76,8 +76,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       int numberOfTrajectoryPoints = solution.getRobotConfigurations().length;
       HandTrajectoryMessage trajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
 
-      trajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-      trajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+      trajectoryMessage.getSE3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+      trajectoryMessage.getSE3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
       // message params.
       ReferenceFrame trajectoryFrame = worldFrame;
@@ -123,7 +123,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
-         trajectoryMessage.setTrajectoryPoint(i, time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity, desiredAngularVelocity,
+         trajectoryMessage.getSE3Trajectory().setTrajectoryPoint(i, time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity, desiredAngularVelocity,
                                               trajectoryFrame);
       }
 
@@ -184,8 +184,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       int numberOfTrajectoryPoints = solution.getRobotConfigurations().length;
       PelvisTrajectoryMessage trajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
 
-      trajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-      trajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+      trajectoryMessage.getSE3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+      trajectoryMessage.getSE3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
       // message params.
       ReferenceFrame trajectoryFrame = worldFrame;
@@ -231,7 +231,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
-         trajectoryMessage.setTrajectoryPoint(i, time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity, desiredAngularVelocity,
+         trajectoryMessage.getSE3Trajectory().setTrajectoryPoint(i, time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity, desiredAngularVelocity,
                                               trajectoryFrame);
       }
 

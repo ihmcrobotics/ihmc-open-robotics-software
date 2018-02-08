@@ -57,12 +57,8 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
     */
    public void set(PelvisTrajectoryCommand command)
    {
-      so3Trajectory.clear(command.getDataFrame());
-      so3Trajectory.setTrajectoryFrame(command.getTrajectoryFrame());
-      so3Trajectory.getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
       setEnableUserPelvisControlDuringWalking(command.isEnableUserPelvisControlDuringWalking());
-      so3Trajectory.setQueueableCommandVariables(command);
-      so3Trajectory.setSelectionMatrix(command.getSelectionMatrix().getAngularPart());
+      so3Trajectory.set(command.getSE3Trajectory());
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()
