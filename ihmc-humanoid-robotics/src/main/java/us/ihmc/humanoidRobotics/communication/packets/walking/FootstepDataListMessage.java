@@ -10,7 +10,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -26,7 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/footstep_list")
-public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
+public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>
 {
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();

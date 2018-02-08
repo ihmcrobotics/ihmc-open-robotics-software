@@ -5,7 +5,6 @@ import java.util.Random;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
@@ -20,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/arm_trajectory")
-public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implements VisualizablePacket
+public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;

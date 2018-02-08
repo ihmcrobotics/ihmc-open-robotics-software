@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -11,14 +10,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation = "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
       + " A hermite based curve (third order) is used to interpolate the orientations."
       + " To excute a simple trajectory to reach a desired chest orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/chest_trajectory")
-public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> implements VisualizablePacket, EpsilonComparable<ChestTrajectoryMessage>
+public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> implements EpsilonComparable<ChestTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
    public SO3TrajectoryMessage so3Trajectory;

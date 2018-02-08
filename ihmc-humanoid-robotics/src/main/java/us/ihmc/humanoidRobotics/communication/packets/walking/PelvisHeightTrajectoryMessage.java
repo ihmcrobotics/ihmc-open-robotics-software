@@ -4,7 +4,6 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,13 +15,12 @@ import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMe
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 
 @RosMessagePacket(documentation = "This mesage commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/pelvis_height_trajectory")
 public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage>
-      implements VisualizablePacket, TransformableDataObject<PelvisHeightTrajectoryMessage>, FrameBasedMessage
+      implements TransformableDataObject<PelvisHeightTrajectoryMessage>, FrameBasedMessage
 {
    /**
     * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the

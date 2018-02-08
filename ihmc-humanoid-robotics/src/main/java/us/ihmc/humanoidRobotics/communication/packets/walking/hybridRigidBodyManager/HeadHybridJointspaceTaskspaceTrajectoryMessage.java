@@ -3,18 +3,17 @@ package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMa
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_head_trajectory")
-public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
+public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements FrameBasedMessage
 {
    public SO3TrajectoryMessage taskspaceTrajectoryMessage;
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
