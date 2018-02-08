@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
@@ -78,6 +79,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPWithTimeFreezingPlannerParameters icpPlannerParameters;
+   private final JumpControllerParameters jumpControllerParameters;
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
@@ -105,9 +107,20 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
    {
+      this(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, highLevelControllerParameters, walkingControllerParameters,
+           icpPlannerParameters, null);
+   }
+
+   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
+                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
+                                             HighLevelControllerParameters highLevelControllerParameters,
+                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters icpPlannerParameters,
+                                             JumpControllerParameters jumpControllerParameteres)
+   {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.icpPlannerParameters = icpPlannerParameters;
+      this.jumpControllerParameters = jumpControllerParameteres;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -271,6 +284,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
    }
 
+   public void useDefaultJumpControllerState()
+   {
+      JumpControllerStateFactory controllerStateFactory = new JumpControllerStateFactory();
+
+      controllerStateFactories.add(controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.JUMPING, controllerStateFactory);
+   }
+
    public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
    {
       controllerStateFactories.add(customControllerStateFactory);
@@ -365,7 +386,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager, initialControllerState,
                                                                                   highLevelControllerParameters, walkingControllerParameters,
-                                                                                  icpPlannerParameters, requestedHighLevelControllerState,
+                                                                                  icpPlannerParameters, jumpControllerParameters, requestedHighLevelControllerState,
                                                                                   controllerFactoriesMap, stateTransitionFactories, managerFactory,
                                                                                   controllerToolbox, centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder, lowLevelControllerOutput);

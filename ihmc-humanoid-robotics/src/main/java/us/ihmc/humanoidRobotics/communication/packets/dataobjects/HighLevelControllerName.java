@@ -23,7 +23,9 @@ public enum HighLevelControllerName
    @RosEnumValueDocumentation(documentation = "The robot is peforming an automated diagnostic routine")
    DIAGNOSTICS,
    @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")
-   CALIBRATION;
+   CALIBRATION,
+   @RosEnumValueDocumentation(documentation = "whole body force control for planning and executing jumps")
+   JUMPING;
 
    public static final HighLevelControllerName[] values = values();
 }

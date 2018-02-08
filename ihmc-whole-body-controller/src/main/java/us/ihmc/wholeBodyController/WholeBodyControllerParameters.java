@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController;
 import java.io.InputStream;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -23,6 +24,11 @@ public interface WholeBodyControllerParameters
    public StateEstimatorParameters getStateEstimatorParameters();
 
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters();
+
+   public default JumpControllerParameters getJumpControlParameters()
+   {
+      return null;
+   }
 
 	public WalkingControllerParameters getWalkingControllerParameters();
 

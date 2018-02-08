@@ -18,6 +18,7 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
@@ -101,6 +102,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
+   private final JumpControllerParameters jumpControlParameters;
    private final RobotContactPointParameters contactPointParameters;
 
    private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
@@ -143,6 +145,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      this.jumpControlParameters = robotModel.getJumpControlParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
@@ -404,7 +407,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
-                                                                 highLevelControllerParameters, walkingControllerParameters, capturePointPlannerParameters);
+                                                                 highLevelControllerParameters, walkingControllerParameters, capturePointPlannerParameters, jumpControlParameters);
       setupHighLevelStates(controllerFactory);
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
@@ -461,9 +464,19 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
+      if(jumpControlParameters != null)
+      {
+         controllerFactory.useDefaultJumpControllerState();
+      }
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
+      
+      if(jumpControlParameters != null)
+      {
+         controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, JUMPING);
+         controllerFactory.addRequestableTransition(JUMPING, DO_NOTHING_BEHAVIOR);
+      }
    }
 
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
