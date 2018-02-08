@@ -115,6 +115,14 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
    }
 
    @Override
+   public void setUniqueId(long uniqueId)
+   {
+      super.setUniqueId(uniqueId);
+      if (se3Trajectory != null)
+         se3Trajectory.setUniqueId(uniqueId);
+   }
+
+   @Override
    public boolean epsilonEquals(FootTrajectoryMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)
