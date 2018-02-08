@@ -820,10 +820,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      if (!command.getSelectionMatrix().isLinearZSelected())
+      if (!command.getSE3Trajectory().getSelectionMatrix().isLinearZSelected())
          return; // The user does not want to control the height, do nothing.
 
-      command.changeFrame(worldFrame);
+      command.getSE3Trajectory().changeFrame(worldFrame);
       tempPelvisHeightTrajectoryCommand.set(command);
       handlePelvisHeightTrajectoryCommand(tempPelvisHeightTrajectoryCommand);
    }

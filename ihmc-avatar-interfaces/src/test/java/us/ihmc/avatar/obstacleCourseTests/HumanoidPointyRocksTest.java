@@ -436,7 +436,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       footPosition.setZ(footPosition.getZ() + 0.1);
 
-      liftFootCommand.addTrajectoryPoint(1.0, new Point3D(footPosition), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+      liftFootCommand.getSE3Trajectory().addTrajectoryPoint(1.0, new Point3D(footPosition), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
       queuedControllerCommands.add(liftFootCommand);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);

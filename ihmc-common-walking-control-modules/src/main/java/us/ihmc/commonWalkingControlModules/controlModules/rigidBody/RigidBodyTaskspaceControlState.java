@@ -519,7 +519,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose,
+   public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand command, FramePose3D initialPose,
                                               JointspaceTrajectoryCommand jointspaceCommand, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
@@ -547,7 +547,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
+   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
