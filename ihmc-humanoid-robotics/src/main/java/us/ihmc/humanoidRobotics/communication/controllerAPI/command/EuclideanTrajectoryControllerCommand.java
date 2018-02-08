@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractEuclideanTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
@@ -19,8 +19,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public final class EuclideanTrajectoryControllerCommand extends QueueableCommand<EuclideanTrajectoryControllerCommand, AbstractEuclideanTrajectoryMessage>
-      implements FrameBasedCommand<AbstractEuclideanTrajectoryMessage>
+public final class EuclideanTrajectoryControllerCommand extends QueueableCommand<EuclideanTrajectoryControllerCommand, EuclideanTrajectoryMessage>
+      implements FrameBasedCommand<EuclideanTrajectoryMessage>
 {
    private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
@@ -83,7 +83,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, AbstractEuclideanTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, EuclideanTrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
@@ -102,7 +102,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    }
 
    @Override
-   public void set(AbstractEuclideanTrajectoryMessage message)
+   public void set(EuclideanTrajectoryMessage message)
    {
       message.getTrajectoryPoints(trajectoryPointList);
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
@@ -112,7 +112,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       message.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, AbstractEuclideanTrajectoryMessage message)
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, EuclideanTrajectoryMessage message)
    {
       this.trajectoryFrame = trajectoryFrame;
       clear(dataFrame);
@@ -278,8 +278,8 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    }
 
    @Override
-   public Class<AbstractEuclideanTrajectoryMessage> getMessageClass()
+   public Class<EuclideanTrajectoryMessage> getMessageClass()
    {
-      return AbstractEuclideanTrajectoryMessage.class;
+      return EuclideanTrajectoryMessage.class;
    }
 }

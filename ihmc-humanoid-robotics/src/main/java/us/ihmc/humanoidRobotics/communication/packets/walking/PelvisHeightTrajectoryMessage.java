@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractEuclideanTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
@@ -37,7 +37,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     **/
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The position trajectory information.")
-   public AbstractEuclideanTrajectoryMessage euclideanTrajectory;
+   public EuclideanTrajectoryMessage euclideanTrajectory;
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -53,7 +53,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
    public PelvisHeightTrajectoryMessage(Random random)
    {
-      euclideanTrajectory = new AbstractEuclideanTrajectoryMessage(random);
+      euclideanTrajectory = new EuclideanTrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       euclideanTrajectory.linearSelectionMatrix = new SelectionMatrix3DMessage();
       euclideanTrajectory.linearSelectionMatrix.setAxisSelection(false, false, true);
@@ -66,7 +66,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     */
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
-      euclideanTrajectory = new AbstractEuclideanTrajectoryMessage(pelvisHeightTrajectoryMessage.euclideanTrajectory);
+      euclideanTrajectory = new EuclideanTrajectoryMessage(pelvisHeightTrajectoryMessage.euclideanTrajectory);
       setUniqueId(pelvisHeightTrajectoryMessage.getUniqueId());
       setDestination(pelvisHeightTrajectoryMessage.getDestination());
 
@@ -87,7 +87,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     */
    public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight, ReferenceFrame trajectoryReferenceFrame, ReferenceFrame dataReferenceFrame)
    {
-      euclideanTrajectory = new AbstractEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), trajectoryReferenceFrame.getNameBasedHashCode());
+      euclideanTrajectory = new EuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), trajectoryReferenceFrame.getNameBasedHashCode());
       euclideanTrajectory.frameInformation.setDataReferenceFrame(dataReferenceFrame);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
@@ -104,7 +104,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     */
    public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight)
    {
-      euclideanTrajectory = new AbstractEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), ReferenceFrame.getWorldFrame());
+      euclideanTrajectory = new EuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), ReferenceFrame.getWorldFrame());
       euclideanTrajectory.frameInformation.setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
@@ -123,7 +123,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     */
    public PelvisHeightTrajectoryMessage(int numberOfTrajectoryPoints)
    {
-      euclideanTrajectory = new AbstractEuclideanTrajectoryMessage(numberOfTrajectoryPoints);
+      euclideanTrajectory = new EuclideanTrajectoryMessage(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
       euclideanTrajectory.linearSelectionMatrix = new SelectionMatrix3DMessage();
@@ -205,7 +205,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       return euclideanTrajectory.frameInformation;
    }
 
-   public AbstractEuclideanTrajectoryMessage getEuclideanTrajectory()
+   public EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclideanTrajectory;
    }
