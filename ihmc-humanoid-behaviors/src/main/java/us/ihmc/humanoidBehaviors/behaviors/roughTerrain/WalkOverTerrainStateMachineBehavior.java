@@ -13,11 +13,14 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkOverTerrainGoalPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
 import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -42,14 +45,14 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final YoDouble swingTime = new YoDouble("swingTime", registry);
    private final YoDouble transferTime = new YoDouble("transferTime", registry);
 
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, YoDouble yoTime, HumanoidReferenceFrames referenceFrames)
+   public WalkOverTerrainStateMachineBehavior(CommunicationBridgeInterface communicationBridge, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, HumanoidReferenceFrames referenceFrames)
    {
       super(communicationBridge);
 
       stateMachine = new StateMachine<>(getName() + "StateMachine", getName() + "StateMachineSwitchTime", WalkOverTerrainState.class, yoTime, registry);
 
       waitState = new WaitState(yoTime);
-      planPathState = new PlanFootstepsState(communicationBridge, referenceFrames.getSoleFrames(), swingTime, registry);
+      planPathState = new PlanFootstepsState(communicationBridge, referenceFrames.getSoleFrames(), wholeBodyControllerParameters, swingTime, registry);
       walkingState = new WalkingState(communicationBridge);
 
       communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) ->
@@ -208,7 +211,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    {
       private final AtomicReference<FootstepStatus> footstepStatusMessage = new AtomicReference<>();
 
-      WalkingState(CommunicationBridge communicationBridge)
+      WalkingState(CommunicationBridgeInterface communicationBridge)
       {
          super(WalkOverTerrainState.WALKING);
          communicationBridge.attachListener(FootstepStatus.class, footstepStatusMessage::set);
