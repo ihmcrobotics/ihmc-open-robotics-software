@@ -3,15 +3,18 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.walking.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
 import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -83,6 +86,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      sendPacketToUI(new TextToSpeechPacket("Starting walk over terrain behavior"));
    }
 
    @Override
@@ -122,7 +126,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       FramePose3D goalPoseInMidFeetZUpFrame = new FramePose3D(goalPose.get());
       goalPoseInMidFeetZUpFrame.changeFrame(midFeetZUpFrame);
       double goalXYDistance = EuclidGeometryTools.pythagorasGetHypotenuse(goalPoseInMidFeetZUpFrame.getX(), goalPoseInMidFeetZUpFrame.getY());
-      return goalXYDistance < 0.2;
+      double yawFromGoal = Math.abs(EuclidCoreTools.trimAngleMinusPiToPi(goalPoseInMidFeetZUpFrame.getYaw()));
+      return goalXYDistance < 0.2 && yawFromGoal < Math.toRadians(25.0);
    }
 
    class WaitState extends State<WalkOverTerrainState>
@@ -165,6 +170,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          {
             waitTime.set(2.0 * waitTime.getDoubleValue());
          }
+
+         sendPacketToUI(new TextToSpeechPacket("Waiting for " + waitTime.getDoubleValue() + " seconds"));
       }
 
       private void lookDown()
@@ -172,7 +179,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
          Quaternion headOrientation = new Quaternion();
          headOrientation.set(orientationAxisAngle);
-         HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(2.0, headOrientation, ReferenceFrame.getWorldFrame(), chestFrame);
+         HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(), chestFrame);
          headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER);
          sendPacket(headTrajectoryMessage);
       }
@@ -213,6 +220,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       @Override
       public void doTransitionIntoAction()
       {
+         sendPacketToUI(new TextToSpeechPacket("Walking"));
+
          // TODO adjust com based on upcoming footsteps
       }
 
