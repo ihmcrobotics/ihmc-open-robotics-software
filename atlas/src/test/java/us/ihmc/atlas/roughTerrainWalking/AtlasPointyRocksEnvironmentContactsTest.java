@@ -48,7 +48,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 210.0) // fix the contacts
-   @Test(timeout = 420000)
+   @Test(timeout = 690000)
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
       try
