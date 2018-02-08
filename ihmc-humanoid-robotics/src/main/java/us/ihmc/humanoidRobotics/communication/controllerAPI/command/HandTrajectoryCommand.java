@@ -50,7 +50,7 @@ public class HandTrajectoryCommand
    public void set(HandTrajectoryCommand other)
    {
       se3Trajectory.set(other.se3Trajectory);
-      setPropertiesOnly(other);
+      robotSide = other.robotSide;
    }
 
    /**

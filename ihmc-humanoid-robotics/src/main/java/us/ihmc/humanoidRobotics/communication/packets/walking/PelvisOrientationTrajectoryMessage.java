@@ -12,6 +12,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This message commands the controller to move in taskspace the pelvis to the desired orientation while going through the specified trajectory points."
@@ -20,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
       + " To excute a normal trajectory to reach a desired pelvis orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/pelvis_orientation_trajectory")
 public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientationTrajectoryMessage>
-      implements VisualizablePacket, EpsilonComparable<PelvisOrientationTrajectoryMessage>
+      implements VisualizablePacket, EpsilonComparable<PelvisOrientationTrajectoryMessage>, FrameBasedMessage
 {
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The orientation trajectory information.")
@@ -116,6 +118,12 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    public SO3TrajectoryMessage getSO3Trajectory()
    {
       return so3Trajectory;
+   }
+
+   @Override
+   public FrameInformation getFrameInformation()
+   {
+      return so3Trajectory.getFrameInformation();
    }
 
    @Override
