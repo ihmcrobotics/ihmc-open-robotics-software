@@ -297,7 +297,7 @@ public interface FootstepPlannerParameters
     */
    public default boolean getReturnBestEffortPlan()
    {
-      return false;
+      return true;
    }
 
    /**
@@ -306,7 +306,7 @@ public interface FootstepPlannerParameters
     */
    public default int getMinimumStepsForBestEffortPlan()
    {
-      return 0;
+      return 3;
    }
 
    /**
