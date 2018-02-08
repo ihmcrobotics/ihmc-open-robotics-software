@@ -115,7 +115,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rotationFrozenOffset.setIdentity();
 
       // R_{measurementFrame}^{world}
-      imuProcessedOutput.getOrientationMeasurement(orientationMeasurement);
+      orientationMeasurement.set(imuProcessedOutput.getOrientationMeasurement());
       transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
 
       // R_{root}^{measurementFrame}
@@ -149,7 +149,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    public void updateForFrozenState()
    {
       // R_{measurementFrame}^{world}
-      imuProcessedOutput.getOrientationMeasurement(orientationMeasurement);
+      orientationMeasurement.set(imuProcessedOutput.getOrientationMeasurement());
       transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
 
       // R_{root}^{measurementFrame}
@@ -199,7 +199,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private void updateRootJointRotation()
    {
       // R_{measurementFrame}^{world}
-      imuProcessedOutput.getOrientationMeasurement(orientationMeasurement);
+      orientationMeasurement.set(imuProcessedOutput.getOrientationMeasurement());
       transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
 
       // R_{root}^{measurementFrame}
@@ -257,7 +257,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       twistRootJointFrameRelativeToMeasurementLink.getAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
 
       // omega_{measurementLink}^{measurementFrame, world}
-      imuProcessedOutput.getAngularVelocityMeasurement(angularVelocityMeasurement);
+      angularVelocityMeasurement.set(imuProcessedOutput.getAngularVelocityMeasurement());
       if (imuBiasProvider != null)
       {
          imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput, angularVelocityMeasurementBias);
