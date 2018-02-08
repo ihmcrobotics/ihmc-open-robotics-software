@@ -12,6 +12,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
@@ -22,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/pelvis_trajectory")
-public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> implements VisualizablePacket, EpsilonComparable<PelvisTrajectoryMessage>
+public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> implements VisualizablePacket, EpsilonComparable<PelvisTrajectoryMessage>, FrameBasedMessage
 {
    private static final long WORLD_FRAME_HASH_CODE = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
@@ -107,6 +109,12 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> imp
    public SE3TrajectoryMessage getSE3Trajectory()
    {
       return se3Trajectory;
+   }
+
+   @Override
+   public FrameInformation getFrameInformation()
+   {
+      return se3Trajectory.getFrameInformation();
    }
 
    @Override

@@ -12,6 +12,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
+import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
@@ -21,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/head_trajectory")
-public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> implements VisualizablePacket, EpsilonComparable<HeadTrajectoryMessage>
+public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> implements VisualizablePacket, EpsilonComparable<HeadTrajectoryMessage>, FrameBasedMessage
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
    public SO3TrajectoryMessage so3Trajectory;
@@ -106,6 +108,12 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
       super.setUniqueId(uniqueId);
       if (so3Trajectory != null)
          so3Trajectory.setUniqueId(uniqueId);
+   }
+
+   @Override
+   public FrameInformation getFrameInformation()
+   {
+      return so3Trajectory.getFrameInformation();
    }
 
    public SO3TrajectoryMessage getSO3Trajectory()
