@@ -4,38 +4,42 @@
     <uniqueId>0</uniqueId>
     <destination>0</destination>
     <source>0</source>
-    <previousMessageId>0</previousMessageId>
-    <taskspaceTrajectoryPoints>
-      <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
-        <uniqueId>0</uniqueId>
-        <destination>0</destination>
-        <time>2.0</time>
-        <position>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.3</z>
-        </position>
-        <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
-        </orientation>
-        <linearVelocity>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-        </linearVelocity>
-        <angularVelocity>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-        </angularVelocity>
-      </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
-    </taskspaceTrajectoryPoints>
-    <trajectoryReferenceFrameId>0</trajectoryReferenceFrameId>
-    <dataReferenceFrameId>0</dataReferenceFrameId>
-    <useCustomControlFrame>false</useCustomControlFrame>
+    <se3Trajectory>
+      <uniqueId>0</uniqueId>
+      <destination>0</destination>
+      <previousMessageId>0</previousMessageId>
+      <taskspaceTrajectoryPoints>
+        <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+          <uniqueId>0</uniqueId>
+          <destination>0</destination>
+          <time>2.0</time>
+          <position>
+            <x>0.0</x>
+            <y>0.0</y>
+            <z>0.3</z>
+          </position>
+          <orientation>
+            <x>0.0</x>
+            <y>0.0</y>
+            <z>0.0</z>
+            <s>1.0</s>
+          </orientation>
+          <linearVelocity>
+            <x>0.0</x>
+            <y>0.0</y>
+            <z>0.0</z>
+          </linearVelocity>
+          <angularVelocity>
+            <x>0.0</x>
+            <y>0.0</y>
+            <z>0.0</z>
+          </angularVelocity>
+        </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+      </taskspaceTrajectoryPoints>
+      <trajectoryReferenceFrameId>0</trajectoryReferenceFrameId>
+      <dataReferenceFrameId>0</dataReferenceFrameId>
+      <useCustomControlFrame>false</useCustomControlFrame>
+    </se3Trajectory>
     <robotSide>RIGHT</robotSide>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
   <long>1492627391854</long>
