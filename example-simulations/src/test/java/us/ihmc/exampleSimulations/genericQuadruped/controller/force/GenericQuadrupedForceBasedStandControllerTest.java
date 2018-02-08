@@ -10,7 +10,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceBasedStandContro
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForceBasedStandControllerTest
 {
    @Override
