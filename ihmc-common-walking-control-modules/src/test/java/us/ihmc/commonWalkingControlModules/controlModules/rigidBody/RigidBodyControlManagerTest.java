@@ -39,7 +39,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
@@ -145,7 +145,7 @@ public class RigidBodyControlManagerTest
       Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-      AbstractSE3TrajectoryMessage message = new AbstractSE3TrajectoryMessage(1, worldFrame);
+      SE3TrajectoryMessage message = new SE3TrajectoryMessage(1, worldFrame);
       message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
 
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
@@ -294,7 +294,7 @@ public class RigidBodyControlManagerTest
          Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-         AbstractSE3TrajectoryMessage message = new AbstractSE3TrajectoryMessage(1, worldFrame);
+         SE3TrajectoryMessage message = new SE3TrajectoryMessage(1, worldFrame);
          message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
          message.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE, -1);
 
@@ -404,7 +404,7 @@ public class RigidBodyControlManagerTest
       Point3D controlFramePosition = EuclidCoreRandomTools.nextPoint3D(random);
       Quaternion controlFrameOrientation = EuclidCoreRandomTools.nextQuaternion(random);
 
-      AbstractSE3TrajectoryMessage message = new AbstractSE3TrajectoryMessage(1, worldFrame);
+      SE3TrajectoryMessage message = new SE3TrajectoryMessage(1, worldFrame);
       message.setControlFramePosition(controlFramePosition);
       message.setControlFrameOrientation(controlFrameOrientation);
       message.setUseCustomControlFrame(true);

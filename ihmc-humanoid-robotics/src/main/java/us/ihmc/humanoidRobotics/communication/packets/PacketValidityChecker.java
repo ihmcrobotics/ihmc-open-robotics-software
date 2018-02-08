@@ -522,7 +522,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateSE3TrajectoryMessage(AbstractSE3TrajectoryMessage message)
+   public static String validateSE3TrajectoryMessage(SE3TrajectoryMessage message)
    {
       String errorMessage = validatePacket(message, true);
       if (errorMessage != null)

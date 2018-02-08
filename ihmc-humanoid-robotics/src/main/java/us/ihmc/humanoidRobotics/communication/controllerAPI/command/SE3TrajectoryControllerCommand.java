@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
@@ -20,8 +20,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3TrajectoryControllerCommand, AbstractSE3TrajectoryMessage>
-      implements FrameBasedCommand<AbstractSE3TrajectoryMessage>
+public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3TrajectoryControllerCommand, SE3TrajectoryMessage>
+      implements FrameBasedCommand<SE3TrajectoryMessage>
 {
    private final FrameSE3TrajectoryPointList trajectoryPointList = new FrameSE3TrajectoryPointList();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
@@ -85,7 +85,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, AbstractSE3TrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
@@ -106,7 +106,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    }
 
    @Override
-   public void set(AbstractSE3TrajectoryMessage message)
+   public void set(SE3TrajectoryMessage message)
    {
       message.getTrajectoryPoints(trajectoryPointList);
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
@@ -116,7 +116,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       message.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, AbstractSE3TrajectoryMessage message)
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, SE3TrajectoryMessage message)
    {
       this.trajectoryFrame = trajectoryFrame;
       clear(dataFrame);
@@ -283,8 +283,8 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    }
 
    @Override
-   public Class<AbstractSE3TrajectoryMessage> getMessageClass()
+   public Class<SE3TrajectoryMessage> getMessageClass()
    {
-      return AbstractSE3TrajectoryMessage.class;
+      return SE3TrajectoryMessage.class;
    }
 }
