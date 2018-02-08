@@ -20,7 +20,7 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    @Override
    public double getMaximumStepReach()
    {
-      return 0.45;
+      return 0.4;
    }
 
    @Override
