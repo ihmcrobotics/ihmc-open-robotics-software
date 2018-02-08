@@ -47,8 +47,8 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 137.5, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT}) // moved to in develop until we have polygon to polygon contacts
-   @Test(timeout = 690000)
+   @ContinuousIntegrationTest(estimatedDuration = 210.0) // fix the contacts
+   @Test(timeout = 420000)
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
       try
@@ -68,7 +68,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 69.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT}) // moved to in develop until we have polygon to polygon contacts
+   @ContinuousIntegrationTest(estimatedDuration = 100.0) // fix the contacts
    @Test(timeout = 350000)
    public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
    {
