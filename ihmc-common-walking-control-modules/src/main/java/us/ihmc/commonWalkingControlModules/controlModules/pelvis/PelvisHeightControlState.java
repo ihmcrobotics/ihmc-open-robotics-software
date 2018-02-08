@@ -145,7 +145,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose3D initialPose)
    {
-      if (command.useCustomControlFrame())
+      if (command.getEuclideanTrajectory().useCustomControlFrame())
       {
          tempPelvisTrajectoryCommand.getSE3Trajectory().getControlFramePose(controlFrame);
          taskspaceControlState.setControlFramePose(controlFrame);
@@ -163,7 +163,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
 
       initialPose.prependTranslation(tempPoint);
 
-      return taskspaceControlState.handleEuclideanTrajectoryCommand(command, initialPose);
+      return taskspaceControlState.handleEuclideanTrajectoryCommand(command.getEuclideanTrajectory(), initialPose);
    }
 
    /**
