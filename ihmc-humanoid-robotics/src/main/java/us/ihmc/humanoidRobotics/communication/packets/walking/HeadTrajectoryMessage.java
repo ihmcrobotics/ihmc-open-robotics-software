@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> implements VisualizablePacket, EpsilonComparable<HeadTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public AbstractSO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory;
 
    /**
     * Empty constructor for serialization.
@@ -41,7 +41,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
     */
    public HeadTrajectoryMessage(Random random)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(random);
+      so3Trajectory = new SO3TrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -51,7 +51,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
     */
    public HeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(headTrajectoryMessage.so3Trajectory);
+      so3Trajectory = new SO3TrajectoryMessage(headTrajectoryMessage.so3Trajectory);
       setUniqueId(headTrajectoryMessage.getUniqueId());
       setDestination(headTrajectoryMessage.getDestination());
    }
@@ -71,7 +71,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
     */
    public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
+      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -83,7 +83,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
     */
    public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameId);
+      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameId);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -96,7 +96,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
     */
    public HeadTrajectoryMessage(int numberOfTrajectoryPoints)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(numberOfTrajectoryPoints);
+      so3Trajectory = new SO3TrajectoryMessage(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -108,7 +108,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
          so3Trajectory.setUniqueId(uniqueId);
    }
 
-   public AbstractSO3TrajectoryMessage getSO3Trajectory()
+   public SO3TrajectoryMessage getSO3Trajectory()
    {
       return so3Trajectory;
    }

@@ -23,7 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public final class AbstractSO3TrajectoryMessage extends Packet<AbstractSO3TrajectoryMessage> implements Transformable, FrameBasedMessage
+public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -49,13 +49,13 @@ public final class AbstractSO3TrajectoryMessage extends Packet<AbstractSO3Trajec
    /**
     * Empty constructor for serialization.
     */
-   public AbstractSO3TrajectoryMessage()
+   public SO3TrajectoryMessage()
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractSO3TrajectoryMessage(Random random)
+   public SO3TrajectoryMessage(Random random)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
@@ -75,7 +75,7 @@ public final class AbstractSO3TrajectoryMessage extends Packet<AbstractSO3Trajec
       queueingProperties = new QueueableMessage(random);
    }
 
-   public AbstractSO3TrajectoryMessage(AbstractSO3TrajectoryMessage so3TrajectoryMessage)
+   public SO3TrajectoryMessage(SO3TrajectoryMessage so3TrajectoryMessage)
    {
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[so3TrajectoryMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
@@ -87,12 +87,12 @@ public final class AbstractSO3TrajectoryMessage extends Packet<AbstractSO3Trajec
       queueingProperties.set(so3TrajectoryMessage.queueingProperties);
    }
 
-   public AbstractSO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
+   public SO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       this(trajectoryTime, desiredOrientation, trajectoryFrame.getNameBasedHashCode());
    }
 
-   public AbstractSO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
+   public SO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       Vector3D zeroAngularVelocity = new Vector3D();
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {new SO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
@@ -100,7 +100,7 @@ public final class AbstractSO3TrajectoryMessage extends Packet<AbstractSO3Trajec
       frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
    }
 
-   public AbstractSO3TrajectoryMessage(int numberOfTrajectoryPoints)
+   public SO3TrajectoryMessage(int numberOfTrajectoryPoints)
    {
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
@@ -121,7 +121,7 @@ public final class AbstractSO3TrajectoryMessage extends Packet<AbstractSO3Trajec
       }
    }
 
-   public void set(AbstractSO3TrajectoryMessage other)
+   public void set(SO3TrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
@@ -351,7 +351,7 @@ public final class AbstractSO3TrajectoryMessage extends Packet<AbstractSO3Trajec
    }
 
    @Override
-   public boolean epsilonEquals(AbstractSO3TrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(SO3TrajectoryMessage other, double epsilon)
    {
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
          return false;

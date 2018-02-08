@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> implements VisualizablePacket, EpsilonComparable<ChestTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public AbstractSO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory;
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -39,7 +39,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
     */
    public ChestTrajectoryMessage(Random random)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(random);
+      so3Trajectory = new SO3TrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -50,7 +50,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
     */
    public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(chestTrajectoryMessage.so3Trajectory);
+      so3Trajectory = new SO3TrajectoryMessage(chestTrajectoryMessage.so3Trajectory);
       setUniqueId(chestTrajectoryMessage.getUniqueId());
       setDestination(chestTrajectoryMessage.getDestination());
    }
@@ -64,7 +64,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
     */
    public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameID)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameID);
+      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameID);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -77,7 +77,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
     */
    public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
+      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -100,7 +100,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
     */
    public ChestTrajectoryMessage(int numberOfTrajectoryPoints)
    {
-      so3Trajectory = new AbstractSO3TrajectoryMessage(numberOfTrajectoryPoints);
+      so3Trajectory = new SO3TrajectoryMessage(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -112,7 +112,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
          so3Trajectory.setUniqueId(uniqueId);
    }
 
-   public AbstractSO3TrajectoryMessage getSO3Trajectory()
+   public SO3TrajectoryMessage getSO3Trajectory()
    {
       return so3Trajectory;
    }

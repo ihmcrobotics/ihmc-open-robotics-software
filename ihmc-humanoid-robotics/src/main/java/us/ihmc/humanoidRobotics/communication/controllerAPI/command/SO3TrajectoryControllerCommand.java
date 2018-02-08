@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
@@ -19,8 +19,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3TrajectoryControllerCommand, AbstractSO3TrajectoryMessage>
-      implements FrameBasedCommand<AbstractSO3TrajectoryMessage>
+public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3TrajectoryControllerCommand, SO3TrajectoryMessage>
+      implements FrameBasedCommand<SO3TrajectoryMessage>
 {
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
@@ -77,7 +77,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, AbstractSO3TrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
@@ -95,7 +95,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    }
 
    @Override
-   public void set(AbstractSO3TrajectoryMessage message)
+   public void set(SO3TrajectoryMessage message)
    {
       message.getTrajectoryPoints(trajectoryPointList);
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
@@ -259,8 +259,8 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    }
 
    @Override
-   public Class<AbstractSO3TrajectoryMessage> getMessageClass()
+   public Class<SO3TrajectoryMessage> getMessageClass()
    {
-      return AbstractSO3TrajectoryMessage.class;
+      return SO3TrajectoryMessage.class;
    }
 }

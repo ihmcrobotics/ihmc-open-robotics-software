@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessag
 public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<ChestHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
 {
 
-   public AbstractSO3TrajectoryMessage taskspaceTrajectoryMessage;
+   public SO3TrajectoryMessage taskspaceTrajectoryMessage;
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
 
    /**
@@ -36,7 +36,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
     */
    public ChestHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(new AbstractSO3TrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
+      this(new SO3TrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
    }
 
    /**
@@ -55,19 +55,19 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
     * @param taskspaceTrajectoryMessage
     * @param jointspaceTrajectoryMessage
     */
-   public ChestHybridJointspaceTaskspaceTrajectoryMessage(AbstractSO3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractSO3TrajectoryMessage getTaskspaceTrajectoryMessage()
+   public SO3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
       return taskspaceTrajectoryMessage;
    }
 
-   public void setTaskspaceTrajectoryMessage(AbstractSO3TrajectoryMessage taskspaceTrajectoryMessage)
+   public void setTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage)
    {
       this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
    }
