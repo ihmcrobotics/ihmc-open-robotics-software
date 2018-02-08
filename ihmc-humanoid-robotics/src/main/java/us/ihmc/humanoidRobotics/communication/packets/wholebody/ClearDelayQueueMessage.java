@@ -1,13 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
 
 /**
  * This message is used to clear the delay buffers on the controller,
  * If you sent a message with a delay and now you do not want them executed, use this command
  */
-public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> implements VisualizablePacket
+public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 {
    /** the class you want to clear **/
    public Class<? extends Packet<?>> clazz;

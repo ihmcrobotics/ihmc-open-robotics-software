@@ -4,13 +4,12 @@ import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.commons.FormattingTools;
 
-public class JointAnglesPacket extends Packet<JointAnglesPacket> implements VisualizablePacket
+public class JointAnglesPacket extends Packet<JointAnglesPacket>
 {
    public double trajectoryTime;
    public double neckJointAngle;

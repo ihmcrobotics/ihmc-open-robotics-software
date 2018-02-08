@@ -4,7 +4,6 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
@@ -17,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/neck_trajectory")
-public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> implements VisualizablePacket
+public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
 {
    @RosExportedField(documentation = "Trajectories for each joint.")
    public JointspaceTrajectoryMessage jointspaceTrajectory;
