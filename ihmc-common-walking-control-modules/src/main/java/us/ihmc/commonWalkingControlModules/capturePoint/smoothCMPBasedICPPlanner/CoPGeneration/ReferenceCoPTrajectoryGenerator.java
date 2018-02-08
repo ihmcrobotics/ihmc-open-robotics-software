@@ -521,7 +521,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       desiredCoPVelocityToPack.set(desiredCoPVelocity);
    }
 
-   // Remember this so in case chicken support is active the standing state does not mess up by swapping the chicken support to the wrong side half the time.
+   /**
+    * Remember this in case the plan is cleared but the planner was doing chicken support. In that
+    * case the ICP should be offset towards the correct foot.
+    */
    private RobotSide lastTransferToSide = RobotSide.LEFT;
 
    @Override
