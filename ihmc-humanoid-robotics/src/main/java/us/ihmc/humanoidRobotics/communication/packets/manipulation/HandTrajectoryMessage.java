@@ -130,6 +130,14 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    }
 
    @Override
+   public void setUniqueId(long uniqueId)
+   {
+      super.setUniqueId(uniqueId);
+      if (se3Trajectory != null)
+         se3Trajectory.setUniqueId(uniqueId);
+   }
+
+   @Override
    public boolean epsilonEquals(HandTrajectoryMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)
