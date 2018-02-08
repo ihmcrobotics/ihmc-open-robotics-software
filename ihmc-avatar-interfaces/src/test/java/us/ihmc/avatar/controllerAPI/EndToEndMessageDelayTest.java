@@ -90,17 +90,17 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
       ChestTrajectoryMessage lookStraightAheadMessage = new ChestTrajectoryMessage(trajectoryTime, lookStraightAhead, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookStraightAheadMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
+      lookStraightAheadMessage.getSO3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
       ChestTrajectoryMessage lookLeftMessage = new ChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookLeftMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
+      lookLeftMessage.getSO3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
       drcSimulationTestHelper.send(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
       ChestTrajectoryMessage lookRightMessage = new ChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookRightMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
+      lookRightMessage.getSO3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, -1);
       drcSimulationTestHelper.send(lookRightMessage);
 
       SpineJointName[] spineJointNames = jointMap.getSpineJointNames();

@@ -19,8 +19,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
-      extends QueueableCommand<T, M> implements FrameBasedCommand<M>
+public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3TrajectoryControllerCommand, AbstractSO3TrajectoryMessage>
+      implements FrameBasedCommand<AbstractSO3TrajectoryMessage>
 {
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
@@ -38,11 +38,10 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    public SO3TrajectoryControllerCommand(Random random)
    {
       int randomNumberOfPoints = random.nextInt(16) + 1;
-      for(int i = 0; i < randomNumberOfPoints; i++)
+      for (int i = 0; i < randomNumberOfPoints; i++)
       {
-         trajectoryPointList.addTrajectoryPoint(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01),
-               RandomGeometry.nextQuaternion(random),
-               RandomGeometry.nextVector3D(random));
+         trajectoryPointList.addTrajectoryPoint(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01), RandomGeometry.nextQuaternion(random),
+                                                RandomGeometry.nextVector3D(random));
       }
 
       trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
@@ -68,7 +67,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    @Override
-   public void set(T other)
+   public void set(SO3TrajectoryControllerCommand other)
    {
       trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
       setPropertiesOnly(other);
@@ -78,7 +77,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, M message)
+   public void set(ReferenceFrameHashCodeResolver resolver, AbstractSO3TrajectoryMessage message)
    {
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
@@ -96,7 +95,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    @Override
-   public void set(M message)
+   public void set(AbstractSO3TrajectoryMessage message)
    {
       message.getTrajectoryPoints(trajectoryPointList);
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
@@ -107,11 +106,12 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
 
    /**
-    * Same as {@link #set(T)} but does not change the trajectory points.
+    * Same as {@link #set(SO3TrajectoryControllerCommand)} but does not change the trajectory
+    * points.
     *
     * @param other
     */
-   public void setPropertiesOnly(T other)
+   public void setPropertiesOnly(SO3TrajectoryControllerCommand other)
    {
       setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
@@ -256,5 +256,11 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    public boolean useCustomControlFrame()
    {
       return useCustomControlFrame;
+   }
+
+   @Override
+   public Class<AbstractSO3TrajectoryMessage> getMessageClass()
+   {
+      return AbstractSO3TrajectoryMessage.class;
    }
 }
