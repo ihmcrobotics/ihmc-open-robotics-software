@@ -135,8 +135,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       int numberOfTrajectoryPoints = solution.getRobotConfigurations().length;
       ChestTrajectoryMessage trajectoryMessage = new ChestTrajectoryMessage(numberOfTrajectoryPoints);
 
-      trajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-      trajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+      trajectoryMessage.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+      trajectoryMessage.getSO3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
       // message params.
       ReferenceFrame trajectoryFrame = worldFrame;
@@ -173,7 +173,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
-         trajectoryMessage.setTrajectoryPoint(i, time, desiredOrientations[i], desiredAngularVelocity, trajectoryFrame);
+         trajectoryMessage.getSO3Trajectory().setTrajectoryPoint(i, time, desiredOrientations[i], desiredAngularVelocity, trajectoryFrame);
       }
 
       wholeBodyTrajectoryMessage.setChestTrajectoryMessage(trajectoryMessage);

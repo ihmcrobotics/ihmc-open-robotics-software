@@ -67,13 +67,13 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    {
       ReferenceFrame pelvisZUp = referenceFrames.getPelvisZUpFrame();
       ChestTrajectoryMessage chestTrajectory = new ChestTrajectoryMessage(trajectoryPoints);
-      chestTrajectory.getFrameInformation().setTrajectoryReferenceFrame(pelvisZUp);
-      chestTrajectory.getFrameInformation().setDataReferenceFrame(pelvisZUp);
+      chestTrajectory.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(pelvisZUp);
+      chestTrajectory.getSO3Trajectory().getFrameInformation().setDataReferenceFrame(pelvisZUp);
 
       for (int i = 0; i < trajectoryPoints; i++)
       {
          double percent = i / (double) (trajectoryPoints - 1);
-         chestTrajectory.setTrajectoryPoint(i, percent, new Quaternion(), new Vector3D(), pelvisZUp);
+         chestTrajectory.getSO3Trajectory().setTrajectoryPoint(i, percent, new Quaternion(), new Vector3D(), pelvisZUp);
       }
 
       sendPacketToController(chestTrajectory);

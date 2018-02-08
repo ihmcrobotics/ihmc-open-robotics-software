@@ -232,9 +232,9 @@ public class WalkingControllerTest
       Quaternion orientation = new Quaternion();
       orientation.appendYawRotation(Math.toRadians(-10.0));
       orientation.appendRollRotation(Math.toRadians(10.0));
-      message.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getPelvisZUpFrame());
-      message.setTrajectoryPoint(0, 0.5, orientation, new Vector3D(), referenceFrames.getPelvisZUpFrame());
-      message.setTrajectoryPoint(1, 1.0, new Quaternion(), new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      message.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getPelvisZUpFrame());
+      message.getSO3Trajectory().setTrajectoryPoint(0, 0.5, orientation, new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      message.getSO3Trajectory().setTrajectoryPoint(1, 1.0, new Quaternion(), new Vector3D(), referenceFrames.getPelvisZUpFrame());
       commandInputManager.submitMessage(message);
    }
 

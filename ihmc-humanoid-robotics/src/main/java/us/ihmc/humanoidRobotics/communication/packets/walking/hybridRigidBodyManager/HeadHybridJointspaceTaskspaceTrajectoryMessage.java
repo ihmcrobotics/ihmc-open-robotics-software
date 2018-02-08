@@ -5,10 +5,10 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
                   topic = "/control/hybrid_head_trajectory")
 public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
 {
-   public HeadTrajectoryMessage headTrajectoryMessage;
+   public AbstractSO3TrajectoryMessage taskspaceTrajectoryMessage;
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
 
    /**
@@ -34,7 +34,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(new HeadTrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
+      this(new AbstractSO3TrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
    }
 
    /**
@@ -43,7 +43,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
-      this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getJointspaceTrajectoryMessage());
+      this(hybridJointspaceTaskspaceMessage.getTaskspaceTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getJointspaceTrajectoryMessage());
       setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
 
@@ -53,21 +53,21 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     * @param taskspaceTrajectoryMessage
     * @param jointspaceTrajectoryMessage
     */
-   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadTrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage(AbstractSO3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      this.headTrajectoryMessage = taskspaceTrajectoryMessage;
+      this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HeadTrajectoryMessage getHeadTrajectoryMessage()
+   public AbstractSO3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
-      return headTrajectoryMessage;
+      return taskspaceTrajectoryMessage;
    }
 
-   public void setHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
+   public void setTaskspaceTrajectoryMessage(AbstractSO3TrajectoryMessage taskspaceTrajectoryMessage)
    {
-      this.headTrajectoryMessage = headTrajectoryMessage;
+      this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
    }
 
    public JointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
@@ -83,13 +83,13 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
    @Override
    public FrameInformation getFrameInformation()
    {
-      return headTrajectoryMessage.getFrameInformation();
+      return taskspaceTrajectoryMessage.getFrameInformation();
    }
 
    @Override
    public boolean epsilonEquals(HeadHybridJointspaceTaskspaceTrajectoryMessage other, double epsilon)
    {
-      if (!headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
+      if (!taskspaceTrajectoryMessage.epsilonEquals(other.taskspaceTrajectoryMessage, epsilon))
          return false;
       if (!jointspaceTrajectoryMessage.epsilonEquals(other.jointspaceTrajectoryMessage, epsilon))
          return false;

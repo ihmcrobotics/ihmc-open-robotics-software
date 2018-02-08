@@ -198,7 +198,7 @@ public class RigidBodyControlManager
          hold();
    }
 
-   public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
+   public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
       if (command.useCustomControlFrame())
       {
@@ -291,7 +291,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand jointspaceCommand)
+   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointspaceCommand)
    {
       throw new RuntimeException("Should not send these messages anymore. Switch to SE3 message with selection matrix.");
 //      if (taskspaceCommand.useCustomControlFrame())

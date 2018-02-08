@@ -12,13 +12,13 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       FrameBasedCommand<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
-   private final HeadTrajectoryCommand taskspaceTrajectoryCommand = new HeadTrajectoryCommand();
+   private final SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SO3TrajectoryControllerCommand();
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
 
-   public HeadHybridJointspaceTaskspaceTrajectoryCommand(HeadTrajectoryCommand taskspaceTrajectoryCommand,
+   public HeadHybridJointspaceTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand taskspaceTrajectoryCommand,
                                                          JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
@@ -27,7 +27,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(new HeadTrajectoryCommand(random), new JointspaceTrajectoryCommand(random));
+      this(new SO3TrajectoryControllerCommand(random), new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -47,14 +47,14 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    public void set(HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(message.getHeadTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(resolver, message.getHeadTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
@@ -75,7 +75,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       return jointspaceTrajectoryCommand;
    }
 
-   public HeadTrajectoryCommand getTaskspaceTrajectoryCommand()
+   public SO3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
    }

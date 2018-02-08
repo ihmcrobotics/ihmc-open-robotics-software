@@ -398,8 +398,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         chestTrajectoryPointList.addTrajectoryPoint(1.0, new Quaternion(0.2, 0.0, 0.0, 1.0), new Vector3D());
         chestTrajectoryPointList.addTrajectoryPoint(2.0, new Quaternion(-0.2, 0.0, 0.0, 1.0), new Vector3D());
         chestTrajectoryPointList.addTrajectoryPoint(3.0, new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D());
-        chestCommand.setTrajectoryPointList(chestTrajectoryPointList);
-        chestCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
+        chestCommand.getSO3Trajectory().setTrajectoryPointList(chestTrajectoryPointList);
+        chestCommand.getSO3Trajectory().setTrajectoryFrame(ReferenceFrame.getWorldFrame());
         queuedControllerCommands.add(chestCommand);
 
         // Some more steps:

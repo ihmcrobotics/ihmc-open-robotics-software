@@ -139,7 +139,7 @@ public class WalkingCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadTrajectoryCommand.class))
       {
          HeadTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(HeadTrajectoryCommand.class);
-         headManager.handleTaskspaceTrajectoryCommand(command);
+         headManager.handleTaskspaceTrajectoryCommand(command.getSO3Trajectory());
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckTrajectoryCommand.class))
       {
@@ -163,7 +163,7 @@ public class WalkingCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestTrajectoryCommand.class))
       {
          ChestTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class);
-         chestManager.handleTaskspaceTrajectoryCommand(command);
+         chestManager.handleTaskspaceTrajectoryCommand(command.getSO3Trajectory());
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineTrajectoryCommand.class))
       {
