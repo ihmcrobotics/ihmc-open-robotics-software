@@ -203,7 +203,7 @@ public class PelvisOrientationManager
 
    public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {
-      if (command.useCustomControlFrame())
+      if (command.getSO3Trajectory().useCustomControlFrame())
       {
          PrintTools.warn("Can not use custom control frame with pelvis orientation.");
          return false;

@@ -1,42 +1,54 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.Random;
+
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-import java.util.Random;
-
-public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerCommand<PelvisOrientationTrajectoryCommand, PelvisOrientationTrajectoryMessage>
+public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrientationTrajectoryCommand, PelvisOrientationTrajectoryMessage>,
+      FrameBasedCommand<PelvisOrientationTrajectoryMessage>, EpsilonComparable<PelvisOrientationTrajectoryCommand>
 {
    private boolean enableUserPelvisControlDuringWalking = false;
+   private final SO3TrajectoryControllerCommand so3Trajectory;
 
    public PelvisOrientationTrajectoryCommand()
    {
+      so3Trajectory = new SO3TrajectoryControllerCommand();
    }
 
    public PelvisOrientationTrajectoryCommand(Random random)
    {
-      super(random);
+      so3Trajectory = new SO3TrajectoryControllerCommand(random);
+   }
+
+   @Override
+   public void clear()
+   {
+      so3Trajectory.clear();
    }
 
    @Override
    public void set(PelvisOrientationTrajectoryCommand other)
    {
       setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
-      super.set(other);
+      so3Trajectory.set(other.so3Trajectory);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisOrientationTrajectoryMessage message)
    {
       setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
-      super.set(resolver, message);
+      so3Trajectory.set(resolver, message.so3Trajectory);
    }
 
    @Override
    public void set(PelvisOrientationTrajectoryMessage message)
    {
       setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
-      super.set(message);
+      so3Trajectory.set(message.so3Trajectory);
    }
 
    /**
@@ -45,12 +57,12 @@ public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerC
     */
    public void set(PelvisTrajectoryCommand command)
    {
-      clear(command.getDataFrame());
-      setTrajectoryFrame(command.getTrajectoryFrame());
-      getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
+      so3Trajectory.clear(command.getDataFrame());
+      so3Trajectory.setTrajectoryFrame(command.getTrajectoryFrame());
+      so3Trajectory.getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
       setEnableUserPelvisControlDuringWalking(command.isEnableUserPelvisControlDuringWalking());
-      setQueueableCommandVariables(command);
-      setSelectionMatrix(command.getSelectionMatrix().getAngularPart());
+      so3Trajectory.setQueueableCommandVariables(command);
+      so3Trajectory.setSelectionMatrix(command.getSelectionMatrix().getAngularPart());
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()
@@ -61,6 +73,23 @@ public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerC
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
+   }
+
+   @Override
+   public boolean epsilonEquals(PelvisOrientationTrajectoryCommand other, double epsilon)
+   {
+      return so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon);
+   }
+
+   public SO3TrajectoryControllerCommand getSO3Trajectory()
+   {
+      return so3Trajectory;
+   }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return so3Trajectory.isCommandValid();
    }
 
    @Override

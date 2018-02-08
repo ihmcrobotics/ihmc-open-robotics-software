@@ -442,7 +442,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return controlFrame;
    }
 
-   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
+   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
