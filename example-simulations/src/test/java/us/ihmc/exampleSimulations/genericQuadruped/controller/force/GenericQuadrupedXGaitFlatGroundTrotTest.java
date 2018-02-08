@@ -8,7 +8,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitFlatGroundTrotTest;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatGroundTrotTest
 {
    @Override
@@ -59,7 +59,7 @@ public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatG
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 24.1)
-   @Test(timeout = 120000)
+   @Test(timeout = 350000)
    public void testTrottingInAForwardRightCircle()
    {
       super.testTrottingInAForwardRightCircle();
@@ -67,7 +67,7 @@ public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatG
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.8)
-   @Test(timeout = 130000)
+   @Test(timeout = 350000)
    public void testTrottingInABackwardLeftCircle()
    {
       super.testTrottingInABackwardLeftCircle();
@@ -75,7 +75,7 @@ public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatG
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 22.9)
-   @Test(timeout = 110000)
+   @Test(timeout = 300000)
    public void testTrottingInABackwardRightCircle()
    {
       super.testTrottingInABackwardRightCircle();
