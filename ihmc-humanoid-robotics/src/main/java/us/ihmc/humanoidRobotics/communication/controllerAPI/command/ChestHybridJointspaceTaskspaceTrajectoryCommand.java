@@ -80,4 +80,34 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    {
       return ChestHybridJointspaceTaskspaceTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      taskspaceTrajectoryCommand.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      taskspaceTrajectoryCommand.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return taskspaceTrajectoryCommand.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return taskspaceTrajectoryCommand.getExecutionTime();
+   }
 }

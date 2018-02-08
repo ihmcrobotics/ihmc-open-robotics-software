@@ -87,4 +87,34 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
          return false;
       return true;
    }
+
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      jointspaceTrajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      jointspaceTrajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return jointspaceTrajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return jointspaceTrajectory.getExecutionTime();
+   }
 }
