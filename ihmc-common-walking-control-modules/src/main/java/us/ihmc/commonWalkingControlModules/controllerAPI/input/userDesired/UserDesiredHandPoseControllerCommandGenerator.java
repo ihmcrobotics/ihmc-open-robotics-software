@@ -94,7 +94,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
                trajectoryPoint.setLinearVelocity(new Vector3D());
                trajectoryPoint.setAngularVelocity(new Vector3D());
 
-               handTrajectoryControllerCommand.addTrajectoryPoint(trajectoryPoint);
+               handTrajectoryControllerCommand.getSE3Trajectory().addTrajectoryPoint(trajectoryPoint);
 
 
                System.out.println("Submitting " + handTrajectoryControllerCommand);

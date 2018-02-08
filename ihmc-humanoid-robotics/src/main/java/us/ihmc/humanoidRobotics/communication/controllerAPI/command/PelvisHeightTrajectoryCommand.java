@@ -95,18 +95,18 @@ public class PelvisHeightTrajectoryCommand extends EuclideanTrajectoryController
     */
    public void set(PelvisTrajectoryCommand command)
    {
-      clear(command.getDataFrame());
-      setQueueableCommandVariables(command);
+      clear(command.getSE3Trajectory().getDataFrame());
+      setQueueableCommandVariables(command.getSE3Trajectory());
       
-      WeightMatrix3D weightMatrix = command.getWeightMatrix().getLinearPart();
+      WeightMatrix3D weightMatrix = command.getSE3Trajectory().getWeightMatrix().getLinearPart();
       double zAxisWeight = weightMatrix.getZAxisWeight();
       WeightMatrix3D currentWeightMatrix = getWeightMatrix();
       currentWeightMatrix.setZAxisWeight(zAxisWeight);
       currentWeightMatrix.setWeightFrame(weightMatrix.getWeightFrame());
       
-      for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < command.getSE3Trajectory().getNumberOfTrajectoryPoints(); i++)
       {
-         FrameSE3TrajectoryPoint trajectoryPoint = command.getTrajectoryPoint(i);
+         FrameSE3TrajectoryPoint trajectoryPoint = command.getSE3Trajectory().getTrajectoryPoint(i);
          double time = trajectoryPoint.getTime();
          double position = trajectoryPoint.getPositionZ();
          double velocity = trajectoryPoint.getLinearVelocityZ();

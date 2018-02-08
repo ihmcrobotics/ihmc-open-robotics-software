@@ -224,7 +224,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
+   public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
       if (command.useCustomControlFrame())
       {
@@ -265,7 +265,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
    {
       if (taskspaceCommand.useCustomControlFrame())
       {

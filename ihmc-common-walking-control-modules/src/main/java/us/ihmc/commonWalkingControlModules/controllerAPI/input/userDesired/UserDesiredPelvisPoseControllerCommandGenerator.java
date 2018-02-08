@@ -140,11 +140,11 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();
       framePose.get(position, orientation);
-      poseCommand.clear(worldFrame);
-      poseCommand.setTrajectoryFrame(worldFrame);
-      poseCommand.addTrajectoryPoint(time, position, orientation, zeroVelocity, zeroVelocity);
-      poseCommand.setExecutionMode(ExecutionMode.OVERRIDE);
-      poseCommand.setCommandId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      poseCommand.getSE3Trajectory().clear(worldFrame);
+      poseCommand.getSE3Trajectory().setTrajectoryFrame(worldFrame);
+      poseCommand.getSE3Trajectory().addTrajectoryPoint(time, position, orientation, zeroVelocity, zeroVelocity);
+      poseCommand.getSE3Trajectory().setExecutionMode(ExecutionMode.OVERRIDE);
+      poseCommand.getSE3Trajectory().setCommandId(Packet.VALID_MESSAGE_DEFAULT_ID);
       if (DEBUG)
          System.out.println("Submitting " + poseCommand);
       controllerCommandInputManager.submitCommand(poseCommand);

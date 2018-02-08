@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -217,16 +218,17 @@ public class PelvisICPBasedTranslationManager
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      SelectionMatrix3D linearSelectionMatrix = command.getSelectionMatrix().getLinearPart();
+      SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+      SelectionMatrix3D linearSelectionMatrix = se3Trajectory.getSelectionMatrix().getLinearPart();
 
       if (!linearSelectionMatrix.isXSelected() && !linearSelectionMatrix.isYSelected())
          return; // The user does not want to control the x and y of the pelvis, do nothing.
 
-      switch (command.getExecutionMode())
+      switch (se3Trajectory.getExecutionMode())
       {
       case OVERRIDE:
          isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(command.getCommandId());
+         clearCommandQueue(se3Trajectory.getCommandId());
          initialPelvisPositionTime.set(yoTime.getDoubleValue());
          initializeTrajectoryGenerator(command, 0.0);
          return;
@@ -240,7 +242,7 @@ public class PelvisICPBasedTranslationManager
          }
          return;
       default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + se3Trajectory.getExecutionMode() + ". Command ignored.");
          break;
       }
    }
@@ -253,7 +255,8 @@ public class PelvisICPBasedTranslationManager
          return false;
       }
 
-      long previousCommandId = command.getPreviousCommandId();
+      SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+      long previousCommandId = se3Trajectory.getPreviousCommandId();
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
@@ -262,7 +265,7 @@ public class PelvisICPBasedTranslationManager
          return false;
       }
 
-      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
+      if (se3Trajectory.getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
          PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          return false;
@@ -270,16 +273,17 @@ public class PelvisICPBasedTranslationManager
 
       commandQueue.add(command);
       numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getCommandId());
+      lastCommandId.set(se3Trajectory.getCommandId());
 
       return true;
    }
 
    private void initializeTrajectoryGenerator(PelvisTrajectoryCommand command, double firstTrajectoryPointTime)
    {
-      command.addTimeOffset(firstTrajectoryPointTime);
+      SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+      se3Trajectory.addTimeOffset(firstTrajectoryPointTime);
 
-      if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (se3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (isRunning.getBooleanValue())
             positionTrajectoryGenerator.getPosition(tempPosition);
@@ -302,7 +306,7 @@ public class PelvisICPBasedTranslationManager
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         positionTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         positionTrajectoryGenerator.appendWaypoint(se3Trajectory.getTrajectoryPoint(trajectoryPointIndex));
       }
 
       if (supportFrame != null)
@@ -317,7 +321,7 @@ public class PelvisICPBasedTranslationManager
 
    private int queueExceedingTrajectoryPointsIfNeeded(PelvisTrajectoryCommand command)
    {
-      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+      int numberOfTrajectoryPoints = command.getSE3Trajectory().getNumberOfTrajectoryPoints();
 
       int maximumNumberOfWaypoints = positionTrajectoryGenerator.getMaximumNumberOfWaypoints() - positionTrajectoryGenerator.getCurrentNumberOfWaypoints();
 
@@ -327,15 +331,15 @@ public class PelvisICPBasedTranslationManager
       PelvisTrajectoryCommand commandForExcedent = commandQueue.addFirst();
       numberOfQueuedCommands.increment();
       commandForExcedent.clear();
-      commandForExcedent.setPropertiesOnly(command);
+      commandForExcedent.getSE3Trajectory().setPropertiesOnly(command.getSE3Trajectory());
 
       for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         commandForExcedent.getSE3Trajectory().addTrajectoryPoint(command.getSE3Trajectory().getTrajectoryPoint(trajectoryPointIndex));
       }
 
-      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+      double timeOffsetToSubtract = command.getSE3Trajectory().getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.getSE3Trajectory().subtractTimeOffset(timeOffsetToSubtract);
 
       return maximumNumberOfWaypoints;
    }

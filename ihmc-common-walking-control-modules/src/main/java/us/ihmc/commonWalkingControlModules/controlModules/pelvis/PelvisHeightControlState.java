@@ -147,7 +147,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       if (command.useCustomControlFrame())
       {
-         tempPelvisTrajectoryCommand.getControlFramePose(controlFrame);
+         tempPelvisTrajectoryCommand.getSE3Trajectory().getControlFramePose(controlFrame);
          taskspaceControlState.setControlFramePose(controlFrame);
       }
       else
@@ -179,7 +179,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       tempPelvisTrajectoryCommand.set(command);
 
       //set the selection matrix to z only
-      SelectionMatrix6D commandSelectionMatrix = tempPelvisTrajectoryCommand.getSelectionMatrix();
+      SelectionMatrix6D commandSelectionMatrix = tempPelvisTrajectoryCommand.getSE3Trajectory().getSelectionMatrix();
       if(commandSelectionMatrix != null)
       {
          linearZSelectionMatrix.set(commandSelectionMatrix);
@@ -198,10 +198,10 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       linearZSelectionMatrix.clearAngularSelection();
       linearZSelectionMatrix.setLinearAxisSelection(false, false, true);
       linearZSelectionMatrix.setSelectionFrame(ReferenceFrame.getWorldFrame());
-      tempPelvisTrajectoryCommand.setSelectionMatrix(linearZSelectionMatrix);
+      tempPelvisTrajectoryCommand.getSE3Trajectory().setSelectionMatrix(linearZSelectionMatrix);
 
       //set the weight matrix to z only
-      WeightMatrix6D commanedWeightMatrix = tempPelvisTrajectoryCommand.getWeightMatrix();
+      WeightMatrix6D commanedWeightMatrix = tempPelvisTrajectoryCommand.getSE3Trajectory().getWeightMatrix();
       if(commanedWeightMatrix != null)
       {
          linearZWeightMatrix.set(commanedWeightMatrix);
@@ -220,11 +220,11 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       WeightMatrix3D weightLinearPart = linearZWeightMatrix.getLinearPart();
       linearZWeightMatrix.setLinearWeights(0.0, 0.0, weightLinearPart.getZAxisWeight());
       linearZWeightMatrix.setWeightFrame(ReferenceFrame.getWorldFrame());
-      tempPelvisTrajectoryCommand.setWeightMatrix(linearZWeightMatrix);
+      tempPelvisTrajectoryCommand.getSE3Trajectory().setWeightMatrix(linearZWeightMatrix);
 
-      if (command.useCustomControlFrame())
+      if (command.getSE3Trajectory().useCustomControlFrame())
       {
-         tempPelvisTrajectoryCommand.getControlFramePose(controlFrame);
+         tempPelvisTrajectoryCommand.getSE3Trajectory().getControlFramePose(controlFrame);
          taskspaceControlState.setControlFramePose(controlFrame);
       }
       else
@@ -240,7 +240,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
 
       initialPose.prependTranslation(tempPoint);
 
-      if(!taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand, initialPose))
+      if(!taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand.getSE3Trajectory(), initialPose))
       {
          taskspaceControlState.clear();
          return false;

@@ -24,10 +24,12 @@ import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/hand_trajectory")
-public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTrajectoryMessage> implements VisualizablePacket
+public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> implements VisualizablePacket
 {
    @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")
    public RobotSide robotSide;
+   @RosExportedField(documentation = "The position/orientation trajectory information.")
+   public AbstractSE3TrajectoryMessage se3Trajectory;
 
    /**
     * Empty constructor for serialization.
@@ -35,13 +37,14 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     */
    public HandTrajectoryMessage()
    {
-      super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandTrajectoryMessage(Random random)
    {
-      super(random);
+      se3Trajectory = new AbstractSE3TrajectoryMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -50,8 +53,17 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     */
    public HandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
-      super(handTrajectoryMessage);
+      se3Trajectory = new AbstractSE3TrajectoryMessage(handTrajectoryMessage.se3Trajectory);
       robotSide = handTrajectoryMessage.robotSide;
+      setUniqueId(handTrajectoryMessage.getUniqueId());
+      setDestination(handTrajectoryMessage.getDestination());
+   }
+
+   public HandTrajectoryMessage(RobotSide robotSide, AbstractSE3TrajectoryMessage trajectoryMessage)
+   {
+      se3Trajectory = new AbstractSE3TrajectoryMessage(trajectoryMessage);
+      this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -64,8 +76,9 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     */
    public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId);
+      se3Trajectory = new AbstractSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -78,8 +91,9 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     */
    public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
+      se3Trajectory = new AbstractSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -92,20 +106,27 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     */
    public HandTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
    {
-      super(numberOfTrajectoryPoints);
+      se3Trajectory = new AbstractSE3TrajectoryMessage(numberOfTrajectoryPoints);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   @Override
    public void set(HandTrajectoryMessage other)
    {
-      super.set(other);
+      se3Trajectory = new AbstractSE3TrajectoryMessage(other.se3Trajectory);
       robotSide = other.robotSide;
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
    }
 
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public AbstractSE3TrajectoryMessage getSE3Trajectory()
+   {
+      return se3Trajectory;
    }
 
    @Override
@@ -114,15 +135,15 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       if (robotSide != other.robotSide)
          return false;
 
-      return super.epsilonEquals(other, epsilon);
+      return se3Trajectory.epsilonEquals(other.se3Trajectory, epsilon);
    }
 
    @Override
    public String toString()
    {
       String ret = "";
-      if (taskspaceTrajectoryPoints != null)
-         ret = "Hand SE3 trajectory: number of SE3 trajectory points = " + getNumberOfTrajectoryPoints();
+      if (se3Trajectory.taskspaceTrajectoryPoints != null)
+         ret = "Hand SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.getNumberOfTrajectoryPoints();
       else
          ret = "Hand SE3 trajectory: no SE3 trajectory points";
 

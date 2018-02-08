@@ -137,10 +137,10 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       waypoint0.get(waypointPosition0, waypointOrientation0);
       waypoint1.get(waypointPosition1, waypointOrientation1);
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
-      handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(chest.getBodyFixedFrame());
-      handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D(), worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.getSE3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chest.getBodyFixedFrame());
+      handTrajectoryMessage.getSE3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
+      handTrajectoryMessage.getSE3Trajectory().setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.getSE3Trajectory().setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D(), worldFrame);
 
       drcSimulationTestHelper.send(handTrajectoryMessage);
 
