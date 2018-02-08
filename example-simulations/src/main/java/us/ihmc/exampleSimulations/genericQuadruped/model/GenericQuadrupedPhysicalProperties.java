@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class GenericQuadrupedPhysicalProperties implements QuadrupedPhysicalProperties
 {
-   private static final double SHIN_LENGTH = 0.4;
+   private static final double SHIN_LENGTH = 0.31;
    private final QuadrantDependentList<Vector3D> jointBeforeFootToSoleOffsets = new QuadrantDependentList<>();
    private final QuadrantDependentList<ArrayList<Point2D>> footGroundContactPoints = new QuadrantDependentList<>();
    
