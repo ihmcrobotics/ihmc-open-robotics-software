@@ -23,7 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuclideanTrajectoryMessage> implements Transformable, FrameBasedMessage
+public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage> implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
    public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -48,13 +48,13 @@ public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuc
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
 
-   public AbstractEuclideanTrajectoryMessage()
+   public EuclideanTrajectoryMessage()
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractEuclideanTrajectoryMessage(Random random)
+   public EuclideanTrajectoryMessage(Random random)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
@@ -70,7 +70,7 @@ public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuc
       queueingProperties = new QueueableMessage(random);
    }
 
-   public AbstractEuclideanTrajectoryMessage(AbstractEuclideanTrajectoryMessage trajectoryMessage)
+   public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage trajectoryMessage)
    {
       int numberOfPoints = trajectoryMessage.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
@@ -95,7 +95,7 @@ public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuc
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
     */
-   public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
+   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -110,7 +110,7 @@ public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuc
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrame the frame the trajectory will be executed in
     */
-   public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
+   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
    {
       this(trajectoryTime, desiredPosition, trajectoryReferenceFrame.getNameBasedHashCode());
    }
@@ -119,7 +119,7 @@ public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuc
     * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
     * @param numberOfTrajectoryPoints number of trajectory points in this message
     */
-   public AbstractEuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
+   public EuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfTrajectoryPoints];
@@ -129,7 +129,7 @@ public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuc
     * set this message to the have the same contents of the other message
     * @param other the other message
     */
-   public void set(AbstractEuclideanTrajectoryMessage other)
+   public void set(EuclideanTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
@@ -382,7 +382,7 @@ public final class AbstractEuclideanTrajectoryMessage extends Packet<AbstractEuc
    }
 
    @Override
-   public boolean epsilonEquals(AbstractEuclideanTrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(EuclideanTrajectoryMessage other, double epsilon)
    {
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
       {
