@@ -267,7 +267,7 @@ public class VisibilityGraphsFactory
       }
    }
 
-   public static SingleSourceVisibilityMap connectToVisiblePoints(ConnectionPoint3D source, int maximumNumberOfConnections, List<NavigableRegion> navigableRegions, int mapId)
+   public static SingleSourceVisibilityMap connectToClosestPoints(ConnectionPoint3D source, int maximumNumberOfConnections, List<NavigableRegion> navigableRegions, int mapId)
    {
       List<Connection> allConnections = new ArrayList<>();
 
