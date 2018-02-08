@@ -53,6 +53,8 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
+
       conductor = null;
       variables = null;
       pusher = null;
@@ -87,7 +89,5 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 7.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }

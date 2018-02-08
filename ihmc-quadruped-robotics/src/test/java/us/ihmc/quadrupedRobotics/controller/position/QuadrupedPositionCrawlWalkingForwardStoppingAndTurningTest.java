@@ -49,6 +49,7 @@ public abstract class QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -83,7 +84,5 @@ public abstract class QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 5.0 + 15.0));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
 }

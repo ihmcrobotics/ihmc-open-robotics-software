@@ -50,6 +50,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -67,8 +68,6 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), 1.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    //"Turn in place slowly still fails due to CoM shifting outside support polygon. Need to fix it..."
@@ -84,8 +83,6 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), 0.3));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 500.0)
@@ -116,7 +113,5 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 3.0 + 4.0));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
 }
