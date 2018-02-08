@@ -79,10 +79,8 @@ import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControl
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.*;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -447,6 +445,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(FootstepPlannerType.class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
       registerPacketClass(WallPosePacket.class);
+      registerPacketClass(WalkOverTerrainGoalPacket.class);
 
       registerPacketClass(DoorLocationPacket.class);
       registerPacketClass(ValveLocationPacket.class);

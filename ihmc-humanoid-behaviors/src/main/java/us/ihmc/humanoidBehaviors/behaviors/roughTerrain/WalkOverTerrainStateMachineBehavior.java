@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
@@ -45,7 +46,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    {
       super(communicationBridge);
 
-      stateMachine = new StateMachine<>(getName() + "StateMachine", getName() + "StateMachine", WalkOverTerrainState.class, yoTime, registry);
+      stateMachine = new StateMachine<>(getName() + "StateMachine", getName() + "StateMachineSwitchTime", WalkOverTerrainState.class, yoTime, registry);
 
       waitState = new WaitState(yoTime);
       planPathState = new PlanFootstepsState(communicationBridge, referenceFrames.getSoleFrames(), swingTime, registry);
@@ -71,7 +72,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       stateMachine.addState(planPathState);
       stateMachine.addState(walkingState);
 
-      StateTransitionAction planningToWalkingAction = () -> waitState.hasWalkedBetweenWaiting.set(true); sendFootstepPlan(planPathState.getPlannerOutput());
+      StateTransitionAction planningToWalkingAction = () -> { waitState.hasWalkedBetweenWaiting.set(true); sendFootstepPlan(planPathState.getPlannerOutput()); };
       StateTransitionCondition planningToWalkingCondition = () -> planPathState.getPlannerOutput() != null && planPathState.getPlannerOutput().planningResult.validForExecution();
       StateTransitionCondition planningToWaitingCondition = () -> planPathState.getPlannerOutput() != null && !planPathState.getPlannerOutput().planningResult.validForExecution();
 
@@ -86,7 +87,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      sendPacketToUI(new TextToSpeechPacket("Starting walk over terrain behavior"));
+      PrintTools.info("Starting walk over terrain behavior");
+      sendTextToSpeechPacket("Starting walk over terrain behavior");
    }
 
    @Override
@@ -171,7 +173,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
             waitTime.set(2.0 * waitTime.getDoubleValue());
          }
 
-         sendPacketToUI(new TextToSpeechPacket("Waiting for " + waitTime.getDoubleValue() + " seconds"));
+         sendTextToSpeechPacket("Waiting for " + waitTime.getDoubleValue() + " seconds");
       }
 
       private void lookDown()
@@ -220,8 +222,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       @Override
       public void doTransitionIntoAction()
       {
-         sendPacketToUI(new TextToSpeechPacket("Walking"));
-
+         sendTextToSpeechPacket("Walking");
          // TODO adjust com based on upcoming footsteps
       }
 
@@ -245,5 +246,10 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
       communicationBridge.sendPacket(footstepDataListMessage);
+   }
+
+   private void sendTextToSpeechPacket(String text)
+   {
+      sendPacketToUI(new TextToSpeechPacket(text));
    }
 }
