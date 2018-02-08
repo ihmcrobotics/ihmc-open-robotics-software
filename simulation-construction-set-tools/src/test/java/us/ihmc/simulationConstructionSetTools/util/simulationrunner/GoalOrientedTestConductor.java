@@ -264,6 +264,11 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
       return scs;
    }
 
+   public void setKeepSCSUp(boolean keepSCSUp)
+   {
+      simulationTestingParameters.setKeepSCSUp(keepSCSUp);
+   }
+
    @Override
    public void simulationDone()
    {

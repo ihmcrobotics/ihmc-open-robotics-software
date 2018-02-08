@@ -17,6 +17,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -50,6 +51,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -58,7 +60,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
    
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 200000)
-   public void testTakingAStep()
+   public void testTakingAStep() throws SimulationExceededMaximumTimeException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
@@ -75,7 +77,5 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       conductor.simulate();
       
       assertEquals("Didn't step to correct location", commandedStepPositionX, frontLeftSolePositionX.getDoubleValue(), 0.05);
-      
-      conductor.concludeTesting();
    }
 }
