@@ -40,6 +40,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       pusher = null;
@@ -146,8 +147,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
@@ -173,8 +172,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
@@ -220,8 +217,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
@@ -291,7 +286,5 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }

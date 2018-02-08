@@ -51,6 +51,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
 
@@ -93,8 +94,6 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
@@ -124,8 +123,6 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 75.0)
@@ -156,8 +153,6 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
@@ -196,7 +191,5 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-
-      conductor.concludeTesting();
    }
 }

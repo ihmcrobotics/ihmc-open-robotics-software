@@ -47,6 +47,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -66,8 +67,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 8.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
@@ -83,8 +82,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.3));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
@@ -100,8 +97,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
@@ -117,8 +112,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 14.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.4));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
@@ -138,8 +131,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI, 0.1));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
@@ -159,8 +150,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI, 0.1));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
@@ -180,8 +169,6 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI, 0.1));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
@@ -201,7 +188,5 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI, 0.1));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }

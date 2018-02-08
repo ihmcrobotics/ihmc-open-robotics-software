@@ -48,6 +48,7 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -77,8 +78,6 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), 0.0, 1e-2));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 120.0)
@@ -104,7 +103,5 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), 0.0, 1e-2));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
 }

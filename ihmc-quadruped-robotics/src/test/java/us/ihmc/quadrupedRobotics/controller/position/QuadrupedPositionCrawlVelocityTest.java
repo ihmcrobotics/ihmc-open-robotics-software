@@ -48,6 +48,7 @@ public abstract class QuadrupedPositionCrawlVelocityTest implements QuadrupedMul
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -65,8 +66,6 @@ public abstract class QuadrupedPositionCrawlVelocityTest implements QuadrupedMul
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.3));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
@@ -80,7 +79,5 @@ public abstract class QuadrupedPositionCrawlVelocityTest implements QuadrupedMul
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 20.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.6));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }

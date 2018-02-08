@@ -35,6 +35,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
