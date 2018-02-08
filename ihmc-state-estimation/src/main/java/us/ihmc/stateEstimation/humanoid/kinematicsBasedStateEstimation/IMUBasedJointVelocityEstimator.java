@@ -29,10 +29,8 @@ public class IMUBasedJointVelocityEstimator
    private final FrameVector3D parentAngularVelocity = new FrameVector3D();
 
    private final DenseMatrix64F jacobianAngularPart64F;
-   private final DenseMatrix64F jacobianTransposed;
    private final DenseMatrix64F omega = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F qd_estimated;
-   private final DenseMatrix64F inverse;
    private final DampedLeastSquaresSolver solver;
 
    public IMUBasedJointVelocityEstimator(GeometricJacobian jacobian, IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoVariableRegistry registry)
@@ -61,9 +59,7 @@ public class IMUBasedJointVelocityEstimator
 
       solver = new DampedLeastSquaresSolver(joints.length);
       jacobianAngularPart64F = new DenseMatrix64F(3, joints.length);
-      jacobianTransposed = new DenseMatrix64F(joints.length, 3);
       qd_estimated = new DenseMatrix64F(joints.length, 1);
-      inverse = new DenseMatrix64F(joints.length, joints.length);
    }
 
    public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoVariableRegistry registry)
@@ -81,20 +77,17 @@ public class IMUBasedJointVelocityEstimator
       // jacobian is 6xn
       CommonOps.extract(jacobian.getJacobianMatrix(), 0, 3, 0, joints.length, jacobianAngularPart64F, 0, 0);
 
-      solver.setA(jacobianAngularPart64F);
-      solver.invert(inverse);
-
       childAngularVelocity.setToZero(childIMU.getMeasurementFrame());
       childIMU.getAngularVelocityMeasurement(childAngularVelocity);
       childAngularVelocity.changeFrame(jacobian.getJacobianFrame());
-
       parentAngularVelocity.setToZero(parentIMU.getMeasurementFrame());
       parentIMU.getAngularVelocityMeasurement(parentAngularVelocity);
       parentAngularVelocity.changeFrame(jacobian.getJacobianFrame());
       childAngularVelocity.sub(parentAngularVelocity);
-
       childAngularVelocity.get(omega);
-      CommonOps.mult(inverse, omega, qd_estimated);
+
+      solver.setA(jacobianAngularPart64F);
+      solver.solve(omega, qd_estimated);
 
       for (int i = 0; i < joints.length; i++)
       {
