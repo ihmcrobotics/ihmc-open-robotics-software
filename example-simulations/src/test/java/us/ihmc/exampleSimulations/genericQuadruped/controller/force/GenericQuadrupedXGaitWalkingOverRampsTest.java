@@ -10,7 +10,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitWalkingOverRamps
 
 import java.io.IOException;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWalkingOverRampsTest
 {
    @Override
@@ -21,7 +21,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @Test(timeout = 500000)
    public void testWalkingDownSlope() throws IOException
    {
       super.testWalkingDownSlope();
@@ -29,7 +29,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @Test(timeout = 500000)
    public void testWalkingOverShallowRamps() throws IOException
    {
       super.testWalkingOverShallowRamps();
@@ -37,7 +37,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @Test(timeout = 300000)
    public void testWalkingUpSlope() throws IOException
    {
       super.testWalkingUpSlope();
@@ -45,7 +45,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
+   @Test(timeout = 300000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
       super.testWalkingUpSlope();

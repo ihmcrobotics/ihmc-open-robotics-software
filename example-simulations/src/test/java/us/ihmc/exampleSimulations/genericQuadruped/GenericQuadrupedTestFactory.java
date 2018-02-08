@@ -4,6 +4,8 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedSimulationInitialPositionParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -42,7 +44,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final boolean SHOW_PLOTTER = true;
-   private static final boolean USE_TRACK_AND_DOLLY = false;
+   private static final boolean USE_TRACK_AND_DOLLY = true;
    private static final boolean USE_NETWORKING = false;
 
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
