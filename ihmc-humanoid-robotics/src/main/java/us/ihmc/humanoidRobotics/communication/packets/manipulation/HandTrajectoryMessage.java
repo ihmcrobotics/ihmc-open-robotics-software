@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
@@ -29,7 +29,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
-   public AbstractSE3TrajectoryMessage se3Trajectory;
+   public SE3TrajectoryMessage se3Trajectory;
 
    /**
     * Empty constructor for serialization.
@@ -42,7 +42,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
    public HandTrajectoryMessage(Random random)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(random);
+      se3Trajectory = new SE3TrajectoryMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -53,15 +53,15 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
     */
    public HandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(handTrajectoryMessage.se3Trajectory);
+      se3Trajectory = new SE3TrajectoryMessage(handTrajectoryMessage.se3Trajectory);
       robotSide = handTrajectoryMessage.robotSide;
       setUniqueId(handTrajectoryMessage.getUniqueId());
       setDestination(handTrajectoryMessage.getDestination());
    }
 
-   public HandTrajectoryMessage(RobotSide robotSide, AbstractSE3TrajectoryMessage trajectoryMessage)
+   public HandTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage trajectoryMessage)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(trajectoryMessage);
+      se3Trajectory = new SE3TrajectoryMessage(trajectoryMessage);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -76,7 +76,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
     */
    public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId);
+      se3Trajectory = new SE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -91,7 +91,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
     */
    public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
+      se3Trajectory = new SE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -106,14 +106,14 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
     */
    public HandTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(numberOfTrajectoryPoints);
+      se3Trajectory = new SE3TrajectoryMessage(numberOfTrajectoryPoints);
       this.robotSide = robotSide;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public void set(HandTrajectoryMessage other)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(other.se3Trajectory);
+      se3Trajectory = new SE3TrajectoryMessage(other.se3Trajectory);
       robotSide = other.robotSide;
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
@@ -124,7 +124,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
       return robotSide;
    }
 
-   public AbstractSE3TrajectoryMessage getSE3Trajectory()
+   public SE3TrajectoryMessage getSE3Trajectory()
    {
       return se3Trajectory;
    }

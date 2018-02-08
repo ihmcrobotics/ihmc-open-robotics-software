@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
@@ -29,7 +29,7 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> imp
    public boolean enableUserPelvisControl = false;
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
-   public AbstractSE3TrajectoryMessage se3Trajectory;
+   public SE3TrajectoryMessage se3Trajectory;
 
    /**
     * Empty constructor for serialization.
@@ -42,7 +42,7 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> imp
 
    public PelvisTrajectoryMessage(Random random)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(random);
+      se3Trajectory = new SE3TrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -52,7 +52,7 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> imp
     */
    public PelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(pelvisTrajectoryMessage.se3Trajectory);
+      se3Trajectory = new SE3TrajectoryMessage(pelvisTrajectoryMessage.se3Trajectory);
       setEnableUserPelvisControl(pelvisTrajectoryMessage.isEnableUserPelvisControl());
       setEnableUserPelvisControlDuringWalking(pelvisTrajectoryMessage.isEnableUserPelvisControlDuringWalking());
       setDestination(pelvisTrajectoryMessage.getDestination());
@@ -68,7 +68,7 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> imp
     */
    public PelvisTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
+      se3Trajectory = new SE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -80,7 +80,7 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> imp
     */
    public PelvisTrajectoryMessage(int numberOfTrajectoryPoints)
    {
-      se3Trajectory = new AbstractSE3TrajectoryMessage(numberOfTrajectoryPoints);
+      se3Trajectory = new SE3TrajectoryMessage(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -104,7 +104,7 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage> imp
       this.enableUserPelvisControl = enableUserPelvisControl;
    }
 
-   public AbstractSE3TrajectoryMessage getSE3Trajectory()
+   public SE3TrajectoryMessage getSE3Trajectory()
    {
       return se3Trajectory;
    }
