@@ -56,8 +56,6 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 200000)
    public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
@@ -86,8 +84,6 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 200000)
    public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
