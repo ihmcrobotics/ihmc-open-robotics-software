@@ -6,10 +6,10 @@ import us.ihmc.robotics.partNames.QuadrupedJointName;
 
 public class GenericQuadrupedSimulationInitialPositionParameters implements QuadrupedSimulationInitialPositionParameters
 {
-   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.37);
+   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.7);
    private static final double HIP_ROLL_ANGLE = 0.0;
-   private static final double HIP_PITCH_ANGLE = 0.3;
-   private static final double KNEE_PITCH_ANGLE = 0.6;
+   private static final double HIP_PITCH_ANGLE = -0.3;
+   private static final double KNEE_PITCH_ANGLE = -0.6;
    
    @Override
    public Point3D getInitialBodyPosition()
