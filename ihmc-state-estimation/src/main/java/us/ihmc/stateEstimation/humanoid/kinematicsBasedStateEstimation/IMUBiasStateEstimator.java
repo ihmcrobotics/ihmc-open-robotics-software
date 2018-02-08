@@ -234,10 +234,10 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
          if (isBiasEstimated.get(imuIndex).getBooleanValue())
          {
-            imuSensor.getOrientationMeasurement(orientationMeasurement);
+            orientationMeasurement.set(imuSensor.getOrientationMeasurement());
             orientationMeasurementTransposed.setAndTranspose(orientationMeasurement);
 
-            imuSensor.getAngularVelocityMeasurement(measurement);
+            measurement.set(imuSensor.getAngularVelocityMeasurement());
             angularVelocityBiases.get(imuIndex).update(measurement);
             measurementBias.set(angularVelocityBiases.get(imuIndex));
             orientationMeasurement.transform(measurementBias);
@@ -246,7 +246,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
             orientationMeasurement.transform(measurement, measurementInWorld);
             angularVelocitiesInWorld.get(imuIndex).set(measurementInWorld);
 
-            imuSensor.getLinearAccelerationMeasurement(measurement);
+            measurement.set(imuSensor.getLinearAccelerationMeasurement());
             orientationMeasurement.transform(measurement, measurementInWorld);
             linearAccelerationsInWorld.get(imuIndex).set(measurementInWorld);
 

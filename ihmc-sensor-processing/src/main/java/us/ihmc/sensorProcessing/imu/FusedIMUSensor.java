@@ -9,7 +9,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -250,7 +252,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private void measureOrientationInFusedFrame(FrameQuaternion orientationToPack, IMUSensorReadOnly imu)
    {
       // R_{IMU}^{world}
-      imu.getOrientationMeasurement(rotationFromIMUToWorld);
+      rotationFromIMUToWorld.set(imu.getOrientationMeasurement());
       transformFromIMUToWorld.setRotationAndZeroTranslation(rotationFromIMUToWorld);
 
       // R_{Fused IMU}^{IMU}
@@ -266,8 +268,8 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
    private void updateAngularVelocity()
    {
-      firstIMU.getAngularVelocityMeasurement(firstVector);
-      secondIMU.getAngularVelocityMeasurement(secondVector);
+      firstVector.set(firstIMU.getAngularVelocityMeasurement());
+      secondVector.set(secondIMU.getAngularVelocityMeasurement());
 
       firstFrameVector.setIncludingFrame(firstIMU.getMeasurementFrame(), firstVector);
       secondFrameVector.setIncludingFrame(secondIMU.getMeasurementFrame(), secondVector);
@@ -281,8 +283,8 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
    private void updateLinearAcceleration()
    {
-      firstIMU.getLinearAccelerationMeasurement(firstVector);
-      secondIMU.getLinearAccelerationMeasurement(secondVector);
+      firstVector.set(firstIMU.getLinearAccelerationMeasurement());
+      secondVector.set(secondIMU.getLinearAccelerationMeasurement());
 
       firstFrameVector.setIncludingFrame(firstIMU.getMeasurementFrame(), firstVector);
       secondFrameVector.setIncludingFrame(secondIMU.getMeasurementFrame(), secondVector);
@@ -313,21 +315,21 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public void getOrientationMeasurement(RotationMatrix orientationToPack)
+   public QuaternionReadOnly getOrientationMeasurement()
    {
-      orientationToPack.set(quaternion);
+      return quaternion;
    }
 
    @Override
-   public void getAngularVelocityMeasurement(Vector3DBasics angularVelocityToPack)
+   public Vector3DReadOnly getAngularVelocityMeasurement()
    {
-      angularVelocityToPack.set(angularVelocity);
+      return angularVelocity;
    }
 
    @Override
-   public void getLinearAccelerationMeasurement(Vector3DBasics linearAccelerationToPack)
+   public Vector3DReadOnly getLinearAccelerationMeasurement()
    {
-      linearAccelerationToPack.set(linearAcceleration);
+      return linearAcceleration;
    }
 
    @Override

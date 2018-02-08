@@ -10,7 +10,6 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
@@ -54,7 +53,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
    // puts the state data into the ring buffer for the output thread
    private final Vector3D32[] imuLinearAccelerations;
    private final Vector3D32[] rawImuAngularVelocities;
-   private final RotationMatrix[] imuOrientationsAsMatrix;
    private final Quaternion32[] imuOrientations;
 
    private final SideDependentList<ReferenceFrame> wristForceSensorFrames = new SideDependentList<ReferenceFrame>();
@@ -91,14 +89,12 @@ public class DRCPoseCommunicator implements RawOutputWriter
       int numberOfImuSensors = imuDefinitions.length;
       imuLinearAccelerations = new Vector3D32[numberOfImuSensors];
       rawImuAngularVelocities = new Vector3D32[numberOfImuSensors];
-      imuOrientationsAsMatrix = new RotationMatrix[numberOfImuSensors];
       imuOrientations = new Quaternion32[numberOfImuSensors];
 
       for (int imuSensorIndex = 0; imuSensorIndex < numberOfImuSensors; imuSensorIndex++)
       {
          imuLinearAccelerations[imuSensorIndex] = new Vector3D32();
          rawImuAngularVelocities[imuSensorIndex] = new Vector3D32();
-         imuOrientationsAsMatrix[imuSensorIndex] = new RotationMatrix();
          imuOrientations[imuSensorIndex] = new Quaternion32();
       }
       ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
@@ -221,10 +217,9 @@ public class DRCPoseCommunicator implements RawOutputWriter
                IMUSensorReadOnly imuSensor = imuRawOutputs.get(sensorNumber);
                IMUPacket imuPacketToPack = configData.getImuSensorData().add();
 
-               imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
-               imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
-               imuOrientations[sensorNumber].set(imuOrientationsAsMatrix[sensorNumber]);
-               imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
+               imuLinearAccelerations[sensorNumber].set(imuSensor.getLinearAccelerationMeasurement());
+               imuOrientations[sensorNumber].set(imuSensor.getOrientationMeasurement());
+               rawImuAngularVelocities[sensorNumber].set(imuSensor.getAngularVelocityMeasurement());
 
                imuPacketToPack.getLinearAcceleration().set(imuLinearAccelerations[sensorNumber]);
                imuPacketToPack.getOrientation().set(imuOrientations[sensorNumber]);
