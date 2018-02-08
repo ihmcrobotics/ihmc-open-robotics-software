@@ -96,4 +96,34 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    {
       return se3Trajectory.epsilonEquals(other.se3Trajectory, epsilon);
    }
+   
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      se3Trajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      se3Trajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return se3Trajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return se3Trajectory.getExecutionTime();
+   }
 }

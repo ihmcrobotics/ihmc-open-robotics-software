@@ -60,4 +60,34 @@ public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, Nec
    {
       return NeckTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      jointspaceTrajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      jointspaceTrajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return jointspaceTrajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return jointspaceTrajectory.getExecutionTime();
+   }
 }

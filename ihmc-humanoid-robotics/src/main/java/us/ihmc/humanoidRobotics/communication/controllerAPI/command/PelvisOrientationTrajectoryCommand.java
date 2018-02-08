@@ -93,4 +93,34 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    {
       return PelvisOrientationTrajectoryMessage.class;
    }
+
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      so3Trajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      so3Trajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return so3Trajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return so3Trajectory.getExecutionTime();
+   }
 }
