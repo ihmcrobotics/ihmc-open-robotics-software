@@ -557,7 +557,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateSO3TrajectoryMessage(AbstractSO3TrajectoryMessage message)
+   public static String validateSO3TrajectoryMessage(SO3TrajectoryMessage message)
    {
       String errorMessage = validatePacket(message, true);
       if (errorMessage != null)
