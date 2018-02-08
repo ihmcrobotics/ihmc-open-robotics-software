@@ -7,19 +7,19 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasToeOffParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidLineContactWalkingTest;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
 {
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -45,7 +45,7 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testWalkingOnStraightForwardLines() throws SimulationExceededMaximumTimeException
    {
@@ -53,7 +53,7 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 300000)
    public void testWalkingOnStraightSidewayLines() throws SimulationExceededMaximumTimeException
    {
@@ -80,11 +80,13 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
    private class TestWalkingParameters extends AtlasWalkingControllerParameters
    {
       private final TestICPOptimizationParameters icpOptimizationParameters;
+      private final TestToeOffParameters toeOffParameters;
 
       public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
          super(target, jointMap, contactPointParameters);
          icpOptimizationParameters = new TestICPOptimizationParameters();
+         toeOffParameters = new TestToeOffParameters(jointMap);
       }
 
       @Override
@@ -97,6 +99,12 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
       public ICPOptimizationParameters getICPOptimizationParameters()
       {
          return icpOptimizationParameters;
+      }
+
+      @Override
+      public ToeOffParameters getToeOffParameters()
+      {
+         return toeOffParameters;
       }
    }
 
@@ -111,6 +119,20 @@ public class AtlasLineContactWalkingTest extends HumanoidLineContactWalkingTest
       public boolean useAngularMomentum()
       {
          return true;
+      }
+   }
+
+   private class TestToeOffParameters extends AtlasToeOffParameters
+   {
+      public TestToeOffParameters(AtlasJointMap jointMap)
+      {
+         super(jointMap);
+      }
+
+      @Override
+      public boolean doToeOffIfPossible()
+      {
+         return false;
       }
    }
 }
