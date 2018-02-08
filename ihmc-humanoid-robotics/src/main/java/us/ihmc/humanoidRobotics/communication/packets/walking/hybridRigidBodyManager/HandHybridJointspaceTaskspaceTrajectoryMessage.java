@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
@@ -20,7 +20,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 {
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
-   public AbstractSE3TrajectoryMessage taskspaceTrajectoryMessage;
+   public SE3TrajectoryMessage taskspaceTrajectoryMessage;
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
 
    /**
@@ -39,7 +39,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
     */
    public HandHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(RobotSide.generateRandomRobotSide(random), new AbstractSE3TrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
+      this(RobotSide.generateRandomRobotSide(random), new SE3TrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
    }
 
    /**
@@ -49,7 +49,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       robotSide = hybridJointspaceTaskspaceMessage.robotSide;
-      taskspaceTrajectoryMessage = new AbstractSE3TrajectoryMessage(hybridJointspaceTaskspaceMessage.getTaskspaceTrajectoryMessage());
+      taskspaceTrajectoryMessage = new SE3TrajectoryMessage(hybridJointspaceTaskspaceMessage.getTaskspaceTrajectoryMessage());
       jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(hybridJointspaceTaskspaceMessage.jointspaceTrajectoryMessage);
       setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
@@ -60,23 +60,23 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
     * @param taskspaceTrajectoryMessage
     * @param jointspaceTrajectoryMessage
     */
-   public HandHybridJointspaceTaskspaceTrajectoryMessage(RobotSide robotSide, AbstractSE3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   public HandHybridJointspaceTaskspaceTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       if (!taskspaceTrajectoryMessage.getQueueingProperties().epsilonEquals(jointspaceTrajectoryMessage.getQueueingProperties(), 0.0))
          throw new IllegalArgumentException("The trajectory messages should have the same queueing properties.");
 
       this.robotSide = robotSide;
-      this.taskspaceTrajectoryMessage = new AbstractSE3TrajectoryMessage(taskspaceTrajectoryMessage);
+      this.taskspaceTrajectoryMessage = new SE3TrajectoryMessage(taskspaceTrajectoryMessage);
       this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractSE3TrajectoryMessage getTaskspaceTrajectoryMessage()
+   public SE3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
       return taskspaceTrajectoryMessage;
    }
 
-   public void setTaskspaceTrajectoryMessage(AbstractSE3TrajectoryMessage taskspaceTrajectoryMessage)
+   public void setTaskspaceTrajectoryMessage(SE3TrajectoryMessage taskspaceTrajectoryMessage)
    {
       this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
    }

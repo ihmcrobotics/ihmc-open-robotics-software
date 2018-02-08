@@ -23,7 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
-public final class AbstractSE3TrajectoryMessage extends Packet<AbstractSE3TrajectoryMessage> implements Transformable, FrameBasedMessage
+public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -47,13 +47,13 @@ public final class AbstractSE3TrajectoryMessage extends Packet<AbstractSE3Trajec
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
 
-   public AbstractSE3TrajectoryMessage()
+   public SE3TrajectoryMessage()
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractSE3TrajectoryMessage(Random random)
+   public SE3TrajectoryMessage(Random random)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
@@ -70,7 +70,7 @@ public final class AbstractSE3TrajectoryMessage extends Packet<AbstractSE3Trajec
       queueingProperties = new QueueableMessage(random);
    }
 
-   public AbstractSE3TrajectoryMessage(AbstractSE3TrajectoryMessage se3TrajectoryMessage)
+   public SE3TrajectoryMessage(SE3TrajectoryMessage se3TrajectoryMessage)
    {
       int numberOfPoints = se3TrajectoryMessage.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfPoints];
@@ -103,7 +103,7 @@ public final class AbstractSE3TrajectoryMessage extends Packet<AbstractSE3Trajec
       queueingProperties.set(se3TrajectoryMessage.queueingProperties);
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
+   public SE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
                                        long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
@@ -114,25 +114,25 @@ public final class AbstractSE3TrajectoryMessage extends Packet<AbstractSE3Trajec
       frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
+   public SE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
                                        ReferenceFrame trajectoryReferenceFrame)
    {
       this(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame.getNameBasedHashCode());
    }
 
-   public AbstractSE3TrajectoryMessage(int numberOfTrajectoryPoints)
+   public SE3TrajectoryMessage(int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfTrajectoryPoints];
    }
 
-   public AbstractSE3TrajectoryMessage(int numberOfPoints, ReferenceFrame trajectoryFrame)
+   public SE3TrajectoryMessage(int numberOfPoints, ReferenceFrame trajectoryFrame)
    {
       this(numberOfPoints);
       getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
    }
 
-   public void set(AbstractSE3TrajectoryMessage other)
+   public void set(SE3TrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
@@ -418,7 +418,7 @@ public final class AbstractSE3TrajectoryMessage extends Packet<AbstractSE3Trajec
    }
 
    @Override
-   public boolean epsilonEquals(AbstractSE3TrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(SE3TrajectoryMessage other, double epsilon)
    {
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
       {
