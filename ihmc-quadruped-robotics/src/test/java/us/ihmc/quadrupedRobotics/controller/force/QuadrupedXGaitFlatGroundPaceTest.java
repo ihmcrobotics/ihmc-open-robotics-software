@@ -55,16 +55,12 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+
    public void testPacingForwardFast()
    {
       paceFast(1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
    public void testPacingBackwardsFast()
    {
       paceFast(-1.0);
@@ -90,16 +86,12 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       }
       conductor.simulate();
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+
    public void testPacingForwardSlow()
    {
       paceSlow(1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
    public void testPacingBackwardsSlow()
    {
       paceSlow(-1.0);
@@ -127,29 +119,21 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       conductor.simulate();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInAForwardLeftCircle()
    {
       paceInACircle(1.0, 1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInAForwardRightCircle()
    {
       paceInACircle(1.0, -1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInABackwardLeftCircle()
    {
       paceInACircle(-1.0, 1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInABackwardRightCircle()
    {
       paceInACircle(-1.0, -1.0);
