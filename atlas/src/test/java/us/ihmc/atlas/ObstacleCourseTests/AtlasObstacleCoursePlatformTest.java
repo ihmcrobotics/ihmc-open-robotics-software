@@ -49,7 +49,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 40.5)
-   @Test(timeout = 70000)
+   @Test(timeout = 140000)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
       super.testSidestepOverSmallWall();
@@ -65,7 +65,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 35.4)
-   @Test(timeout = 60000)
+   @Test(timeout = 120000)
    public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOffOfMediumPlatformSlowSteps();
