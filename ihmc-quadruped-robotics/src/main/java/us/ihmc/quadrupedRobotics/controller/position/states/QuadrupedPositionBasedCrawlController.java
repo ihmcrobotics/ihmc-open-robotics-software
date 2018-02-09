@@ -570,7 +570,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       FramePose3D centerOfMassPose = new FramePose3D(referenceFrames.getCenterOfFourHipsFrame());
       centerOfMassPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredCoMHeight.set(quadrupedControllerParameters.getInitalCoMHeight());
+      desiredCoMHeight.set(quadrupedControllerParameters.getInitialCoMHeight());
       filteredDesiredCoMHeight.update();
       centerOfMassPose.setZ(filteredDesiredCoMHeight.getDoubleValue());
       desiredCoMPose.set(centerOfMassPose);
@@ -1190,7 +1190,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       desiredFootPositionInBody.setIncludingFrame(feedForwardCenterOfMassFrame, desiredFootPosition);
       desiredFootPositionInBody.changeFrame(feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant));
 
-      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInBody);
+      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).setAndMatchFrame(desiredFootPositionInBody);
    }
 
 

@@ -5,77 +5,92 @@ import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBas
 
 public class GenericQuadrupedPositionBasedCrawlControllerParameters implements QuadrupedPositionBasedCrawlControllerParameters
 {
+   private final double minimumVelocityForFullSkew = 0.14;//0.1;
+   private final double minimumDistanceFromSameSideFoot = 0.04;
+   private final double strideLength = 1.05;//1.13;
+   private final double strideWidth = 0.4;
+   private final double maxForwardSkew = 0.26;
+   private final double maxLateralSkew = 0.05;
+   private final double maxYawPerStep = 0.1;
+   private final double maxYawRate = 0.13;
+   private final double initalCoMHeight = 0.55;//0.6;
+   private final double swingHeight = 0.075;
+   private final double swingDuration = 0.6;//1.25;
+   private final double subCircleRadius = 0.09;
+
+   private final double comCloseToFinalDesiredTransitionRadius = 0.10;
    private final Vector2D desiredCoMOffset = new Vector2D(0.02, 0.0);
-   
+
    @Override
    public double getMinimumVelocityForFullSkew()
    {
-      return 0.1;
+      return minimumVelocityForFullSkew;
    }
 
    @Override
    public double getMinimumDistanceFromSameSideFoot()
    {
-      return 0.04;
+      return minimumDistanceFromSameSideFoot;
    }
 
    @Override
    public double getStanceLength()
    {
-      return 0.6;
+      return strideLength;
    }
 
    @Override
    public double getStanceWidth()
    {
-      return 0.3;
+      return strideWidth;
    }
 
    @Override
    public double getMaxForwardSkew()
    {
-      return 0.2;
+      return maxForwardSkew;
    }
    
    @Override
    public double getMaxLateralSkew()
    {
-      return 0.05;
-   }
-   @Override
-   public double getMaxYawPerStep()
-   {
-      return 0.25;
+      return maxLateralSkew;
    }
 
    @Override
-   public double getInitalCoMHeight()
+   public double getMaxYawPerStep()
    {
-      return 0.35;
+      return maxYawPerStep;
+   }
+
+   @Override
+   public double getInitialCoMHeight()
+   {
+      return initalCoMHeight;
    }
 
    @Override
    public double getDefaultSwingHeight()
    {
-      return 0.075;
+      return swingHeight;
    }
 
    @Override
    public double getDefaultSwingDuration()
    {
-      return 1.0;
+      return swingDuration;
    }
 
    @Override
    public double getDefaultSubCircleRadius()
    {
-      return 0.2;
+      return subCircleRadius;
    }
 
    @Override
    public double getDefaultCoMCloseToFinalDesiredTransitionRadius()
    {
-      return 0.1;
+      return comCloseToFinalDesiredTransitionRadius;
    }
 
    @Override
@@ -87,7 +102,7 @@ public class GenericQuadrupedPositionBasedCrawlControllerParameters implements Q
    @Override
    public double getMaxYawRate()
    {
-      return 0.2;
+      return maxYawRate;
    }
 
    @Override

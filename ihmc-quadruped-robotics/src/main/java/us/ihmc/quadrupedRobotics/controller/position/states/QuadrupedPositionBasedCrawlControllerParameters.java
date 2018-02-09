@@ -6,18 +6,18 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 public interface QuadrupedPositionBasedCrawlControllerParameters extends SwingTargetGeneratorParameters
 {
-   public abstract double getInitalCoMHeight();
+   double getInitialCoMHeight();
    
-   public abstract double getDefaultSwingHeight();
+   double getDefaultSwingHeight();
 
-   public abstract double getDefaultSwingDuration();
+   double getDefaultSwingDuration();
 
-   public abstract double getDefaultSubCircleRadius();
+   double getDefaultSubCircleRadius();
 
-   public abstract double getMaxYawRate();
+   double getMaxYawRate();
 
-   public abstract double getDefaultCoMCloseToFinalDesiredTransitionRadius();
+   double getDefaultCoMCloseToFinalDesiredTransitionRadius();
    
-   public abstract Vector2D getDefaultDesiredCoMOffset();
+   Vector2D getDefaultDesiredCoMOffset();
 
 }
