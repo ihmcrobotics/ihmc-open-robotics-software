@@ -23,7 +23,7 @@ public class GenericQuadrupedTurning720Test extends QuadrupedXGaitTurning720Test
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 400000)
    public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.rotate720InPlaceRight();
@@ -31,7 +31,7 @@ public class GenericQuadrupedTurning720Test extends QuadrupedXGaitTurning720Test
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 400000)
    public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.rotate720InPlaceLeft();
