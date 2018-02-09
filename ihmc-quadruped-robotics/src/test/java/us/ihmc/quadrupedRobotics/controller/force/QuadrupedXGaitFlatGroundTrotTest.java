@@ -4,10 +4,8 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import junit.framework.AssertionFailedError;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -48,21 +46,18 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
    public void testTrottingForwardFast()
    {
       trotFast(1.0);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
    public void testTrottingBackwardsFast()
    {
       trotFast(-1.0);
@@ -87,19 +82,13 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 2.0));
       }
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
    public void testTrottingForwardSlow()
    {
       trotSlow(1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
    public void testTrottingBackwardsSlow()
    {
       trotSlow(-1.0);
@@ -128,33 +117,23 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       }
       
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testTrottingInAForwardLeftCircle()
    {
       trotInACircle(1.0, 1.0);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testTrottingInAForwardRightCircle()
    {
       trotInACircle(1.0, -1.0);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testTrottingInABackwardLeftCircle()
    {
       trotInACircle(-1.0, 1.0);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testTrottingInABackwardRightCircle()
    {
       trotInACircle(-1.0, -1.0);
@@ -187,7 +166,5 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), directionZ * Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), directionZ * Math.PI, 0.1));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }

@@ -50,6 +50,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -76,8 +77,6 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 120.0)
@@ -100,8 +99,6 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 150.0)
@@ -124,8 +121,6 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 150.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
@@ -148,7 +143,5 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
 }

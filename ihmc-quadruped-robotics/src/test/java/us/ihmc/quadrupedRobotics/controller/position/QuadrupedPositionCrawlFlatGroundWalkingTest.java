@@ -47,6 +47,7 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -62,8 +63,6 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 25.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.5));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    public void testWalkingForwardSlow() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -75,8 +74,6 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 35.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.35));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    public void testWalkingBackwardsFast() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -88,8 +85,6 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 25.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -1.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    public void testWalkingBackwardsSlow() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -101,8 +96,6 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 25.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.48));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    public void testWalkingInAForwardLeftCircle() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -114,8 +107,6 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    public void testWalkingInAForwardRightCircle() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -127,8 +118,6 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    public void testWalkingInABackwardLeftCircle() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -140,8 +129,6 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    public void testWalkingInABackwardRightCircle() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -153,7 +140,5 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }

@@ -49,6 +49,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -95,8 +96,6 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 200.0)
@@ -125,8 +124,6 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 300.0)
@@ -163,7 +160,5 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
-      
-      conductor.concludeTesting();
    }
 }

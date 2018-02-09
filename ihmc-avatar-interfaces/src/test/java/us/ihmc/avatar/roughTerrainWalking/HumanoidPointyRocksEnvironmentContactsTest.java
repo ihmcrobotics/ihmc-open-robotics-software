@@ -11,6 +11,7 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -30,7 +31,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PointyRocksWorld
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -43,14 +43,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
    private YoDouble percentageChickenSupport;
    private YoDouble timeBeforeExploring;
    private SideDependentList<YoBoolean> autoCropToLineAfterExploration = new SideDependentList<>();
-   private SideDependentList<YoBoolean> holdFlatDuringExploration = new SideDependentList<>(); // old hold position
-   private SideDependentList<YoBoolean> holdFlatDuringHoldPosition = new SideDependentList<>(); // old hold position
    private SideDependentList<YoBoolean> holdFlat = new SideDependentList<>(); // new supportState
-   private SideDependentList<YoBoolean> smartHoldPosition = new SideDependentList<>();
    private YoBoolean allowUpperBodyMomentumInSingleSupport;
    private YoBoolean allowUpperBodyMomentumInDoubleSupport;
    private YoBoolean allowUsingHighMomentumWeight;
-   private YoBoolean doToeOffIfPossible;
    private SideDependentList<YoBoolean> requestExploration = new SideDependentList<>();
    private SideDependentList<YoBoolean> doPartialDetection = new SideDependentList<>();
    private SideDependentList<YoBoolean> cropToConvexHullOfCoPs = new SideDependentList<>();
@@ -80,22 +76,13 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       for (RobotSide robotSide : RobotSide.values)
       {
          autoCropToLineAfterExploration.get(robotSide).set(true);
-         if (holdFlatDuringExploration.get(robotSide) != null)
-            holdFlatDuringExploration.get(robotSide).set(true);
-         if (holdFlatDuringExploration.get(robotSide) != null)
-            holdFlatDuringExploration.get(robotSide).set(true);
-         if (smartHoldPosition.get(robotSide) != null)
-            smartHoldPosition.get(robotSide).set(false);
-
-         if (holdFlat.get(robotSide) != null)
-            holdFlat.get(robotSide).set(true);
+         holdFlat.get(robotSide).set(true);
          doPartialDetection.get(robotSide).set(true);
       }
 
       doFootExplorationInTransferToStanding.set(true);
       percentageChickenSupport.set(0.4);
       timeBeforeExploring.set(1.0);
-      doToeOffIfPossible.set(false);
 
       double swingTime = 0.8;
       double transferTime = 0.15;
@@ -151,22 +138,13 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       for (RobotSide robotSide : RobotSide.values)
       {
          autoCropToLineAfterExploration.get(robotSide).set(false);
-         if (holdFlatDuringExploration.get(robotSide) != null)
-            holdFlatDuringExploration.get(robotSide).set(true);
-         if (holdFlatDuringExploration.get(robotSide) != null)
-            holdFlatDuringExploration.get(robotSide).set(true);
-         if (smartHoldPosition.get(robotSide) != null)
-            smartHoldPosition.get(robotSide).set(false);
-
-         if (holdFlat.get(robotSide) != null)
-            holdFlat.get(robotSide).set(true);
+         holdFlat.get(robotSide).set(true);
          doPartialDetection.get(robotSide).set(true);
       }
 
       doFootExplorationInTransferToStanding.set(true);
       percentageChickenSupport.set(0.3);
       timeBeforeExploring.set(1.0);
-      doToeOffIfPossible.set(false);
 
       double swingTime = 0.8;
       double transferTime = 0.15;
@@ -231,8 +209,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       // create simulation test helper
       String className = getClass().getSimpleName();
       DRCRobotModel robotModel = getRobotModel(15, 8, onlyEdgeContacts);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.createSimulation(className);
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 
@@ -248,7 +225,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
       // get a bunch of relevant variables
       doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
-      percentageChickenSupport = (YoDouble) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
+      percentageChickenSupport = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPlannerCoPTrajectoryGeneratorPercentageChickenSupport");
       timeBeforeExploring = (YoDouble) drcSimulationTestHelper.getYoVariable("ExplorationState_TimeBeforeExploring");
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -259,12 +236,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
          YoBoolean autoCrop = (YoBoolean) drcSimulationTestHelper.getYoVariable(footName + "ExpectingLineContact");
          autoCropToLineAfterExploration.put(robotSide, autoCrop);
-         YoBoolean holdFlatDuringExploration = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoHoldFootFlatOrientation");
-         this.holdFlatDuringExploration.put(robotSide, holdFlatDuringExploration);
-         YoBoolean holdFlatDuringHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable("ExploreFootPolygon", footName + "DoHoldFootFlatOrientation");
-         this.holdFlatDuringHoldPosition.put(robotSide, holdFlatDuringHoldPosition);
-         YoBoolean smartHoldPosition = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoSmartHoldPosition");
-         this.smartHoldPosition.put(robotSide, smartHoldPosition);
          YoBoolean requestExplorationForFoot = (YoBoolean) drcSimulationTestHelper.getYoVariable(footControlNamespace, longFootName + "RequestExploration");
          requestExploration.put(robotSide, requestExplorationForFoot);
          YoBoolean doPartialDetectionForFoot = (YoBoolean) drcSimulationTestHelper.getYoVariable(partialfootControlNamespace, footName + "DoPartialFootholdDetection");
@@ -279,7 +250,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
       allowUsingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
-      doToeOffIfPossible = (YoBoolean) drcSimulationTestHelper.getYoVariable("doToeOffIfPossible");
 
       ThreadTools.sleep(1000);
    }
@@ -295,7 +265,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
    private void armsUp() throws SimulationExceededMaximumTimeException
    {
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
       // bring the arms in a stretched position
       for (RobotSide robotSide : RobotSide.values)
@@ -308,7 +278,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          {
             TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
             trajectoryPoint.position = armConfig[i];
-            trajectoryPoint.time = 1.0;
+            trajectoryPoint.time = 0.5;
             OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
             jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
             armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
@@ -316,6 +286,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          drcSimulationTestHelper.send(armTrajectoryMessage);
       }
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.6);
    }
 }
