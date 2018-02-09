@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -29,7 +28,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -64,7 +62,8 @@ public class FeetManager
    private final YoDouble blindFootstepsHeightOffset = new YoDouble("blindFootstepsHeightOffset", registry);
 
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry parentRegistry)
+                      PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
+                      YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       feet = controllerToolbox.getContactableFeet();
@@ -91,13 +90,6 @@ public class FeetManager
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
-      PIDSE3GainsReadOnly swingGains = walkingControllerParameters.getSwingFootControlGains();
-      PIDSE3GainsReadOnly swingFootControlGains = new ParameterizedPIDSE3Gains("SwingFoot", swingGains, registry);
-      PIDSE3GainsReadOnly holdGains = walkingControllerParameters.getHoldPositionFootControlGains();
-      PIDSE3GainsReadOnly holdPositionFootControlGains = new ParameterizedPIDSE3Gains("HoldFoot", holdGains, registry);
-      PIDSE3GainsReadOnly toeGains = walkingControllerParameters.getToeOffFootControlGains();
-      PIDSE3GainsReadOnly toeOffFootControlGains = new ParameterizedPIDSE3Gains("ToeOffFoot", toeGains, registry);
-
       ExplorationParameters explorationParameters = null;
       if (walkingControllerParameters.createFootholdExplorationTools())
       {
@@ -106,8 +98,8 @@ public class FeetManager
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, controllerToolbox, explorationParameters, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
+                                                                     toeOffFootGains, controllerToolbox, explorationParameters, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
