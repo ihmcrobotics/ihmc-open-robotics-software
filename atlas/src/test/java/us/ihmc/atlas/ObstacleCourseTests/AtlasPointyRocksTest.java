@@ -25,92 +25,92 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
 {
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 115.0)
-   @Test(timeout = 230000)
    /**
     * Hard test: Atlas walks forward and steps on unknown contacts including lines that need to be explored.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 115.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test(timeout = 230000)
    public void testWalkingForwardWithHalfFootContactChangesStopBetweenSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingForwardWithHalfFootContactChangesStopBetweenSteps();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 370000)
    /**
     * Tests the foothold detection and makes sure the detected area matches the real one.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 370000)
    public void testStandingWithGCPointsChangingOnTheFly() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       super.testStandingWithGCPointsChangingOnTheFly();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 350000)
    /**
     * The robot walks continuously for a few steps with unknown half foot contacts.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 350000)
    public void testWalkingForwardWithHalfFootContactChangesContinuousSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingForwardWithHalfFootContactChangesContinuousSteps();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 170.0)
-   @Test(timeout = 400000)
    /**
     * The robot walks forward with partial footholds. The controller knows about the foothold beforehand.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 170.0)
+   @Test(timeout = 400000)
    public void testWalkingForwardWithPartialFootholdsAndStopBetweenSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingForwardWithPartialFootholdsAndStopBetweenSteps();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 170.0)
-   @Test(timeout = 460000)
    /**
     * This test steps in place with partial footholds. The controller knows about the foothold beforehand.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 170.0)
+   @Test(timeout = 460000)
    public void testTakingStepsWithActualAndPredictedFootPolygonsChanging() throws SimulationExceededMaximumTimeException
    {
       super.testTakingStepsWithActualAndPredictedFootPolygonsChanging();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 180000)
    /**
     * The robot takes a step while on a partial foothold and receives a push that requires the use of angular momentum to recover.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 180000)
    public void testSidePushDuringSwing() throws SimulationExceededMaximumTimeException
    {
       super.testSidePushDuringSwing();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 77.5)
-   @Test(timeout = 390000)
-   @Ignore // is a duplicate of other tests with less asserts.
    /**
     * In this test, the robot is standing, but then the floor is dropped out from underneath it. So the robot has to detect the rotation
     * and hold position. Then it takes some steps in place with the part of foot changing each step.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 77.5)
+   @Test(timeout = 390000)
+   @Ignore // is a duplicate of other tests with less asserts.
    public void testStandingAndStepsInPlaceWithHalfFootContactsChanges() throws SimulationExceededMaximumTimeException
    {
       super.testStandingAndStepsInPlaceWithHalfFootContactsChanges();
    }
 
+   /**
+    * The robot walks thinking it has small footholds but actually has full footholds.
+    */
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 58.3)
    @Test(timeout = 290000)
    @Ignore // does only test stuff that is already covered by other tests in a easier setup
-   /**
-    * The robot walks thinking it has small footholds but actually has full footholds.
-    */
    public void testWalkingWithLinePredictedSupportPolygonButFullActualPolygon() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingWithLinePredictedSupportPolygonButFullActualPolygon();
@@ -125,12 +125,12 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testHoldPositionByStandingOnOneLegAndGettingPushedSideways();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 300000)
    /**
     * Attempts to stand on a line for a while.
     */
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test(timeout = 300000)
    public void testBalanceOnLine() throws SimulationExceededMaximumTimeException
    {
       super.testBalanceOnLine();

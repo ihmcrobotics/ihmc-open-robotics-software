@@ -62,7 +62,7 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionB
    }
 
    @Override
-   public double getInitalCoMHeight()
+   public double getInitialCoMHeight()
    {
       return 0;
    }

@@ -72,7 +72,7 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
    private final double forcePercentageOfWeight2 = 0.025;
    private final double forceDuration2 = 1.0;
    private final double forceDelay2 = 1.0 * swingTime;
-   private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
+   private final Vector3D forceDirection2 = new Vector3D(1.0, 0.1, 0.0);
 
    @Override
    @Test(timeout = 520000)

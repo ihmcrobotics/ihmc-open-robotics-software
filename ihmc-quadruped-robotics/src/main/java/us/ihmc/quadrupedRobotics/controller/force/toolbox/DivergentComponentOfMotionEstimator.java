@@ -11,17 +11,17 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
+
 public class DivergentComponentOfMotionEstimator
 {
    private final ReferenceFrame comZUpFrame;
    private final LinearInvertedPendulumModel lipModel;
 
-   YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
-   ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   YoFramePoint yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
-   YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
 
    public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry)
@@ -29,10 +29,21 @@ public class DivergentComponentOfMotionEstimator
       this.comZUpFrame = comZUpFrame;
       this.lipModel = lipModel;
 
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
+      parentRegistry.addChild(registry);
+
+      if (graphicsListRegistry != null)
+         createGraphics(graphicsListRegistry);
+   }
+
+   private void createGraphics(YoGraphicsListRegistry graphicsListRegistry)
+   {
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate", yoIcpPositionEstimate, 0.01, Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       artifactList.add(yoIcpPositionEstimateViz.createArtifact());
-      parentRegistry.addChild(registry);
       graphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       graphicsListRegistry.registerArtifactList(artifactList);
    }

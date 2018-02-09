@@ -580,7 +580,7 @@ public class FootCoPOccupancyGrid
                }
             }
          }
-         lineToPack.set(pointA, pointB);
+         lineToPack.setIncludingFrame(pointA, pointB);
          return true;
       }
 
