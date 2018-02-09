@@ -80,6 +80,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPWithTimeFreezingPlannerParameters icpPlannerParameters;
    private final JumpControllerParameters jumpControllerParameters;
+   private final JumpControlManagerFactory jumpControlManagerFactory;
 
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
@@ -132,6 +133,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory = new HighLevelControlManagerFactory(statusMessageOutputManager, registry);
       managerFactory.setCapturePointPlannerParameters(icpPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
+
+      jumpControlManagerFactory = new JumpControlManagerFactory(registry);
    }
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
@@ -379,7 +382,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-
+      jumpControlManagerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
@@ -387,7 +391,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager, initialControllerState,
                                                                                   highLevelControllerParameters, walkingControllerParameters,
                                                                                   icpPlannerParameters, jumpControllerParameters, requestedHighLevelControllerState,
-                                                                                  controllerFactoriesMap, stateTransitionFactories, managerFactory,
+                                                                                  controllerFactoriesMap, stateTransitionFactories, managerFactory, jumpControlManagerFactory,
                                                                                   controllerToolbox, centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder, lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);

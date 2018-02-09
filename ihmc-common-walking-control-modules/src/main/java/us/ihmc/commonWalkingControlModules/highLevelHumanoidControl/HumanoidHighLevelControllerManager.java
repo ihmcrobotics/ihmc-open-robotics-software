@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JumpControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -59,6 +60,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
    private final HighLevelControlManagerFactory managerFactory;
+   private final JumpControlManagerFactory jumpControlManagerFactory;
 
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
 
@@ -71,13 +73,14 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
                                              HighLevelControllerName initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters, ICPTrajectoryPlannerParameters icpPlannerParameters,
-                                             JumpControllerParameters jumpControllerParameters, YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
+                                             JumpControllerParameters jumpControllerParameters,
+                                             YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
                                              EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
-                                             HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                             HighLevelControlManagerFactory managerFactory, JumpControlManagerFactory jumpControlManagerFactory,
+                                             HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                             ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                             JointDesiredOutputList lowLevelControllerOutput)
+                                             ForceSensorDataHolderReadOnly forceSensorDataHolder, JointDesiredOutputList lowLevelControllerOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -85,6 +88,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.initialControllerState = initialControllerState;
       this.managerFactory = managerFactory;
+      this.jumpControlManagerFactory = jumpControlManagerFactory;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
 
@@ -101,7 +105,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
-      stateMachine = setUpStateMachine(controllerStateFactories, controllerTransitionFactories, managerFactory, controllerToolbox.getYoTime(), registry);
+      stateMachine = setUpStateMachine(controllerStateFactories, controllerTransitionFactories, managerFactory, jumpControlManagerFactory,
+                                       controllerToolbox.getYoTime(), registry);
       isListeningToHighLevelStateMessage.set(true);
       for (HighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
       {
@@ -174,16 +179,17 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
    private GenericStateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                                                                                     ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
-                                                                                                    HighLevelControlManagerFactory managerFactory, YoDouble yoTime,
-                                                                                                    YoVariableRegistry registry)
+                                                                                                    HighLevelControlManagerFactory managerFactory,
+                                                                                                    JumpControlManagerFactory jumpControlManagerFactory,
+                                                                                                    YoDouble yoTime, YoVariableRegistry registry)
    {
       controllerFactoryHelper.setControllerFactories(controllerStateFactories);
       controllerFactoryHelper.setHighLevelControlManagerFactory(managerFactory);
-
+      controllerFactoryHelper.setJumpControlManagerFactory(jumpControlManagerFactory);
       GenericStateMachine<HighLevelControllerName, HighLevelControllerState> highLevelStateMachine = new GenericStateMachine<>("highLevelControllerName",
                                                                                                                                "switchTimeName",
-                                                                                                                               HighLevelControllerName.class, yoTime,
-                                                                                                                               registry);
+                                                                                                                               HighLevelControllerName.class,
+                                                                                                                               yoTime, registry);
 
       // create controller states
       for (HighLevelControllerStateFactory controllerStateFactory : controllerStateFactories.values())
@@ -204,7 +210,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
       for (ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory : controllerTransitionFactories)
       {
          StateTransition<HighLevelControllerName> stateTransition = controllerStateTransitionFactory.getOrCreateStateTransition(highLevelControllerStates,
-                                                                                                                                controllerFactoryHelper, registry);
+                                                                                                                                controllerFactoryHelper,
+                                                                                                                                registry);
 
          HighLevelControllerState state = highLevelControllerStates.get(controllerStateTransitionFactory.getStateToAttachEnum());
          state.addStateTransition(stateTransition);

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.*;
+import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
 
 import java.util.List;
 
@@ -14,13 +14,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -29,6 +29,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WholeBodyControlCoreToolbox
 {
@@ -36,6 +37,7 @@ public class WholeBodyControlCoreToolbox
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final String namePrefix;
    private final double controlDT;
    private final double gravityZ;
    private final FloatingInverseDynamicsJoint rootJoint;
@@ -111,10 +113,11 @@ public class WholeBodyControlCoreToolbox
     *           {@link Artifact}s of the controller core are registered.
     * @param parentRegistry registry to which this toolbox will attach its own registry.
     */
-   public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, InverseDynamicsJoint[] controlledJoints,
+   public WholeBodyControlCoreToolbox(String namePrefix, double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, InverseDynamicsJoint[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
+      this.namePrefix = namePrefix + "ControllerCoreToolbox";
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
       this.rootJoint = rootJoint;
@@ -124,6 +127,8 @@ public class WholeBodyControlCoreToolbox
 
       rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
+      for(int i = 0; i < controlledJoints.length; i++)
+         PrintTools.debug("ControlledJoint " + i + ": " +controlledJoints[i].getName().toString());
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);
@@ -361,7 +366,7 @@ public class WholeBodyControlCoreToolbox
    public PlaneContactWrenchProcessor getPlaneContactWrenchProcessor()
    {
       if (planeContactWrenchProcessor == null)
-         planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
+         planeContactWrenchProcessor = new PlaneContactWrenchProcessor(namePrefix, contactablePlaneBodies, yoGraphicsListRegistry, registry);
       return planeContactWrenchProcessor;
    }
 
@@ -373,7 +378,7 @@ public class WholeBodyControlCoreToolbox
    public WrenchVisualizer getWrenchVisualizer()
    {
       if (wrenchVisualizer == null)
-         wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+         wrenchVisualizer = createWrenchVisualizerWithContactableBodies(namePrefix + "DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
       return wrenchVisualizer;
    }
 

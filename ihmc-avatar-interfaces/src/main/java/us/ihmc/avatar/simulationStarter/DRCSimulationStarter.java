@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -420,7 +421,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       for (int i = 0; i < controllerTransitionFactories.size(); i++)
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
 
-      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
+      controllerFactory.setInitialState(HighLevelControllerName.JUMPING);
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
@@ -463,17 +464,18 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory)
    {
       controllerFactory.useDefaultDoNothingControlState();
-      controllerFactory.useDefaultWalkingControlState();
+      //controllerFactory.useDefaultWalkingControlState();
       if(jumpControlParameters != null)
       {
          controllerFactory.useDefaultJumpControllerState();
       }
 
-      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
-      controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
+      //controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
+      //controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
       
       if(jumpControlParameters != null)
       {
+         PrintTools.debug("Adding jumping transitions");
          controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, JUMPING);
          controllerFactory.addRequestableTransition(JUMPING, DO_NOTHING_BEHAVIOR);
       }

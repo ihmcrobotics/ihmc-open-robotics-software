@@ -1,27 +1,33 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.WholeBodyMomentumManager;
+
 public class FlightState extends AbstractJumpingState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.FLIGHT;
-
-   public FlightState()
+   private final WholeBodyMomentumManager wholeBodyMomentumManager;
+   private final FeetJumpManager feetJumpManager;
+   
+   public FlightState(WholeBodyMomentumManager wholeBodyMomentumManager, FeetJumpManager feetJumpManager)
    {
       super(stateEnum);
-      // TODO Auto-generated constructor stub
+      this.wholeBodyMomentumManager = wholeBodyMomentumManager;
+      this.feetJumpManager = feetJumpManager;
    }
 
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public void doAction()
    {
-      // TODO Auto-generated method stub
-
+      wholeBodyMomentumManager.update(stateEnum);
+      wholeBodyMomentumManager.compute();
+      feetJumpManager.compute();
    }
 
    @Override

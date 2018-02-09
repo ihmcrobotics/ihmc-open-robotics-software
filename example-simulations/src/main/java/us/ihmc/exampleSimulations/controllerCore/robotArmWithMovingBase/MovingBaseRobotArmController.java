@@ -114,7 +114,7 @@ public class MovingBaseRobotArmController implements RobotController
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
                                                                                        optimizationSettings, yoGraphicsListRegistry, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)

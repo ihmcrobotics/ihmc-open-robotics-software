@@ -308,7 +308,7 @@ public class KinematicsToolboxController extends ToolboxController
       {
          controlledJoints = oneDoFJoints;
       }
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();

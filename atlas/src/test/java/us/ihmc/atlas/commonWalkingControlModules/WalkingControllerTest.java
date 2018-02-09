@@ -402,7 +402,7 @@ public class WalkingControllerTest
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
                                                                             momentumOptimizationSettings, yoGraphicsListRegistry, registry);
       toolbox.setupForInverseDynamicsSolver(contactableBodies);
 

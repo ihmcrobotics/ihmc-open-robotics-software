@@ -140,7 +140,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new InverseDynamicsJoint[0]);
       FloatingInverseDynamicsJoint rootJoint = fullHumanoidRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,
+      toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame, momentumOptimizationSettings,
                                                 yoGraphicsListRegistry, registry);
       toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 

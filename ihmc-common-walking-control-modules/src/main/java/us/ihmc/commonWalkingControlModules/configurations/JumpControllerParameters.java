@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 
 public abstract class JumpControllerParameters
 {
-   public abstract ControllerCoreOptimizationSettings getMomentumOptimizationSettings();
+   public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
 
 }
