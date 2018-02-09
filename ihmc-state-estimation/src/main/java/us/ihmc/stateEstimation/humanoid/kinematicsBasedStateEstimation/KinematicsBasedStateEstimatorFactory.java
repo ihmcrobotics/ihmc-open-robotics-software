@@ -32,22 +32,22 @@ import java.util.Map;
  */
 public class KinematicsBasedStateEstimatorFactory
 {
-   private RequiredFactoryField<FullHumanoidRobotModel> estimatorFullRobotModelField;
-   private RequiredFactoryField<DRCRobotSensorInformation> sensorInformationField;
+   private RequiredFactoryField<FullHumanoidRobotModel> estimatorFullRobotModelField = new RequiredFactoryField<>("estimatorFullRobotModelField");
+   private RequiredFactoryField<DRCRobotSensorInformation> sensorInformationField = new RequiredFactoryField<>("sensorInformationField");
 
-   private RequiredFactoryField<SensorOutputMapReadOnly> sensorOutputMapReadOnlyField;
-   private RequiredFactoryField<Double> gravityField;
-   private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParametersField;
+   private RequiredFactoryField<SensorOutputMapReadOnly> sensorOutputMapReadOnlyField = new RequiredFactoryField<>("sensorOutputMapReadOnlyField");
+   private RequiredFactoryField<Double> gravityField = new RequiredFactoryField<>("gravityField");
+   private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParametersField = new RequiredFactoryField<>("stateEstimatorParametersField");
 
-   private RequiredFactoryField<ContactableBodiesFactory> contactableBodiesFactoryField;
-   private RequiredFactoryField<ForceSensorDataHolder> estimatorForceSensorDataHolderToUpdateField;
+   private RequiredFactoryField<ContactableBodiesFactory> contactableBodiesFactoryField = new RequiredFactoryField<>("contactableBodiesFactoryField");
+   private RequiredFactoryField<ForceSensorDataHolder> estimatorForceSensorDataHolderToUpdateField = new RequiredFactoryField<>("estimatorForceSensorDataHolderToUpdateField");
 
-   private RequiredFactoryField<CenterOfMassDataHolder> estimatorCenterOfMassDataHolderToUpdateField;
+   private RequiredFactoryField<CenterOfMassDataHolder> estimatorCenterOfMassDataHolderToUpdateField = new RequiredFactoryField<>("estimatorCenterOfMassDataHolderToUpdateField");
 
-   private RequiredFactoryField<ContactSensorHolder> contactSensorHolderField;
+   private RequiredFactoryField<ContactSensorHolder> contactSensorHolderField = new RequiredFactoryField<>("contactSensorHolderField");
 
-   private RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField;
-   private RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField;
+   private RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new RequiredFactoryField<>("centerOfPressureDataHolderFromControllerField");
+   private RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new RequiredFactoryField<>("robotMotionStatusFromControllerField");
 
    public KinematicsBasedStateEstimatorFactory setEstimatorFullRobotModel(FullHumanoidRobotModel estimatorFullRobotModel)
    {
