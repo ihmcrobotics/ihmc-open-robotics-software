@@ -91,7 +91,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    // feedback controllers
    private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
-   private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
    private final QuadrupedComPositionController comPositionController;
@@ -150,7 +149,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       // feedback controllers
       dcmPositionEstimate = new FramePoint3D();
       dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
-      dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = controllerToolbox.getComPositionController();
@@ -244,7 +242,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
 
       // update desired horizontal com forces
       computeDcmSetpoints();
-      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
+      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionEstimate, dcmPositionController.getDCMPositionSetpoint(), dcmPositionController.getDCMVelocitySetpoint());
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
       // update desired com position, velocity, and vertical force
@@ -330,14 +328,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       if (robotTimestamp.getDoubleValue() <= dcmTransitionTrajectory.getEndTime())
       {
          dcmTransitionTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-         dcmTransitionTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         dcmTransitionTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+         dcmTransitionTrajectory.getPosition(dcmPositionController.getDCMPositionSetpoint());
+         dcmTransitionTrajectory.getVelocity(dcmPositionController.getDCMVelocitySetpoint());
       }
       else
       {
          dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+         dcmTrajectory.getPosition(dcmPositionController.getDCMPositionSetpoint());
+         dcmTrajectory.getVelocity(dcmPositionController.getDCMVelocitySetpoint());
       }
    }
 
@@ -379,7 +377,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
       {
          // compute step adjustment for ongoing steps (proportional to dcm tracking error)
-         FramePoint3D dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
+         FramePoint3D dcmPositionSetpoint = dcmPositionController.getDCMPositionSetpoint();
          dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          instantaneousStepAdjustment.set(dcmPositionEstimate);
@@ -438,7 +436,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       updateEstimates();
 
       // initialize feedback controllers
-      dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
+      dcmPositionController.initializeSetpoint(dcmPositionEstimate);
       dcmPositionController.reset();
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
