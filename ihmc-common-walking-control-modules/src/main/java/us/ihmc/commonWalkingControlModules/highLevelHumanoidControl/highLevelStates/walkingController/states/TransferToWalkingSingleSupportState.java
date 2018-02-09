@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -126,10 +126,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
     */
    private void adjustTiming(FootstepTiming stepTiming)
    {
-      double originalSwingTime = stepTiming.getSwingTime();
-
       if (!stepTiming.hasAbsoluteTime())
          return;
+
+      double originalSwingTime = stepTiming.getSwingTime();
+      double originalTransferTime = stepTiming.getTransferTime();
+      double originalTouchdownDuration = stepTiming.getTouchdownDuration();
 
       double currentTime = controllerToolbox.getYoTime().getDoubleValue();
       double timeInFootstepPlan = currentTime - stepTiming.getExecutionStartTime();
@@ -137,7 +139,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       // make sure transfer does not get too short
       adjustedTransferTime = Math.max(adjustedTransferTime, minimumTransferTime.getDoubleValue());
-      double touchdownDuration = stepTiming.getTouchdownDuration();
+
+      // as the touchdown in part of transfer scale it according to the transfer adjustment
+      double adjustmentFactor = adjustedTransferTime / originalTransferTime;
+      double adjustedTouchdownDuration = originalTouchdownDuration * adjustmentFactor;
 
       // GW TODO - possible improvement:
       // If the adjustment is capped by the minimum transfer time adjust also the upcoming transfer times here. That
@@ -146,6 +151,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       // to debug. If we have big adjustments a lot we should revisit this.
 
       // keep swing times and only adjust transfers for now
-      stepTiming.setTimings(originalSwingTime, touchdownDuration, adjustedTransferTime);
+      stepTiming.setTimings(originalSwingTime, adjustedTouchdownDuration, adjustedTransferTime);
    }
 }

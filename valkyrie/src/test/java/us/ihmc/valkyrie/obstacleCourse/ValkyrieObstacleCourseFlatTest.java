@@ -81,7 +81,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 63.0)
-   @Test(timeout = 130000)
+   @Test(timeout = 190000)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpToRampWithShortSteps();
@@ -129,7 +129,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 76.3)
-   @Test(timeout = 170000)
+   @Test(timeout = 250000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       super.testLongStepsMaxHeightPauseAndResume();
@@ -145,7 +145,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 40.6)
-   @Test(timeout = 100000)
+   @Test(timeout = 150000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       super.testStandingOnUnevenTerrainForACoupleSeconds();
