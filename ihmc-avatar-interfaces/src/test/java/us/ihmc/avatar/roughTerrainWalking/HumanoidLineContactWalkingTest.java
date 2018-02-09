@@ -99,13 +99,13 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       doFootExplorationInTransferToStanding.set(true);
       percentageChickenSupport.set(0.4);
 
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 3; i++)
       {
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          ArrayList<Point2D> newContactPoints = generateContactPointsForRotatedLineOfContact(Math.PI/2.0, 0.0, 0.0);
          contactPointController.setNewContacts(newContactPoints, robotSide, true);
 
-         FootstepDataListMessage message = new FootstepDataListMessage(0.8, 0.15);
+         FootstepDataListMessage message = new FootstepDataListMessage(0.6, 0.15);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
@@ -119,7 +119,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
-         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          assertTrue(success);
       }
    }
@@ -145,13 +145,13 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       doFootExplorationInTransferToStanding.set(true);
       percentageChickenSupport.set(0.4);
 
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 3; i++)
       {
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          ArrayList<Point2D> newContactPoints = generateContactPointsForRotatedLineOfContact(0.0, 0.0, 0.0);
          contactPointController.setNewContacts(newContactPoints, robotSide, true);
 
-         FootstepDataListMessage message = new FootstepDataListMessage(0.8, 0.15);
+         FootstepDataListMessage message = new FootstepDataListMessage(0.6, 0.15);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
@@ -165,7 +165,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
-         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          assertTrue(success);
       }
    }
