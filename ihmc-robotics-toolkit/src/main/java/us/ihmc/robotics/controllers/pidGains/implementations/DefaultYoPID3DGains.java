@@ -28,8 +28,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class DefaultYoPID3DGains implements YoPID3DGains
 {
-   private final GainCoupling gainCoupling;
-   private final boolean useIntegrator;
+   private final boolean usingIntegrator;
 
    private final Map<Axis, YoDouble> kpMap = new EnumMap<>(Axis.class);
    private final Map<Axis, YoDouble> kdMap = new EnumMap<>(Axis.class);
@@ -48,16 +47,19 @@ public class DefaultYoPID3DGains implements YoPID3DGains
 
    private final YoBoolean updateFromDampingRatio;
 
-   public DefaultYoPID3DGains(String suffix, PID3DGainsReadOnly other, YoVariableRegistry registry)
+   public DefaultYoPID3DGains(String suffix, PID3DConfiguration configuration, YoVariableRegistry registry)
    {
-      this(suffix, other.getGainCoupling(), other.isUseIntegrator(), registry);
-      set(other);
+      this(suffix, configuration.getGainCoupling(), configuration.isUseIntegrator(), configuration.getGains(), registry);
    }
 
    public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
    {
-      this.gainCoupling = gainCoupling;
-      this.useIntegrator = useIntegrator;
+      this(suffix, gainCoupling, useIntegrator, null, registry);
+   }
+
+   public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, PID3DGainsReadOnly gains, YoVariableRegistry registry)
+   {
+      this.usingIntegrator = useIntegrator;
 
       populateMap(kpMap, "kp", suffix, gainCoupling, registry);
       populateMap(kdMap, "kd", suffix, gainCoupling, registry);
@@ -86,6 +88,11 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       maxFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
+
+      if (gains != null)
+      {
+         set(gains);
+      }
    }
 
    static void populateMap(Map<Axis, YoDouble> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
@@ -176,7 +183,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    @Override
    public double[] getIntegralGains()
    {
-      if (!useIntegrator)
+      if (!usingIntegrator)
       {
          for (int i = 0; i < 3; i++)
          {
@@ -199,7 +206,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    @Override
    public double getMaximumIntegralError()
    {
-      if (!useIntegrator)
+      if (!usingIntegrator)
       {
          return 0.0;
       }
@@ -276,7 +283,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
-      if (!useIntegrator)
+      if (!usingIntegrator)
       {
          return;
       }
@@ -328,17 +335,5 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
-   }
-
-   @Override
-   public GainCoupling getGainCoupling()
-   {
-      return gainCoupling;
-   }
-
-   @Override
-   public boolean isUseIntegrator()
-   {
-      return useIntegrator;
    }
 }

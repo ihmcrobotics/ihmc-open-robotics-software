@@ -43,7 +43,6 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -120,7 +119,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoDouble maxInitialLinearVelocityMagnitude;
    private final YoDouble maxInitialAngularVelocityMagnitude;
 
-   private final DoubleParameter finalSwingHeightOffset;
+   private final YoDouble finalSwingHeightOffset;
    private final double controlDT;
 
    private final YoDouble minHeightDifferenceForObstacleClearance;
@@ -171,7 +170,8 @@ public class SwingState extends AbstractUnconstrainedState
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
-      finalSwingHeightOffset = new DoubleParameter(namePrefix + "SwingFinalHeightOffset", registry, swingTrajectoryParameters.getDesiredTouchdownHeightOffset(), -0.01, 0.005);
+      finalSwingHeightOffset = new YoDouble(namePrefix + "SwingFinalHeightOffset", registry);
+      finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
       footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);

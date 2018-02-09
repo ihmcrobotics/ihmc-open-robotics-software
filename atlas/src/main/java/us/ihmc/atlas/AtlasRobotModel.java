@@ -836,15 +836,22 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return null;
    }
 
-   public static String getParameterResourceName()
+   public static String getParameterResourceName(RobotTarget target)
    {
-      return "/us/ihmc/atlas/parameters/controller.xml";
+      if (target == RobotTarget.REAL_ROBOT)
+      {
+         return "/us/ihmc/atlas/parameters/controller_real_robot.xml";
+      }
+      else
+      {
+         return "/us/ihmc/atlas/parameters/controller_simulation.xml";
+      }
    }
 
    @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
-      return getClass().getResourceAsStream(getParameterResourceName());
+      return getClass().getResourceAsStream(getParameterResourceName(target));
    }
 
 }
