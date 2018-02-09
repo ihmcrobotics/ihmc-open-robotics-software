@@ -43,7 +43,11 @@ public class IMUBasedJointVelocityEstimator
       joints = ScrewTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJoint.class);
       if (joints.length > 3)
       {
-         throw new IllegalArgumentException("Cannot solve for more than 3 DoF betwen IMUs. " + joints.length + " DoF were given.");
+         throw new IllegalArgumentException("Cannot solve for more than 3 DoF betwen IMUs. " + joints.length + " DoF were given");
+      }
+      if (joints.length != jacobian.getJointsInOrder().length)
+      {
+         throw new IllegalArgumentException("Can only solve for a chain of OneDoFJoints");
       }
 
       jointVelocitiesFromIMU = new YoDouble[joints.length];
@@ -51,10 +55,6 @@ public class IMUBasedJointVelocityEstimator
       {
          OneDoFJoint joint = joints[i];
          jointVelocitiesFromIMU[i] = new YoDouble("qd_" + joint.getName() + "_IMUBased", registry);
-         if (!(joint instanceof OneDoFJoint))
-         {
-            throw new IllegalArgumentException("Cannot solve for non-OneDoFJoint " + joint.getName());
-         }
       }
 
       solver = new DampedLeastSquaresSolver(joints.length);
@@ -107,5 +107,14 @@ public class IMUBasedJointVelocityEstimator
          }
       }
       return Double.NaN;
+   }
+
+   public double getEstimatedJointVelocity(int jointIndex)
+   {
+      if (jointIndex < 0 || jointIndex >= joints.length)
+      {
+         throw new IndexOutOfBoundsException("Joint index out of bounds");
+      }
+      return jointVelocitiesFromIMU[jointIndex].getDoubleValue();
    }
 }
