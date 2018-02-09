@@ -50,7 +50,7 @@ public class LLAQuadrupedPositionBasedCrawlControllerParameters implements Quadr
    }
 
    @Override
-   public double getInitalCoMHeight()
+   public double getInitialCoMHeight()
    {
       return 0.35;
    }

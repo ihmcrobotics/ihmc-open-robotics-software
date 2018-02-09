@@ -81,7 +81,6 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    private final LinearInvertedPendulumModel lipModel;
    private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
-   private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
    private final QuadrupedComPositionController comPositionController;
@@ -137,7 +136,6 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
       dcmPositionEstimate = new FramePoint3D();
       dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
-      dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = controllerToolbox.getComPositionController();
@@ -197,7 +195,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    {
       // update desired horizontal com forces
       trotStateMachine.process();
-      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
+      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionEstimate, dcmPositionController.getDCMPositionSetpoint(),
+                                    dcmPositionController.getDCMVelocitySetpoint());
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
       // update desired com position, velocity, and vertical force
@@ -247,12 +246,13 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       updateEstimates();
 
       // initialize feedback controllers
-      dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
+      dcmPositionController.initializeSetpoint(dcmPositionEstimate);
       dcmPositionController.reset();
       dcmPositionController.setVrpPositionRateLimit(vrpPositionRateLimitParameter.get());
       dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
       dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
       dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
+
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
       comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
@@ -388,8 +388,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
          // compute dcm setpoint
          dcmTrajectory.computeTrajectory(currentTime);
-         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+         dcmTrajectory.getPosition(dcmPositionController.getDCMPositionSetpoint());
+         dcmTrajectory.getVelocity(dcmPositionController.getDCMVelocitySetpoint());
 
          // trigger touch down event
          if (currentTime > timeInterval.getEndTime())
@@ -497,11 +497,11 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
          // compute dcm setpoint
          dcmTrajectory.computeTrajectory(currentTime);
-         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+         dcmTrajectory.getPosition(dcmPositionController.getDCMPositionSetpoint());
+         dcmTrajectory.getVelocity(dcmPositionController.getDCMVelocitySetpoint());
 
          // adjust swing foot goal position based on dcm tracking error
-         FramePoint3D dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
+         FramePoint3D dcmPositionSetpoint = dcmPositionController.getDCMPositionSetpoint();
          dcmPositionSetpoint.changeFrame(worldFrame);
          dcmPositionEstimate.changeFrame(worldFrame);
          for (int i = 0; i < 2; i++)

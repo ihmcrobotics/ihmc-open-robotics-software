@@ -48,6 +48,7 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       
@@ -65,8 +66,6 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       conductor.addTimeLimit(variables.getYoTime(), 35.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyYaw(), -Math.PI / 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 42.0)
@@ -80,8 +79,6 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       conductor.addTimeLimit(variables.getYoTime(), 40.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), Math.PI / 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
@@ -95,8 +92,6 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       conductor.addTimeLimit(variables.getYoTime(), 60.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyYaw(), -Math.PI / 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 80.0)
@@ -110,7 +105,5 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       conductor.addTimeLimit(variables.getYoTime(), 60.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), Math.PI / 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }

@@ -6,11 +6,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import junit.framework.AssertionFailedError;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -40,6 +38,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    @After
    public void tearDown()
    {
+      conductor.concludeTesting();
       conductor = null;
       variables = null;
       pusher = null;
@@ -47,8 +46,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -58,8 +55,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_RIGHT_HIP_ROLL.getUnderBarName());
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -69,8 +64,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_LEFT_HIP_ROLL.getUnderBarName());
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -80,8 +73,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_RIGHT_HIP_ROLL.getUnderBarName());
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -96,7 +87,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       pusher = new PushRobotTestConductor(conductor.getScs(), jointToPushOn);
-      
+
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 30.0, 1.0);
@@ -146,12 +137,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+
    public void testStandingAndResistingHumanPowerKickToFace() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -173,12 +160,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -220,12 +203,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
    public void testStandingUpAndAdjustingCoM() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -291,7 +270,5 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      conductor.concludeTesting();
    }
 }
