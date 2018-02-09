@@ -49,21 +49,18 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
    @After
    public void tearDown()
    {
+      conductor.concludeTesting(2);
       conductor = null;
       variables = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+
    public void testPacingForwardFast()
    {
       paceFast(1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
    public void testPacingBackwardsFast()
    {
       paceFast(-1.0);
@@ -88,19 +85,13 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 2.0));
       }
       conductor.simulate();
-      
-      conductor.concludeTesting(2);
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+
    public void testPacingForwardSlow()
    {
       paceSlow(1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
    public void testPacingBackwardsSlow()
    {
       paceSlow(-1.0);
@@ -126,33 +117,23 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 0.4));
       }
       conductor.simulate();
-      
-      conductor.concludeTesting(2);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInAForwardLeftCircle()
    {
       paceInACircle(1.0, 1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInAForwardRightCircle()
    {
       paceInACircle(1.0, -1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInABackwardLeftCircle()
    {
       paceInACircle(-1.0, 1.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
    public void testPacingInABackwardRightCircle()
    {
       paceInACircle(-1.0, -1.0);
@@ -177,7 +158,5 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), directionZ * Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), directionZ * Math.PI, 0.1));
       conductor.simulate();
-      
-      conductor.concludeTesting(2);
    }
 }
