@@ -19,7 +19,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -33,7 +37,6 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -491,7 +494,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       if (!planIsAvailable.getBooleanValue())
       {
          int footstepIndex = 0;
-         initializeFootPolygons(RobotSide.LEFT, footstepIndex);
+         initializeFootPolygons(lastTransferToSide, footstepIndex);
          getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, swingFootInitialPolygon, supportFootPolygon, worldFrame);
          desiredCoPPosition.setIncludingFrame(tempDoubleSupportPolygonCentroid);
          desiredCoPVelocity.setToZero(worldFrame);
@@ -518,12 +521,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       desiredCoPVelocityToPack.set(desiredCoPVelocity);
    }
 
+   /**
+    * Remember this in case the plan is cleared but the planner was doing chicken support. In that
+    * case the ICP should be offset towards the correct foot.
+    */
+   private RobotSide lastTransferToSide = RobotSide.LEFT;
+
    @Override
    public void computeReferenceCoPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
    {
       int footstepIndex = 0;
       int copLocationIndex = 1;
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(footstepIndex);
+      lastTransferToSide = transferToSide;
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && numberOfUpcomingFootsteps.getIntegerValue() == 0)
       {
@@ -677,7 +687,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private void computeMidFeetPointWithChickenSupportForFinalTransfer(FramePoint3D framePointToPack)
    {
-      computeMidFeetPointWithChickenSupport(framePointToPack, supportFootPolygon, swingFootPredictedFinalPolygon);
+      computeMidFeetPointWithChickenSupport(framePointToPack, swingFootPredictedFinalPolygon, supportFootPolygon);
    }
 
    /**
@@ -696,22 +706,25 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private void computeMidFeetPointByPositionFraction(FramePoint3D framePointToPack, FrameConvexPolygon2d footPolygonA, FrameConvexPolygon2d footPolygonB,
                                                       double fraction, ReferenceFrame referenceFrameToConvertTo)
    {
+      getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, footPolygonA, footPolygonB, referenceFrameToConvertTo);
+
+      tempFramePoint1.setIncludingFrame(footPolygonA.getCentroid(), 0.0);
+      tempFramePoint1.changeFrame(referenceFrameToConvertTo);
+
+      tempFramePoint2.setIncludingFrame(footPolygonB.getCentroid(), 0.0);
+      tempFramePoint2.changeFrame(referenceFrameToConvertTo);
+
+      framePointToPack.setToZero(referenceFrameToConvertTo);
+
       fraction = MathTools.clamp(fraction, 0.0, 1.0);
-      FrameConvexPolygon2d framePolygonReference;
       if (fraction < 0.5)
       {
-         fraction *= 2.0;
-         framePolygonReference = footPolygonA;
+         framePointToPack.interpolate(tempFramePoint1, tempDoubleSupportPolygonCentroid, 2.0 * fraction);
       }
       else
       {
-         fraction = (fraction - 0.5) * 2.0;
-         framePolygonReference = footPolygonB;
+         framePointToPack.interpolate(tempDoubleSupportPolygonCentroid, tempFramePoint2, 2.0 * (fraction - 0.5));
       }
-      getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, footPolygonA, footPolygonB, referenceFrameToConvertTo);
-      convertToFramePointRetainingZ(tempFramePoint1, framePolygonReference.getCentroid(), referenceFrameToConvertTo);
-      framePointToPack.changeFrame(referenceFrameToConvertTo);
-      framePointToPack.interpolate(this.tempDoubleSupportPolygonCentroid, tempFramePoint1, fraction);
    }
 
    private void computeCoPPointLocationForPreviousPlan(FramePoint3D framePointToPack, CoPPointPlanningParameters copPointParameters, RobotSide swingSide,
@@ -1449,8 +1462,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    public void getDoubleSupportPolygonCentroid(FixedFramePoint3DBasics copPositionToPack)
    {
-      setFootPolygonFromCurrentState(supportFootPolygon, RobotSide.LEFT);
-      setFootPolygonFromCurrentState(swingFootInitialPolygon, RobotSide.RIGHT);
+      setFootPolygonFromCurrentState(supportFootPolygon, lastTransferToSide.getOppositeSide());
+      setFootPolygonFromCurrentState(swingFootInitialPolygon, lastTransferToSide);
       computeMidFeetPointWithChickenSupport(tempFramePoint1, supportFootPolygon, swingFootInitialPolygon);
       tempFramePoint1.changeFrame(copPositionToPack.getReferenceFrame());
       copPositionToPack.set(tempFramePoint1);
