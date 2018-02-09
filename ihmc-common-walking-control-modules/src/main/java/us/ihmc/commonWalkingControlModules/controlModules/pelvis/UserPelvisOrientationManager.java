@@ -72,7 +72,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    {
       tempPose.setToNaN(initialOrientation.getReferenceFrame());
       tempPose.setOrientation(initialOrientation);
-      return taskspaceControlState.handleOrientationTrajectoryCommand(command, tempPose);
+      return taskspaceControlState.handleOrientationTrajectoryCommand(command.getSO3Trajectory(), tempPose);
    }
 
    public ReferenceFrame getControlFrame()

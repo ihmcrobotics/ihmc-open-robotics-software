@@ -24,14 +24,14 @@ public class ArmTrajectoryCommandTest
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
       armTrajectoryCommand.clear();
       assertNull(armTrajectoryCommand.getRobotSide());
-      assertEquals(Packet.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getCommandId());
+      assertEquals(Packet.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
       assertEquals(0.0, armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
-      assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getExecutionMode());
+      assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(0.0, armTrajectoryCommand.getExecutionTime(), 1e-9);
-      assertEquals(0, armTrajectoryCommand.getNumberOfJoints());
-      assertEquals(Packet.INVALID_MESSAGE_ID, armTrajectoryCommand.getPreviousCommandId());
-      assertEquals(0, armTrajectoryCommand.getTrajectoryPointLists().size());
-      armTrajectoryCommand.getJointTrajectoryPoint(0, 0);
+      assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
+      assertEquals(Packet.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
+      assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists().size());
+      armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPoint(0, 0);
    }
 
    @Test(timeout = 30000)
@@ -57,13 +57,13 @@ public class ArmTrajectoryCommandTest
       armTrajectoryCommand.clear(RobotSide.LEFT);
       assertEquals(RobotSide.LEFT, armTrajectoryCommand.getRobotSide());
 
-      assertEquals(Packet.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getCommandId());
+      assertEquals(Packet.VALID_MESSAGE_DEFAULT_ID, armTrajectoryCommand.getJointspaceTrajectory().getCommandId());
       assertEquals(0.0, armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
-      assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getExecutionMode());
+      assertEquals(ExecutionMode.OVERRIDE, armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(0.0, armTrajectoryCommand.getExecutionTime(), 1e-9);
-      assertEquals(0, armTrajectoryCommand.getNumberOfJoints());
-      assertEquals(Packet.INVALID_MESSAGE_ID, armTrajectoryCommand.getPreviousCommandId());
-      assertEquals(0, armTrajectoryCommand.getTrajectoryPointLists().size());
+      assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
+      assertEquals(Packet.INVALID_MESSAGE_ID, armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
+      assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists().size());
    }
 
    @Test(timeout = 30000)
@@ -83,20 +83,20 @@ public class ArmTrajectoryCommandTest
       ArmTrajectoryMessage message = new ArmTrajectoryMessage(random);
       armTrajectoryCommand.set(message);
 
-      assertEquals(message.getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
-      assertEquals(message.getExecutionMode(), armTrajectoryCommand.getExecutionMode());
-      assertEquals(message.getNumberOfJoints(), armTrajectoryCommand.getNumberOfJoints());
+      assertEquals(message.getQueueingProperties().getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
+      assertEquals(message.getQueueingProperties().getExecutionMode(), armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
+      assertEquals(message.getJointspaceTrajectory().getNumberOfJoints(), armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
 
-      for (int i = 0; i < message.getNumberOfJoints(); i++)
+      for (int i = 0; i < message.getJointspaceTrajectory().getNumberOfJoints(); i++)
       {
-         int numberOfJointTrajectoryPoints = message.getNumberOfJointTrajectoryPoints(i);
-         OneDoFJointTrajectoryCommand jointTrajectoryPointList = armTrajectoryCommand.getJointTrajectoryPointList(i);
+         int numberOfJointTrajectoryPoints = message.getJointspaceTrajectory().getNumberOfJointTrajectoryPoints(i);
+         OneDoFJointTrajectoryCommand jointTrajectoryPointList = armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPointList(i);
          assertEquals(numberOfJointTrajectoryPoints, jointTrajectoryPointList.getNumberOfTrajectoryPoints());
 
          for (int j = 0; j < numberOfJointTrajectoryPoints; j++)
          {
             SimpleTrajectoryPoint1D trajectoryPoint = jointTrajectoryPointList.getTrajectoryPoint(j);
-            TrajectoryPoint1DMessage jointTrajectoryPoint = message.getJointTrajectoryPoint(i, j);
+            TrajectoryPoint1DMessage jointTrajectoryPoint = message.getJointspaceTrajectory().getJointTrajectoryPoint(i, j);
 
             assertEquals(jointTrajectoryPoint.getPosition(), trajectoryPoint.getPosition(), 1e-9);
             assertEquals(jointTrajectoryPoint.getVelocity(), trajectoryPoint.getVelocity(), 1e-9);
@@ -113,19 +113,19 @@ public class ArmTrajectoryCommandTest
       armTrajectoryCommand.set(otherArmTrajectoryCommand);
       armTrajectoryCommand.epsilonEquals(otherArmTrajectoryCommand, 1e-8);
 
-      assertEquals(armTrajectoryCommand.getCommandId(), otherArmTrajectoryCommand.getCommandId());
+      assertEquals(armTrajectoryCommand.getJointspaceTrajectory().getCommandId(), otherArmTrajectoryCommand.getJointspaceTrajectory().getCommandId());
       assertEquals(armTrajectoryCommand.getExecutionDelayTime(), otherArmTrajectoryCommand.getExecutionDelayTime(), 1e-9);
-      assertEquals(armTrajectoryCommand.getExecutionMode(), otherArmTrajectoryCommand.getExecutionMode());
+      assertEquals(armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode(), otherArmTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(armTrajectoryCommand.getExecutionTime(), otherArmTrajectoryCommand.getExecutionTime(), 1e-9);
       assertEquals(armTrajectoryCommand.getMessageClass(), otherArmTrajectoryCommand.getMessageClass());
-      assertEquals(armTrajectoryCommand.getNumberOfJoints(), otherArmTrajectoryCommand.getNumberOfJoints());
-      assertEquals(armTrajectoryCommand.getPreviousCommandId(), otherArmTrajectoryCommand.getPreviousCommandId());
+      assertEquals(armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints(), otherArmTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
+      assertEquals(armTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId(), otherArmTrajectoryCommand.getJointspaceTrajectory().getPreviousCommandId());
       assertEquals(armTrajectoryCommand.getRobotSide(), otherArmTrajectoryCommand.getRobotSide());
 
-      for (int i = 0; i < armTrajectoryCommand.getNumberOfJoints(); i++)
+      for (int i = 0; i < armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints(); i++)
       {
-         OneDoFJointTrajectoryCommand jointTrajectoryPointList = armTrajectoryCommand.getJointTrajectoryPointList(i);
-         OneDoFJointTrajectoryCommand otherJointTrajectoryPointList = otherArmTrajectoryCommand.getJointTrajectoryPointList(i);
+         OneDoFJointTrajectoryCommand jointTrajectoryPointList = armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPointList(i);
+         OneDoFJointTrajectoryCommand otherJointTrajectoryPointList = otherArmTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPointList(i);
 
          assertEquals(jointTrajectoryPointList.getCommandId(), otherJointTrajectoryPointList.getCommandId());
          assertEquals(jointTrajectoryPointList.getExecutionDelayTime(), otherJointTrajectoryPointList.getExecutionDelayTime(), 1e-8);

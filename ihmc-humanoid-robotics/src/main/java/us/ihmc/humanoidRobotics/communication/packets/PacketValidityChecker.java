@@ -13,7 +13,20 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeri
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.*;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -390,41 +403,12 @@ public abstract class PacketValidityChecker
    public static String validateHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
       String errorMessage = validatePacket(handTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateSE3TrajectoryMessage(handTrajectoryMessage.se3Trajectory);
       if (errorMessage != null)
          return HandTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
-      if(handTrajectoryMessage.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
-      }
-
-      if(handTrajectoryMessage.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
-      }
-
       ObjectErrorType errorType;
-      SE3TrajectoryPointMessage previousTrajectoryPoint = null;
-
-      if (handTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
-      {
-         String messageClassName = handTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = "Received " + messageClassName + " with no waypoint.";
-         return errorMessage;
-      }
-
-      for (int i = 0; i < handTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
-      {
-         SE3TrajectoryPointMessage waypoint = handTrajectoryMessage.getTrajectoryPoint(i);
-         errorMessage = validateSE3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = handTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
-            return errorMessage;
-         }
-         previousTrajectoryPoint = waypoint;
-      }
 
       errorType = ObjectValidityChecker.validateEnum(handTrajectoryMessage.getRobotSide());
       if (errorType != null)
@@ -433,18 +417,14 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (handTrajectoryMessage.useCustomControlFrame() && handTrajectoryMessage.controlFramePose == null)
-      {
-         String messageClassName = handTrajectoryMessage.getClass().getSimpleName();
-         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
-      }
-
       return null;
    }
 
    public static String validateArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
       String errorMessage = validatePacket(armTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateJointspaceTrajectoryMessage(armTrajectoryMessage.getJointspaceTrajectory());
       if (errorMessage != null)
          return ArmTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
@@ -456,74 +436,27 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (armTrajectoryMessage.jointTrajectoryMessages == null)
-      {
-         String messageClassName = armTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s trajectory points are empty.";
-         return errorMessage;
-      }
-
-      int numberOfJoints = armTrajectoryMessage.getNumberOfJoints();
-      if (numberOfJoints == 0)
-      {
-         String messageClassName = armTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + " is empty.";
-         return errorMessage;
-      }
-
-      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
-      {
-         OneDoFJointTrajectoryMessage jointTrajectory1DMessage = armTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         errorMessage = validateOneJointTrajectoryMessage(jointTrajectory1DMessage, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = armTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = messageClassName + ": Error with the " + jointIndex + " " + OneDoFJointTrajectoryMessage.class.getSimpleName() + " : "
-                  + errorMessage;
-            return errorMessage;
-         }
-      }
-
       return null;
    }
 
    public static String validateHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
       String errorMessage = validatePacket(headTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateSO3TrajectoryMessage(headTrajectoryMessage.so3Trajectory);
       if (errorMessage != null)
          return HeadTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
-      if(headTrajectoryMessage.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
-      }
+      return null;
+   }
 
-      if(headTrajectoryMessage.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
-      }
-
-      SO3TrajectoryPointMessage previousTrajectoryPoint = null;
-
-      if (headTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
-      {
-         String messageClassName = headTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = "Received " + messageClassName + " with no waypoint.";
-         return errorMessage;
-      }
-
-      for (int i = 0; i < headTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
-      {
-         SO3TrajectoryPointMessage waypoint = headTrajectoryMessage.getTrajectoryPoint(i);
-         errorMessage = validateSO3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = headTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
-            return errorMessage;
-         }
-         previousTrajectoryPoint = waypoint;
-      }
+   public static String validateChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
+   {
+      String errorMessage = validatePacket(chestTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateSO3TrajectoryMessage(chestTrajectoryMessage.so3Trajectory);
+      if (errorMessage != null)
+         return ChestTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       return null;
    }
@@ -531,40 +464,26 @@ public abstract class PacketValidityChecker
    public static String validateNeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
    {
       String errorMessage = validatePacket(neckTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateJointspaceTrajectoryMessage(neckTrajectoryMessage.getJointspaceTrajectory());
       if (errorMessage != null)
          return NeckTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-
-      if (neckTrajectoryMessage.jointTrajectoryMessages == null)
-      {
-         String messageClassName = neckTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s trajectory points are empty.";
-         return errorMessage;
-      }
-
-      int numberOfJoints = neckTrajectoryMessage.getNumberOfJoints();
-      if (numberOfJoints == 0)
-      {
-         String messageClassName = neckTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + " is empty.";
-         return errorMessage;
-      }
-
-      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
-      {
-         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = neckTrajectoryMessage.getJointTrajectoryPointList(jointIndex);
-         errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = neckTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = messageClassName + " Error with the " + jointIndex + " " + OneDoFJointTrajectoryMessage.class.getSimpleName() + " : " + errorMessage;
-            return errorMessage;
-         }
-      }
 
       return null;
    }
 
-   public static String validateJointspaceTrajectoryMessage(AbstractJointspaceTrajectoryMessage<?> message)
+   public static String validateSpineTrajectoryMessage(SpineTrajectoryMessage spineTrajectoryMessage)
+   {
+      String errorMessage = validatePacket(spineTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateJointspaceTrajectoryMessage(spineTrajectoryMessage.getJointspaceTrajectory());
+      if (errorMessage != null)
+         return SpineTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+
+      return null;
+   }
+
+   public static String validateJointspaceTrajectoryMessage(JointspaceTrajectoryMessage message)
    {
       String errorMessage = validatePacket(message, true);
       if (errorMessage != null)
@@ -603,11 +522,58 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateSO3TrajectoryMessage(AbstractSO3TrajectoryMessage<?> message)
+   public static String validateSE3TrajectoryMessage(SE3TrajectoryMessage message)
    {
       String errorMessage = validatePacket(message, true);
       if (errorMessage != null)
-         return ChestTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+         return message.getClass().getSimpleName() + " " + errorMessage;
+
+      if(message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      {
+         return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+
+      if(message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      {
+         return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
+
+      SE3TrajectoryPointMessage previousTrajectoryPoint = null;
+
+      if (message.getNumberOfTrajectoryPoints() == 0)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         errorMessage = "Received " + messageClassName + " with no waypoint.";
+         return errorMessage;
+      }
+
+      for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
+      {
+         SE3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(i);
+         errorMessage = validateSE3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
+         if (errorMessage != null)
+         {
+            String messageClassName = message.getClass().getSimpleName();
+            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
+            return errorMessage;
+         }
+         previousTrajectoryPoint = waypoint;
+      }
+
+      if (message.useCustomControlFrame() && message.controlFramePose == null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
+      }
+
+      return null;
+   }
+
+   public static String validateSO3TrajectoryMessage(SO3TrajectoryMessage message)
+   {
+      String errorMessage = validatePacket(message, true);
+      if (errorMessage != null)
+         return message.getClass().getSimpleName() + " " + errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -620,12 +586,12 @@ public abstract class PacketValidityChecker
 
       if(message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+         return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
       if(message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+         return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
 
       for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
@@ -653,40 +619,10 @@ public abstract class PacketValidityChecker
    public static String validatePelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
    {
       String errorMessage = validatePacket(pelvisOrientationTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateSO3TrajectoryMessage(pelvisOrientationTrajectoryMessage.so3Trajectory);
       if (errorMessage != null)
          return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-
-      if(pelvisOrientationTrajectoryMessage.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
-      }
-
-      if(pelvisOrientationTrajectoryMessage.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
-      }
-
-      SO3TrajectoryPointMessage previousTrajectoryPoint = null;
-
-      if (pelvisOrientationTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
-      {
-         String messageClassName = pelvisOrientationTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = "Received " + messageClassName + " with no waypoint.";
-         return errorMessage;
-      }
-
-      for (int i = 0; i < pelvisOrientationTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
-      {
-         SO3TrajectoryPointMessage waypoint = pelvisOrientationTrajectoryMessage.getTrajectoryPoint(i);
-         errorMessage = validateSO3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = pelvisOrientationTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
-            return errorMessage;
-         }
-         previousTrajectoryPoint = waypoint;
-      }
 
       return null;
    }
@@ -694,46 +630,10 @@ public abstract class PacketValidityChecker
    public static String validatePelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
       String errorMessage = validatePacket(pelvisTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateSE3TrajectoryMessage(pelvisTrajectoryMessage.se3Trajectory);
       if (errorMessage != null)
          return PelvisTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-
-      if(pelvisTrajectoryMessage.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
-      }
-
-      if(pelvisTrajectoryMessage.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
-      }
-
-      SE3TrajectoryPointMessage previousTrajectoryPoint = null;
-
-      if (pelvisTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
-      {
-         String messageClassName = pelvisTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = "Received " + messageClassName + " with no waypoint.";
-         return errorMessage;
-      }
-
-      for (int i = 0; i < pelvisTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
-      {
-         SE3TrajectoryPointMessage waypoint = pelvisTrajectoryMessage.getTrajectoryPoint(i);
-         errorMessage = validateSE3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = pelvisTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
-            return errorMessage;
-         }
-         previousTrajectoryPoint = waypoint;
-      }
-
-      if (pelvisTrajectoryMessage.useCustomControlFrame() && pelvisTrajectoryMessage.controlFramePose == null)
-      {
-         String messageClassName = pelvisTrajectoryMessage.getClass().getSimpleName();
-         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
-      }
 
       return null;
    }
@@ -741,41 +641,12 @@ public abstract class PacketValidityChecker
    public static String validateFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
       String errorMessage = validatePacket(footTrajectoryMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateSE3TrajectoryMessage(footTrajectoryMessage.se3Trajectory);
       if (errorMessage != null)
          return FootTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
-      if(footTrajectoryMessage.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
-      }
-
-      if(footTrajectoryMessage.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
-      {
-         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
-      }
-
       ObjectErrorType errorType;
-      SE3TrajectoryPointMessage previousTrajectoryPoint = null;
-
-      if (footTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
-      {
-         String messageClassName = footTrajectoryMessage.getClass().getSimpleName();
-         errorMessage = "Received " + messageClassName + " with no waypoint.";
-         return errorMessage;
-      }
-
-      for (int i = 0; i < footTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
-      {
-         SE3TrajectoryPointMessage waypoint = footTrajectoryMessage.getTrajectoryPoint(i);
-         errorMessage = validateSE3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
-         if (errorMessage != null)
-         {
-            String messageClassName = footTrajectoryMessage.getClass().getSimpleName();
-            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
-            return errorMessage;
-         }
-         previousTrajectoryPoint = waypoint;
-      }
 
       errorType = ObjectValidityChecker.validateEnum(footTrajectoryMessage.getRobotSide());
       if (errorType != null)
@@ -783,12 +654,6 @@ public abstract class PacketValidityChecker
          String messageClassName = footTrajectoryMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s robotSide field " + errorType.getMessage();
          return errorMessage;
-      }
-
-      if (footTrajectoryMessage.useCustomControlFrame() && footTrajectoryMessage.controlFramePose == null)
-      {
-         String messageClassName = footTrajectoryMessage.getClass().getSimpleName();
-         return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
       }
 
       return null;
@@ -851,16 +716,16 @@ public abstract class PacketValidityChecker
 
       EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
+      if (pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getNumberOfTrajectoryPoints() == 0)
       {
          String messageClassName = pelvisHeightTrajectoryMessage.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
 
-      for (int i = 0; i < pelvisHeightTrajectoryMessage.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getNumberOfTrajectoryPoints(); i++)
       {
-         EuclideanTrajectoryPointMessage waypoint = pelvisHeightTrajectoryMessage.getTrajectoryPoint(i);
+         EuclideanTrajectoryPointMessage waypoint = pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getTrajectoryPoint(i);
          errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {

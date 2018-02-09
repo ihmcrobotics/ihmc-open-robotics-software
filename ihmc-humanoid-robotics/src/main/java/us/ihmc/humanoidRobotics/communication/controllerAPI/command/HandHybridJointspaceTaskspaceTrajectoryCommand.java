@@ -1,34 +1,36 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.communication.packets.QueueableMessage;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
-
 import java.util.Random;
 
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
 public class HandHybridJointspaceTaskspaceTrajectoryCommand
-      extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage>
-      implements FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
+      implements Command<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage>,
+      FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
-   private final ArmTrajectoryCommand jointspaceTrajectoryCommand = new ArmTrajectoryCommand();
-   private final HandTrajectoryCommand taskspaceTrajectoryCommand = new HandTrajectoryCommand();
+   private RobotSide robotSide;
+   private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
+   private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
 
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(HandTrajectoryCommand taskspaceTrajectoryCommand, ArmTrajectoryCommand jointspaceTrajectoryCommand)
+   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
+                                                         JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
-      super();
+      this.robotSide = robotSide;
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(new HandTrajectoryCommand(random), new ArmTrajectoryCommand(random));
+      this(RobotSide.generateRandomRobotSide(random), new SE3TrajectoryControllerCommand(random), new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -40,6 +42,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void clear()
    {
+      robotSide = null;
       jointspaceTrajectoryCommand.clear();
       taskspaceTrajectoryCommand.clear();
    }
@@ -47,65 +50,75 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
-      setQueueableCommandVariables(message);
+      robotSide = message.getRobotSide();
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(resolver, message.getHandTrajectoryMessage());
-      setQueueableCommandVariables(message);
+      robotSide = message.getRobotSide();
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public boolean isCommandValid()
    {
-      return jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid();
+      return robotSide != null && jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid();
    }
 
    @Override
    public void set(HandHybridJointspaceTaskspaceTrajectoryCommand other)
    {
+      robotSide = other.robotSide;
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
-      setQueueableCommandVariables(other);
    }
 
-   @Override
-   public void addTimeOffset(double timeOffset)
+   public RobotSide getRobotSide()
    {
-      taskspaceTrajectoryCommand.addTimeOffset(timeOffset);
-      jointspaceTrajectoryCommand.addTimeOffset(timeOffset);
+      return robotSide;
    }
 
-   public ArmTrajectoryCommand getJointspaceTrajectoryCommand()
+   public JointspaceTrajectoryCommand getJointspaceTrajectoryCommand()
    {
       return jointspaceTrajectoryCommand;
    }
 
-   public HandTrajectoryCommand getTaskspaceTrajectoryCommand()
+   public SE3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
    }
 
    @Override
-   public void setQueueableCommandVariables(QueueableMessage<?> message)
+   public boolean isDelayedExecutionSupported()
    {
-      // this override is needed to correctly store queuing information into the sub-messages
-      super.setQueueableCommandVariables(message);
-      jointspaceTrajectoryCommand.setQueueableCommandVariables(message);
-      taskspaceTrajectoryCommand.setQueueableCommandVariables(message);
+      return true;
    }
 
    @Override
-   public void setQueueableCommandVariables(QueueableCommand<?, ?> other)
+   public void setExecutionDelayTime(double delayTime)
    {
-      // this override is needed to correctly store queuing information into the sub-messages
-      taskspaceTrajectoryCommand.setQueueableCommandVariables(other);
-      jointspaceTrajectoryCommand.setQueueableCommandVariables(other);
-      super.setQueueableCommandVariables(other);
+      taskspaceTrajectoryCommand.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      taskspaceTrajectoryCommand.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return taskspaceTrajectoryCommand.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return taskspaceTrajectoryCommand.getExecutionTime();
    }
 }

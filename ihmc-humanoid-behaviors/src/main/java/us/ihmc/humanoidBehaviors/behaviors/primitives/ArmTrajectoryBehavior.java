@@ -60,7 +60,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
 
       robotSide = armTrajectoryMessage.getRobotSide();
       startTime.set(yoTime.getDoubleValue());
-      trajectoryTime.set(armTrajectoryMessage.getTrajectoryTime());
+      trajectoryTime.set(armTrajectoryMessage.getJointspaceTrajectory().getTrajectoryTime());
 
       hasInputBeenSet.set(true);
    }

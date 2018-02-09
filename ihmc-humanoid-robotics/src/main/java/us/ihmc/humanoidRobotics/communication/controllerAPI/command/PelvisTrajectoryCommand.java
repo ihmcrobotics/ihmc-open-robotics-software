@@ -2,25 +2,32 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<PelvisTrajectoryCommand, PelvisTrajectoryMessage>
+public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand, PelvisTrajectoryMessage>, FrameBasedCommand<PelvisTrajectoryMessage>, EpsilonComparable<PelvisTrajectoryCommand>
 {
    private boolean enableUserPelvisControl = false;
    private boolean enableUserPelvisControlDuringWalking = false;
+   private final SE3TrajectoryControllerCommand se3Trajectory;
 
    public PelvisTrajectoryCommand()
    {
-      super(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      se3Trajectory = new SE3TrajectoryControllerCommand();
    }
 
    public PelvisTrajectoryCommand(Random random)
    {
-      super(EuclidFrameRandomTools.nextReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
-            EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+      se3Trajectory = new SE3TrajectoryControllerCommand(random);
+   }
+
+   @Override
+   public void clear()
+   {
+      se3Trajectory.clear();
    }
 
    @Override
@@ -28,7 +35,7 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
    {
       setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
       setEnableUserPelvisControl(other.isEnableUserPelvisControl());
-      super.set(other);
+      se3Trajectory.set(other.se3Trajectory);
    }
 
    @Override
@@ -36,7 +43,7 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
    {
       setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
       setEnableUserPelvisControl(message.isEnableUserPelvisControl());
-      super.set(resolver, message);
+      se3Trajectory.set(resolver, message.se3Trajectory);
    }
 
    @Override
@@ -44,7 +51,7 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
    {
       setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
       setEnableUserPelvisControl(message.isEnableUserPelvisControl());
-      super.set(message);
+      se3Trajectory.set(message.se3Trajectory);
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()
@@ -67,9 +74,56 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
       this.enableUserPelvisControl = enableUserPelvisControl;
    }
 
+   public SE3TrajectoryControllerCommand getSE3Trajectory()
+   {
+      return se3Trajectory;
+   }
+
    @Override
    public Class<PelvisTrajectoryMessage> getMessageClass()
    {
       return PelvisTrajectoryMessage.class;
+   }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return se3Trajectory.isCommandValid();
+   }
+
+   @Override
+   public boolean epsilonEquals(PelvisTrajectoryCommand other, double epsilon)
+   {
+      return se3Trajectory.epsilonEquals(other.se3Trajectory, epsilon);
+   }
+   
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      se3Trajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      se3Trajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return se3Trajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return se3Trajectory.getExecutionTime();
    }
 }

@@ -154,7 +154,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
             for (int trajectoryPointIndex = 0; trajectoryPointIndex < RigidBodyJointspaceControlState.maxPointsInGenerator - 1; trajectoryPointIndex++)
             {
-               TrajectoryPoint1DMessage expectedTrajectoryPoint = armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, trajectoryPointIndex);
+               TrajectoryPoint1DMessage expectedTrajectoryPoint = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryPoint(jointIndex, trajectoryPointIndex);
                SimpleTrajectoryPoint1D controllerTrajectoryPoint = findTrajectoryPoint(armJoint, trajectoryPointIndex + 1, scs);
                assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), epsilon);
                assertEquals(expectedTrajectoryPoint.getPosition(), controllerTrajectoryPoint.getPosition(), epsilon);
@@ -174,7 +174,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          double[] desiredJointVelocities = new double[armJoints.length];
 
          for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
-            desiredJointPositions[jointIndex] = armTrajectoryMessages.get(robotSide).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
+            desiredJointPositions[jointIndex] = armTrajectoryMessages.get(robotSide).getJointspaceTrajectory().getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
 
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       }
@@ -207,7 +207,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-               message.setTrajectoryPoint(jointIdx, pointIdx, time, 0.0, 0.0);
+               message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, pointIdx, time, 0.0, 0.0);
             time = time + 0.05;
          }
          drcSimulationTestHelper.send(message);
@@ -226,7 +226,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-               message.setTrajectoryPoint(jointIdx, pointIdx, time, 0.0, 0.0);
+               message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, pointIdx, time, 0.0, 0.0);
             time = time + 0.05;
          }
          drcSimulationTestHelper.send(message);
@@ -276,7 +276,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          ArmTrajectoryMessage trajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
          trajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            trajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            trajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
          id++;
 
          TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
@@ -300,7 +300,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
             {
                SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-               trajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+               trajectoryMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
                      trajectoryPoint.getVelocity());
             }
          }
@@ -353,7 +353,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       double[] desiredJointVelocities = new double[armJoints.length];
 
       for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
-         desiredJointPositions[jointIndex] = armTrajectoryMessages.get(numberOfMessages - 1).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
+         desiredJointPositions[jointIndex] = armTrajectoryMessages.get(numberOfMessages - 1).getJointspaceTrajectory().getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
 
       assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
@@ -403,7 +403,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                if (messageIndex == numberOfMessages - 1)
                   previousMessageId = id + 100; // Bad ID
 
-               armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
             }
             id++;
 
@@ -428,7 +428,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
                   SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-                  armTrajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+                  armTrajectoryMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
                         trajectoryPoint.getVelocity());
                }
             }
@@ -507,7 +507,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
             armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
-               armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
 
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
@@ -531,7 +531,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
                   SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-                  armTrajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+                  armTrajectoryMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
                         trajectoryPoint.getVelocity());
                }
             }
@@ -572,7 +572,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          {
             OneDoFJoint armJoint = armJoints[jointIndex];
 
-            TrajectoryPoint1DMessage expectedTrajectoryPoint = overridingMessage.getJointTrajectoryPoint(jointIndex, 0);
+            TrajectoryPoint1DMessage expectedTrajectoryPoint = overridingMessage.getJointspaceTrajectory().getJointTrajectoryPoint(jointIndex, 0);
             SimpleTrajectoryPoint1D controllerTrajectoryPoint = findTrajectoryPoint(armJoint, 1, scs);
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), epsilon);
             assertEquals(expectedTrajectoryPoint.getPosition(), controllerTrajectoryPoint.getPosition(), epsilon);
@@ -592,7 +592,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          double[] desiredJointVelocities = new double[armJoints.length];
 
          for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
-            desiredJointPositions[jointIndex] = overridingMessages.get(robotSide).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
+            desiredJointPositions[jointIndex] = overridingMessages.get(robotSide).getJointspaceTrajectory().getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
 
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       }
@@ -809,7 +809,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
          {
             SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-            armTrajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+            armTrajectoryMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
                   trajectoryPoint.getVelocity());
          }
       }

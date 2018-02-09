@@ -83,17 +83,17 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendPitchRotation(Math.PI / 2.0);
 
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage1.getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
-      handTrajectoryMessage1.getFrameInformation().setDataReferenceFrame(worldFrame);
-      handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage1.getSE3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
+      handTrajectoryMessage1.getSE3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
+      handTrajectoryMessage1.getSE3Trajectory().setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage2.getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
-      handTrajectoryMessage2.getFrameInformation().setDataReferenceFrame(worldFrame);
-      handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage2.getSE3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
+      handTrajectoryMessage2.getSE3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
+      handTrajectoryMessage2.getSE3Trajectory().setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage2);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);

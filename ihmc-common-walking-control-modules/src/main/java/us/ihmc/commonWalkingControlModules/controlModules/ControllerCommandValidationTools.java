@@ -15,17 +15,17 @@ public class ControllerCommandValidationTools
 {
    public static boolean checkArmTrajectoryCommand(OneDoFJoint[] joints, ArmTrajectoryCommand command)
    {
-      return checkOneDoFJointTrajectoryCommandList(joints, command.getTrajectoryPointLists());
+      return checkOneDoFJointTrajectoryCommandList(joints, command.getJointspaceTrajectory().getTrajectoryPointLists());
    }
 
    public static boolean checkNeckTrajectoryCommand(OneDoFJoint[] joints, NeckTrajectoryCommand command)
    {
-      return checkOneDoFJointTrajectoryCommandList(joints, command.getTrajectoryPointLists());
+      return checkOneDoFJointTrajectoryCommandList(joints, command.getJointspaceTrajectory().getTrajectoryPointLists());
    }
 
    public static boolean checkSpineTrajectoryCommand(OneDoFJoint[] joints, SpineTrajectoryCommand command)
    {
-      return checkOneDoFJointTrajectoryCommandList(joints, command.getTrajectoryPointLists());
+      return checkOneDoFJointTrajectoryCommandList(joints, command.getJointspaceTrajectory().getTrajectoryPointLists());
    }
 
    public static boolean checkArmDesiredAccelerationsCommand(OneDoFJoint[] joints, ArmDesiredAccelerationsCommand command)

@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
@@ -22,8 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEuclideanTrajectoryMessage<T>> extends QueueableMessage<T>
-      implements Transformable, FrameBasedMessage
+public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage> implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
    public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -45,15 +45,17 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
    public QuaternionBasedTransform controlFramePose = new QuaternionBasedTransform();
 
-   public AbstractEuclideanTrajectoryMessage()
+   @RosExportedField(documentation = "Properties for queueing trajectories.")
+   public QueueableMessage queueingProperties = new QueueableMessage();
+
+   public EuclideanTrajectoryMessage()
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractEuclideanTrajectoryMessage(Random random)
+   public EuclideanTrajectoryMessage(Random random)
    {
-      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
@@ -65,9 +67,10 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
       useCustomControlFrame = random.nextBoolean();
       controlFramePose.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      queueingProperties = new QueueableMessage(random);
    }
 
-   public AbstractEuclideanTrajectoryMessage(T trajectoryMessage)
+   public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage trajectoryMessage)
    {
       int numberOfPoints = trajectoryMessage.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
@@ -76,8 +79,6 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(trajectoryMessage.taskspaceTrajectoryPoints[i]);
       }
 
-      setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
-      setExecutionDelayTime(trajectoryMessage.getExecutionDelayTime());
       setUniqueId(trajectoryMessage.getUniqueId());
       setDestination(trajectoryMessage.getDestination());
       linearSelectionMatrix.set(trajectoryMessage.linearSelectionMatrix);
@@ -85,6 +86,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       linearWeightMatrix.set(trajectoryMessage.linearWeightMatrix);
       useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
       controlFramePose.set(trajectoryMessage.controlFramePose);
+      queueingProperties.set(trajectoryMessage.queueingProperties);
    }
 
    /**
@@ -93,7 +95,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
     */
-   public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
+   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -108,7 +110,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrame the frame the trajectory will be executed in
     */
-   public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
+   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
    {
       this(trajectoryTime, desiredPosition, trajectoryReferenceFrame.getNameBasedHashCode());
    }
@@ -117,7 +119,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
     * @param numberOfTrajectoryPoints number of trajectory points in this message
     */
-   public AbstractEuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
+   public EuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfTrajectoryPoints];
@@ -127,7 +129,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * set this message to the have the same contents of the other message
     * @param other the other message
     */
-   public void set(T other)
+   public void set(EuclideanTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
@@ -138,8 +140,6 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
-      setExecutionDelayTime(other.getExecutionDelayTime());
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
       linearSelectionMatrix.set(other.linearSelectionMatrix);
@@ -147,6 +147,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       linearWeightMatrix.set(other.linearWeightMatrix);
       useCustomControlFrame = other.useCustomControlFrame;
       controlFramePose.set(other.controlFramePose);
+      queueingProperties.set(other.queueingProperties);
    }
 
    /**
@@ -381,8 +382,13 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(EuclideanTrajectoryMessage other, double epsilon)
    {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+      {
+         return false;
+      }
+
       if (!frameInformation.epsilonEquals(other.frameInformation, epsilon))
       {
          return false;
@@ -417,7 +423,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
             return false;
       }
 
-      return super.epsilonEquals(other, epsilon);
+      return true;
    }
 
    public void setUseCustomControlFrame(boolean useCustomControlFrame)
@@ -450,5 +456,10 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          controlFrameTransformToPack.setToNaN();
       else
          controlFrameTransformToPack.set(controlFramePose);
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
    }
 }

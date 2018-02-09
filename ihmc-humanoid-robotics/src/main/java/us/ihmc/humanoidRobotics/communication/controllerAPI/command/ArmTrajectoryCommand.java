@@ -2,36 +2,39 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ArmTrajectoryCommand extends JointspaceTrajectoryCommand<ArmTrajectoryCommand, ArmTrajectoryMessage>
+public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTrajectoryMessage>, EpsilonComparable<ArmTrajectoryCommand>
 {
    private RobotSide robotSide;
+   private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
    public ArmTrajectoryCommand()
    {
-      super();
       robotSide = null;
+      jointspaceTrajectory = new JointspaceTrajectoryCommand();
    }
 
    public ArmTrajectoryCommand(Random random)
    {
-      super(random);
       robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
+      jointspaceTrajectory = new JointspaceTrajectoryCommand(random);
    }
 
    @Override
    public void clear()
    {
       robotSide = null;
-      super.clear();
+      jointspaceTrajectory.clear();
    }
 
    public void clear(RobotSide robotSide)
    {
       this.robotSide = robotSide;
-      super.clear();
+      jointspaceTrajectory.clear();
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -43,19 +46,24 @@ public class ArmTrajectoryCommand extends JointspaceTrajectoryCommand<ArmTraject
    public void set(ArmTrajectoryMessage message)
    {
       clear(message.getRobotSide());
-      super.set(message);
+      jointspaceTrajectory.set(message.getJointspaceTrajectory());
    }
 
    @Override
    public void set(ArmTrajectoryCommand other)
    {
       clear(other.getRobotSide());
-      super.set(other);
+      jointspaceTrajectory.set(other.getJointspaceTrajectory());
    }
 
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public JointspaceTrajectoryCommand getJointspaceTrajectory()
+   {
+      return jointspaceTrajectory;
    }
 
    @Override
@@ -67,16 +75,46 @@ public class ArmTrajectoryCommand extends JointspaceTrajectoryCommand<ArmTraject
    @Override
    public boolean isCommandValid()
    {
-      return robotSide != null && super.isCommandValid();
+      return robotSide != null && jointspaceTrajectory.isCommandValid();
    }
-   
+
    @Override
    public boolean epsilonEquals(ArmTrajectoryCommand other, double epsilon)
    {
-      if(robotSide != other.robotSide)
-      {
+      if (robotSide != other.robotSide)
          return false;
-      }
-      return super.epsilonEquals(other, epsilon);
+      if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
+         return false;
+      return true;
+   }
+
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      jointspaceTrajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      jointspaceTrajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return jointspaceTrajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return jointspaceTrajectory.getExecutionTime();
    }
 }

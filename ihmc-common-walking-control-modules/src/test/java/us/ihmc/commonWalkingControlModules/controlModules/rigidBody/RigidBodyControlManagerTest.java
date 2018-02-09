@@ -38,6 +38,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
@@ -143,7 +145,7 @@ public class RigidBodyControlManagerTest
       Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-      SE3Message message = new SE3Message(1, worldFrame);
+      SE3TrajectoryMessage message = new SE3TrajectoryMessage(1, worldFrame);
       message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
 
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
@@ -170,7 +172,7 @@ public class RigidBodyControlManagerTest
       weightMatrix.setLinearWeights(linearXWeight, linearYWeight, linearZWeight);
       message.setWeightMatrix(weightMatrix);
 
-      SE3Command command = new SE3Command();
+      SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
       command.set(worldFrame, worldFrame, message);
       manager.handleTaskspaceTrajectoryCommand(command);
       manager.compute();
@@ -292,9 +294,9 @@ public class RigidBodyControlManagerTest
          Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-         SE3Message message = new SE3Message(1, worldFrame);
+         SE3TrajectoryMessage message = new SE3TrajectoryMessage(1, worldFrame);
          message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
-         message.setExecutionMode(ExecutionMode.OVERRIDE, -1);
+         message.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE, -1);
 
          SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
          boolean angularXSelected = random.nextBoolean();
@@ -328,7 +330,7 @@ public class RigidBodyControlManagerTest
          weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
          message.setWeightMatrix(weightMatrix);
 
-         SE3Command command = new SE3Command();
+         SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
          command.set(resolver, message);
          manager.handleTaskspaceTrajectoryCommand(command);
          manager.compute();
@@ -402,13 +404,13 @@ public class RigidBodyControlManagerTest
       Point3D controlFramePosition = EuclidCoreRandomTools.nextPoint3D(random);
       Quaternion controlFrameOrientation = EuclidCoreRandomTools.nextQuaternion(random);
 
-      SE3Message message = new SE3Message(1, worldFrame);
+      SE3TrajectoryMessage message = new SE3TrajectoryMessage(1, worldFrame);
       message.setControlFramePosition(controlFramePosition);
       message.setControlFrameOrientation(controlFrameOrientation);
       message.setUseCustomControlFrame(true);
       message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
 
-      SE3Command command = new SE3Command();
+      SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
       command.set(worldFrame, worldFrame, message);
       manager.handleTaskspaceTrajectoryCommand(command);
       manager.compute();

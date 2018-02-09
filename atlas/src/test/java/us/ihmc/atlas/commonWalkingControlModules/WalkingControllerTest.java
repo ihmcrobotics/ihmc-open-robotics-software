@@ -232,9 +232,9 @@ public class WalkingControllerTest
       Quaternion orientation = new Quaternion();
       orientation.appendYawRotation(Math.toRadians(-10.0));
       orientation.appendRollRotation(Math.toRadians(10.0));
-      message.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getPelvisZUpFrame());
-      message.setTrajectoryPoint(0, 0.5, orientation, new Vector3D(), referenceFrames.getPelvisZUpFrame());
-      message.setTrajectoryPoint(1, 1.0, new Quaternion(), new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      message.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getPelvisZUpFrame());
+      message.getSO3Trajectory().setTrajectoryPoint(0, 0.5, orientation, new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      message.getSO3Trajectory().setTrajectoryPoint(1, 1.0, new Quaternion(), new Vector3D(), referenceFrames.getPelvisZUpFrame());
       commandInputManager.submitMessage(message);
    }
 
@@ -251,8 +251,8 @@ public class WalkingControllerTest
             OneDoFJoint joint = joints[jointIdx];
             double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
-            message.setTrajectoryPoint(jointIdx, 0, 0.5, angle1, 0.0);
-            message.setTrajectoryPoint(jointIdx, 1, 1.0, angle2, 0.0);
+            message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, 0, 0.5, angle1, 0.0);
+            message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, 1, 1.0, angle2, 0.0);
          }
          commandInputManager.submitMessage(message);
       }
