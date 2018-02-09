@@ -27,7 +27,7 @@ public class JointStateUpdater
 
    private OneDoFJoint[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
-   private final IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator;
+   private final IMUBasedJointStateEstimator iMUBasedJointStateEstimator;
 
    private final YoBoolean enableIMUBasedJointVelocityEstimator = new YoBoolean("enableIMUBasedJointVelocityEstimator", registry);
 
@@ -42,7 +42,7 @@ public class JointStateUpdater
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
-      iMUBasedJointVelocityEstimator = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
+      iMUBasedJointStateEstimator = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -52,8 +52,8 @@ public class JointStateUpdater
       this.oneDoFJoints = oneDoFJoints;
    }
 
-   public IMUBasedJointVelocityEstimator createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+   public IMUBasedJointStateEstimator createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
+                                                                           StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
       if (stateEstimatorParameters == null || stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation() == null)
          return null;
@@ -81,12 +81,12 @@ public class JointStateUpdater
       {
          double estimatorDT = stateEstimatorParameters.getEstimatorDT();
          double slopTime = stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime();
-         IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
-         iMUBasedJointVelocityEstimator.compute();
+         IMUBasedJointStateEstimator iMUBasedJointStateEstimator = new IMUBasedJointStateEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
+         iMUBasedJointStateEstimator.compute();
          double alphaIMUsForSpineJointVelocityEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation();
          double alphaIMUsForSpineJointPositionEstimation = stateEstimatorParameters.getAlphaIMUsForSpineJointPositionEstimation();
-         iMUBasedJointVelocityEstimator.setAlphaFuse(alphaIMUsForSpineJointVelocityEstimation, alphaIMUsForSpineJointPositionEstimation);
-         return iMUBasedJointVelocityEstimator;
+         iMUBasedJointStateEstimator.setAlphaFuse(alphaIMUsForSpineJointVelocityEstimation, alphaIMUsForSpineJointPositionEstimation);
+         return iMUBasedJointStateEstimator;
       }
       else
       {
@@ -112,9 +112,9 @@ public class JointStateUpdater
 
    public void updateJointState()
    {
-      if (iMUBasedJointVelocityEstimator != null)
+      if (iMUBasedJointStateEstimator != null)
       {
-         iMUBasedJointVelocityEstimator.compute();
+         iMUBasedJointStateEstimator.compute();
       }
 
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -126,13 +126,13 @@ public class JointStateUpdater
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
          boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
 
-         if (enableIMUBasedJointVelocityEstimator.getBooleanValue() && iMUBasedJointVelocityEstimator != null)
+         if (enableIMUBasedJointVelocityEstimator.getBooleanValue() && iMUBasedJointStateEstimator != null)
          {
-            double estimatedJointVelocity = iMUBasedJointVelocityEstimator.getEstimatedJointVelocitiy(oneDoFJoint);
+            double estimatedJointVelocity = iMUBasedJointStateEstimator.getEstimatedJointVelocitiy(oneDoFJoint);
             if (!Double.isNaN(estimatedJointVelocity))
                velocitySensorData = estimatedJointVelocity;
 
-            double estimatedJointPosition = iMUBasedJointVelocityEstimator.getEstimatedJointPosition(oneDoFJoint);
+            double estimatedJointPosition = iMUBasedJointStateEstimator.getEstimatedJointPosition(oneDoFJoint);
             if (!Double.isNaN(estimatedJointPosition))
                positionSensorData = estimatedJointPosition;
          }
