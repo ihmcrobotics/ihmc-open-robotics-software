@@ -131,7 +131,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       
       variables.getYoPlanarVelocityInputX().set(0.75);
       conductor.addTimeLimit(variables.getYoTime(), 8.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 4.5));
       conductor.simulate();
       
       variables.getYoPlanarVelocityInputX().set(0.0);
