@@ -29,7 +29,7 @@ public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehav
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 63.6, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @ContinuousIntegrationTest(estimatedDuration = 63.6, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = 320000)
    public void testWalkOverCinderBlocks() throws IOException
    {
