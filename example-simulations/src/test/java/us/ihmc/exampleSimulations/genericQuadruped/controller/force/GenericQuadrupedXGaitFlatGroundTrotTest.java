@@ -19,7 +19,7 @@ public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatG
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 11.1)
-   @Test(timeout = 55000)
+   @Test(timeout = 90000)
    public void testTrottingForwardFast()
    {
       super.testTrottingForwardFast();
@@ -35,7 +35,7 @@ public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatG
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 12.7)
-   @Test(timeout = 63000)
+   @Test(timeout = 100000)
    public void testTrottingBackwardsFast()
    {
       super.testTrottingBackwardsFast();
@@ -51,7 +51,7 @@ public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatG
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.4)
-   @Test(timeout = 130000)
+   @Test(timeout = 180000)
    public void testTrottingInAForwardLeftCircle()
    {
       super.testTrottingInAForwardLeftCircle();
