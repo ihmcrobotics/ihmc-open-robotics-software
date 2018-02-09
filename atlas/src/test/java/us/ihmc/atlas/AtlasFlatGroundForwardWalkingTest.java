@@ -66,7 +66,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    private final double transferTime = 0.2;
    private final double finalTransferTime = 1.0;
 
-   private final double forcePercentageOfWeight1 = 0.025;
+   private final double forcePercentageOfWeight1 = 0.02;
    private final double forceDuration1 = 1;
    private final double forceDelay1 = 0.1 * swingTime;
    private final Vector3D forceDirection1 = new Vector3D(0.0, -1.0, 0.0);
