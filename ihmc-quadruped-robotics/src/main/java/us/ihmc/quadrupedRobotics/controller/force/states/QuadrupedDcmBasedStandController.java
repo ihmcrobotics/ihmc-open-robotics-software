@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -61,7 +62,6 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final LinearInvertedPendulumModel lipModel;
    private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
-   private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
    private final QuadrupedComPositionController comPositionController;
@@ -97,7 +97,6 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
       dcmPositionEstimate = new FramePoint3D();
       dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
-      dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = controllerToolbox.getComPositionController();
@@ -158,12 +157,15 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private void updateSetpoints()
    {
       // update desired dcm position
-      dcmPositionControllerSetpoints.getDcmPosition().changeFrame(supportFrame);
-      dcmPositionControllerSetpoints.getDcmPosition().set(postureProvider.getComVelocityInput());
-      dcmPositionControllerSetpoints.getDcmPosition().scale(1.0 / lipModel.getNaturalFrequency());
-      dcmPositionControllerSetpoints.getDcmPosition().add(postureProvider.getComPositionInput());
-      dcmPositionControllerSetpoints.getDcmVelocity().setToZero(supportFrame);
-      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
+      FramePoint3D dcmPositionSetpoint = dcmPositionController.getDCMPositionSetpoint();
+      FrameVector3D dcmVelocitySetpoint = dcmPositionController.getDCMVelocitySetpoint();
+      dcmPositionSetpoint.changeFrame(supportFrame);
+      dcmPositionSetpoint.set(postureProvider.getComVelocityInput());
+      dcmPositionSetpoint.scale(1.0 / lipModel.getNaturalFrequency());
+      dcmPositionSetpoint.add(postureProvider.getComPositionInput());
+      dcmVelocitySetpoint.setToZero(supportFrame);
+
+      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
       // update desired com position and velocity
@@ -209,7 +211,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       updateEstimates();
 
       // initialize feedback controllers
-      dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
+      dcmPositionController.initializeSetpoint(dcmPositionEstimate);
       dcmPositionController.reset();
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
