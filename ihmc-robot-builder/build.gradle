@@ -33,7 +33,7 @@ mainDependencies {
 
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.6"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
