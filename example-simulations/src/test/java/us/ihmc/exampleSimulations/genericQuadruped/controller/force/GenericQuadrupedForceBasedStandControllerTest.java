@@ -29,7 +29,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 100000)
+   @Test(timeout = 150000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
       super.testStandingAndResistingPushesOnBody();
