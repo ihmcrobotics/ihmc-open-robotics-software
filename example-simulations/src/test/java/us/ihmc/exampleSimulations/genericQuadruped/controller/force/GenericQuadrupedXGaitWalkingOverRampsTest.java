@@ -21,7 +21,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 500000)
+   @Test(timeout = 600000)
    public void testWalkingDownSlope() throws IOException
    {
       super.testWalkingDownSlope();
