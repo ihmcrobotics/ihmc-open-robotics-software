@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
@@ -38,7 +38,7 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"

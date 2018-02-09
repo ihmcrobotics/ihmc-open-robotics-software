@@ -34,7 +34,7 @@ mainDependencies {
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.bidib.jbidib.org.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-state-estimation", version: "source"
@@ -58,7 +58,7 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.3"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.3"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
