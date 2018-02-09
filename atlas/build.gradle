@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.5"
+      classpath "us.ihmc:ihmc-build:0.12.8"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -86,7 +86,7 @@ mainDependencies {
 testDependencies {
    compile group: "junit", name: "junit", version: "4.12"
    compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.6"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.7"
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.18.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: "source"
