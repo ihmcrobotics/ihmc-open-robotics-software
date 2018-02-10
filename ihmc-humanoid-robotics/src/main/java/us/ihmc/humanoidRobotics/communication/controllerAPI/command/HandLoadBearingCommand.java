@@ -9,7 +9,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
 
    private boolean useJointspaceCommand = false;
 
-   private ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
+   private JointspaceTrajectoryCommand jointspaceTrajectory = new JointspaceTrajectoryCommand();
    
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
@@ -28,7 +28,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
       robotSide = other.robotSide;
       executionDelayTime = other.getExecutionDelayTime();
       useJointspaceCommand = other.isUseJointspaceCommand();
-      armTrajectoryCommand.set(other.getArmTrajectoryCommand());
+      jointspaceTrajectory.set(other.getJointspaceTrajectory());
    }
 
    @Override
@@ -38,15 +38,15 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
       executionDelayTime = message.executionDelayTime;
       robotSide = message.robotSide;
       useJointspaceCommand = message.isUseJointspaceCommand();
-      if (message.getArmTrajectoryMessage() != null)
+      if (message.getJointspaceTrajectory() != null)
       {
-         armTrajectoryCommand.set(message.getArmTrajectoryMessage());
+         jointspaceTrajectory.set(message.getJointspaceTrajectory());
       }
    }
 
-   public ArmTrajectoryCommand getArmTrajectoryCommand()
+   public JointspaceTrajectoryCommand getJointspaceTrajectory()
    {
-      return armTrajectoryCommand;
+      return jointspaceTrajectory;
    }
 
    public boolean isUseJointspaceCommand()
@@ -60,7 +60,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
       super.clear();
       robotSide = null;
       useJointspaceCommand = false;
-      armTrajectoryCommand.clear();
+      jointspaceTrajectory.clear();
    }
 
    @Override
@@ -73,13 +73,13 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    public boolean isCommandValid()
    {
       boolean armTrajectoryValid = true;
-      if (useJointspaceCommand && armTrajectoryCommand == null)
+      if (useJointspaceCommand && jointspaceTrajectory == null)
       {
          armTrajectoryValid = false;
       }
       else if (useJointspaceCommand)
       {
-         armTrajectoryValid = armTrajectoryCommand.isCommandValid();
+         armTrajectoryValid = jointspaceTrajectory.isCommandValid();
       }
 
       return armTrajectoryValid && robotSide != null && super.isCommandValid();

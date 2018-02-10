@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadBearingMessage>
@@ -15,7 +16,7 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
    public boolean useJointspaceCommand = false;
 
    /** The jointspace arm trajectory message that will be used for the hybrid control if {@link #useJointspaceCommand} is true. */
-   public ArmTrajectoryMessage armTrajectoryMessage;
+   public JointspaceTrajectoryMessage jointspaceTrajectory;
 
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
@@ -35,17 +36,17 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
    {
       super(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      armTrajectoryMessage = new ArmTrajectoryMessage(random);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
    }
 
-   public void setArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
+   public void setJointspaceTrajectory(JointspaceTrajectoryMessage armTrajectoryMessage)
    {
-      this.armTrajectoryMessage = armTrajectoryMessage;
+      this.jointspaceTrajectory = armTrajectoryMessage;
    }
 
-   public ArmTrajectoryMessage getArmTrajectoryMessage()
+   public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
-      return armTrajectoryMessage;
+      return jointspaceTrajectory;
    }
 
    public void setUseJointspaceCommand(boolean useJointspaceCommand)
@@ -82,21 +83,21 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
       boolean robotSideEqual = robotSide == other.robotSide;
 
       boolean armTrajectoryEqual;
-      if (armTrajectoryMessage == null && other.armTrajectoryMessage == null)
+      if (jointspaceTrajectory == null && other.jointspaceTrajectory == null)
       {
          armTrajectoryEqual = true;
       }
-      else if (armTrajectoryMessage == null && other.armTrajectoryMessage != null)
+      else if (jointspaceTrajectory == null && other.jointspaceTrajectory != null)
       {
          armTrajectoryEqual = false;
       }
-      else if (armTrajectoryMessage != null && other.armTrajectoryMessage == null)
+      else if (jointspaceTrajectory != null && other.jointspaceTrajectory == null)
       {
          armTrajectoryEqual = false;
       }
       else
       {
-         armTrajectoryEqual = armTrajectoryMessage.epsilonEquals(other.armTrajectoryMessage, epsilon);
+         armTrajectoryEqual = jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon);
       }
 
       boolean useArmTrajectoryEqual = useJointspaceCommand == other.useJointspaceCommand;

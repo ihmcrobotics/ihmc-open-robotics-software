@@ -32,6 +32,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
     */
    public ArmTrajectoryMessage()
    {
+      jointspaceTrajectory = new JointspaceTrajectoryMessage();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
