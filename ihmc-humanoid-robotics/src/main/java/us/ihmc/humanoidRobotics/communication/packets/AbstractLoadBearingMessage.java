@@ -8,7 +8,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>> extends Packet<T>
+public final class AbstractLoadBearingMessage extends Packet<AbstractLoadBearingMessage>
 {
    /** If set to true this will load the contact point. Otherwise the rigid body will stop bearing load. */
    public boolean load = false;
@@ -77,7 +77,7 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(AbstractLoadBearingMessage other, double epsilon)
    {
       if (load != other.load)
          return false;

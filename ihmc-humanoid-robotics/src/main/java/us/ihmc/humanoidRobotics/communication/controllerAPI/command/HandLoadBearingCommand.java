@@ -1,9 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadBearingCommand, HandLoadBearingMessage>
+public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, HandLoadBearingMessage>
 {
    private RobotSide robotSide;
 
@@ -16,6 +17,8 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    /** the execution time. This number is set if the execution delay is non zero**/
    public double adjustedExecutionTime;
 
+   private final AbstractLoadBearingCommand loadBearingCommand = new AbstractLoadBearingCommand();
+
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -24,7 +27,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    @Override
    public void set(HandLoadBearingCommand other)
    {
-      super.set(other);
+      loadBearingCommand.set(other.loadBearingCommand);
       robotSide = other.robotSide;
       executionDelayTime = other.getExecutionDelayTime();
       useJointspaceCommand = other.isUseJointspaceCommand();
@@ -34,7 +37,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    @Override
    public void set(HandLoadBearingMessage message)
    {
-      super.set(message);
+      loadBearingCommand.set(message.loadBearingMessage);
       executionDelayTime = message.executionDelayTime;
       robotSide = message.robotSide;
       useJointspaceCommand = message.isUseJointspaceCommand();
@@ -54,10 +57,15 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
       return useJointspaceCommand;
    }
 
+   public AbstractLoadBearingCommand getLoadBearingCommand()
+   {
+      return loadBearingCommand;
+   }
+
    @Override
    public void clear()
    {
-      super.clear();
+      loadBearingCommand.clear();
       robotSide = null;
       useJointspaceCommand = false;
       jointspaceTrajectory.clear();
@@ -82,7 +90,7 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
          armTrajectoryValid = jointspaceTrajectory.isCommandValid();
       }
 
-      return armTrajectoryValid && robotSide != null && super.isCommandValid();
+      return armTrajectoryValid && robotSide != null && loadBearingCommand.isCommandValid();
    }
    
    /**

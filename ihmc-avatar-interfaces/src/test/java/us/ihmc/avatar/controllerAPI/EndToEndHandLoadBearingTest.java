@@ -104,10 +104,10 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       transformToContactFrame.appendRollRotation(Math.PI);
 
       HandLoadBearingMessage loadBearingMessage = new HandLoadBearingMessage(RobotSide.LEFT);
-      loadBearingMessage.setLoad(true);
-      loadBearingMessage.setCoefficientOfFriction(0.8);
-      loadBearingMessage.setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
-      loadBearingMessage.setBodyFrameToContactFrame(transformToContactFrame);
+      loadBearingMessage.getLoadBearingMessage().setLoad(true);
+      loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
+      loadBearingMessage.getLoadBearingMessage().setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
+      loadBearingMessage.getLoadBearingMessage().setBodyFrameToContactFrame(transformToContactFrame);
       drcSimulationTestHelper.send(loadBearingMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
