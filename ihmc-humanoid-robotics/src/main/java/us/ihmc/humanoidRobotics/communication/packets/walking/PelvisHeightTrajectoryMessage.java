@@ -67,7 +67,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
       enableUserPelvisControl = pelvisHeightTrajectoryMessage.enableUserPelvisControl;
       enableUserPelvisControlDuringWalking = pelvisHeightTrajectoryMessage.isEnableUserPelvisControlDuringWalking();
-      euclideanTrajectory.queueingProperties.set(pelvisHeightTrajectoryMessage.euclideanTrajectory.queueingProperties);
    }
 
    /**

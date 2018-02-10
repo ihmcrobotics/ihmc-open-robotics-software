@@ -86,7 +86,8 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
       linearWeightMatrix.set(trajectoryMessage.linearWeightMatrix);
       useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
       controlFramePose.set(trajectoryMessage.controlFramePose);
-      queueingProperties.set(trajectoryMessage.queueingProperties);
+      if (trajectoryMessage.queueingProperties != null)
+         queueingProperties.set(trajectoryMessage.queueingProperties);
    }
 
    /**
