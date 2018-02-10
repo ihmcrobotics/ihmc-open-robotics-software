@@ -27,7 +27,7 @@ public class AtlasSwingTrajectoryTest extends DRCSwingTrajectoryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 76.4)
-   @Test(timeout = 120000)
+   @Test(timeout = 200000)
    public void testMultipleHeightFootsteps() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleHeightFootsteps();
