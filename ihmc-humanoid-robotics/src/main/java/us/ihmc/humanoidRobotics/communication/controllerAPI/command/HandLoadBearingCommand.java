@@ -17,7 +17,7 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    /** the execution time. This number is set if the execution delay is non zero**/
    public double adjustedExecutionTime;
 
-   private final AbstractLoadBearingCommand loadBearingCommand = new AbstractLoadBearingCommand();
+   private final LoadBearingCommand loadBearingCommand = new LoadBearingCommand();
 
    public RobotSide getRobotSide()
    {
@@ -57,7 +57,7 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
       return useJointspaceCommand;
    }
 
-   public AbstractLoadBearingCommand getLoadBearingCommand()
+   public LoadBearingCommand getLoadBearingCommand()
    {
       return loadBearingCommand;
    }

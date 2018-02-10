@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -25,22 +25,22 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
-   public AbstractLoadBearingMessage loadBearingMessage;
+   public LoadBearingMessage loadBearingMessage;
 
    public HandLoadBearingMessage()
    {
-      loadBearingMessage = new AbstractLoadBearingMessage();
+      loadBearingMessage = new LoadBearingMessage();
    }
 
    public HandLoadBearingMessage(RobotSide robotSide)
    {
-      loadBearingMessage = new AbstractLoadBearingMessage();
+      loadBearingMessage = new LoadBearingMessage();
       this.robotSide = robotSide;
    }
 
    public HandLoadBearingMessage(Random random)
    {
-      loadBearingMessage = new AbstractLoadBearingMessage(random);
+      loadBearingMessage = new LoadBearingMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
    }
@@ -65,7 +65,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       return useJointspaceCommand;
    }
 
-   public AbstractLoadBearingMessage getLoadBearingMessage()
+   public LoadBearingMessage getLoadBearingMessage()
    {
       return loadBearingMessage;
    }

@@ -18,7 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
@@ -395,7 +395,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleLoadBearingCommand(AbstractLoadBearingCommand command, JointspaceTrajectoryCommand jointspaceCommand)
+   public void handleLoadBearingCommand(LoadBearingCommand command, JointspaceTrajectoryCommand jointspaceCommand)
    {
       if (loadBearingControlState == null)
       {
