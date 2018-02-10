@@ -425,7 +425,7 @@ public class Footstep implements Settable<Footstep>
       boolean arePosesEqual = footstepPose.epsilonEquals(otherFootstep.footstepPose, epsilon);
       boolean sameRobotSide = robotSide == otherFootstep.robotSide;
       boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
-      boolean isAdjustableTheSame = isAdjustable = otherFootstep.isAdjustable;
+      boolean isAdjustableTheSame = isAdjustable == otherFootstep.isAdjustable;
 
       boolean sameWaypoints = customPositionWaypoints.size() == otherFootstep.customPositionWaypoints.size();
       if (sameWaypoints)
