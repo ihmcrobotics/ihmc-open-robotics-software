@@ -51,7 +51,7 @@ public class GenericQuadrupedXGaitFlatGroundTrotTest extends QuadrupedXGaitFlatG
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.4)
-   @Test(timeout = 180000)
+   @Test(timeout = 250000)
    public void testTrottingInAForwardLeftCircle()
    {
       super.testTrottingInAForwardLeftCircle();
