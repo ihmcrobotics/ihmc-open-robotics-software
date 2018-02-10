@@ -251,7 +251,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       }
    }
 
-   public boolean handleLoadbearingCommand(AbstractLoadBearingCommand<?, ?> command)
+   public boolean handleLoadbearingCommand(AbstractLoadBearingCommand command)
    {
       setCoefficientOfFriction(command.getCoefficientOfFriction());
       setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());

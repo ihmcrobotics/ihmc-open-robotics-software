@@ -3,11 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadBearingMessage>
+public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 {
    /** The robot side of that hand that will be load bearing. */
    public RobotSide robotSide;
@@ -15,26 +16,31 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
    /** A boolean that determines whether hybrid load-bearing & jointspace control will be used. */
    public boolean useJointspaceCommand = false;
 
-   /** The jointspace arm trajectory message that will be used for the hybrid control if {@link #useJointspaceCommand} is true. */
+   /**
+    * The jointspace arm trajectory message that will be used for the hybrid control if
+    * {@link #useJointspaceCommand} is true.
+    */
    public JointspaceTrajectoryMessage jointspaceTrajectory;
 
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
+   public AbstractLoadBearingMessage loadBearingMessage;
+
    public HandLoadBearingMessage()
    {
-      super();
+      loadBearingMessage = new AbstractLoadBearingMessage();
    }
 
    public HandLoadBearingMessage(RobotSide robotSide)
    {
-      super();
+      loadBearingMessage = new AbstractLoadBearingMessage();
       this.robotSide = robotSide;
    }
 
    public HandLoadBearingMessage(Random random)
    {
-      super(random);
+      loadBearingMessage = new AbstractLoadBearingMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
    }
@@ -58,18 +64,25 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
    {
       return useJointspaceCommand;
    }
-   
+
+   public AbstractLoadBearingMessage getLoadBearingMessage()
+   {
+      return loadBearingMessage;
+   }
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
+    * 
     * @return the time to delay this command in seconds
     */
    public double getExecutionDelayTime()
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
+    * 
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    public void setExecutionDelayTime(double delayTime)
@@ -102,6 +115,6 @@ public class HandLoadBearingMessage extends AbstractLoadBearingMessage<HandLoadB
 
       boolean useArmTrajectoryEqual = useJointspaceCommand == other.useJointspaceCommand;
 
-      return robotSideEqual && armTrajectoryEqual && useArmTrajectoryEqual && super.epsilonEquals(other, epsilon);
+      return robotSideEqual && armTrajectoryEqual && useArmTrajectoryEqual && loadBearingMessage.epsilonEquals(other.loadBearingMessage, epsilon);
    }
 }

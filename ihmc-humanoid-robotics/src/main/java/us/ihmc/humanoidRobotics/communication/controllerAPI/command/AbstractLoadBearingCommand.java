@@ -5,7 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractLoadBearingMessage;
 
-public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingCommand<T, M>, M extends AbstractLoadBearingMessage<M>> implements Command<T, M>
+public final class AbstractLoadBearingCommand implements Command<AbstractLoadBearingCommand, AbstractLoadBearingMessage>
 {
    /** If set to true this will load the contact point. Otherwise the rigid body will stop bearing load. */
    private boolean load = false;
@@ -40,7 +40,7 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
    }
 
    @Override
-   public void set(T other)
+   public void set(AbstractLoadBearingCommand other)
    {
       load = other.getLoad();
       coefficientOfFriction = other.getCoefficientOfFriction();
@@ -49,7 +49,7 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
    }
 
    @Override
-   public void set(M message)
+   public void set(AbstractLoadBearingMessage message)
    {
       load = message.getLoad();
       coefficientOfFriction = message.getCoefficientOfFriction();
@@ -78,4 +78,9 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
       return true;
    }
 
+   @Override
+   public Class<AbstractLoadBearingMessage> getMessageClass()
+   {
+      return AbstractLoadBearingMessage.class;
+   }
 }

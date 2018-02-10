@@ -395,7 +395,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command, JointspaceTrajectoryCommand jointspaceCommand)
+   public void handleLoadBearingCommand(AbstractLoadBearingCommand command, JointspaceTrajectoryCommand jointspaceCommand)
    {
       if (loadBearingControlState == null)
       {
