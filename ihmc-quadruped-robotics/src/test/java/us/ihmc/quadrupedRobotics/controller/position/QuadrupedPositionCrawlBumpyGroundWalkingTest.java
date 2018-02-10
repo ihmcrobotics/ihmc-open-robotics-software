@@ -59,8 +59,7 @@ public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements Qu
    public void testWalkingOverBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
-      conductor.setKeepSCSUp(true);
-      
+
       variables.getYoPlanarVelocityInputX().set(0.08);
       variables.getYoPlanarVelocityInputZ().set(0.05);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
