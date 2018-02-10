@@ -23,7 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> implements Transformable, FrameBasedMessage
+public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> implements Transformable
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -83,7 +83,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
 
       setUniqueId(so3TrajectoryMessage.getUniqueId());
       setDestination(so3TrajectoryMessage.getDestination());
-      frameInformation.set(so3TrajectoryMessage);
+      frameInformation.set(so3TrajectoryMessage.getFrameInformation());
       queueingProperties.set(so3TrajectoryMessage.queueingProperties);
    }
 
@@ -127,7 +127,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
          throw new RuntimeException("Must the same number of waypoints.");
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
-      frameInformation.set(other);
+      frameInformation.set(other.getFrameInformation());
       queueingProperties.set(other.queueingProperties);
    }
 
@@ -283,7 +283,6 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
          weightMatrix.getWeightMatrix(weightMatrixToPack);
    }
 
-   @Override
    public FrameInformation getFrameInformation()
    {
       if (frameInformation == null)

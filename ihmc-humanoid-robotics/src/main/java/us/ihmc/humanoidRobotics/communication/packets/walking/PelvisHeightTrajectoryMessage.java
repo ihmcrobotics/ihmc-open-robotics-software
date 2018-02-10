@@ -12,15 +12,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This mesage commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/pelvis_height_trajectory")
-public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage>
-      implements TransformableDataObject<PelvisHeightTrajectoryMessage>, FrameBasedMessage
+public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage> implements TransformableDataObject<PelvisHeightTrajectoryMessage>
 {
    /**
     * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the
@@ -85,7 +82,8 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     */
    public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight, ReferenceFrame trajectoryReferenceFrame, ReferenceFrame dataReferenceFrame)
    {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), trajectoryReferenceFrame.getNameBasedHashCode());
+      euclideanTrajectory = new EuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
+                                                           trajectoryReferenceFrame.getNameBasedHashCode());
       euclideanTrajectory.frameInformation.setDataReferenceFrame(dataReferenceFrame);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
@@ -195,12 +193,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       super.setUniqueId(uniqueId);
       if (euclideanTrajectory != null)
          euclideanTrajectory.setUniqueId(uniqueId);
-   }
-
-   @Override
-   public FrameInformation getFrameInformation()
-   {
-      return euclideanTrajectory.frameInformation;
    }
 
    public EuclideanTrajectoryMessage getEuclideanTrajectory()

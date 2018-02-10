@@ -23,7 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage> implements Transformable, FrameBasedMessage
+public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage> implements Transformable
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
    public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -82,7 +82,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
       setUniqueId(trajectoryMessage.getUniqueId());
       setDestination(trajectoryMessage.getDestination());
       linearSelectionMatrix.set(trajectoryMessage.linearSelectionMatrix);
-      frameInformation.set(trajectoryMessage);
+      frameInformation.set(trajectoryMessage.getFrameInformation());
       linearWeightMatrix.set(trajectoryMessage.linearWeightMatrix);
       useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
       controlFramePose.set(trajectoryMessage.controlFramePose);
@@ -143,7 +143,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
       linearSelectionMatrix.set(other.linearSelectionMatrix);
-      frameInformation.set(other);
+      frameInformation.set(other.getFrameInformation());
       linearWeightMatrix.set(other.linearWeightMatrix);
       useCustomControlFrame = other.useCustomControlFrame;
       controlFramePose.set(other.controlFramePose);
@@ -330,7 +330,6 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
          linearWeightMatrix.getWeightMatrix(weightMatrixToPack);
    }
 
-   @Override
    public FrameInformation getFrameInformation()
    {
       if (frameInformation == null)
