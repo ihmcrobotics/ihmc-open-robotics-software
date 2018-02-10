@@ -38,7 +38,7 @@ public class GenericQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGait
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 350000)
    public void testWalkingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
