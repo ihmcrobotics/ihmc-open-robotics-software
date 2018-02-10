@@ -14,8 +14,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -27,7 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/foot_trajectory")
-public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> implements EpsilonComparable<FootTrajectoryMessage>, FrameBasedMessage
+public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> implements EpsilonComparable<FootTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public RobotSide robotSide;
@@ -120,12 +118,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
    public SE3TrajectoryMessage getSE3Trajectory()
    {
       return se3Trajectory;
-   }
-
-   @Override
-   public FrameInformation getFrameInformation()
-   {
-      return se3Trajectory.getFrameInformation();
    }
 
    @Override

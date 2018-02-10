@@ -5,17 +5,15 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_hand_trajectory")
-public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandHybridJointspaceTaskspaceTrajectoryMessage> implements FrameBasedMessage
+public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
@@ -88,12 +86,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    public void setJointspaceTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
-   }
-
-   @Override
-   public FrameInformation getFrameInformation()
-   {
-      return taskspaceTrajectoryMessage.getFrameInformation();
    }
 
    public RobotSide getRobotSide()
