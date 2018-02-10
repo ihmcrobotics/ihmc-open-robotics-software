@@ -19,6 +19,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -288,6 +289,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(ExecutionMode.class);
       netClassList.registerPacketClass(ExecutionTiming.class);
 
+      netClassList.registerPacketField(QueueableMessage.class);
       netClassList.registerPacketField(ArrayList.class);
       netClassList.registerPacketField(Point3D.class);
       netClassList.registerPacketField(Point3D[].class);
