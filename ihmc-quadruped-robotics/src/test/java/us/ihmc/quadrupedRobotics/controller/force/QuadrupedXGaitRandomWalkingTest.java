@@ -73,7 +73,6 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
 
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      conductor.setKeepSCSUp(true);
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
