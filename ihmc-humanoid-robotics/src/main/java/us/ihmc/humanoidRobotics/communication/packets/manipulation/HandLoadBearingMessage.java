@@ -30,12 +30,14 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
    public HandLoadBearingMessage()
    {
       loadBearingMessage = new LoadBearingMessage();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandLoadBearingMessage(RobotSide robotSide)
    {
       loadBearingMessage = new LoadBearingMessage();
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandLoadBearingMessage(Random random)
@@ -43,6 +45,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       loadBearingMessage = new LoadBearingMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public void setJointspaceTrajectory(JointspaceTrajectoryMessage armTrajectoryMessage)
@@ -68,6 +71,14 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
    public LoadBearingMessage getLoadBearingMessage()
    {
       return loadBearingMessage;
+   }
+
+   @Override
+   public void setUniqueId(long uniqueId)
+   {
+      super.setUniqueId(uniqueId);
+      if (loadBearingMessage != null)
+         loadBearingMessage.setUniqueId(uniqueId);
    }
 
    /**
