@@ -136,7 +136,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
@@ -337,7 +336,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WeightMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
       registerPacketField(Class.class);
-      registerPacketField(TrajectoryPoint3D.class);
 
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);
