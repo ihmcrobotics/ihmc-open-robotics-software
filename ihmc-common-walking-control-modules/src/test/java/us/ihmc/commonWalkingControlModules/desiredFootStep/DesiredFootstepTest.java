@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
@@ -24,6 +25,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -344,12 +346,32 @@ public class DesiredFootstepTest
          Footstep sentFootstep = sentFootsteps.get(i);
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
-         if (!sentFootstep.epsilonEquals(receivedFootstep, 1e-4))
-         {
-            System.out.println("Test Broken");
-         }
-         assertTrue(sentFootstep.epsilonEquals(receivedFootstep, 1e-4));
+         assertTrue(areFoostepsEqual(sentFootstep, receivedFootstep, 1e-4));
       }
+   }
+
+   private boolean areFoostepsEqual(Footstep sentFootstep, Footstep receivedFootstep, double epsilon)
+   {
+      boolean arePosesEqual = sentFootstep.getFootstepPose().epsilonEquals(receivedFootstep.getFootstepPose(), epsilon);
+      boolean sameRobotSide = sentFootstep.getRobotSide() == receivedFootstep.getRobotSide();
+      boolean isTrustHeightTheSame = sentFootstep.getTrustHeight() == receivedFootstep.getTrustHeight();
+      // FIXME the field is set in FootstepDataListMessage only, which makes impossible to properly convert messages to footsteps.
+      boolean isAdjustableTheSame = true; //sentFootstep.getIsAdjustable() == receivedFootstep.getIsAdjustable();
+
+      boolean sameWaypoints = sentFootstep.getCustomPositionWaypoints().size() == receivedFootstep.getCustomPositionWaypoints().size();
+      if (sameWaypoints)
+      {
+         for (int i = 0; i < sentFootstep.getCustomPositionWaypoints().size(); i++)
+         {
+            FramePoint3D waypoint = sentFootstep.getCustomPositionWaypoints().get(i);
+            FramePoint3D otherWaypoint = receivedFootstep.getCustomPositionWaypoints().get(i);
+            sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
+         }
+      }
+
+      boolean sameBlendDuration = MathTools.epsilonEquals(sentFootstep.getSwingTrajectoryBlendDuration(), receivedFootstep.getSwingTrajectoryBlendDuration(), epsilon);
+
+      return arePosesEqual && sameRobotSide && isTrustHeightTheSame && isAdjustableTheSame && sameWaypoints && sameBlendDuration;
    }
 
    private void compareStatusSentWithReceived(ArrayList<FootstepStatus> sentFootstepStatus, ArrayList<FootstepStatus> receivedFootsteps)
