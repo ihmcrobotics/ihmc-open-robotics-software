@@ -7,16 +7,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CenterOfMassTrajectoryHandler
 {
    private final YoDouble yoTime;
-   private final RecyclingArrayList<TrajectoryPoint3D> comTrajectoryPoints = new RecyclingArrayList<>(10, TrajectoryPoint3D.class);
+   private final RecyclingArrayList<SimpleEuclideanTrajectoryPoint> comTrajectoryPoints = new RecyclingArrayList<>(10, SimpleEuclideanTrajectoryPoint.class);
 
    private final YoPolynomial polynomial = new YoPolynomial("CubicPolynomial", 4, new YoVariableRegistry("Temp"));
 
@@ -43,10 +43,10 @@ public class CenterOfMassTrajectoryHandler
    {
       clearPoints();
 
-      switch (command.getExecutionMode())
+      switch (command.getEuclideanTrajectory().getExecutionMode())
       {
       case OVERRIDE:
-         command.addTimeOffset(yoTime.getDoubleValue());
+         command.getEuclideanTrajectory().addTimeOffset(yoTime.getDoubleValue());
          comTrajectoryPoints.clear();
          break;
       case QUEUE:
@@ -55,21 +55,21 @@ public class CenterOfMassTrajectoryHandler
             PrintTools.warn("Can not queue without points");
             return;
          }
-         if (command.getComTrajectoryPoint(0).getTime() <= 0.0)
+         if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() <= 0.0)
          {
             PrintTools.warn("Can not queue trajectory with initial time 0.0");
             return;
          }
          double lastTime = comTrajectoryPoints.getLast().getTime();
-         command.addTimeOffset(lastTime);
+         command.getEuclideanTrajectory().addTimeOffset(lastTime);
          break;
       default:
          throw new RuntimeException("Unhadled execution mode.");
       }
 
-      for (int idx = 0; idx < command.getNumberOfComTrajectoryPoints(); idx++)
+      for (int idx = 0; idx < command.getEuclideanTrajectory().getNumberOfTrajectoryPoints(); idx++)
       {
-         comTrajectoryPoints.add().set(command.getComTrajectoryPoint(idx));
+         comTrajectoryPoints.add().set(command.getEuclideanTrajectory().getTrajectoryPoint(idx));
       }
    }
 
@@ -206,18 +206,18 @@ public class CenterOfMassTrajectoryHandler
          endIndex++;
       }
 
-      TrajectoryPoint3D startPoint = comTrajectoryPoints.get(endIndex - 1);
-      TrajectoryPoint3D endPoint = comTrajectoryPoints.get(endIndex);
+      SimpleEuclideanTrajectoryPoint startPoint = comTrajectoryPoints.get(endIndex - 1);
+      SimpleEuclideanTrajectoryPoint endPoint = comTrajectoryPoints.get(endIndex);
 
       double t0 = startPoint.getTime();
       double t1 = endPoint.getTime();
 
       for (int i = 0; i < 3; i++)
       {
-         double p0 = startPoint.getPosition().getElement(i);
-         double v0 = startPoint.getVelocity().getElement(i);
-         double p1 = endPoint.getPosition().getElement(i);
-         double v1 = endPoint.getVelocity().getElement(i);
+         double p0 = startPoint.getEuclideanWaypoint().getPosition().getElement(i);
+         double v0 = startPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
+         double p1 = endPoint.getEuclideanWaypoint().getPosition().getElement(i);
+         double v1 = endPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
 
          polynomial.setCubic(t0, t1, p0, v0, p1, v1);
          polynomial.compute(time);
