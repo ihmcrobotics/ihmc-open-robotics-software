@@ -5,7 +5,6 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -20,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/head_trajectory")
-public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> implements EpsilonComparable<HeadTrajectoryMessage>
+public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
    public SO3TrajectoryMessage so3Trajectory;

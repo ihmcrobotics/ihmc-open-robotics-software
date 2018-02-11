@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
 
 import us.ihmc.commons.MathTools;
@@ -25,7 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/footstep_list")
-public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>
+public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>
 {
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
@@ -241,12 +240,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
                + "\tSwing Duration: " + this.defaultSwingDuration + "\n"
                + "\tSize: " + this.size() + " Footsteps");
       }
-   }
-
-   @Override
-   public Iterator<FootstepDataMessage> iterator()
-   {
-      return footstepDataList.iterator();
    }
 
    @Override

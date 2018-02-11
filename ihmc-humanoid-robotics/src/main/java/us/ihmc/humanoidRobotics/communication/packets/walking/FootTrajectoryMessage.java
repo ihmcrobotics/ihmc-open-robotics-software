@@ -6,7 +6,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,7 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/foot_trajectory")
-public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> implements EpsilonComparable<FootTrajectoryMessage>
+public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public RobotSide robotSide;
