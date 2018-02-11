@@ -311,7 +311,7 @@ public class DesiredFootstepTest
       return server;
    }
 
-   private <T extends Packet> PacketCommunicator createStreamingDataConsumer(Class<T> clazz, PacketConsumer<T> consumer, NetworkPorts port) throws IOException
+   private <T extends Packet<T>> PacketCommunicator createStreamingDataConsumer(Class<T> clazz, PacketConsumer<T> consumer, NetworkPorts port) throws IOException
    {
       PacketCommunicator client = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", port, getNetClassList());
       client.connect();
@@ -402,7 +402,7 @@ public class DesiredFootstepTest
       public void receivedPacket(FootstepDataListMessage packet)
       {
          boolean adjustable = packet.areFootstepsAdjustable;
-         for (FootstepDataMessage footstepData : packet)
+         for (FootstepDataMessage footstepData : packet.footstepDataList)
          {
             List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
             if (contactPoints != null && contactPoints.size() == 0)
