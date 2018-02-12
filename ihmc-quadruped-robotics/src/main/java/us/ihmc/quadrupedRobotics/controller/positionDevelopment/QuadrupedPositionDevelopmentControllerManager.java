@@ -28,7 +28,7 @@ public class QuadrupedPositionDevelopmentControllerManager implements QuadrupedC
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
-   private final FiniteStateMachine<QuadrupedPositionDevelopmentControllerState, ControllerEvent> stateMachine;
+   private final FiniteStateMachine<QuadrupedPositionDevelopmentControllerState, ControllerEvent, QuadrupedController> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedPositionDevelopmentControllerRequestedEvent> userEventTrigger;
 
    public QuadrupedPositionDevelopmentControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory,
@@ -75,7 +75,7 @@ public class QuadrupedPositionDevelopmentControllerManager implements QuadrupedC
       return motionStatusHolder;
    }
 
-   private FiniteStateMachine<QuadrupedPositionDevelopmentControllerState, ControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
+   private FiniteStateMachine<QuadrupedPositionDevelopmentControllerState, ControllerEvent, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
          QuadrupedSimulationInitialPositionParameters initialPositionParameters,
          QuadrupedLegInverseKinematicsCalculator legIKCalculator)
@@ -88,7 +88,7 @@ public class QuadrupedPositionDevelopmentControllerManager implements QuadrupedC
       QuadrupedController comVerificationController = new QuadrupedPositionBasedCenterOfMassVerificationController(runtimeEnvironment, modelFactory,
             physicalProperties, legIKCalculator, registry);
 
-      FiniteStateMachineBuilder<QuadrupedPositionDevelopmentControllerState, ControllerEvent> builder = new FiniteStateMachineBuilder<>(
+      FiniteStateMachineBuilder<QuadrupedPositionDevelopmentControllerState, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(
             QuadrupedPositionDevelopmentControllerState.class, ControllerEvent.class, "positionDevelopmentControllerState", registry);
 
       builder.addState(QuadrupedPositionDevelopmentControllerState.JOINT_INITIALIZATION, jointInitializationController);

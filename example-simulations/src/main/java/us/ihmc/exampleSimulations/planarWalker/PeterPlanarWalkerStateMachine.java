@@ -1,6 +1,7 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.exampleSimulations.selfStablePlanarRunner.Controller;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -56,8 +57,8 @@ public class PeterPlanarWalkerStateMachine
    private YoMinimumJerkTrajectory trajectorySwingHip;
    private YoMinimumJerkTrajectory trajectorySwingKnee;
 
-   private FiniteStateMachineBuilder<ControllerState, ControllerEvent> stateMachineBuilder;
-   private FiniteStateMachine<ControllerState, ControllerEvent> stateMachine;
+   private FiniteStateMachineBuilder<ControllerState, ControllerEvent, FiniteStateMachineState<ControllerEvent>> stateMachineBuilder;
+   private FiniteStateMachine<ControllerState, ControllerEvent, FiniteStateMachineState<ControllerEvent>> stateMachine;
    private final YoDouble timestamp;
 
    public PeterPlanarWalkerStateMachine(PeterPlanarWalkerRobot robot, double deltaT, RobotSide robotSide, YoDouble timestamp,
@@ -331,7 +332,7 @@ public class PeterPlanarWalkerStateMachine
       robot.setKneeTorque(robotSide, controlEffort);
    }
 
-   public FiniteStateMachine<ControllerState, ControllerEvent> getStateMachine()
+   public FiniteStateMachine<ControllerState, ControllerEvent, FiniteStateMachineState<ControllerEvent>> getStateMachine()
    {
       return stateMachine;
    }

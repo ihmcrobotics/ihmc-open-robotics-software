@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.forceDevelopment;
 
 import java.io.IOException;
 
+import com.jme3.scene.shape.Quad;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
@@ -29,7 +30,7 @@ public class QuadrupedForceDevelopmentControllerManager implements QuadrupedCont
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
-   private final FiniteStateMachine<QuadrupedForceDevelopmentControllerState, ControllerEvent> stateMachine;
+   private final FiniteStateMachine<QuadrupedForceDevelopmentControllerState, ControllerEvent, QuadrupedController> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedForceDevelopmentControllerRequestedEvent> userEventTrigger;
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
@@ -91,7 +92,7 @@ public class QuadrupedForceDevelopmentControllerManager implements QuadrupedCont
       return motionStatusHolder;
    }
 
-   private FiniteStateMachine<QuadrupedForceDevelopmentControllerState, ControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
+   private FiniteStateMachine<QuadrupedForceDevelopmentControllerState, ControllerEvent, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedPhysicalProperties physicalProperties)
    {
       // Initialize controllers.
@@ -102,7 +103,7 @@ public class QuadrupedForceDevelopmentControllerManager implements QuadrupedCont
             runtimeEnvironment.getFootSwitches(), runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry,
             runtimeEnvironment.getGraphicsListRegistry());
 
-      FiniteStateMachineBuilder<QuadrupedForceDevelopmentControllerState, ControllerEvent> builder = new FiniteStateMachineBuilder<>(
+      FiniteStateMachineBuilder<QuadrupedForceDevelopmentControllerState, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(
             QuadrupedForceDevelopmentControllerState.class, ControllerEvent.class, "forceDevelopmentControllerState", registry);
 
       builder.addState(QuadrupedForceDevelopmentControllerState.JOINT_INITIALIZATION, jointInitializationController);

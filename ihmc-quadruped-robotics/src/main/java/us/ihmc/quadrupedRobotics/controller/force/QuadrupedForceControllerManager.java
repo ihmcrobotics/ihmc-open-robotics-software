@@ -70,7 +70,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedXGaitStepStream xGaitStepStream;
    private final QuadrupedStepStreamMultiplexer<QuadrupedForceControllerState> stepStreamMultiplexer;
 
-   private final FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent> stateMachine;
+   private final FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent, QuadrupedController> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedForceControllerRequestedEvent> userEventTrigger;
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
@@ -270,7 +270,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       return motionStatusHolder;
    }
 
-   private FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
+   private FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedPostureInputProviderInterface inputProvider)
    {
       // Initialize controllers.
@@ -285,7 +285,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(runtimeEnvironment, controllerToolbox,
             soleWaypointInputProvider);
 
-      FiniteStateMachineBuilder<QuadrupedForceControllerState, ControllerEvent> builder = new FiniteStateMachineBuilder<>(QuadrupedForceControllerState.class,
+      FiniteStateMachineBuilder<QuadrupedForceControllerState, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(QuadrupedForceControllerState.class,
             ControllerEvent.class, "forceControllerState", registry);
 
       builder.addState(QuadrupedForceControllerState.JOINT_INITIALIZATION, jointInitializationController);

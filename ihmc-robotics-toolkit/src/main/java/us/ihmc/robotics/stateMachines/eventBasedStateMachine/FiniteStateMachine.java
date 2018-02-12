@@ -13,9 +13,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * @param <S> the state enum type
  * @param <E> the default event enum type, for convenience
  */
-public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
+public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends FiniteStateMachineState<E>>
 {
-   private final Map<S, FiniteStateMachineState<E>> states;
+   private final Map<S, C> states;
 
    /**
     * The list of possible transitions. This is equivalent to a state-transition function in FSM literature.
@@ -67,7 +67,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    /**
     * Use {@link FiniteStateMachineBuilder} instead.
     */
-   FiniteStateMachine(Map<S, FiniteStateMachineState<E>> states, Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions,
+   FiniteStateMachine(Map<S, C> states, Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions,
          Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks, S initialState, Class<S> enumType, Class<E> standardEventType,
          String yoVariableName, YoVariableRegistry registry)
    {
@@ -153,7 +153,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    public void process()
    {
-      FiniteStateMachineState<E> instance = states.get(getState());
+      C instance = states.get(getState());
 
       // Call the delayed onEntry() function at the beginning of the process(), rather than at the end of the previous process().
       if (needToCallOnEntry)
@@ -221,7 +221,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
       needToCallOnEntry = true;
    }
    
-   public FiniteStateMachineState<E> getState(S state)
+   public C getState(S state)
    {
       return states.get(state);
    }
