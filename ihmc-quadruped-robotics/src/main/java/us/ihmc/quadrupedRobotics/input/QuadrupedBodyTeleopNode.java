@@ -13,6 +13,7 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
@@ -49,7 +50,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    private final RobotDataReceiver robotDataReceiver;
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
 
    private final QuadrupedXGaitTeleopMode xGaitTeleopMode;
    private final QuadrupedStepTeleopMode stepTeleopMode;

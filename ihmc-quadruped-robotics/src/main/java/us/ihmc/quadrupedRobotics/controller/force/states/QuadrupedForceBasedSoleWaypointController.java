@@ -5,6 +5,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleWaypointController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -50,7 +51,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
 
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
 
    private FullQuadrupedRobotModel fullRobotModel;
@@ -60,7 +61,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    {
       soleWaypointInputProvider = inputProvider;
       quadrupedSoleWaypointController = controllerToolbox.getSoleWaypointController();
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();

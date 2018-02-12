@@ -69,7 +69,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final QuadrupedBodyOrientationController bodyOrientationController;
 
    // task space controller
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
@@ -104,7 +104,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
 
       // task space controllers
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();

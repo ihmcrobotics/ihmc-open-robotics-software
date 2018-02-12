@@ -29,7 +29,7 @@ public class QuadrupedFootStateMachine
    private final FrameVector3D soleForceCommand;
    private final YoQuadrupedTimedStep stepCommand;
    private final YoBoolean stepCommandIsValid;
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedFootStateMachineParameters parameters;
 
    // foot state machine
@@ -57,7 +57,7 @@ public class QuadrupedFootStateMachine
       this.soleForceCommand = new FrameVector3D();
       this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
-      this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       this.parameters = parameters;
       // state machine
       FiniteStateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(FootState.class, FootEvent.class,
@@ -110,7 +110,7 @@ public class QuadrupedFootStateMachine
          return ContactState.NO_CONTACT;
    }
 
-   public void compute(FrameVector3D soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
+   public void compute(FrameVector3D soleForceCommand, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
       // Update estimates.
       this.taskSpaceEstimates.set(taskSpaceEstimates);

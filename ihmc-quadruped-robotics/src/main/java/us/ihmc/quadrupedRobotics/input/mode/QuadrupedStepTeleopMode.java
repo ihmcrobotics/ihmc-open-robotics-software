@@ -15,7 +15,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator.Estimates;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
@@ -78,7 +78,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void update(Map<XBoxOneMapping, Double> channels, Estimates estimates)
+   public void update(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates)
    {
       double bodyRoll = 0.0;
       double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.get();
@@ -100,7 +100,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void onInputEvent(Map<XBoxOneMapping, Double> channels, Estimates estimates, Event event)
+   public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates, Event event)
    {
       if (event.getValue() < 0.5)
          return;

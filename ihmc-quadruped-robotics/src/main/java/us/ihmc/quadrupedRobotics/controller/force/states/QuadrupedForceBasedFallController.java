@@ -7,6 +7,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleWaypointController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -68,7 +69,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
 
    private final QuadrupedSoleWaypointList quadrupedSoleWaypointList;
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
    private final FramePoint3D solePositionSetpoint;
@@ -79,7 +80,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    {
       this.fallBehaviorType.set(FallBehaviorType.GO_HOME_XYZ);
       quadrupedSoleWaypointController = controllerToolbox.getSoleWaypointController();
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       referenceFrames = controllerToolbox.getReferenceFrames();
       quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();

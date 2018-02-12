@@ -9,6 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceLimits;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
@@ -59,7 +60,7 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<FrameVector3D> soleForceCommand;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrupedContactForceLimits contactForceLimits;
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
 
    // graphics
    private final FramePoint3D stepSequenceVisualizationPosition;
@@ -103,7 +104,7 @@ public class QuadrupedTimedStepController
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
       contactForceLimits = new QuadrupedContactForceLimits();
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
 
       // state machine
       stepStateMachine = new QuadrantDependentList<>();
@@ -227,7 +228,7 @@ public class QuadrupedTimedStepController
    }
 
    public void compute(QuadrantDependentList<ContactState> contactState, QuadrupedContactForceLimits contactForceLimits,
-         QuadrantDependentList<FrameVector3D> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEsimates)
+         QuadrantDependentList<FrameVector3D> soleForceCommand, QuadrupedTaskSpaceEstimates taskSpaceEsimates)
    {
       // copy inputs
       this.taskSpaceEstimates.set(taskSpaceEsimates);

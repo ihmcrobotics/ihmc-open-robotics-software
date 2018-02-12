@@ -29,7 +29,7 @@ public class QuadrupedSolePositionController
          this.soleForceFeedforward = new FrameVector3D();
       }
 
-      public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
+      public void initialize(QuadrupedTaskSpaceEstimates estimates)
       {
          this.solePosition.setIncludingFrame(estimates.getSolePosition(robotQuadrant));
          this.solePosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -96,7 +96,7 @@ public class QuadrupedSolePositionController
       solePositionController.resetIntegrator();
    }
 
-   public void compute(FrameVector3D soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void compute(FrameVector3D soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimates estimates)
    {
       FramePoint3D solePositionSetpoint = setpoints.getSolePosition();
       FrameVector3D soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
