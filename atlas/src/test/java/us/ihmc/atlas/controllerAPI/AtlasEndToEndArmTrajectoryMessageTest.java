@@ -77,7 +77,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 40000)
+   @Test(timeout = 80000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();
