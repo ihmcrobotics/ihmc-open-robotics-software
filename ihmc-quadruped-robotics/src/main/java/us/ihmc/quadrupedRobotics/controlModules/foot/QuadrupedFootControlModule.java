@@ -23,7 +23,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedFootControlModule
 {
-
    // control variables
    private final YoVariableRegistry registry;
    private final YoDouble timestamp;
@@ -40,7 +39,7 @@ public class QuadrupedFootControlModule
    {
       TIMEOUT
    }
-   private final FiniteStateMachine<QuadrupedFootStates, FootEvent, FiniteStateMachineState<FootEvent>> footStateMachine;
+   private final FiniteStateMachine<QuadrupedFootStates, FootEvent, QuadrupedFootState> footStateMachine;
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedFootControlModule(QuadrupedFootControlModuleParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
@@ -58,8 +57,9 @@ public class QuadrupedFootControlModule
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       this.parameters = parameters;
       // state machine
-      FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, FiniteStateMachineState<FootEvent>> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
+      FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, QuadrupedFootState> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
             prefix + "QuadrupedFootStates", registry);
+      //QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, timestamp, stepCommand, stepTransitionCallback);
       stateMachineBuilder.addState(QuadrupedFootStates.SUPPORT, new SupportState(robotQuadrant));
       stateMachineBuilder.addState(QuadrupedFootStates.SWING, new SwingState(robotQuadrant));
       stateMachineBuilder.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.SWING);
@@ -112,6 +112,7 @@ public class QuadrupedFootControlModule
    {
       // Update estimates.
       this.taskSpaceEstimates.set(taskSpaceEstimates);
+      //footStateMachine.getCurrentState().updateEstimates(taskSpaceEstimates);
 
       // Update foot state machine.
       footStateMachine.process();
@@ -120,13 +121,19 @@ public class QuadrupedFootControlModule
       soleForceCommand.set(this.soleForceCommand);
    }
 
-   private class SupportState implements FiniteStateMachineState<FootEvent>
+   private class SupportState extends QuadrupedFootState
    {
       private RobotQuadrant robotQuadrant;
 
       public SupportState(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
+      }
+
+      @Override
+      public void updateEstimates(QuadrupedTaskSpaceEstimates estimates)
+      {
+         taskSpaceEstimates.set(estimates);
       }
 
       @Override
@@ -163,7 +170,7 @@ public class QuadrupedFootControlModule
       }
    }
 
-   private class SwingState implements FiniteStateMachineState<FootEvent>
+   private class SwingState extends QuadrupedFootState
    {
       private RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;
@@ -177,6 +184,12 @@ public class QuadrupedFootControlModule
          this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
          this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                parameters.getTouchdownTriggerWindowParameter());
+      }
+
+      @Override
+      public void updateEstimates(QuadrupedTaskSpaceEstimates estimates)
+      {
+         taskSpaceEstimates.set(estimates);
       }
 
       @Override
