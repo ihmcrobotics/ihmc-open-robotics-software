@@ -7,10 +7,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceLimits;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 
@@ -54,7 +51,7 @@ public class QuadrupedTimedStepController
    // control variables
    private final YoDouble timestamp;
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
-   private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
+   private final QuadrantDependentList<QuadrupedSolePositionControllerSetpoints> solePositionControllerSetpoints;
    private final PreallocatedList<QuadrupedTimedStep> stepSequence;
    private final QuadrantDependentList<FramePoint3D> solePositionEstimate;
    private final QuadrantDependentList<FrameVector3D> soleForceCommand;
@@ -91,7 +88,7 @@ public class QuadrupedTimedStepController
       this.solePositionControllerSetpoints = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         this.solePositionControllerSetpoints.set(robotQuadrant, new QuadrupedSolePositionController.Setpoints(robotQuadrant));
+         this.solePositionControllerSetpoints.set(robotQuadrant, new QuadrupedSolePositionControllerSetpoints(robotQuadrant));
       }
       stepSequence = new PreallocatedList<>(100, QuadrupedTimedStep.class);
       contactState = new QuadrantDependentList<>();

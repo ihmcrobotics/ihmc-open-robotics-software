@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
@@ -29,7 +30,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoQuadrupedTimedStep stepCommand;
 
    private final QuadrupedSolePositionController solePositionController;
-   private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
+   private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
 
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, QuadrupedSolePositionController solePositionController,
                               YoBoolean stepCommandIsValid, YoQuadrupedTimedStep stepCommand, YoVariableRegistry registry)
@@ -41,7 +42,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.stepCommand = stepCommand;
 
       this.parameters = toolbox.getFootControlModuleParameters();
-      this.solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints(robotQuadrant);
+      this.solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
       this.goalPosition = new FramePoint3D();
       this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);

@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -8,9 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
@@ -50,7 +47,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
    // Feedback controller
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
-   private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
+   private final QuadrantDependentList<QuadrupedSolePositionControllerSetpoints> solePositionControllerSetpoints;
 
    // Task space controller
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
@@ -80,7 +77,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       solePositionControllerSetpoints = new QuadrantDependentList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         solePositionControllerSetpoints.set(quadrant, new QuadrupedSolePositionController.Setpoints(quadrant));
+         solePositionControllerSetpoints.set(quadrant, new QuadrupedSolePositionControllerSetpoints(quadrant));
       }
 
       // Task space controller
