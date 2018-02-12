@@ -90,7 +90,7 @@ public class QuadrupedFootStateMachine
 
    public void triggerStep(QuadrupedTimedStep stepCommand)
    {
-      if (footStateMachine.getState() == FootState.SUPPORT)
+      if (footStateMachine.getCurrentStateEnum() == FootState.SUPPORT)
       {
          this.stepCommand.set(stepCommand);
          this.stepCommandIsValid.set(true);
@@ -104,7 +104,7 @@ public class QuadrupedFootStateMachine
 
    public ContactState getContactState()
    {
-      if (footStateMachine.getState() == FootState.SUPPORT)
+      if (footStateMachine.getCurrentStateEnum() == FootState.SUPPORT)
          return ContactState.IN_CONTACT;
       else
          return ContactState.NO_CONTACT;

@@ -54,7 +54,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
    /**
     * The present state.
     */
-   private YoEnum<S> state;
+   private YoEnum<S> stateEnum;
 
    /**
     * Whether or not the current state's {@link FiniteStateMachineState#onEntry()} needs to be called at the beginning of the next {@link #process()} call. This
@@ -77,8 +77,8 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
       this.stateChangedListeners = new ArrayList<>();
       this.initialState = initialState;
       this.standardEventType = standardEventType;
-      this.state = new YoEnum<>(yoVariableName, registry, enumType);
-      this.state.set(initialState);
+      this.stateEnum = new YoEnum<>(yoVariableName, registry, enumType);
+      this.stateEnum.set(initialState);
    }
 
    /**
@@ -120,7 +120,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
             FiniteStateMachineCallback<S, ?> callback = callbacksTypeM.get(i);
 
             // Check if this callback should be called.
-            if (callback.getState() == getState() && event == callback.getEvent())
+            if (callback.getState() == getCurrentStateEnum() && event == callback.getEvent())
             {
                callback.call();
             }
@@ -135,7 +135,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
             FiniteStateMachineTransition<S, ?> transition = transitionsTypeM.get(i);
 
             // Check if this transition matches the source state and event.
-            if (transition.getFrom() == getState() && event == transition.getEvent())
+            if (transition.getFrom() == getCurrentStateEnum() && event == transition.getEvent())
             {
                for (int j = 0; j < stateChangedListeners.size(); j++)
                {
@@ -153,7 +153,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
     */
    public void process()
    {
-      C instance = states.get(getState());
+      C instance = states.get(getCurrentStateEnum());
 
       // Call the delayed onEntry() function at the beginning of the process(), rather than at the end of the previous process().
       if (needToCallOnEntry)
@@ -174,9 +174,9 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
    /**
     * {@see #state}
     */
-   public S getState()
+   public S getCurrentStateEnum()
    {
-      return state.getEnumValue();
+      return stateEnum.getEnumValue();
    }
 
    /**
@@ -184,11 +184,11 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
     * <p/>
     * NOTE: Use this method with caution. It does not enforce reachability of the new state.
     *
-    * @param state the new state
+    * @param stateEnum the new state
     */
-   public void setState(S state)
+   public void setState(S stateEnum)
    {
-      this.state.set(state);
+      this.stateEnum.set(stateEnum);
    }
 
    /**
@@ -197,7 +197,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
     */
    public void reset()
    {
-      transition(getState(), initialState);
+      transition(getCurrentStateEnum(), initialState);
    }
 
    private FiniteStateMachineState<?> getInstanceForEnum(S state)
@@ -221,8 +221,13 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
       needToCallOnEntry = true;
    }
    
-   public C getState(S state)
+   public C getState(S stateEnum)
    {
-      return states.get(state);
+      return states.get(stateEnum);
+   }
+
+   public C getCurrentState()
+   {
+      return states.get(getCurrentStateEnum());
    }
 }

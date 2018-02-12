@@ -189,7 +189,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       }
       if (preplannedStepProvider.isStepPlanAvailable())
       {
-         if (stateMachine.getState() == QuadrupedForceControllerState.STAND)
+         if (stateMachine.getCurrentStateEnum() == QuadrupedForceControllerState.STAND)
          {
             // trigger step event if preplanned steps are available in stand state
             lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
@@ -201,7 +201,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       stateMachine.process();
 
       // update contact state used for state estimation
-      switch (stateMachine.getState())
+      switch (stateMachine.getCurrentStateEnum())
       {
       case DO_NOTHING:
       case STAND_PREP:
@@ -238,7 +238,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       outputProcessor.update();
 
       // Send state information
-      quadrupedForceControllerStatePacket.set(stateMachine.getState());
+      quadrupedForceControllerStatePacket.set(stateMachine.getCurrentStateEnum());
       
       if (runtimeEnvironment.getGlobalDataProducer() != null)
       {
