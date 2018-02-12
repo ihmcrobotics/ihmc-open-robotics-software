@@ -26,9 +26,9 @@ public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>, C e
       this.registry = registry;
    }
 
-   public FiniteStateMachineBuilder addState(S state, C instance)
+   public FiniteStateMachineBuilder addState(S stateEnum, C state)
    {
-      states.put(state, instance);
+      states.put(stateEnum, state);
 
       return this;
    }
