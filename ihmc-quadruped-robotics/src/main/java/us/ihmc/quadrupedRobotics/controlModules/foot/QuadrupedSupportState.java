@@ -15,16 +15,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep stepCommand;
 
-   private final QuadrupedStepTransitionCallback stepTransitionCallback;
-
-   public QuadrupedSupportState(RobotQuadrant robotQuadrant, YoBoolean stepCommandIsValid, YoDouble timestamp, YoQuadrupedTimedStep stepCommand,
-                                QuadrupedStepTransitionCallback stepTransitionCallback)
+   public QuadrupedSupportState(RobotQuadrant robotQuadrant, YoBoolean stepCommandIsValid, YoDouble timestamp, YoQuadrupedTimedStep stepCommand)
    {
       this.robotQuadrant = robotQuadrant;
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = timestamp;
       this.stepCommand = stepCommand;
-      this.stepTransitionCallback = stepTransitionCallback;
 
       this.estimates = new QuadrupedTaskSpaceEstimates();
    }
@@ -38,7 +34,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    @Override
    public void onEntry()
    {
-      //soleForceCommand.setToZero();
    }
 
    @Override

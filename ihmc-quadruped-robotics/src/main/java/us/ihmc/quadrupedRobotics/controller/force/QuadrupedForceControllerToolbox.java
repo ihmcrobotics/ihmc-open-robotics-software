@@ -57,7 +57,7 @@ public class QuadrupedForceControllerToolbox
                new QuadrupedSolePositionController(robotQuadrant, referenceFrames.getFootReferenceFrames().get(robotQuadrant),
                      runtimeEnvironment.getControlDT(), registry));
          footStateMachine.set(robotQuadrant,
-               new QuadrupedFootControlModule(footControlModuleParameters, robotQuadrant, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
+               new QuadrupedFootControlModule(robotQuadrant, this, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
       }
       soleWaypointController = new QuadrupedSoleWaypointController(referenceFrames.getBodyFrame(), solePositionController, runtimeEnvironment.getRobotTimestamp(), registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
