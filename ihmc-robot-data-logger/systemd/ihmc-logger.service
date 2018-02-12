@@ -4,9 +4,9 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/home/shadylady/IHMCLogger/bin/IHMCLogger
-User=shadylady
-Group=shadylady
+ExecStart=/home/[Desired user]/IHMCLogger/bin/IHMCLogger
+User=[Desired user]
+Group=[Desired group]
 
 [Install]
 WantedBy=multi-user.target
