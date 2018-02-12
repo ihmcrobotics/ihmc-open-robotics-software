@@ -28,10 +28,8 @@ public class QuadrupedFootControlModule
    private final YoDouble timestamp;
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
-   private final FrameVector3D soleForceCommand;
    private final YoQuadrupedTimedStep stepCommand;
    private final YoBoolean stepCommandIsValid;
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedFootControlModuleParameters parameters;
 
    // foot state machine
@@ -51,15 +49,12 @@ public class QuadrupedFootControlModule
       this.timestamp = timestamp;
       this.solePositionController = solePositionController;
       this.solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints(robotQuadrant);
-      this.soleForceCommand = new FrameVector3D();
       this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
-      this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       this.parameters = parameters;
       // state machine
       FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, QuadrupedFootState> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
             prefix + "QuadrupedFootStates", registry);
-      //QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, timestamp, stepCommand, stepTransitionCallback);
       stateMachineBuilder.addState(QuadrupedFootStates.SUPPORT, new SupportState(robotQuadrant));
       stateMachineBuilder.addState(QuadrupedFootStates.SWING, new SwingState(robotQuadrant));
       stateMachineBuilder.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.SWING);
@@ -111,14 +106,13 @@ public class QuadrupedFootControlModule
    public void compute(FrameVector3D soleForceCommand, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
       // Update estimates.
-      this.taskSpaceEstimates.set(taskSpaceEstimates);
-      //footStateMachine.getCurrentState().updateEstimates(taskSpaceEstimates);
+      footStateMachine.getCurrentState().updateEstimates(taskSpaceEstimates);
 
       // Update foot state machine.
       footStateMachine.process();
 
       // Pack sole force command result.
-      soleForceCommand.set(this.soleForceCommand);
+      soleForceCommand.set(footStateMachine.getCurrentState().getSoleForceCommand());
    }
 
    private class SupportState extends QuadrupedFootState
@@ -133,7 +127,7 @@ public class QuadrupedFootControlModule
       @Override
       public void updateEstimates(QuadrupedTaskSpaceEstimates estimates)
       {
-         taskSpaceEstimates.set(estimates);
+         this.estimates.set(estimates);
       }
 
       @Override
@@ -189,7 +183,7 @@ public class QuadrupedFootControlModule
       @Override
       public void updateEstimates(QuadrupedTaskSpaceEstimates estimates)
       {
-         taskSpaceEstimates.set(estimates);
+         this.estimates.set(estimates);
       }
 
       @Override
@@ -201,7 +195,7 @@ public class QuadrupedFootControlModule
          stepCommand.getGoalPosition(goalPosition);
          goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
          goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
-         FramePoint3D solePosition = taskSpaceEstimates.getSolePosition(robotQuadrant);
+         FramePoint3D solePosition = estimates.getSolePosition(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
@@ -211,7 +205,7 @@ public class QuadrupedFootControlModule
          solePositionController.getGains().setDerivativeGains(parameters.getSolePositionDerivativeGainsParameter());
          solePositionController.getGains()
                .setIntegralGains(parameters.getSolePositionIntegralGainsParameter(), parameters.getSolePositionMaxIntegralErrorParameter());
-         solePositionControllerSetpoints.initialize(taskSpaceEstimates);
+         solePositionControllerSetpoints.initialize(estimates);
 
          touchdownTrigger.set(false);
       }
@@ -236,7 +230,7 @@ public class QuadrupedFootControlModule
          swingTrajectory.getPosition(solePositionControllerSetpoints.getSolePosition());
 
          // Detect early touch-down.
-         FrameVector3D soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
+         FrameVector3D soleForceEstimate = estimates.getSoleVirtualForce(robotQuadrant);
          soleForceEstimate.changeFrame(ReferenceFrame.getWorldFrame());
          double pressureEstimate = -soleForceEstimate.getZ();
          double relativeTimeInSwing = currentTime - stepCommand.getTimeInterval().getStartTime();
@@ -255,7 +249,7 @@ public class QuadrupedFootControlModule
          }
          else
          {
-            solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, taskSpaceEstimates);
+            solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, estimates);
             soleForceCommand.changeFrame(ReferenceFrame.getWorldFrame());
          }
 
