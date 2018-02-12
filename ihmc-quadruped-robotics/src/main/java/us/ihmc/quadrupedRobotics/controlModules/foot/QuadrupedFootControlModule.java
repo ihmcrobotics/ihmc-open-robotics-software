@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controlModules;
+package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -36,16 +36,11 @@ public class QuadrupedFootControlModule
    private final QuadrupedFootControlModuleParameters parameters;
 
    // foot state machine
-   public enum FootState
-   {
-      SUPPORT, SWING
-   }
-
    public enum FootEvent
    {
       TIMEOUT
    }
-   private final FiniteStateMachine<FootState, FootEvent, FiniteStateMachineState<FootEvent>> footStateMachine;
+   private final FiniteStateMachine<QuadrupedFootStates, FootEvent, FiniteStateMachineState<FootEvent>> footStateMachine;
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedFootControlModule(QuadrupedFootControlModuleParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
@@ -63,13 +58,13 @@ public class QuadrupedFootControlModule
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       this.parameters = parameters;
       // state machine
-      FiniteStateMachineBuilder<FootState, FootEvent, FiniteStateMachineState<FootEvent>> stateMachineBuilder = new FiniteStateMachineBuilder<>(FootState.class, FootEvent.class,
-            prefix + "FootState", registry);
-      stateMachineBuilder.addState(FootState.SUPPORT, new SupportState(robotQuadrant));
-      stateMachineBuilder.addState(FootState.SWING, new SwingState(robotQuadrant));
-      stateMachineBuilder.addTransition(FootEvent.TIMEOUT, FootState.SUPPORT, FootState.SWING);
-      stateMachineBuilder.addTransition(FootEvent.TIMEOUT, FootState.SWING, FootState.SUPPORT);
-      footStateMachine = stateMachineBuilder.build(FootState.SUPPORT);
+      FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, FiniteStateMachineState<FootEvent>> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
+            prefix + "QuadrupedFootStates", registry);
+      stateMachineBuilder.addState(QuadrupedFootStates.SUPPORT, new SupportState(robotQuadrant));
+      stateMachineBuilder.addState(QuadrupedFootStates.SWING, new SwingState(robotQuadrant));
+      stateMachineBuilder.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.SWING);
+      stateMachineBuilder.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
+      footStateMachine = stateMachineBuilder.build(QuadrupedFootStates.SUPPORT);
       stepTransitionCallback = null;
 
       parentRegistry.addChild(registry);
@@ -93,7 +88,7 @@ public class QuadrupedFootControlModule
 
    public void triggerStep(QuadrupedTimedStep stepCommand)
    {
-      if (footStateMachine.getCurrentStateEnum() == FootState.SUPPORT)
+      if (footStateMachine.getCurrentStateEnum() == QuadrupedFootStates.SUPPORT)
       {
          this.stepCommand.set(stepCommand);
          this.stepCommandIsValid.set(true);
@@ -107,7 +102,7 @@ public class QuadrupedFootControlModule
 
    public ContactState getContactState()
    {
-      if (footStateMachine.getCurrentStateEnum() == FootState.SUPPORT)
+      if (footStateMachine.getCurrentStateEnum() == QuadrupedFootStates.SUPPORT)
          return ContactState.IN_CONTACT;
       else
          return ContactState.NO_CONTACT;

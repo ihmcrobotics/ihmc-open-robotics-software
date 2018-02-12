@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import us.ihmc.quadrupedRobotics.controlModules.QuadrupedFootControlModule;
-import us.ihmc.quadrupedRobotics.controlModules.QuadrupedFootControlModuleParameters;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModule;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
