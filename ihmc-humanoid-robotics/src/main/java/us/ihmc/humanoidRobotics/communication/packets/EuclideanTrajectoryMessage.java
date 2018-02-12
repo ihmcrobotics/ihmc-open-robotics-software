@@ -69,28 +69,31 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
       queueingProperties = new QueueableMessage(random);
    }
 
-   public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage trajectoryMessage)
+   public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage other)
    {
-      int numberOfPoints = trajectoryMessage.getNumberOfTrajectoryPoints();
+      int numberOfPoints = other.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
       for (int i = 0; i < numberOfPoints; i++)
       {
-         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(trajectoryMessage.taskspaceTrajectoryPoints[i]);
+         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setUniqueId(trajectoryMessage.getUniqueId());
-      setDestination(trajectoryMessage.getDestination());
-      selectionMatrix.set(trajectoryMessage.selectionMatrix);
-      frameInformation.set(trajectoryMessage.getFrameInformation());
-      weightMatrix.set(trajectoryMessage.weightMatrix);
-      useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
-      controlFramePose.set(trajectoryMessage.controlFramePose);
-      if (trajectoryMessage.queueingProperties != null)
-         queueingProperties.set(trajectoryMessage.queueingProperties);
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
+      frameInformation.set(other.getFrameInformation());
+      if (other.selectionMatrix != null)
+         selectionMatrix.set(other.selectionMatrix);
+      if (other.weightMatrix != null)
+         weightMatrix.set(other.weightMatrix);
+      useCustomControlFrame = other.useCustomControlFrame;
+      controlFramePose.set(other.controlFramePose);
+      if (other.queueingProperties != null)
+         queueingProperties.set(other.queueingProperties);
    }
 
    /**
     * set a single point
+    * 
     * @param trajectoryTime the duration of the trajectory
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
@@ -106,6 +109,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    /**
     * set a single point
+    * 
     * @param trajectoryTime the duration of the trajectory
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrame the frame the trajectory will be executed in
@@ -117,6 +121,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    /**
     * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
+    * 
     * @param numberOfTrajectoryPoints number of trajectory points in this message
     */
    public EuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
@@ -127,6 +132,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    /**
     * set this message to the have the same contents of the other message
+    * 
     * @param other the other message
     */
    public void set(EuclideanTrajectoryMessage other)
@@ -152,6 +158,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    /**
     * Get the trajectory points from this message
+    * 
     * @param trajectoryPointListToPack
     */
    public void getTrajectoryPoints(FrameEuclideanTrajectoryPointList trajectoryPointListToPack)
@@ -164,7 +171,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
       {
          EuclideanTrajectoryPointMessage euclideanTrajectoryPointMessage = trajectoryPointMessages[i];
          trajectoryPointListToPack.addTrajectoryPoint(euclideanTrajectoryPointMessage.time, euclideanTrajectoryPointMessage.position,
-               euclideanTrajectoryPointMessage.linearVelocity);
+                                                      euclideanTrajectoryPointMessage.linearVelocity);
       }
    }
 
@@ -180,7 +187,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity,
-         ReferenceFrame expressedInReferenceFrame)
+                                        ReferenceFrame expressedInReferenceFrame)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -199,7 +206,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity,
-         long expressedInReferenceFrameId)
+                                        long expressedInReferenceFrameId)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -242,8 +249,8 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     * frame if not defined otherwise.
     * </p>
     *
-    * @param selectionMatrix3D the selection matrix to use when executing this trajectory message. Not
-    *           modified.
+    * @param selectionMatrix3D the selection matrix to use when executing this trajectory message.
+    *           Not modified.
     */
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix3D)
    {
@@ -256,17 +263,17 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    /**
     * Sets the weight matrix to use for executing this message.
     * <p>
-    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the end-effector.
-    * When it is not provided, or when the weights are set to Double.NaN, the controller will use the default QP Weights
-    * set for each axis.
+    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the
+    * end-effector. When it is not provided, or when the weights are set to Double.NaN, the
+    * controller will use the default QP Weights set for each axis.
     * </p>
     * <p>
     * The selection frame coming along with the given weight matrix is used to determine to what
     * reference frame the weights are referring to.
     * </p>
     *
-    * @param weightMatrix3D the selection matrix to use when executing this trajectory message. parameter is not
-    *           modified.
+    * @param weightMatrix3D the selection matrix to use when executing this trajectory message.
+    *           parameter is not modified.
     */
    public void setWeightMatrix(WeightMatrix3D weightMatrix3D)
    {
@@ -283,6 +290,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    /**
     * Returns the internal mutable list of points, modifying this list changes the internal message
+    * 
     * @return
     */
    public final EuclideanTrajectoryPointMessage[] getTrajectoryPoints()
@@ -376,8 +384,8 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException(
-               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
+               + getNumberOfTrajectoryPoints());
    }
 
    @Override
