@@ -14,50 +14,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedSolePositionController
 {
-   public static class Setpoints
-   {
-      private RobotQuadrant robotQuadrant;
-      private final FramePoint3D solePosition;
-      private final FrameVector3D soleLinearVelocity;
-      private final FrameVector3D soleForceFeedforward;
-
-      public Setpoints(RobotQuadrant robotQuadrant)
-      {
-         this.robotQuadrant = robotQuadrant;
-         this.solePosition = new FramePoint3D();
-         this.soleLinearVelocity = new FrameVector3D();
-         this.soleForceFeedforward = new FrameVector3D();
-      }
-
-      public void initialize(QuadrupedTaskSpaceEstimates estimates)
-      {
-         this.solePosition.setIncludingFrame(estimates.getSolePosition(robotQuadrant));
-         this.solePosition.changeFrame(ReferenceFrame.getWorldFrame());
-         this.soleLinearVelocity.setToZero();
-         this.soleForceFeedforward.setToZero();
-      }
-
-      public RobotQuadrant getRobotQuadrant()
-      {
-         return robotQuadrant;
-      }
-
-      public FramePoint3D getSolePosition()
-      {
-         return solePosition;
-      }
-
-      public FrameVector3D getSoleLinearVelocity()
-      {
-         return soleLinearVelocity;
-      }
-
-      public FrameVector3D getSoleForceFeedforward()
-      {
-         return soleForceFeedforward;
-      }
-   }
-
    private final RobotQuadrant robotQuadrant;
    private final ReferenceFrame soleFrame;
    private final EuclideanPositionController solePositionController;
@@ -96,7 +52,7 @@ public class QuadrupedSolePositionController
       solePositionController.resetIntegrator();
    }
 
-   public void compute(FrameVector3D soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimates estimates)
+   public void compute(FrameVector3D soleForceCommand, QuadrupedSolePositionControllerSetpoints setpoints, QuadrupedTaskSpaceEstimates estimates)
    {
       FramePoint3D solePositionSetpoint = setpoints.getSolePosition();
       FrameVector3D soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
