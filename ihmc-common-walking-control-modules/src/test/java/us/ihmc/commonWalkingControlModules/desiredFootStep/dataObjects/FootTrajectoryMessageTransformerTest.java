@@ -26,12 +26,12 @@ public class FootTrajectoryMessageTransformerTest
    {
       // RobotSide robotSide;
       assertTrue(starting.getRobotSide().equals(ending.getRobotSide()));
-      assertTrue(starting.getSE3Trajectory().getNumberOfTrajectoryPoints() == ending.getSE3Trajectory().getNumberOfTrajectoryPoints());
+      assertTrue(starting.getSe3Trajectory().getNumberOfTrajectoryPoints() == ending.getSe3Trajectory().getNumberOfTrajectoryPoints());
 
-      for (int i = 0; i < starting.getSE3Trajectory().getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < starting.getSe3Trajectory().getNumberOfTrajectoryPoints(); i++)
       {
-         SE3TrajectoryPointMessage startingWaypoint = starting.getSE3Trajectory().getTrajectoryPoint(i);
-         SE3TrajectoryPointMessage endingWaypoint = ending.getSE3Trajectory().getTrajectoryPoint(i);
+         SE3TrajectoryPointMessage startingWaypoint = starting.getSe3Trajectory().getTrajectoryPoint(i);
+         SE3TrajectoryPointMessage endingWaypoint = ending.getSe3Trajectory().getTrajectoryPoint(i);
 
          // Point3D position;
          double distance = getDistanceBetweenPoints(startingWaypoint.position, transform3D, endingWaypoint.position);

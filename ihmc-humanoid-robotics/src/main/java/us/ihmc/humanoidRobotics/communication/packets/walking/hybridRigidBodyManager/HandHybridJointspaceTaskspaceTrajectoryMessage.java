@@ -17,7 +17,9 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 {
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
+   @RosExportedField(documentation = "The taskspace trajectory information.")
    public SE3TrajectoryMessage taskspaceTrajectoryMessage;
+   @RosExportedField(documentation = "The jointspace trajectory information.")
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
 
    /**
@@ -36,7 +38,11 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
     */
    public HandHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(RobotSide.generateRandomRobotSide(random), new SE3TrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
+      robotSide = RobotSide.generateRandomRobotSide(random);
+      this.taskspaceTrajectoryMessage = new SE3TrajectoryMessage(random);
+      this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(random);
+      jointspaceTrajectoryMessage.queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -100,6 +106,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
          return false;
       if (!jointspaceTrajectoryMessage.epsilonEquals(other.jointspaceTrajectoryMessage, epsilon))
          return false;
-      return false;
+      return true;
    }
 }

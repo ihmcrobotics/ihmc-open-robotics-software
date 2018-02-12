@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -23,21 +23,20 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/euclidean_trajectory")
 public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage> implements Transformable
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
    public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
 
-   /** the selection matrix for each axis **/
-   @RosIgnoredField
-   public SelectionMatrix3DMessage linearSelectionMatrix = new SelectionMatrix3DMessage();
+   @RosExportedField(documentation = "The selection matrix for each axis.")
+   public SelectionMatrix3DMessage selectionMatrix = new SelectionMatrix3DMessage();
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
 
-   /** the weight matrix for each axis **/
-   @RosIgnoredField
-   public WeightMatrix3DMessage linearWeightMatrix = new WeightMatrix3DMessage();
+   @RosExportedField(documentation = "The weight matrix for each axis.")
+   public WeightMatrix3DMessage weightMatrix = new WeightMatrix3DMessage();
 
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
    public boolean useCustomControlFrame = false;
@@ -81,9 +80,9 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
       setUniqueId(trajectoryMessage.getUniqueId());
       setDestination(trajectoryMessage.getDestination());
-      linearSelectionMatrix.set(trajectoryMessage.linearSelectionMatrix);
+      selectionMatrix.set(trajectoryMessage.selectionMatrix);
       frameInformation.set(trajectoryMessage.getFrameInformation());
-      linearWeightMatrix.set(trajectoryMessage.linearWeightMatrix);
+      weightMatrix.set(trajectoryMessage.weightMatrix);
       useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
       controlFramePose.set(trajectoryMessage.controlFramePose);
       if (trajectoryMessage.queueingProperties != null)
@@ -143,9 +142,9 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
-      linearSelectionMatrix.set(other.linearSelectionMatrix);
+      selectionMatrix.set(other.selectionMatrix);
       frameInformation.set(other.getFrameInformation());
-      linearWeightMatrix.set(other.linearWeightMatrix);
+      weightMatrix.set(other.weightMatrix);
       useCustomControlFrame = other.useCustomControlFrame;
       controlFramePose.set(other.controlFramePose);
       queueingProperties.set(other.queueingProperties);
@@ -248,10 +247,10 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     */
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix3D)
    {
-      if (linearSelectionMatrix == null)
-         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix3D);
+      if (selectionMatrix == null)
+         selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix3D);
       else
-         linearSelectionMatrix.set(selectionMatrix3D);
+         selectionMatrix.set(selectionMatrix3D);
    }
 
    /**
@@ -266,15 +265,15 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     * reference frame the weights are referring to.
     * </p>
     *
-    * @param weightMatrix the selection matrix to use when executing this trajectory message. parameter is not
+    * @param weightMatrix3D the selection matrix to use when executing this trajectory message. parameter is not
     *           modified.
     */
-   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   public void setWeightMatrix(WeightMatrix3D weightMatrix3D)
    {
-      if (linearWeightMatrix == null)
-         linearWeightMatrix = new WeightMatrix3DMessage(weightMatrix);
+      if (weightMatrix == null)
+         weightMatrix = new WeightMatrix3DMessage(weightMatrix3D);
       else
-         linearWeightMatrix.set(weightMatrix);
+         weightMatrix.set(weightMatrix3D);
    }
 
    public final int getNumberOfTrajectoryPoints()
@@ -309,26 +308,26 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    public boolean hasSelectionMatrix()
    {
-      return linearSelectionMatrix != null;
+      return selectionMatrix != null;
    }
 
    public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
    {
       selectionMatrixToPack.resetSelection();
-      if (linearSelectionMatrix != null)
-         linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack);
+      if (selectionMatrix != null)
+         selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
    }
 
    public boolean hasWeightMatrix()
    {
-      return linearWeightMatrix != null;
+      return weightMatrix != null;
    }
 
    public void getWeightMatrix(WeightMatrix3D weightMatrixToPack)
    {
       weightMatrixToPack.clear();
-      if (linearWeightMatrix != null)
-         linearWeightMatrix.getWeightMatrix(weightMatrixToPack);
+      if (weightMatrix != null)
+         weightMatrix.getWeightMatrix(weightMatrixToPack);
    }
 
    public FrameInformation getFrameInformation()
@@ -350,8 +349,8 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     */
    public long getLinearSelectionFrameId()
    {
-      if (linearSelectionMatrix != null)
-         return linearSelectionMatrix.getSelectionFrameId();
+      if (selectionMatrix != null)
+         return selectionMatrix.getSelectionFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
@@ -368,8 +367,8 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     */
    public long getLinearWeightMatrixFrameId()
    {
-      if (linearWeightMatrix != null)
-         return linearWeightMatrix.getWeightFrameId();
+      if (weightMatrix != null)
+         return weightMatrix.getWeightFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
@@ -394,22 +393,22 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
          return false;
       }
 
-      if (linearSelectionMatrix == null && other.linearSelectionMatrix != null)
+      if (selectionMatrix == null ^ other.selectionMatrix == null)
       {
          return false;
       }
 
-      if (linearSelectionMatrix != null && !linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
+      if (selectionMatrix != null && !selectionMatrix.epsilonEquals(other.selectionMatrix, epsilon))
       {
          return false;
       }
 
-      if (linearWeightMatrix == null && other.linearWeightMatrix != null)
+      if (weightMatrix == null ^ other.weightMatrix == null)
       {
          return false;
       }
 
-      if (linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(other.linearWeightMatrix, epsilon))
+      if (weightMatrix != null && !weightMatrix.epsilonEquals(other.weightMatrix, epsilon))
       {
          return false;
       }

@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -23,6 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/so3_trajectory")
 public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> implements Transformable
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
@@ -31,10 +32,10 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
 
-   @RosIgnoredField
+   @RosExportedField(documentation = "The selection matrix for each axis.")
    public SelectionMatrix3DMessage selectionMatrix;
 
-   @RosIgnoredField
+   @RosExportedField(documentation = "The weight matrix for each axis.")
    public WeightMatrix3DMessage weightMatrix;
 
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
@@ -73,6 +74,9 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
 
       controlFramePose = new QuaternionBasedTransform(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
       queueingProperties = new QueueableMessage(random);
+
+      selectionMatrix = new SelectionMatrix3DMessage(random);
+      weightMatrix = new WeightMatrix3DMessage(random);
    }
 
    public SO3TrajectoryMessage(SO3TrajectoryMessage so3TrajectoryMessage)
@@ -367,6 +371,18 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
             return false;
       }
 
+      if (selectionMatrix == null ^ other.selectionMatrix == null)
+         return false;
+
+      if (selectionMatrix == null && !selectionMatrix.epsilonEquals(other.selectionMatrix, epsilon))
+         return false;
+
+      if (weightMatrix == null ^ other.weightMatrix == null)
+         return false;
+
+      if (weightMatrix == null && !weightMatrix.epsilonEquals(other.weightMatrix, epsilon))
+         return false;
+
       return true;
    }
 
@@ -400,6 +416,11 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
          controlFrameTransformToPack.setToNaN();
       else
          controlFrameTransformToPack.set(controlFramePose);
+   }
+
+   public void setQueueingProperties(QueueableMessage queueingProperties)
+   {
+      this.queueingProperties = queueingProperties;
    }
 
    public QueueableMessage getQueueingProperties()

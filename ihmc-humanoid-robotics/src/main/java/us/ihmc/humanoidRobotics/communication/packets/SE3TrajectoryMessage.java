@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -23,20 +23,22 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/se3_trajectory")
 public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implements Transformable
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
-   @RosIgnoredField
+   @RosExportedField(documentation = "The selection matrix for each axis of the angular part.")
    public SelectionMatrix3DMessage angularSelectionMatrix;
-   @RosIgnoredField
+   @RosExportedField(documentation = "The selection matrix for each axis of the linear part.")
    public SelectionMatrix3DMessage linearSelectionMatrix;
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
 
-   @RosIgnoredField
+   @RosExportedField(documentation = "The weight matrix for each axis of the angular part.")
    public WeightMatrix3DMessage angularWeightMatrix;
+   @RosExportedField(documentation = "The weight matrix for each axis of the linear part.")
    public WeightMatrix3DMessage linearWeightMatrix;
 
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
@@ -68,43 +70,58 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
       useCustomControlFrame = random.nextBoolean();
       controlFramePose = new QuaternionBasedTransform(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
       queueingProperties = new QueueableMessage(random);
+
+      angularSelectionMatrix = new SelectionMatrix3DMessage(random);
+      linearSelectionMatrix = new SelectionMatrix3DMessage(random);
+
+      angularWeightMatrix = new WeightMatrix3DMessage(random);
+      linearWeightMatrix = new WeightMatrix3DMessage(random);
    }
 
-   public SE3TrajectoryMessage(SE3TrajectoryMessage se3TrajectoryMessage)
+   public SE3TrajectoryMessage(SE3TrajectoryMessage other)
    {
-      int numberOfPoints = se3TrajectoryMessage.getNumberOfTrajectoryPoints();
+      int numberOfPoints = other.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfPoints];
       for (int i = 0; i < numberOfPoints; i++)
       {
-         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(se3TrajectoryMessage.taskspaceTrajectoryPoints[i]);
+         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setUniqueId(se3TrajectoryMessage.getUniqueId());
-      setDestination(se3TrajectoryMessage.getDestination());
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
 
-      frameInformation.set(se3TrajectoryMessage.getFrameInformation());
+      frameInformation.set(other.getFrameInformation());
 
-      if (se3TrajectoryMessage.angularWeightMatrix != null)
+      if (other.angularSelectionMatrix != null)
       {
-         angularWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.angularWeightMatrix);
+         angularSelectionMatrix = new SelectionMatrix3DMessage(other.angularSelectionMatrix);
       }
 
-      if (se3TrajectoryMessage.linearWeightMatrix != null)
+      if (other.linearSelectionMatrix != null)
       {
-         linearWeightMatrix = new WeightMatrix3DMessage(se3TrajectoryMessage.linearWeightMatrix);
+         linearSelectionMatrix = new SelectionMatrix3DMessage(other.linearSelectionMatrix);
       }
 
-      useCustomControlFrame = se3TrajectoryMessage.useCustomControlFrame;
-      if (se3TrajectoryMessage.controlFramePose != null)
+      if (other.angularWeightMatrix != null)
       {
-         controlFramePose = new QuaternionBasedTransform(se3TrajectoryMessage.controlFramePose);
+         angularWeightMatrix = new WeightMatrix3DMessage(other.angularWeightMatrix);
       }
 
-      queueingProperties.set(se3TrajectoryMessage.queueingProperties);
+      if (other.linearWeightMatrix != null)
+      {
+         linearWeightMatrix = new WeightMatrix3DMessage(other.linearWeightMatrix);
+      }
+
+      useCustomControlFrame = other.useCustomControlFrame;
+      if (other.controlFramePose != null)
+      {
+         controlFramePose = new QuaternionBasedTransform(other.controlFramePose);
+      }
+
+      queueingProperties.set(other.queueingProperties);
    }
 
-   public SE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
-                                       long trajectoryReferenceFrameId)
+   public SE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -115,7 +132,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    }
 
    public SE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
-                                       ReferenceFrame trajectoryReferenceFrame)
+                               ReferenceFrame trajectoryReferenceFrame)
    {
       this(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame.getNameBasedHashCode());
    }
@@ -429,42 +446,42 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
          return false;
       }
 
-      if (linearSelectionMatrix == null && other.linearSelectionMatrix != null)
+      if (linearSelectionMatrix == null ^ other.linearSelectionMatrix == null)
       {
          return false;
       }
 
-      if (linearSelectionMatrix != null && !linearSelectionMatrix.equals(other.linearSelectionMatrix))
+      if (linearSelectionMatrix != null && !linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
       {
          return false;
       }
 
-      if (angularSelectionMatrix == null && other.angularSelectionMatrix != null)
+      if (angularSelectionMatrix == null ^ other.angularSelectionMatrix == null)
       {
          return false;
       }
 
-      if (angularSelectionMatrix != null && !angularSelectionMatrix.equals(other.angularSelectionMatrix))
+      if (angularSelectionMatrix != null && !angularSelectionMatrix.epsilonEquals(other.angularSelectionMatrix, epsilon))
       {
          return false;
       }
 
-      if (linearWeightMatrix == null && other.linearWeightMatrix != null)
+      if (linearWeightMatrix == null ^ other.linearWeightMatrix == null)
       {
          return false;
       }
 
-      if (linearWeightMatrix != null && !linearWeightMatrix.equals(other.linearWeightMatrix))
+      if (linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(other.linearWeightMatrix, epsilon))
       {
          return false;
       }
 
-      if (angularWeightMatrix == null && other.angularWeightMatrix != null)
+      if (angularWeightMatrix == null ^ other.angularWeightMatrix == null)
       {
          return false;
       }
 
-      if (angularWeightMatrix != null && !angularWeightMatrix.equals(other.angularWeightMatrix))
+      if (angularWeightMatrix != null && !angularWeightMatrix.epsilonEquals(other.angularWeightMatrix, epsilon))
       {
          return false;
       }
@@ -511,6 +528,11 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
          controlFrameTransformToPack.setToNaN();
       else
          controlFrameTransformToPack.set(controlFramePose);
+   }
+
+   public void setQueueingProperties(QueueableMessage queueingProperties)
+   {
+      this.queueingProperties = queueingProperties;
    }
 
    public QueueableMessage getQueueingProperties()

@@ -46,6 +46,11 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
       desiredAccelerations = new DesiredAccelerationsMessage(desiredJointAccelerations);
    }
 
+   public void setDesiredAccelerations(DesiredAccelerationsMessage desiredAccelerations)
+   {
+      this.desiredAccelerations = desiredAccelerations;
+   }
+
    public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;

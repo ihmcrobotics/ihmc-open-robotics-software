@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMa
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
@@ -13,7 +14,9 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
                   topic = "/control/hybrid_head_trajectory")
 public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
+   @RosExportedField(documentation = "The taskspace trajectory information.")
    public SO3TrajectoryMessage taskspaceTrajectoryMessage;
+   @RosExportedField(documentation = "The jointspace trajectory information.")
    public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
 
    /**
@@ -23,6 +26,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
    public HeadHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -31,7 +35,10 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(new SO3TrajectoryMessage(random), new JointspaceTrajectoryMessage(random));
+      this.taskspaceTrajectoryMessage = new SO3TrajectoryMessage(random);
+      this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(random);
+      jointspaceTrajectoryMessage.queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -52,6 +59,9 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
+      if (!taskspaceTrajectoryMessage.getQueueingProperties().epsilonEquals(jointspaceTrajectoryMessage.getQueueingProperties(), 0.0))
+         throw new IllegalArgumentException("The trajectory messages should have the same queueing properties.");
+
       this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
       this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);

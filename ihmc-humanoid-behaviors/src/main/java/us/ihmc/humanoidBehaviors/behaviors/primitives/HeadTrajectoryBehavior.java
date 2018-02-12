@@ -60,7 +60,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
          
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingHeadTrajectoryMessage.getSO3Trajectory().getTrajectoryTime());
+         trajectoryTime.set(outgoingHeadTrajectoryMessage.getSo3Trajectory().getTrajectoryTime());
       }
    }
 

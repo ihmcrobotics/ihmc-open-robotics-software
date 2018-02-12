@@ -8,8 +8,10 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.tools.ArrayTools;
 
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/desired_joint_accelerations")
 public final class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMessage>
 {
    @RosExportedField(documentation = "Specifies the desired joint accelerations.")

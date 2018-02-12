@@ -102,7 +102,12 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
       this.enableUserPelvisControl = enableUserPelvisControl;
    }
 
-   public SE3TrajectoryMessage getSE3Trajectory()
+   public void setSe3Trajectory(SE3TrajectoryMessage se3Trajectory)
+   {
+      this.se3Trajectory = se3Trajectory;
+   }
+
+   public SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3Trajectory;
    }

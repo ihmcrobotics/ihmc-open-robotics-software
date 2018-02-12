@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
@@ -14,7 +15,8 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
  *
  * @param <T> Type of the final implementation of this message.
  */
-public final class QueueableMessage implements EpsilonComparable<QueueableMessage>
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/queueable_properties")
+public final class QueueableMessage extends Packet<QueueableMessage> implements EpsilonComparable<QueueableMessage>
 {
    @RosExportedField(documentation = "When OVERRIDE is chosen:"
          + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
