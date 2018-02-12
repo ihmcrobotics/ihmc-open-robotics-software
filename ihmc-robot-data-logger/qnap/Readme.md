@@ -22,3 +22,22 @@ If you are using a card different than the Decklink DUO 2, it will probably not 
 Run "ssh admin@10.0.5.1 ls -lh /dev/blackmagic" to list all blackmagic devices (adjust admin@10.0.5.1 accordingly). Edit /etc/ihmc/init/insertBlackmagicDrivers.sh to make the correct devices using mknod and adjust the BlackmagicPreferencesStartup calls to run only for the available devices.
 
 
+## Setting up file shares for logger
+
+In the QNAP administrator console, enable NFS v4 file server. Create a shared folder, and add the following line to /etc/fstab
+
+```
+10.0.5.1:/[Your folder name]     /media/remote/robotLogs nfs auto        0       0
+```
+
+Create the folders and mount
+```
+sudo mkdir -p /media/remote/robotLogs
+sudo mount -a
+mkdir /media/remote/robotLogs/incoming
+ln -s /media/remote/robotLogs/incoming ~/robotLogs
+
+``` 
+
+## Autostarting the logger
+Follow the instructions in the systemd directory in ihmc-robot-data-logger. By default, the desired user is `admin` and group `administrator`.
