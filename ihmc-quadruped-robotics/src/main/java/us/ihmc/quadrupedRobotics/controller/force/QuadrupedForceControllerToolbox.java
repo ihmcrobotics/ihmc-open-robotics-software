@@ -27,14 +27,18 @@ public class QuadrupedForceControllerToolbox
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
 
+   private final QuadrupedRuntimeEnvironment runtimeEnvironment;
+   private final QuadrupedFootControlModuleParameters footControlModuleParameters;
+
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
       double gravity = 9.81;
       double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
+
+      this.runtimeEnvironment = runtimeEnvironment;
       
-      QuadrupedFootControlModuleParameters parameters = new QuadrupedFootControlModuleParameters();
-      
-      runtimeEnvironment.getParentRegistry().addChild(parameters.getYoVariableRegistry());
+      footControlModuleParameters = new QuadrupedFootControlModuleParameters();
+      runtimeEnvironment.getParentRegistry().addChild(footControlModuleParameters.getYoVariableRegistry());
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
@@ -53,11 +57,21 @@ public class QuadrupedForceControllerToolbox
                new QuadrupedSolePositionController(robotQuadrant, referenceFrames.getFootReferenceFrames().get(robotQuadrant),
                      runtimeEnvironment.getControlDT(), registry));
          footStateMachine.set(robotQuadrant,
-               new QuadrupedFootControlModule(parameters, robotQuadrant, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
+               new QuadrupedFootControlModule(footControlModuleParameters, robotQuadrant, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
       }
       soleWaypointController = new QuadrupedSoleWaypointController(referenceFrames.getBodyFrame(), solePositionController, runtimeEnvironment.getRobotTimestamp(), registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
+   }
+
+   public QuadrupedRuntimeEnvironment getRuntimeEnvironment()
+   {
+      return runtimeEnvironment;
+   }
+
+   public QuadrupedFootControlModuleParameters getFootControlModuleParameters()
+   {
+      return footControlModuleParameters;
    }
 
    public QuadrupedReferenceFrames getReferenceFrames()
