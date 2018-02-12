@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class FiniteStateMachineYoVariableTrigger<E extends Enum<E>>
 {
-   public FiniteStateMachineYoVariableTrigger(final FiniteStateMachine<?, ?> stateMachine, String name, YoVariableRegistry registry,
+   public FiniteStateMachineYoVariableTrigger(final FiniteStateMachine<?, ?, ?> stateMachine, String name, YoVariableRegistry registry,
          final Class<E> enumType)
    {
       final YoEnum<E> yoVariable = new YoEnum<>(name, registry, enumType, true);

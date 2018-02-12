@@ -34,7 +34,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
-   private final FiniteStateMachine<QuadrupedPositionControllerState, ControllerEvent> stateMachine;
+   private final FiniteStateMachine<QuadrupedPositionControllerState, ControllerEvent, QuadrupedController> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedPositionControllerRequestedEvent> userEventTrigger;
 
    public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedSimulationInitialPositionParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
@@ -50,7 +50,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters, postureProvider, planarVelocityProvider, legIKCalculator);
 
-      FiniteStateMachineBuilder<QuadrupedPositionControllerState, ControllerEvent> builder = new FiniteStateMachineBuilder<>(
+      FiniteStateMachineBuilder<QuadrupedPositionControllerState, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(
             QuadrupedPositionControllerState.class, ControllerEvent.class, "positionControllerState", registry);
 
       builder.addState(QuadrupedPositionControllerState.JOINT_INITIALIZATION, jointInitializationController);

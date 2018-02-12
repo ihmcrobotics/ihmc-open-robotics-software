@@ -79,7 +79,7 @@ public class QuadrupedTimedStepController
       TIMEOUT
    }
 
-   private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
+   private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent, FiniteStateMachineState<StepEvent>>> stepStateMachine;
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedTimedStepController(QuadrantDependentList<QuadrupedSolePositionController> solePositionController, YoDouble timestamp,
@@ -111,7 +111,7 @@ public class QuadrupedTimedStepController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseName();
-         FiniteStateMachineBuilder<StepState, StepEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(StepState.class, StepEvent.class,
+         FiniteStateMachineBuilder<StepState, StepEvent, FiniteStateMachineState<StepEvent>> stateMachineBuilder = new FiniteStateMachineBuilder<>(StepState.class, StepEvent.class,
                prefix + "StepState", registry);
          stateMachineBuilder.addState(StepState.SUPPORT, new SupportState(robotQuadrant));
          stateMachineBuilder.addState(StepState.SWING, new SwingState(robotQuadrant));

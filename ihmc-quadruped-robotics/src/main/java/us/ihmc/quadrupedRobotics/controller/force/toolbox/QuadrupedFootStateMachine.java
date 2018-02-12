@@ -42,7 +42,7 @@ public class QuadrupedFootStateMachine
    {
       TIMEOUT
    }
-   private final FiniteStateMachine<FootState, FootEvent> footStateMachine;
+   private final FiniteStateMachine<FootState, FootEvent, FiniteStateMachineState<FootEvent>> footStateMachine;
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedFootStateMachine(QuadrupedFootStateMachineParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
@@ -60,7 +60,7 @@ public class QuadrupedFootStateMachine
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       this.parameters = parameters;
       // state machine
-      FiniteStateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(FootState.class, FootEvent.class,
+      FiniteStateMachineBuilder<FootState, FootEvent, FiniteStateMachineState<FootEvent>> stateMachineBuilder = new FiniteStateMachineBuilder<>(FootState.class, FootEvent.class,
             prefix + "FootState", registry);
       stateMachineBuilder.addState(FootState.SUPPORT, new SupportState(robotQuadrant));
       stateMachineBuilder.addState(FootState.SWING, new SwingState(robotQuadrant));

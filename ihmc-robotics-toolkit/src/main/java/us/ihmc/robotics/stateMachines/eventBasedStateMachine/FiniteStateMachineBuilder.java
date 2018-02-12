@@ -7,14 +7,14 @@ import java.util.Map;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>>
+public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>, C extends FiniteStateMachineState<E>>
 {
    private final Class<S> enumType;
    private final Class<E> standardEventType;
    private final String yoVariableName;
    private final YoVariableRegistry registry;
 
-   private final Map<S, FiniteStateMachineState<E>> states = new HashMap<>();
+   private final Map<S, C> states = new HashMap<>();
    private final Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions = new HashMap<>();
    private final Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks = new HashMap<>();
 
@@ -26,7 +26,7 @@ public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>>
       this.registry = registry;
    }
 
-   public FiniteStateMachineBuilder addState(S state, FiniteStateMachineState<E> instance)
+   public FiniteStateMachineBuilder addState(S state, C instance)
    {
       states.put(state, instance);
 
@@ -69,7 +69,7 @@ public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>>
       return this;
    }
 
-   public FiniteStateMachine<S, E> build(S initialState)
+   public FiniteStateMachine<S, E, C> build(S initialState)
    {
       return new FiniteStateMachine<>(states, transitions, callbacks, initialState, enumType, standardEventType, yoVariableName, registry);
    }
