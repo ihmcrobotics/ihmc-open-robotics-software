@@ -30,7 +30,7 @@ public class ControllerCommandValidationTools
 
    public static boolean checkArmDesiredAccelerationsCommand(OneDoFJoint[] joints, ArmDesiredAccelerationsCommand command)
    {
-      return command.getNumberOfJoints() == joints.length;
+      return command.getDesiredAccelerations().getNumberOfJoints() == joints.length;
    }
 
    public static boolean checkOneDoFJointTrajectoryCommandList(OneDoFJoint[] joints, RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists)

@@ -149,7 +149,7 @@ public class WalkingCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
       {
          NeckDesiredAccelerationsCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(NeckDesiredAccelerationsCommand.class);
-         headManager.handleDesiredAccelerationsCommand(command);
+         headManager.handleDesiredAccelerationsCommand(command.getDesiredAccelerations());
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
@@ -173,7 +173,7 @@ public class WalkingCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineDesiredAccelerationCommand.class))
       {
          SpineDesiredAccelerationCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineDesiredAccelerationCommand.class);
-         chestManager.handleDesiredAccelerationsCommand(command);
+         chestManager.handleDesiredAccelerationsCommand(command.getDesiredAccelerations());
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
@@ -298,7 +298,7 @@ public class WalkingCommandConsumer
             ArmDesiredAccelerationsCommand command = armDesiredAccelerationCommands.get(i);
             RobotSide robotSide = command.getRobotSide();
             if (handManagers.get(robotSide) != null)
-               handManagers.get(robotSide).handleDesiredAccelerationsCommand(command);
+               handManagers.get(robotSide).handleDesiredAccelerationsCommand(command.getDesiredAccelerations());
          }
 
          for (int i = 0; i < handComplianceCommands.size(); i++)

@@ -51,7 +51,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       abortUserControlMode = new YoBoolean(prefix + "Abort", registry);
    }
 
-   public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
+   public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand command)
    {
       if (!hasWeights.getBooleanValue())
       {
