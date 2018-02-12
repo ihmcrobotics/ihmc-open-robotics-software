@@ -107,6 +107,11 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
          jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
+   public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)
+   {
+      this.jointspaceTrajectory = jointspaceTrajectory;
+   }
+
    public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspaceTrajectory;

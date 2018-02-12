@@ -42,16 +42,16 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    {
       euclideanTrajectory = new EuclideanTrajectoryMessage();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      euclideanTrajectory.linearSelectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.linearSelectionMatrix.setAxisSelection(false, false, true);
+      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
+      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
    }
 
    public PelvisHeightTrajectoryMessage(Random random)
    {
       euclideanTrajectory = new EuclideanTrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      euclideanTrajectory.linearSelectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.linearSelectionMatrix.setAxisSelection(false, false, true);
+      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
+      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
    }
 
    /**
@@ -86,8 +86,8 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       euclideanTrajectory.frameInformation.setDataReferenceFrame(dataReferenceFrame);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
-      euclideanTrajectory.linearSelectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.linearSelectionMatrix.setAxisSelection(false, false, true);
+      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
+      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
    }
 
    /**
@@ -103,8 +103,8 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       euclideanTrajectory.frameInformation.setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
-      euclideanTrajectory.linearSelectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.linearSelectionMatrix.setAxisSelection(false, false, true);
+      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
+      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
    }
 
    /**
@@ -121,8 +121,8 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       euclideanTrajectory = new EuclideanTrajectoryMessage(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
-      euclideanTrajectory.linearSelectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.linearSelectionMatrix.setAxisSelection(false, false, true);
+      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
+      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
    }
 
    /**

@@ -125,6 +125,11 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
          jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
+   public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)
+   {
+      this.jointspaceTrajectory = jointspaceTrajectory;
+   }
+
    public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspaceTrajectory;

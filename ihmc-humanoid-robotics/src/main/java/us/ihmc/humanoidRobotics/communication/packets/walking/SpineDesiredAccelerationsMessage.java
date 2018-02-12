@@ -46,6 +46,11 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
       desiredAccelerations = new DesiredAccelerationsMessage(desiredJointAccelerations);
    }
 
+   public void setDesiredAccelerations(DesiredAccelerationsMessage desiredAccelerations)
+   {
+      this.desiredAccelerations = desiredAccelerations;
+   }
+
    public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;

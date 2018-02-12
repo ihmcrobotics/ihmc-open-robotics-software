@@ -106,7 +106,12 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
          so3Trajectory.setUniqueId(uniqueId);
    }
 
-   public SO3TrajectoryMessage getSO3Trajectory()
+   public void setSo3Trajectory(SO3TrajectoryMessage so3Trajectory)
+   {
+      this.so3Trajectory = so3Trajectory;
+   }
+
+   public SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3Trajectory;
    }

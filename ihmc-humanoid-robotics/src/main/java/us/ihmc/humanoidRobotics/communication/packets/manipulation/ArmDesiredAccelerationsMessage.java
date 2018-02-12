@@ -10,18 +10,15 @@ import us.ihmc.humanoidRobotics.communication.packets.DesiredAccelerationsMessag
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@RosMessagePacket(documentation =
-      "This message gives the user the option to bypass IHMC feedback controllers for the arm joints by sending desired arm joint accelerations."
-            + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
-            + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
-      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
-      topic = "/control/arm_desired_joint_accelerations")
+@RosMessagePacket(documentation = "This message gives the user the option to bypass IHMC feedback controllers for the arm joints by sending desired arm joint accelerations."
+      + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/arm_desired_joint_accelerations")
 public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAccelerationsMessage>
 {
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "The desired joint acceleration information.")
-   public DesiredAccelerationsMessage desiredAccelerations; 
+   public DesiredAccelerationsMessage desiredAccelerations;
 
    public ArmDesiredAccelerationsMessage()
    {
@@ -45,7 +42,12 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
    {
       return robotSide;
    }
-   
+
+   public void setDesiredAccelerations(DesiredAccelerationsMessage desiredAccelerations)
+   {
+      this.desiredAccelerations = desiredAccelerations;
+   }
+
    public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;

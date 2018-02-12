@@ -145,6 +145,11 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
       return robotSide;
    }
 
+   public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)
+   {
+      this.jointspaceTrajectory = jointspaceTrajectory;
+   }
+
    public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspaceTrajectory;

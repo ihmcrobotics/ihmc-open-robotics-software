@@ -5,8 +5,10 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/jointspace_trajectory")
 public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of points in the trajectory.")
@@ -203,6 +205,21 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
          }
       }
       return trajectoryTime;
+   }
+
+   public void setJointTrajectoryMessages(OneDoFJointTrajectoryMessage[] jointTrajectoryMessages)
+   {
+      this.jointTrajectoryMessages = jointTrajectoryMessages;
+   }
+
+   public OneDoFJointTrajectoryMessage[] getJointTrajectoryMessages()
+   {
+      return jointTrajectoryMessages;
+   }
+
+   public void setQueueingProperties(QueueableMessage queueingProperties)
+   {
+      this.queueingProperties = queueingProperties;
    }
 
    public QueueableMessage getQueueingProperties()
