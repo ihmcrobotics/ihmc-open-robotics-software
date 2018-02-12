@@ -318,7 +318,7 @@ public class RigidBodyControlManager
 //      }
    }
 
-   public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
+   public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand command)
    {
       if (userControlState.handleDesiredAccelerationsCommand(command))
       {

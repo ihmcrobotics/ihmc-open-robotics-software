@@ -22,10 +22,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -742,6 +744,8 @@ public abstract class PacketValidityChecker
    public static String validateArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage)
    {
       String errorMessage = validatePacket(armDesiredAccelerationsMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateDesiredAccelerationsMessage(armDesiredAccelerationsMessage.getDesiredAccelerations(), false);
       if (errorMessage != null)
          return ArmDesiredAccelerationsMessage.class.getSimpleName() + " " + errorMessage;
 
@@ -753,19 +757,27 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (armDesiredAccelerationsMessage.desiredJointAccelerations == null)
-      {
-         String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";
-         return errorMessage;
-      }
+      return null;
+   }
 
-      if (armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
-      {
-         String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";
-         return errorMessage;
-      }
+   public static String validateNeckDesiredAccelerationsMessage(NeckDesiredAccelerationsMessage neckDesiredAccelerationsMessage)
+   {
+      String errorMessage = validatePacket(neckDesiredAccelerationsMessage, true);
+      if (errorMessage == null)
+         errorMessage = validateDesiredAccelerationsMessage(neckDesiredAccelerationsMessage.getDesiredAccelerations(), false);
+      if (errorMessage != null)
+         return NeckDesiredAccelerationsMessage.class.getSimpleName() + " " + errorMessage;
+
+      return null;
+   }
+
+   public static String validateSpineDesiredAccelerationsMessage(SpineDesiredAccelerationsMessage message)
+   {
+      String errorMessage = validatePacket(message, true);
+      if (errorMessage == null)
+         errorMessage = validateDesiredAccelerationsMessage(message.getDesiredAccelerations(), false);
+      if (errorMessage != null)
+         return message.getClass().getSimpleName() + " " + errorMessage;
 
       return null;
    }
@@ -939,7 +951,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateDesiredAccelerationsMessage(AbstractDesiredAccelerationsMessage<?> packet, boolean checkId)
+   public static String validateDesiredAccelerationsMessage(AbstractDesiredAccelerationsMessage packet, boolean checkId)
    {
       if (packet == null)
          return "is null.";

@@ -6,16 +6,16 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.tools.ArrayTools;
 
-public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesiredAccelerationsMessage<T>> extends Packet<T>
+public final class AbstractDesiredAccelerationsMessage extends Packet<AbstractDesiredAccelerationsMessage>
 {
    @RosExportedField(documentation = "Specifies the desired joint accelerations.")
    public double[] desiredJointAccelerations;
-   
-   /** the time to delay this command on the controller side before being executed **/
-   public double executionDelayTime;
+   @RosExportedField(documentation = "Properties for queueing trajectories.")
+   public QueueableMessage queueingProperties = new QueueableMessage();
 
    public AbstractDesiredAccelerationsMessage()
    {
@@ -56,27 +56,14 @@ public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesi
    {
       return desiredJointAccelerations[jointIndex];
    }
-   
-   /**
-    * returns the amount of time this command is delayed on the controller side before executing
-    * @return the time to delay this command in seconds
-    */
-   public double getExecutionDelayTime()
+
+   public QueueableMessage getQueueingProperties()
    {
-      return executionDelayTime;
-   }
-   
-   /**
-    * sets the amount of time this command is delayed on the controller side before executing
-    * @param delayTime the time in seconds to delay after receiving the command before executing
-    */
-   public void setExecutionDelayTime(double delayTime)
-   {
-      this.executionDelayTime = delayTime;
+      return queueingProperties;
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(AbstractDesiredAccelerationsMessage other, double epsilon)
    {
       if (!ArrayTools.deltaEquals(getDesiredJointAccelerations(), other.getDesiredJointAccelerations(), epsilon))
          return false;
