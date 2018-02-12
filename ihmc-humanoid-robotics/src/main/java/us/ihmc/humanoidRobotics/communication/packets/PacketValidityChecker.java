@@ -951,7 +951,7 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateDesiredAccelerationsMessage(AbstractDesiredAccelerationsMessage packet, boolean checkId)
+   public static String validateDesiredAccelerationsMessage(DesiredAccelerationsMessage packet, boolean checkId)
    {
       if (packet == null)
          return "is null.";

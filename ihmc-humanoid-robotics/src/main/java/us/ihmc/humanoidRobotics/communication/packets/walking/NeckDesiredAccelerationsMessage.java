@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.DesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This message gives the user the option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint accelerations."
@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerationsMessage>
 {
    @RosExportedField(documentation = "The desired joint acceleration information.")
-   public AbstractDesiredAccelerationsMessage desiredAccelerations;
+   public DesiredAccelerationsMessage desiredAccelerations;
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -22,7 +22,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
     */
    public NeckDesiredAccelerationsMessage()
    {
-      desiredAccelerations = new AbstractDesiredAccelerationsMessage();
+      desiredAccelerations = new DesiredAccelerationsMessage();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -33,7 +33,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
     */
    public NeckDesiredAccelerationsMessage(Random random)
    {
-      desiredAccelerations = new AbstractDesiredAccelerationsMessage(random);
+      desiredAccelerations = new DesiredAccelerationsMessage(random);
    }
 
    /**
@@ -43,10 +43,10 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
     */
    public NeckDesiredAccelerationsMessage(double[] desiredJointAccelerations)
    {
-      desiredAccelerations = new AbstractDesiredAccelerationsMessage(desiredJointAccelerations);
+      desiredAccelerations = new DesiredAccelerationsMessage(desiredJointAccelerations);
    }
 
-   public AbstractDesiredAccelerationsMessage getDesiredAccelerations()
+   public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;
    }
