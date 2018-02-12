@@ -34,6 +34,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
    public NeckDesiredAccelerationsMessage(Random random)
    {
       desiredAccelerations = new DesiredAccelerationsMessage(random);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -44,6 +45,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
    public NeckDesiredAccelerationsMessage(double[] desiredJointAccelerations)
    {
       desiredAccelerations = new DesiredAccelerationsMessage(desiredJointAccelerations);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public void setDesiredAccelerations(DesiredAccelerationsMessage desiredAccelerations)

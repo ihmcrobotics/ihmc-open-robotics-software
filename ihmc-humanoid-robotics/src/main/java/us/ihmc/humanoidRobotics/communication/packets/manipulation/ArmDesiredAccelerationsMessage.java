@@ -30,12 +30,14 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
    {
       desiredAccelerations = new DesiredAccelerationsMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public ArmDesiredAccelerationsMessage(RobotSide robotSide, double[] armDesiredJointAccelerations)
    {
       desiredAccelerations = new DesiredAccelerationsMessage(armDesiredJointAccelerations);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public RobotSide getRobotSide()
