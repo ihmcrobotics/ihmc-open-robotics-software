@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 
-public class SpineDesiredAccelerationCommand implements Command<SpineDesiredAccelerationCommand, SpineDesiredAccelerationsMessage>
+public class SpineDesiredAccelerationsCommand implements Command<SpineDesiredAccelerationsCommand, SpineDesiredAccelerationsMessage>
 {
-   private final DesiredAccelerationCommand desiredAccelerations = new DesiredAccelerationCommand();
+   private final DesiredAccelerationsCommand desiredAccelerations = new DesiredAccelerationsCommand();
 
    @Override
    public void clear()
@@ -14,7 +14,7 @@ public class SpineDesiredAccelerationCommand implements Command<SpineDesiredAcce
    }
 
    @Override
-   public void set(SpineDesiredAccelerationCommand other)
+   public void set(SpineDesiredAccelerationsCommand other)
    {
       desiredAccelerations.set(other.desiredAccelerations);
    }
@@ -25,7 +25,7 @@ public class SpineDesiredAccelerationCommand implements Command<SpineDesiredAcce
       desiredAccelerations.set(message.desiredAccelerations);
    }
 
-   public DesiredAccelerationCommand getDesiredAccelerations()
+   public DesiredAccelerationsCommand getDesiredAccelerations()
    {
       return desiredAccelerations;
    }
