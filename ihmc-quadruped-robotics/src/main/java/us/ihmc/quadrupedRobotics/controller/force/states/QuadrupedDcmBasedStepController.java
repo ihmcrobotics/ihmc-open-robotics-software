@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedFootControlModule;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -88,7 +89,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
-   private final QuadrantDependentList<QuadrupedFootStateMachine> footStateMachine;
+   private final QuadrantDependentList<QuadrupedFootControlModule> footStateMachine;
 
    // task space controller
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
