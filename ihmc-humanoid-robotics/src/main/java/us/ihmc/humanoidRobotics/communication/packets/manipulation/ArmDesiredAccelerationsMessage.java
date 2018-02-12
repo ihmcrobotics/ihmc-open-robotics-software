@@ -6,7 +6,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractDesiredAccelerationsMessage;
+import us.ihmc.humanoidRobotics.communication.packets.DesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -21,23 +21,23 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "The desired joint acceleration information.")
-   public AbstractDesiredAccelerationsMessage desiredAccelerations; 
+   public DesiredAccelerationsMessage desiredAccelerations; 
 
    public ArmDesiredAccelerationsMessage()
    {
-      desiredAccelerations = new AbstractDesiredAccelerationsMessage();
+      desiredAccelerations = new DesiredAccelerationsMessage();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public ArmDesiredAccelerationsMessage(Random random)
    {
-      desiredAccelerations = new AbstractDesiredAccelerationsMessage(random);
+      desiredAccelerations = new DesiredAccelerationsMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
    }
 
    public ArmDesiredAccelerationsMessage(RobotSide robotSide, double[] armDesiredJointAccelerations)
    {
-      desiredAccelerations = new AbstractDesiredAccelerationsMessage(armDesiredJointAccelerations);
+      desiredAccelerations = new DesiredAccelerationsMessage(armDesiredJointAccelerations);
       this.robotSide = robotSide;
    }
 
@@ -46,7 +46,7 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
       return robotSide;
    }
    
-   public AbstractDesiredAccelerationsMessage getDesiredAccelerations()
+   public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;
    }

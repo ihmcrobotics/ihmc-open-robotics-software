@@ -10,19 +10,19 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.tools.ArrayTools;
 
-public final class AbstractDesiredAccelerationsMessage extends Packet<AbstractDesiredAccelerationsMessage>
+public final class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMessage>
 {
    @RosExportedField(documentation = "Specifies the desired joint accelerations.")
    public double[] desiredJointAccelerations;
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
 
-   public AbstractDesiredAccelerationsMessage()
+   public DesiredAccelerationsMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractDesiredAccelerationsMessage(Random random)
+   public DesiredAccelerationsMessage(Random random)
    {
       int randomNumberOfAccels = random.nextInt(16) + 1;
       desiredJointAccelerations = new double[randomNumberOfAccels];
@@ -33,7 +33,7 @@ public final class AbstractDesiredAccelerationsMessage extends Packet<AbstractDe
       }
    }
 
-   public AbstractDesiredAccelerationsMessage(double[] desiredJointAccelerations)
+   public DesiredAccelerationsMessage(double[] desiredJointAccelerations)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.desiredJointAccelerations = desiredJointAccelerations;
@@ -63,7 +63,7 @@ public final class AbstractDesiredAccelerationsMessage extends Packet<AbstractDe
    }
 
    @Override
-   public boolean epsilonEquals(AbstractDesiredAccelerationsMessage other, double epsilon)
+   public boolean epsilonEquals(DesiredAccelerationsMessage other, double epsilon)
    {
       if (!ArrayTools.deltaEquals(getDesiredJointAccelerations(), other.getDesiredJointAccelerations(), epsilon))
          return false;
