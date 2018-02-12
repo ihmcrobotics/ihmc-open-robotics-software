@@ -32,12 +32,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
 
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, QuadrupedSolePositionController solePositionController,
-                              YoBoolean stepCommandIsValid, YoDouble timestamp, YoQuadrupedTimedStep stepCommand, YoVariableRegistry registry)
+                              YoBoolean stepCommandIsValid, YoQuadrupedTimedStep stepCommand, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
       this.solePositionController = solePositionController;
       this.stepCommandIsValid = stepCommandIsValid;
-      this.timestamp = timestamp;
+      this.timestamp = toolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.stepCommand = stepCommand;
 
       this.parameters = toolbox.getFootControlModuleParameters();
