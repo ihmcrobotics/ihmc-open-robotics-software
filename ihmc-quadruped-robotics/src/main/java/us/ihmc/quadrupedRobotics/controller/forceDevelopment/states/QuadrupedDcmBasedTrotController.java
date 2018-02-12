@@ -204,7 +204,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
-      if (trotStateMachine.getState() != TrotState.QUAD_SUPPORT)
+      if (trotStateMachine.getCurrentStateEnum() != TrotState.QUAD_SUPPORT)
       {
          bodyYawSetpoint += planarVelocityProvider.get().getZ() * controlDT;
       }
