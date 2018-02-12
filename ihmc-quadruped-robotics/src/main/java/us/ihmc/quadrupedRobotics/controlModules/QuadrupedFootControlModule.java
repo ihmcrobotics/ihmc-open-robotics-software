@@ -1,8 +1,11 @@
-package us.ihmc.quadrupedRobotics.controller.force.toolbox;
+package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
@@ -18,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedFootStateMachine
+public class QuadrupedFootControlModule
 {
 
    // control variables
@@ -30,7 +33,7 @@ public class QuadrupedFootStateMachine
    private final YoQuadrupedTimedStep stepCommand;
    private final YoBoolean stepCommandIsValid;
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private final QuadrupedFootStateMachineParameters parameters;
+   private final QuadrupedFootControlModuleParameters parameters;
 
    // foot state machine
    public enum FootState
@@ -45,8 +48,8 @@ public class QuadrupedFootStateMachine
    private final FiniteStateMachine<FootState, FootEvent, FiniteStateMachineState<FootEvent>> footStateMachine;
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
-   public QuadrupedFootStateMachine(QuadrupedFootStateMachineParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
-         YoDouble timestamp, YoVariableRegistry parentRegistry)
+   public QuadrupedFootControlModule(QuadrupedFootControlModuleParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
+                                     YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
