@@ -29,7 +29,7 @@ public class QuadrupedFallDetector
    private final IntegerParameter fallDetectorGlitchFilterWindow = parameterFactory.createInteger("fallDetectorGlitchFilterWindow", 1);
 
    //Estimation Variables
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
@@ -47,7 +47,7 @@ public class QuadrupedFallDetector
       this.taskSpaceEstimator = taskSpaceEstimator;
       this.isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, fallDetectorGlitchFilterWindow.get());
       this.isFallDetected.set(false);
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       dcmPositionEstimate = new FramePoint3D();
       this.dcmPositionEstimator = dcmPositionEstimator;
       supportPolygon = new QuadrupedSupportPolygon(taskSpaceEstimates.getSolePosition());

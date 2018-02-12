@@ -19,7 +19,7 @@ public class QuadrupedComPositionController
       private final FrameVector3D comVelocity = new FrameVector3D();
       private final FrameVector3D comForceFeedforward = new FrameVector3D();
 
-      public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
+      public void initialize(QuadrupedTaskSpaceEstimates estimates)
       {
          comPosition.setIncludingFrame(estimates.getComPosition());
          comPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -76,7 +76,7 @@ public class QuadrupedComPositionController
       comPositionController.resetIntegrator();
    }
 
-   public void compute(FrameVector3D comForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void compute(FrameVector3D comForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimates estimates)
    {
       FramePoint3D comPositionSetpoint = setpoints.getComPosition();
       FrameVector3D comVelocitySetpoint = setpoints.getComVelocity();

@@ -57,7 +57,7 @@ public class QuadrupedSoleWaypointController
 
 
    public void initialize(QuadrupedSoleWaypointList quadrupedSoleWaypointList, YoPID3DGains positionControllerGains,
-         QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates, boolean useInitialSoleForceAsFeedforwardTerm)
+         QuadrupedTaskSpaceEstimates taskSpaceEstimates, boolean useInitialSoleForceAsFeedforwardTerm)
    {
       this.quadrupedSoleWaypointList = quadrupedSoleWaypointList;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -79,7 +79,7 @@ public class QuadrupedSoleWaypointController
       taskStartTime = robotTime.getDoubleValue();
    }
 
-   public boolean compute(QuadrantDependentList<FrameVector3D> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
+   public boolean compute(QuadrantDependentList<FrameVector3D> soleForceCommand, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
       if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())

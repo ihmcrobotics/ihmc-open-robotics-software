@@ -10,6 +10,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
@@ -75,7 +76,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void update(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void update(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates)
    {
       double bodyYaw = 0.0;
       double bodyRoll = 0.0;
@@ -129,7 +130,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates, Event event)
+   public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates, Event event)
    {
       switch (XBoxOneMapping.getMapping(event))
       {

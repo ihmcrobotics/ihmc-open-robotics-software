@@ -6,13 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedComPositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedTimedStepController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -89,7 +83,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    private final QuadrupedTimedStepController timedStepController;
 
    // task space controller
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
@@ -145,7 +139,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
             runtimeEnvironment.getGraphicsListRegistry());
 
       // task space controllers
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();

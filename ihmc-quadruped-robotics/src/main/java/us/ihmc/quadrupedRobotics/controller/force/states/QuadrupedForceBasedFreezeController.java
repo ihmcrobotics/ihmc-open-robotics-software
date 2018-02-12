@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -52,7 +53,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
 
    // Task space controller
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
@@ -83,7 +84,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       }
 
       // Task space controller
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
