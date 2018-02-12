@@ -4,11 +4,11 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.DesiredAccelerationsMessage;
 
-public final class DesiredAccelerationCommand extends QueueableCommand<DesiredAccelerationCommand, DesiredAccelerationsMessage>
+public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredAccelerationsCommand, DesiredAccelerationsMessage>
 {
    private final TDoubleArrayList desiredJointAccelerations = new TDoubleArrayList(10);
 
-   public DesiredAccelerationCommand()
+   public DesiredAccelerationsCommand()
    {
    }
 
@@ -30,7 +30,7 @@ public final class DesiredAccelerationCommand extends QueueableCommand<DesiredAc
    }
 
    @Override
-   public void set(DesiredAccelerationCommand other)
+   public void set(DesiredAccelerationsCommand other)
    {
       desiredJointAccelerations.reset();
       for (int i = 0; i < other.getNumberOfJoints(); i++)

@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -318,7 +318,7 @@ public class RigidBodyControlManager
 //      }
    }
 
-   public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand command)
+   public void handleDesiredAccelerationsCommand(DesiredAccelerationsCommand command)
    {
       if (userControlState.handleDesiredAccelerationsCommand(command))
       {

@@ -7,7 +7,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAccelerationsCommand, ArmDesiredAccelerationsMessage>
 {
    private RobotSide robotSide;
-   private final DesiredAccelerationCommand desiredAccelerations = new DesiredAccelerationCommand();
+   private final DesiredAccelerationsCommand desiredAccelerations = new DesiredAccelerationsCommand();
 
    public ArmDesiredAccelerationsCommand()
    {
@@ -45,7 +45,7 @@ public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAcceler
       return robotSide;
    }
 
-   public DesiredAccelerationCommand getDesiredAccelerations()
+   public DesiredAccelerationsCommand getDesiredAccelerations()
    {
       return desiredAccelerations;
    }

@@ -5,7 +5,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAcceler
 
 public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccelerationsCommand, NeckDesiredAccelerationsMessage>
 {
-   private final DesiredAccelerationCommand desiredAccelerations = new DesiredAccelerationCommand();
+   private final DesiredAccelerationsCommand desiredAccelerations = new DesiredAccelerationsCommand();
 
    @Override
    public void clear()
@@ -25,7 +25,7 @@ public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccel
       desiredAccelerations.set(message.desiredAccelerations);
    }
 
-   public DesiredAccelerationCommand getDesiredAccelerations()
+   public DesiredAccelerationsCommand getDesiredAccelerations()
    {
       return desiredAccelerations;
    }
