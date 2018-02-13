@@ -41,6 +41,12 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   public ChestTrajectoryMessage(SO3TrajectoryMessage so3Trajectory)
+   {
+      this.so3Trajectory = new SO3TrajectoryMessage(so3Trajectory);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
    /**
     * Clone constructor.
     * 
