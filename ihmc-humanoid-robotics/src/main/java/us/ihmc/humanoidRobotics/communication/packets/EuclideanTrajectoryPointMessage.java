@@ -4,11 +4,11 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -16,15 +16,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomGeometry;
 
 @RosMessagePacket(documentation = "This class is used to build trajectory messages in taskspace. It holds the only the translational information for one trajectory point (position & linear velocity). "
       + "Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational)", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryPointMessage>
-      implements EuclideanTrajectoryPointInterface<EuclideanTrajectoryPointMessage>, TransformableDataObject<EuclideanTrajectoryPointMessage>
+      implements EuclideanTrajectoryPointInterface<EuclideanTrajectoryPointMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -251,14 +249,6 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
          return false;
 
       return true;
-   }
-
-   @Override
-   public EuclideanTrajectoryPointMessage transform(RigidBodyTransform transform)
-   {
-      EuclideanTrajectoryPointMessage transformedTrajectoryPointMessage = new EuclideanTrajectoryPointMessage(this);
-      transformedTrajectoryPointMessage.applyTransform(transform);
-      return transformedTrajectoryPointMessage;
    }
 
    @Override

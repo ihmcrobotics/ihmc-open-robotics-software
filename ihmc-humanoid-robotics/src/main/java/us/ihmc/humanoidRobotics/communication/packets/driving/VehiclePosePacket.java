@@ -9,12 +9,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.commons.FormattingTools;
 
-public class VehiclePosePacket extends Packet<VehiclePosePacket> implements TransformableDataObject<VehiclePosePacket>
+public class VehiclePosePacket extends Packet<VehiclePosePacket>
 {
    public Point3D position;
    public Quaternion orientation;
@@ -46,8 +45,8 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
 
    public VehiclePosePacket(VehiclePosePacket other)
    {
-      this.position = new Point3D(other.position);
-      this.orientation = new Quaternion(other.orientation);
+      position = new Point3D(other.position);
+      orientation = new Quaternion(other.orientation);
    }
 
    public Point3D getPosition()
@@ -60,31 +59,23 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
       return orientation;
    }
 
-   public VehiclePosePacket transform(RigidBodyTransform transform)
-   {
-      VehiclePosePacket ret = new VehiclePosePacket(this);
-
-      ret.position.applyTransform(transform);
-      ret.orientation.applyTransform(transform);
-
-      return ret;
-   }
-
+   @Override
    public boolean epsilonEquals(VehiclePosePacket other, double epsilon)
    {
-      boolean ret = RotationTools.quaternionEpsilonEquals(this.getOrientation(), other.getOrientation(), epsilon);
-      ret &= this.getPosition().epsilonEquals(other.getPosition(), epsilon);
+      boolean ret = RotationTools.quaternionEpsilonEquals(getOrientation(), other.getOrientation(), epsilon);
+      ret &= getPosition().epsilonEquals(other.getPosition(), epsilon);
 
       return ret;
    }
 
+   @Override
    public String toString()
    {
       double[] ypr = new double[3];
       YawPitchRollConversion.convertQuaternionToYawPitchRoll(orientation, ypr);
-      String ret = ("Car= (" + FormattingTools.getFormattedDecimal3D(position.getX()) + "," + FormattingTools.getFormattedDecimal3D(position.getY()) + ","
-                    + FormattingTools.getFormattedDecimal3D(position.getZ()) + ")," + " (" + FormattingTools.getFormattedDecimal3D(ypr[0]) + ","
-                    + FormattingTools.getFormattedDecimal3D(ypr[1]) + "," + FormattingTools.getFormattedDecimal3D(ypr[2]) + ")");
+      String ret = "Car= (" + FormattingTools.getFormattedDecimal3D(position.getX()) + "," + FormattingTools.getFormattedDecimal3D(position.getY()) + ","
+            + FormattingTools.getFormattedDecimal3D(position.getZ()) + ")," + " (" + FormattingTools.getFormattedDecimal3D(ypr[0]) + ","
+            + FormattingTools.getFormattedDecimal3D(ypr[1]) + "," + FormattingTools.getFormattedDecimal3D(ypr[2]) + ")";
 
       return ret;
    }
@@ -94,10 +85,10 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
       Point3D point = new Point3D();
       Quaternion quat = new Quaternion();
 
-      point.set(RandomGeometry.nextPoint3D(random, 0.288, 0.288, 0.288));    // magic numbers so point will not exceed XYZ_MIN / MAX in PelvisOrientationPacketSerializer
+      point.set(RandomGeometry.nextPoint3D(random, 0.288, 0.288, 0.288)); // magic numbers so point will not exceed XYZ_MIN / MAX in PelvisOrientationPacketSerializer
       quat.set(RandomGeometry.nextAxisAngle(random));
 
-      this.position = point;
-      this.orientation = quat;
+      position = point;
+      orientation = quat;
    }
 }
