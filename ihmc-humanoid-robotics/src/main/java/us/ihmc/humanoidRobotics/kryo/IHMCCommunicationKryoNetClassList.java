@@ -131,9 +131,6 @@ import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTraje
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
@@ -402,8 +399,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // LIDAR
       registerPacketClass(AbstractPointCloudPacket.class);
-      registerPacketClass(DepthDataStateCommand.class);
-      registerPacketField(LidarState.class);
 
       registerPacketField(int[].class);
       registerPacketField(float[].class);
@@ -461,8 +456,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WallTaskBehaviorData.class);
       registerPacketField(WallTaskBehaviorData.Commands.class);
 
-      registerPacketClass(DepthDataStateCommand.class);
-      registerPacketClass(DepthDataFilterParameters.class);
       registerPacketClass(DrivingTrajectoryPacket.class);
       registerPacketField(DrivingTrajectoryPacket.Length.class);
       registerPacketClass(DrivingStatePacket.class);

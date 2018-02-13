@@ -10,11 +10,10 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<ExampleStates>
 {
@@ -84,7 +83,8 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Enabling Lidar");
             sendPacket(p1);
-            atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
+            // FIXME
+//            atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
          }
       };
 
