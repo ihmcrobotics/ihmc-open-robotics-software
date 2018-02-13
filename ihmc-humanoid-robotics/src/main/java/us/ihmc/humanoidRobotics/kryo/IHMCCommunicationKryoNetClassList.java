@@ -74,7 +74,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlM
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.DrillPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
@@ -434,7 +433,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WalkToGoalBehaviorPacket.WalkToGoalAction.class);
       registerPacketClass(FootstepPlanRequestPacket.class);
       registerPacketField(FootstepPlannerType.class);
-      registerPacketClass(DrillPacket.class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
       registerPacketClass(WallPosePacket.class);
 
