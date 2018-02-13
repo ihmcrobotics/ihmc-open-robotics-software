@@ -120,7 +120,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBeari
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPowerCyclePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -343,9 +342,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Valkyrie specific
       registerPacketClass(ValkyrieLowLevelControlModeMessage.class);
       registerPacketField(ValkyrieLowLevelControlModeMessage.ControlMode.class);
-
-      // Handstep
-      registerPacketClass(HandstepPacket.class);
 
       //Vehicle
       registerPacketClass(VehiclePosePacket.class);
