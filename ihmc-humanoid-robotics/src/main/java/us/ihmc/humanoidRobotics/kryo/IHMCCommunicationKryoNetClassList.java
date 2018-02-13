@@ -140,7 +140,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPac
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
@@ -413,9 +412,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(MultisenseParameterPacket.class);
 
-      registerPacketClass(TestbedClientPacket.class);
-
-      // registerPacketClass(FishEyeControlPacket.class);
       registerPacketClass(ControlStatusPacket.class);
       registerPacketField(ControlStatusPacket.ControlStatus.class);
 
@@ -439,7 +435,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketClass(ManualHandControlPacket.class);
       registerPacketClass(MultisenseParameterPacket.class);
-      registerPacketClass(TestbedClientPacket.class);
       registerPacketClass(SnapFootstepPacket.class);
       registerPacketClass(BlackFlyParameterPacket.class);
       registerPacketClass(HumanoidBehaviorDebrisPacket.class);
