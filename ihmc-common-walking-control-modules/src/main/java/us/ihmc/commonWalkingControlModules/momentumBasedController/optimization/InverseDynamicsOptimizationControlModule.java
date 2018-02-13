@@ -273,6 +273,9 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F convectiveTerm = motionQPInputCalculator.getCentroidalMomentumConvectiveTerm();
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      for(int i = 0; i < gravityWrench.numCols; i++)
+         for(int j = 0 ; j < gravityWrench.numRows; j++)
+            gravityWrench.set(j, i, 0.0);
       qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench);
    }
 

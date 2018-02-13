@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -75,6 +76,19 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
 
    public void completeWith(RootJointDesiredConfigurationDataReadOnly other)
    {
+//      if(orientation.containsNaN())
+//         PrintTools.debug("Orientation contains Nan");
+//      if(position.containsNaN())
+//         PrintTools.debug("Position contains Nan");
+//      if(angularVelocity.containsNaN())
+//         PrintTools.debug("Angular velocity contains Nan");
+//      if(linearVelocity.containsNaN())
+//         PrintTools.debug("Linear velocity contains Nan");
+//      if(angularAcceleration.containsNaN())
+//         PrintTools.debug("Angular acceleration contains Nan");
+//      if(linearAcceleration.containsNaN())
+//         PrintTools.debug("Linear acceleration contains Nan");
+      
       if (!hasDesiredConfiguration())
          setConfiguration(other);
 

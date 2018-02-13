@@ -70,7 +70,7 @@ public class JumpControllerState extends HighLevelControllerState
       controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, jumpingControlManagerFactory.createFeedbackControlTemplate(),
                                                    lowLevelControllerOutput, registry);
 
-      jumpController = new JumpHighLevelHumanoidController(commandInputManager, statusOutputManager, controllerToolbox, jumpingControlParameters,
+      jumpController = new JumpHighLevelHumanoidController(commandInputManager, statusOutputManager, controllerCoreToolbox, controllerToolbox, jumpingControlParameters,
                                                            jumpingControlManagerFactory);
    }
 
@@ -97,13 +97,17 @@ public class JumpControllerState extends HighLevelControllerState
       controllerCore.compute();
       //controllerCoreTimer.stopMeasurement();
    }
+   
+   public void initialize()
+   {
+      controllerCore.initialize();
+      jumpController.initialize();
+   }
  
    @Override
    public void doTransitionIntoAction()
    {
-      PrintTools.debug("initializing controller core");
-      controllerCore.initialize();
-      jumpController.initialize();
+      initialize();
    }
 
    @Override

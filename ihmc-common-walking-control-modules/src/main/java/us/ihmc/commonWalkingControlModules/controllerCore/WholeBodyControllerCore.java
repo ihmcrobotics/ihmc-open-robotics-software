@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -231,7 +232,7 @@ public class WholeBodyControllerCore
       feedbackController.computeInverseDynamics();
       InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getInverseDynamicsOutput();
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
-      inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
+      //inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
       inverseDynamicsSolver.compute();
       feedbackController.computeAchievedAccelerations();
       LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();
@@ -324,6 +325,8 @@ public class WholeBodyControllerCore
 
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
+      //for(OneDoFJoint joint: controlledOneDoFJoints)
+      //   yoLowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, 0.0);
       return yoLowLevelOneDoFJointDesiredDataHolder;
    }
 

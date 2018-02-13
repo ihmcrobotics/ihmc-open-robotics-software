@@ -127,8 +127,8 @@ public class WholeBodyControlCoreToolbox
 
       rootBody = ScrewTools.getRootBody(controlledJoints[0].getPredecessor());
       jointIndexHandler = new JointIndexHandler(controlledJoints);
-      for(int i = 0; i < controlledJoints.length; i++)
-         PrintTools.debug("ControlledJoint " + i + ": " +controlledJoints[i].getName().toString());
+      //for(int i = 0; i < controlledJoints.length; i++)
+      //   PrintTools.debug("ControlledJoint " + i + ": " +controlledJoints[i].getName().toString());
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody, gravityZ);

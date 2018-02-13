@@ -43,7 +43,6 @@ public class WholeBodyMomentumManager
       controlFrame = ReferenceFrame.getWorldFrame();
       controlDT = controllerToolbox.getControlDT();
       gravityZ = controllerToolbox.getGravityZ();
-      PrintTools.debug("Controller gravity:" + gravityZ);
       setMomentumCommandWeights();
    }
 
@@ -78,8 +77,8 @@ public class WholeBodyMomentumManager
    public void compute()
    {
       //FIXME This is a hack to confirm that the controller core is working. This should be based on the controller state. Currently hacked to work with flight controller
-      desiredLinearMomentumRateOfChange.set(controlFrame, 0.0, 0.0, -9.81);
-      desiredAngularMomentumRateOfChange.set(controlFrame, 0.0, 1.0, 0.0);
+      desiredLinearMomentumRateOfChange.set(controlFrame, 0.0, 0.0, -9.81 * 18);
+      desiredAngularMomentumRateOfChange.set(controlFrame, 0.0, 0.0, 0.0);
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       momentumCommand.setSelectionMatrixToIdentity();
       //PrintTools.debug("Linear weights: " + linearMomentumWeight.toString() + ", AngularMomentumwWeights: " + angularMomentumWeight.toString());

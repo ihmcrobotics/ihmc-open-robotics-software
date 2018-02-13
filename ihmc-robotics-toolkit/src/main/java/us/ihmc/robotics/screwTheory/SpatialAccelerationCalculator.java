@@ -2,12 +2,14 @@ package us.ihmc.robotics.screwTheory;
 
 import static us.ihmc.robotics.screwTheory.ScrewTools.*;
 
+import java.awt.image.PixelInterleavedSampleModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -189,6 +191,7 @@ public class SpatialAccelerationCalculator
    // TODO rename to reset
    public void compute()
    {
+      PrintTools.debug(assignedAccelerations.get(0).toString());
       while (rigidBodiesWithAssignedAcceleration.size() > 1)
          rigidBodyToAssignedAccelerationIndex.get(rigidBodiesWithAssignedAcceleration.remove(rigidBodiesWithAssignedAcceleration.size() - 1)).setValue(-1);
 
@@ -609,5 +612,13 @@ public class SpatialAccelerationCalculator
       rigidBodiesWithAssignedAcceleration.add(body);
       assignedAccelerations.add(newAssignedAcceleration);
       return newAssignedAcceleration;
+   }
+   
+   /**
+    * Returns the root body acceleration vector
+    */
+   public SpatialAccelerationVector getRootSpatialAcceleration()
+   {
+      return rootAcceleration;
    }
 }

@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.awt.Robot;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.WholeBodyMomentumManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -33,6 +36,7 @@ public class JumpHighLevelHumanoidController
    private final JumpControllerParameters jumpControllerParameters;
    private final MomentumOptimizationSettings momentumOptimizationSettings;
 
+   private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WholeBodyMomentumManager wholeBodyMomentumManager;
    private final FeetJumpManager feetManager;
@@ -40,7 +44,7 @@ public class JumpHighLevelHumanoidController
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(PlaneContactStateCommand.class);
    
    public JumpHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters jumpingControlParameters,
+                                             WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters jumpingControlParameters,
                                              JumpControlManagerFactory jumpingControlManagerFactory)
    {
       String namePrefix = "jump";
@@ -51,6 +55,7 @@ public class JumpHighLevelHumanoidController
       this.jumpControllerParameters = jumpingControlParameters;
       this.momentumOptimizationSettings = jumpingControlParameters.getMomentumOptimizationSettings();
       
+      this.controlCoreToolbox = controlCoreToolbox;
       this.controllerToolbox = controllerToolbox;
       this.wholeBodyMomentumManager = jumpingControlManagerFactory.getOrCreateWholeBodyMomentumManager();
       this.wholeBodyMomentumManager.setOptimizationWeights(momentumOptimizationSettings.getAngularMomentumWeight(), momentumOptimizationSettings.getLinearMomentumWeight());
@@ -61,13 +66,15 @@ public class JumpHighLevelHumanoidController
    // TODO Hacked for now to default to the flight state
    private void setupStateMachine()
    {
-      FlightState flightState = new FlightState(wholeBodyMomentumManager, feetManager);
+      FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, feetManager);
       stateMachine.addState(flightState);
       stateMachine.setCurrentState(JumpStateEnum.FLIGHT);
    }
 
    public void doAction()
    {
+      for(RobotSide side : RobotSide.values)
+         controllerToolbox.setFootContactStateFree(side);
       controllerToolbox.update();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
@@ -76,8 +83,8 @@ public class JumpHighLevelHumanoidController
 
    private void submitControllerCommands()
    {
-      //PrintTools.debug(wholeBodyMomentumManager.getMomentumRateCommand().toString());
-      controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
+      planeContactStateCommandPool.clear();
+      //controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
       controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(RobotSide.LEFT));
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -94,7 +101,8 @@ public class JumpHighLevelHumanoidController
 
    public void initialize()
    {
-
+      controllerCoreCommand.requestReinitialization();
+      controllerToolbox.initialize();
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -36,6 +38,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -176,10 +179,18 @@ public class FullRobotModelFromDescription implements FullRobotModel
       return sdfJointNameMap;
    }
 
+   /**
+    * Root joint wrench to compute changes in root joint location
+    */
+   private final Wrench rootJointResidualWrench = new Wrench();
+   private final DenseMatrix64F wholeRobotInertiaTensor = new DenseMatrix64F();
    /** {@inheritDoc} */
    @Override
    public synchronized void updateFrames()
    {
+      //rootJoint.getWrench(rootJointResidualWrench);
+      //Screw
+      //rootJoint.updateFramesRecursively();
       elevator.updateFramesRecursively();
    }
 
