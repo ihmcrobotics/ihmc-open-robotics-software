@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,13 +19,17 @@ import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
+import us.ihmc.humanoidRobotics.communication.util.MessageUnpackingTools;
+import us.ihmc.humanoidRobotics.communication.util.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 /**
- * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet communicator and the controller API.
- * It automatically creates all the {@link PacketConsumer} for all the messages supported by the {@link CommandInputManager}.
- * The status messages are send to the network communicator on a separate thread to avoid any delay in the controller thread.
+ * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet
+ * communicator and the controller API. It automatically creates all the {@link PacketConsumer} for
+ * all the messages supported by the {@link CommandInputManager}. The status messages are send to
+ * the network communicator on a separate thread to avoid any delay in the controller thread.
+ * 
  * @author Sylvain
  *
  */
@@ -49,12 +54,15 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
    /** All the possible messages that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
-   
-   /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
+
+   /**
+    * Local buffers for each message to ensure proper copying from the controller thread to the
+    * communication thread.
+    */
    private final Map<Class<? extends SettablePacket<?>>, ConcurrentRingBuffer<? extends SettablePacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
-         PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+                                      PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
@@ -70,14 +78,52 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       }
 
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
-      listOfSupportedControlMessages.add(MessageOfMessages.class);
 
       createAllSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
       createAllStatusMessageBuffers();
 
+      registerSubcriberWithMessageUnpacker(MessageOfMessages.class, 20, MessageUnpackingTools.createMessageOfMessagesUnpacker());
+
       if (scheduler != null)
          scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
+   }
+
+   public <T extends Packet<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageHolderClass, int expectedMessageSize,
+                                                                          MessageUnpacker<T> messageUnpacker)
+   {
+      PacketConsumer<T> packetConsumer = new PacketConsumer<T>()
+      {
+         private final List<Packet<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
+
+         @Override
+         public void receivedPacket(T multipleMessageHolder)
+         {
+            if (DEBUG)
+               PrintTools.debug(ControllerNetworkSubscriber.this,
+                                "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
+
+            String errorMessage = multipleMessageHolder.validateMessage();
+
+            if (errorMessage != null)
+            {
+               reportInvalidMessage(multipleMessageHolderClass, errorMessage);
+               return;
+            }
+
+            if (testMessageWithMessageFilter(multipleMessageHolder))
+            {
+               messageUnpacker.unpackMessage(multipleMessageHolder, unpackedMessages);
+
+               for (int i = 0; i < unpackedMessages.size(); i++)
+               {
+                  receivedMessage(unpackedMessages.get(i));
+               }
+               unpackedMessages.clear();
+            }
+         }
+      };
+      packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
    }
 
    public void addMessageFilter(MessageFilter newFilter)
@@ -102,62 +148,60 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       }
    }
 
+   @SuppressWarnings("unchecked")
    private <T extends Packet<T>> void createAllSubscribersForSupportedMessages()
    {
-
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       {
-         @SuppressWarnings("unchecked")
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         createSubscriber(messageClass);
+         packetCommunicator.attachListener(messageClass, this::receivedMessage);
       }
    }
 
-   private <T extends Packet<T>> void createSubscriber(final Class<T> messageClass)
+   @SuppressWarnings("unchecked")
+   private <T extends Packet<T>> void receivedMessage(Packet<?> message)
    {
-      PacketConsumer<T> packetConsumer = new PacketConsumer<T>()
+      if (DEBUG)
+         PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
+
+      String errorMessage = message.validateMessage();
+
+      if (errorMessage != null)
       {
-         @Override
-         public void receivedPacket(T message)
-         {
-            String errorMessage = message.validateMessage();
+         reportInvalidMessage((Class<? extends Packet<?>>) message.getClass(), errorMessage);
+         return;
+      }
 
-            if (DEBUG)
-               PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
+      if (testMessageWithMessageFilter(message))
+         controllerCommandInputManager.submitMessage((T) message);
+   }
 
-            if (errorMessage != null)
-            {
-               reportInvalidMessage(messageClass, errorMessage);
-               PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate:"); 
-               PrintTools.error(ControllerNetworkSubscriber.this, errorMessage); 
-               return;
-            }
+   private boolean testMessageWithMessageFilter(Packet<?> messageToTest)
+   {
+      if (messageFilter.get() != null && !messageFilter.get().isMessageValid(messageToTest))
+      {
+         if (DEBUG)
+            PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter! Filter class: "
+                  + messageFilter.get().getClass().getSimpleName() + ", rejected message: " + messageToTest.getClass().getSimpleName());
+         return false;
+      }
+      return true;
+   }
 
-            if (messageFilter.get() != null && !messageFilter.get().isMessageValid(message))
-            {
-               if (DEBUG)
-                  PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter! Filter class: "
-                        + messageFilter.get().getClass().getSimpleName() + ", rejected message: " + message.getClass().getSimpleName());
-               return;
-            }
+   private void reportInvalidMessage(Class<? extends Packet<?>> messageClass, String errorMessage)
+   {
+      ConcurrentRingBuffer<?> buffer = statusMessageClassToBufferMap.get(InvalidPacketNotificationPacket.class);
 
-            controllerCommandInputManager.submitMessage(message);
-         }
+      InvalidPacketNotificationPacket next = (InvalidPacketNotificationPacket) buffer.next();
 
-         private void reportInvalidMessage(Class<T> messageClass, String errorMessage)
-         {
-            ConcurrentRingBuffer<?> buffer = statusMessageClassToBufferMap.get(InvalidPacketNotificationPacket.class);
+      if (next != null)
+      {
+         next.set(messageClass, errorMessage);
+         buffer.commit();
+      }
 
-            InvalidPacketNotificationPacket next = (InvalidPacketNotificationPacket) buffer.next();
-
-            if (next != null)
-            {
-               next.set(messageClass, errorMessage);
-               buffer.commit();
-            }
-         }
-      };
-      packetCommunicator.attachListener(messageClass, packetConsumer);
+      PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate:");
+      PrintTools.error(ControllerNetworkSubscriber.this, errorMessage);
    }
 
    private void createGlobalStatusMessageListener()
