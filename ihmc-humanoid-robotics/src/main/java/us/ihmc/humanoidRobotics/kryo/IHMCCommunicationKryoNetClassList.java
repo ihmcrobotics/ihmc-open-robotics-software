@@ -109,7 +109,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSen
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
@@ -239,7 +238,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Vector2D32.class);
       registerPacketClass(QuaternionBasedTransform.class);
 
-      registerPacketClass(HandComplianceControlParametersMessage.class);
       registerPacketField(Vector3D32.class);
       registerPacketField(boolean[].class);
 
