@@ -31,7 +31,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPack
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
@@ -85,7 +84,6 @@ public class PacketsForwardedToTheUi
       ControllerCrashNotificationPacket.class,
       InvalidPacketNotificationPacket.class,
       DetectedObjectPacket.class,
-      MultisenseMocapExperimentPacket.class,
       FisheyePacket.class,
       SimpleCoactiveBehaviorDataPacket.class,
       LocalizationPointMapPacket.class,

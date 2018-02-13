@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
@@ -52,7 +51,6 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupROSAPIModule(params));
       tryToStartModule(() -> setupMocapModule(robotModel, params));
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
-      tryToStartModule(() -> setupMultisenseManualTestModule(robotModel, params));
       tryToStartModule(() -> setupDrillDetectionModule(params));
       tryToStartModule(() -> setupConstrainedWholebodyPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsToolboxModule(robotModel, params));
@@ -215,28 +213,6 @@ public class DRCNetworkProcessor
 
       String methodName = "setupFootstepPlanningModule";
       printModuleConnectedDebugStatement(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, methodName);
-   }
-
-   private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
-   {
-      if (params.isMultisenseManualTestModuleEnabled())
-      {
-         new MultisenseMocapManualCalibrationTestModule(robotModel, params.getRosUri());
-
-         PacketCommunicator multisenseModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, NET_CLASS_LIST);
-         packetRouter.attachPacketCommunicator(PacketDestination.MULTISENSE_TEST_MODULE, multisenseModuleCommunicator);
-         try
-         {
-            multisenseModuleCommunicator.connect();
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-
-         String methodName = "setupMultisenseManualTestModule";
-         printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
-      }
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
