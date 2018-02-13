@@ -50,7 +50,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationT
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
@@ -85,7 +84,6 @@ public class PacketsForwardedToTheUi
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
       WholeBodyTrajectoryMessage.class,
-      JointAnglesPacket.class,
       ControllerCrashNotificationPacket.class,
       InvalidPacketNotificationPacket.class,
       DetectedObjectPacket.class,
