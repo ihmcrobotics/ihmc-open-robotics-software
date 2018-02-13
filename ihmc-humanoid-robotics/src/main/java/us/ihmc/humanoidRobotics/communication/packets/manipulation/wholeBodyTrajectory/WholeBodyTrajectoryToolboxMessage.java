@@ -3,10 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 
-public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage> implements MultiplePacketHolder
+public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage>
 {
    public WholeBodyTrajectoryToolboxConfigurationMessage configuration;
    public List<WaypointBasedTrajectoryMessage> endEffectorTrajectories;
@@ -103,23 +102,6 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    public List<ReachingManifoldMessage> getReachingManifolds()
    {
       return reachingManifolds;
-   }
-
-   @Override
-   public List<Packet<?>> getPackets()
-   {
-      List<Packet<?>> allPackets = new ArrayList<>();
-
-      if (endEffectorTrajectories != null)
-         allPackets.addAll(endEffectorTrajectories);
-      if (explorationConfigurations != null)
-         allPackets.addAll(explorationConfigurations);
-      if (configuration != null)
-         allPackets.add(configuration);
-      if (reachingManifolds != null)
-         allPackets.addAll(reachingManifolds);
-
-      return allPackets;
    }
 
    @Override
