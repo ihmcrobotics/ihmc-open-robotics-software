@@ -83,7 +83,6 @@ public class JumpControllerState extends HighLevelControllerState
    @Override
    public void doAction()
    {
-      PrintTools.debug("****************************************************************");
       jumpController.doAction();
       ControllerCoreCommand controllerCoreCommand = jumpController.getControllerCoreCommand();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);

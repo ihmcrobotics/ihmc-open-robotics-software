@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class FlightState extends AbstractJumpingState
@@ -32,7 +33,7 @@ public class FlightState extends AbstractJumpingState
       this.wholeBodyMomentumManager = wholeBodyMomentumManager;
       this.feetJumpManager = feetJumpManager;
       this.rootBody = controlCoreToolbox.getRootBody();
-      this.zeroGravitationalAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), new Vector3D(0.0, 0.0, -9.81), new Vector3D(0.0, 0.0, 0.0));
+      this.zeroGravitationalAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
    }
 
    @Override
@@ -47,7 +48,9 @@ public class FlightState extends AbstractJumpingState
       wholeBodyMomentumManager.update(stateEnum);
       wholeBodyMomentumManager.compute();
       feetJumpManager.compute();
-      //controlCoreToolbox.getInverseDynamicsCalculator().getSpatialAccelerationCalculator().setRootAcceleration(zeroGravitationalAcceleration);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = controlCoreToolbox.getInverseDynamicsCalculator().getSpatialAccelerationCalculator();
+      spatialAccelerationCalculator.setRootAcceleration(zeroGravitationalAcceleration);
+      spatialAccelerationCalculator.compute();
    }
 
    @Override

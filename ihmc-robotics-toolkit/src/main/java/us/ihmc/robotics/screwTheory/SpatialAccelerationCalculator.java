@@ -38,9 +38,6 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  */
 public class SpatialAccelerationCalculator
 {
-   
-   private static int count = 0;
-   private final int serial;
    /**
     * The root body of the system for which this {@code SpatialAccelerationCalculator} is available.
     */
@@ -146,7 +143,6 @@ public class SpatialAccelerationCalculator
    public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, boolean doVelocityTerms, boolean doAccelerationTerms,
                                         boolean useDesiredAccelerations)
    {
-      this.serial = count++;
       this.inertialFrame = rootAcceleration.getBaseFrame();
       this.rootBody = ScrewTools.getRootBody(body);
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
@@ -161,7 +157,7 @@ public class SpatialAccelerationCalculator
       assignedAccelerations = new ArrayList<>(numberOfRigidBodies);
       rigidBodiesWithAssignedAcceleration = new ArrayList<>(numberOfRigidBodies);
 
-      assignedAccelerations.add(rootAcceleration);
+      assignedAccelerations.add(this.rootAcceleration);
       rigidBodiesWithAssignedAcceleration.add(rootBody);
       rigidBodyToAssignedAccelerationIndex.put(rootBody, new MutableInt(0));
    }
@@ -194,9 +190,10 @@ public class SpatialAccelerationCalculator
    // TODO rename to reset
    public void compute()
    {
-      PrintTools.debug("Spatial Acceleration: " + serial + ": " + assignedAccelerations.get(0).toString());
       while (rigidBodiesWithAssignedAcceleration.size() > 1)
+      {
          rigidBodyToAssignedAccelerationIndex.get(rigidBodiesWithAssignedAcceleration.remove(rigidBodiesWithAssignedAcceleration.size() - 1)).setValue(-1);
+      }
 
       while (assignedAccelerations.size() > 1)
          unnassignedAccelerations.add(assignedAccelerations.remove(assignedAccelerations.size() - 1));
