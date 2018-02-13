@@ -118,6 +118,11 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
       setDestination(other.getDestination());
    }
 
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;

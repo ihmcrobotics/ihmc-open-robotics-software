@@ -109,6 +109,11 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
       setDestination(other.getDestination());
    }
 
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
