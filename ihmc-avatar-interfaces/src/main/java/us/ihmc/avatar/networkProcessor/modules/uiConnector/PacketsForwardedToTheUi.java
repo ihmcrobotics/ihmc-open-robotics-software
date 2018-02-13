@@ -27,7 +27,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAngl
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
@@ -77,7 +76,6 @@ public class PacketsForwardedToTheUi
       VideoPacket.class,
       HandTrajectoryMessage.class,
       ArmTrajectoryMessage.class,
-      DepthDataClearCommand.class,
       ValveLocationPacket.class,
       BehaviorStatusPacket.class,
       DoorLocationPacket.class,
@@ -90,7 +88,6 @@ public class PacketsForwardedToTheUi
       MultisenseMocapExperimentPacket.class,
       FisheyePacket.class,
       SimpleCoactiveBehaviorDataPacket.class,
-//      HandPoseStatus.class,
       LocalizationPointMapPacket.class,
       BlackFlyParameterPacket.class,
       DrillDetectionPacket.class,
