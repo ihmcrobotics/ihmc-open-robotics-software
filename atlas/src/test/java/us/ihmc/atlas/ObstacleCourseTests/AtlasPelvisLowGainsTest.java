@@ -55,7 +55,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 160000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       super.testStandingWithLowPelvisOrientationGains();
