@@ -19,7 +19,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPa
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
@@ -57,7 +56,6 @@ public class PacketsForwardedToTheUi
 
    public static Class<?>[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
       FootstepStatus.class,
-      ScriptBehaviorStatusPacket.class,
       PelvisPoseErrorPacket.class,
       BehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,

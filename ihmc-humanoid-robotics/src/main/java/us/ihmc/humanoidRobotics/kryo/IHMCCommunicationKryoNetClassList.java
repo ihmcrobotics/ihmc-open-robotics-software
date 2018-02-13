@@ -81,8 +81,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPac
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallTaskBehaviorData;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusEnum;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -408,8 +406,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HumanoidBehaviorType.class);
       registerPacketClass(BehaviorControlModePacket.class);
       registerPacketField(BehaviorControlModeEnum.class);
-      registerPacketClass(ScriptBehaviorStatusPacket.class);
-      registerPacketClass(ScriptBehaviorStatusEnum.class);
       registerPacketClass(BehaviorControlModeResponsePacket.class);
       registerPacketClass(WallTaskBehaviorData.class);
       registerPacketField(WallTaskBehaviorData.Commands.class);
