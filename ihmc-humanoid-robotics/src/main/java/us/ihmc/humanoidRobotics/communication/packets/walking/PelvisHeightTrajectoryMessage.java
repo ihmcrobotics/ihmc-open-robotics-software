@@ -7,17 +7,14 @@ import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This mesage commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/pelvis_height_trajectory")
-public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage> implements TransformableDataObject<PelvisHeightTrajectoryMessage>
+public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage>
 {
    /**
     * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the
@@ -169,21 +166,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
-   }
-
-   /**
-    * Transforms each point within the point list
-    */
-   @Override
-   public PelvisHeightTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      PelvisHeightTrajectoryMessage transformedMessage = new PelvisHeightTrajectoryMessage(this);
-      for (int trajectoryPointIndex = 0; trajectoryPointIndex < euclideanTrajectory.getNumberOfTrajectoryPoints(); trajectoryPointIndex++)
-      {
-         EuclideanTrajectoryPointMessage trajectoryPoint = transformedMessage.euclideanTrajectory.getTrajectoryPoint(trajectoryPointIndex);
-         trajectoryPoint.transform(transform);
-      }
-      return transformedMessage;
    }
 
    @Override

@@ -20,7 +20,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -30,7 +29,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
+public class FootstepDataMessage extends Packet<FootstepDataMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
@@ -155,12 +154,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.transferDuration = footstepData.transferDuration;
       this.touchdownDuration = footstepData.touchdownDuration;
       this.executionDelayTime = footstepData.executionDelayTime;
-   }
-
-   @Override
-   public FootstepDataMessage clone()
-   {
-      return new FootstepDataMessage(this);
    }
 
    public FootstepDataMessage(Footstep footstep)
@@ -480,24 +473,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
             && swingTrajectoryBlendDurationEquals;
-   }
-
-   @Override
-   public FootstepDataMessage transform(RigidBodyTransform transform)
-   {
-      FootstepDataMessage ret = this.clone();
-
-      ret.location.applyTransform(transform);
-      ret.orientation.applyTransform(transform);
-
-      // Waypoints if they exist:
-      if (positionWaypoints != null)
-      {
-         for (int i = 0; i < positionWaypoints.length; i++)
-            ret.positionWaypoints[i].applyTransform(transform);
-      }
-
-      return ret;
    }
 
    public FootstepDataMessage(Random random)
