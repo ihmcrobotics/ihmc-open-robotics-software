@@ -87,7 +87,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
@@ -419,8 +418,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WallTaskBehaviorData.class);
       registerPacketField(WallTaskBehaviorData.Commands.class);
 
-      registerPacketClass(DrivingTrajectoryPacket.class);
-      registerPacketField(DrivingTrajectoryPacket.Length.class);
       registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketClass(ManualHandControlPacket.class);
       registerPacketClass(MultisenseParameterPacket.class);
