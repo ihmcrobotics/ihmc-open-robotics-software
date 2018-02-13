@@ -127,7 +127,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatus
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
@@ -445,8 +444,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(LocalizationStatusPacket.class);
       registerPacketClass(PelvisPoseErrorPacket.class);
       registerPacketClass(LocalizationPointMapPacket.class);
-
-      registerPacketClass(RawIMUPacket.class);
 
       registerPacketField(Vector3D[].class);
       registerPacketField(Quaternion[].class);
