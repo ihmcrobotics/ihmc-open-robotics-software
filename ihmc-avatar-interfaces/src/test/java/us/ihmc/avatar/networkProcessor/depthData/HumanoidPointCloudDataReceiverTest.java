@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.depthData;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,24 +17,21 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.WallAtDistanceEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTestInterface
 {
@@ -114,9 +112,9 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
 
          testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for KryoObjectClient to connect
 
-         DepthDataStateCommand lidarEnablePacket = new DepthDataStateCommand(LidarState.ENABLE);
-         lidarEnablePacket.setDestination(PacketDestination.SENSOR_MANAGER);
-         packetCommunicator.send(lidarEnablePacket);
+//         DepthDataStateCommand lidarEnablePacket = new DepthDataStateCommand(LidarState.ENABLE);
+//         lidarEnablePacket.setDestination(PacketDestination.SENSOR_MANAGER);
+//         packetCommunicator.send(lidarEnablePacket);
       }
       catch (IOException e)
       {
