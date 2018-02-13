@@ -27,7 +27,7 @@ public class ValkyrieEndToEndNeckTrajectoryMessageTest extends EndToEndNeckTraje
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 18.8)
-   @Test(timeout = 30000)
+   @Test(timeout = 100000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
