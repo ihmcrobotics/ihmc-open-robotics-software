@@ -129,10 +129,8 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
@@ -223,7 +221,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Video data
       registerPacketClass(VideoPacket.class);
       registerPacketClass(SimulatedLidarScanPacket.class);
-      registerPacketClass(FilteredPointCloudPacket.class);
       registerPacketClass(TestbedServerPacket.class);
       registerPacketClass(JointConfigurationData.class);
 
@@ -396,9 +393,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       //SCS
       registerPacketClass(SCSListenerPacket.class);
-
-      // LIDAR
-      registerPacketClass(AbstractPointCloudPacket.class);
 
       registerPacketField(int[].class);
       registerPacketField(float[].class);
