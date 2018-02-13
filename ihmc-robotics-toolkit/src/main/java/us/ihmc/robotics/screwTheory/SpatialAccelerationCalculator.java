@@ -1,8 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.screwTheory.ScrewTools.*;
+import static us.ihmc.robotics.screwTheory.ScrewTools.createGravitationalSpatialAcceleration;
 
-import java.awt.image.PixelInterleavedSampleModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +38,9 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  */
 public class SpatialAccelerationCalculator
 {
+   
+   private static int count = 0;
+   private final int serial;
    /**
     * The root body of the system for which this {@code SpatialAccelerationCalculator} is available.
     */
@@ -144,6 +146,7 @@ public class SpatialAccelerationCalculator
    public SpatialAccelerationCalculator(RigidBody body, SpatialAccelerationVector rootAcceleration, boolean doVelocityTerms, boolean doAccelerationTerms,
                                         boolean useDesiredAccelerations)
    {
+      this.serial = count++;
       this.inertialFrame = rootAcceleration.getBaseFrame();
       this.rootBody = ScrewTools.getRootBody(body);
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
@@ -191,7 +194,7 @@ public class SpatialAccelerationCalculator
    // TODO rename to reset
    public void compute()
    {
-      PrintTools.debug(assignedAccelerations.get(0).toString());
+      PrintTools.debug("Spatial Acceleration: " + serial + ": " + assignedAccelerations.get(0).toString());
       while (rigidBodiesWithAssignedAcceleration.size() > 1)
          rigidBodyToAssignedAccelerationIndex.get(rigidBodiesWithAssignedAcceleration.remove(rigidBodiesWithAssignedAcceleration.size() - 1)).setValue(-1);
 

@@ -32,7 +32,7 @@ public class FlightState extends AbstractJumpingState
       this.wholeBodyMomentumManager = wholeBodyMomentumManager;
       this.feetJumpManager = feetJumpManager;
       this.rootBody = controlCoreToolbox.getRootBody();
-      this.zeroGravitationalAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), new Vector3D(0.0, 0.0, -9.81), new Vector3D(0.0, 0.0, 0.0));
+      this.zeroGravitationalAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), new Vector3D(0.0, 0.0, -9.81), new Vector3D(0.0, 0.0, 0.0));
    }
 
    @Override
@@ -47,7 +47,7 @@ public class FlightState extends AbstractJumpingState
       wholeBodyMomentumManager.update(stateEnum);
       wholeBodyMomentumManager.compute();
       feetJumpManager.compute();
-      controlCoreToolbox.getSpatialAccelerationCalculator().setRootAcceleration(zeroGravitationalAcceleration);
+      //controlCoreToolbox.getInverseDynamicsCalculator().getSpatialAccelerationCalculator().setRootAcceleration(zeroGravitationalAcceleration);
    }
 
    @Override
