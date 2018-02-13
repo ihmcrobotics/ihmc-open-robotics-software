@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -30,11 +27,6 @@ public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
 
    public WalkingStatusMessage()
    {
-   }
-
-   public WalkingStatusMessage(Random random)
-   {
-      status = RandomNumbers.nextEnum(random, Status.class);
    }
 
    public WalkingStatusMessage(Status status)

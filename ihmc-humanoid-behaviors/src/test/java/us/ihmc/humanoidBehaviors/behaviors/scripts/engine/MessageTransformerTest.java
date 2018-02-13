@@ -10,6 +10,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -26,10 +27,10 @@ public class MessageTransformerTest
    {
       Random random = new Random(6543);
 
-      HandTrajectoryMessage original = new HandTrajectoryMessage(random);
+      HandTrajectoryMessage original = RandomHumanoidMessages.nextHandTrajectoryMessage(random);
 
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
+
       HandTrajectoryMessage expected = new HandTrajectoryMessage(original);
       for (SE3TrajectoryPointMessage trajectoryPoint : expected.se3Trajectory.taskspaceTrajectoryPoints)
       {
@@ -51,10 +52,10 @@ public class MessageTransformerTest
    {
       Random random = new Random(6543);
 
-      PelvisHeightTrajectoryMessage original = new PelvisHeightTrajectoryMessage(random);
+      PelvisHeightTrajectoryMessage original = RandomHumanoidMessages.nextPelvisHeightTrajectoryMessage(random);
 
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
+
       PelvisHeightTrajectoryMessage expected = new PelvisHeightTrajectoryMessage(original);
       for (EuclideanTrajectoryPointMessage trajectoryPoint : expected.euclideanTrajectory.taskspaceTrajectoryPoints)
       {
@@ -74,10 +75,10 @@ public class MessageTransformerTest
    {
       Random random = new Random(6543);
 
-      AdjustFootstepMessage original = new AdjustFootstepMessage(random);
+      AdjustFootstepMessage original = RandomHumanoidMessages.nextAdjustFootstepMessage(random);
 
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
+
       AdjustFootstepMessage expected = new AdjustFootstepMessage(original);
       expected.location.applyTransform(transform);
       expected.orientation.applyTransform(transform);
@@ -93,10 +94,10 @@ public class MessageTransformerTest
    {
       Random random = new Random(6543);
 
-      FootstepDataMessage original = new FootstepDataMessage(random);
+      FootstepDataMessage original = RandomHumanoidMessages.nextFootstepDataMessage(random);
 
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
+
       FootstepDataMessage expected = new FootstepDataMessage(original);
       expected.location.applyTransform(transform);
       expected.orientation.applyTransform(transform);
@@ -114,10 +115,10 @@ public class MessageTransformerTest
    {
       Random random = new Random(6543);
 
-      FootstepDataListMessage original = new FootstepDataListMessage(random);
+      FootstepDataListMessage original = RandomHumanoidMessages.nextFootstepDataListMessage(random);
 
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
+
       FootstepDataListMessage expected = new FootstepDataListMessage(original);
       for (FootstepDataMessage footstepDataMessage : expected.footstepDataList)
       {
@@ -138,10 +139,10 @@ public class MessageTransformerTest
    {
       Random random = new Random(6543);
 
-      VehiclePosePacket original = new VehiclePosePacket(random);
+      VehiclePosePacket original = RandomHumanoidMessages.nextVehiclePosePacket(random);
 
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
+
       VehiclePosePacket expected = new VehiclePosePacket(original);
       expected.position.applyTransform(transform);
       expected.orientation.applyTransform(transform);
@@ -157,10 +158,10 @@ public class MessageTransformerTest
    {
       Random random = new Random(6543);
 
-      VideoPacket original = new VideoPacket(random);
+      VideoPacket original = RandomHumanoidMessages.nextVideoPacket(random);
 
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
+
       VideoPacket expected = new VideoPacket(original);
       expected.position.applyTransform(transform);
       expected.orientation.applyTransform(transform);

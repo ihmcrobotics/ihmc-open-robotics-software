@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -9,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CapturabilityBasedStatus extends SettablePacket<CapturabilityBasedStatus>
@@ -25,25 +23,6 @@ public class CapturabilityBasedStatus extends SettablePacket<CapturabilityBasedS
    public Point2D[] leftFootSupportPolygonStore = new Point2D[MAXIMUM_NUMBER_OF_VERTICES];
    public int rightFootSupportPolygonLength;
    public Point2D[] rightFootSupportPolygonStore = new Point2D[MAXIMUM_NUMBER_OF_VERTICES];
-
-   public CapturabilityBasedStatus(Random random)
-   {
-      double max = Double.MAX_VALUE / 2;
-      capturePoint = RandomGeometry.nextPoint2D(random, max, max);
-      desiredCapturePoint = RandomGeometry.nextPoint2D(random, max, max);
-      centerOfMass = RandomGeometry.nextPoint3D(random, max, max, max);
-
-      leftFootSupportPolygonLength = Math.abs(random.nextInt(MAXIMUM_NUMBER_OF_VERTICES));
-      for (int i = 0; i < leftFootSupportPolygonLength; i++)
-      {
-         leftFootSupportPolygonStore[i] = RandomGeometry.nextPoint2D(random, max, max);
-      }
-      rightFootSupportPolygonLength = Math.abs(random.nextInt(MAXIMUM_NUMBER_OF_VERTICES));
-      for (int i = 0; i < rightFootSupportPolygonLength; i++)
-      {
-         rightFootSupportPolygonStore[i] = RandomGeometry.nextPoint2D(random, max, max);
-      }
-   }
 
    public CapturabilityBasedStatus()
    {

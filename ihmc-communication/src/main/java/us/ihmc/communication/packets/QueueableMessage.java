@@ -1,8 +1,5 @@
 package us.ihmc.communication.packets;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -40,15 +37,6 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
     */
    public QueueableMessage()
    {
-   }
-
-   /**
-    * Random constructor for message tests.
-    * @param random
-    */
-   public QueueableMessage(Random random)
-   {
-      executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
    }
 
    public void set(QueueableMessage other)

@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.momentum;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
 
@@ -27,12 +25,6 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
    {
       angularMomentumTrajectory = new EuclideanTrajectoryMessage(numberOfTrajectoryPoints);
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public MomentumTrajectoryMessage(Random random)
-   {
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      angularMomentumTrajectory = new EuclideanTrajectoryMessage(random);
    }
 
    public EuclideanTrajectoryMessage getAngularMomentumTrajectory()

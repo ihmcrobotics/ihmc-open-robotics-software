@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 
@@ -18,13 +17,6 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 	public ArrayList<FootstepDataMessage> goals = new ArrayList<FootstepDataMessage>();
 
 	public RequestType requestType;
-	
-	public FootstepPlanRequestPacket(Random random)
-	{
-	   startFootstep = new FootstepDataMessage(random);
-	   thetaStart = random.nextDouble();
-	   maxSuboptimality = random.nextDouble();
-	}
 
 	public FootstepPlanRequestPacket()
 	{

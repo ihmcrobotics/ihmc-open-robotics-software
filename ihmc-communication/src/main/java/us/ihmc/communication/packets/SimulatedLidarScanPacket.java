@@ -1,7 +1,5 @@
 package us.ihmc.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
@@ -11,21 +9,6 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    public int sensorId;
    public LidarScanParameters params;
 
-   public SimulatedLidarScanPacket(Random random)
-   {
-	   int size = Math.abs(random.nextInt(1000000));
-	   ranges = new float[size];
-	   for(int i = 0; i < ranges.length; i++)
-	   {
-		   ranges[i] = random.nextFloat();
-	   }
-	   
-	   sensorId = random.nextInt();
-	   
-	   params = new LidarScanParameters(random);
-	   
-   }
-   
    public SimulatedLidarScanPacket()
    {
    }
@@ -55,10 +38,10 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    {
       return params.getTimestamp();
    }
-   
+
    public LidarScanParameters getLidarScanParameters()
    {
-	   return params;
+      return params;
    }
 
    public float[] getRanges()

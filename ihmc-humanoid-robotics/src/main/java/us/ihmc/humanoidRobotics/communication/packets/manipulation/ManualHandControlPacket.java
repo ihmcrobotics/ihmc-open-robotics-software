@@ -1,20 +1,17 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
-
 
 public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
 {
    public static final int VELOCITY = 0;
    public static final int POSITION = 1;
 
-   public static enum HandType {IROBOT, ROBOTIQ}
-
-   ;
+   public static enum HandType
+   {
+      IROBOT, ROBOTIQ
+   }
 
    public RobotSide robotSide;
    public double index;
@@ -100,19 +97,5 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
    public RobotSide getSide()
    {
       return robotSide;
-   }
-
-   public ManualHandControlPacket(Random random)
-   {
-      this.robotSide = RobotSide.generateRandomRobotSide(random);
-      double[] angles = RandomNumbers.nextDoubleArray(random, 4, 0, 1);
-
-
-      this.index = angles[0];
-      this.middle = angles[1];
-      this.thumb = angles[2];
-      this.spread = angles[3];
-      this.controlType = 0;
-
    }
 }

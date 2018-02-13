@@ -1,10 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -25,15 +22,6 @@ public final class LoadBearingMessage extends Packet<LoadBearingMessage>
    public LoadBearingMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public LoadBearingMessage(Random random)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      load = random.nextBoolean();
-      coefficientOfFriction = random.nextDouble();
-      bodyFrameToContactFrame = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      contactNormalInWorldFrame = EuclidCoreRandomTools.nextVector3D(random);
    }
 
    public void setLoad(boolean load)

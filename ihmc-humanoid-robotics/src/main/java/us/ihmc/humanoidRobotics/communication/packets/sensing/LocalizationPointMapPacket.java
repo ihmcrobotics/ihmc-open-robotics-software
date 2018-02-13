@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,28 +10,14 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
    public long timestamp;
    public float[] localizationPointMap;
 
-   public LocalizationPointMapPacket(Random random)
-   {
-      timestamp = random.nextLong();
-      
-      int size = Math.abs(random.nextInt(100000));
-      
-      size = Math.abs(random.nextInt(100000));
-      localizationPointMap = new float[size];
-      for (int i = 0; i < localizationPointMap.length; i++)
-      {
-         localizationPointMap[i] = random.nextFloat();
-      }
-   }
-   
    public LocalizationPointMapPacket()
    {
       setDestination(PacketDestination.UI);
    }
-   
+
    public void setLocalizationPointMap(Point3D[] pointCloud)
    {
-      localizationPointMap = new float[pointCloud.length*3];
+      localizationPointMap = new float[pointCloud.length * 3];
       for (int i = 0; i < pointCloud.length; i++)
       {
          Point3D point = pointCloud[i];
@@ -45,11 +29,11 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
 
    public Point3D32[] getPointMap()
    {
-      
-      int numberOfPoints = localizationPointMap.length/3;
-      
+
+      int numberOfPoints = localizationPointMap.length / 3;
+
       Point3D32[] points = new Point3D32[numberOfPoints];
-      for(int i = 0; i < numberOfPoints; i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
          Point3D32 point = new Point3D32();
          point.setX(localizationPointMap[3 * i]);
@@ -57,10 +41,10 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
          point.setZ(localizationPointMap[3 * i + 2]);
          points[i] = point;
       }
-      
+
       return points;
    }
-   
+
    @Override
    public boolean epsilonEquals(LocalizationPointMapPacket other, double epsilon)
    {
@@ -71,11 +55,11 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
       }
       return ret;
    }
-   
+
    @Override
    public String toString()
    {
-      return "PointCloudWorldPacket [timestamp=" + timestamp + " points, localizationPointMap=" + localizationPointMap.length/3 + "]";
+      return "PointCloudWorldPacket [timestamp=" + timestamp + " points, localizationPointMap=" + localizationPointMap.length / 3 + "]";
    }
 
    public long getTimestamp()

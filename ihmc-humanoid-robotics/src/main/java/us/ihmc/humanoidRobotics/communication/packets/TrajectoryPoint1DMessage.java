@@ -2,10 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Random;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -28,13 +26,6 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
     */
    public TrajectoryPoint1DMessage()
    {
-   }
-
-   public TrajectoryPoint1DMessage(Random random)
-   {
-      time = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
-      position = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
-      velocity = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
    }
 
    public TrajectoryPoint1DMessage(OneDoFTrajectoryPointInterface<?> trajectoryPoint)

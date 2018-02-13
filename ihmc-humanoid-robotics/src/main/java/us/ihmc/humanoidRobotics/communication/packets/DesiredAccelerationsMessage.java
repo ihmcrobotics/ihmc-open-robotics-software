@@ -2,9 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Random;
 
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -22,17 +20,6 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
    public DesiredAccelerationsMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public DesiredAccelerationsMessage(Random random)
-   {
-      int randomNumberOfAccels = random.nextInt(16) + 1;
-      desiredJointAccelerations = new double[randomNumberOfAccels];
-
-      for(int i = 0; i < randomNumberOfAccels; i++)
-      {
-         desiredJointAccelerations[i] = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
-      }
    }
 
    public DesiredAccelerationsMessage(double[] desiredJointAccelerations)

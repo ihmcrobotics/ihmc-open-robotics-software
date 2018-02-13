@@ -1,39 +1,31 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
- * User: Matt
- * Date: 1/18/13
+ * User: Matt Date: 1/18/13
  */
 @RosMessagePacket(documentation = "This message gives the status of the current footstep from the controller as well as the position\n"
-                                  + "and orientation of the footstep in world cooredinates. ",
-                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
-                  topic = "/output/footstep_status")
+      + "and orientation of the footstep in world cooredinates. ", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/output/footstep_status")
 public class FootstepStatus extends SettablePacket<FootstepStatus>
 {
    public enum Status
    {
       @RosEnumValueDocumentation(documentation = "execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state")
-      STARTED,
-      @RosEnumValueDocumentation(documentation = "a footstep is completed")
+      STARTED, @RosEnumValueDocumentation(documentation = "a footstep is completed")
       COMPLETED
    }
 
    @RosExportedField(documentation = "The current footstep status enum value.")
    public Status status;
    @RosExportedField(documentation = "footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"
-                                     + "FootstepDataListMessage.")
+         + "FootstepDataListMessage.")
    public int footstepIndex;
 
    @RosExportedField(documentation = "The robot side (left or right) that this footstep status correlates to.")
@@ -45,10 +37,10 @@ public class FootstepStatus extends SettablePacket<FootstepStatus>
          + "the orientation where the foot actually is")
    public Quaternion desiredFootOrientationInWorld;
    @RosExportedField(documentation = "actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
-                                     + "to the desired position sent to the controller")
+         + "to the desired position sent to the controller")
    public Point3D actualFootPositionInWorld;
    @RosExportedField(documentation = "actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to\n"
-                                     + "the desired orientation sent to the controller")
+         + "the desired orientation sent to the controller")
    public Quaternion actualFootOrientationInWorld;
 
    public FootstepStatus()
@@ -90,7 +82,7 @@ public class FootstepStatus extends SettablePacket<FootstepStatus>
    }
 
    public FootstepStatus(Status status, int footstepIndex, Point3D desiredFootPositionInWorld, Quaternion desiredFootOrientationInWorld,
-         Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld, RobotSide robotSide)
+                         Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld, RobotSide robotSide)
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
@@ -185,7 +177,7 @@ public class FootstepStatus extends SettablePacket<FootstepStatus>
 
    public RobotSide getRobotSide()
    {
-         return robotSide;
+      return robotSide;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -260,16 +252,5 @@ public class FootstepStatus extends SettablePacket<FootstepStatus>
    public boolean epsilonEquals(FootstepStatus other, double epsilon)
    {
       return this.equals(other);
-   }
-
-   public FootstepStatus(Random random)
-   {
-      this.status = Status.values()[random.nextInt(Status.values().length)];
-      this.footstepIndex = RandomNumbers.nextIntWithEdgeCases(random, 0.1);
-      this.robotSide = RobotSide.generateRandomRobotSide(random);
-      this.desiredFootPositionInWorld = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
-      this.desiredFootOrientationInWorld = RandomGeometry.nextQuaternion(random);
-      this.actualFootPositionInWorld = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
-      this.actualFootOrientationInWorld = RandomGeometry.nextQuaternion(random);
    }
 }

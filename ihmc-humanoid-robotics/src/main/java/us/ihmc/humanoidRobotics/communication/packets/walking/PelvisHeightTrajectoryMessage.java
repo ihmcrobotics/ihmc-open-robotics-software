@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -38,14 +36,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public PelvisHeightTrajectoryMessage()
    {
       euclideanTrajectory = new EuclideanTrajectoryMessage();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
-   }
-
-   public PelvisHeightTrajectoryMessage(Random random)
-   {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
       euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);

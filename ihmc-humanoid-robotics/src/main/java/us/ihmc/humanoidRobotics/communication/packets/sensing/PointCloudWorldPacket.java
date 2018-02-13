@@ -1,54 +1,34 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+
 @HighBandwidthPacket
 public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 {
    public long timestamp;
-   
+
    public float[] groundQuadTreeSupport;
-   
+
    // Code is duplicated, probably gets replaced with locality hash
    public float[] decayingWorldScan;
 
    public float defaultGroundHeight;
-   
-   public PointCloudWorldPacket(Random random)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      timestamp = random.nextLong();
-      
-      int size = Math.abs(random.nextInt(100000));
-      groundQuadTreeSupport = new float[size];
-      for (int i = 0; i < groundQuadTreeSupport.length; i++)
-      {
-         groundQuadTreeSupport[i] = random.nextFloat();
-      }
-      
-      size = Math.abs(random.nextInt(100000));
-      decayingWorldScan = new float[size];
-      for (int i = 0; i < decayingWorldScan.length; i++)
-      {
-         decayingWorldScan[i] = random.nextFloat();
-      }
-   }
-   
+
    public PointCloudWorldPacket()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       setDestination(PacketDestination.BROADCAST);
    }
-   
+
    public void setGroundQuadTreeSupport(Point3D[] pointCloud)
    {
-      groundQuadTreeSupport = new float[pointCloud.length*3];
+      groundQuadTreeSupport = new float[pointCloud.length * 3];
       for (int i = 0; i < pointCloud.length; i++)
       {
          Point3D point = pointCloud[i];
@@ -57,10 +37,10 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
          groundQuadTreeSupport[3 * i + 2] = (float) point.getZ();
       }
    }
-   
+
    public void setDecayingWorldScan(Point3D[] pointCloud)
    {
-      decayingWorldScan = new float[pointCloud.length*3];
+      decayingWorldScan = new float[pointCloud.length * 3];
       for (int i = 0; i < pointCloud.length; i++)
       {
          Point3D point = pointCloud[i];
@@ -72,7 +52,7 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 
    public void setDecayingWorldScan(ArrayList<Point3D> pointCloud)
    {
-      decayingWorldScan = new float[pointCloud.size()*3];
+      decayingWorldScan = new float[pointCloud.size() * 3];
       for (int i = 0; i < pointCloud.size(); i++)
       {
          Point3D point = pointCloud.get(i);
@@ -84,11 +64,11 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 
    public Point3D32[] getGroundQuadTreeSupport()
    {
-      
-      int numberOfPoints = groundQuadTreeSupport.length/3;
-      
+
+      int numberOfPoints = groundQuadTreeSupport.length / 3;
+
       Point3D32[] points = new Point3D32[numberOfPoints];
-      for(int i = 0; i < numberOfPoints; i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
          Point3D32 point = new Point3D32();
          point.setX(groundQuadTreeSupport[3 * i]);
@@ -96,16 +76,16 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
          point.setZ(groundQuadTreeSupport[3 * i + 2]);
          points[i] = point;
       }
-      
+
       return points;
    }
 
    public Point3D32[] getDecayingWorldScan()
    {
-      int numberOfPoints = decayingWorldScan.length/3;
-      
+      int numberOfPoints = decayingWorldScan.length / 3;
+
       Point3D32[] points = new Point3D32[numberOfPoints];
-      for(int i = 0; i < numberOfPoints; i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
          Point3D32 point = new Point3D32();
          point.setX(decayingWorldScan[3 * i]);
@@ -113,10 +93,10 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
          point.setZ(decayingWorldScan[3 * i + 2]);
          points[i] = point;
       }
-      
+
       return points;
    }
-   
+
    @Override
    public boolean epsilonEquals(PointCloudWorldPacket other, double epsilon)
    {
@@ -130,10 +110,10 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
          ret &= decayingWorldScan[i] == other.decayingWorldScan[i];
       }
       ret &= defaultGroundHeight == other.defaultGroundHeight;
-      
+
       return ret;
    }
-   
+
    @Override
    public String toString()
    {
@@ -141,8 +121,8 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 
       try
       {
-         ret = "PointCloudWorldPacket [timestamp=" + timestamp + ", groundQuadTreeSupport=" + groundQuadTreeSupport.length/3 + " points, decayingWorldScan="
-               + decayingWorldScan.length/3 + " points, defaultGroundHeight=" + defaultGroundHeight + "]";
+         ret = "PointCloudWorldPacket [timestamp=" + timestamp + ", groundQuadTreeSupport=" + groundQuadTreeSupport.length / 3 + " points, decayingWorldScan="
+               + decayingWorldScan.length / 3 + " points, defaultGroundHeight=" + defaultGroundHeight + "]";
       }
       catch (NullPointerException e)
       {

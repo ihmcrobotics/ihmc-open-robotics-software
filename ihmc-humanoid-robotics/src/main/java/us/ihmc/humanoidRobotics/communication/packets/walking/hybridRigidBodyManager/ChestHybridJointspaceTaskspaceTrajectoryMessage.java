@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -26,18 +24,6 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
    public ChestHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Random constructor for unit testing this packet
-    * @param random seed
-    */
-   public ChestHybridJointspaceTaskspaceTrajectoryMessage(Random random)
-   {
-      this.taskspaceTrajectoryMessage = new SO3TrajectoryMessage(random);
-      this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(random);
-      jointspaceTrajectoryMessage.queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

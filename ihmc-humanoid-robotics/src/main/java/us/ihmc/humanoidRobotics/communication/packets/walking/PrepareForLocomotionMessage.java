@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 
 public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMessage>
@@ -19,12 +17,6 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       this.prepareManipulation = prepareManipulation;
       this.preparePelvis = preparePelvis;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public PrepareForLocomotionMessage(Random random)
-   {
-      this.prepareManipulation = random.nextBoolean();
-      this.preparePelvis = random.nextBoolean();
    }
 
    /**

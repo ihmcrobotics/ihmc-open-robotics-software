@@ -1,9 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
-
 
 public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 {
@@ -16,9 +13,8 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
    public boolean autoExposure;
    public boolean autoWhiteBalance;
 
-
-   public MultisenseParameterPacket(boolean initialize, double gain, double motorSpeed, double dutyCycle, boolean ledEnable,
-                                    boolean flashEnable, boolean autoExposure, boolean autoWhiteBalance)
+   public MultisenseParameterPacket(boolean initialize, double gain, double motorSpeed, double dutyCycle, boolean ledEnable, boolean flashEnable,
+                                    boolean autoExposure, boolean autoWhiteBalance)
    {
       this.intialize = initialize;
       this.gain = gain;
@@ -30,12 +26,11 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       this.autoWhiteBalance = autoWhiteBalance;
 
    }
-   
+
    public MultisenseParameterPacket()
    {
-      
-   }
 
+   }
 
    public boolean isInitialize()
    {
@@ -111,7 +106,6 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       }
    }
 
-
    @Override
    public boolean epsilonEquals(MultisenseParameterPacket other, double epsilon)
    {
@@ -129,12 +123,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       System.out.println("auto white balance 1: " + isAutoWhiteBalance() + " auto white balance 2 " + other.isAutoWhiteBalance());
 
       return (other.isInitialize() == isInitialize()) && (other.getGain() == roundedGain) && (other.getMotorSpeed() == roundedSpeed)
-             && (other.getDutyCycle() == roundedDutyCycle) && (other.isFlashEnable() == isFlashEnable())
-             && (other.isLedEnable() == isLedEnable()) && (other.isAutoExposure() == isAutoExposure()) && (other.isAutoWhiteBalance() == isAutoWhiteBalance());
-   }
-
-   public MultisenseParameterPacket(Random random)
-   {
-      this(true, random.nextDouble(), random.nextDouble(), random.nextDouble(), true, true, true, true);
+            && (other.getDutyCycle() == roundedDutyCycle) && (other.isFlashEnable() == isFlashEnable()) && (other.isLedEnable() == isLedEnable())
+            && (other.isAutoExposure() == isAutoExposure()) && (other.isAutoWhiteBalance() == isAutoWhiteBalance());
    }
 }

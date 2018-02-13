@@ -1,9 +1,6 @@
 package us.ihmc.communication.packets;
 
 import java.util.Arrays;
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 
 /**
  *
@@ -42,27 +39,6 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
       this.boundingBoxYCoordinates = other.boundingBoxYCoordinates;
       this.boundingBoxWidths = other.boundingBoxWidths;
       this.boundingBoxHeights = other.boundingBoxHeights;
-   }
-
-   public BoundingBoxesPacket(Random random)
-   {
-      int boxesToGenerate = random.nextInt(20);
-
-      this.labels = new String[boxesToGenerate];
-      Arrays.fill(labels, Integer.toHexString(random.nextInt()));
-
-      for (int i = 0; i < boxesToGenerate; i++)
-      {
-         boundingBoxXCoordinates = new int[boxesToGenerate];
-         boundingBoxYCoordinates = new int[boxesToGenerate];
-         boundingBoxWidths = new int[boxesToGenerate];
-         boundingBoxHeights = new int[boxesToGenerate];
-
-         boundingBoxXCoordinates[i] = RandomNumbers.nextInt(random, -1000, 1000);
-         boundingBoxYCoordinates[i] = RandomNumbers.nextInt(random, -1000, 1000);
-         boundingBoxWidths[i] = RandomNumbers.nextInt(random, 0, 1000);
-         boundingBoxHeights[i] = RandomNumbers.nextInt(random, 0, 1000);
-      }
    }
 
    @Override public boolean epsilonEquals(BoundingBoxesPacket other, double epsilon)

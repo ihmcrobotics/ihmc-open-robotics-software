@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
@@ -19,7 +17,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -51,22 +48,6 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public EuclideanTrajectoryMessage(Random random)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      int randomNumberOfPoints = random.nextInt(16) + 1;
-      taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[randomNumberOfPoints];
-      for (int i = 0; i < randomNumberOfPoints; i++)
-      {
-         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(random);
-      }
-
-      useCustomControlFrame = random.nextBoolean();
-      controlFramePose.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
-      queueingProperties = new QueueableMessage(random);
    }
 
    public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage other)

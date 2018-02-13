@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -122,13 +119,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    {
       jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
       this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public ArmTrajectoryMessage(Random random)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
-      this.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

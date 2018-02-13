@@ -8,8 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 
-import java.util.Random;
-
 /**
  * This is a holder for frame related information that is passed through packages that implement
  * {@link FrameBasedMessage}.
@@ -65,12 +63,6 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
    public FrameInformation(ReferenceFrame trajectoryFrame)
    {
       trajectoryReferenceFrameId = trajectoryFrame.getNameBasedHashCode();
-   }
-
-   public FrameInformation(Random random)
-   {
-      trajectoryReferenceFrameId = random.nextLong();
-      dataReferenceFrameId = random.nextLong();
    }
 
    public long getTrajectoryReferenceFrameId()
