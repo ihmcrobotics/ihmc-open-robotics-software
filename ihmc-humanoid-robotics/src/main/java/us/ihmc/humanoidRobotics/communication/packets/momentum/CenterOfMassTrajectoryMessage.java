@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.momentum;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
 
@@ -22,12 +20,6 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
    public CenterOfMassTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       euclideanTrajectory = new EuclideanTrajectoryMessage(numberOfTrajectoryPoints);
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public CenterOfMassTrajectoryMessage(Random random)
-   {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(random);
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 

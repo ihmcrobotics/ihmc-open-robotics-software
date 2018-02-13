@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,11 +36,5 @@ public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket>
       boolean ret = this.getRobotSide().equals(other.getRobotSide());
 
       return ret;
-   }
-
-   public HandPowerCyclePacket(Random random)
-   {
-      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT);
-
    }
 }

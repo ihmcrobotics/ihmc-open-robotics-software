@@ -1,14 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -30,34 +28,6 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    public FootstepPlanningToolboxOutputStatus()
    {
       // empty constructor for serialization
-   }
-
-   public FootstepPlanningToolboxOutputStatus(Random random)
-   {
-      footstepDataList = new FootstepDataListMessage(random);
-      int result = random.nextInt(FootstepPlanningResult.values.length);
-      planningResult = FootstepPlanningResult.values[result];
-      planId = random.nextInt();
-
-      bodyPath = new Point2D[random.nextInt(10)];
-      for (int i = 0; i < bodyPath.length; i++)
-      {
-         bodyPath[i] = EuclidCoreRandomTools.nextPoint2D(random);
-      }
-
-      lowLevelPlannerGoal = new Pose2D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-
-      navigableExtrusions = new Point3D[random.nextInt(40) + 1][];
-      for (int i = 0; i < navigableExtrusions.length; i++)
-      {
-         int numberOfPoints = random.nextInt(5) + 1;
-         navigableExtrusions[i] = new Point3D[numberOfPoints];
-
-         for (int j = 0; j < numberOfPoints; j++)
-         {
-            navigableExtrusions[i][j] = EuclidCoreRandomTools.nextPoint3D(random);
-         }
-      }
    }
 
    public void setPlanId(int planId)
@@ -90,40 +60,40 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    {
       if (!planningResult.equals(other.planningResult))
          return false;
-      if(planId != other.planId)
+      if (planId != other.planId)
          return false;
 
-      if(!nullAndEpilsonCompare(planarRegionsListMessage, other.planarRegionsListMessage, epsilon))
+      if (!nullAndEpilsonCompare(planarRegionsListMessage, other.planarRegionsListMessage, epsilon))
          return false;
-      if(!nullAndEpilsonCompare(lowLevelPlannerGoal, other.lowLevelPlannerGoal, epsilon))
+      if (!nullAndEpilsonCompare(lowLevelPlannerGoal, other.lowLevelPlannerGoal, epsilon))
          return false;
-      if(!bothOrNeitherAreNull(bodyPath, other.bodyPath))
+      if (!bothOrNeitherAreNull(bodyPath, other.bodyPath))
          return false;
-      if(!bothOrNeitherAreNull(navigableExtrusions, other.navigableExtrusions))
+      if (!bothOrNeitherAreNull(navigableExtrusions, other.navigableExtrusions))
          return false;
 
-      if(bodyPath != null)
+      if (bodyPath != null)
       {
          for (int i = 0; i < bodyPath.length; i++)
          {
-            if(!bodyPath[i].epsilonEquals(other.bodyPath[i], epsilon))
+            if (!bodyPath[i].epsilonEquals(other.bodyPath[i], epsilon))
                return false;
          }
       }
 
-      if(navigableExtrusions != null)
+      if (navigableExtrusions != null)
       {
          for (int i = 0; i < navigableExtrusions.length; i++)
          {
             for (int j = 0; j < navigableExtrusions[i].length; j++)
             {
-               if(!navigableExtrusions[i][j].epsilonEquals(other.navigableExtrusions[i][j], epsilon))
+               if (!navigableExtrusions[i][j].epsilonEquals(other.navigableExtrusions[i][j], epsilon))
                   return false;
             }
          }
       }
 
-      if(!footstepDataList.epsilonEquals(other.footstepDataList, epsilon))
+      if (!footstepDataList.epsilonEquals(other.footstepDataList, epsilon))
          return false;
 
       return true;
@@ -131,18 +101,18 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
 
    private static <T extends EpsilonComparable<T>> boolean nullAndEpilsonCompare(T object1, T object2, double epsilon)
    {
-      if(!bothOrNeitherAreNull(object1, object2))
+      if (!bothOrNeitherAreNull(object1, object2))
          return false;
-      else if(object1 != null && !object1.epsilonEquals(object2, epsilon))
+      else if (object1 != null && !object1.epsilonEquals(object2, epsilon))
          return false;
       return true;
    }
 
    private static boolean bothOrNeitherAreNull(Object object1, Object object2)
    {
-      if(object1 == null && object2 != null)
+      if (object1 == null && object2 != null)
          return false;
-      else if(object1 != null && object2 == null)
+      else if (object1 != null && object2 == null)
          return false;
       return true;
    }

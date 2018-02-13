@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -42,12 +39,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    public FootLoadBearingMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public FootLoadBearingMessage(Random random)
-   {
-      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      request = RandomNumbers.nextEnum(random, LoadBearingRequest.class);
    }
 
    /**

@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
 import java.util.List;
-import java.util.Random;
 import java.util.zip.CRC32;
 
 import us.ihmc.communication.packets.IMUPacket;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -43,46 +41,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    public int lastReceivedPacketTypeID;
    public long lastReceivedPacketUniqueId;
    public long lastReceivedPacketRobotTimestamp;
-
-   public RobotConfigurationData(Random random)
-   {
-      timestamp = random.nextLong();
-      sensorHeadPPSTimestamp = random.nextLong();
-      jointNameHash = random.nextInt(10000);
-
-      int size = Math.abs(random.nextInt(1000));
-
-      jointAngles = new float[size];
-      for (int i = 0; i < jointAngles.length; i++)
-      {
-         jointAngles[i] = random.nextFloat();
-      }
-
-      jointVelocities = new float[size];
-      for (int i = 0; i < jointVelocities.length; i++)
-      {
-         jointVelocities[i] = random.nextFloat();
-      }
-
-      jointTorques = new float[size];
-      for (int i = 0; i < jointTorques.length; i++)
-      {
-         jointTorques[i] = random.nextFloat();
-      }
-
-      rootTranslation = RandomGeometry.nextVector3D32(random);
-      rootOrientation = RandomGeometry.nextQuaternion32(random);
-
-      size = Math.abs(random.nextInt(1000));
-      momentAndForceDataAllForceSensors = new float[size][Wrench.SIZE];
-      for (int i = 0; i < momentAndForceDataAllForceSensors.length; i++)
-      {
-         for (int j = 0; j < Wrench.SIZE; j++)
-         {
-            momentAndForceDataAllForceSensors[i][j] = random.nextFloat();
-         }
-      }
-   }
 
    public RobotConfigurationData()
    {

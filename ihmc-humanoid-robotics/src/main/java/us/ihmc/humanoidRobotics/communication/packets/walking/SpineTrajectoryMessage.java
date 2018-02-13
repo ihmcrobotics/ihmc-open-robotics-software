@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -20,16 +18,6 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
     */
    public SpineTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Random constructor for unit testing this packet
-    * @param random seed
-    */
-   public SpineTrajectoryMessage(Random random)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

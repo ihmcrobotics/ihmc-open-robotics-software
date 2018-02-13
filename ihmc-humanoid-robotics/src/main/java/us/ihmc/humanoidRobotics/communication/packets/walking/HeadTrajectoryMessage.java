@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -30,16 +28,6 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
     */
    public HeadTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Random constructor for unit testing this packet
-    * @param random seed
-    */
-   public HeadTrajectoryMessage(Random random)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

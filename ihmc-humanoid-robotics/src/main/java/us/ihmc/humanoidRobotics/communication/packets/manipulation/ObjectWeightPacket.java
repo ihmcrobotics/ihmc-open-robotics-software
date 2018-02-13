@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -9,12 +7,6 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
 {
    public RobotSide robotSide;
    public double weight;
-   
-   public ObjectWeightPacket(Random random)
-   {
-      weight = random.nextDouble();
-      robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-   }
    
    public ObjectWeightPacket()
    {
@@ -36,12 +28,6 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
    {
       return weight;
    }
-   
-//   public void set(ObjectWeightPacket other)
-//   {
-//      robotSide = other.getRobotSide();
-//      weight = other.getWeight();
-//   }
    
    @Override
    public boolean epsilonEquals(ObjectWeightPacket other, double epsilon)

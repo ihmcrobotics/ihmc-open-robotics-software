@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -27,16 +25,6 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
    public OneDoFJointTrajectoryMessage()
    {
       super();
-   }
-
-   public OneDoFJointTrajectoryMessage(Random random)
-   {
-      this(random.nextInt(16) + 1);
-
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-      {
-         trajectoryPoints[i] = new TrajectoryPoint1DMessage(random);
-      }
    }
 
    public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage trajectory1dMessage)

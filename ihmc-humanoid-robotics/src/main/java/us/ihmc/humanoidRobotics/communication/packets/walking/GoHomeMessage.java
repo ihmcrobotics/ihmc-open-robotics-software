@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -11,9 +8,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
-      + " It is useful to get back to a safe configuration before walking.",
-                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
-                  topic = "/control/go_home")
+      + " It is useful to get back to a safe configuration before walking.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/go_home")
 public class GoHomeMessage extends Packet<GoHomeMessage>
 {
    public enum BodyPart
@@ -48,20 +43,12 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
    public RobotSide robotSide;
    @RosExportedField(documentation = "How long the trajectory will spline from the current desired to the home configuration.")
    public double trajectoryTime;
-   
+
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
    public GoHomeMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public GoHomeMessage(Random random)
-   {
-      bodyPart = RandomNumbers.nextEnum(random, BodyPart.class);
-      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      trajectoryTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -103,18 +90,20 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
    {
       return trajectoryTime;
    }
-   
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
+    * 
     * @return the time to delay this command in seconds
     */
    public double getExecutionDelayTime()
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
+    * 
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    public void setExecutionDelayTime(double delayTime)
@@ -131,7 +120,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
          return false;
       return true;
    }
-   
+
    /** {@inheritDoc} */
    @Override
    public String validateMessage()

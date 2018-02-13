@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
@@ -19,7 +17,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
@@ -53,29 +50,6 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public SE3TrajectoryMessage(Random random)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      int randomNumberOfPoints = random.nextInt(16) + 1;
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[randomNumberOfPoints];
-      for (int i = 0; i < randomNumberOfPoints; i++)
-      {
-         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(random);
-      }
-      frameInformation.setTrajectoryReferenceFrameId(random.nextLong());
-      frameInformation.setDataReferenceFrameId(random.nextLong());
-      useCustomControlFrame = random.nextBoolean();
-      controlFramePose = new QuaternionBasedTransform(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
-      queueingProperties = new QueueableMessage(random);
-
-      angularSelectionMatrix = new SelectionMatrix3DMessage(random);
-      linearSelectionMatrix = new SelectionMatrix3DMessage(random);
-
-      angularWeightMatrix = new WeightMatrix3DMessage(random);
-      linearWeightMatrix = new WeightMatrix3DMessage(random);
    }
 
    public SE3TrajectoryMessage(SE3TrajectoryMessage other)

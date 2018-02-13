@@ -1,25 +1,17 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Random;
-
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.Packet;
 
-public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> 
+public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket>
 {
    public float residualError;
-   public float totalError;   
+   public float totalError;
    public boolean hasMapBeenReset;
-   
-	public PelvisPoseErrorPacket(Random random)
-	{
-	   residualError = random.nextFloat();
-	   totalError = random.nextFloat();
-	}
-	
-	public PelvisPoseErrorPacket()
-	{
-	}
+
+   public PelvisPoseErrorPacket()
+   {
+   }
 
    public PelvisPoseErrorPacket(float residualError, float totalError, boolean hasMapBeenReset)
    {
@@ -27,13 +19,12 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket>
       this.totalError = totalError;
       this.hasMapBeenReset = hasMapBeenReset;
    }
-	
+
    @Override
    public boolean epsilonEquals(PelvisPoseErrorPacket other, double epsilon)
    {
-      return (MathTools.epsilonEquals(residualError, other.residualError, epsilon)
-         && MathTools.epsilonEquals(totalError, other.totalError, epsilon)
-         && other.hasMapBeenReset == hasMapBeenReset);
-	}
+      return (MathTools.epsilonEquals(residualError, other.residualError, epsilon) && MathTools.epsilonEquals(totalError, other.totalError, epsilon)
+            && other.hasMapBeenReset == hasMapBeenReset);
+   }
 
 }

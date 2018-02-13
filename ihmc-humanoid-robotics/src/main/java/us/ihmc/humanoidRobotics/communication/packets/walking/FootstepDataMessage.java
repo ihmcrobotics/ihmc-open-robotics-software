@@ -3,16 +3,14 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
-import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -23,8 +21,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -473,38 +469,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
             && swingTrajectoryBlendDurationEquals;
-   }
-
-   public FootstepDataMessage(Random random)
-   {
-      TrajectoryType[] trajectoryTypes = TrajectoryType.values();
-      int randomOrdinal = random.nextInt(trajectoryTypes.length);
-
-      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
-      this.orientation = RandomGeometry.nextQuaternion(random);
-      int numberOfPredictedContactPoints = random.nextInt(10);
-      this.predictedContactPoints = new ArrayList<>();
-
-      for (int i = 0; i < numberOfPredictedContactPoints; i++)
-      {
-         predictedContactPoints.add(new Point2D(random.nextDouble(), random.nextDouble()));
-      }
-
-      this.trajectoryType = trajectoryTypes[randomOrdinal];
-      this.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.05);
-
-      this.swingDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
-      this.transferDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
-      //TODO: when the footstep data list ros message gets regenerated uncomment this! -shrews
-//      this.touchdownDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
-
-      if (trajectoryType == TrajectoryType.CUSTOM)
-      {
-         positionWaypoints = new Point3D[2];
-         positionWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         positionWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-      }
    }
 
    /** {@inheritDoc} */

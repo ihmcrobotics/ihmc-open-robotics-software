@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -44,10 +42,5 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       boolean ret = this.getRobotSide().equals(other.getRobotSide());
 
       return ret;
-   }
-
-   public AtlasWristSensorCalibrationRequestPacket(Random random)
-   {
-      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT);
    }
 }

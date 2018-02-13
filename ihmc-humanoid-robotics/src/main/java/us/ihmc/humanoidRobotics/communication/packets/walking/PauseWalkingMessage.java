@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -62,10 +60,5 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage>
    public boolean epsilonEquals(PauseWalkingMessage other, double epsilon)
    {
       return (this.isPaused() == other.isPaused());
-   }
-
-   public PauseWalkingMessage(Random random)
-   {
-      this(random.nextBoolean());
    }
 }

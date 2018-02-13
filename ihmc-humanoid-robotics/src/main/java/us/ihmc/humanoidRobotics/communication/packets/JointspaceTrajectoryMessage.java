@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -115,15 +113,6 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.jointTrajectoryMessages = jointTrajectory1DListMessages;
-   }
-
-   public JointspaceTrajectoryMessage(Random random)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      queueingProperties = new QueueableMessage(random);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[random.nextInt(10) + 1];
-      for (int i = 0; i < getNumberOfJoints(); i++)
-         setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
    }
 
    public void set(JointspaceTrajectoryMessage other)

@@ -1,7 +1,5 @@
 package us.ihmc.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,14 +27,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
     */
    public WeightMatrix3DMessage()
    {
-   }
-
-   public WeightMatrix3DMessage(Random random)
-   {
-      weightFrameId = random.nextLong();
-      xWeight = random.nextDouble();
-      yWeight = random.nextDouble();
-      zWeight = random.nextDouble();
    }
 
    /**

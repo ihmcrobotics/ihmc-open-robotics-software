@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 
@@ -17,16 +15,6 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public StopAllTrajectoryMessage()
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * 
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param random
-    */
-   public StopAllTrajectoryMessage(Random random)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }

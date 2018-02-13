@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -9,54 +7,31 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 {
    private static final boolean DEBUG = false;
 
+   public boolean autoExposure;
+
+   public boolean autoGain;
+
+   public boolean autoShutter;
+
+   public double exposure;
+
+   public double frameRate;
+
    public boolean fromUI;
 
-   public boolean isAutoExposure()
-   {
-      return autoExposure;
-   }
-
-   public void setAutoExposure(boolean autoExposure)
-   {
-      this.autoExposure = autoExposure;
-   }
-
-   public boolean isAutoShutter()
-   {
-      return autoShutter;
-   }
-
-   public void setAutoShutter(boolean autoShutter)
-   {
-      this.autoShutter = autoShutter;
-   }
-
-   public boolean isAutoGain()
-   {
-      return autoGain;
-   }
-
-   public void setAutoGain(boolean autoGain)
-   {
-      this.autoGain = autoGain;
-   }
-
-   public RobotSide getSide()
-   {
-      return side;
-   }
-
-   public boolean autoExposure;
-   public boolean autoShutter;
-   public boolean autoGain;
    public double gain;
-   public double exposure;
-   public double frameRate;
+
    public double shutter;
+
    public RobotSide side;
 
+   public BlackFlyParameterPacket()
+   {
+
+   }
+
    public BlackFlyParameterPacket(boolean fromUI, double gain, double exposure, double frameRate, double shutter, boolean autoExPosure, boolean autoGain,
-         boolean autoShutter, RobotSide side)
+                                  boolean autoShutter, RobotSide side)
    {
       this.fromUI = fromUI;
       this.exposure = exposure;
@@ -67,48 +42,6 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       this.autoGain = autoGain;
       this.autoShutter = autoShutter;
       this.side = side;
-   }
-
-   public BlackFlyParameterPacket()
-   {
-
-   }
-
-   public double getExposure()
-   {
-      return exposure;
-   }
-
-   public double getShutter()
-   {
-      return shutter;
-   }
-
-   public double getGain()
-   {
-      return gain;
-   }
-
-   public double getFrameRate()
-   {
-      return frameRate;
-   }
-
-   public boolean isFromUI()
-   {
-      return fromUI;
-   }
-
-   public boolean equals(Object other)
-   {
-      if (other instanceof BlackFlyParameterPacket)
-      {
-         return epsilonEquals((BlackFlyParameterPacket) other, 0);
-      }
-      else
-      {
-         return false;
-      }
    }
 
    @Override
@@ -133,17 +66,82 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
             && (other.getFrameRate() == roundedFrameRate) && (other.getShutter() == roundedShutter);
    }
 
-   public BlackFlyParameterPacket(Random random)
+   public boolean equals(Object other)
    {
-      this(false, Math.round(random.nextDouble() * 10) / 10.0, Math.round(random.nextDouble() * 10) / 10.0, Math.round(random.nextDouble() * 10) / 10.0, Math
-            .round(random.nextDouble() * 10) / 10.0, random.nextBoolean(), random.nextBoolean(), random.nextBoolean(), RobotSide.LEFT);
+      if (other instanceof BlackFlyParameterPacket)
+      {
+         return epsilonEquals((BlackFlyParameterPacket) other, 0);
+      }
+      else
+      {
+         return false;
+      }
+   }
 
+   public double getExposure()
+   {
+      return exposure;
+   }
+
+   public double getFrameRate()
+   {
+      return frameRate;
+   }
+
+   public double getGain()
+   {
+      return gain;
+   }
+
+   public double getShutter()
+   {
+      return shutter;
+   }
+
+   public RobotSide getSide()
+   {
+      return side;
+   }
+
+   public boolean isAutoExposure()
+   {
+      return autoExposure;
+   }
+
+   public boolean isAutoGain()
+   {
+      return autoGain;
+   }
+
+   public boolean isAutoShutter()
+   {
+      return autoShutter;
+   }
+
+   public boolean isFromUI()
+   {
+      return fromUI;
+   }
+
+   public void setAutoExposure(boolean autoExposure)
+   {
+      this.autoExposure = autoExposure;
+   }
+
+   public void setAutoGain(boolean autoGain)
+   {
+      this.autoGain = autoGain;
+   }
+
+   public void setAutoShutter(boolean autoShutter)
+   {
+      this.autoShutter = autoShutter;
    }
 
    @Override
    public String toString()
    {
-      return " source(fromUI?)" + fromUI +" "+ side.name() + " gain " + gain + " fps " + frameRate + " shutter " + shutter + " exposure " + exposure
+      return " source(fromUI?)" + fromUI + " " + side.name() + " gain " + gain + " fps " + frameRate + " shutter " + shutter + " exposure " + exposure
             + " autoExposure/autoGain/autoShutter " + autoExposure + autoGain + autoShutter;
    }
 }

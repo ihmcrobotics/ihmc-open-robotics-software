@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -16,12 +15,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-@RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).",
-                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
+@RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 {
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
@@ -37,7 +34,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public List<Point2D> predictedContactPoints;
-   
+
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
@@ -65,7 +62,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    }
 
    public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-         TrajectoryType trajectoryType, double swingHeight)
+                                TrajectoryType trajectoryType, double swingHeight)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
       this.robotSide = robotSide;
@@ -176,13 +173,15 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 
    public void setLocation(Point3D location)
    {
-      if (this.location == null) this.location = new Point3D();
+      if (this.location == null)
+         this.location = new Point3D();
       this.location.set(location);
    }
 
    public void setOrientation(Quaternion orientation)
    {
-      if (this.orientation == null) this.orientation = new Quaternion();
+      if (this.orientation == null)
+         this.orientation = new Quaternion();
       this.orientation.set(orientation);
    }
 
@@ -190,18 +189,20 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    {
       this.predictedContactPoints = predictedContactPoints;
    }
-   
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
+    * 
     * @return the time to delay this command in seconds
     */
    public double getExecutionDelayTime()
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
+    * 
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    public void setExecutionDelayTime(double delayTime)
@@ -271,21 +272,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       }
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
-   }
-
-   public AdjustFootstepMessage(Random random)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
-      this.orientation = RandomGeometry.nextQuaternion(random);
-      int numberOfPredictedContactPoints = random.nextInt(10);
-      this.predictedContactPoints = new ArrayList<>();
-
-      for (int i = 0; i < numberOfPredictedContactPoints; i++)
-      {
-         predictedContactPoints.add(new Point2D(random.nextDouble(), random.nextDouble()));
-      }
    }
 
    /** {@inheritDoc} */

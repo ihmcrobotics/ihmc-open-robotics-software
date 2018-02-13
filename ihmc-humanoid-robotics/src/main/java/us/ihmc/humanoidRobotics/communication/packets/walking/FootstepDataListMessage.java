@@ -1,10 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
@@ -326,22 +324,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public QueueableMessage getQueueingProperties()
    {
       return queueingProperties;
-   }
-
-   public FootstepDataListMessage(Random random)
-   {
-      setUniqueId(1L);
-      int footstepListSize = random.nextInt(20);
-      for (int i = 0; i < footstepListSize; i++)
-      {
-         footstepDataList.add(new FootstepDataMessage(random));
-      }
-
-      this.defaultSwingDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      this.defaultTransferDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      this.finalTransferDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      this.executionTiming = RandomNumbers.nextEnum(random, ExecutionTiming.class);
-      queueingProperties = new QueueableMessage(random);
    }
 
    /** {@inheritDoc} */

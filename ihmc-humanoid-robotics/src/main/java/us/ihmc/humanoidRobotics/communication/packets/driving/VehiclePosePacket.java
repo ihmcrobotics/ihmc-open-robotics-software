@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.driving;
 
-import java.util.Random;
-
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
@@ -10,8 +9,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.commons.FormattingTools;
 
 public class VehiclePosePacket extends Packet<VehiclePosePacket>
 {
@@ -78,17 +75,5 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket>
             + FormattingTools.getFormattedDecimal3D(ypr[1]) + "," + FormattingTools.getFormattedDecimal3D(ypr[2]) + ")";
 
       return ret;
-   }
-
-   public VehiclePosePacket(Random random)
-   {
-      Point3D point = new Point3D();
-      Quaternion quat = new Quaternion();
-
-      point.set(RandomGeometry.nextPoint3D(random, 0.288, 0.288, 0.288)); // magic numbers so point will not exceed XYZ_MIN / MAX in PelvisOrientationPacketSerializer
-      quat.set(RandomGeometry.nextAxisAngle(random));
-
-      position = point;
-      orientation = quat;
    }
 }
