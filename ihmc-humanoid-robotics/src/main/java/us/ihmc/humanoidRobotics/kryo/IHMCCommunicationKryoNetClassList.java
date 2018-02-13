@@ -50,6 +50,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -58,9 +59,6 @@ import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
-import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingAction;
-import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingCommand;
-import us.ihmc.humanoidRobotics.communication.packets.LowLevelDrivingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.SCSListenerPacket;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
@@ -108,22 +106,18 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectric
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.BatchedDesiredSteeringAngleAndSingleJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPowerCyclePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ReachingManifoldMessage;
@@ -180,7 +174,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -261,15 +254,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HandConfiguration.class);
       registerPacketFields(RobotSide.class);
       registerPacketClass(ObjectWeightPacket.class);
-      registerPacketClass(HandRotateAboutAxisPacket.class);
-      registerPacketField(HandRotateAboutAxisPacket.DataType.class);
-      registerPacketClass(SteeringWheelInformationPacket.class);
       registerPacketField(RobotSide.class);
       registerPacketField(Point3D.class);
       registerPacketField(Point3D32.class);
       registerPacketField(Vector3D.class);
       registerPacketField(Vector2D32.class);
-      registerPacketClass(DesiredSteeringAnglePacket.class);
       registerPacketClass(QuaternionBasedTransform.class);
 
       registerPacketClass(HandComplianceControlParametersMessage.class);
@@ -445,12 +434,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Recording
       registerPacketClass(EndOfScriptCommand.class);
 
-      // Driving
-      registerPacketClass(LowLevelDrivingCommand.class);
-      registerPacketClass(LowLevelDrivingStatus.class);
-      registerPacketClass(LowLevelDrivingCommand.class);
-      registerPacketField(LowLevelDrivingAction.class);
-
       //hand joint and control packets
       registerPacketClass(ManualHandControlPacket.class);
       registerPacketClass(HandPowerCyclePacket.class);
@@ -585,7 +568,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(LegCompliancePacket.class);
       registerPacketClass(DrillDetectionPacket.class);
       registerPacketClass(UIPositionCheckerPacket.class);
-      registerPacketClass(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class);
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
 

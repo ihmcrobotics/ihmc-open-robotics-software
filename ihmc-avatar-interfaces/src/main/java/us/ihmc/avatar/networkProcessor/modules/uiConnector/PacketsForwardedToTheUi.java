@@ -24,7 +24,6 @@ import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadT
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
@@ -79,7 +78,6 @@ public class PacketsForwardedToTheUi
       VideoPacket.class,
       HandTrajectoryMessage.class,
       ArmTrajectoryMessage.class,
-      HandRotateAboutAxisPacket.class,
       DepthDataClearCommand.class,
       ValveLocationPacket.class,
       BehaviorStatusPacket.class,
