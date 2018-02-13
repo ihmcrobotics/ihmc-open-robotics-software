@@ -137,10 +137,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest.MultisenseFrameName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
@@ -211,10 +208,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(char[].class);
       registerPacketField(String[].class);
       registerPacketClass(HandCollisionDetectedPacket.class);
-
-      registerPacketField(MultisenseTest.class);
-      registerPacketField(MultisenseFrameName.class);
-      registerPacketClass(MultisenseMocapExperimentPacket.class);
 
       // Video data
       registerPacketClass(VideoPacket.class);
