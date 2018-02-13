@@ -129,7 +129,6 @@ import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajector
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
@@ -468,8 +467,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(LocalizationPointMapPacket.class);
 
       registerPacketClass(RawIMUPacket.class);
-      registerPacketClass(HeadPosePacket.class);
-      registerPacketClass(HeadPosePacket.MeasurementStatus.class);
 
       registerPacketField(Vector3D[].class);
       registerPacketField(Quaternion[].class);

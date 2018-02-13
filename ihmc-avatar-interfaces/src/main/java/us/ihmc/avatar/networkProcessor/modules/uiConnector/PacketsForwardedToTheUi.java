@@ -29,7 +29,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
@@ -109,7 +108,6 @@ public class PacketsForwardedToTheUi
 //      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotPoseData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(CapturabilityBasedStatus.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotConfigurationData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
-      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(HeadPosePacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RawIMUPacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
    }
 
