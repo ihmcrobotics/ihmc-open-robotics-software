@@ -121,7 +121,6 @@ import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajector
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
@@ -454,7 +453,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Point3D[].class);
 
       registerPacketClass(PointCloudWorldPacket.class);
-      registerPacketClass(LidarPosePacket.class);
 
       // New quadTree
       registerPacketClass(HeightQuadTreeToolboxRequestMessage.class);
