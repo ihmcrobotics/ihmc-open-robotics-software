@@ -126,6 +126,18 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
          setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
    }
 
+   public void set(JointspaceTrajectoryMessage other)
+   {
+      queueingProperties.set(other.queueingProperties);
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[other.jointTrajectoryMessages.length];
+      for (int i = 0; i < jointTrajectoryMessages.length; i++)
+      {
+         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage();
+         jointTrajectoryMessages[i].set(other.jointTrajectoryMessages[i]);
+      }
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
    /**
     * Set the trajectory points to be executed by this joint.
     * @param jointIndex index of the joint that will go through the trajectory points.

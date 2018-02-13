@@ -140,6 +140,17 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
          jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
+   public void set(ArmTrajectoryMessage other)
+   {
+      robotSide = other.robotSide;
+      jointspaceTrajectory.set(other.jointspaceTrajectory);
+   }
+
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
