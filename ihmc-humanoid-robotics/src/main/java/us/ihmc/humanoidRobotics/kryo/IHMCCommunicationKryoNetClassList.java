@@ -80,7 +80,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBe
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallTaskBehaviorData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -407,8 +406,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BehaviorControlModePacket.class);
       registerPacketField(BehaviorControlModeEnum.class);
       registerPacketClass(BehaviorControlModeResponsePacket.class);
-      registerPacketClass(WallTaskBehaviorData.class);
-      registerPacketField(WallTaskBehaviorData.Commands.class);
 
       registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketClass(ManualHandControlPacket.class);
