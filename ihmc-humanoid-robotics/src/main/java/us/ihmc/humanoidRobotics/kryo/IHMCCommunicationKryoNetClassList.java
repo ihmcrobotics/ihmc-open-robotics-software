@@ -191,7 +191,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMan
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationData;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestMessage;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
@@ -220,7 +219,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Video data
       registerPacketClass(VideoPacket.class);
       registerPacketClass(SimulatedLidarScanPacket.class);
-      registerPacketClass(JointConfigurationData.class);
 
       registerPacketClass(IMUPacket.class);
       registerPacketField(IMUPacket[].class);
