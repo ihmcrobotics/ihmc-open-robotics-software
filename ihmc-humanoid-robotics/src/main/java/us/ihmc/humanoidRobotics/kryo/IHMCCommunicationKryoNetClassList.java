@@ -147,7 +147,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
@@ -221,7 +220,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Video data
       registerPacketClass(VideoPacket.class);
       registerPacketClass(SimulatedLidarScanPacket.class);
-      registerPacketClass(TestbedServerPacket.class);
       registerPacketClass(JointConfigurationData.class);
 
       registerPacketClass(IMUPacket.class);
