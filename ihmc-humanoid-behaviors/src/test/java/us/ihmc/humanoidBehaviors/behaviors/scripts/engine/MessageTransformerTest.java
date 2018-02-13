@@ -13,7 +13,6 @@ import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMe
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -129,26 +128,6 @@ public class MessageTransformerTest
       }
 
       FootstepDataListMessage actual = new FootstepDataListMessage(original);
-      MessageTransformer.transform(actual, transform);
-
-      assertTrue(expected.epsilonEquals(actual, 1.0e-5));
-   }
-
-   @Test(timeout = 30000)
-   public void testHandstepPacket()
-   {
-      Random random = new Random(6543);
-
-      HandstepPacket original = new HandstepPacket(random);
-
-      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      
-      HandstepPacket expected = new HandstepPacket(original);
-      expected.location.applyTransform(transform);
-      expected.orientation.applyTransform(transform);
-      expected.surfaceNormal.applyTransform(transform);
-
-      HandstepPacket actual = new HandstepPacket(original);
       MessageTransformer.transform(actual, transform);
 
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
