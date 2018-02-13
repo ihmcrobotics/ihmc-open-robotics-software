@@ -26,11 +26,11 @@ public class FeetJumpManager
    
    public void compute()
    {
-      InverseDynamicsJoint joint = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH);
+      InverseDynamicsJoint joint = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH);
       jointAcceleration.reshape(joint.getDegreesOfFreedom(), 1);
-      jointAcceleration.set(0, 0,  0.0);
-      jointAccelerationCommand.addJoint(joint, jointAcceleration);
-      jointAccelerationCommand.setWeight(10.0);
+      jointAcceleration.set(0, 0,  -10.0);
+      jointAccelerationCommand.clear();
+      jointAccelerationCommand.addJoint(joint, jointAcceleration, 100.0);
    }
    
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide side)

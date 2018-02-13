@@ -232,7 +232,7 @@ public class WholeBodyControllerCore
       feedbackController.computeInverseDynamics();
       InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getInverseDynamicsOutput();
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
-      //inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
+      inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
       inverseDynamicsSolver.compute();
       feedbackController.computeAchievedAccelerations();
       LowLevelOneDoFJointDesiredDataHolder inverseDynamicsOutput = inverseDynamicsSolver.getOutput();

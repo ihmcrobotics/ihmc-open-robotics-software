@@ -85,7 +85,7 @@ public class JumpControllerState extends HighLevelControllerState
    {
       jumpController.doAction();
       ControllerCoreCommand controllerCoreCommand = jumpController.getControllerCoreCommand();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      //controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
       JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
