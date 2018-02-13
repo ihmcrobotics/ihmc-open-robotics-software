@@ -13,7 +13,9 @@ import java.util.Random;
 import java.util.Set;
 
 import org.junit.Test;
+import org.reflections.Reflections;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -24,6 +26,37 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
 public class PacketCodeQualityTest
 {
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
+   public void testNoRandomConstructor()
+   {
+      boolean printPacketTypesWithRandomConstructor = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Set<Class<? extends Packet>> packetTypesWithRandomConstructor = new HashSet<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            packetType.getConstructor(Random.class);
+            // If we get here, that means the type implement a random constructor.
+            if (printPacketTypesWithRandomConstructor)
+               PrintTools.error("Found type that implements a random constructor: " + packetType.getSimpleName());
+            packetTypesWithRandomConstructor.add(packetType);
+         }
+         catch (NoSuchMethodException | SecurityException e)
+         {
+         }
+      }
+
+      assertTrue("Packet sub-types should not implement a random constructor.", packetTypesWithRandomConstructor.isEmpty());
+   }
+
+
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAllPacketFieldsArePublic()
