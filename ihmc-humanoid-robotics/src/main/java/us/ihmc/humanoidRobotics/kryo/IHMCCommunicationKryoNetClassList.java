@@ -90,8 +90,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingSpeed;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket;
@@ -149,7 +147,6 @@ import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelC
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
@@ -351,9 +348,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(FootstepDataListMessage.class);
       registerPacketField(ArrayList.class);
-
-      registerPacketClass(BlindWalkingPacket.class);
-      registerPacketFields(Point2D.class, BlindWalkingDirection.class, BlindWalkingSpeed.class);
 
       registerPacketClass(PauseWalkingMessage.class);
       registerPacketClass(FootstepStatus.class);
