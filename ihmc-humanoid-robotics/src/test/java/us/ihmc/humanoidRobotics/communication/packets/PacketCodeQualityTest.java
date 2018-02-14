@@ -27,7 +27,60 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 public class PacketCodeQualityTest
 {
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
+   public void testOnlyEmptyConstructor()
+   {
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Set<Class<? extends Packet>> packetTypesWithoutEmptyConstructor = new HashSet<>();
+      Set<Class<? extends Packet>> packetTypesWithNonEmptyConstructors = new HashSet<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            List<Constructor<?>> constructors = Arrays.asList(packetType.getConstructors());
+            assertFalse("The type: " + packetType.getSimpleName() + " has no constructors?!", constructors.isEmpty());
+
+            boolean hasEmptyConstructor = constructors.stream().filter(constructor -> constructor.getParameterTypes().length == 0).findFirst().isPresent();
+            if (!hasEmptyConstructor)
+               packetTypesWithoutEmptyConstructor.add(packetType);
+
+            boolean hasNonEmptyConstructors = constructors.stream().filter(constructor -> constructor.getParameterTypes().length != 0).findFirst().isPresent();
+            if (hasNonEmptyConstructors)
+               packetTypesWithNonEmptyConstructors.add(packetType);
+
+            packetTypesWithNonEmptyConstructors.add(packetType);
+         }
+         catch (SecurityException e)
+         {
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithoutEmptyConstructor.isEmpty())
+         {
+            PrintTools.error("List of packet sub-types without an empty constructor:");
+            packetTypesWithoutEmptyConstructor.forEach(type -> PrintTools.error(type.getSimpleName()));
+         }
+         if (!packetTypesWithNonEmptyConstructors.isEmpty())
+         {
+            PrintTools.error("List of packet sub-types with non-empty constructors:");
+            packetTypesWithNonEmptyConstructors.forEach(type -> PrintTools.error(type.getSimpleName()));
+         }
+      }
+
+      assertFalse("Packet sub-types should implement an empty constructor.", packetTypesWithoutEmptyConstructor.isEmpty());
+      assertTrue("Packet sub-types should not implement a non-empty constructor.", packetTypesWithNonEmptyConstructors.isEmpty());
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = 30000)
    public void testNoRandomConstructor()
    {
