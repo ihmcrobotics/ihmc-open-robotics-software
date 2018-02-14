@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -68,6 +69,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
 
+   private final QuadrupedFeetManager feetManager;
+
    // task space controller
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
@@ -102,6 +105,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
+
+      feetManager = controllerToolbox.getFeetManager();
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
@@ -217,6 +222,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       comPositionController.reset();
       bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
       bodyOrientationController.reset();
+
+      feetManager.requestFullContact();
 
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
