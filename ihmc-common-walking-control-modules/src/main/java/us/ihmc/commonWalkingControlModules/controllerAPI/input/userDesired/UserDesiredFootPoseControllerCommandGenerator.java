@@ -67,7 +67,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
                trajectoryPoint.setLinearVelocity(new Vector3D());
                trajectoryPoint.setAngularVelocity(new Vector3D());
     
-               footTrajectoryControllerCommand.addTrajectoryPoint(trajectoryPoint);
+               footTrajectoryControllerCommand.getSE3Trajectory().addTrajectoryPoint(trajectoryPoint);
                
                footTrajectoryControllerCommand.setRobotSide(userFootPoseSide.getEnumValue());
 

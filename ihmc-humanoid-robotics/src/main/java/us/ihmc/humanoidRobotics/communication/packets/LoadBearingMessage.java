@@ -8,7 +8,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>> extends Packet<T>
+public final class LoadBearingMessage extends Packet<LoadBearingMessage>
 {
    /** If set to true this will load the contact point. Otherwise the rigid body will stop bearing load. */
    public boolean load = false;
@@ -22,12 +22,12 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
    /** Sets the contact normal used by the controller to load the contact point. */
    public Vector3D contactNormalInWorldFrame = new Vector3D();
 
-   public AbstractLoadBearingMessage()
+   public LoadBearingMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractLoadBearingMessage(Random random)
+   public LoadBearingMessage(Random random)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       load = random.nextBoolean();
@@ -77,7 +77,7 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(LoadBearingMessage other, double epsilon)
    {
       if (load != other.load)
          return false;

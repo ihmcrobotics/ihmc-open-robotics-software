@@ -2,11 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -22,22 +23,20 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
-public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEuclideanTrajectoryMessage<T>> extends QueueableMessage<T>
-      implements Transformable, FrameBasedMessage
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/euclidean_trajectory")
+public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage> implements Transformable
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
    public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
 
-   /** the selection matrix for each axis **/
-   @RosIgnoredField
-   public SelectionMatrix3DMessage linearSelectionMatrix = new SelectionMatrix3DMessage();
+   @RosExportedField(documentation = "The selection matrix for each axis.")
+   public SelectionMatrix3DMessage selectionMatrix = new SelectionMatrix3DMessage();
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
 
-   /** the weight matrix for each axis **/
-   @RosIgnoredField
-   public WeightMatrix3DMessage linearWeightMatrix = new WeightMatrix3DMessage();
+   @RosExportedField(documentation = "The weight matrix for each axis.")
+   public WeightMatrix3DMessage weightMatrix = new WeightMatrix3DMessage();
 
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
    public boolean useCustomControlFrame = false;
@@ -45,15 +44,17 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
    public QuaternionBasedTransform controlFramePose = new QuaternionBasedTransform();
 
-   public AbstractEuclideanTrajectoryMessage()
+   @RosExportedField(documentation = "Properties for queueing trajectories.")
+   public QueueableMessage queueingProperties = new QueueableMessage();
+
+   public EuclideanTrajectoryMessage()
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbstractEuclideanTrajectoryMessage(Random random)
+   public EuclideanTrajectoryMessage(Random random)
    {
-      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
@@ -65,35 +66,39 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
       useCustomControlFrame = random.nextBoolean();
       controlFramePose.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      queueingProperties = new QueueableMessage(random);
    }
 
-   public AbstractEuclideanTrajectoryMessage(T trajectoryMessage)
+   public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage other)
    {
-      int numberOfPoints = trajectoryMessage.getNumberOfTrajectoryPoints();
+      int numberOfPoints = other.getNumberOfTrajectoryPoints();
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
       for (int i = 0; i < numberOfPoints; i++)
       {
-         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(trajectoryMessage.taskspaceTrajectoryPoints[i]);
+         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
-      setExecutionDelayTime(trajectoryMessage.getExecutionDelayTime());
-      setUniqueId(trajectoryMessage.getUniqueId());
-      setDestination(trajectoryMessage.getDestination());
-      linearSelectionMatrix.set(trajectoryMessage.linearSelectionMatrix);
-      frameInformation.set(trajectoryMessage);
-      linearWeightMatrix.set(trajectoryMessage.linearWeightMatrix);
-      useCustomControlFrame = trajectoryMessage.useCustomControlFrame;
-      controlFramePose.set(trajectoryMessage.controlFramePose);
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
+      frameInformation.set(other.getFrameInformation());
+      if (other.selectionMatrix != null)
+         selectionMatrix.set(other.selectionMatrix);
+      if (other.weightMatrix != null)
+         weightMatrix.set(other.weightMatrix);
+      useCustomControlFrame = other.useCustomControlFrame;
+      controlFramePose.set(other.controlFramePose);
+      if (other.queueingProperties != null)
+         queueingProperties.set(other.queueingProperties);
    }
 
    /**
     * set a single point
+    * 
     * @param trajectoryTime the duration of the trajectory
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
     */
-   public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
+   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -104,20 +109,22 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
    /**
     * set a single point
+    * 
     * @param trajectoryTime the duration of the trajectory
     * @param desiredPosition the desired end position
     * @param trajectoryReferenceFrame the frame the trajectory will be executed in
     */
-   public AbstractEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
+   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
    {
       this(trajectoryTime, desiredPosition, trajectoryReferenceFrame.getNameBasedHashCode());
    }
 
    /**
     * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
+    * 
     * @param numberOfTrajectoryPoints number of trajectory points in this message
     */
-   public AbstractEuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
+   public EuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfTrajectoryPoints];
@@ -125,9 +132,10 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
    /**
     * set this message to the have the same contents of the other message
+    * 
     * @param other the other message
     */
-   public void set(T other)
+   public void set(EuclideanTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          throw new RuntimeException("Must the same number of waypoints.");
@@ -138,19 +146,19 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
-      setExecutionDelayTime(other.getExecutionDelayTime());
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
-      linearSelectionMatrix.set(other.linearSelectionMatrix);
-      frameInformation.set(other);
-      linearWeightMatrix.set(other.linearWeightMatrix);
+      selectionMatrix.set(other.selectionMatrix);
+      frameInformation.set(other.getFrameInformation());
+      weightMatrix.set(other.weightMatrix);
       useCustomControlFrame = other.useCustomControlFrame;
       controlFramePose.set(other.controlFramePose);
+      queueingProperties.set(other.queueingProperties);
    }
 
    /**
     * Get the trajectory points from this message
+    * 
     * @param trajectoryPointListToPack
     */
    public void getTrajectoryPoints(FrameEuclideanTrajectoryPointList trajectoryPointListToPack)
@@ -163,7 +171,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
       {
          EuclideanTrajectoryPointMessage euclideanTrajectoryPointMessage = trajectoryPointMessages[i];
          trajectoryPointListToPack.addTrajectoryPoint(euclideanTrajectoryPointMessage.time, euclideanTrajectoryPointMessage.position,
-               euclideanTrajectoryPointMessage.linearVelocity);
+                                                      euclideanTrajectoryPointMessage.linearVelocity);
       }
    }
 
@@ -179,7 +187,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity,
-         ReferenceFrame expressedInReferenceFrame)
+                                        ReferenceFrame expressedInReferenceFrame)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
@@ -198,7 +206,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     *           point. It is expressed in world frame.
     */
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity,
-         long expressedInReferenceFrameId)
+                                        long expressedInReferenceFrameId)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
@@ -241,38 +249,38 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     * frame if not defined otherwise.
     * </p>
     *
-    * @param selectionMatrix3D the selection matrix to use when executing this trajectory message. Not
-    *           modified.
+    * @param selectionMatrix3D the selection matrix to use when executing this trajectory message.
+    *           Not modified.
     */
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix3D)
    {
-      if (linearSelectionMatrix == null)
-         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix3D);
+      if (selectionMatrix == null)
+         selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix3D);
       else
-         linearSelectionMatrix.set(selectionMatrix3D);
+         selectionMatrix.set(selectionMatrix3D);
    }
 
    /**
     * Sets the weight matrix to use for executing this message.
     * <p>
-    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the end-effector.
-    * When it is not provided, or when the weights are set to Double.NaN, the controller will use the default QP Weights
-    * set for each axis.
+    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the
+    * end-effector. When it is not provided, or when the weights are set to Double.NaN, the
+    * controller will use the default QP Weights set for each axis.
     * </p>
     * <p>
     * The selection frame coming along with the given weight matrix is used to determine to what
     * reference frame the weights are referring to.
     * </p>
     *
-    * @param weightMatrix the selection matrix to use when executing this trajectory message. parameter is not
-    *           modified.
+    * @param weightMatrix3D the selection matrix to use when executing this trajectory message.
+    *           parameter is not modified.
     */
-   public void setWeightMatrix(WeightMatrix3D weightMatrix)
+   public void setWeightMatrix(WeightMatrix3D weightMatrix3D)
    {
-      if (linearWeightMatrix == null)
-         linearWeightMatrix = new WeightMatrix3DMessage(weightMatrix);
+      if (weightMatrix == null)
+         weightMatrix = new WeightMatrix3DMessage(weightMatrix3D);
       else
-         linearWeightMatrix.set(weightMatrix);
+         weightMatrix.set(weightMatrix3D);
    }
 
    public final int getNumberOfTrajectoryPoints()
@@ -282,6 +290,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
    /**
     * Returns the internal mutable list of points, modifying this list changes the internal message
+    * 
     * @return
     */
    public final EuclideanTrajectoryPointMessage[] getTrajectoryPoints()
@@ -307,29 +316,28 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
 
    public boolean hasSelectionMatrix()
    {
-      return linearSelectionMatrix != null;
+      return selectionMatrix != null;
    }
 
    public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
    {
       selectionMatrixToPack.resetSelection();
-      if (linearSelectionMatrix != null)
-         linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack);
+      if (selectionMatrix != null)
+         selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
    }
 
    public boolean hasWeightMatrix()
    {
-      return linearWeightMatrix != null;
+      return weightMatrix != null;
    }
 
    public void getWeightMatrix(WeightMatrix3D weightMatrixToPack)
    {
       weightMatrixToPack.clear();
-      if (linearWeightMatrix != null)
-         linearWeightMatrix.getWeightMatrix(weightMatrixToPack);
+      if (weightMatrix != null)
+         weightMatrix.getWeightMatrix(weightMatrixToPack);
    }
 
-   @Override
    public FrameInformation getFrameInformation()
    {
       if (frameInformation == null)
@@ -349,8 +357,8 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     */
    public long getLinearSelectionFrameId()
    {
-      if (linearSelectionMatrix != null)
-         return linearSelectionMatrix.getSelectionFrameId();
+      if (selectionMatrix != null)
+         return selectionMatrix.getSelectionFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
@@ -367,8 +375,8 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
     */
    public long getLinearWeightMatrixFrameId()
    {
-      if (linearWeightMatrix != null)
-         return linearWeightMatrix.getWeightFrameId();
+      if (weightMatrix != null)
+         return weightMatrix.getWeightFrameId();
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
@@ -376,34 +384,39 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
    private void rangeCheck(int trajectoryPointIndex)
    {
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException(
-               "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
+         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
+               + getNumberOfTrajectoryPoints());
    }
 
    @Override
-   public boolean epsilonEquals(T other, double epsilon)
+   public boolean epsilonEquals(EuclideanTrajectoryMessage other, double epsilon)
    {
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+      {
+         return false;
+      }
+
       if (!frameInformation.epsilonEquals(other.frameInformation, epsilon))
       {
          return false;
       }
 
-      if (linearSelectionMatrix == null && other.linearSelectionMatrix != null)
+      if (selectionMatrix == null ^ other.selectionMatrix == null)
       {
          return false;
       }
 
-      if (linearSelectionMatrix != null && !linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
+      if (selectionMatrix != null && !selectionMatrix.epsilonEquals(other.selectionMatrix, epsilon))
       {
          return false;
       }
 
-      if (linearWeightMatrix == null && other.linearWeightMatrix != null)
+      if (weightMatrix == null ^ other.weightMatrix == null)
       {
          return false;
       }
 
-      if (linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(other.linearWeightMatrix, epsilon))
+      if (weightMatrix != null && !weightMatrix.epsilonEquals(other.weightMatrix, epsilon))
       {
          return false;
       }
@@ -417,7 +430,7 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
             return false;
       }
 
-      return super.epsilonEquals(other, epsilon);
+      return true;
    }
 
    public void setUseCustomControlFrame(boolean useCustomControlFrame)
@@ -450,5 +463,10 @@ public abstract class AbstractEuclideanTrajectoryMessage<T extends AbstractEucli
          controlFrameTransformToPack.setToNaN();
       else
          controlFrameTransformToPack.set(controlFramePose);
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return queueingProperties;
    }
 }

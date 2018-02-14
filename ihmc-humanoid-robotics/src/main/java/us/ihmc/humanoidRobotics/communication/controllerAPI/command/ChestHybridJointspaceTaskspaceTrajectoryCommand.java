@@ -1,25 +1,25 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.communication.packets.QueueableMessage;
+import java.util.Random;
+
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-import java.util.Random;
-
 public class ChestHybridJointspaceTaskspaceTrajectoryCommand
-      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage>
-      implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
+      implements Command<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage>,
+      FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
-   private final SpineTrajectoryCommand jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
-   private final ChestTrajectoryCommand taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
+   private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
+   private final SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SO3TrajectoryControllerCommand();
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand()
    {
    }
 
-   public ChestHybridJointspaceTaskspaceTrajectoryCommand(ChestTrajectoryCommand taskspaceTrajectoryCommand, SpineTrajectoryCommand jointspaceTrajectoryCommand)
+   public ChestHybridJointspaceTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand taskspaceTrajectoryCommand,
+                                                          JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
       super();
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
@@ -28,7 +28,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(new ChestTrajectoryCommand(random), new SpineTrajectoryCommand(random));
+      this(new SO3TrajectoryControllerCommand(random), new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -41,17 +41,15 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(message.getChestTrajectoryMessage());
-      setQueueableCommandVariables(message);
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(resolver, message.getChestTrajectoryMessage());
-      setQueueableCommandVariables(message);
+      jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
@@ -65,22 +63,14 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    {
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
-      setQueueableCommandVariables(other);
    }
 
-   @Override
-   public void addTimeOffset(double timeOffset)
-   {
-      taskspaceTrajectoryCommand.addTimeOffset(timeOffset);
-      jointspaceTrajectoryCommand.addTimeOffset(timeOffset);
-   }
-
-   public SpineTrajectoryCommand getJointspaceTrajectoryCommand()
+   public JointspaceTrajectoryCommand getJointspaceTrajectoryCommand()
    {
       return jointspaceTrajectoryCommand;
    }
 
-   public ChestTrajectoryCommand getTaskspaceTrajectoryCommand()
+   public SO3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
    }
@@ -92,20 +82,32 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public void setQueueableCommandVariables(QueueableMessage<?> message)
+   public boolean isDelayedExecutionSupported()
    {
-      // this override is needed to correctly store queuing information into the sub-messages
-      super.setQueueableCommandVariables(message);
-      jointspaceTrajectoryCommand.setQueueableCommandVariables(message);
-      taskspaceTrajectoryCommand.setQueueableCommandVariables(message);
+      return true;
    }
 
    @Override
-   public void setQueueableCommandVariables(QueueableCommand<?, ?> other)
+   public void setExecutionDelayTime(double delayTime)
    {
-      // this override is needed to correctly store queuing information into the sub-messages
-      taskspaceTrajectoryCommand.setQueueableCommandVariables(other);
-      jointspaceTrajectoryCommand.setQueueableCommandVariables(other);
-      super.setQueueableCommandVariables(other);
+      taskspaceTrajectoryCommand.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      taskspaceTrajectoryCommand.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return taskspaceTrajectoryCommand.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return taskspaceTrajectoryCommand.getExecutionTime();
    }
 }

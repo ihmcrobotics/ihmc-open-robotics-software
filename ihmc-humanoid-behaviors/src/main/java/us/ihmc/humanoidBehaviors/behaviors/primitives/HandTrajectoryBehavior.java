@@ -60,7 +60,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
 
       robotSide = armTrajectoryMessage.getRobotSide();
       startTime.set(yoTime.getDoubleValue());
-      trajectoryTime.set(armTrajectoryMessage.getTrajectoryTime());
+      trajectoryTime.set(armTrajectoryMessage.getSe3Trajectory().getTrajectoryTime());
 
       hasInputBeenSet.set(true);
    }

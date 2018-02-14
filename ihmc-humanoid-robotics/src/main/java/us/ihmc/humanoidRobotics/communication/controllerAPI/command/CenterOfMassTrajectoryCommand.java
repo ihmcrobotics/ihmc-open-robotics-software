@@ -1,17 +1,17 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class CenterOfMassTrajectoryCommand extends QueueableCommand<CenterOfMassTrajectoryCommand, CenterOfMassTrajectoryMessage>
+public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajectoryCommand, CenterOfMassTrajectoryMessage>, FrameBasedCommand<CenterOfMassTrajectoryMessage>
 {
-   private final RecyclingArrayList<TrajectoryPoint3D> comTrajectory = new RecyclingArrayList<>(10, TrajectoryPoint3D.class);
+   private final EuclideanTrajectoryControllerCommand euclideanTrajectory = new EuclideanTrajectoryControllerCommand();
 
    public CenterOfMassTrajectoryCommand()
    {
-      comTrajectory.clear();
+      euclideanTrajectory.clear();
    }
 
    public CenterOfMassTrajectoryCommand(CenterOfMassTrajectoryCommand other)
@@ -22,57 +22,30 @@ public class CenterOfMassTrajectoryCommand extends QueueableCommand<CenterOfMass
    @Override
    public void set(CenterOfMassTrajectoryMessage message)
    {
-      clear();
-      for (int i = 0; i < message.getNumberOfComTrajectoryPoints(); i++)
-      {
-         TrajectoryPoint3D trajectoryPoint = comTrajectory.add();
-         trajectoryPoint.set(message.getComTrajectoryPoint(i));
-      }
-      setQueueableCommandVariables(message);
+      euclideanTrajectory.set(message.euclideanTrajectory);
    }
 
    @Override
    public void set(CenterOfMassTrajectoryCommand other)
    {
-      clear();
-      for (int i = 0; i < other.getNumberOfComTrajectoryPoints(); i++)
-      {
-         TrajectoryPoint3D trajectoryPoint = comTrajectory.add();
-         trajectoryPoint.set(other.getComTrajectoryPoint(i));
-      }
-      setQueueableCommandVariables(other);
+      euclideanTrajectory.set(other.euclideanTrajectory);
    }
 
-   public void addComTrajectoryPoint(TrajectoryPoint3D trajectoryPoint)
+   @Override
+   public void set(ReferenceFrameHashCodeResolver resolver, CenterOfMassTrajectoryMessage message)
    {
-      comTrajectory.add().set(trajectoryPoint);
-   }
-
-   public int getNumberOfComTrajectoryPoints()
-   {
-      return comTrajectory.size();
-   }
-
-   public TrajectoryPoint3D getComTrajectoryPoint(int i)
-   {
-      return comTrajectory.get(i);
+      euclideanTrajectory.set(resolver, message.euclideanTrajectory);
    }
 
    @Override
    public void clear()
    {
-      comTrajectory.clear();
-      clearQueuableCommandVariables();
+      euclideanTrajectory.clear();
    }
 
-   @Override
-   public void addTimeOffset(double timeOffset)
+   public EuclideanTrajectoryControllerCommand getEuclideanTrajectory()
    {
-      for (int i = 0; i < comTrajectory.size(); i++)
-      {
-         TrajectoryPoint3D trajectoryPoint = comTrajectory.get(i);
-         trajectoryPoint.setTime(trajectoryPoint.getTime() + timeOffset);
-      }
+      return euclideanTrajectory;
    }
 
    @Override
@@ -84,6 +57,36 @@ public class CenterOfMassTrajectoryCommand extends QueueableCommand<CenterOfMass
    @Override
    public boolean isCommandValid()
    {
-      return !comTrajectory.isEmpty();
+      return euclideanTrajectory.isCommandValid();
+   }
+
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      euclideanTrajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      euclideanTrajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return euclideanTrajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return euclideanTrajectory.getExecutionTime();
    }
 }

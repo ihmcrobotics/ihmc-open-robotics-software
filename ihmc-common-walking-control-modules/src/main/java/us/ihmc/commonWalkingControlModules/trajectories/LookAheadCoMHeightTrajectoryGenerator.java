@@ -820,21 +820,21 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      if (!command.getSelectionMatrix().isLinearZSelected())
+      if (!command.getSE3Trajectory().getSelectionMatrix().isLinearZSelected())
          return; // The user does not want to control the height, do nothing.
 
-      command.changeFrame(worldFrame);
+      command.getSE3Trajectory().changeFrame(worldFrame);
       tempPelvisHeightTrajectoryCommand.set(command);
       handlePelvisHeightTrajectoryCommand(tempPelvisHeightTrajectoryCommand);
    }
 
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      switch (command.getExecutionMode())
+      switch (command.getEuclideanTrajectory().getExecutionMode())
       {
       case OVERRIDE:
          isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(command.getCommandId());
+         clearCommandQueue(command.getEuclideanTrajectory().getCommandId());
          offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
          initializeOffsetTrajectoryGenerator(command, 0.0);
          return;
@@ -850,7 +850,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          }
          return;
       default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getEuclideanTrajectory().getExecutionMode() + ". Command ignored.");
          return;
       }
    }
@@ -863,7 +863,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          return false;
       }
 
-      long previousCommandId = command.getPreviousCommandId();
+      long previousCommandId = command.getEuclideanTrajectory().getPreviousCommandId();
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
@@ -872,7 +872,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          return false;
       }
 
-      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
+      if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
          PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          return false;
@@ -880,18 +880,18 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       commandQueue.add(command);
       numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getCommandId());
+      lastCommandId.set(command.getEuclideanTrajectory().getCommandId());
 
       return true;
    }
 
    private void initializeOffsetTrajectoryGenerator(PelvisHeightTrajectoryCommand command, double firstTrajectoryPointTime)
    {
-      command.addTimeOffset(firstTrajectoryPointTime);
+      command.getEuclideanTrajectory().addTimeOffset(firstTrajectoryPointTime);
 
       offsetHeightTrajectoryGenerator.clear();
 
-      if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
+      if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
       {
          offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       }
@@ -900,7 +900,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         FrameEuclideanTrajectoryPoint waypoint = command.getTrajectoryPoint(trajectoryPointIndex);
+         FrameEuclideanTrajectoryPoint waypoint = command.getEuclideanTrajectory().getTrajectoryPoint(trajectoryPointIndex);
          double time = waypoint.getTime();
          double z = waypoint.getPositionZ();
          double zDot = waypoint.getLinearVelocityZ();
@@ -920,7 +920,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private int queueExceedingTrajectoryPointsIfNeeded(PelvisHeightTrajectoryCommand command)
    {
-      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+      int numberOfTrajectoryPoints = command.getEuclideanTrajectory().getNumberOfTrajectoryPoints();
 
       int maximumNumberOfWaypoints = offsetHeightTrajectoryGenerator.getMaximumNumberOfWaypoints() - offsetHeightTrajectoryGenerator.getCurrentNumberOfWaypoints();
 
@@ -930,15 +930,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
       PelvisHeightTrajectoryCommand commandForExcedent = commandQueue.addFirst();
       numberOfQueuedCommands.increment();
       commandForExcedent.clear();
-      commandForExcedent.setPropertiesOnly(command);
+      commandForExcedent.getEuclideanTrajectory().setPropertiesOnly(command.getEuclideanTrajectory());
 
       for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         commandForExcedent.getEuclideanTrajectory().addTrajectoryPoint(command.getEuclideanTrajectory().getTrajectoryPoint(trajectoryPointIndex));
       }
 
-      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+      double timeOffsetToSubtract = command.getEuclideanTrajectory().getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.getEuclideanTrajectory().subtractTimeOffset(timeOffsetToSubtract);
 
       return maximumNumberOfWaypoints;
    }

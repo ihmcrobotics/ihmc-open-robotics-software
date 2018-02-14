@@ -24,6 +24,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestStereoPointCloudMessage;
@@ -50,6 +51,7 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
@@ -134,7 +136,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.AbstractPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
@@ -309,6 +310,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(CenterOfMassTrajectoryMessage.class);
 
       // Trajectory message fields
+      registerPacketField(JointspaceTrajectoryMessage.class);
+      registerPacketField(QueueableMessage.class);
       registerPacketClass(ExecutionMode.class);
       registerPacketClass(ExecutionTiming.class);
       registerPacketClass(OneDoFJointTrajectoryMessage.class);
@@ -333,7 +336,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WeightMatrix3DMessage.class);
       registerPacketField(BodyPart.class);
       registerPacketField(Class.class);
-      registerPacketField(TrajectoryPoint3D.class);
 
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);

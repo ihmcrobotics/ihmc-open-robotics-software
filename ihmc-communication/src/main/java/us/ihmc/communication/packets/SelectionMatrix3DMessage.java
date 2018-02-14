@@ -1,10 +1,14 @@
 package us.ihmc.communication.packets;
 
+import java.util.Random;
+
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/selection_matrix")
 public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
 {
    @RosExportedField(documentation = "The Id of the reference frame defining the selection frame."
@@ -27,12 +31,31 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
    {
    }
 
+   public SelectionMatrix3DMessage(Random random)
+   {
+      selectionFrameId = random.nextLong();
+      xSelected = random.nextBoolean();
+      ySelected = random.nextBoolean();
+      zSelected = random.nextBoolean();
+   }
+
    /**
     * Copy constructor.
     * 
     * @param selectionMatrix3D the original selection matrix to copy. Not modified.
     */
    public SelectionMatrix3DMessage(SelectionMatrix3D selectionMatrix3D)
+   {
+      set(selectionMatrix3D);
+   }
+
+
+   /**
+    * Copy constructor.
+    * 
+    * @param selectionMatrix3D the original selection matrix to copy. Not modified.
+    */
+   public SelectionMatrix3DMessage(SelectionMatrix3DMessage selectionMatrix3D)
    {
       set(selectionMatrix3D);
    }
@@ -49,13 +72,13 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
       this.ySelected = selectionMatrix3D.isYSelected();
       this.zSelected = selectionMatrix3D.isZSelected();
    }
-   
+
    public void set(SelectionMatrix3DMessage selectionMatrix3D)
    {
-      this.selectionFrameId = selectionMatrix3D.selectionFrameId;  
-      this.xSelected = selectionMatrix3D.xSelected;          
-      this.ySelected = selectionMatrix3D.ySelected;          
-      this.zSelected = selectionMatrix3D.zSelected;          
+      this.selectionFrameId = selectionMatrix3D.selectionFrameId;
+      this.xSelected = selectionMatrix3D.xSelected;
+      this.ySelected = selectionMatrix3D.ySelected;
+      this.zSelected = selectionMatrix3D.zSelected;
    }
 
    /**
@@ -116,6 +139,36 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
       selectionMatrix3D.selectXAxis(xSelected);
       selectionMatrix3D.selectYAxis(ySelected);
       selectionMatrix3D.selectZAxis(zSelected);
+   }
+
+   public void setXSelected(boolean xSelected)
+   {
+      this.xSelected = xSelected;
+   }
+
+   public void setYSelected(boolean ySelected)
+   {
+      this.ySelected = ySelected;
+   }
+
+   public void setZSelected(boolean zSelected)
+   {
+      this.zSelected = zSelected;
+   }
+
+   public boolean getXSelected()
+   {
+      return xSelected;
+   }
+
+   public boolean getYSelected()
+   {
+      return ySelected;
+   }
+
+   public boolean getZSelected()
+   {
+      return zSelected;
    }
 
    /**

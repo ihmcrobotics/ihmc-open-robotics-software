@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
 public class FootstepPlanningToolboxOutputStatus extends SettablePacket<FootstepPlanningToolboxOutputStatus>
 {
@@ -43,7 +42,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
       bodyPath = new Point2D[random.nextInt(10)];
       for (int i = 0; i < bodyPath.length; i++)
       {
-         bodyPath[i] = EuclidCoreRandomTools.generateRandomPoint2D(random);
+         bodyPath[i] = EuclidCoreRandomTools.nextPoint2D(random);
       }
 
       lowLevelPlannerGoal = new Pose2D(random.nextDouble(), random.nextDouble(), random.nextDouble());
@@ -56,7 +55,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
 
          for (int j = 0; j < numberOfPoints; j++)
          {
-            navigableExtrusions[i][j] = EuclidCoreRandomTools.generateRandomPoint3D(random);
+            navigableExtrusions[i][j] = EuclidCoreRandomTools.nextPoint3D(random);
          }
       }
    }
@@ -130,7 +129,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
       return true;
    }
 
-   private static boolean nullAndEpilsonCompare(EpsilonComparable object1, EpsilonComparable object2, double epsilon)
+   private static <T extends EpsilonComparable<T>> boolean nullAndEpilsonCompare(T object1, T object2, double epsilon)
    {
       if(!bothOrNeitherAreNull(object1, object2))
          return false;
@@ -153,9 +152,9 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    {
       planningResult = other.planningResult;
       footstepDataList.destination = other.footstepDataList.destination;
-      footstepDataList.executionMode = other.footstepDataList.executionMode;
+      footstepDataList.getQueueingProperties().set(other.footstepDataList.getQueueingProperties());
       footstepDataList.footstepDataList = new ArrayList<>();
-      for (FootstepDataMessage footstepData : other.footstepDataList)
+      for (FootstepDataMessage footstepData : other.footstepDataList.footstepDataList)
          footstepDataList.footstepDataList.add(new FootstepDataMessage(footstepData));
       if (other.notes != null)
          footstepDataList.notes = new String(other.notes);

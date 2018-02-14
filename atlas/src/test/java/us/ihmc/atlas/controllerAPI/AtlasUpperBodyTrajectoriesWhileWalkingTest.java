@@ -124,10 +124,10 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          Quaternion orientation = new Quaternion(handPosition.getOrientation());
 
          HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage(robotSide, 1);
-         handHoldMessage.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
-         handHoldMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+         handHoldMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
+         handHoldMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
          Vector3D zeroVelocity = new Vector3D();
-         handHoldMessage.setTrajectoryPoint(0, 11.0, position, orientation, zeroVelocity, zeroVelocity, worldFrame);
+         handHoldMessage.getSe3Trajectory().setTrajectoryPoint(0, 11.0, position, orientation, zeroVelocity, zeroVelocity, worldFrame);
          drcSimulationTestHelper.send(handHoldMessage);
       }
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToCompleteWalking);
@@ -162,7 +162,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
             ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
             armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
-               armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
 
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
@@ -186,7 +186,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
                   SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-                  armTrajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+                  armTrajectoryMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
                         trajectoryPoint.getVelocity());
                }
             }

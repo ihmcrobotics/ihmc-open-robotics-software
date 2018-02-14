@@ -398,8 +398,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         chestTrajectoryPointList.addTrajectoryPoint(1.0, new Quaternion(0.2, 0.0, 0.0, 1.0), new Vector3D());
         chestTrajectoryPointList.addTrajectoryPoint(2.0, new Quaternion(-0.2, 0.0, 0.0, 1.0), new Vector3D());
         chestTrajectoryPointList.addTrajectoryPoint(3.0, new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D());
-        chestCommand.setTrajectoryPointList(chestTrajectoryPointList);
-        chestCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
+        chestCommand.getSO3Trajectory().setTrajectoryPointList(chestTrajectoryPointList);
+        chestCommand.getSO3Trajectory().setTrajectoryFrame(ReferenceFrame.getWorldFrame());
         queuedControllerCommands.add(chestCommand);
 
         // Some more steps:
@@ -441,9 +441,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(1.0, new Point3D(1.1, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
         footPointList.addTrajectoryPoint(2.0, new Point3D(1.1, -0.2, 0.35), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
 
-        footTrajectoryCommand.setTrajectoryPointList(footPointList);
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
-        footTrajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryFrame(ReferenceFrame.getWorldFrame());
         queuedControllerCommands.add(footTrajectoryCommand);
 
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -490,7 +490,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(3.0, new Point3D(0.0, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
         footPointList.addTrajectoryPoint(4.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
 
-        footTrajectoryCommand.setTrajectoryPointList(footPointList);
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
 
@@ -505,7 +505,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(3.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.0, 0.1, 1.0), new Vector3D(), new Vector3D());
         footPointList.addTrajectoryPoint(4.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.1, 0.0, 1.0), new Vector3D(), new Vector3D());
 
-        footTrajectoryCommand.setTrajectoryPointList(footPointList);
+        footTrajectoryCommand.getSE3Trajectory().setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
 

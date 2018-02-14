@@ -19,11 +19,11 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
-
 # "load_bearing_request" enum values:
 uint8 LOAD=0 # Request to load the given end-effector.
 uint8 UNLOAD=1 # Request to unload the given end-effector.
+
+# "robot_side" enum values:
+uint8 LEFT=0 # refers to the LEFT side of a robot
+uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

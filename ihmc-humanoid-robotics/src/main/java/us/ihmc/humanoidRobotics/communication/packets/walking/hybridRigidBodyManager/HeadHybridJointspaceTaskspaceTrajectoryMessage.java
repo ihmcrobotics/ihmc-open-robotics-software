@@ -3,22 +3,21 @@ package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMa
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
-import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_head_trajectory")
-public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
+public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
-   public HeadTrajectoryMessage headTrajectoryMessage;
-   public NeckTrajectoryMessage neckTrajectoryMessage;
+   @RosExportedField(documentation = "The taskspace trajectory information.")
+   public SO3TrajectoryMessage taskspaceTrajectoryMessage;
+   @RosExportedField(documentation = "The jointspace trajectory information.")
+   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
 
    /**
     * Empty constructor for serialization.
@@ -27,6 +26,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public HeadHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -35,7 +35,10 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
-      this(new HeadTrajectoryMessage(random), new NeckTrajectoryMessage(random));
+      this.taskspaceTrajectoryMessage = new SO3TrajectoryMessage(random);
+      this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(random);
+      jointspaceTrajectoryMessage.queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -44,46 +47,53 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
     */
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
-      this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getNeckTrajectoryMessage());
-      setExecutionDelayTime(hybridJointspaceTaskspaceMessage.getExecutionDelayTime());
+      this(hybridJointspaceTaskspaceMessage.getTaskspaceTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getJointspaceTrajectoryMessage());
+      setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
 
    /**
     * Typical constructor to use, pack the two taskspace and joint space commands.
     * If these messages conflict, the qp weights and gains will dictate the desireds
-    * @param headTrajectoryMessage
-    * @param neckTrajectoryMessage
+    * @param taskspaceTrajectoryMessage
+    * @param jointspaceTrajectoryMessage
     */
-   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, NeckTrajectoryMessage neckTrajectoryMessage)
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      this.headTrajectoryMessage = headTrajectoryMessage;
-      this.neckTrajectoryMessage = neckTrajectoryMessage;
+      if (!taskspaceTrajectoryMessage.getQueueingProperties().epsilonEquals(jointspaceTrajectoryMessage.getQueueingProperties(), 0.0))
+         throw new IllegalArgumentException("The trajectory messages should have the same queueing properties.");
+
+      this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
+      this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HeadTrajectoryMessage getHeadTrajectoryMessage()
+   public SO3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
-      return headTrajectoryMessage;
+      return taskspaceTrajectoryMessage;
    }
 
-   public void setHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
+   public void setTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage)
    {
-      this.headTrajectoryMessage = headTrajectoryMessage;
+      this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
    }
 
-   public NeckTrajectoryMessage getNeckTrajectoryMessage()
+   public JointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
    {
-      return neckTrajectoryMessage;
+      return jointspaceTrajectoryMessage;
    }
 
-   public void setNeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
+   public void setJointspaceTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      this.neckTrajectoryMessage = neckTrajectoryMessage;
+      this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
    }
 
    @Override
-   public FrameInformation getFrameInformation()
+   public boolean epsilonEquals(HeadHybridJointspaceTaskspaceTrajectoryMessage other, double epsilon)
    {
-      return headTrajectoryMessage.getFrameInformation();
+      if (!taskspaceTrajectoryMessage.epsilonEquals(other.taskspaceTrajectoryMessage, epsilon))
+         return false;
+      if (!jointspaceTrajectoryMessage.epsilonEquals(other.jointspaceTrajectoryMessage, epsilon))
+         return false;
+      return true;
    }
 }

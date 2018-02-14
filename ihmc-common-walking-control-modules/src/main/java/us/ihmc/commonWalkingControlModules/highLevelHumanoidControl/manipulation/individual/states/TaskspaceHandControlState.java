@@ -174,7 +174,7 @@ public class TaskspaceHandControlState extends HandControlState
    public boolean handleHandTrajectoryCommand(HandTrajectoryCommand command, ReferenceFrame newControlFrame, boolean initializeToCurrent)
    {
       isReadyToHandleQueuedCommands.set(true);
-      clearCommandQueue(command.getCommandId());
+      clearCommandQueue(command.getSE3Trajectory().getCommandId());
       initializeTrajectoryGenerators(command, newControlFrame, initializeToCurrent, 0.0);
       return true;
    }
@@ -187,7 +187,7 @@ public class TaskspaceHandControlState extends HandControlState
          return false;
       }
 
-      long previousCommandId = command.getPreviousCommandId();
+      long previousCommandId = command.getSE3Trajectory().getPreviousCommandId();
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
@@ -199,7 +199,7 @@ public class TaskspaceHandControlState extends HandControlState
          return false;
       }
 
-      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
+      if (command.getSE3Trajectory().getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
          PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          isReadyToHandleQueuedCommands.set(false);
@@ -210,7 +210,7 @@ public class TaskspaceHandControlState extends HandControlState
 
       commandQueue.add(command);
       numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getCommandId());
+      lastCommandId.set(command.getSE3Trajectory().getCommandId());
 
       return true;
    }
@@ -263,18 +263,18 @@ public class TaskspaceHandControlState extends HandControlState
    private void initializeTrajectoryGenerators(HandTrajectoryCommand command, ReferenceFrame newControlFrame, boolean initializeToCurrent, double firstTrajectoryPointTime)
    {
       updateControlFrameAndDesireds(newControlFrame, initializeToCurrent, initialTrajectoryPoint);
-      command.addTimeOffset(firstTrajectoryPointTime);
+      command.getSE3Trajectory().addTimeOffset(firstTrajectoryPointTime);
 
-      ReferenceFrame trajectoryFrame = command.getTrajectoryFrame();
+      ReferenceFrame trajectoryFrame = command.getSE3Trajectory().getTrajectoryFrame();
 
       if (trajectoryFrame == null)
       {
-         PrintTools.error(this, "The base: " + command.getTrajectoryFrame() + " is not handled.");
+         PrintTools.error(this, "The base: " + command.getSE3Trajectory().getTrajectoryFrame() + " is not handled.");
          abortTaskspaceControlState.set(true);
          return;
       }
 
-      if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
+      if (command.getSE3Trajectory().getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
       {
          initialTrajectoryPoint.changeFrame(worldFrame);
 
@@ -293,8 +293,8 @@ public class TaskspaceHandControlState extends HandControlState
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         positionTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
-         orientationTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         positionTrajectoryGenerator.appendWaypoint(command.getSE3Trajectory().getTrajectoryPoint(trajectoryPointIndex));
+         orientationTrajectoryGenerator.appendWaypoint(command.getSE3Trajectory().getTrajectoryPoint(trajectoryPointIndex));
       }
 
       positionTrajectoryGenerator.changeFrame(trajectoryFrame);
@@ -306,7 +306,7 @@ public class TaskspaceHandControlState extends HandControlState
 
    private int queueExceedingTrajectoryPointsIfNeeded(HandTrajectoryCommand command)
    {
-      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+      int numberOfTrajectoryPoints = command.getSE3Trajectory().getNumberOfTrajectoryPoints();
 
       int maximumNumberOfWaypoints = positionTrajectoryGenerator.getMaximumNumberOfWaypoints() - positionTrajectoryGenerator.getCurrentNumberOfWaypoints();
 
@@ -320,11 +320,11 @@ public class TaskspaceHandControlState extends HandControlState
 
       for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+         commandForExcedent.getSE3Trajectory().addTrajectoryPoint(command.getSE3Trajectory().getTrajectoryPoint(trajectoryPointIndex));
       }
 
-      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+      double timeOffsetToSubtract = command.getSE3Trajectory().getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.getSE3Trajectory().subtractTimeOffset(timeOffsetToSubtract);
 
       return maximumNumberOfWaypoints;
    }

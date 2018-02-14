@@ -1,10 +1,14 @@
 package us.ihmc.communication.packets;
 
+import java.util.Random;
+
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
+@RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/weight_matrix")
 public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
 {
    @RosExportedField(documentation = "The Id of the reference frame defining the weight frame."
@@ -25,6 +29,14 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
     */
    public WeightMatrix3DMessage()
    {
+   }
+
+   public WeightMatrix3DMessage(Random random)
+   {
+      weightFrameId = random.nextLong();
+      xWeight = random.nextDouble();
+      yWeight = random.nextDouble();
+      zWeight = random.nextDouble();
    }
 
    /**

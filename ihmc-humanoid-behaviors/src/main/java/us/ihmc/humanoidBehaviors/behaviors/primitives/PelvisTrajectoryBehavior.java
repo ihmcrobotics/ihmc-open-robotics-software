@@ -56,7 +56,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
          sendPacketToController(outgoingPelvisTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingPelvisTrajectoryMessage.getTrajectoryTime());
+         trajectoryTime.set(outgoingPelvisTrajectoryMessage.getSe3Trajectory().getTrajectoryTime());
       }
    }
 

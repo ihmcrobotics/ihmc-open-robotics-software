@@ -4,18 +4,17 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 @RosMessagePacket(documentation = "This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> implements OneDoFTrajectoryPointInterface<TrajectoryPoint1DMessage>
+public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -45,6 +44,13 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       velocity = trajectoryPoint.getVelocity();
    }
 
+   public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage trajectoryPoint)
+   {
+      time = trajectoryPoint.getTime();
+      position = trajectoryPoint.getPosition();
+      velocity = trajectoryPoint.getVelocity();
+   }
+
    public TrajectoryPoint1DMessage(double time, double position, double velocity)
    {
       this.time = time;
@@ -52,7 +58,6 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       this.velocity = velocity;
    }
 
-   @Override
    public void set(TrajectoryPoint1DMessage other)
    {
       time = other.time;
@@ -60,31 +65,26 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       velocity = other.velocity;
    }
 
-   @Override
    public void setTime(double time)
    {
       this.time = time;
    }
 
-   @Override
    public void addTimeOffset(double timeOffsetToAdd)
    {
       time += timeOffsetToAdd;
    }
 
-   @Override
    public void subtractTimeOffset(double timeOffsetToSubtract)
    {
       time -= timeOffsetToSubtract;
    }
 
-   @Override
    public double getTime()
    {
       return time;
    }
 
-   @Override
    public double getPosition()
    {
       return position;
@@ -95,7 +95,6 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       this.position = position;
    }
 
-   @Override
    public double getVelocity()
    {
       return velocity;
@@ -106,13 +105,11 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       this.velocity = velocity;
    }
 
-   @Override
    public void setTimeToZero()
    {
       time = 0.0;
    }
 
-   @Override
    public void setToZero()
    {
       time = 0.0;
@@ -120,13 +117,11 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       velocity = 0.0;
    }
 
-   @Override
    public void setTimeToNaN()
    {
       time = Double.NaN;
    }
 
-   @Override
    public void setToNaN()
    {
       time = Double.NaN;
@@ -134,7 +129,6 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       velocity = Double.NaN;
    }
 
-   @Override
    public boolean containsNaN()
    {
       return Double.isNaN(time) || Double.isNaN(position) || Double.isNaN(velocity);
@@ -153,12 +147,6 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
    }
 
    @Override
-   public boolean geometricallyEquals(TrajectoryPoint1DMessage other, double epsilon)
-   {
-      return epsilonEquals(other, epsilon);
-   }
-
-   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
@@ -166,17 +154,5 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       String positionString = "position = " + doubleFormat.format(getPosition());
       String velocityString = "velocity = " + doubleFormat.format(getVelocity());
       return "Trajectory point 1D: (" + timeString + ", " + positionString + ", " + velocityString + ")";
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      // Do nothing since simple numbers here.
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      // Do nothing since simple numbers here.
    }
 }

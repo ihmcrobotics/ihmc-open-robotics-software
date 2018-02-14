@@ -60,10 +60,10 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       for (int i = 0; i < 10; i++)
       {
-         handTrajectoryMessage.setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
+         handTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
          footstepDataListMessage.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(), new Quaternion()));
       }
-      handTrajectoryMessage.setExecutionDelayTime(0.1);
+      handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionDelayTime(0.1);
       footstepDataListMessage.setExecutionDelayTime(0.1);
       drcSimulationTestHelper.send(handTrajectoryMessage);
       drcSimulationTestHelper.send(footstepDataListMessage);
