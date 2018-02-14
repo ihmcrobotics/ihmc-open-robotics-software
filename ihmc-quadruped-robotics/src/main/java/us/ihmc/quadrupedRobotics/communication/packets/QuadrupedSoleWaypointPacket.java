@@ -2,29 +2,38 @@ package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedSoleWaypointPacket extends Packet<QuadrupedSoleWaypointPacket>
 {
-   private QuadrupedSoleWaypointList quadrupedSoleWaypointList;
+   private final QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists = new QuadrantDependentList<>();
 
    public QuadrupedSoleWaypointPacket()
    {
-      this.quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         this.quadrupedSoleWaypointLists.set(robotQuadrant, new QuadrupedSoleWaypointList());
    }
 
-   public QuadrupedSoleWaypointPacket(QuadrupedSoleWaypointList quadrupedSoleWaypointList)
+   public QuadrupedSoleWaypointPacket(QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists)
    {
-      this.quadrupedSoleWaypointList = new QuadrupedSoleWaypointList(quadrupedSoleWaypointList);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         this.quadrupedSoleWaypointLists.set(robotQuadrant, new QuadrupedSoleWaypointList(quadrupedSoleWaypointLists.get(robotQuadrant)));
    }
 
    @Override
    public boolean epsilonEquals(QuadrupedSoleWaypointPacket other, double epsilon)
    {
-      return quadrupedSoleWaypointList.epsilonEquals(other.quadrupedSoleWaypointList, epsilon);
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         if (!quadrupedSoleWaypointLists.get(quadrant).epsilonEquals(other.quadrupedSoleWaypointLists.get(quadrant), epsilon))
+            return false;
+      }
+      return true;
    }
 
-   public QuadrupedSoleWaypointList get()
+   public QuadrantDependentList<QuadrupedSoleWaypointList> get()
    {
-      return quadrupedSoleWaypointList;
+      return quadrupedSoleWaypointLists;
    }
 }

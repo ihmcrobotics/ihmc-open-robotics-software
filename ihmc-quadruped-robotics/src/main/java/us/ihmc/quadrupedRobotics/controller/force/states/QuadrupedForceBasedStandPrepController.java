@@ -24,6 +24,7 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -62,7 +63,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
-   private QuadrupedSoleWaypointList quadrupedSoleWaypointList;
+   private final QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists = new QuadrantDependentList<>();
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
@@ -78,12 +79,14 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       referenceFrames = controllerToolbox.getReferenceFrames();
-      quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
       solePositionSetpoint = new FramePoint3D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());
-         quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());
+         QuadrupedSoleWaypointList quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
+         quadrupedSoleWaypointList.add(new SoleWaypoint());
+         quadrupedSoleWaypointList.add(new SoleWaypoint());
+
+         quadrupedSoleWaypointLists.set(quadrant, quadrupedSoleWaypointList);
       }
       zeroVelocity = new Vector3D(0, 0, 0);
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
@@ -115,15 +118,15 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       {
          solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
          solePositionSetpoint.changeFrame(referenceFrames.getBodyFrame());
-         quadrupedSoleWaypointList.get(quadrant).get(0).set(solePositionSetpoint, zeroVelocity, 0.0);
+         quadrupedSoleWaypointLists.get(quadrant).get(0).set(solePositionSetpoint, zeroVelocity, 0.0);
          solePositionSetpoint.setToZero(referenceFrames.getBodyFrame());
          solePositionSetpoint.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
          solePositionSetpoint.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
          solePositionSetpoint.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(),
                quadrant.getEnd().negateIfHindEnd(Math.sin(stancePitchParameter.get())) * robotLength / 2 - stanceHeightParameter.get());
-         quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.get());
+         quadrupedSoleWaypointLists.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.get());
       }
-      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains, taskSpaceEstimates, false);
+      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointLists, yoPositionControllerGains, taskSpaceEstimates, false);
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
