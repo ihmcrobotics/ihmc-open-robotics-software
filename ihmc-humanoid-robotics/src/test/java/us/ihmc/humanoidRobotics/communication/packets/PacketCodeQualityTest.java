@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -19,7 +18,6 @@ import org.reflections.Reflections;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -79,6 +77,36 @@ public class PacketCodeQualityTest
 
       assertFalse("Packet sub-types should implement an empty constructor.", packetTypesWithoutEmptyConstructor.isEmpty());
       assertTrue("Packet sub-types should not implement a non-empty constructor.", packetTypesWithNonEmptyConstructors.isEmpty());
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
+   public void testNoCopyConstructor()
+   {
+      boolean printPacketTypesWithCopyConstructor = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Set<Class<? extends Packet>> packetTypesWithCopyConstructor = new HashSet<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            packetType.getConstructor(packetType);
+            // If we get here, that means the type implement a random constructor.
+            if (printPacketTypesWithCopyConstructor)
+               PrintTools.error("Found type that implements a copy constructor: " + packetType.getSimpleName());
+            packetTypesWithCopyConstructor.add(packetType);
+         }
+         catch (NoSuchMethodException | SecurityException e)
+         {
+         }
+      }
+
+      assertTrue("Packet sub-types should not implement a copy constructor.", packetTypesWithCopyConstructor.isEmpty());
    }
 
    @SuppressWarnings("rawtypes")
