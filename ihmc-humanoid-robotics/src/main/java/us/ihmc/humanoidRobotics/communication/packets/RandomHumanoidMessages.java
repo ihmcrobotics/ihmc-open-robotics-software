@@ -1080,6 +1080,7 @@ public final class RandomHumanoidMessages
       AdjustFootstepMessage next = new AdjustFootstepMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.location = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
       next.predictedContactPoints = new ArrayList<>();
       IntStream.range(0, random.nextInt(10)).forEach(i -> next.predictedContactPoints.add(EuclidCoreRandomTools.nextPoint2D(random)));
