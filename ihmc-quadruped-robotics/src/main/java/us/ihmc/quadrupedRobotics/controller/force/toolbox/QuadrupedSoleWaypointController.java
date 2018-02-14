@@ -25,16 +25,17 @@ public class QuadrupedSoleWaypointController
    private final QuadrantDependentList<FrameVector3D> initialSoleForces;
 
    private ReferenceFrame bodyFrame;
-   private QuadrupedSoleWaypointList quadrupedSoleWaypointList;
+   private QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists = new QuadrantDependentList<>();
    private double taskStartTime;
 
    public QuadrupedSoleWaypointController(ReferenceFrame bodyFrame, QuadrantDependentList<QuadrupedSolePositionController> solePositionController,
          YoDouble robotTimeStamp, YoVariableRegistry parentRegistry)
    {
-      this.quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
       this.bodyFrame = bodyFrame;
       robotTime = robotTimeStamp;
       quadrupedWaypointsPositionTrajectoryGenerator = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         this.quadrupedSoleWaypointLists.set(robotQuadrant, new QuadrupedSoleWaypointList());
 
       // Feedback controller
       this.solePositionController = solePositionController;
@@ -56,12 +57,12 @@ public class QuadrupedSoleWaypointController
    }
 
 
-   public void initialize(QuadrupedSoleWaypointList quadrupedSoleWaypointList, YoPID3DGains positionControllerGains,
+   public void initialize(QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists, YoPID3DGains positionControllerGains,
          QuadrupedTaskSpaceEstimates taskSpaceEstimates, boolean useInitialSoleForceAsFeedforwardTerm)
    {
-      this.quadrupedSoleWaypointList = quadrupedSoleWaypointList;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         this.quadrupedSoleWaypointLists.get(robotQuadrant).set(quadrupedSoleWaypointLists.get(robotQuadrant));
          solePositionControllerSetpoints.get(robotQuadrant).initialize(taskSpaceEstimates);
          solePositionController.get(robotQuadrant).reset();
          if (useInitialSoleForceAsFeedforwardTerm)
@@ -82,7 +83,11 @@ public class QuadrupedSoleWaypointController
    public boolean compute(QuadrantDependentList<FrameVector3D> soleForceCommand, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
-      if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())
+      double finalTime = 0.0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         finalTime = Math.max(finalTime, quadrupedSoleWaypointLists.get(robotQuadrant).getFinalTime());
+
+      if (currentTrajectoryTime > finalTime)
       {
          return false;
       }
@@ -105,13 +110,13 @@ public class QuadrupedSoleWaypointController
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).clear();
-         for (int i = 0; i < quadrupedSoleWaypointList.size(quadrant); ++i)
+         for (int i = 0; i < quadrupedSoleWaypointLists.get(quadrant).size(); ++i)
          {
             quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant)
-                  .appendWaypoint(quadrupedSoleWaypointList.get(quadrant).get(i).getTime(), quadrupedSoleWaypointList.get(quadrant).get(i).getPosition(),
-                        quadrupedSoleWaypointList.get(quadrant).get(i).getVelocity());
+                  .appendWaypoint(quadrupedSoleWaypointLists.get(quadrant).get(i).getTime(), quadrupedSoleWaypointLists.get(quadrant).get(i).getPosition(),
+                        quadrupedSoleWaypointLists.get(quadrant).get(i).getVelocity());
          }
-         if (quadrupedSoleWaypointList.size(quadrant) > 0)
+         if (quadrupedSoleWaypointLists.get(quadrant).size() > 0)
          {
             quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).initialize();
          }

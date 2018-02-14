@@ -6,6 +6,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSoleWaypointPacket;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedSoleWaypointInputProvider
@@ -29,7 +30,7 @@ public class QuadrupedSoleWaypointInputProvider
       }
    }
 
-   public QuadrupedSoleWaypointList get()
+   public QuadrantDependentList<QuadrupedSoleWaypointList> get()
    {
       return quadrupedSoleWaypointPacket.get().get();
    }
