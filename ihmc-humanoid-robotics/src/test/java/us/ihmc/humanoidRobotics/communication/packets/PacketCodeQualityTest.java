@@ -8,7 +8,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -84,7 +86,7 @@ public class PacketCodeQualityTest
    @Test(timeout = 30000)
    public void testNoRandomConstructor()
    {
-      boolean printPacketTypesWithRandomConstructor = true;
+      boolean printPacketTypesWithRandomConstructor = false;
 
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
@@ -124,51 +126,6 @@ public class PacketCodeQualityTest
       for (Class<?> clazz : classList.getPacketFieldList())
       {
          checkIfAllFieldsArePublic(clazz);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testAllRosExportedPacketsHaveRandomConstructor()
-   {
-      IHMCCommunicationKryoNetClassList classList = new IHMCCommunicationKryoNetClassList();
-      Set<Class> badClasses = new HashSet<>();
-
-      for (Class<?> clazz : classList.getPacketClassList())
-      {
-         checkIfClassHasRandomConstructor(clazz, badClasses);
-      }
-
-      if(!badClasses.isEmpty())
-      {
-         System.err.println("PacketCodeQualityTest.checkIfClassHasRandomConstructor failed: The following classes do not have Random constructors:");
-         for (Class badClass : badClasses)
-         {
-            System.err.println("- " + badClass.getCanonicalName());
-         }
-
-         fail("PacketCodeQualityTest.checkIfClassHasRandomConstructor failed. Consult Standard Error logs for list of classes without Random constructors.");
-      }
-   }
-
-   private void checkIfClassHasRandomConstructor(Class<?> clazz, Set<Class> badClasses)
-   {
-      // Skip base class
-      if(clazz == Packet.class)
-      {
-         return;
-      }
-
-      if(Packet.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers()) && clazz.isAnnotationPresent(RosMessagePacket.class))
-      {
-         try
-         {
-            Constructor<?> constructor = clazz.getConstructor(Random.class);
-         }
-         catch (NoSuchMethodException e)
-         {
-            badClasses.add(clazz);
-         }
       }
    }
 
