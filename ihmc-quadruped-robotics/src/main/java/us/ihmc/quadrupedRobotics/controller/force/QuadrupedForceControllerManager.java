@@ -104,8 +104,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment.getControlDT(),
             runtimeEnvironment.getRobotTimestamp(), registry);
       FiniteStateMachineStateChangedListener stateChangedListener = stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         controllerToolbox.getFootStateMachine().get(robotQuadrant).attachStateChangedListener(stateChangedListener);
+      controllerToolbox.getFeetManager().attachStateChangedListener(stateChangedListener);
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
       outputProcessor = outputProcessorBuilder.build();
