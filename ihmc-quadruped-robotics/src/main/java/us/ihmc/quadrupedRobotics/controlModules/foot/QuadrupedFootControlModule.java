@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
@@ -29,10 +30,11 @@ public class QuadrupedFootControlModule
    {
       TIMEOUT
    }
+
    private final FiniteStateMachine<QuadrupedFootStates, FootEvent, QuadrupedFootState> footStateMachine;
 
    public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, QuadrupedSolePositionController solePositionController,
-                                     YoDouble timestamp, YoVariableRegistry parentRegistry)
+                                     YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
@@ -42,7 +44,7 @@ public class QuadrupedFootControlModule
       // state machine
       FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, QuadrupedFootState> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
             prefix + "QuadrupedFootStates", registry);
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, timestamp, stepCommand);
+      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, toolbox.getRuntimeEnvironment().getRobotTimestamp(), stepCommand);
       QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, toolbox, solePositionController, stepCommandIsValid, stepCommand, registry);
       stateMachineBuilder.addState(QuadrupedFootStates.SUPPORT, supportState);
       stateMachineBuilder.addState(QuadrupedFootStates.SWING, swingState);
@@ -79,7 +81,7 @@ public class QuadrupedFootControlModule
       }
    }
 
-   public void adjustStep(FramePoint3D newGoalPosition)
+   public void adjustStep(FramePoint3DReadOnly newGoalPosition)
    {
       this.stepCommand.setGoalPosition(newGoalPosition);
    }
