@@ -58,6 +58,11 @@ float64 swing_duration
 # of this field is invalid (not positive) it will be replaced by a default transferDuration.
 float64 transfer_duration
 
+# (Experimental) The touchdown duration is the time spent trying to do a soft touchdown. If the value
+# of this field is invalid (not positive) it will be replaced by a default transferDuration. If the
+# default is set to zero, the touchdown state will be disabled
+float64 touchdown_duration
+
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id
 # in the top level message is used, the unique id in nested messages is ignored. Use
 # /output/last_received_message for feedback about when the last message was received. A message with
