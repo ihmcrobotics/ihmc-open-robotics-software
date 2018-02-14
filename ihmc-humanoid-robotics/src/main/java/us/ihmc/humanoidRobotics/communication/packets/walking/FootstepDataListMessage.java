@@ -48,12 +48,12 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
          + "\nfootstep list is finished. If the value is negative the defaultTransferDuration will be used.")
    public double finalTransferDuration = -1.0;
 
-   /** If{@code false} the controller adjust each footstep height to be at the support sole height. */
+   @RosExportedField(documentation = "If false the controller adjust each footstep height to be at the support sole height.")
    public boolean trustHeightOfFootsteps = true;
    @RosExportedField(documentation = "Contains information on whether the robot can automatically adjust its footsteps to retain balance.")
    public boolean areFootstepsAdjustable = true;
 
-   /** If {@code true} the controller will adjust upcoming footsteps with the location error of previous steps. */
+   @RosExportedField(documentation = "If true the controller will adjust upcoming footsteps with the location error of previous steps.")
    public boolean offsetFootstepsWithExecutionError = false;
 
    @RosExportedField(documentation = "Properties for queueing footstep lists.")

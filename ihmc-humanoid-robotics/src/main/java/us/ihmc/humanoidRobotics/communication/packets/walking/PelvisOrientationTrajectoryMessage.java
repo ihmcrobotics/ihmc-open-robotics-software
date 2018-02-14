@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/pelvis_orientation_trajectory")
 public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientationTrajectoryMessage>
 {
+   @RosExportedField(documentation = "Whether the pelvis orientation is allowed to controlled by the user when the robot is walking.")
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The orientation trajectory information.")
    public SO3TrajectoryMessage so3Trajectory;

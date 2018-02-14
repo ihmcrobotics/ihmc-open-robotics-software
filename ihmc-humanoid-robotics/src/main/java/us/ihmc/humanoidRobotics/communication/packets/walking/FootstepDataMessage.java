@@ -66,10 +66,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
-   
-//   this needs to be tested on the real robot before it's exposed in ROS. -shrews
-//   @RosExportedField(documentation = "The touchdown duration is the time spent trying to do a soft touchdown."
-//         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
+
+   @RosExportedField(documentation = "(Experimental) The touchdown duration is the time spent trying to do a soft touchdown."
+         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
    public double touchdownDuration = -1.0;
 
    /** the time to delay this command on the controller side before being executed **/
@@ -326,7 +325,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    {
       this.touchdownDuration = touchdownDuration;
    }
-   
+
    public void setTransferDuration(double transferDuration)
    {
       this.transferDuration = transferDuration;
@@ -336,7 +335,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    {
       return swingDuration;
    }
-   
+
    public double getTouchdownDuration()
    {
       return touchdownDuration;
@@ -349,6 +348,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
    /**
     * returns the amount of time this command is delayed on the controller side before executing
+    * 
     * @return the time to delay this command in seconds
     */
    public double getExecutionDelayTime()
@@ -358,6 +358,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
    /**
     * sets the amount of time this command is delayed on the controller side before executing
+    * 
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    public void setExecutionDelayTime(double delayTime)
@@ -461,11 +462,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
          }
       }
 
-      boolean sameTimings = MathTools.epsilonEquals(swingDuration, footstepData.swingDuration, epsilon);
-      sameTimings = sameTimings && MathTools.epsilonEquals(transferDuration, footstepData.transferDuration, epsilon);
-      sameTimings = sameTimings && MathTools.epsilonEquals(touchdownDuration, footstepData.touchdownDuration, epsilon);
+      boolean sameTimings = MathTools.epsilonCompare(swingDuration, footstepData.swingDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonCompare(transferDuration, footstepData.transferDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonCompare(touchdownDuration, footstepData.touchdownDuration, epsilon);
 
-      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonEquals(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
+      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonCompare(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
             && swingTrajectoryBlendDurationEquals;

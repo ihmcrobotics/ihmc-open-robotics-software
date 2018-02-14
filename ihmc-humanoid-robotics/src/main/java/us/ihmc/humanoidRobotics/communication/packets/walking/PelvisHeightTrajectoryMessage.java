@@ -14,17 +14,11 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/pelvis_height_trajectory")
 public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage>
 {
-   /**
-    * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the
-    * leg kinematics
-    **/
+   @RosExportedField(documentation = "Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.")
    public boolean enableUserPelvisControl = false;
 
-   /**
-    * If {@code enableUserPelvisControl} is true then {@code enableUserPelvisControlDuringWalking}
-    * will keep the height manager in user mode while walking. If this is false the height manager
-    * will switch to controller mode when walking
-    **/
+   @RosExportedField(documentation = " If enableUserPelvisControl is true then enableUserPelvisControlDuringWalking"
+         + " will keep the height manager in user mode while walking. If this is false the height manager will switch to controller mode when walking.")
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The position trajectory information.")
    public EuclideanTrajectoryMessage euclideanTrajectory;

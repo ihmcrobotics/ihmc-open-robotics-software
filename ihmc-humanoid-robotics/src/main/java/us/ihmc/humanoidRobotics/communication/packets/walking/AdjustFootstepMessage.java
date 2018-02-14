@@ -35,7 +35,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public List<Point2D> predictedContactPoints;
 
-   /** the time to delay this command on the controller side before being executed **/
+   @RosExportedField(documentation = "The time to delay this command on the controller side before being executed.")
    public double executionDelayTime;
 
    /**
