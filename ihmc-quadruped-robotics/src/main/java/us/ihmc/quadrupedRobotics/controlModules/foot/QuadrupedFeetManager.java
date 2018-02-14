@@ -72,4 +72,10 @@ public class QuadrupedFeetManager
    {
       return footControlModules.get(robotQuadrant).getContactState();
    }
+
+   public void requestFullContact()
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footControlModules.get(robotQuadrant).requestSupport();
+   }
 }
