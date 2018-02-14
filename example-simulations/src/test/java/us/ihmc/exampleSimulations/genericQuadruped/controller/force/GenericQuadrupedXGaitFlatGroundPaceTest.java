@@ -18,7 +18,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 11.1)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 150000)
    public void testPacingForwardFast()
    {
@@ -26,7 +26,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 13.5)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 150000)
    public void testPacingForwardSlow()
    {
@@ -34,7 +34,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 12.7)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 150000)
    public void testPacingBackwardsFast()
    {
@@ -42,7 +42,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 16.8)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 150000)
    public void testPacingBackwardsSlow()
    {
@@ -50,7 +50,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.4)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 200000)
    public void testPacingInAForwardLeftCircle()
    {
@@ -58,7 +58,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 24.1)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 200000)
    public void testPacingInAForwardRightCircle()
    {
@@ -66,7 +66,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.8)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 200000)
    public void testPacingInABackwardLeftCircle()
    {
@@ -74,7 +74,7 @@ public class GenericQuadrupedXGaitFlatGroundPaceTest extends QuadrupedXGaitFlatG
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.9)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 200000)
    public void testPacingInABackwardRightCircle()
    {

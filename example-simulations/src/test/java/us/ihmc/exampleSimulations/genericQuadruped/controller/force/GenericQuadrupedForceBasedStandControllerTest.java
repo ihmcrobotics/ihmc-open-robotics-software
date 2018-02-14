@@ -21,7 +21,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testStandingUpAndAdjustingCoM() throws IOException
    {
@@ -29,7 +29,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 250000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
@@ -37,7 +37,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
    @Test(timeout = 200000)
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
@@ -45,7 +45,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
    @Test(timeout = 200000)
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
@@ -53,7 +53,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
    @Test(timeout = 200000)
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
@@ -61,7 +61,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
    @Test(timeout = 200000)
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
