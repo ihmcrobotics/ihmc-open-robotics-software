@@ -45,7 +45,7 @@ public abstract class ControllerAPIDefinition
       commands.add(PrepareForLocomotionCommand.class);
       commands.add(PauseWalkingCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
-      commands.add(SpineDesiredAccelerationCommand.class);
+      commands.add(SpineDesiredAccelerationsCommand.class);
       commands.add(HandLoadBearingCommand.class);
       commands.add(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
       commands.add(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);

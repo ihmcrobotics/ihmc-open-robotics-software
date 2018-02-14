@@ -203,7 +203,7 @@ public class PelvisOrientationManager
 
    public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {
-      if (command.useCustomControlFrame())
+      if (command.getSO3Trajectory().useCustomControlFrame())
       {
          PrintTools.warn("Can not use custom control frame with pelvis orientation.");
          return false;
@@ -221,7 +221,7 @@ public class PelvisOrientationManager
    private final PelvisOrientationTrajectoryCommand tempPelvisOrientationTrajectoryCommand = new PelvisOrientationTrajectoryCommand();
    public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      SelectionMatrix3D angularSelectionMatrix = command.getSelectionMatrix().getAngularPart();
+      SelectionMatrix3D angularSelectionMatrix = command.getSE3Trajectory().getSelectionMatrix().getAngularPart();
 
       if (angularSelectionMatrix.isXSelected() || angularSelectionMatrix.isYSelected() || angularSelectionMatrix.isZSelected())
       { // At least one axis is to be controlled, process the command.

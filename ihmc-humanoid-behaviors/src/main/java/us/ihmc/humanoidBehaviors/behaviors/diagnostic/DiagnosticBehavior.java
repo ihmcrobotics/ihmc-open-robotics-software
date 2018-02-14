@@ -1817,7 +1817,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             }
             calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
             calculator.computeTrajectoryPointVelocities(true);
-            flyingMessage.setTrajectory1DMessage(jointIndex, new OneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));
+            flyingMessage.getJointspaceTrajectory().setTrajectory1DMessage(jointIndex, new OneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));
          }
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),

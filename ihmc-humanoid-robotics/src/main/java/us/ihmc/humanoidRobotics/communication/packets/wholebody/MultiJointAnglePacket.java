@@ -4,9 +4,8 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
 
-public class MultiJointAnglePacket extends Packet<MultiJointAnglePacket> implements VisualizablePacket
+public class MultiJointAnglePacket extends Packet<MultiJointAnglePacket>
 {
    public SingleJointAnglePacket[] singleJointAnglePackets;
 

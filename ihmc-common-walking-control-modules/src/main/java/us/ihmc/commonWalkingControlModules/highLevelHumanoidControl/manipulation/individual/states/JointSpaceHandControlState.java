@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
@@ -130,10 +131,11 @@ public class JointSpaceHandControlState extends HandControlState
          return false;
 
       isReadyToHandleQueuedCommands.set(true);
-      clearCommandQueues(command.getCommandId());
+      JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+      clearCommandQueues(jointspaceTrajectory.getCommandId());
 
-      RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryCommands = command.getTrajectoryPointLists();
-      int numberOfJoints = command.getNumberOfJoints();
+      RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryCommands = jointspaceTrajectory.getTrajectoryPointLists();
+      int numberOfJoints = jointspaceTrajectory.getNumberOfJoints();
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -152,7 +154,8 @@ public class JointSpaceHandControlState extends HandControlState
          return false;
       }
 
-      long previousCommandId = command.getPreviousCommandId();
+      JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+      long previousCommandId = jointspaceTrajectory.getPreviousCommandId();
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
@@ -164,13 +167,13 @@ public class JointSpaceHandControlState extends HandControlState
          return false;
       }
 
-      for (int jointIndex = 0; jointIndex < command.getNumberOfJoints(); jointIndex++)
+      for (int jointIndex = 0; jointIndex < jointspaceTrajectory.getNumberOfJoints(); jointIndex++)
       {
          OneDoFJoint joint = controlledJoints[jointIndex];
          OneDoFJointTrajectoryCommand localCommand = commandQueues.get(joint).addLast();
          numberOfQueuedCommands.get(joint).increment();
 
-         OneDoFJointTrajectoryCommand jointTrajectoryCommand = command.getJointTrajectoryPointList(jointIndex);
+         OneDoFJointTrajectoryCommand jointTrajectoryCommand = jointspaceTrajectory.getJointTrajectoryPointList(jointIndex);
 
          if (jointTrajectoryCommand.getTrajectoryPoint(0).getTime() < 1.0e-5)
          {
@@ -182,10 +185,10 @@ public class JointSpaceHandControlState extends HandControlState
          }
 
          localCommand.set(jointTrajectoryCommand);
-         localCommand.setCommandId(command.getCommandId());
+         localCommand.setCommandId(jointspaceTrajectory.getCommandId());
       }
 
-      lastCommandId.set(command.getCommandId());
+      lastCommandId.set(jointspaceTrajectory.getCommandId());
 
       return true;
    }

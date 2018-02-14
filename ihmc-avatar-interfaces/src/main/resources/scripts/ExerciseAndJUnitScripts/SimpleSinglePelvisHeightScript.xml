@@ -4,60 +4,59 @@
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
-    <executionMode>OVERRIDE</executionMode>
-    <previousMessageId>0</previousMessageId>
-    <executionDelayTime>0.0</executionDelayTime>
-    <taskspaceTrajectoryPoints>
-      <us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
+    <euclideanTrajectory>
+      <taskspaceTrajectoryPoints>
+        <us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
+          <uniqueId>0</uniqueId>
+          <destination>0</destination>
+          <time>2.0</time>
+          <position>
+            <x>0.0</x>
+            <y>0.0</y>
+            <z>0.6</z>
+          </position>
+          <linearVelocity>
+            <x>0.0</x>
+            <y>0.0</y>
+            <z>0.0</z>
+          </linearVelocity>
+        </us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
+      </taskspaceTrajectoryPoints>
+      <linearSelectionMatrix>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <time>2.0</time>
-        <position>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.6</z>
-        </position>
-        <linearVelocity>
+        <selectionFrameId>0</selectionFrameId>
+        <xSelected>false</xSelected>
+        <ySelected>false</ySelected>
+        <zSelected>true</zSelected>
+      </linearSelectionMatrix>
+      <frameInformation>
+      <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
+        <dataReferenceFrameId>83766130</dataReferenceFrameId>
+      </frameInformation>
+      <linearWeightMatrix>
+        <uniqueId>0</uniqueId>
+        <destination>0</destination>
+        <weightFrameId>0</weightFrameId>
+        <xWeight>NaN</xWeight>
+        <yWeight>NaN</yWeight>
+        <zWeight>NaN</zWeight>
+      </linearWeightMatrix>
+      <useCustomControlFrame>false</useCustomControlFrame>
+      <controlFramePose>
+        <quaternion>
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-        </linearVelocity>
-      </us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
-    </taskspaceTrajectoryPoints>
-    <linearSelectionMatrix>
-      <uniqueId>0</uniqueId>
-      <destination>0</destination>
-      <selectionFrameId>0</selectionFrameId>
-      <xSelected>false</xSelected>
-      <ySelected>false</ySelected>
-      <zSelected>true</zSelected>
-    </linearSelectionMatrix>
-    <frameInformation>
-      <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-      <dataReferenceFrameId>83766130</dataReferenceFrameId>
-    </frameInformation>
-    <linearWeightMatrix>
-      <uniqueId>0</uniqueId>
-      <destination>0</destination>
-      <weightFrameId>0</weightFrameId>
-      <xWeight>NaN</xWeight>
-      <yWeight>NaN</yWeight>
-      <zWeight>NaN</zWeight>
-    </linearWeightMatrix>
-    <useCustomControlFrame>false</useCustomControlFrame>
-    <controlFramePose>
-      <quaternion>
-        <x>0.0</x>
-        <y>0.0</y>
-        <z>0.0</z>
-        <s>1.0</s>
-      </quaternion>
-      <translationVector>
-        <x>0.0</x>
-        <y>0.0</y>
-        <z>0.0</z>
-      </translationVector>
-    </controlFramePose>
+          <s>1.0</s>
+        </quaternion>
+        <translationVector>
+          <x>0.0</x>
+          <y>0.0</y>
+          <z>0.0</z>
+        </translationVector>
+      </controlFramePose>
+    </euclideanTrajectory>
     <enableUserPelvisControl>false</enableUserPelvisControl>
     <enableUserPelvisControlDuringWalking>false</enableUserPelvisControlDuringWalking>
   </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>

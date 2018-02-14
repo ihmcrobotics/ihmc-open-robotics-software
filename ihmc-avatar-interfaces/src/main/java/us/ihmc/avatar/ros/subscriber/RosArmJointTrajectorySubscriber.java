@@ -73,7 +73,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
          
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            ihmcMessage.setTrajectoryPoint(jointIndex, waypointIndex, time, positions[jointIndex], velocities[jointIndex]);
+            ihmcMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, waypointIndex, time, positions[jointIndex], velocities[jointIndex]);
          }
       }
       

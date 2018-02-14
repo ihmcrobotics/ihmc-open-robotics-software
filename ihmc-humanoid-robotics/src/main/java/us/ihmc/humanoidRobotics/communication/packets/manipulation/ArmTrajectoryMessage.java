@@ -4,10 +4,10 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -19,10 +19,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/arm_trajectory")
-public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<ArmTrajectoryMessage> implements VisualizablePacket
+public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
+   @RosExportedField(documentation = "Trajectories for each joint.")
+   public JointspaceTrajectoryMessage jointspaceTrajectory;
 
    /**
     * Empty constructor for serialization.
@@ -30,7 +32,8 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
     */
    public ArmTrajectoryMessage()
    {
-      super();
+      jointspaceTrajectory = new JointspaceTrajectoryMessage();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -39,8 +42,16 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
     */
    public ArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
-      super(armTrajectoryMessage);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(armTrajectoryMessage.jointspaceTrajectory);
       robotSide = armTrajectoryMessage.robotSide;
+      setUniqueId(armTrajectoryMessage.getUniqueId());
+   }
+
+   public ArmTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   {
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
+      this.robotSide = robotSide;
+      setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
    }
 
    /**
@@ -52,8 +63,9 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
     */
    public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
    {
-      super(trajectoryTime, desiredJointPositions);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
    
    /**
@@ -66,8 +78,9 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
     */
    public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
-      super(trajectoryTime, desiredJointPositions, weights);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -78,8 +91,9 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
     */
    public ArmTrajectoryMessage(RobotSide robotSide, OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
-      super(jointTrajectory1DListMessages);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointTrajectory1DListMessages);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -91,8 +105,9 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
     */
    public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints)
    {
-      super(numberOfJoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -105,8 +120,24 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
     */
    public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints, int numberOfTrajectoryPoints)
    {
-      super(numberOfJoints, numberOfTrajectoryPoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public ArmTrajectoryMessage(Random random)
+   {
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
+      this.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   @Override
+   public void setUniqueId(long uniqueId)
+   {
+      super.setUniqueId(uniqueId);
+      if (jointspaceTrajectory != null)
+         jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
    public RobotSide getRobotSide()
@@ -114,26 +145,36 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
       return robotSide;
    }
 
+   public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)
+   {
+      this.jointspaceTrajectory = jointspaceTrajectory;
+   }
+
+   public JointspaceTrajectoryMessage getJointspaceTrajectory()
+   {
+      return jointspaceTrajectory;
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return jointspaceTrajectory.getQueueingProperties();
+   }
+
    @Override
    public boolean epsilonEquals(ArmTrajectoryMessage other, double epsilon)
    {
       if (!this.robotSide.equals(other.robotSide))
          return false;
-
-      return super.epsilonEquals(other, epsilon);
-   }
-
-   public ArmTrajectoryMessage(Random random)
-   {
-      super(random);
-      this.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
+         return false;
+      return true;
    }
 
    @Override
    public String toString()
    {
-      if (jointTrajectoryMessages != null)
-         return "Arm 1D trajectories: number of joints = " + getNumberOfJoints() + ", robotSide = " + robotSide;
+      if (jointspaceTrajectory.jointTrajectoryMessages != null)
+         return "Arm 1D trajectories: number of joints = " + jointspaceTrajectory.getNumberOfJoints() + ", robotSide = " + robotSide;
       else
          return "Arm 1D trajectories: no joint trajectory, robotSide = " + robotSide;
    }

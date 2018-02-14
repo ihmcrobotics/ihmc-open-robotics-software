@@ -114,7 +114,7 @@ public class IHMCROSTranslationRuntimeTools
       footsteps.defaultSwingDuration = message.getDefaultSwingDuration();
       footsteps.defaultTransferDuration = message.getDefaultTransferDuration();
       footsteps.setUniqueId(message.getUniqueId());
-      footsteps.executionMode = ExecutionMode.values[message.getExecutionMode()];
+      footsteps.getQueueingProperties().executionMode = ExecutionMode.values[message.getQueueingProperties().getExecutionMode()];
       footsteps.finalTransferDuration = message.getFinalTransferDuration();
       footsteps.executionTiming = ExecutionTiming.values[message.getExecutionTiming()];
 
@@ -340,7 +340,7 @@ public class IHMCROSTranslationRuntimeTools
       message.setDefaultSwingDuration(footstepList.defaultSwingDuration);
       message.setDefaultTransferDuration(footstepList.defaultTransferDuration);
       message.setUniqueId(footstepList.getUniqueId());
-      message.setExecutionMode((byte) footstepList.executionMode.ordinal());
+      message.getQueueingProperties().setExecutionMode((byte) footstepList.getQueueingProperties().executionMode.ordinal());
       message.setFinalTransferDuration(footstepList.finalTransferDuration);
       message.setExecutionTiming((byte) footstepList.getExecutionTiming().ordinal());
 

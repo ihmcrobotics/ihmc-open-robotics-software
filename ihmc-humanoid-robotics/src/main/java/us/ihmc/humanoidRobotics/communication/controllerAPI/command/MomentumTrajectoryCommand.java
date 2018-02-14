@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajectoryCommand, MomentumTrajectoryMessage>
+public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryCommand, MomentumTrajectoryMessage>, FrameBasedCommand<MomentumTrajectoryMessage>
 {
-   private final RecyclingArrayList<TrajectoryPoint3D> angularMomentumTrajectory = new RecyclingArrayList<>(10, TrajectoryPoint3D.class);
+   private final EuclideanTrajectoryControllerCommand angularMomentumTrajectory = new EuclideanTrajectoryControllerCommand();
 
    public MomentumTrajectoryCommand()
    {
@@ -22,57 +22,30 @@ public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajecto
    @Override
    public void set(MomentumTrajectoryMessage message)
    {
-      clear();
-      for (int i = 0; i < message.getNumberOfAngularMomentumTrajectoryPoints(); i++)
-      {
-         TrajectoryPoint3D trajectoryPoint = angularMomentumTrajectory.add();
-         trajectoryPoint.set(message.getAngularMomentumTrajectoryPoint(i));
-      }
-      setQueueableCommandVariables(message);
+      angularMomentumTrajectory.set(message.angularMomentumTrajectory);
+   }
+   
+   @Override
+   public void set(ReferenceFrameHashCodeResolver resolver, MomentumTrajectoryMessage message)
+   {
+      angularMomentumTrajectory.set(resolver, message.angularMomentumTrajectory);
    }
 
    @Override
    public void set(MomentumTrajectoryCommand other)
    {
-      clear();
-      for (int i = 0; i < other.getNumberOfAngularMomentumTrajectoryPoints(); i++)
-      {
-         TrajectoryPoint3D trajectoryPoint = angularMomentumTrajectory.add();
-         trajectoryPoint.set(other.getAngularMomentumTrajectoryPoint(i));
-      }
-      setQueueableCommandVariables(other);
-   }
-
-   public void addAngularMomentumTrajectoryPoint(TrajectoryPoint3D trajectoryPoint)
-   {
-      angularMomentumTrajectory.add().set(trajectoryPoint);
-   }
-
-   public int getNumberOfAngularMomentumTrajectoryPoints()
-   {
-      return angularMomentumTrajectory.size();
-   }
-
-   public TrajectoryPoint3D getAngularMomentumTrajectoryPoint(int i)
-   {
-      return angularMomentumTrajectory.get(i);
+      angularMomentumTrajectory.set(other.angularMomentumTrajectory);
    }
 
    @Override
    public void clear()
    {
       angularMomentumTrajectory.clear();
-      clearQueuableCommandVariables();
    }
 
-   @Override
-   public void addTimeOffset(double timeOffset)
+   public EuclideanTrajectoryControllerCommand getAngularMomentumTrajectory()
    {
-      for (int i = 0; i < angularMomentumTrajectory.size(); i++)
-      {
-         TrajectoryPoint3D trajectoryPoint = angularMomentumTrajectory.get(i);
-         trajectoryPoint.setTime(trajectoryPoint.getTime() + timeOffset);
-      }
+      return angularMomentumTrajectory;
    }
 
    @Override
@@ -84,7 +57,36 @@ public class MomentumTrajectoryCommand extends QueueableCommand<MomentumTrajecto
    @Override
    public boolean isCommandValid()
    {
-      return !angularMomentumTrajectory.isEmpty();
+      return angularMomentumTrajectory.isCommandValid();
    }
 
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return true;
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      angularMomentumTrajectory.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      angularMomentumTrajectory.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return angularMomentumTrajectory.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return angularMomentumTrajectory.getExecutionTime();
+   }
 }

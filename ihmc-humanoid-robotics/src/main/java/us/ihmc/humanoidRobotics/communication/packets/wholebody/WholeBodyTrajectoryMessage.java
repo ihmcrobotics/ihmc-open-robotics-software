@@ -6,7 +6,6 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -21,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 @RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
       + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/whole_body_trajectory")
-public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage> implements VisualizablePacket, MultiplePacketHolder
+public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage> implements MultiplePacketHolder
 {
    @RosExportedField(documentation = "Trajectory for the left hand")
    public HandTrajectoryMessage leftHandTrajectoryMessage;
@@ -369,61 +368,42 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    @Override
    public boolean epsilonEquals(WholeBodyTrajectoryMessage other, double epsilon)
    {
-      if (leftHandTrajectoryMessage == null && other.leftHandTrajectoryMessage != null)
+      if (leftHandTrajectoryMessage == null ^ other.leftHandTrajectoryMessage == null)
          return false;
-      if (rightHandTrajectoryMessage == null && other.rightHandTrajectoryMessage != null)
+      if (rightHandTrajectoryMessage == null ^ other.rightHandTrajectoryMessage == null)
          return false;
-      if (leftArmTrajectoryMessage == null && other.leftArmTrajectoryMessage != null)
+      if (leftArmTrajectoryMessage == null ^ other.leftArmTrajectoryMessage == null)
          return false;
-      if (rightArmTrajectoryMessage == null && other.rightArmTrajectoryMessage != null)
+      if (rightArmTrajectoryMessage == null ^ other.rightArmTrajectoryMessage == null)
          return false;
-      if (chestTrajectoryMessage == null && other.chestTrajectoryMessage != null)
+      if (chestTrajectoryMessage == null ^ other.chestTrajectoryMessage == null)
          return false;
-      if (pelvisTrajectoryMessage == null && other.pelvisTrajectoryMessage != null)
+      if (pelvisTrajectoryMessage == null ^ other.pelvisTrajectoryMessage == null)
          return false;
-      if (headTrajectoryMessage == null && other.headTrajectoryMessage != null)
+      if (headTrajectoryMessage == null ^ other.headTrajectoryMessage == null)
          return false;
-      if (leftFootTrajectoryMessage == null && other.leftFootTrajectoryMessage != null)
+      if (leftFootTrajectoryMessage == null ^ other.leftFootTrajectoryMessage == null)
          return false;
-      if (rightFootTrajectoryMessage == null && other.rightFootTrajectoryMessage != null)
-         return false;
-
-      if (leftHandTrajectoryMessage != null && other.leftHandTrajectoryMessage == null)
-         return false;
-      if (rightHandTrajectoryMessage != null && other.rightHandTrajectoryMessage == null)
-         return false;
-      if (leftArmTrajectoryMessage != null && other.leftArmTrajectoryMessage == null)
-         return false;
-      if (rightArmTrajectoryMessage != null && other.rightArmTrajectoryMessage == null)
-         return false;
-      if (chestTrajectoryMessage != null && other.chestTrajectoryMessage == null)
-         return false;
-      if (pelvisTrajectoryMessage != null && other.pelvisTrajectoryMessage == null)
-         return false;
-      if (headTrajectoryMessage != null && other.headTrajectoryMessage == null)
-         return false;
-      if (leftFootTrajectoryMessage != null && other.leftFootTrajectoryMessage == null)
-         return false;
-      if (rightFootTrajectoryMessage != null && other.rightFootTrajectoryMessage == null)
+      if (rightFootTrajectoryMessage == null ^ other.rightFootTrajectoryMessage == null)
          return false;
 
-      if (!leftHandTrajectoryMessage.epsilonEquals(other.leftHandTrajectoryMessage, epsilon))
+      if (leftHandTrajectoryMessage != null && !leftHandTrajectoryMessage.epsilonEquals(other.leftHandTrajectoryMessage, epsilon))
          return false;
-      if (!rightHandTrajectoryMessage.epsilonEquals(other.rightHandTrajectoryMessage, epsilon))
+      if (rightHandTrajectoryMessage != null && !rightHandTrajectoryMessage.epsilonEquals(other.rightHandTrajectoryMessage, epsilon))
          return false;
-      if (!leftArmTrajectoryMessage.epsilonEquals(other.leftArmTrajectoryMessage, epsilon))
+      if (leftArmTrajectoryMessage != null && !leftArmTrajectoryMessage.epsilonEquals(other.leftArmTrajectoryMessage, epsilon))
          return false;
-      if (!rightArmTrajectoryMessage.epsilonEquals(other.rightArmTrajectoryMessage, epsilon))
+      if (rightArmTrajectoryMessage != null && !rightArmTrajectoryMessage.epsilonEquals(other.rightArmTrajectoryMessage, epsilon))
          return false;
-      if (!chestTrajectoryMessage.epsilonEquals(other.chestTrajectoryMessage, epsilon))
+      if (chestTrajectoryMessage != null && !chestTrajectoryMessage.epsilonEquals(other.chestTrajectoryMessage, epsilon))
          return false;
-      if (!pelvisTrajectoryMessage.epsilonEquals(other.pelvisTrajectoryMessage, epsilon))
+      if (pelvisTrajectoryMessage != null && !pelvisTrajectoryMessage.epsilonEquals(other.pelvisTrajectoryMessage, epsilon))
          return false;
-      if (!headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
+      if (headTrajectoryMessage != null && !headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
          return false;
-      if (!leftFootTrajectoryMessage.epsilonEquals(other.leftFootTrajectoryMessage, epsilon))
+      if (leftFootTrajectoryMessage != null && !leftFootTrajectoryMessage.epsilonEquals(other.leftFootTrajectoryMessage, epsilon))
          return false;
-      if (!rightFootTrajectoryMessage.epsilonEquals(other.rightFootTrajectoryMessage, epsilon))
+      if (rightFootTrajectoryMessage != null && !rightFootTrajectoryMessage.epsilonEquals(other.rightFootTrajectoryMessage, epsilon))
          return false;
 
       return true;

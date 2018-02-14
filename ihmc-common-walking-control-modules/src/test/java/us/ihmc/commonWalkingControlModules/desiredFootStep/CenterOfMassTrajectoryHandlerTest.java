@@ -1,11 +1,13 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,8 +15,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -31,9 +31,9 @@ public class CenterOfMassTrajectoryHandlerTest
       double epsilon = 1.0e-10;
 
       // assume method x(t) = -1/2 * t^3 + 3/2 * t^2 for x and y and 0.0 for z
-      command.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 0.0));
-      command.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0), 1.0));
-      command.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 2.0));
+      command.getEuclideanTrajectory().addTrajectoryPoint(0.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
+      command.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
 
       CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime);
       handler.handleComTrajectory(command);
@@ -84,9 +84,9 @@ public class CenterOfMassTrajectoryHandlerTest
       double offset = -0.56;
 
       // assume method x(t) = -1/2 * t^3 + 3/2 * t^2 for x and y and 0.0 for z
-      command.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 0.0));
-      command.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0), 1.0));
-      command.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 2.0));
+      command.getEuclideanTrajectory().addTrajectoryPoint(0.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
+      command.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
 
       CenterOfMassTrajectoryHandler handler = new CenterOfMassTrajectoryHandler(yoTime);
       yoTime.set(offset);
@@ -140,17 +140,17 @@ public class CenterOfMassTrajectoryHandlerTest
 
       // assume method x(t) = -1/2 * t^3 + 3/2 * t^2 for x and y and 0.0 for z
       CenterOfMassTrajectoryCommand command1 = new CenterOfMassTrajectoryCommand();
-      command1.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 0.0));
-      command1.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0), 1.0));
-      command1.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 2.0));
+      command1.getEuclideanTrajectory().addTrajectoryPoint(0.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command1.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
+      command1.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
       handler.handleComTrajectory(command1);
 
       // assume method x(t) = -1/2 * (t - 3.0)^3 + 3/2 * (t - 3.0)^2 for x and y and 0.0 for z
       CenterOfMassTrajectoryCommand command2 = new CenterOfMassTrajectoryCommand();
-      command2.setExecutionMode(ExecutionMode.QUEUE);
-      command2.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 1.0));
-      command2.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0), 2.0));
-      command2.addComTrajectoryPoint(new TrajectoryPoint3D(new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0), 3.0));
+      command2.getEuclideanTrajectory().setExecutionMode(ExecutionMode.QUEUE);
+      command2.getEuclideanTrajectory().addTrajectoryPoint(1.0, new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
+      command2.getEuclideanTrajectory().addTrajectoryPoint(2.0, new Point3D(1.0, 1.0, 0.0), new Vector3D(1.5, 1.5, 0.0));
+      command2.getEuclideanTrajectory().addTrajectoryPoint(3.0, new Point3D(2.0, 2.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
 
       yoTime.set(-20.9);
       handler.handleComTrajectory(command2);

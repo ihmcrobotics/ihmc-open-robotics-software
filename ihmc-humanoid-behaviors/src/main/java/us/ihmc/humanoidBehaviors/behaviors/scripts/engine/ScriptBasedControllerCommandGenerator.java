@@ -89,20 +89,20 @@ public class ScriptBasedControllerCommandGenerator
       else if (scriptObject instanceof FootTrajectoryMessage)
       {
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
-         message.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-         message.getFrameInformation().setDataReferenceFrame(worldFrame);
+         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
          FootTrajectoryCommand command = new FootTrajectoryCommand();
-         command.set(worldFrame, worldFrame, message);
+         command.getSE3Trajectory().set(worldFrame, worldFrame, message.se3Trajectory);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof HandTrajectoryMessage)
       {
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
-         message.getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
-         message.getFrameInformation().setDataReferenceFrame(worldFrame);
+         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
          HandTrajectoryCommand command = new HandTrajectoryCommand();
-         command.set(worldFrame, chestFrame, message);
+         command.getSE3Trajectory().set(worldFrame, chestFrame, message.se3Trajectory);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof PelvisHeightTrajectoryMessage)

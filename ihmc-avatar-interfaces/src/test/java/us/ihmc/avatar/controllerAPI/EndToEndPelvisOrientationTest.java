@@ -71,7 +71,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.25));
 
       String pelvisName = fullRobotModel.getPelvis().getName();
-      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, message.taskspaceTrajectoryPoints[0], scs, epsilon);
+      EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, message.getSO3Trajectory().taskspaceTrajectoryPoints[0], scs, epsilon);
 
       GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.PELVIS, trajectoryTime);
       drcSimulationTestHelper.send(goHomeMessage);
@@ -102,7 +102,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       pelvisOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
-      SO3TrajectoryPointMessage waypoint = message.taskspaceTrajectoryPoints[0];
+      SO3TrajectoryPointMessage waypoint = message.getSO3Trajectory().taskspaceTrajectoryPoints[0];
       drcSimulationTestHelper.send(message);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
 
@@ -190,7 +190,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       initialOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(numberOfPoints);
-      message.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+      message.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
 
       for (int point = 0; point < numberOfPoints; point++)
       {
@@ -221,7 +221,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
          if (point == numberOfPoints - 1)
             angularVelocity.setToZero();
-         message.setTrajectoryPoint(point, time, orientation, angularVelocity, worldFrame);
+         message.getSO3Trajectory().setTrajectoryPoint(point, time, orientation, angularVelocity, worldFrame);
       }
 
       drcSimulationTestHelper.send(message);
@@ -232,13 +232,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       EndToEndTestTools.assertNumberOfPoints(pelvisName + postFix, numberOfPoints + 1, scs);
       for (int point = 1; point < RigidBodyTaskspaceControlState.maxPointsInGenerator; point++)
       {
-         SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(point - 1);
+         SO3TrajectoryPointMessage waypoint = message.getSO3Trajectory().getTrajectoryPoint(point - 1);
          EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName + postFix, point, waypoint, scs, epsilon);
       }
 
       double simulationTime = timePerPoint * numberOfPoints + 0.5;
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(numberOfPoints - 1);
+      SO3TrajectoryPointMessage waypoint = message.getSO3Trajectory().getTrajectoryPoint(numberOfPoints - 1);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
       
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);

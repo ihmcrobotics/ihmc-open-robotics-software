@@ -442,7 +442,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return controlFrame;
    }
 
-   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
+   public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
@@ -519,8 +519,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose,
-                                              JointspaceTrajectoryCommand<?, ?> jointspaceCommand, double[] initialJointPositions)
+   public boolean handleHybridPoseTrajectoryCommand(SE3TrajectoryControllerCommand command, FramePose3D initialPose,
+                                              JointspaceTrajectoryCommand jointspaceCommand, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
       {
@@ -547,7 +547,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
+   public boolean handlePoseTrajectoryCommand(SE3TrajectoryControllerCommand command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
@@ -638,7 +638,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand<?, ?> command, FramePose3D initialPose)
+   public boolean handleEuclideanTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FramePose3D initialPose)
    {
       if (!handleCommandInternal(command))
          return false;
