@@ -81,7 +81,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       trustHeightOfFootsteps = other.trustHeightOfFootsteps;
       areFootstepsAdjustable = other.areFootstepsAdjustable;
       offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
-      queueingProperties.set(other.queueingProperties);
+      if (other.queueingProperties != null)
+         queueingProperties.set(other.queueingProperties);
    }
 
    public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double finalTransferDuration)
