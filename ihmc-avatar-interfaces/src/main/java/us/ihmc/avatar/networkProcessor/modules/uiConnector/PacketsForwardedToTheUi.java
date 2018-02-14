@@ -21,7 +21,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBe
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
@@ -59,7 +58,6 @@ public class PacketsForwardedToTheUi
       PelvisPoseErrorPacket.class,
       BehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,
-      ControlStatusPacket.class,
       FootstepDataListMessage.class,
       PelvisHeightTrajectoryMessage.class,
       HeadTrajectoryMessage.class,

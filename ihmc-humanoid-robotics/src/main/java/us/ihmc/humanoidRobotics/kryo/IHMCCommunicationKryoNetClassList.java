@@ -93,7 +93,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectric
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
@@ -396,9 +395,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(FisheyePacket.class);
 
       registerPacketClass(MultisenseParameterPacket.class);
-
-      registerPacketClass(ControlStatusPacket.class);
-      registerPacketField(ControlStatusPacket.ControlStatus.class);
 
       // Humanoid Behaviors
       registerPacketClass(HumanoidBehaviorTypePacket.class);
