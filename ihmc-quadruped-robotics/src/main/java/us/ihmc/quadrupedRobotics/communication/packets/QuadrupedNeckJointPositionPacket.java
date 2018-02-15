@@ -1,11 +1,12 @@
 package us.ihmc.quadrupedRobotics.communication.packets;
 
+import java.util.Arrays;
+import java.util.Map;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.tools.ArrayTools;
-
-import java.util.Map;
 
 public class QuadrupedNeckJointPositionPacket extends Packet<QuadrupedNeckJointPositionPacket>
 {
@@ -43,6 +44,14 @@ public class QuadrupedNeckJointPositionPacket extends Packet<QuadrupedNeckJointP
          this.neckJointPosition[i] = entry.getValue();
          i++;
       }
+   }
+
+   @Override
+   public void set(QuadrupedNeckJointPositionPacket other)
+   {
+      neckJointName = Arrays.copyOf(other.neckJointName, other.neckJointName.length);
+      neckJointPosition = Arrays.copyOf(other.neckJointPosition, other.neckJointPosition.length);
+      setPacketInformation(other);
    }
 
    public int size()

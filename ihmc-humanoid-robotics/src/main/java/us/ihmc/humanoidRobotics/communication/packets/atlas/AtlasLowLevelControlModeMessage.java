@@ -20,6 +20,13 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
       requestedControlMode = request;
    }
 
+   @Override
+   public void set(AtlasLowLevelControlModeMessage other)
+   {
+      setPacketInformation(other);
+      requestedControlMode = other.requestedControlMode;
+   }
+
    public void setRequestedControlMode(ControlMode requestedControlMode)
    {
       this.requestedControlMode = requestedControlMode;

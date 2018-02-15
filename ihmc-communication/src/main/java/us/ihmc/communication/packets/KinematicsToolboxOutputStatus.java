@@ -70,6 +70,7 @@ public class KinematicsToolboxOutputStatus extends SettablePacket<KinematicsTool
       uniqueId = other.uniqueId;
       destination = other.destination;
       solutionQuality = other.solutionQuality;
+      setPacketInformation(other);
    }
 
    public void getDesiredJointState(FloatingInverseDynamicsJoint rootJointToUpdate, OneDoFJoint[] jointsToUpdate)

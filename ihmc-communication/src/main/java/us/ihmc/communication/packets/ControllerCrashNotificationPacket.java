@@ -29,6 +29,14 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
    }
 
    @Override
+   public void set(ControllerCrashNotificationPacket other)
+   {
+      location = other.location;
+      stacktrace = other.stacktrace;
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(ControllerCrashNotificationPacket other, double epsilon)
    {
       return true;

@@ -27,6 +27,13 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
    }
 
    @Override
+   public void set(AtlasDesiredPumpPSIPacket other)
+   {
+      setPacketInformation(other);
+      desiredPumpPsi = other.desiredPumpPsi;
+   }
+
+   @Override
    public boolean epsilonEquals(AtlasDesiredPumpPSIPacket other, double epsilon)
    {
       return desiredPumpPsi == other.desiredPumpPsi;

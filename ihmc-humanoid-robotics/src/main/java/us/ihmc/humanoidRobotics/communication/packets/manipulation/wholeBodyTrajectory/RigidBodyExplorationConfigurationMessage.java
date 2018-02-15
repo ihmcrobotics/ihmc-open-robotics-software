@@ -67,6 +67,13 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(RigidBodyExplorationConfigurationMessage other)
+   {
+      rigidBodyNameBasedHashCode = other.rigidBodyNameBasedHashCode;
+      degreesOfFreedomToExplore = Arrays.copyOf(other.degreesOfFreedomToExplore, other.degreesOfFreedomToExplore.length);
+   }
+
    public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
    {
       if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)

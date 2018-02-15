@@ -29,6 +29,37 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(WholeBodyTrajectoryToolboxMessage other)
+   {
+      configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
+      configuration.set(other.configuration);
+      endEffectorTrajectories = new ArrayList<>();
+      for (WaypointBasedTrajectoryMessage otherTrajectory : other.endEffectorTrajectories)
+      {
+         WaypointBasedTrajectoryMessage trajectory = new WaypointBasedTrajectoryMessage();
+         trajectory.set(otherTrajectory);
+         endEffectorTrajectories.add(trajectory);
+      }
+
+      explorationConfigurations = new ArrayList<>();
+      for (RigidBodyExplorationConfigurationMessage otherConfiguration : other.explorationConfigurations)
+      {
+         RigidBodyExplorationConfigurationMessage configuration = new RigidBodyExplorationConfigurationMessage();
+         configuration.set(otherConfiguration);
+         explorationConfigurations.add(configuration);
+      }
+      
+      reachingManifolds = new ArrayList<>();
+      for (ReachingManifoldMessage otherManifold : other.reachingManifolds)
+      {
+         ReachingManifoldMessage manifold = new ReachingManifoldMessage();
+         manifold.set(otherManifold);
+         reachingManifolds.add(manifold);
+      }
+      setPacketInformation(other);
+   }
+
    public void setConfiguration(WholeBodyTrajectoryToolboxConfigurationMessage configuration)
    {
       this.configuration = configuration;

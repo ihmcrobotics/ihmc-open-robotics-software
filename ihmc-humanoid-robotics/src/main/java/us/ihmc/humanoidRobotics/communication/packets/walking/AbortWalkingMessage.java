@@ -18,6 +18,12 @@ public class AbortWalkingMessage extends Packet<AbortWalkingMessage>
    }
 
    @Override
+   public void set(AbortWalkingMessage other)
+   {
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(AbortWalkingMessage other, double epsilon)
    {
       return true;

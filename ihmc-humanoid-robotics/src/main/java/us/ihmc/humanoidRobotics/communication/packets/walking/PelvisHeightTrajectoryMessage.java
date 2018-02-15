@@ -106,6 +106,16 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
    }
 
+   
+   @Override
+   public void set(PelvisHeightTrajectoryMessage other)
+   {
+      enableUserPelvisControl = other.enableUserPelvisControl;
+      enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
+      euclideanTrajectory = new EuclideanTrajectoryMessage();
+      euclideanTrajectory.set(other.euclideanTrajectory);
+   }
+
    /**
     * Returns whether or not user mode is enabled. If enabled the controller will execute the
     * trajectory in user mode. User mode will try to achieve the desireds regardless of the leg

@@ -30,6 +30,13 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
    }
 
    @Override
+   public void set(HighLevelStateMessage other)
+   {
+      highLevelState = other.highLevelState;
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean equals(Object obj)
    {
       return ((obj instanceof HighLevelStateMessage) && this.epsilonEquals((HighLevelStateMessage) obj, 0));

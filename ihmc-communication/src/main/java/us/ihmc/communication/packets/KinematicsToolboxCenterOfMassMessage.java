@@ -2,6 +2,8 @@ package us.ihmc.communication.packets;
 
 import static us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage.nullEqualsAndEpsilonEquals;
 
+import java.util.Arrays;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.MathTools;
@@ -64,6 +66,20 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    {
       setDesiredPosition(desiredPosition);
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   @Override
+   public void set(KinematicsToolboxCenterOfMassMessage other)
+   {
+      desiredPositionInWorld = new Point3D32(other.desiredPositionInWorld);
+      if (other.selectionMatrix != null)
+      {
+         selectionMatrix = new SelectionMatrix3DMessage();
+         selectionMatrix.set(other.selectionMatrix);
+      }
+      if (other.weights != null)
+         weights = Arrays.copyOf(other.weights, other.weights.length);
+      setPacketInformation(other);
    }
 
    /**

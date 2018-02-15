@@ -34,6 +34,14 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       return motorEnableEnum;
    }
 
+   @Override
+   public void set(AtlasElectricMotorEnablePacket other)
+   {
+      setPacketInformation(other);
+      motorEnableEnum = other.motorEnableEnum;
+      enable = other.enable;
+   }
+
    public boolean isEnabled()
    {
       return enable;

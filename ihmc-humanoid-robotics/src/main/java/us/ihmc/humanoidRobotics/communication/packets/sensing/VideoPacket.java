@@ -57,6 +57,18 @@ public class VideoPacket extends Packet<VideoPacket>
       this.intrinsicParameters = intrinsicParameters;
    }
 
+   @Override
+   public void set(VideoPacket other)
+   {
+      videoSource = other.videoSource;
+      timeStamp = other.timeStamp;
+      data = Arrays.copyOf(other.data, other.data.length);
+      position = new Point3D(other.position);
+      orientation = new Quaternion(other.orientation);
+      intrinsicParameters = other.intrinsicParameters;
+      setPacketInformation(other);
+   }
+
    public VideoSource getVideoSource()
    {
       return videoSource;

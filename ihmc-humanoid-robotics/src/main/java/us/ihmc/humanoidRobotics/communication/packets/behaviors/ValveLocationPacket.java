@@ -20,6 +20,14 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
       this.valveRadius = valveRadius;
    }
 
+   @Override
+   public void set(ValveLocationPacket other)
+   {
+      valveTransformToWorld = new RigidBodyTransform(other.valveTransformToWorld);
+      valveRadius = other.valveRadius;
+      setPacketInformation(other);
+   }
+
    public RigidBodyTransform getValveTransformToWorld()
    {
       return valveTransformToWorld;

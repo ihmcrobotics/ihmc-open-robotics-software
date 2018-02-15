@@ -100,12 +100,12 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
    public void set(HandTrajectoryMessage other)
    {
       se3Trajectory = new SE3TrajectoryMessage(other.se3Trajectory);
       robotSide = other.robotSide;
-      setUniqueId(other.getUniqueId());
-      setDestination(other.getDestination());
+      setPacketInformation(other);
    }
 
    public void setRobotSide(RobotSide robotSide)

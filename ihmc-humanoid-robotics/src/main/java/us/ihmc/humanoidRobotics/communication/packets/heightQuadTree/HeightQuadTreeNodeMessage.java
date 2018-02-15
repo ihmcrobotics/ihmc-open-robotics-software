@@ -34,6 +34,7 @@ public class HeightQuadTreeNodeMessage extends SettablePacket<HeightQuadTreeNode
             children[childIndex].set(other.children[childIndex]);
          }
       }
+      setPacketInformation(other);
    }
 
    public int getNumberOfChildren()

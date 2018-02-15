@@ -3,8 +3,6 @@ package us.ihmc.quadrupedRobotics.planning;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedSoleWaypointList extends ArrayList<SoleWaypoint>
 {

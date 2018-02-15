@@ -46,6 +46,15 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
    }
 
    @Override
+   public void set(ArmDesiredAccelerationsMessage other)
+   {
+      desiredAccelerations = new DesiredAccelerationsMessage();
+      desiredAccelerations.set(other.desiredAccelerations);
+      robotSide = other.robotSide;
+      setPacketInformation(other);
+   }
+
+   @Override
    public void setUniqueId(long uniqueId)
    {
       super.setUniqueId(uniqueId);

@@ -63,6 +63,8 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
          linearVelocity.set(other.linearVelocity);
       else
          linearVelocity.set(0.0, 0.0, 0.0);
+      
+      setPacketInformation(other);
    }
 
    @Override

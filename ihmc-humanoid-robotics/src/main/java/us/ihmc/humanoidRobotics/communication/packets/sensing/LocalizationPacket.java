@@ -18,6 +18,14 @@ public class LocalizationPacket extends Packet<LocalizationPacket>
       this.toggle = toggle;
    }
 
+   @Override
+   public void set(LocalizationPacket other)
+   {
+      reset = other.reset;
+      toggle = other.toggle;
+      setPacketInformation(other);
+   }
+
    public boolean getReset()
    {
       return reset;

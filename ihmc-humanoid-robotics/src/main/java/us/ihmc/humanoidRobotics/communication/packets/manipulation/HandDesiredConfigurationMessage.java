@@ -38,6 +38,14 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       this.handDesiredConfiguration = handDesiredConfiguration;
    }
 
+   @Override
+   public void set(HandDesiredConfigurationMessage other)
+   {
+      robotSide = other.robotSide;
+      handDesiredConfiguration = other.handDesiredConfiguration;
+      setPacketInformation(other);
+   }
+
    public HandConfiguration getHandDesiredConfiguration()
    {
       return handDesiredConfiguration;

@@ -87,6 +87,14 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
    }
 
    @Override
+   public void set(HeadTrajectoryMessage other)
+   {
+      so3Trajectory = new SO3TrajectoryMessage();
+      so3Trajectory.set(other.so3Trajectory);
+      setPacketInformation(other);
+   }
+
+   @Override
    public void setUniqueId(long uniqueId)
    {
       super.setUniqueId(uniqueId);

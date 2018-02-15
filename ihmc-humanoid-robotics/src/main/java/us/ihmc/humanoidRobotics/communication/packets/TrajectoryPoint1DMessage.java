@@ -49,11 +49,13 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       this.velocity = velocity;
    }
 
+   @Override
    public void set(TrajectoryPoint1DMessage other)
    {
       time = other.time;
       position = other.position;
       velocity = other.velocity;
+      setPacketInformation(other);
    }
 
    public void setTime(double time)

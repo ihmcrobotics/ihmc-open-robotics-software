@@ -33,6 +33,36 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
    }
 
    @Override
+   public void set(FootstepPathPlanPacket other)
+   {
+      goalsValid = other.goalsValid;
+      start = new FootstepDataMessage();
+      start.set(other.start);
+      originalGoals = new ArrayList<>();
+      for (int i = 0; i < other.originalGoals.size(); i++)
+      {
+         FootstepDataMessage footstep = new FootstepDataMessage();
+         footstep.set(other.originalGoals.get(i));
+         originalGoals.add(footstep);
+      }
+      pathPlan = new ArrayList<>();
+      for (int i = 0; i < other.pathPlan.size(); i++)
+      {
+         FootstepDataMessage footstep = new FootstepDataMessage();
+         footstep.set(other.pathPlan.get(i));
+         pathPlan.add(footstep);
+      }
+
+      footstepUnknown = new ArrayList<>();
+      other.footstepUnknown.forEach(footstepUnknown::add);
+
+      subOptimality = other.subOptimality;
+      pathCost = other.pathCost;
+
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(FootstepPathPlanPacket other, double epsilon)
    {
       if (goalsValid != other.goalsValid)

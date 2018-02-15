@@ -40,6 +40,22 @@ public class PlanarRegionSegmentationMessage extends Packet<PlanarRegionSegmenta
       this.hitLocations = hitLocations;
    }
 
+   @Override
+   public void set(PlanarRegionSegmentationMessage other)
+   {
+      id = other.id;
+      origin = new Point3D32(other.origin);
+      normal = new Vector3D32(other.normal);
+      nodeKeys = new OcTreeKeyMessage[other.nodeKeys.length];
+      for (int i = 0; i < nodeKeys.length; i++)
+      {
+         nodeKeys[i] = new OcTreeKeyMessage();
+         nodeKeys[i].set(other.nodeKeys[i]);
+      }
+      hitLocations = Arrays.stream(other.hitLocations).map(Point3D32::new).toArray(Point3D32[]::new);
+      setPacketInformation(other);
+   }
+
    public int getRegionId()
    {
       return id;

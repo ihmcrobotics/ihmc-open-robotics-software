@@ -91,12 +91,12 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
    public void set(FootTrajectoryMessage other)
    {
       se3Trajectory = new SE3TrajectoryMessage(other.se3Trajectory);
       robotSide = other.robotSide;
-      setUniqueId(other.getUniqueId());
-      setDestination(other.getDestination());
+      setPacketInformation(other);
    }
 
    public void setRobotSide(RobotSide robotSide)

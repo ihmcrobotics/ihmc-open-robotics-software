@@ -14,6 +14,13 @@ public class SCSListenerPacket extends Packet<SCSListenerPacket>
    }
 
    @Override
+   public void set(SCSListenerPacket other)
+   {
+      isStopped = other.isStopped;
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(SCSListenerPacket other, double epsilon)
    {
       return other.isStopped == isStopped;

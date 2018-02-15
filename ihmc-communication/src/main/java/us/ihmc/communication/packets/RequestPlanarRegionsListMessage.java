@@ -36,11 +36,13 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
          setDestination(destination);
    }
 
+   @Override
    public void set(RequestPlanarRegionsListMessage other)
    {
-      this.requestType = other.requestType;
-      this.boundingBoxInWorldForRequest = other.boundingBoxInWorldForRequest;
+      requestType = other.requestType;
+      boundingBoxInWorldForRequest = other.boundingBoxInWorldForRequest;
       setDestination(other.getDestination());
+      setPacketInformation(other);
    }
 
    public RequestType getRequestType()

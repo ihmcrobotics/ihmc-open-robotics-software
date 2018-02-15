@@ -16,6 +16,13 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
    }
 
    @Override
+   public void set(BDIBehaviorStatusPacket other)
+   {
+      setPacketInformation(other);
+      currentBehavior = other.currentBehavior;
+   }
+
+   @Override
    public boolean equals(Object other)
    {
       return epsilonEquals((BDIBehaviorStatusPacket) other, 0);

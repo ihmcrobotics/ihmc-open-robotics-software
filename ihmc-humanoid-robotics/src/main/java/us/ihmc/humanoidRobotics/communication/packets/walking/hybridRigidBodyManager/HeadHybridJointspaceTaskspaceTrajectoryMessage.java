@@ -53,6 +53,16 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(HeadHybridJointspaceTaskspaceTrajectoryMessage other)
+   {
+      taskspaceTrajectoryMessage = new SO3TrajectoryMessage();
+      taskspaceTrajectoryMessage.set(other.taskspaceTrajectoryMessage);
+      jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.set(other.jointspaceTrajectoryMessage);
+      setPacketInformation(other);
+   }
+
    public SO3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
       return taskspaceTrajectoryMessage;

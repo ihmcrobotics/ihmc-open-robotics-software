@@ -37,9 +37,27 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       this(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
    }
 
-   public FootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
+   public FootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose,
+                                        FootstepPlannerType requestedPlannerType)
    {
       set(initialStanceFootPose, initialStanceSide, goalPose, requestedPlannerType);
+   }
+
+   @Override
+   public void set(FootstepPlanningRequestPacket other)
+   {
+      initialStanceSide = other.initialStanceSide;
+      stanceFootPositionInWorld = new Point3D32(other.stanceFootPositionInWorld);
+      stanceFootOrientationInWorld = new Quaternion32(other.stanceFootOrientationInWorld);
+      goalPositionInWorld = new Point3D32(other.goalPositionInWorld);
+      goalOrientationInWorld = new Quaternion32(other.goalOrientationInWorld);
+      requestedPlannerType = other.requestedPlannerType;
+      timeout = other.timeout;
+      planarRegionsListMessage = new PlanarRegionsListMessage();
+      planarRegionsListMessage.set(other.planarRegionsListMessage);
+      planId = other.planId;
+
+      setPacketInformation(other);
    }
 
    public void set(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
@@ -98,11 +116,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          return false;
       if (!RotationTools.quaternionEpsilonEquals(goalOrientationInWorld, other.goalOrientationInWorld, (float) epsilon))
          return false;
-      if(this.requestedPlannerType != other.requestedPlannerType)
+      if (this.requestedPlannerType != other.requestedPlannerType)
          return false;
-      if(planId != other.planId)
+      if (planId != other.planId)
          return false;
-      if(planarRegionsListMessage != null && other.planarRegionsListMessage != null && planarRegionsListMessage.epsilonEquals(other.planarRegionsListMessage, epsilon))
+      if (planarRegionsListMessage != null && other.planarRegionsListMessage != null
+            && planarRegionsListMessage.epsilonEquals(other.planarRegionsListMessage, epsilon))
          return false;
       return true;
    }

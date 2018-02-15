@@ -46,6 +46,14 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket>
       orientation = new Quaternion(other.orientation);
    }
 
+   @Override
+   public void set(VehiclePosePacket other)
+   {
+      position = new Point3D(other.position);
+      orientation = new Quaternion(other.orientation);
+      setPacketInformation(other);
+   }
+
    public Point3D getPosition()
    {
       return position;

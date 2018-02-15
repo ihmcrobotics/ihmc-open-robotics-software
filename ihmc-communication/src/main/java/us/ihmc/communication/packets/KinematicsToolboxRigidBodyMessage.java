@@ -71,12 +71,14 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public SelectionMatrix3DMessage linearSelectionMatrix;
 
    /**
-    * Weight Matrix used to define the priority of controlling the rotation around each axis on the solver side:<br>
+    * Weight Matrix used to define the priority of controlling the rotation around each axis on the
+    * solver side:<br>
     */
    public WeightMatrix3DMessage angularWeightMatrix;
-   
+
    /**
-    * Weight Matrix used to define the priority of controlling the translation of each axis on the solver side:<br>
+    * Weight Matrix used to define the priority of controlling the translation of each axis on the
+    * solver side:<br>
     */
    public WeightMatrix3DMessage linearWeightMatrix;
 
@@ -196,6 +198,40 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
       setControlFramePose(transformToBodyFixedFrame.getTranslationVector(), transformToBodyFixedFrame.getRotationMatrix());
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   @Override
+   public void set(KinematicsToolboxRigidBodyMessage other)
+   {
+      endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
+      if (other.desiredPositionInWorld != null)
+         desiredPositionInWorld = new Point3D32(other.desiredPositionInWorld);
+      if (other.desiredOrientationInWorld != null)
+         desiredOrientationInWorld = new Quaternion32(other.desiredOrientationInWorld);
+      if (other.controlFramePositionInEndEffector != null)
+         controlFramePositionInEndEffector = new Point3D32(other.controlFramePositionInEndEffector);
+      controlFrameOrientationInEndEffector = new Quaternion32(other.controlFrameOrientationInEndEffector);
+      if (other.angularSelectionMatrix != null)
+      {
+         angularSelectionMatrix = new SelectionMatrix3DMessage();
+         angularSelectionMatrix.set(other.angularSelectionMatrix);
+      }
+      if (other.linearSelectionMatrix != null)
+      {
+         linearSelectionMatrix = new SelectionMatrix3DMessage();
+         linearSelectionMatrix.set(other.linearSelectionMatrix);
+      }
+      if (other.angularWeightMatrix != null)
+      {
+         angularWeightMatrix = new WeightMatrix3DMessage();
+         angularWeightMatrix.set(other.angularWeightMatrix);
+      }
+      if (other.linearWeightMatrix != null)
+      {
+         linearWeightMatrix = new WeightMatrix3DMessage();
+         linearWeightMatrix.set(other.linearWeightMatrix);
+      }
+      setPacketInformation(other);
    }
 
    /**
@@ -320,13 +356,12 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       {
          linearWeightMatrix = new WeightMatrix3DMessage();
       }
-      
+
       if (angularWeightMatrix == null)
       {
          angularWeightMatrix = new WeightMatrix3DMessage();
       }
-      
-      
+
    }
 
    /**
@@ -361,7 +396,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       linearWeightMatrix.setWeights(linear, linear, linear);
       angularWeightMatrix.setWeights(angular, angular, angular);
    }
-   
+
    /**
     * Sets the weight to use for this task with the angular and linear parts set independently.
     * <p>
@@ -579,7 +614,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
    {
       weightMatrixToPack.clear();
-      if (angularWeightMatrix!= null)
+      if (angularWeightMatrix != null)
          angularWeightMatrix.getWeightMatrix(weightMatrixToPack.getAngularPart());
       if (linearWeightMatrix != null)
          linearWeightMatrix.getWeightMatrix(weightMatrixToPack.getLinearPart());
@@ -620,13 +655,13 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       else
          return NameBasedHashCodeTools.NULL_HASHCODE;
    }
-   
+
    /**
-    * Returns the unique ID referring to the frame to use with the linear part of the
-    * weight matrix of this message.
+    * Returns the unique ID referring to the frame to use with the linear part of the weight matrix
+    * of this message.
     * <p>
-    * If this message does not have a linear weight matrix or the frame has not been set, this method returns
-    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * If this message does not have a linear weight matrix or the frame has not been set, this
+    * method returns {@link NameBasedHashCodeTools#NULL_HASHCODE}.
     * </p>
     * 
     * @return the frame ID for the linear part of the weight matrix.
@@ -640,11 +675,11 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    }
 
    /**
-    * Returns the unique ID referring to the frame to use with the angular part of the
-    * weight matrix of this message.
+    * Returns the unique ID referring to the frame to use with the angular part of the weight matrix
+    * of this message.
     * <p>
-    * If this message does not have a angular weight matrix or the frame has not been set, this method returns
-    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
+    * If this message does not have a angular weight matrix or the frame has not been set, this
+    * method returns {@link NameBasedHashCodeTools#NULL_HASHCODE}.
     * </p>
     * 
     * @return the frame ID for the linear part of the weight matrix.
@@ -683,25 +718,24 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
          return false;
 
       // TODO Add the selection matrix back in here
-      if(linearWeightMatrix == null ^ other.linearWeightMatrix == null)//bit wise or
+      if (linearWeightMatrix == null ^ other.linearWeightMatrix == null)//bit wise or
       {
          return false;
       }
-      if(angularWeightMatrix == null ^ other.angularWeightMatrix == null)//bit wise or
-      {
-         return false;
-      }
-      
-      if(linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(linearWeightMatrix, epsilon))
+      if (angularWeightMatrix == null ^ other.angularWeightMatrix == null)//bit wise or
       {
          return false;
       }
 
-      if(angularWeightMatrix != null && !angularWeightMatrix.epsilonEquals(angularWeightMatrix, epsilon))
+      if (linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(linearWeightMatrix, epsilon))
       {
          return false;
       }
-      
+
+      if (angularWeightMatrix != null && !angularWeightMatrix.epsilonEquals(angularWeightMatrix, epsilon))
+      {
+         return false;
+      }
 
       return true;
    }

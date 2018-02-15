@@ -17,8 +17,10 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       this.enable = enable;
    }
 
+   @Override
    public void set(AutomaticManipulationAbortMessage other)
    {
+      setPacketInformation(other);
       enable = other.enable;
    }
 

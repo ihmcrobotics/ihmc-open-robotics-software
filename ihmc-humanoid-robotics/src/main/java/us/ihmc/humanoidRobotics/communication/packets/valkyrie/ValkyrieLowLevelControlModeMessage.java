@@ -27,6 +27,13 @@ public class ValkyrieLowLevelControlModeMessage extends Packet<ValkyrieLowLevelC
    {
    }
 
+   @Override
+   public void set(ValkyrieLowLevelControlModeMessage other)
+   {
+      requestedControlMode = other.requestedControlMode;
+      setPacketInformation(other);
+   }
+
    public void setRequestedControlMode(ControlMode requestedControlMode)
    {
       this.requestedControlMode = requestedControlMode;

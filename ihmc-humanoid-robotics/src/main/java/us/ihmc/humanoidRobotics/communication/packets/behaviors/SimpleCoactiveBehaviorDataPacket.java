@@ -18,9 +18,16 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
    }
 
    @Override
+   public void set(SimpleCoactiveBehaviorDataPacket other)
+   {
+      key = other.key;
+      value = other.value;
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(SimpleCoactiveBehaviorDataPacket other, double epsilon)
    {
       return key.equals(other.key) && value == other.value;
    }
-
 }

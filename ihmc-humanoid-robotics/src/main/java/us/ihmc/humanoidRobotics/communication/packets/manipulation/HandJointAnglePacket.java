@@ -35,9 +35,11 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
       this.calibrated = calibrated;
    }
 
+   @Override
    public void set(HandJointAnglePacket other)
    {
       setAll(other.robotSide, other.connected, other.calibrated, other.jointAngles);
+      setPacketInformation(other);
    }
 
    public double getJointAngle(HandJointName jointName)

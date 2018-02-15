@@ -45,6 +45,21 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
    }
 
    @Override
+   public void set(BlackFlyParameterPacket other)
+   {
+      setPacketInformation(other);
+      this.fromUI = other.fromUI;
+      this.exposure = other.exposure;
+      this.shutter = other.shutter;
+      this.gain = other.gain;
+      this.frameRate = other.frameRate;
+      this.autoExposure = other.autoExposure;
+      this.autoGain = other.autoGain;
+      this.autoShutter = other.autoShutter;
+      this.side = other.side;
+   }
+
+   @Override
    public boolean epsilonEquals(BlackFlyParameterPacket other, double epsilon)
    {
       if (fromUI)

@@ -123,6 +123,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
       getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
    }
 
+   @Override
    public void set(SE3TrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
@@ -131,6 +132,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       frameInformation.set(other.getFrameInformation());
       queueingProperties.set(other.queueingProperties);
+      setPacketInformation(other);
    }
 
    public void getTrajectoryPoints(FrameSE3TrajectoryPointList trajectoryPointListToPack)
@@ -256,10 +258,10 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
     */
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
-      if (this.angularWeightMatrix == null)
-         this.angularWeightMatrix = new WeightMatrix3DMessage(weightMatrix.getAngularPart());
+      if (angularWeightMatrix == null)
+         angularWeightMatrix = new WeightMatrix3DMessage(weightMatrix.getAngularPart());
       else
-         this.angularWeightMatrix.set(weightMatrix.getAngularPart());
+         angularWeightMatrix.set(weightMatrix.getAngularPart());
 
       if (linearWeightMatrix == null)
          linearWeightMatrix = new WeightMatrix3DMessage(weightMatrix.getLinearPart());

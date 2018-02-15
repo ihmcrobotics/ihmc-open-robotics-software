@@ -96,6 +96,14 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
    }
 
    @Override
+   public void set(ChestTrajectoryMessage other)
+   {
+      so3Trajectory = new SO3TrajectoryMessage();
+      so3Trajectory.set(other.so3Trajectory);
+      setPacketInformation(other);
+   }
+
+   @Override
    public void setUniqueId(long uniqueId)
    {
       super.setUniqueId(uniqueId);

@@ -20,20 +20,28 @@ public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket>
       this.robotSide = robotSide;
    }
 
+   @Override
+   public void set(HandPowerCyclePacket other)
+   {
+      robotSide = other.robotSide;
+      setPacketInformation(other);
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
    }
 
+   @Override
    public boolean equals(Object obj)
    {
-      return ((obj instanceof HandPowerCyclePacket) && this.epsilonEquals((HandPowerCyclePacket) obj, 0));
+      return obj instanceof HandPowerCyclePacket && epsilonEquals((HandPowerCyclePacket) obj, 0);
    }
 
    @Override
    public boolean epsilonEquals(HandPowerCyclePacket other, double epsilon)
    {
-      boolean ret = this.getRobotSide().equals(other.getRobotSide());
+      boolean ret = getRobotSide().equals(other.getRobotSide());
 
       return ret;
    }

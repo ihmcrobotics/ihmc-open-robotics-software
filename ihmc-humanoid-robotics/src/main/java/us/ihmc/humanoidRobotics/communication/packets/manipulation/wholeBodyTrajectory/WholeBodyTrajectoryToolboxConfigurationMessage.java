@@ -29,6 +29,16 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(WholeBodyTrajectoryToolboxConfigurationMessage other)
+   {
+      numberOfInitialGuesses = other.numberOfInitialGuesses;
+      maximumExpansionSize = other.maximumExpansionSize;
+      initialConfiguration = new KinematicsToolboxOutputStatus();
+      initialConfiguration.set(other.initialConfiguration);
+      setPacketInformation(other);
+   }
+
    public void setNumberOfInitialGuesses(int numberOfInitialGuesses)
    {
       this.numberOfInitialGuesses = numberOfInitialGuesses;

@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 {
-   public boolean intialize;
+   public boolean initialize;
    public double gain;
    public double motorSpeed;
    public boolean ledEnable;
@@ -16,7 +16,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
    public MultisenseParameterPacket(boolean initialize, double gain, double motorSpeed, double dutyCycle, boolean ledEnable, boolean flashEnable,
                                     boolean autoExposure, boolean autoWhiteBalance)
    {
-      this.intialize = initialize;
+      this.initialize = initialize;
       this.gain = gain;
       this.flashEnable = flashEnable;
       this.motorSpeed = motorSpeed;
@@ -29,12 +29,25 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 
    public MultisenseParameterPacket()
    {
+   }
 
+   @Override
+   public void set(MultisenseParameterPacket other)
+   {
+      this.initialize = other.initialize;
+      this.gain = other.gain;
+      this.flashEnable = other.flashEnable;
+      this.motorSpeed = other.motorSpeed;
+      this.ledEnable = other.ledEnable;
+      this.dutyCycle = other.dutyCycle;
+      this.autoExposure = other.autoExposure;
+      this.autoWhiteBalance = other.autoWhiteBalance;
+      setPacketInformation(other);
    }
 
    public boolean isInitialize()
    {
-      return intialize;
+      return initialize;
    }
 
    public boolean isAutoExposure()
@@ -109,7 +122,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
    @Override
    public boolean epsilonEquals(MultisenseParameterPacket other, double epsilon)
    {
-      if (intialize)
+      if (initialize)
          return other.isInitialize();
       double roundedGain = Math.round(getGain() * 100) / 100.0;
       double roundedSpeed = Math.round(getMotorSpeed() * 1000) / 1000.0;

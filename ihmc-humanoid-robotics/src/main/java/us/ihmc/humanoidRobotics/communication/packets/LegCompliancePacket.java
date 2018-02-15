@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.Arrays;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,6 +35,14 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    {
       this.maxVelocityDeltas = maxVelocityDeltas;
       this.robotSide = side;
+   }
+
+   @Override
+   public void set(LegCompliancePacket other)
+   {
+      maxVelocityDeltas = Arrays.copyOf(other.maxVelocityDeltas, other.maxVelocityDeltas.length);
+      robotSide = other.robotSide;
+      setPacketInformation(other);
    }
 
    @Override

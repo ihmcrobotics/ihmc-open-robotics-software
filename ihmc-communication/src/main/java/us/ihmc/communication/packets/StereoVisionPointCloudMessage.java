@@ -31,6 +31,15 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       this.colors = colors;
    }
 
+   @Override
+   public void set(StereoVisionPointCloudMessage other)
+   {
+      robotTimestamp = other.robotTimestamp;
+      pointCloud = Arrays.copyOf(other.pointCloud, other.pointCloud.length);
+      colors = Arrays.copyOf(other.colors, other.colors.length);
+      setPacketInformation(other);
+   }
+
    public void setRobotTimestamp(long robotTimestamp)
    {
       this.robotTimestamp = robotTimestamp;

@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import us.ihmc.communication.packets.Packet;
 
@@ -24,6 +25,22 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
       this.footstepData = data;
       this.footstepOrder = footstepOrder;
       this.flag = flag;
+   }
+
+   @Override
+   public void set(SnapFootstepPacket other)
+   {
+      footstepData = new ArrayList<>();
+      for (FootstepDataMessage otherStep : other.footstepData)
+      {
+         FootstepDataMessage step = new FootstepDataMessage();
+         step.set(otherStep);
+         footstepData.add(step);
+      }
+
+      footstepOrder = Arrays.copyOf(other.footstepOrder, other.footstepOrder.length);
+      flag = Arrays.copyOf(other.flag, other.flag.length);
+      setPacketInformation(other);
    }
 
    public ArrayList<FootstepDataMessage> getFootstepData()

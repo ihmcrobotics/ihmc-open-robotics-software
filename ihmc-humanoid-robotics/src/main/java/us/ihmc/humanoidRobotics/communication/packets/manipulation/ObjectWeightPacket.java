@@ -7,28 +7,36 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
 {
    public RobotSide robotSide;
    public double weight;
-   
+
    public ObjectWeightPacket()
    {
-      
+
    }
-   
+
    public ObjectWeightPacket(RobotSide robotSide, double weight)
    {
       this.robotSide = robotSide;
       this.weight = weight;
    }
-   
+
+   @Override
+   public void set(ObjectWeightPacket other)
+   {
+      robotSide = other.robotSide;
+      weight = other.weight;
+      setPacketInformation(other);
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
    }
-   
+
    public double getWeight()
    {
       return weight;
    }
-   
+
    @Override
    public boolean epsilonEquals(ObjectWeightPacket other, double epsilon)
    {

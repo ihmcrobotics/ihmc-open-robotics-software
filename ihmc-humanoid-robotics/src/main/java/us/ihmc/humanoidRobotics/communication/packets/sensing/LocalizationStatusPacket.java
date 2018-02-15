@@ -18,6 +18,14 @@ public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
       this.status = status;
    }
 
+   @Override
+   public void set(LocalizationStatusPacket other)
+   {
+      overlap = other.overlap;
+      status = other.status;
+      setPacketInformation(other);
+   }
+
    public double getOverlap()
    {
       return overlap;

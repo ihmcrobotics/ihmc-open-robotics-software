@@ -41,6 +41,15 @@ public class WallPosePacket extends Packet<WallPosePacket>
       setCenterOrientation(centerOrientation);
    }
 
+   @Override
+   public void set(WallPosePacket other)
+   {
+      cuttingRadius = other.cuttingRadius;
+      centerPosition = new Point3D(other.centerPosition);
+      centerOrientation = new Quaternion(other.centerOrientation);
+      setPacketInformation(other);
+   }
+
    public double getCuttingRadius()
    {
       return cuttingRadius;

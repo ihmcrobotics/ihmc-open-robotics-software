@@ -35,6 +35,14 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(SpineDesiredAccelerationsMessage other)
+   {
+      desiredAccelerations = new DesiredAccelerationsMessage();
+      desiredAccelerations.set(other.desiredAccelerations);
+      setPacketInformation(other);
+   }
+
    public void setDesiredAccelerations(DesiredAccelerationsMessage desiredAccelerations)
    {
       this.desiredAccelerations = desiredAccelerations;

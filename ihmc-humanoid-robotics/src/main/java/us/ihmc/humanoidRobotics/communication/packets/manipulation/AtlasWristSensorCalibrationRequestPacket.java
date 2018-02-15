@@ -26,20 +26,28 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       this.robotSide = robotSide;
    }
 
+   @Override
+   public void set(AtlasWristSensorCalibrationRequestPacket other)
+   {
+      setPacketInformation(other);
+      robotSide = other.robotSide;
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;
    }
 
+   @Override
    public boolean equals(Object obj)
    {
-      return ((obj instanceof AtlasWristSensorCalibrationRequestPacket) && this.epsilonEquals((AtlasWristSensorCalibrationRequestPacket) obj, 0));
+      return obj instanceof AtlasWristSensorCalibrationRequestPacket && epsilonEquals((AtlasWristSensorCalibrationRequestPacket) obj, 0);
    }
 
    @Override
    public boolean epsilonEquals(AtlasWristSensorCalibrationRequestPacket other, double epsilon)
    {
-      boolean ret = this.getRobotSide().equals(other.getRobotSide());
+      boolean ret = getRobotSide().equals(other.getRobotSide());
 
       return ret;
    }

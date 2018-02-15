@@ -21,6 +21,16 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
       this.confidenceFactor = confidenceFactor;
    }
 
+   @Override
+   public void set(StampedPosePacket other)
+   {
+      transform = new TimeStampedTransform3D();
+      transform.set(other.transform);
+      confidenceFactor = other.confidenceFactor;
+      frameId = other.frameId;
+      setPacketInformation(other);
+   }
+
    public String getFrameId()
    {
       return frameId;

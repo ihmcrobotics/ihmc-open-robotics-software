@@ -54,5 +54,6 @@ public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
    public void set(TextToSpeechPacket other)
    {
       textToSpeak = other.textToSpeak;
+      setPacketInformation(other);
    }
 }

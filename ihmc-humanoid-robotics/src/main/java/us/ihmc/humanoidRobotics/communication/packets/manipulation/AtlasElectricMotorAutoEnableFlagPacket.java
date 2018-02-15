@@ -22,6 +22,13 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
       this.shouldAutoEnable = shouldAutoEnable;
    }
 
+   @Override
+   public void set(AtlasElectricMotorAutoEnableFlagPacket other)
+   {
+      setPacketInformation(other);
+      shouldAutoEnable = other.shouldAutoEnable;
+   }
+
    public boolean shouldAutoEnable()
    {
       return shouldAutoEnable;

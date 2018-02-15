@@ -20,6 +20,14 @@ public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
    }
 
    @Override
+   public void set(WalkOverTerrainGoalPacket other)
+   {
+      position = new Point3D(other.position);
+      orientation = new Quaternion(other.orientation);
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(WalkOverTerrainGoalPacket other, double epsilon)
    {
       if(other == null)

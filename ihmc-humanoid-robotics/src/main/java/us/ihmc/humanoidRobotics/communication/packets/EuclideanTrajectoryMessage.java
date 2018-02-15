@@ -116,6 +116,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     * 
     * @param other the other message
     */
+   @Override
    public void set(EuclideanTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
@@ -127,14 +128,14 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setUniqueId(other.getUniqueId());
-      setDestination(other.getDestination());
       selectionMatrix.set(other.selectionMatrix);
       frameInformation.set(other.getFrameInformation());
       weightMatrix.set(other.weightMatrix);
       useCustomControlFrame = other.useCustomControlFrame;
       controlFramePose.set(other.controlFramePose);
       queueingProperties.set(other.queueingProperties);
+
+      setPacketInformation(other);
    }
 
    /**

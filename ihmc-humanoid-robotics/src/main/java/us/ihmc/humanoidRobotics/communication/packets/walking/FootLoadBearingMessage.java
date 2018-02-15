@@ -53,6 +53,14 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       this.request = request;
    }
 
+   @Override
+   public void set(FootLoadBearingMessage other)
+   {
+      robotSide = other.robotSide;
+      request = other.request;
+      setPacketInformation(other);
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;

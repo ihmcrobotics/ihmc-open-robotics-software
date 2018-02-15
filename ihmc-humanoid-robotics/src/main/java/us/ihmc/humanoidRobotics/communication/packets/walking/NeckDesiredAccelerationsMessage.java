@@ -35,6 +35,14 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(NeckDesiredAccelerationsMessage other)
+   {
+      desiredAccelerations = new DesiredAccelerationsMessage();
+      desiredAccelerations.set(other.desiredAccelerations);
+      setPacketInformation(other);
+   }
+
    public void setDesiredAccelerations(DesiredAccelerationsMessage desiredAccelerations)
    {
       this.desiredAccelerations = desiredAccelerations;

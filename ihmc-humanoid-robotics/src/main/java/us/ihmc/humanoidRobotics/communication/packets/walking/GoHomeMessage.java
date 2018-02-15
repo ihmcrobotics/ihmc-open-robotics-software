@@ -76,6 +76,16 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
          throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
    }
 
+   @Override
+   public void set(GoHomeMessage other)
+   {
+      bodyPart = other.bodyPart;
+      robotSide = other.robotSide;
+      trajectoryTime = other.trajectoryTime;
+      executionDelayTime = other.executionDelayTime;
+      setPacketInformation(other);
+   }
+
    public BodyPart getBodyPart()
    {
       return bodyPart;

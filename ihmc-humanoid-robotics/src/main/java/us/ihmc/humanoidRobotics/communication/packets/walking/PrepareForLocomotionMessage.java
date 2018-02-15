@@ -19,6 +19,14 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(PrepareForLocomotionMessage other)
+   {
+      prepareManipulation = other.prepareManipulation;
+      preparePelvis = other.preparePelvis;
+      setPacketInformation(other);
+   }
+
    /**
     * Specifies if the arm controller should be switching to chest frame or jointspace only if
     * necessary. This is particularly useful when manipulation was performed with respect to world

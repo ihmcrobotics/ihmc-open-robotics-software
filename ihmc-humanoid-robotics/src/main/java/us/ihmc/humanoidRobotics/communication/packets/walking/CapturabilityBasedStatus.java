@@ -47,6 +47,7 @@ public class CapturabilityBasedStatus extends SettablePacket<CapturabilityBasedS
          leftFootSupportPolygonStore[i].set(other.leftFootSupportPolygonStore[i]);
          rightFootSupportPolygonStore[i].set(other.rightFootSupportPolygonStore[i]);
       }
+      setPacketInformation(other);
    }
 
    public void setSupportPolygon(RobotSide robotSide, FrameConvexPolygon2d footPolygon)

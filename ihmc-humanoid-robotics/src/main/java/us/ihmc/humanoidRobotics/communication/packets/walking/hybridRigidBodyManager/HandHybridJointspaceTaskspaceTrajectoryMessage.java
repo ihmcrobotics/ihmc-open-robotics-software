@@ -59,6 +59,17 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(HandHybridJointspaceTaskspaceTrajectoryMessage other)
+   {
+      robotSide = other.robotSide;
+      taskspaceTrajectoryMessage = new SE3TrajectoryMessage();
+      taskspaceTrajectoryMessage.set(other.taskspaceTrajectoryMessage);
+      jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.set(other.jointspaceTrajectoryMessage);
+      setPacketInformation(other);
+   }
+
    public SE3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
       return taskspaceTrajectoryMessage;
