@@ -29,17 +29,22 @@ public class QuadrupedFootControlModule
    public enum FootEvent { TIMEOUT }
    public enum QuadrupedFootRequest { REQUEST_SUPPORT, REQUEST_SWING, REQUEST_MOVE_VIA_WAYPOINTS, REQUEST_HOLD }
 
+   private final QuadrupedSolePositionController solePositionController;
+
    private final QuadrupedMoveViaWaypointsState moveViaWaypointsState;
    private final FiniteStateMachine<QuadrupedFootStates, FootEvent, QuadrupedFootState> footStateMachine;
 
-   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, QuadrupedSolePositionController solePositionController,
-                                     YoVariableRegistry parentRegistry)
+   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
       this.registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
       this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
+
+      // position controller
+      solePositionController = new QuadrupedSolePositionController(robotQuadrant, toolbox, registry);
+
       // state machine
       QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, toolbox.getRuntimeEnvironment().getRobotTimestamp(), stepCommand);
       QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, toolbox, solePositionController, stepCommandIsValid, stepCommand, registry);
@@ -73,6 +78,11 @@ public class QuadrupedFootControlModule
       footStateMachine = stateMachineBuilder.build(QuadrupedFootStates.MOVE_VIA_WAYPOINTS);
 
       parentRegistry.addChild(registry);
+   }
+
+   public QuadrupedSolePositionController getSolePositionController()
+   {
+      return solePositionController;
    }
 
    public void registerStepTransitionCallback(QuadrupedStepTransitionCallback stepTransitionCallback)
