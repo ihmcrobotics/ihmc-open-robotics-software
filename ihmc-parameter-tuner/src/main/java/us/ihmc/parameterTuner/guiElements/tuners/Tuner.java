@@ -11,11 +11,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.javaFXToolkit.TextFormatterTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public class Tuner extends VBox
 {
+   private static final int MAX_DESCRIPTION_CHARACTERS = 255;
+
    private static final String FXML_PATH = "tuner.fxml";
 
    @FXML
@@ -46,6 +49,7 @@ public class Tuner extends VBox
 
       name.setText(parameter.getName());
       description.setText(parameter.getCurrentDescription());
+      description.setTextFormatter(TextFormatterTools.maxLengthTextFormatter(MAX_DESCRIPTION_CHARACTERS));
       ParameterTuningTools.addThreadSafeListeners(description, () -> parameter.setDescription(description.getText()));
 
       parameter.addChangedListener(p -> {
