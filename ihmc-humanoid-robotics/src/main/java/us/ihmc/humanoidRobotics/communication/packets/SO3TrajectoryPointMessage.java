@@ -46,13 +46,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
          angularVelocity = new Vector3D(trajectoryPoint.angularVelocity);
    }
 
-   public SO3TrajectoryPointMessage(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
-   {
-      this.time = time;
-      this.orientation = new Quaternion(orientation);
-      this.angularVelocity = new Vector3D(angularVelocity);
-   }
-
    public void set(SO3TrajectoryPointMessage other)
    {
       time = other.time;

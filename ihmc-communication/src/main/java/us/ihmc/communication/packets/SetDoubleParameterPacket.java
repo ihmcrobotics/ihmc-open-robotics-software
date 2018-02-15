@@ -10,13 +10,6 @@ public class SetDoubleParameterPacket extends Packet<SetDoubleParameterPacket>
    // Empty constructor for serialization
    public SetDoubleParameterPacket()
    {
-      this(null, Double.NaN);
-   }
-
-   public SetDoubleParameterPacket(String parameterName, double parameterValue)
-   {
-      this.parameterName = parameterName;
-      this.parameterValue = parameterValue;
    }
 
    @Override

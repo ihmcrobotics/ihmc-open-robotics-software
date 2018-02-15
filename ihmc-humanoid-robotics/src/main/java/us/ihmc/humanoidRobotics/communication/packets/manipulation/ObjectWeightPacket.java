@@ -13,12 +13,6 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
 
    }
 
-   public ObjectWeightPacket(RobotSide robotSide, double weight)
-   {
-      this.robotSide = robotSide;
-      this.weight = weight;
-   }
-
    @Override
    public void set(ObjectWeightPacket other)
    {

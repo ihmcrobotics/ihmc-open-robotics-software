@@ -47,52 +47,6 @@ public class FootstepStatus extends SettablePacket<FootstepStatus>
    {
    }
 
-   public FootstepStatus(Status status, int footstepIndex)
-   {
-      this.status = status;
-      this.footstepIndex = footstepIndex;
-      this.desiredFootPositionInWorld = null;
-      this.desiredFootOrientationInWorld = null;
-      this.actualFootPositionInWorld = null;
-      this.actualFootOrientationInWorld = null;
-      this.robotSide = null;
-   }
-
-   public FootstepStatus(Status status, int footstepIndex, Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld)
-   {
-      this.status = status;
-      this.footstepIndex = footstepIndex;
-      this.desiredFootPositionInWorld = null;
-      this.desiredFootOrientationInWorld = null;
-      this.actualFootPositionInWorld = actualFootPositionInWorld;
-      this.actualFootOrientationInWorld = actualFootOrientationInWorld;
-
-      this.robotSide = null;
-   }
-
-   public FootstepStatus(Status status, int footstepIndex, Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld, RobotSide robotSide)
-   {
-      this.status = status;
-      this.footstepIndex = footstepIndex;
-      this.desiredFootPositionInWorld = null;
-      this.desiredFootOrientationInWorld = null;
-      this.actualFootPositionInWorld = actualFootPositionInWorld;
-      this.actualFootOrientationInWorld = actualFootOrientationInWorld;
-      this.robotSide = robotSide;
-   }
-
-   public FootstepStatus(Status status, int footstepIndex, Point3D desiredFootPositionInWorld, Quaternion desiredFootOrientationInWorld,
-                         Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld, RobotSide robotSide)
-   {
-      this.status = status;
-      this.footstepIndex = footstepIndex;
-      this.desiredFootPositionInWorld = desiredFootPositionInWorld;
-      this.desiredFootOrientationInWorld = desiredFootOrientationInWorld;
-      this.actualFootPositionInWorld = actualFootPositionInWorld;
-      this.actualFootOrientationInWorld = actualFootOrientationInWorld;
-      this.robotSide = robotSide;
-   }
-
    @Override
    public void set(FootstepStatus other)
    {

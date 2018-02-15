@@ -48,24 +48,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       // empty constructor for serialization
    }
 
-   public RobotConfigurationData(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, AuxiliaryRobotData auxiliaryRobotData,
-         IMUDefinition[] imuDefinitions)
-   {
-      jointAngles = new float[joints.length];
-      jointVelocities = new float[joints.length];
-      jointTorques = new float[joints.length];
-      momentAndForceDataAllForceSensors = new float[forceSensorDefinitions.length][Wrench.SIZE];
-
-      imuSensorData = new IMUPacket[imuDefinitions.length];
-      for (int sensorNumber = 0; sensorNumber < imuSensorData.length; sensorNumber++)
-      {
-         imuSensorData[sensorNumber] = new IMUPacket();
-      }
-
-      jointNameHash = calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
-      this.auxiliaryRobotData = auxiliaryRobotData;
-   }
-
    @Override
    public void set(RobotConfigurationData other)
    {

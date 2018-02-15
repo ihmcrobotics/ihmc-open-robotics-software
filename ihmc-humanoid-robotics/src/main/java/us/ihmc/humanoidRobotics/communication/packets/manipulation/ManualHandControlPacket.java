@@ -25,17 +25,6 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       // Empty constructor for deserialization
    }
 
-   // joint values should be in the range [0,1]
-   public ManualHandControlPacket(RobotSide robotSide, double index, double middle, double thumb, double spread, int type)
-   {
-      this.robotSide = robotSide;
-      this.index = index;
-      this.middle = middle;
-      this.thumb = thumb;
-      this.spread = spread;
-      controlType = type;
-   }
-
    @Override
    public void set(ManualHandControlPacket other)
    {

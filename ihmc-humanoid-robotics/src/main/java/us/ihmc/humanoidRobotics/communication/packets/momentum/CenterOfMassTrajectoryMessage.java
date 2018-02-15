@@ -17,12 +17,6 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public CenterOfMassTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(numberOfTrajectoryPoints);
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
    @Override
    public void set(CenterOfMassTrajectoryMessage other)
    {

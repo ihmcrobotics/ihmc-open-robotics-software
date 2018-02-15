@@ -9,12 +9,6 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage>
    {
    }
 
-   public RequestLidarScanMessage(boolean removeShadows, boolean removeSelfCollisions)
-   {
-      this.removeShadows = removeShadows;
-      this.removeSelfCollisions = removeSelfCollisions;
-   }
-
    @Override
    public void set(RequestLidarScanMessage other)
    {

@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
@@ -58,7 +59,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       double stepWidth = 0.14;
       int steps = 10;
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       for (int i = 1; i <= steps; i++)
       {
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -66,7 +67,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          double footstepX = stepLength * i;
          Point3D location = new Point3D(footstepX, footstepY, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
          footsteps.add(footstepData);
       }
 
@@ -200,13 +201,13 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       generator.rotate(yaw, Axis.Z);
       RigidBodyTransform transform = generator.getRigidBodyTransformCopy();
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
       Point3D stepPosition = new Point3D(stepLength, footstepY, 0.0);
       Quaternion stepOrientation = new Quaternion();
       transform.transform(stepPosition);
       transform.getRotation(stepOrientation);
-      FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPosition, stepOrientation);
+      FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, stepPosition, stepOrientation);
       footsteps.add(footstepData);
 
       // this should be a regular step

@@ -15,23 +15,6 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
 
    }
 
-   public BoundingBoxesPacket(int[] packedBoxes, String[] labels)
-   {
-      this.labels = labels;
-      int n = packedBoxes.length / 4;
-      boundingBoxXCoordinates = new int[n];
-      boundingBoxYCoordinates = new int[n];
-      boundingBoxWidths = new int[n];
-      boundingBoxHeights = new int[n];
-      for (int i = 0; i < n; i++)
-      {
-         boundingBoxXCoordinates[i] = packedBoxes[i * 4];
-         boundingBoxYCoordinates[i] = packedBoxes[i * 4 + 1];
-         boundingBoxWidths[i] = packedBoxes[i * 4 + 2];
-         boundingBoxHeights[i] = packedBoxes[i * 4 + 3];
-      }
-   }
-
    public BoundingBoxesPacket(BoundingBoxesPacket other)
    {
       this.labels = other.labels;
@@ -50,7 +33,7 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
       this.boundingBoxYCoordinates = other.boundingBoxYCoordinates;
       this.boundingBoxWidths = other.boundingBoxWidths;
       this.boundingBoxHeights = other.boundingBoxHeights;
-   }   
+   }
 
    @Override
    public boolean epsilonEquals(BoundingBoxesPacket other, double epsilon)

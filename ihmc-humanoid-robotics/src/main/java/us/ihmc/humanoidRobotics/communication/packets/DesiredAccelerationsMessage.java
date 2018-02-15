@@ -23,12 +23,6 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public DesiredAccelerationsMessage(double[] desiredJointAccelerations)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.desiredJointAccelerations = desiredJointAccelerations;
-   }
-
    @Override
    public void set(DesiredAccelerationsMessage other)
    {

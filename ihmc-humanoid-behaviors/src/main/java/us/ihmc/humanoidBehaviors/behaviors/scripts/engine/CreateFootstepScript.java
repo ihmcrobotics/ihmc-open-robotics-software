@@ -11,6 +11,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -118,11 +119,11 @@ public class CreateFootstepScript
 
    private void assembleScript(ArrayList<Object> scriptObjects)
    {
-      scriptObjects.add(new PauseWalkingMessage(true));
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(desiredSwingTime, desiredTransferTime);
+      scriptObjects.add(HumanoidMessageTools.createPauseWalkingMessage(true));
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(desiredSwingTime, desiredTransferTime);
       addFootsteps(footsteps);
       scriptObjects.add(footsteps);
-      scriptObjects.add(new PauseWalkingMessage(true));
+      scriptObjects.add(HumanoidMessageTools.createPauseWalkingMessage(true));
       scriptObjects.add(new EndOfScriptCommand());
    }
 

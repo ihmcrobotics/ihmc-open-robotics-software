@@ -2,8 +2,6 @@ package us.ihmc.communication.packets;
 
 public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
 {
-
-   private static final boolean DEBUG = false;
    public static final String FOOTSTEP_COMPLETED = "Finished Taking Footstep";
    public static final String FINISHED_WALKING = "Finished walking";
    public static final String WALKING_ABORTED = "walking aborted";
@@ -20,13 +18,6 @@ public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
 
    public TextToSpeechPacket()
    {
-   }
-
-   public TextToSpeechPacket(String textToSpeak)
-   {
-      if (DEBUG)
-         System.out.println("created new TextToSpeechPacket " + textToSpeak);
-      this.textToSpeak = textToSpeak;
    }
 
    public void setbeep(boolean beep)

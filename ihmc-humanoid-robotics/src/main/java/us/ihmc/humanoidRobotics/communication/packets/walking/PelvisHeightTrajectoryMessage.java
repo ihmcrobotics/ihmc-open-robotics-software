@@ -4,8 +4,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
@@ -38,75 +36,18 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    /**
     * Clone contructor.
     * 
-    * @param pelvisHeightTrajectoryMessage message to clone.
+    * @param other message to clone.
     */
-   public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
+   public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage other)
    {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(pelvisHeightTrajectoryMessage.euclideanTrajectory);
-      setUniqueId(pelvisHeightTrajectoryMessage.getUniqueId());
-      setDestination(pelvisHeightTrajectoryMessage.getDestination());
+      euclideanTrajectory = new EuclideanTrajectoryMessage(other.euclideanTrajectory);
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
 
-      enableUserPelvisControl = pelvisHeightTrajectoryMessage.enableUserPelvisControl;
-      enableUserPelvisControlDuringWalking = pelvisHeightTrajectoryMessage.isEnableUserPelvisControlDuringWalking();
+      enableUserPelvisControl = other.enableUserPelvisControl;
+      enableUserPelvisControlDuringWalking = other.isEnableUserPelvisControlDuringWalking();
    }
 
-   /**
-    * Use this constructor to go straight to the given end point. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param trajectoryTime how long it takes to reach the desired height.
-    * @param desiredHeight desired pelvis height expressed in data frame
-    * @param trajectoryReferenceFrame the frame in which the height will be executed
-    * @param dataReferenceFrame the frame the desiredHeight is expressed in, the height will be
-    *           changed to the trajectory frame on the controller side
-    */
-   public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight, ReferenceFrame trajectoryReferenceFrame, ReferenceFrame dataReferenceFrame)
-   {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
-                                                           trajectoryReferenceFrame.getNameBasedHashCode());
-      euclideanTrajectory.frameInformation.setDataReferenceFrame(dataReferenceFrame);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
-   }
-
-   /**
-    * Use this constructor to go straight to the given end point. The trajectory and data frame are
-    * set to world frame Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param trajectoryTime how long it takes to reach the desired height.
-    * @param desiredHeight desired pelvis height expressed in world frame.
-    */
-   public PelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight)
-   {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), ReferenceFrame.getWorldFrame());
-      euclideanTrajectory.frameInformation.setDataReferenceFrame(ReferenceFrame.getWorldFrame());
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint}
-    * for each trajectory point afterwards. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public PelvisHeightTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      euclideanTrajectory = new EuclideanTrajectoryMessage(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
-   }
-
-   
    @Override
    public void set(PelvisHeightTrajectoryMessage other)
    {

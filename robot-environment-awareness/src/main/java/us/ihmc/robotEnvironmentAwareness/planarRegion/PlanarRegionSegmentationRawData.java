@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAPlanarRegionsConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 
 public class PlanarRegionSegmentationRawData
@@ -181,7 +182,7 @@ public class PlanarRegionSegmentationRawData
 
    public PlanarRegionSegmentationMessage toMessage()
    {
-      return new PlanarRegionSegmentationMessage(regionId, origin, normal, null, pointCloud);
+      return REAPlanarRegionsConverter.createPlanarRegionSegmentationMessage(regionId, origin, normal, null, pointCloud);
    }
 
    public static PlanarRegionSegmentationMessage[] toMessageArray(List<PlanarRegionSegmentationRawData> rawData)

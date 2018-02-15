@@ -14,12 +14,6 @@ public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket>
       // Empty constructor for deserialization
    }
 
-   public HandPowerCyclePacket(RobotSide robotSide)
-   {
-      setDestination(PacketDestination.CONTROLLER.ordinal());
-      this.robotSide = robotSide;
-   }
-
    @Override
    public void set(HandPowerCyclePacket other)
    {

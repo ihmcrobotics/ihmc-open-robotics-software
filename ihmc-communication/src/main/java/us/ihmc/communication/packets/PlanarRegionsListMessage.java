@@ -11,11 +11,6 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage>
    {
    }
 
-   public PlanarRegionsListMessage(List<PlanarRegionMessage> planarRegions)
-   {
-      this.planarRegions = planarRegions;
-   }
-
    @Override
    public void set(PlanarRegionsListMessage other)
    {

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -13,6 +14,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -51,7 +53,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
       double[] leftHandAfterGrabLocation = new double[] {-0.799566492522621, -0.8850712601496326, 1.1978163314288173, 0.9978871050058826, -0.22593401111949774,
             -0.2153318563363089, -1.2957848304397805};
 
-      ArmTrajectoryMessage leftHandAfterGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandAfterGrabLocation);
+      ArmTrajectoryMessage leftHandAfterGrabMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandAfterGrabLocation);
 
       ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, atlasPrimitiveActions.leftArmTrajectoryBehavior);
       ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, atlasPrimitiveActions.leftArmTrajectoryBehavior);
@@ -63,7 +65,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Picking Up The Ball");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Picking Up The Ball");
             sendPacket(p1);
             FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
                   grabLocation.getY(),
@@ -93,10 +95,10 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          }
       };
 
-      GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 2);
+      GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.CHEST, 2);
       GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, atlasPrimitiveActions.chestGoHomeBehavior);
 
-      GoHomeMessage goHomepelvisMessage = new GoHomeMessage(BodyPart.PELVIS, 2);
+      GoHomeMessage goHomepelvisMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.PELVIS, 2);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, atlasPrimitiveActions.pelvisGoHomeBehavior);
 
       pipeLine.submitSingleTaskStage(leftHandBeforeGrab);

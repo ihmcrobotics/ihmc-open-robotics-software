@@ -7,16 +7,13 @@ import java.util.List;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
@@ -46,94 +43,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
    }
 
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
+   public AdjustFootstepMessage(AdjustFootstepMessage other)
    {
-      this(robotSide, location, orientation, null);
-   }
-
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
-   {
-      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
-   }
-
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
-   {
-      this(robotSide, location, orientation, null, trajectoryType, swingHeight);
-   }
-
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-                                TrajectoryType trajectoryType, double swingHeight)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.robotSide = robotSide;
-      this.location = location;
-      this.orientation = orientation;
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         this.predictedContactPoints = null;
-      else
-         this.predictedContactPoints = predictedContactPoints;
-   }
-
-   public AdjustFootstepMessage(AdjustFootstepMessage footstepData)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      robotSide = footstepData.robotSide;
-      location = new Point3D(footstepData.location);
-      orientation = new Quaternion(footstepData.orientation);
-      executionDelayTime = footstepData.executionDelayTime;
-      orientation.checkIfUnitary();
-      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
-      {
-         predictedContactPoints = null;
-      }
-      else
-      {
-         predictedContactPoints = new ArrayList<>();
-         for (Point2D contactPoint : footstepData.predictedContactPoints)
-         {
-            predictedContactPoints.add(new Point2D(contactPoint));
-         }
-      }
-   }
-
-   @Override
-   public AdjustFootstepMessage clone()
-   {
-      return new AdjustFootstepMessage(this);
-   }
-
-   public AdjustFootstepMessage(Footstep footstep)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      robotSide = footstep.getRobotSide();
-
-      FramePoint3D location = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
-      footstep.getPose(location, orientation);
-      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.location = new Point3D(location);
-      this.orientation = new Quaternion(orientation);
-
-      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null)
-      {
-         if (predictedContactPoints == null)
-         {
-            predictedContactPoints = new ArrayList<>();
-         }
-         else
-         {
-            predictedContactPoints.clear();
-         }
-         for (Point2D contactPoint : footstepContactPoints)
-         {
-            predictedContactPoints.add(new Point2D(contactPoint));
-         }
-      }
-      else
-      {
-         predictedContactPoints = null;
-      }
+      set(other);
    }
 
    @Override

@@ -30,13 +30,6 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HandLoadBearingMessage(RobotSide robotSide)
-   {
-      loadBearingMessage = new LoadBearingMessage();
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    @Override
    public void set(HandLoadBearingMessage other)
    {

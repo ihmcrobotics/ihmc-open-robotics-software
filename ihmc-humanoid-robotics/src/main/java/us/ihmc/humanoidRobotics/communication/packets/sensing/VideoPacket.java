@@ -38,25 +38,6 @@ public class VideoPacket extends Packet<VideoPacket>
       intrinsicParameters = new IntrinsicParameters(other.intrinsicParameters);
    }
 
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation,
-                      IntrinsicParameters intrinsicParameters)
-   {
-      this(videoSource, timeStamp, data, position, orientation, intrinsicParameters, null);
-   }
-
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation,
-                      IntrinsicParameters intrinsicParameters, PacketDestination packetDestination)
-   {
-      if (packetDestination != null)
-         setDestination(packetDestination);
-      this.videoSource = videoSource;
-      this.timeStamp = timeStamp;
-      this.data = data;
-      this.position = new Point3D(position);
-      this.orientation = new Quaternion(orientation);
-      this.intrinsicParameters = intrinsicParameters;
-   }
-
    @Override
    public void set(VideoPacket other)
    {

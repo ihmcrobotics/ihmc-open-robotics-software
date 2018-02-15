@@ -31,12 +31,6 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    {
    }
 
-   public LegCompliancePacket(float[] maxVelocityDeltas, RobotSide side)
-   {
-      this.maxVelocityDeltas = maxVelocityDeltas;
-      this.robotSide = side;
-   }
-
    @Override
    public void set(LegCompliancePacket other)
    {

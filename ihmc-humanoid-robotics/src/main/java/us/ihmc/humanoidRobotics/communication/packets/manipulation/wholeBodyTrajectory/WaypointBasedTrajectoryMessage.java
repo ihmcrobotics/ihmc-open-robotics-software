@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Arrays;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -47,23 +48,6 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    public WaypointBasedTrajectoryMessage()
    {
       // empty constructor for deserialization
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public WaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints)
-   {
-      this(endEffector, waypointTimes, waypoints, null);
-   }
-
-   public WaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints, SelectionMatrix6D selectionMatrix)
-   {
-      endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      setWaypoints(waypointTimes, waypoints);
-      if (selectionMatrix != null)
-      {
-         angularSelectionMatrix.set(selectionMatrix.getAngularPart());
-         linearSelectionMatrix.set(selectionMatrix.getLinearPart());
-      }
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -149,12 +133,12 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    public void setSelectionMatrix(SelectionMatrix6D selectionMatrix6D)
    {
       if (angularSelectionMatrix == null)
-         angularSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
+         angularSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
       else
          angularSelectionMatrix.set(selectionMatrix6D.getAngularPart());
 
       if (linearSelectionMatrix == null)
-         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
+         linearSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
       else
          linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }

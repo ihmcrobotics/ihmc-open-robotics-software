@@ -22,20 +22,6 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       // for serialization
    }
 
-   public WalkToGoalBehaviorPacket(WalkToGoalAction action)
-   {
-      this.action = action;
-   }
-
-   public WalkToGoalBehaviorPacket(double xGoal, double yGoal, double thetaGoal, RobotSide goalSide)
-   {
-      this.action = WalkToGoalAction.FIND_PATH;
-      this.xGoal = xGoal;
-      this.yGoal = yGoal;
-      this.thetaGoal = thetaGoal;
-      this.goalSide = goalSide;
-   }
-
    @Override
    public void set(WalkToGoalBehaviorPacket other)
    {

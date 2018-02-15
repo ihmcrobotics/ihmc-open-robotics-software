@@ -24,17 +24,6 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * Constructor that sets the desired accelerations in this message to the provided values
-    * 
-    * @param desiredJointAccelerations
-    */
-   public NeckDesiredAccelerationsMessage(double[] desiredJointAccelerations)
-   {
-      desiredAccelerations = new DesiredAccelerationsMessage(desiredJointAccelerations);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    @Override
    public void set(NeckDesiredAccelerationsMessage other)
    {

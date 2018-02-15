@@ -13,13 +13,6 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket>
    {
    }
 
-   public PelvisPoseErrorPacket(float residualError, float totalError, boolean hasMapBeenReset)
-   {
-      this.residualError = residualError;
-      this.totalError = totalError;
-      this.hasMapBeenReset = hasMapBeenReset;
-   }
-
    @Override
    public void set(PelvisPoseErrorPacket other)
    {

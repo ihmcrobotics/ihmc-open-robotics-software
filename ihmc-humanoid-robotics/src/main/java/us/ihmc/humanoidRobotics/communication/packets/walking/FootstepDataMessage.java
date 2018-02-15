@@ -2,13 +2,11 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -20,7 +18,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -81,38 +78,29 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    {
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
+   FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
    {
       this(robotSide, new Point3D(location), new Quaternion(orientation), null);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
+   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
    {
       this(robotSide, location, orientation, null);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
+   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
    {
       this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
+   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
    {
       this(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
+   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
                               TrajectoryType trajectoryType, double swingHeight)
    {
-      this.robotSide = robotSide;
-      this.location = location;
-      this.orientation = orientation;
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         this.predictedContactPoints = null;
-      else
-         this.predictedContactPoints = predictedContactPoints;
-      this.trajectoryType = trajectoryType;
-      this.swingHeight = swingHeight;
    }
 
    public FootstepDataMessage(FootstepDataMessage footstepData)
@@ -149,54 +137,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       this.transferDuration = footstepData.transferDuration;
       this.touchdownDuration = footstepData.touchdownDuration;
       this.executionDelayTime = footstepData.executionDelayTime;
-   }
-
-   public FootstepDataMessage(Footstep footstep)
-   {
-      robotSide = footstep.getRobotSide();
-
-      FramePoint3D location = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
-      footstep.getPose(location, orientation);
-      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.location = new Point3D(location);
-      this.orientation = new Quaternion(orientation);
-
-      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null)
-      {
-         if (predictedContactPoints == null)
-         {
-            predictedContactPoints = new ArrayList<>();
-         }
-         else
-         {
-            predictedContactPoints.clear();
-         }
-         for (int i = 0; i < footstepContactPoints.size(); i++)
-         {
-            Point2D point = new Point2D(footstepContactPoints.get(i));
-            predictedContactPoints.add(point);
-         }
-      }
-      else
-      {
-         predictedContactPoints = null;
-      }
-      trajectoryType = footstep.getTrajectoryType();
-      swingHeight = footstep.getSwingHeight();
-      swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
-
-      if (footstep.getCustomPositionWaypoints().size() != 0)
-      {
-         positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
-         for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
-         {
-            FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
-            framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            positionWaypoints[i] = new Point3D(framePoint);
-         }
-      }
    }
 
    @Override

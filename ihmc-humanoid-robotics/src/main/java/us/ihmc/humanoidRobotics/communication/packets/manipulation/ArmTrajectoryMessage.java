@@ -35,91 +35,11 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
 
    /**
     * Clone constructor.
-    * @param armTrajectoryMessage message to clone.
+    * @param other message to clone.
     */
-   public ArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
+   public ArmTrajectoryMessage(ArmTrajectoryMessage other)
    {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(armTrajectoryMessage.jointspaceTrajectory);
-      robotSide = armTrajectoryMessage.robotSide;
-      setUniqueId(armTrajectoryMessage.getUniqueId());
-   }
-
-   public ArmTrajectoryMessage(RobotSide robotSide, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
-      this.robotSide = robotSide;
-      setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
-   }
-
-   /**
-    * Use this constructor to go straight to the given end points.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredJointPositions desired joint positions. The array length should be equal to the number of arm joints.
-    */
-   public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-   
-   /**
-    * Use this constructor to go straight to the given end points using the specified qp weights.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredJointPositions desired joint positions. The array length should be equal to the number of arm joints.
-    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that joint will use the controller default weight
-    */
-   public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] weights)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Create a message using the given joint trajectory points.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param jointTrajectory1DListMessages joint trajectory points to be executed.
-    */
-   public ArmTrajectoryMessage(RobotSide robotSide, OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointTrajectory1DListMessages);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param numberOfJoints number of joints that will be executing the message.
-    */
-   public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory points.
-    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectoryPoint(int, int, double, double, double)} for each joint and trajectory point afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param numberOfJoints number of joints that will be executing the message.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
-    */
-   public ArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints, int numberOfTrajectoryPoints)
-   {
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      set(other);
    }
 
    @Override

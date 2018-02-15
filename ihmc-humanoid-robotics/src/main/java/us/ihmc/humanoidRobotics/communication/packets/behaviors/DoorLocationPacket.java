@@ -6,16 +6,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 public class DoorLocationPacket extends Packet<DoorLocationPacket>
 {
    public RigidBodyTransform doorTransformToWorld;
-   
-   
+
    public DoorLocationPacket()
    {
-      
-   }
-   
-   public DoorLocationPacket(RigidBodyTransform doorTransformToWorld)
-   {
-      this.doorTransformToWorld = doorTransformToWorld;
+
    }
 
    @Override
@@ -30,7 +24,6 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket>
       return doorTransformToWorld;
    }
 
-  
    public boolean epsilonEquals(DoorLocationPacket doorPacket, double epsilon)
    {
       boolean transformEquals = doorTransformToWorld.epsilonEquals(doorPacket.getValveTransformToWorld(), epsilon);

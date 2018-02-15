@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -74,14 +75,14 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       double robotScale = getLegLength();
       double pelvisTrajectoryTime = 0.5;
-      PelvisHeightTrajectoryMessage pelvisHeightMessage = new PelvisHeightTrajectoryMessage(pelvisTrajectoryTime, 1.1 * robotScale);
+      PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(pelvisTrajectoryTime, 1.1 * robotScale);
       drcSimulationTestHelper.send(pelvisHeightMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(pelvisTrajectoryTime));
 
       double swingTime = 2.0;
       double transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double initialTransferTime = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       footstepDataList.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
 
       // step in place but do some fancy foot motion

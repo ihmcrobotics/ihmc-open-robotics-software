@@ -12,11 +12,6 @@ public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlMod
    {
    }
 
-   public BehaviorControlModeResponsePacket(BehaviorControlModeEnum requestedControl)
-   {
-      this.requestedControl = requestedControl;
-   }
-
    @Override
    public void set(BehaviorControlModeResponsePacket other)
    {

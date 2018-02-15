@@ -29,11 +29,6 @@ public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
    {
    }
 
-   public WalkingStatusMessage(Status status)
-   {
-      this.status = status;
-   }
-
    @Override
    public void set(WalkingStatusMessage other)
    {

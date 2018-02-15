@@ -11,12 +11,6 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AutomaticManipulationAbortMessage(boolean enable)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.enable = enable;
-   }
-
    @Override
    public void set(AutomaticManipulationAbortMessage other)
    {

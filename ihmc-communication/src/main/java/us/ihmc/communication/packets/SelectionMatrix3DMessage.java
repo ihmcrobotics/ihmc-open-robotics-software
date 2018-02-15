@@ -29,16 +29,6 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
    {
    }
 
-   /**
-    * Copy constructor.
-    * 
-    * @param selectionMatrix3D the original selection matrix to copy. Not modified.
-    */
-   public SelectionMatrix3DMessage(SelectionMatrix3D selectionMatrix3D)
-   {
-      set(selectionMatrix3D);
-   }
-
 
    /**
     * Copy constructor.

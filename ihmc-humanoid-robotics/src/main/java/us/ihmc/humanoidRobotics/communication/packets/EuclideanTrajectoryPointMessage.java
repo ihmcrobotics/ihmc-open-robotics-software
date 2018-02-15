@@ -44,13 +44,6 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
          linearVelocity = new Vector3D(trajectoryPoint.linearVelocity);
    }
 
-   public EuclideanTrajectoryPointMessage(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
-   {
-      this.time = time;
-      this.position = new Point3D(position);
-      this.linearVelocity = new Vector3D(linearVelocity);
-   }
-
    @Override
    public void set(EuclideanTrajectoryPointMessage other)
    {
@@ -63,7 +56,7 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
          linearVelocity.set(other.linearVelocity);
       else
          linearVelocity.set(0.0, 0.0, 0.0);
-      
+
       setPacketInformation(other);
    }
 
@@ -177,17 +170,17 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
    {
       return position.distance(other.position);
    }
-   
+
    public double getX()
    {
       return position.getX();
    }
-   
+
    public double getY()
    {
       return position.getY();
    }
-   
+
    public double getZ()
    {
       return position.getZ();

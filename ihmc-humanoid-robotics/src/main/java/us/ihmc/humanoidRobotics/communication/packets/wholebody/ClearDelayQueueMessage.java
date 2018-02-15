@@ -22,16 +22,6 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
    }
 
-   /**
-    * set the class you want to clear
-    * @param clazz the class you want to clear
-    */
-   public ClearDelayQueueMessage(Class<? extends Packet<?>> clazz)
-   {
-      this.clazz = clazz;
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-   }
-
    @Override
    public void set(ClearDelayQueueMessage other)
    {

@@ -12,12 +12,6 @@ public class LocalizationPacket extends Packet<LocalizationPacket>
       // Empty constructor for deserialization
    }
 
-   public LocalizationPacket(boolean reset, boolean toggle)
-   {
-      this.reset = reset;
-      this.toggle = toggle;
-   }
-
    @Override
    public void set(LocalizationPacket other)
    {

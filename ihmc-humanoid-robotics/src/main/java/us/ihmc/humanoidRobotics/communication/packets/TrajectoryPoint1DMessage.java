@@ -7,11 +7,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 @RosMessagePacket(documentation = "This class is used to build 1D trajectory messages including jointspace trajectory messages."
-      + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).",
-      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
+      + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
@@ -28,25 +26,11 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
    {
    }
 
-   public TrajectoryPoint1DMessage(OneDoFTrajectoryPointInterface<?> trajectoryPoint)
-   {
-      time = trajectoryPoint.getTime();
-      position = trajectoryPoint.getPosition();
-      velocity = trajectoryPoint.getVelocity();
-   }
-
    public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage trajectoryPoint)
    {
       time = trajectoryPoint.getTime();
       position = trajectoryPoint.getPosition();
       velocity = trajectoryPoint.getVelocity();
-   }
-
-   public TrajectoryPoint1DMessage(double time, double position, double velocity)
-   {
-      this.time = time;
-      this.position = position;
-      this.velocity = velocity;
    }
 
    @Override

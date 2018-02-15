@@ -10,11 +10,6 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
    {
    }
 
-   public BDIBehaviorStatusPacket(BDIRobotBehavior currentBehavior)
-   {
-      this.currentBehavior = currentBehavior;
-   }
-
    @Override
    public void set(BDIBehaviorStatusPacket other)
    {

@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 
@@ -18,12 +17,6 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
    public AtlasDesiredPumpPSIPacket()
    {
 
-   }
-
-   public AtlasDesiredPumpPSIPacket(int desiredPumpPsi)
-   {
-      setDestination(PacketDestination.CONTROLLER.ordinal());
-      this.desiredPumpPsi = desiredPumpPsi;
    }
 
    @Override

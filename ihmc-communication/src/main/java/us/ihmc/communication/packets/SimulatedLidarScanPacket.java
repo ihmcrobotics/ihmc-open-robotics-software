@@ -15,13 +15,6 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    {
    }
 
-   public SimulatedLidarScanPacket(int sensorId, LidarScanParameters params, float[] ranges)
-   {
-      this.ranges = ranges;
-      this.sensorId = sensorId;
-      this.params = params;
-   }
-
    @Override
    public void set(SimulatedLidarScanPacket other)
    {

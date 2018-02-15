@@ -15,11 +15,6 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
    {
    }
 
-   public StateEstimatorModePacket(StateEstimatorMode requestedOperatingMode)
-   {
-      this.requestedOperatingMode = requestedOperatingMode;
-   }
-
    @Override
    public void set(StateEstimatorModePacket other)
    {

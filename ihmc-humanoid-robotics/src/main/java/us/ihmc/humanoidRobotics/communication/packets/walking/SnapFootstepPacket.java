@@ -20,13 +20,6 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
       // Empty constructor for deserialization
    }
 
-   public SnapFootstepPacket(ArrayList<FootstepDataMessage> data, int[] footstepOrder, byte[] flag)
-   {
-      this.footstepData = data;
-      this.footstepOrder = footstepOrder;
-      this.flag = flag;
-   }
-
    @Override
    public void set(SnapFootstepPacket other)
    {

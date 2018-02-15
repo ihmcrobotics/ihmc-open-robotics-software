@@ -6,19 +6,13 @@ import com.google.common.math.DoubleMath;
 
 public class SetDoubleArrayParameterPacket extends Packet<SetDoubleArrayParameterPacket>
 {
+
    public String parameterName;
    public double[] parameterValue;
 
    // Empty constructor for serialization
    public SetDoubleArrayParameterPacket()
    {
-      this(null, new double[] { });
-   }
-
-   public SetDoubleArrayParameterPacket(String parameterName, double[] parameterValue)
-   {
-      this.parameterName = parameterName;
-      this.parameterValue = parameterValue;
    }
 
    @Override

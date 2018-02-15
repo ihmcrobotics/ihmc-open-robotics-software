@@ -36,7 +36,6 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
-      Set<Class<? extends Packet>> packetTypesWithoutCopyConstructor = new HashSet<>();
       Set<Class<? extends Packet>> packetTypesWithoutEmptyConstructor = new HashSet<>();
       Set<Class<? extends Packet>> packetTypesWithNonEmptyConstructors = new HashSet<>();
 
@@ -54,21 +53,12 @@ public class PacketCodeQualityTest
             if (!hasEmptyConstructor)
                packetTypesWithoutEmptyConstructor.add(packetType);
 
-            boolean hasCopyConstructor = constructors.stream()
-                  .filter(constructor -> constructor.getParameterTypes().length == 1 && constructor.getParameterTypes()[0].equals(packetType))
-                  .findFirst()
-                  .isPresent();
-            if (!hasCopyConstructor)
-               packetTypesWithoutCopyConstructor.add(packetType);
-
             boolean hasNonEmptyConstructors = constructors.stream()
                   .filter(constructor -> constructor.getParameterTypes().length != 0)
                   .filter(constructor -> constructor.getParameterTypes().length != 1 || !constructor.getParameterTypes()[0].equals(packetType))
                   .findFirst().isPresent();
             if (hasNonEmptyConstructors)
                packetTypesWithNonEmptyConstructors.add(packetType);
-
-            packetTypesWithNonEmptyConstructors.add(packetType);
          }
          catch (SecurityException e)
          {
@@ -77,13 +67,6 @@ public class PacketCodeQualityTest
 
       if (verbose)
       {
-         if (!packetTypesWithoutCopyConstructor.isEmpty())
-         {
-            System.out.println();
-            System.out.println();
-            PrintTools.error("List of packet sub-types without a copy constructor:");
-            packetTypesWithoutCopyConstructor.forEach(type -> PrintTools.error(type.getSimpleName()));
-         }
          if (!packetTypesWithoutEmptyConstructor.isEmpty())
          {
             System.out.println();
@@ -100,7 +83,7 @@ public class PacketCodeQualityTest
          }
       }
 
-      assertFalse("Packet sub-types should implement an empty constructor.", packetTypesWithoutEmptyConstructor.isEmpty());
+      assertTrue("Packet sub-types should implement an empty constructor.", packetTypesWithoutEmptyConstructor.isEmpty());
       assertTrue("Packet sub-types should not implement a non-empty constructor.", packetTypesWithNonEmptyConstructors.isEmpty());
    }
 

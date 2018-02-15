@@ -42,23 +42,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
 
-   /**
-    * Typical constructor to use, pack the two taskspace and joint space commands.
-    * If these messages conflict, the qp weights and gains will dictate the desireds
-    * @param taskspaceTrajectoryMessage
-    * @param jointspaceTrajectoryMessage
-    */
-   public HandHybridJointspaceTaskspaceTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
-   {
-      if (!taskspaceTrajectoryMessage.getQueueingProperties().epsilonEquals(jointspaceTrajectoryMessage.getQueueingProperties(), 0.0))
-         throw new IllegalArgumentException("The trajectory messages should have the same queueing properties.");
-
-      this.robotSide = robotSide;
-      this.taskspaceTrajectoryMessage = new SE3TrajectoryMessage(taskspaceTrajectoryMessage);
-      this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    @Override
    public void set(HandHybridJointspaceTaskspaceTrajectoryMessage other)
    {

@@ -31,26 +31,9 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
     * Clone constructor.
     * @param message to clone.
     */
-   public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage other)
    {
-      this(hybridJointspaceTaskspaceMessage.getTaskspaceTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getJointspaceTrajectoryMessage());
-      setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
-   }
-
-   /**
-    * Typical constructor to use, pack the two taskspace and joint space commands.
-    * If these messages conflict, the qp weights and gains will dictate the desireds
-    * @param taskspaceTrajectoryMessage
-    * @param jointspaceTrajectoryMessage
-    */
-   public ChestHybridJointspaceTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
-   {
-      if (!taskspaceTrajectoryMessage.getQueueingProperties().epsilonEquals(jointspaceTrajectoryMessage.getQueueingProperties(), 0.0))
-         throw new IllegalArgumentException("The trajectory messages should have the same queueing properties.");
-
-      this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
-      this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      set(other);
    }
 
    @Override

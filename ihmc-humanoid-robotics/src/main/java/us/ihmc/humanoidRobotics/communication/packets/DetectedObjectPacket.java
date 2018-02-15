@@ -12,12 +12,6 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
    {
    }
 
-   public DetectedObjectPacket(RigidBodyTransform pose, int id)
-   {
-      this.pose = pose;
-      this.id = id;
-   }
-
    @Override
    public void set(DetectedObjectPacket other)
    {

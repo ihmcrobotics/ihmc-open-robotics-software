@@ -11,16 +11,6 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    {
    }
 
-   public BDIBehaviorCommandPacket(BDIRobotBehavior atlasRobotBehavior)
-   {
-      this.atlasRobotBehavior = atlasRobotBehavior;
-   }
-
-   public BDIBehaviorCommandPacket(boolean stop)
-   {
-      this.stop = stop;
-   }
-
    @Override
    public void set(BDIBehaviorCommandPacket other)
    {

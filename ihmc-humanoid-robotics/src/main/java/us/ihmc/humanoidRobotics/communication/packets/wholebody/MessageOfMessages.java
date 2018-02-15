@@ -6,23 +6,15 @@ import java.util.List;
 import us.ihmc.communication.packets.Packet;
 
 /**
- *  MessageOfMessages provides a generic way to send a collection of messages to the controller.
+ * MessageOfMessages provides a generic way to send a collection of messages to the controller.
  */
 public class MessageOfMessages extends Packet<MessageOfMessages>
 {
-   
    public List<Packet<?>> packets = new ArrayList<>();
-   
+
    public MessageOfMessages()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-   
-   public MessageOfMessages(ArrayList<Packet<?>> messages)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      packets.clear();
-      packets.addAll(messages);
    }
 
    public MessageOfMessages(Packet<?>... messages)
@@ -42,7 +34,7 @@ public class MessageOfMessages extends Packet<MessageOfMessages>
 
    public void addPacket(Packet<?>... messages)
    {
-      for(Packet<?> packet : messages)
+      for (Packet<?> packet : messages)
       {
          if (packet instanceof MessageOfMessages)
             packets.addAll(((MessageOfMessages) packet).getPackets());
@@ -65,18 +57,18 @@ public class MessageOfMessages extends Packet<MessageOfMessages>
    @Override
    public boolean epsilonEquals(MessageOfMessages other, double epsilon)
    {
-      if(packets.size() != other.packets.size())
+      if (packets.size() != other.packets.size())
       {
          return false;
       }
-      
-      for(int i = 0; i < packets.size(); i++)
+
+      for (int i = 0; i < packets.size(); i++)
       {
          Packet packet = packets.get(i);
          Packet otherPacket = other.packets.get(i);
          packet.epsilonEquals(otherPacket, epsilon);
       }
-      
+
       return true;
    }
 }

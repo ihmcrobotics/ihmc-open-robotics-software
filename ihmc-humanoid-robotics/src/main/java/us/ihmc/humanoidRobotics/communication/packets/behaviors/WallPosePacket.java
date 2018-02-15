@@ -19,28 +19,6 @@ public class WallPosePacket extends Packet<WallPosePacket>
 
    }
 
-   public WallPosePacket(WallPosePacket other)
-   {
-      setCuttingRadius(other.getCuttingRadius());
-      setCenterPosition(other.getCenterPosition());
-      setCenterOrientation(other.getCenterOrientation());
-   }
-
-   public WallPosePacket(double cuttingRadius, Tuple3DReadOnly centerPosition, QuaternionReadOnly centerOrientation)
-   {
-      setCuttingRadius(cuttingRadius);
-      setCenterPosition(centerPosition);
-      setCenterOrientation(centerOrientation);
-   }
-
-   public WallPosePacket(double cuttingRadius, Tuple3DReadOnly centerPosition, RotationMatrixReadOnly rotationMatrix)
-   {
-      setCuttingRadius(cuttingRadius);
-      setCenterPosition(centerPosition);
-      Quaternion centerOrientation = new Quaternion(rotationMatrix);
-      setCenterOrientation(centerOrientation);
-   }
-
    @Override
    public void set(WallPosePacket other)
    {

@@ -20,12 +20,6 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       // Empty constructor for deserialization
    }
 
-   public AtlasWristSensorCalibrationRequestPacket(RobotSide robotSide)
-   {
-      setDestination(PacketDestination.CONTROLLER.ordinal());
-      this.robotSide = robotSide;
-   }
-
    @Override
    public void set(AtlasWristSensorCalibrationRequestPacket other)
    {

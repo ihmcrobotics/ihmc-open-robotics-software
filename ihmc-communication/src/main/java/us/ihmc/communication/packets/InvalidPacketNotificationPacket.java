@@ -4,15 +4,10 @@ public class InvalidPacketNotificationPacket extends SettablePacket<InvalidPacke
 {
    public String packetClass;
    public String errorMessage;
-   
+
    public InvalidPacketNotificationPacket()
    {
       setDestination(PacketDestination.BROADCAST);
-   }
-   
-   public InvalidPacketNotificationPacket(Class<? extends Packet<?>> packetClass, String errorMessage)
-   {
-      set(packetClass, errorMessage);
    }
 
    public void set(Class<? extends Packet<?>> packetClass, String errorMessage)
@@ -34,5 +29,4 @@ public class InvalidPacketNotificationPacket extends SettablePacket<InvalidPacke
    {
       return true;
    }
-
 }
