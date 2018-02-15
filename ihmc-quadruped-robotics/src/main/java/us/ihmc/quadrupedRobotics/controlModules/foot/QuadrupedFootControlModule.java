@@ -49,6 +49,7 @@ public class QuadrupedFootControlModule
                                                                                                                                           prefix + "QuadrupedFootStates", registry);
       stateMachineBuilder.addState(QuadrupedFootStates.SUPPORT, supportState);
       stateMachineBuilder.addState(QuadrupedFootStates.SWING, swingState);
+      stateMachineBuilder.addState(QuadrupedFootStates.MOVE_VIA_WAYPOINTS, moveViaWaypointsState);
 
       stateMachineBuilder.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.SWING);
       stateMachineBuilder.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
