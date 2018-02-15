@@ -105,4 +105,10 @@ public class QuadrupedFeetManager
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footControlModules.get(robotQuadrant).requestSupport();
    }
+
+   public void requestHoldAll()
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footControlModules.get(robotQuadrant).requestHold();
+   }
 }
