@@ -15,6 +15,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajecto
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -46,6 +47,15 @@ public class QuadrupedBalanceManager
    private final QuadrupedPostureInputProviderInterface postureProvider;
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
+   private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
+   private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
+   private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
+   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
+   private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
+   private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
+   private final DoubleParameter vrpPositionRateLimitParameter = parameterFactory.createDouble("vrpPositionRateLimit", Double.MAX_VALUE);
    private final DoubleParameter comPositionGravityCompensationParameter = parameterFactory.createDouble("comPositionGravityCompensation", 1);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
    private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
@@ -84,8 +94,8 @@ public class QuadrupedBalanceManager
       double controlDT = toolbox.getRuntimeEnvironment().getControlDT();
 
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(comZUpFrame, mass, gravity, 1.0, registry);
-      dcmPositionEstimator = new DivergentComponentOfMotionEstimator(comZUpFrame, linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
-      dcmPositionController = new DivergentComponentOfMotionController(comZUpFrame, controlDT, linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
+      dcmPositionEstimator = new DivergentComponentOfMotionEstimator(comZUpFrame, linearInvertedPendulumModel, "Manager", registry, yoGraphicsListRegistry);
+      dcmPositionController = new DivergentComponentOfMotionController(comZUpFrame, controlDT, linearInvertedPendulumModel, "Manager", registry, yoGraphicsListRegistry);
       comPositionController = new QuadrupedComPositionController(comZUpFrame, controlDT, registry);
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
 
@@ -105,8 +115,25 @@ public class QuadrupedBalanceManager
       parentRegistry.addChild(registry);
    }
 
+   public void initialize(QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   {
+      // update model
+      linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
+
+      // update dcm estimate
+      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
+
+      // initialize feedback controllers
+      dcmPositionController.initializeSetpoint(dcmPositionEstimate);
+      dcmPositionController.reset();
+      comPositionControllerSetpoints.initialize(taskSpaceEstimates);
+      comPositionController.reset();
+   }
+
    public void compute(FrameVector3D linearMomentumRateOfChangeToPack, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
+      updateGains();
+
       // update estimates
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
@@ -195,5 +222,22 @@ public class QuadrupedBalanceManager
             groundPlaneEstimator.projectZ(stepGoalPositionToPack);
          }
       }
+   }
+
+   public FramePoint3D getDcmPositionSetpoint()
+   {
+      return dcmPositionController.getDCMPositionSetpoint();
+   }
+
+
+   private void updateGains()
+   {
+      dcmPositionController.setVrpPositionRateLimit(vrpPositionRateLimitParameter.get());
+      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
+      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
+      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
+      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
+      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
+      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
    }
 }
