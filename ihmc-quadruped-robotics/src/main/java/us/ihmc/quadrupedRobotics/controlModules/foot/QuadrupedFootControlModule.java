@@ -60,7 +60,7 @@ public class QuadrupedFootControlModule
       stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SWING, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.SWING);
       stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SWING, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SWING);
 
-      footStateMachine = stateMachineBuilder.build(QuadrupedFootStates.SUPPORT);
+      footStateMachine = stateMachineBuilder.build(QuadrupedFootStates.MOVE_VIA_WAYPOINTS);
 
       parentRegistry.addChild(registry);
    }
