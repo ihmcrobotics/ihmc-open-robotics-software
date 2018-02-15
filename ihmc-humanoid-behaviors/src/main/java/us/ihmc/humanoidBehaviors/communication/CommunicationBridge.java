@@ -205,22 +205,9 @@ public class CommunicationBridge implements CommunicationBridgeInterface
       sendPacketToUI(newPacket);
    }
 
-   public void sendToUI(String key, Object data)
-   {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
-      sendPacketToUI(newPacket);
-   }
-
    public void sendToBehavior(String key, double value)
    {
       SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
       sendPacketToBehavior(newPacket);
    }
-
-   public void sendToBehavior(String key, Object data)
-   {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
-      sendPacketToBehavior(newPacket);
-   }
-
 }

@@ -39,7 +39,6 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
@@ -185,7 +184,8 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            enableBehaviorOnlyLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
+            // FIXME
+//            enableBehaviorOnlyLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
             coactiveElement.currentState.set(PickUpBallBehaviorState.ENABLING_LIDAR);
          }
       };

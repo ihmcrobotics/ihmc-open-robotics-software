@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,13 +14,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 {
@@ -74,10 +72,10 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    private Point3D32[] filterPointsNearBall(Point3D32[] fullPointCloud)
    {
       if (fullPointCloud.length == 0)
-      {
-         DepthDataStateCommand enableBehaviorLidar = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
-         enableBehaviorLidar.setDestination(PacketDestination.SENSOR_MANAGER);
-         sendPacket(enableBehaviorLidar);
+      { // FIXME
+//         DepthDataStateCommand enableBehaviorLidar = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
+//         enableBehaviorLidar.setDestination(PacketDestination.SENSOR_MANAGER);
+//         sendPacket(enableBehaviorLidar);
          
          ThreadTools.sleep(100);
          
@@ -143,11 +141,11 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    public void onBehaviorEntered()
    {
       coloredCircularBlobDetectorBehaviorService.run();
-      
-      DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
-      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
-      
-      sendPacket(depthDataStateCommand);
+
+      // FIXME
+//      DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
+//      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
+//      sendPacket(depthDataStateCommand);
       
       TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
       textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH);
