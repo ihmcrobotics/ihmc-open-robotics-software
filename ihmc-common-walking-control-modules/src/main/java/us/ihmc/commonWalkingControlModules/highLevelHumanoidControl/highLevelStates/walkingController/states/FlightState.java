@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.WholeBodyMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
@@ -19,7 +19,7 @@ public class FlightState extends AbstractJumpingState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.FLIGHT;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-   private final WholeBodyMomentumManager wholeBodyMomentumManager;
+   private final CentroidalMomentumManager wholeBodyMomentumManager;
    private final SpatialAccelerationVector zeroGravitationalAcceleration;
    private final RigidBody rootBody;
    
@@ -27,7 +27,7 @@ public class FlightState extends AbstractJumpingState
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
 
    
-   public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox, WholeBodyMomentumManager wholeBodyMomentumManager, FeetJumpManager feetJumpManager)
+   public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox, CentroidalMomentumManager wholeBodyMomentumManager, FeetJumpManager feetJumpManager)
    {
       super(stateEnum);
       this.controllerToolbox = controllerToolbox;

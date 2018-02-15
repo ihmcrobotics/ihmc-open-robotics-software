@@ -8,6 +8,8 @@ import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -15,6 +17,7 @@ import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -27,6 +30,8 @@ public class CentroidalMomentumHandler
 {
    private final DenseMatrix64F adotV = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumMatrixPart = new DenseMatrix64F(1, 1);
+   private final RigidBody rootBody;
+   private final RigidBody[] rigidBodyList;
    private final SpatialForceVector centroidalMomentumRate;
 
    private final InverseDynamicsJoint[] jointsInOrder;
@@ -39,10 +44,14 @@ public class CentroidalMomentumHandler
    private final ReferenceFrame centerOfMassFrame;
    private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
    private final double robotMass;
+   private final RigidBodyInertia tempRigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), 0.01, 0.01, 0.01, 0.01);  // Dummy value to create a valid inertia tensor
+   private final DenseMatrix64F tempMatrixForStoringRigidBodyInertia = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    public CentroidalMomentumHandler(RigidBody rootBody, ReferenceFrame centerOfMassFrame)
    {
+      this.rootBody = rootBody;
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
+      this.rigidBodyList = ScrewTools.computeRigidBodiesAfterThisJoint(rootBody.getParentJoint());
 
       int nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
@@ -136,5 +145,19 @@ public class CentroidalMomentumHandler
       CommonOps.mult(selectionMatrix, momentumRate, centroidalMomentumEquationRightHandSide);
       CommonOps.subtractEquals(centroidalMomentumEquationRightHandSide, adotV);
       return centroidalMomentumEquationRightHandSide;
+   }
+
+   public void computeSpatialIntertiaMatrix(DenseMatrix64F spatialCentroidalInertiaToPack)
+   {
+      spatialCentroidalInertiaToPack.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      spatialCentroidalInertiaToPack.zero();
+      for (int i = 0; i < rigidBodyList.length; i++)
+      {
+         RigidBodyInertia rigidBodyInertia = rigidBodyList[i].getInertia();
+         tempRigidBodyInertia.set(rigidBodyInertia);
+         tempRigidBodyInertia.changeFrame(centerOfMassFrame);
+         tempRigidBodyInertia.getMatrix(tempMatrixForStoringRigidBodyInertia);
+         CommonOps.addEquals(spatialCentroidalInertiaToPack, tempMatrixForStoringRigidBodyInertia);
+      }
    }
 }

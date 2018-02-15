@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JumpControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -22,6 +21,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
@@ -32,6 +32,8 @@ public class JumpControllerState extends HighLevelControllerState
    
    private final WholeBodyControllerCore controllerCore;
    private final JumpHighLevelHumanoidController jumpController;
+
+   private final ExecutionTimer controllerCoreTimer = new ExecutionTimer(namePrefix + "ControllerCoreTimer", registry);
 
    private boolean setupControllerCoreForInverseDynamics = true;
    private boolean setupControllerCoreForInverseKinematics = false;
@@ -85,17 +87,16 @@ public class JumpControllerState extends HighLevelControllerState
    {
       jumpController.doAction();
       ControllerCoreCommand controllerCoreCommand = jumpController.getControllerCoreCommand();
-      //controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
       JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
       controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
-      //controllerCoreTimer.startMeasurement();
+      controllerCoreTimer.startMeasurement();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
-      //controllerCoreTimer.stopMeasurement();
+      controllerCoreTimer.stopMeasurement();
    }
    
    public void initialize()

@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.WholeBodyMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -35,7 +35,7 @@ public class JumpHighLevelHumanoidController
 
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-   private final WholeBodyMomentumManager wholeBodyMomentumManager;
+   private final CentroidalMomentumManager wholeBodyMomentumManager;
    //private final FeetJumpManager feetManager;
    
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(PlaneContactStateCommand.class);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
@@ -27,6 +28,7 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactive
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.screwTheory.CentroidalMomentumRateADotVTerm;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -79,6 +81,8 @@ public class InverseDynamicsOptimizationControlModule
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
    private final DenseMatrix64F centroidalAcceleration = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F spatialCentroidalInertia = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+   private final DenseMatrix64F spatialCentroidalMomentumRateOfChange = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -277,8 +281,7 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F convectiveTerm = motionQPInputCalculator.getCentroidalMomentumConvectiveTerm();
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-      //TODO this is a hack, Should be changed so that the gravitational wrench is computed based on a set root joint acceleration (Apoorv)
-      qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench, centroidalAcceleration);
+      qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench, spatialCentroidalMomentumRateOfChange);
    }
 
    public void setupTorqueMinimizationCommand()
@@ -353,7 +356,9 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitCoMAccelerationCommand(CoMAccelerationCommand command)
    {
-      SpatialAccelerationVector comAccelerationCommand = command.getCoMSpatialAcceleration();
-      comAccelerationCommand.getMatrix(centroidalAcceleration, 0);
+      SpatialAccelerationVector spatialCentroidalAcceleration = command.getCoMSpatialAcceleration();
+      spatialCentroidalAcceleration.getMatrix(centroidalAcceleration, 0);
+      motionQPInputCalculator.getSpatialCentroidalMomentumMatrix(spatialCentroidalInertia);
+      CommonOps.mult(spatialCentroidalInertia, centroidalAcceleration, spatialCentroidalMomentumRateOfChange);
    }
 }

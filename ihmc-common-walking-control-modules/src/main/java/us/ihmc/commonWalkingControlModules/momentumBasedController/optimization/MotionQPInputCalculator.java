@@ -607,7 +607,12 @@ public class MotionQPInputCalculator
    {
       return centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
    }
-
+   
+   public void getSpatialCentroidalMomentumMatrix(DenseMatrix64F spatialCentroidaInertiaToPack)
+   {
+      centroidalMomentumHandler.computeSpatialIntertiaMatrix(spatialCentroidaInertiaToPack);
+   }
+   
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
    {
       return centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();

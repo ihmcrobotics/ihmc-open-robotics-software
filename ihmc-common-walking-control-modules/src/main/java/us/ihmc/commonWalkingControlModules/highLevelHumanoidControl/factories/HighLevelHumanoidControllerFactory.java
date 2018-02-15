@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import boofcv.abst.feature.orientation.ConfigOrientation.Gradient;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
@@ -59,7 +60,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
-
+   
+   
    private final ArrayList<HighLevelControllerStateFactory> controllerStateFactories = new ArrayList<>();
    private final EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelControllerName.class);
 
@@ -116,12 +118,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters icpPlannerParameters,
-                                             JumpControllerParameters jumpControllerParameteres)
+                                             JumpControllerParameters jumpControllerParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.icpPlannerParameters = icpPlannerParameters;
-      this.jumpControllerParameters = jumpControllerParameteres;
+      this.jumpControllerParameters = jumpControllerParameters;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -134,7 +136,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory.setCapturePointPlannerParameters(icpPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
 
-      jumpControlManagerFactory = new JumpControlManagerFactory(registry);
+      jumpControlManagerFactory = new JumpControlManagerFactory(jumpControllerParameters, registry);
    }
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;

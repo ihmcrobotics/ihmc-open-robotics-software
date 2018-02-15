@@ -393,7 +393,7 @@ public class InverseDynamicsQPSolver
     * @param comAcceleration the acceleration of the center of mass 
     */
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
-                                                  DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench, DenseMatrix64F centroidalAcceleration)
+                                                  DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench, DenseMatrix64F spatialCentroidalMomentumRateOfChange)
    {
       if (!hasFloatingBase)
       {
@@ -404,6 +404,7 @@ public class InverseDynamicsQPSolver
       tempWrenchConstraint_RHS.set(convectiveTerm);
       CommonOps.subtractEquals(tempWrenchConstraint_RHS, additionalExternalWrench);
       CommonOps.subtractEquals(tempWrenchConstraint_RHS, gravityWrench);
+      CommonOps.addEquals(tempWrenchConstraint_RHS, spatialCentroidalMomentumRateOfChange);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
