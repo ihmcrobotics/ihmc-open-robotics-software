@@ -1,19 +1,22 @@
-package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
+package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
 {
-   public FramePose3D goalPose;
+   public Point3D position;
+   public Quaternion orientation;
 
    public WalkOverTerrainGoalPacket()
    {
    }
 
-   public WalkOverTerrainGoalPacket(FramePose3D goalPose)
+   public WalkOverTerrainGoalPacket(Point3D position, Quaternion orientation)
    {
-      this.goalPose = goalPose;
+      this.position = position;
+      this.orientation = orientation;
    }
 
    @Override
@@ -22,6 +25,6 @@ public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
       if(other == null)
          return false;
 
-      return goalPose.epsilonEquals(other.goalPose, epsilon);
+      return other.position.epsilonEquals(position, epsilon) && other.orientation.epsilonEquals(orientation, epsilon);
    }
 }
