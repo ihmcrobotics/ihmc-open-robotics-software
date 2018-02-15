@@ -30,4 +30,13 @@ public class TextFormatterTools
       String ipAddress = partialBlock + "?" + subsequentPartialBlock + "{0,3}";
       return "^" + ipAddress;
    }
+
+   /**
+    * @return a TextFormatter that ensures the amount of characters in a text is less or equal the specified amount.
+    */
+   public static TextFormatter<Change> maxLengthTextFormatter(int maxCharacters)
+   {
+      UnaryOperator<Change> lengthFilter = change -> change.getControlNewText().length() <= maxCharacters ? change : null;
+      return new TextFormatter<>(lengthFilter);
+   }
 }
