@@ -7,6 +7,7 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionC
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
@@ -25,7 +26,7 @@ public class QuadrupedFootControlModule
 
    // foot state machine
    public enum FootEvent { TIMEOUT }
-   public enum QuadrupedFootRequest { REQUEST_SUPPORT, REQUEST_SWING }
+   public enum QuadrupedFootRequest { REQUEST_SUPPORT, REQUEST_SWING, REQUEST_MOVE_VIA_WAYPOINTS }
 
    private final FiniteStateMachine<QuadrupedFootStates, FootEvent, QuadrupedFootState> footStateMachine;
 
@@ -38,10 +39,11 @@ public class QuadrupedFootControlModule
       this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
       // state machine
-      FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, QuadrupedFootState> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
-            prefix + "QuadrupedFootStates", registry);
       QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, toolbox.getRuntimeEnvironment().getRobotTimestamp(), stepCommand);
       QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, toolbox, solePositionController, stepCommandIsValid, stepCommand, registry);
+
+      FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, QuadrupedFootState> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
+                                                                                                                                          prefix + "QuadrupedFootStates", registry);
       stateMachineBuilder.addState(QuadrupedFootStates.SUPPORT, supportState);
       stateMachineBuilder.addState(QuadrupedFootStates.SWING, swingState);
 
@@ -49,7 +51,11 @@ public class QuadrupedFootControlModule
       stateMachineBuilder.addTransition(FootEvent.TIMEOUT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
 
       stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SUPPORT, QuadrupedFootStates.SWING, QuadrupedFootStates.SUPPORT);
+      stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SUPPORT, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SUPPORT);
+      stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.MOVE_VIA_WAYPOINTS);
+      stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SWING, QuadrupedFootStates.MOVE_VIA_WAYPOINTS);
       stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SWING, QuadrupedFootStates.SUPPORT, QuadrupedFootStates.SWING);
+      stateMachineBuilder.addTransition(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SWING, QuadrupedFootStates.MOVE_VIA_WAYPOINTS, QuadrupedFootStates.SWING);
 
       footStateMachine = stateMachineBuilder.build(QuadrupedFootStates.SUPPORT);
 
@@ -67,6 +73,11 @@ public class QuadrupedFootControlModule
       footStateMachine.attachStateChangedListener(stateChangedListener);
    }
 
+   public void initializeWaypointTrajectory(QuadrupedSoleWaypointList quadrupedSoleWaypointList, QuadrupedTaskSpaceEstimates taskSpaceEstimates,
+                                            boolean useInitialSoleForceAsFeedforwardTerm)
+   {
+   }
+
    public void requestSupport()
    {
       footStateMachine.trigger(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SUPPORT);
@@ -75,6 +86,11 @@ public class QuadrupedFootControlModule
    public void requestSwing()
    {
       footStateMachine.trigger(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_SWING);
+   }
+
+   public void requestMoveViaWaypoints()
+   {
+      footStateMachine.trigger(QuadrupedFootRequest.class, QuadrupedFootRequest.REQUEST_MOVE_VIA_WAYPOINTS);
    }
 
    public void reset()
