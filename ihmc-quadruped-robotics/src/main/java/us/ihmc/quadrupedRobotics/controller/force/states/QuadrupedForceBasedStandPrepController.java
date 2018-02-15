@@ -2,13 +2,11 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleWaypointController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -30,11 +28,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class QuadrupedForceBasedStandPrepController implements QuadrupedController
+public class QuadrupedForceBasedStandPrepController implements QuadrupedController, QuadrupedWaypointCallback
 {
    //Yo Variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoPID3DGains yoPositionControllerGains;
 
    // Parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
@@ -48,11 +45,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory
-         .createDoubleArray("solePositionProportionalGains", 10000, 10000, 10000);
-   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 100, 100, 100);
-   private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
 
    // Yo variables
@@ -64,18 +56,20 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    private final QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists = new QuadrantDependentList<>();
-   private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
+   private final QuadrupedFeetManager feetManager;
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
    private FramePoint3D solePositionSetpoint;
    private final Vector3D zeroVelocity;
    private final double robotLength;
-   private FullQuadrupedRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
+
+   private final YoBoolean isDoneMoving = new YoBoolean("standPrepDoneMoving", registry);
 
    public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
-      quadrupedSoleWaypointController = controllerToolbox.getSoleWaypointController();
+      feetManager = controllerToolbox.getFeetManager();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       referenceFrames = controllerToolbox.getReferenceFrames();
@@ -92,7 +86,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
-      yoPositionControllerGains = new DefaultYoPID3DGains("positionControllerGains", GainCoupling.NONE, true, registry);
       yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
 
       // Calculate the robot length
@@ -109,10 +102,16 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    }
 
    @Override
+   public void isDoneMoving(boolean doneMoving)
+   {
+      boolean done = doneMoving && isDoneMoving.getBooleanValue();
+      isDoneMoving.set(done);
+   }
+
+   @Override
    public void onEntry()
    {
       taskSpaceEstimator.compute(taskSpaceEstimates);
-      updateGains();
       // Create sole waypoint trajectories
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -126,7 +125,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
                quadrant.getEnd().negateIfHindEnd(Math.sin(stancePitchParameter.get())) * robotLength / 2 - stanceHeightParameter.get());
          quadrupedSoleWaypointLists.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.get());
       }
-      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointLists, yoPositionControllerGains, taskSpaceEstimates, false);
+      feetManager.initializeWaypointTrajectory(quadrupedSoleWaypointLists, taskSpaceEstimates, false);
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -149,15 +148,17 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
             oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
          }
       }
+
+      feetManager.registerWaypointCallback(this);
    }
 
    @Override
    public ControllerEvent process()
    {
       taskSpaceEstimator.compute(taskSpaceEstimates);
-      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
-      return success ? null : ControllerEvent.DONE;
+      return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
    }
 
    @Override
@@ -172,12 +173,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
             oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
          }
       }
-   }
 
-   private void updateGains()
-   {
-      yoPositionControllerGains.setProportionalGains(solePositionProportionalGainsParameter.get());
-      yoPositionControllerGains.setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
-      yoPositionControllerGains.setDerivativeGains(solePositionDerivativeGainsParameter.get());
+      feetManager.registerWaypointCallback(null);
    }
 }
