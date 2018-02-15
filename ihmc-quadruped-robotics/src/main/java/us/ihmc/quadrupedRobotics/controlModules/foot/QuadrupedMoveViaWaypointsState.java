@@ -105,6 +105,9 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       {
          soleForceCommand.setToZero();
 
+         if (waypointCallback != null)
+            waypointCallback.isDoneMoving(true);
+
          return QuadrupedFootControlModule.FootEvent.TIMEOUT;
       }
       else
@@ -114,6 +117,9 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
          solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
          solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
          solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, taskSpaceEstimates);
+
+         if (waypointCallback != null)
+            waypointCallback.isDoneMoving(false);
 
          return null;
       }
