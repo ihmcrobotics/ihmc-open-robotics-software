@@ -1,17 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import org.ejml.data.DenseMatrix64F;
-
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-
 public class FeetJumpManager
 {
+   /*
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private FullHumanoidRobotModel fullRobotModel;
    
@@ -37,4 +28,5 @@ public class FeetJumpManager
    {
       return jointAccelerationCommand;
    }
+   */
 }

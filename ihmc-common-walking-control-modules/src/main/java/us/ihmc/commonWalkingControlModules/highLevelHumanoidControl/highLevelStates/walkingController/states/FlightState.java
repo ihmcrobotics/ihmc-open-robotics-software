@@ -20,10 +20,12 @@ public class FlightState extends AbstractJumpingState
    private static final JumpStateEnum stateEnum = JumpStateEnum.FLIGHT;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WholeBodyMomentumManager wholeBodyMomentumManager;
-   private final FeetJumpManager feetJumpManager;
-   private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final SpatialAccelerationVector zeroGravitationalAcceleration;
    private final RigidBody rootBody;
+   
+   //private final FeetJumpManager feetJumpManager;
+   private final WholeBodyControlCoreToolbox controlCoreToolbox;
+
    
    public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox, WholeBodyMomentumManager wholeBodyMomentumManager, FeetJumpManager feetJumpManager)
    {
@@ -31,7 +33,7 @@ public class FlightState extends AbstractJumpingState
       this.controllerToolbox = controllerToolbox;
       this.controlCoreToolbox = controlCoreToolbox;
       this.wholeBodyMomentumManager = wholeBodyMomentumManager;
-      this.feetJumpManager = feetJumpManager;
+      //this.feetJumpManager = feetJumpManager;
       this.rootBody = controlCoreToolbox.getRootBody();
       this.zeroGravitationalAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
    }
@@ -47,7 +49,7 @@ public class FlightState extends AbstractJumpingState
    {
       wholeBodyMomentumManager.update(stateEnum);
       wholeBodyMomentumManager.compute();
-      feetJumpManager.compute();
+      //feetJumpManager.compute();
       SpatialAccelerationCalculator spatialAccelerationCalculator = controlCoreToolbox.getInverseDynamicsCalculator().getSpatialAccelerationCalculator();
       spatialAccelerationCalculator.setRootAcceleration(zeroGravitationalAcceleration);
       spatialAccelerationCalculator.compute();

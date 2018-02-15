@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.awt.Robot;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.WholeBodyMomentumManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -16,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.robotics.hyperCubeTree.ConstantResolutionProvider;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
@@ -39,7 +36,7 @@ public class JumpHighLevelHumanoidController
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WholeBodyMomentumManager wholeBodyMomentumManager;
-   private final FeetJumpManager feetManager;
+   //private final FeetJumpManager feetManager;
    
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(PlaneContactStateCommand.class);
    
@@ -59,14 +56,16 @@ public class JumpHighLevelHumanoidController
       this.controllerToolbox = controllerToolbox;
       this.wholeBodyMomentumManager = jumpingControlManagerFactory.getOrCreateWholeBodyMomentumManager();
       this.wholeBodyMomentumManager.setOptimizationWeights(momentumOptimizationSettings.getAngularMomentumWeight(), momentumOptimizationSettings.getLinearMomentumWeight());
-      this.feetManager = jumpingControlManagerFactory.getOrCreateFeetJumpManager();
+      this.wholeBodyMomentumManager.setTotalRobotMass(controlCoreToolbox.getTotalRobotMass());
+      //this.feetManager = jumpingControlManagerFactory.getOrCreateFeetJumpManager();
       setupStateMachine();
    }
 
    // TODO Hacked for now to default to the flight state
    private void setupStateMachine()
    {
-      FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, feetManager);
+      //FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, feetManager);
+      FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, null);
       stateMachine.addState(flightState);
       stateMachine.setCurrentState(JumpStateEnum.FLIGHT);
    }
@@ -84,8 +83,8 @@ public class JumpHighLevelHumanoidController
    private void submitControllerCommands()
    {
       planeContactStateCommandPool.clear();
-      //controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(RobotSide.LEFT));
+      controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
+      //controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(RobotSide.LEFT));
       for (RobotSide robotSide : RobotSide.values)
       {
          //controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));

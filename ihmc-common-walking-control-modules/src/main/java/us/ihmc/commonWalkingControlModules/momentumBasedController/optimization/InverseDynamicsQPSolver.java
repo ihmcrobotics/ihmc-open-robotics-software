@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
@@ -389,9 +390,10 @@ public class InverseDynamicsQPSolver
     *           robot is holding.
     * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by
     *           the wieght of the robot.
+    * @param comAcceleration the acceleration of the center of mass 
     */
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
-                                                  DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
+                                                  DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench, DenseMatrix64F centroidalAcceleration)
    {
       if (!hasFloatingBase)
       {

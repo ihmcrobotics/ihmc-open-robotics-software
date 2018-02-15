@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.RootJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
@@ -32,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -292,6 +294,12 @@ public class WholeBodyInverseDynamicsSolver
             break;
          case JOINT_ACCELERATION_INTEGRATION:
             jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
+            break;
+         case ROOT_JOINT_ACCELERATION_COMMAND:
+            spatialAccelerationCalculator.setRootAcceleration(((RootJointAccelerationCommand) command).getRootJointSpatialAcceleration());
+            break;
+         case COM_ACCELERATION_COMMAND:
+            
             break;
          case COMMAND_LIST:
             submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
