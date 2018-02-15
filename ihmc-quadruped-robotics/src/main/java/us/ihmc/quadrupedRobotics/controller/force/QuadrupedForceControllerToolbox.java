@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -19,7 +18,6 @@ public class QuadrupedForceControllerToolbox
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController bodyOrientationController;
-   private final QuadrupedFeetManager feetManager;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
 
@@ -45,7 +43,6 @@ public class QuadrupedForceControllerToolbox
       dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
       bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
-      feetManager = new QuadrupedFeetManager(this, registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
    }
@@ -98,11 +95,6 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedBodyOrientationController getBodyOrientationController()
    {
       return bodyOrientationController;
-   }
-
-   public QuadrupedFeetManager getFeetManager()
-   {
-      return feetManager;
    }
 
    public GroundPlaneEstimator getGroundPlaneEstimator()

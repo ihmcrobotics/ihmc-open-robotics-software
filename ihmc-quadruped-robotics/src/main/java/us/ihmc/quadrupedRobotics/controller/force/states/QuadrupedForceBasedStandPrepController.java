@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -67,9 +68,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
 
    private final YoBoolean isDoneMoving = new YoBoolean("standPrepDoneMoving", registry);
 
-   public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedForceBasedStandPrepController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                                 YoVariableRegistry parentRegistry)
    {
-      feetManager = controllerToolbox.getFeetManager();
+      feetManager = controlManagerFactory.getOrCreateFeetManager();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       referenceFrames = controllerToolbox.getReferenceFrames();
@@ -97,8 +99,8 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       hindLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.HIND_LEFT));
       hindLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
       robotLength = frontLeftHipRollFrame.getX() - hindLeftHipRollFrame.getX();
-      fullRobotModel = environment.getFullRobotModel();
-      environment.getParentRegistry().addChild(registry);
+      fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
+      parentRegistry.addChild(registry);
    }
 
    @Override
