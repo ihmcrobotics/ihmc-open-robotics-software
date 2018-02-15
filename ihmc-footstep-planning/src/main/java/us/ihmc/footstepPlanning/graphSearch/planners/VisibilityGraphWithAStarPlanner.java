@@ -58,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private static final double defaultHeuristicWeight = 15.0;
    private static final double planningHorizon = 1.0;
    private static final double defaultTimeout = 5.0;

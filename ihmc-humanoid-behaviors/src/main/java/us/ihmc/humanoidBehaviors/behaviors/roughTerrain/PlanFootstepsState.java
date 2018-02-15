@@ -106,7 +106,7 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
 
       if (planarRegionsListMessage.get() == null)
       {
-         PrintTools.info("waiting for planar regions");
+         requestPlanarRegionsList();
          return;
       }
 
@@ -127,8 +127,9 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
       }
       else
       {
-         PrintTools.info("starting to plan...");
+         PrintTools.info("setting up planner...");
          planner.setPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage.get()));
+         PrintTools.info("setting swing time...");
          planner.setTimeout(swingTime.getValue() - 0.25);
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
@@ -136,14 +137,18 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
          goalPose.changeFrame(ReferenceFrame.getWorldFrame());
          goal.setGoalPoseBetweenFeet(goalPose);
          goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+         PrintTools.info("setting goal...");
          planner.setGoal(goal);
 
          RobotSide stanceSide = nextSideToSwing.getValue().getOppositeSide();
          FramePose3D stanceFootPose = new FramePose3D(soleFrames.get(stanceSide));
          stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         PrintTools.info("setting initial stance foot...");
          planner.setInitialStanceFoot(stanceFootPose, stanceSide);
 
+         PrintTools.info("starting to plan...");
          FootstepPlanningResult result = planner.plan();
+         PrintTools.info("finished planning. result: " + result);
          FootstepPlan plan = planner.getPlan();
 
          FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
@@ -153,8 +158,6 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
             nextSideToSwing.set(stanceSide);
             outputStatus.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(plan, 0.0, 0.0, ExecutionMode.OVERRIDE);
          }
-
-         PrintTools.info("Finished planning. Result: " + result);
 
          this.plannerOutputStatus.set(outputStatus);
       }
