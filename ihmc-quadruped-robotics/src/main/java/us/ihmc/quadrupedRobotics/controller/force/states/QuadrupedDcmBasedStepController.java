@@ -3,15 +3,14 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
-import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModule;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
@@ -40,7 +39,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepStream stepStream;
    private final YoDouble robotTimestamp;
-   private final double controlDT;
    private final double gravity;
    private final double mass;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -122,15 +120,15 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
    private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
 
-   public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepStream stepStream)
+   public QuadrupedDcmBasedStepController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                          QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepStream stepStream,
+                                          YoVariableRegistry parentRegistry)
    {
       this.postureProvider = postureProvider;
       this.stepStream = stepStream;
-      this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      this.controlDT = runtimeEnvironment.getControlDT();
+      this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.gravity = 9.81;
-      this.mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
+      this.mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
 
       // frames
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -148,7 +146,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      feetManager = controllerToolbox.getFeetManager();
+      feetManager = controlManagerFactory.getOrCreateFeetManager();
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
@@ -186,7 +184,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
                }
             });
 
-      runtimeEnvironment.getParentRegistry().addChild(registry);
+      parentRegistry.addChild(registry);
    }
 
    private void updateGains()
