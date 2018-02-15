@@ -151,6 +151,30 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE, Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(FootstepDataListMessage other)
+   {
+      footstepDataList = new ArrayList<>();
+      for (FootstepDataMessage otherFootstep : other.footstepDataList)
+      {
+         FootstepDataMessage footstep = new FootstepDataMessage();
+         footstep.set(otherFootstep);
+         footstepDataList.add(footstep);
+      }
+
+      executionTiming = other.executionTiming;
+      defaultSwingDuration = other.defaultSwingDuration;
+      defaultTransferDuration = other.defaultTransferDuration;
+      finalTransferDuration = other.finalTransferDuration;
+      trustHeightOfFootsteps = other.trustHeightOfFootsteps;
+      areFootstepsAdjustable = other.areFootstepsAdjustable;
+      offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
+      if (other.queueingProperties != null)
+         queueingProperties.set(other.queueingProperties);
+      
+      setPacketInformation(other);      
+   }
+
    public ArrayList<FootstepDataMessage> getDataList()
    {
       return footstepDataList;

@@ -59,7 +59,8 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
          angularVelocity = new Vector3D(se3TrajectoryPointMessage.angularVelocity);
    }
 
-   public SE3TrajectoryPointMessage(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   public SE3TrajectoryPointMessage(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
+                                    Vector3DReadOnly angularVelocity)
    {
       this.time = time;
       this.position = new Point3D(position);
@@ -88,6 +89,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
          angularVelocity.set(other.angularVelocity);
       else
          angularVelocity.setToZero();
+      setPacketInformation(other);
    }
 
    public void packData(FrameSE3TrajectoryPoint trajectoryPoint)

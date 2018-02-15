@@ -199,6 +199,38 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       }
    }
 
+   @Override
+   public void set(FootstepDataMessage other)
+   {
+      robotSide = other.robotSide;
+      location = new Point3D(other.location);
+      orientation = new Quaternion(other.orientation);
+      if (other.predictedContactPoints != null)
+      {
+         predictedContactPoints = new ArrayList<>();
+         other.predictedContactPoints.stream().map(Point2D::new).forEach(predictedContactPoints::add);
+      }
+
+      trajectoryType = other.trajectoryType;
+      swingHeight = other.swingHeight;
+      if (other.positionWaypoints != null)
+      {
+         positionWaypoints = Arrays.stream(other.positionWaypoints).map(Point3D::new).toArray(Point3D[]::new);
+      }
+
+      if (other.swingTrajectory != null)
+      {
+         swingTrajectory = new SE3TrajectoryPointMessage[other.swingTrajectory.length];
+         for (int i = 0; i < swingTrajectory.length; i++)
+         {
+            swingTrajectory[i] = new SE3TrajectoryPointMessage();
+            swingTrajectory[i].set(other.swingTrajectory[i]);
+         }
+      }
+
+      setPacketInformation(other);
+   }
+
    public ArrayList<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;

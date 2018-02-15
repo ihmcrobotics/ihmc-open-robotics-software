@@ -23,6 +23,12 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
       this.requestedControl = requestedControl;
    }
 
+   @Override
+   public void set(BehaviorControlModePacket other)
+   {
+      requestedControl = other.requestedControl;
+   }
+
    public BehaviorControlModeEnum getRequestedControl()
    {
       return requestedControl;

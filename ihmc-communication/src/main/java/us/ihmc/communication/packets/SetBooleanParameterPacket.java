@@ -2,8 +2,8 @@ package us.ihmc.communication.packets;
 
 public class SetBooleanParameterPacket extends Packet<SetBooleanParameterPacket>
 {
-   private final String parameterName;
-   private final boolean parameterValue;
+   public String parameterName;
+   public boolean parameterValue;
 
    // Empty constructor for serialization
    public SetBooleanParameterPacket()
@@ -15,6 +15,14 @@ public class SetBooleanParameterPacket extends Packet<SetBooleanParameterPacket>
    {
       this.parameterName = parameterName;
       this.parameterValue = parameterValue;
+   }
+
+   @Override
+   public void set(SetBooleanParameterPacket other)
+   {
+      parameterName = other.parameterName;
+      parameterValue = other.parameterValue;
+      setPacketInformation(other);
    }
 
    public String getParameterName()

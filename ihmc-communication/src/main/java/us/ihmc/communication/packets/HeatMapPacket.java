@@ -25,7 +25,18 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
       this.name = other.name;
    }
 
-   @Override public boolean epsilonEquals(HeatMapPacket other, double epsilon)
+   @Override
+   public void set(HeatMapPacket other)
+   {
+      this.data = Arrays.copyOf(other.data, other.data.length);
+      this.width = other.width;
+      this.height = other.height;
+      this.name = other.name;
+      setPacketInformation(other);
+   }
+
+   @Override
+   public boolean epsilonEquals(HeatMapPacket other, double epsilon)
    {
       boolean widthEquals = other.width == this.width;
       boolean heightEquals = other.height == this.height;

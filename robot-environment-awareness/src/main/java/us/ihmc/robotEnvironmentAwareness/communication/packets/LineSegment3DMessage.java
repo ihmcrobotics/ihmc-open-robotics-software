@@ -24,6 +24,14 @@ public class LineSegment3DMessage extends Packet<LineSegment3DMessage>
       end = new Point3D32(lineSegment3d.getSecondEndpoint());
    }
 
+   @Override
+   public void set(LineSegment3DMessage other)
+   {
+      start = new Point3D32(other.start);
+      end = new Point3D32(other.end);
+      setPacketInformation(other);
+   }
+
    public Point3D32 getStart()
    {
       return start;

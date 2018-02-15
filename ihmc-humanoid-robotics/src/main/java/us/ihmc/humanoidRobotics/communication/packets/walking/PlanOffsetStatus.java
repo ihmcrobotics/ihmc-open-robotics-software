@@ -33,6 +33,7 @@ public class PlanOffsetStatus extends SettablePacket<PlanOffsetStatus>
    public void set(PlanOffsetStatus other)
    {
       offsetVector.set(other.getOffsetVector());
+      setPacketInformation(other);
    }
 
 }

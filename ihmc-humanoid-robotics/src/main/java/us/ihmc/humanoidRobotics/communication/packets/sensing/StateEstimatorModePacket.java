@@ -20,6 +20,13 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
       this.requestedOperatingMode = requestedOperatingMode;
    }
 
+   @Override
+   public void set(StateEstimatorModePacket other)
+   {
+      requestedOperatingMode = other.requestedOperatingMode;
+      setPacketInformation(other);
+   }
+
    public StateEstimatorMode getRequestedOperatingMode()
    {
       return requestedOperatingMode;

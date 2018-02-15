@@ -31,7 +31,15 @@ public class MessageOfMessages extends Packet<MessageOfMessages>
       packets.clear();
       addPacket(messages);
    }
-   
+
+   @Override
+   public void set(MessageOfMessages other)
+   {
+      packets.clear();
+      packets.addAll(other.packets);
+      setPacketInformation(other);
+   }
+
    public void addPacket(Packet<?>... messages)
    {
       for(Packet<?> packet : messages)

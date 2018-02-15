@@ -27,6 +27,14 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(MomentumTrajectoryMessage other)
+   {
+      angularMomentumTrajectory = new EuclideanTrajectoryMessage();
+      angularMomentumTrajectory.set(other.angularMomentumTrajectory);
+      setPacketInformation(other);
+   }
+
    public EuclideanTrajectoryMessage getAngularMomentumTrajectory()
    {
       return angularMomentumTrajectory;

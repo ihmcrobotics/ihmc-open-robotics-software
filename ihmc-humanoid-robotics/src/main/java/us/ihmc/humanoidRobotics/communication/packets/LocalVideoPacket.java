@@ -16,6 +16,15 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
 
    }
 
+   @Override
+   public void set(LocalVideoPacket other)
+   {
+      timeStamp = other.timeStamp;
+      image = other.image;
+      intrinsicParameters =  other.intrinsicParameters;
+      setPacketInformation(other);
+   }
+
    public long getTimeStamp()
    {
       return timeStamp;

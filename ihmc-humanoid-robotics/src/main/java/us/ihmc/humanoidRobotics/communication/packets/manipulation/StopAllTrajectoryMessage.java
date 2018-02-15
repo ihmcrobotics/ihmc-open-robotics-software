@@ -20,6 +20,12 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
    }
 
    @Override
+   public void set(StopAllTrajectoryMessage other)
+   {
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(StopAllTrajectoryMessage other, double epsilon)
    {
       return true;

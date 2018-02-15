@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
@@ -26,6 +27,14 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.desiredJointAccelerations = desiredJointAccelerations;
+   }
+
+   @Override
+   public void set(DesiredAccelerationsMessage other)
+   {
+      desiredJointAccelerations = Arrays.copyOf(other.desiredJointAccelerations, other.desiredJointAccelerations.length);
+      queueingProperties.set(other.queueingProperties);
+      setPacketInformation(other);
    }
 
    public int getNumberOfJoints()

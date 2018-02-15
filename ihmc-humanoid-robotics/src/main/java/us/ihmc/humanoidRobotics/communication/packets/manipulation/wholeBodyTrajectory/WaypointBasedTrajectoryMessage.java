@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
+import java.util.Arrays;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -39,7 +41,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
     * end-effector.
     */
    public Quaternion32 controlFrameOrientationInEndEffector;
-   
+
    public double weight = Double.NaN;
 
    public WaypointBasedTrajectoryMessage()
@@ -65,6 +67,21 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(WaypointBasedTrajectoryMessage other)
+   {
+      endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
+      waypointTimes = Arrays.copyOf(other.waypointTimes, other.waypointTimes.length);
+      waypoints = Arrays.stream(other.waypoints).map(Pose3D::new).toArray(Pose3D[]::new);
+      angularSelectionMatrix.set(other.angularSelectionMatrix);
+      linearSelectionMatrix.set(other.linearSelectionMatrix);
+      if (other.controlFramePositionInEndEffector != null)
+         controlFramePositionInEndEffector = new Point3D32(other.controlFramePositionInEndEffector);
+      if (other.controlFrameOrientationInEndEffector != null)
+         controlFrameOrientationInEndEffector = new Quaternion32(other.controlFrameOrientationInEndEffector);
+      weight = other.weight;
+   }
+
    public void setWaypoints(double[] waypointTimes, Pose3D[] waypoints)
    {
       if (waypointTimes.length != waypoints.length)
@@ -73,7 +90,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       this.waypointTimes = waypointTimes;
       this.waypoints = waypoints;
    }
-   
+
    public void setWeight(double weight)
    {
       this.weight = weight;
@@ -355,8 +372,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
          return false;
       if (!linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
          return false;
-      
-      if(weight != other.weight)
+
+      if (weight != other.weight)
          return false;
 
       return true;

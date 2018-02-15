@@ -22,6 +22,14 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    }
 
    @Override
+   public void set(BDIBehaviorCommandPacket other)
+   {
+      setPacketInformation(other);
+      atlasRobotBehavior = other.atlasRobotBehavior;
+      stop = other.stop;
+   }
+
+   @Override
    public boolean equals(Object other)
    {
       return (other instanceof BDIBehaviorCommandPacket) && epsilonEquals((BDIBehaviorCommandPacket) other, 0);

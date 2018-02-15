@@ -130,10 +130,12 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
          jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
+   @Override
    public void set(ArmTrajectoryMessage other)
    {
       robotSide = other.robotSide;
       jointspaceTrajectory.set(other.jointspaceTrajectory);
+      setPacketInformation(other);
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -164,7 +166,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    @Override
    public boolean epsilonEquals(ArmTrajectoryMessage other, double epsilon)
    {
-      if (!this.robotSide.equals(other.robotSide))
+      if (!robotSide.equals(other.robotSide))
          return false;
       if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
          return false;

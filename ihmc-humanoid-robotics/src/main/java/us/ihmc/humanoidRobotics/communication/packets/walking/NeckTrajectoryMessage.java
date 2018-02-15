@@ -106,6 +106,14 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
    }
 
    @Override
+   public void set(NeckTrajectoryMessage other)
+   {
+      jointspaceTrajectory = new JointspaceTrajectoryMessage();
+      jointspaceTrajectory.set(other.jointspaceTrajectory);
+      setPacketInformation(other);
+   }
+
+   @Override
    public void setUniqueId(long uniqueId)
    {
       super.setUniqueId(uniqueId);

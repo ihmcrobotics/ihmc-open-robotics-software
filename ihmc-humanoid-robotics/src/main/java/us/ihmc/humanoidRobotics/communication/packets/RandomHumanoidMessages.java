@@ -961,7 +961,7 @@ public final class RandomHumanoidMessages
    {
       MultisenseParameterPacket next = new MultisenseParameterPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.intialize = random.nextBoolean();
+      next.initialize = random.nextBoolean();
       next.gain = random.nextDouble();
       next.motorSpeed = random.nextDouble();
       next.ledEnable = random.nextBoolean();

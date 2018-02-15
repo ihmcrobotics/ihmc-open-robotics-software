@@ -129,6 +129,7 @@ public class FootstepStatus extends SettablePacket<FootstepStatus>
          actualFootOrientationInWorld.setToNaN();
       else
          actualFootOrientationInWorld.set(other.actualFootOrientationInWorld);
+      setPacketInformation(other);
    }
 
    public Status getStatus()

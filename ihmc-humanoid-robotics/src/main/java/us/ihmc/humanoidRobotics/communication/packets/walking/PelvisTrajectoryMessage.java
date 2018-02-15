@@ -74,6 +74,16 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(PelvisTrajectoryMessage other)
+   {
+      enableUserPelvisControl = other.enableUserPelvisControl;
+      enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
+      se3Trajectory = new SE3TrajectoryMessage();
+      se3Trajectory.set(other.se3Trajectory);
+      setPacketInformation(other);
+   }
+
    public boolean isEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;

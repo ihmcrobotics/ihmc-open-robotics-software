@@ -53,6 +53,7 @@ public class WalkingControllerFailureStatusMessage extends SettablePacket<Walkin
             fallingDirection = new Vector2D32();
          fallingDirection.set(other.fallingDirection);
       }
+      setPacketInformation(other);
    }
 
    @Override

@@ -19,6 +19,14 @@ public final class REAMessage<T> extends Packet<REAMessage<T>>
       this.messageContent = messageContent;
    }
 
+   @Override
+   public void set(REAMessage<T> other)
+   {
+      topicId = other.topicId;
+      messageContent = other.messageContent;
+      setPacketInformation(other);
+   }
+
    public APIElementId getTopicId()
    {
       return topicId;

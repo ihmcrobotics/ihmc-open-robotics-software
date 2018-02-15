@@ -37,6 +37,18 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(HandLoadBearingMessage other)
+   {
+      robotSide = other.robotSide;
+      useJointspaceCommand = other.useJointspaceCommand;
+      jointspaceTrajectory = new JointspaceTrajectoryMessage();
+      jointspaceTrajectory.set(other.jointspaceTrajectory);
+      executionDelayTime = other.executionDelayTime;
+      loadBearingMessage = other.loadBearingMessage;
+      setPacketInformation(other);
+   }
+
    public void setJointspaceTrajectory(JointspaceTrajectoryMessage armTrajectoryMessage)
    {
       this.jointspaceTrajectory = armTrajectoryMessage;

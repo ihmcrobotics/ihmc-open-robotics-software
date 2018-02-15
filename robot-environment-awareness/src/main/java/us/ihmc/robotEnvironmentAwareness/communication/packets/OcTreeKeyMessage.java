@@ -13,7 +13,7 @@ public class OcTreeKeyMessage extends Packet<OcTreeKeyMessage> implements OcTree
    public OcTreeKeyMessage()
    {
    }
-   
+
    public OcTreeKeyMessage(int k0, int k1, int k2)
    {
       set(k0, k1, k2);
@@ -22,6 +22,13 @@ public class OcTreeKeyMessage extends Packet<OcTreeKeyMessage> implements OcTree
    public OcTreeKeyMessage(OcTreeKeyReadOnly other)
    {
       set(other);
+   }
+
+   @Override
+   public void set(OcTreeKeyMessage other)
+   {
+      set(other.getKey(0), other.getKey(1), other.getKey(2));
+      setPacketInformation(other);
    }
 
    public void set(OcTreeKeyReadOnly other)

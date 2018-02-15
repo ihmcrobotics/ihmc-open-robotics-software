@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
@@ -24,6 +25,16 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       setDestination(PacketDestination.BROADCAST);
+   }
+
+   @Override
+   public void set(PointCloudWorldPacket other)
+   {
+      timestamp = other.timestamp;
+      groundQuadTreeSupport = Arrays.copyOf(other.groundQuadTreeSupport, other.groundQuadTreeSupport.length);
+      decayingWorldScan = Arrays.copyOf(other.decayingWorldScan, other.decayingWorldScan.length);
+      defaultGroundHeight = other.defaultGroundHeight;
+      setPacketInformation(other);
    }
 
    public void setGroundQuadTreeSupport(Point3D[] pointCloud)

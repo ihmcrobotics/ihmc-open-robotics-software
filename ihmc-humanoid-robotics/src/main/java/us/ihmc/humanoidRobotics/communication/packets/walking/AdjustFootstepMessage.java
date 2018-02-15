@@ -77,21 +77,21 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    public AdjustFootstepMessage(AdjustFootstepMessage footstepData)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.robotSide = footstepData.robotSide;
-      this.location = new Point3D(footstepData.location);
-      this.orientation = new Quaternion(footstepData.orientation);
-      this.executionDelayTime = footstepData.executionDelayTime;
+      robotSide = footstepData.robotSide;
+      location = new Point3D(footstepData.location);
+      orientation = new Quaternion(footstepData.orientation);
+      executionDelayTime = footstepData.executionDelayTime;
       orientation.checkIfUnitary();
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
       {
-         this.predictedContactPoints = null;
+         predictedContactPoints = null;
       }
       else
       {
-         this.predictedContactPoints = new ArrayList<>();
+         predictedContactPoints = new ArrayList<>();
          for (Point2D contactPoint : footstepData.predictedContactPoints)
          {
-            this.predictedContactPoints.add(new Point2D(contactPoint));
+            predictedContactPoints.add(new Point2D(contactPoint));
          }
       }
    }
@@ -136,6 +136,29 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       }
    }
 
+   @Override
+   public void set(AdjustFootstepMessage other)
+   {
+      robotSide = other.robotSide;
+      location = new Point3D(other.location);
+      orientation = new Quaternion(other.orientation);
+      executionDelayTime = other.executionDelayTime;
+      orientation.checkIfUnitary();
+      if (other.predictedContactPoints == null || other.predictedContactPoints.isEmpty())
+      {
+         predictedContactPoints = null;
+      }
+      else
+      {
+         predictedContactPoints = new ArrayList<>();
+         for (Point2D contactPoint : other.predictedContactPoints)
+         {
+            predictedContactPoints.add(new Point2D(contactPoint));
+         }
+      }
+      setPacketInformation(other);
+   }
+
    public List<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
@@ -158,7 +181,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 
    public void getOrientation(Quaternion orientationToPack)
    {
-      orientationToPack.set(this.orientation);
+      orientationToPack.set(orientation);
    }
 
    public RobotSide getRobotSide()
@@ -207,7 +230,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
     */
    public void setExecutionDelayTime(double delayTime)
    {
-      this.executionDelayTime = delayTime;
+      executionDelayTime = delayTime;
    }
 
    @Override
@@ -215,7 +238,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    {
       String ret = "";
 
-      FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), this.orientation);
+      FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), orientation);
       double[] ypr = new double[3];
       frameOrientation.getYawPitchRoll(ypr);
       ret = location.toString();
@@ -249,11 +272,11 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 
       boolean contactPointsEqual = true;
 
-      if ((this.predictedContactPoints == null) && (footstepData.predictedContactPoints != null))
+      if (predictedContactPoints == null && footstepData.predictedContactPoints != null)
          contactPointsEqual = false;
-      else if ((this.predictedContactPoints != null) && (footstepData.predictedContactPoints == null))
+      else if (predictedContactPoints != null && footstepData.predictedContactPoints == null)
          contactPointsEqual = false;
-      else if (this.predictedContactPoints != null)
+      else if (predictedContactPoints != null)
       {
          int size = predictedContactPoints.size();
          if (size != footstepData.predictedContactPoints.size())

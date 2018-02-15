@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
+import java.util.Arrays;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,6 +15,14 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
    public LocalizationPointMapPacket()
    {
       setDestination(PacketDestination.UI);
+   }
+
+   @Override
+   public void set(LocalizationPointMapPacket other)
+   {
+      timestamp = other.timestamp;
+      localizationPointMap = Arrays.copyOf(other.localizationPointMap, other.localizationPointMap.length);
+      setPacketInformation(other);
    }
 
    public void setLocalizationPointMap(Point3D[] pointCloud)

@@ -24,6 +24,16 @@ public final class LoadBearingMessage extends Packet<LoadBearingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(LoadBearingMessage other)
+   {
+      load = other.load;
+      coefficientOfFriction = other.coefficientOfFriction;
+      bodyFrameToContactFrame = new RigidBodyTransform(other.bodyFrameToContactFrame);
+      contactNormalInWorldFrame = new Vector3D(other.contactNormalInWorldFrame);
+      setPacketInformation(other);
+   }
+
    public void setLoad(boolean load)
    {
       this.load = load;

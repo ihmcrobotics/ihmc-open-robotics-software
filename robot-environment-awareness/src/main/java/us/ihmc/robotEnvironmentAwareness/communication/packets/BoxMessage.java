@@ -29,6 +29,16 @@ public class BoxMessage extends Packet<BoxMessage>
       return empty;
    }
 
+   @Override
+   public void set(BoxMessage other)
+   {
+      setPacketInformation(other);
+      isEmpty = other.isEmpty;
+      size = new Vector3D32(other.size);
+      center = new Point3D32(center);
+      orientation = new Quaternion32(other.orientation);
+   }
+
    public boolean isEmpty()
    {
       return isEmpty;

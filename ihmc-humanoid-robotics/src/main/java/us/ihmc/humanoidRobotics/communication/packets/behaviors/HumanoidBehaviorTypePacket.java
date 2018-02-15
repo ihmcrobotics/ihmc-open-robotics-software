@@ -16,6 +16,13 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
       this.behaviorType = behaviorType;
    }
 
+   @Override
+   public void set(HumanoidBehaviorTypePacket other)
+   {
+      behaviorType = other.behaviorType;
+      setPacketInformation(other);
+   }
+
    public HumanoidBehaviorType getBehaviorType()
    {
       return behaviorType;

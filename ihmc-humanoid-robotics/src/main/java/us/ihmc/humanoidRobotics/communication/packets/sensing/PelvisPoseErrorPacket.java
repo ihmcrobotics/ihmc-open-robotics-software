@@ -21,6 +21,15 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket>
    }
 
    @Override
+   public void set(PelvisPoseErrorPacket other)
+   {
+      residualError = other.residualError;
+      totalError = other.totalError;
+      hasMapBeenReset = other.hasMapBeenReset;
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(PelvisPoseErrorPacket other, double epsilon)
    {
       return (MathTools.epsilonEquals(residualError, other.residualError, epsilon) && MathTools.epsilonEquals(totalError, other.totalError, epsilon)

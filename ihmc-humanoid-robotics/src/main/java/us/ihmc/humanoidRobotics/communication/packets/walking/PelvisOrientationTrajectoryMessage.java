@@ -88,11 +88,12 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
    }
 
+   @Override
    public void set(PelvisOrientationTrajectoryMessage other)
    {
       so3Trajectory = new SO3TrajectoryMessage(other.so3Trajectory);
-      setUniqueId(other.getUniqueId());
-      setDestination(other.getDestination());
+      enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
+      setPacketInformation(other);
    }
 
    @Override

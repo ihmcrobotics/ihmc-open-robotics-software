@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -63,6 +64,38 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
 
       jointNameHash = calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
       this.auxiliaryRobotData = auxiliaryRobotData;
+   }
+
+   @Override
+   public void set(RobotConfigurationData other)
+   {
+      timestamp = other.timestamp;
+      sensorHeadPPSTimestamp = other.sensorHeadPPSTimestamp;
+      jointNameHash = other.jointNameHash;
+      jointAngles = Arrays.copyOf(other.jointAngles, other.jointAngles.length);
+      jointVelocities = Arrays.copyOf(other.jointVelocities, other.jointVelocities.length);
+      jointTorques = Arrays.copyOf(other.jointTorques, other.jointTorques.length);
+
+      rootTranslation.set(other.rootTranslation);
+      rootOrientation.set(other.rootOrientation);
+      pelvisLinearVelocity.set(other.pelvisLinearVelocity);
+      pelvisAngularVelocity.set(other.pelvisAngularVelocity);
+      pelvisLinearAcceleration.set(other.pelvisLinearAcceleration);
+      momentAndForceDataAllForceSensors = new float[other.momentAndForceDataAllForceSensors.length][Wrench.SIZE];
+      for (int i = 0; i < momentAndForceDataAllForceSensors.length; i++)
+         momentAndForceDataAllForceSensors[i] = Arrays.copyOf(other.momentAndForceDataAllForceSensors[i], Wrench.SIZE);
+      imuSensorData = new IMUPacket[other.imuSensorData.length];
+      for (int i = 0; i < imuSensorData.length; i++)
+      {
+         imuSensorData[i] = new IMUPacket();
+         imuSensorData[i].set(other.imuSensorData[i]);
+      }
+      robotMotionStatus = other.robotMotionStatus;
+      auxiliaryRobotData.setAuxiliaryRobotData(other.auxiliaryRobotData);
+      lastReceivedPacketTypeID = other.lastReceivedPacketTypeID;
+      lastReceivedPacketUniqueId = other.lastReceivedPacketUniqueId;
+      lastReceivedPacketRobotTimestamp = other.lastReceivedPacketRobotTimestamp;
+      setPacketInformation(other);
    }
 
    public void setJointState(OneDoFJoint[] newJointData)

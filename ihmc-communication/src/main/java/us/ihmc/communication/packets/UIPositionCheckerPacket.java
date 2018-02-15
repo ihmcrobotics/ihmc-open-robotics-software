@@ -25,6 +25,14 @@ public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket>
       this.orientation = orientation;
    }
 
+   @Override
+   public void set(UIPositionCheckerPacket other)
+   {
+      position = new Point3D(other.position);
+      orientation = new Quaternion(other.orientation);
+      setPacketInformation(other);
+   }
+
    public Point3D getPosition()
    {
       return position;

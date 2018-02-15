@@ -39,11 +39,13 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    {
    }
 
+   @Override
    public void set(QueueableMessage other)
    {
       executionMode = other.executionMode;
       previousMessageId = other.previousMessageId;
       executionDelayTime = other.executionDelayTime;
+      setPacketInformation(other);
    }
 
    /**
@@ -76,7 +78,7 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
 
    public void setExecutionDelayTime(double delayTime)
    {
-      this.executionDelayTime = (float) delayTime;
+      executionDelayTime = (float) delayTime;
    }
 
    public double getExecutionDelayTime()

@@ -88,6 +88,14 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
    }
 
    @Override
+   public void set(SpineTrajectoryMessage other)
+   {
+      jointspaceTrajectory = new JointspaceTrajectoryMessage();
+      jointspaceTrajectory.set(other.jointspaceTrajectory);
+      setPacketInformation(other);
+   }
+
+   @Override
    public void setUniqueId(long uniqueId)
    {
       super.setUniqueId(uniqueId);

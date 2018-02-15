@@ -1,11 +1,13 @@
 package us.ihmc.communication.packets;
 
+import java.util.Arrays;
+
 import com.google.common.math.DoubleMath;
 
 public class SetDoubleArrayParameterPacket extends Packet<SetDoubleArrayParameterPacket>
 {
-   private final String parameterName;
-   private final double[] parameterValue;
+   public String parameterName;
+   public double[] parameterValue;
 
    // Empty constructor for serialization
    public SetDoubleArrayParameterPacket()
@@ -17,6 +19,14 @@ public class SetDoubleArrayParameterPacket extends Packet<SetDoubleArrayParamete
    {
       this.parameterName = parameterName;
       this.parameterValue = parameterValue;
+   }
+
+   @Override
+   public void set(SetDoubleArrayParameterPacket other)
+   {
+      parameterName = other.parameterName;
+      parameterValue = Arrays.copyOf(other.parameterValue, other.parameterValue.length);
+      setPacketInformation(other);
    }
 
    public String getParameterName()

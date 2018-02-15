@@ -18,6 +18,13 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket>
       this.doorTransformToWorld = doorTransformToWorld;
    }
 
+   @Override
+   public void set(DoorLocationPacket other)
+   {
+      doorTransformToWorld = new RigidBodyTransform(other.doorTransformToWorld);
+      setPacketInformation(other);
+   }
+
    public RigidBodyTransform getValveTransformToWorld()
    {
       return doorTransformToWorld;

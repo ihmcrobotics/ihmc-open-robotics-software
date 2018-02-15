@@ -58,17 +58,19 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
    public void set(SelectionMatrix3D selectionMatrix3D)
    {
       setSelectionFrame(selectionMatrix3D.getSelectionFrame());
-      this.xSelected = selectionMatrix3D.isXSelected();
-      this.ySelected = selectionMatrix3D.isYSelected();
-      this.zSelected = selectionMatrix3D.isZSelected();
+      xSelected = selectionMatrix3D.isXSelected();
+      ySelected = selectionMatrix3D.isYSelected();
+      zSelected = selectionMatrix3D.isZSelected();
    }
 
-   public void set(SelectionMatrix3DMessage selectionMatrix3D)
+   @Override
+   public void set(SelectionMatrix3DMessage other)
    {
-      this.selectionFrameId = selectionMatrix3D.selectionFrameId;
-      this.xSelected = selectionMatrix3D.xSelected;
-      this.ySelected = selectionMatrix3D.ySelected;
-      this.zSelected = selectionMatrix3D.zSelected;
+      selectionFrameId = other.selectionFrameId;
+      xSelected = other.xSelected;
+      ySelected = other.ySelected;
+      zSelected = other.zSelected;
+      setPacketInformation(other);
    }
 
    /**

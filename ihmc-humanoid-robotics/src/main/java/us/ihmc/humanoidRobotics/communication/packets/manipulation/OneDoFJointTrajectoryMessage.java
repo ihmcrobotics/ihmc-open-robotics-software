@@ -34,7 +34,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       {
          trajectoryPoints[i] = new TrajectoryPoint1DMessage(trajectory1dMessage.getTrajectoryPoint(i));
       }
-      this.weight = trajectory1dMessage.getWeight();
+      weight = trajectory1dMessage.getWeight();
    }
 
    public OneDoFJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
@@ -81,6 +81,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       trajectoryPoints = new TrajectoryPoint1DMessage[numberOfTrajectoryPoints];
    }
 
+   @Override
    public void set(OneDoFJointTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
@@ -89,6 +90,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          trajectoryPoints[i].set(other.trajectoryPoints[i]);
       weight = other.weight;
+      setPacketInformation(other);
    }
 
    /**

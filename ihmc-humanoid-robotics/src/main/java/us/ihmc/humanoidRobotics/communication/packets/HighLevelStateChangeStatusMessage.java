@@ -40,6 +40,7 @@ public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelS
       destination = other.destination;
       initialState = other.initialState;
       endState = other.endState;
+      setPacketInformation(other);
    }
 
    public HighLevelControllerName getInitialState()

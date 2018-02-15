@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class QuadrupedForceControllerStatePacket extends Packet<QuadrupedForceControllerStatePacket>
 {
-   private QuadrupedForceControllerState state;
+   public QuadrupedForceControllerState state;
 
    public QuadrupedForceControllerStatePacket()
    {
@@ -17,13 +17,25 @@ public class QuadrupedForceControllerStatePacket extends Packet<QuadrupedForceCo
       this.state = state;
    }
 
+   @Override
+   public void set(QuadrupedForceControllerStatePacket other)
+   {
+      state = other.state;
+      setPacketInformation(other);
+   }
+
    public QuadrupedForceControllerState get()
    {
       return state;
    }
 
-   public void set(QuadrupedForceControllerState state){ this.state = state;}
-   @Override public boolean epsilonEquals(QuadrupedForceControllerStatePacket other, double epsilon)
+   public void set(QuadrupedForceControllerState state)
+   {
+      this.state = state;
+   }
+
+   @Override
+   public boolean epsilonEquals(QuadrupedForceControllerStatePacket other, double epsilon)
    {
       return (this.state == other.state);
    }

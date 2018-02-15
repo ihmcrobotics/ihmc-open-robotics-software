@@ -33,7 +33,19 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       this.middle = middle;
       this.thumb = thumb;
       this.spread = spread;
-      this.controlType = type;
+      controlType = type;
+   }
+
+   @Override
+   public void set(ManualHandControlPacket other)
+   {
+      robotSide = other.robotSide;
+      index = other.index;
+      middle = other.middle;
+      thumb = other.thumb;
+      spread = other.spread;
+      controlType = other.controlType;
+      setPacketInformation(other);
    }
 
    public RobotSide getRobotSide()
@@ -41,20 +53,22 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       return robotSide;
    }
 
+   @Override
    public String toString()
    {
       return robotSide.getSideNameFirstLetter() + " finger jodoubles";
    }
 
+   @Override
    public boolean epsilonEquals(ManualHandControlPacket other, double epsilon)
    {
-      boolean ret = this.getRobotSide().equals(other.getRobotSide());
+      boolean ret = getRobotSide().equals(other.getRobotSide());
 
-      ret &= Math.abs(this.getIndex() - other.getIndex()) < epsilon;
-      ret &= Math.abs(this.getMiddle() - other.getMiddle()) < epsilon;
-      ret &= Math.abs(this.getThumb() - other.getThumb()) < epsilon;
-      ret &= Math.abs(this.getSpread() - other.getSpread()) < epsilon;
-      ret &= Math.abs(this.getControlType() - other.getControlType()) < epsilon;
+      ret &= Math.abs(getIndex() - other.getIndex()) < epsilon;
+      ret &= Math.abs(getMiddle() - other.getMiddle()) < epsilon;
+      ret &= Math.abs(getThumb() - other.getThumb()) < epsilon;
+      ret &= Math.abs(getSpread() - other.getSpread()) < epsilon;
+      ret &= Math.abs(getControlType() - other.getControlType()) < epsilon;
 
       return ret;
    }

@@ -26,6 +26,7 @@ public class InvalidPacketNotificationPacket extends SettablePacket<InvalidPacke
    {
       this.packetClass = other.packetClass;
       this.errorMessage = other.errorMessage;
+      setPacketInformation(other);
    }
 
    @Override

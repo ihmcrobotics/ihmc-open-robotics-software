@@ -1,5 +1,7 @@
 package us.ihmc.communication.packets;
 
+import java.util.Arrays;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
@@ -18,6 +20,15 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       this.ranges = ranges;
       this.sensorId = sensorId;
       this.params = params;
+   }
+
+   @Override
+   public void set(SimulatedLidarScanPacket other)
+   {
+      ranges = Arrays.copyOf(other.ranges, other.ranges.length);
+      sensorId = other.sensorId;
+      params = other.params;
+      setPacketInformation(other);
    }
 
    @Override

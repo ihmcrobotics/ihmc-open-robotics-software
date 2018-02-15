@@ -17,6 +17,13 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
       
    }
 
+   @Override
+   public void set(ToolboxStateMessage other)
+   {
+      requestedState = other.requestedState;
+      set(other);
+   }
+
    public void setRequestedState(ToolboxState requestedState)
    {
       this.requestedState = requestedState;

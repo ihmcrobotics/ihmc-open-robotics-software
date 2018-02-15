@@ -21,6 +21,13 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket>
       this.currentStatus = requestedControl;
    }
 
+   @Override
+   public void set(BehaviorStatusPacket other)
+   {
+      setPacketInformation(other);
+      currentStatus = other.currentStatus;
+   }
+
    public CurrentBehaviorStatus getCurrentStatus()
    {
       return currentStatus;

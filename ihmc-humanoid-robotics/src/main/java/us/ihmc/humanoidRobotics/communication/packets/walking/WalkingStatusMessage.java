@@ -38,6 +38,7 @@ public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
    public void set(WalkingStatusMessage other)
    {
       status = other.status;
+      setPacketInformation(other);
    }
 
    public void setWalkingStatus(Status status)

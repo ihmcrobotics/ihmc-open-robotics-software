@@ -112,9 +112,10 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
    public JointspaceTrajectoryMessage(OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.jointTrajectoryMessages = jointTrajectory1DListMessages;
+      jointTrajectoryMessages = jointTrajectory1DListMessages;
    }
 
+   @Override
    public void set(JointspaceTrajectoryMessage other)
    {
       queueingProperties.set(other.queueingProperties);
@@ -124,7 +125,7 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
          jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage();
          jointTrajectoryMessages[i].set(other.jointTrajectoryMessages[i]);
       }
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      setPacketInformation(other);
    }
 
    /**
@@ -247,14 +248,14 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
          return false;
 
-      if (this.jointTrajectoryMessages.length != other.jointTrajectoryMessages.length)
+      if (jointTrajectoryMessages.length != other.jointTrajectoryMessages.length)
       {
          return false;
       }
 
-      for (int i = 0; i < this.jointTrajectoryMessages.length; i++)
+      for (int i = 0; i < jointTrajectoryMessages.length; i++)
       {
-         if (!this.jointTrajectoryMessages[i].epsilonEquals(other.jointTrajectoryMessages[i], epsilon))
+         if (!jointTrajectoryMessages[i].epsilonEquals(other.jointTrajectoryMessages[i], epsilon))
          {
             return false;
          }
