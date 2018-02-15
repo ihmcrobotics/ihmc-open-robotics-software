@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkOverTerrainGoalPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -53,8 +54,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) ->
       {
-         goalPose.set(packet.goalPose);
-         planPathState.setGoalPose(packet.goalPose);
+         goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.position, packet.orientation));
+         planPathState.setGoalPose(goalPose.get());
       });
 
       this.chestFrame = referenceFrames.getChestFrame();
