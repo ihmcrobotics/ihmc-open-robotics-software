@@ -11,11 +11,9 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -24,7 +22,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements TransformableDataObject<AdjustFootstepMessage>
+public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 {
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public RobotSide robotSide;
@@ -273,17 +271,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       }
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
-   }
-
-   @Override
-   public AdjustFootstepMessage transform(RigidBodyTransform transform)
-   {
-      AdjustFootstepMessage ret = this.clone();
-
-      ret.location.applyTransform(transform);
-      ret.orientation.applyTransform(transform);
-
-      return ret;
    }
 
    public AdjustFootstepMessage(Random random)
