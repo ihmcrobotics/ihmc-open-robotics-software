@@ -29,13 +29,14 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = 30000)
-   public void testOnlyEmptyConstructor()
+   public void testOnlyEmptyAndCopyConstructor()
    {
       boolean verbose = true;
 
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
+      Set<Class<? extends Packet>> packetTypesWithoutCopyConstructor = new HashSet<>();
       Set<Class<? extends Packet>> packetTypesWithoutEmptyConstructor = new HashSet<>();
       Set<Class<? extends Packet>> packetTypesWithNonEmptyConstructors = new HashSet<>();
 
@@ -46,11 +47,24 @@ public class PacketCodeQualityTest
             List<Constructor<?>> constructors = Arrays.asList(packetType.getConstructors());
             assertFalse("The type: " + packetType.getSimpleName() + " has no constructors?!", constructors.isEmpty());
 
-            boolean hasEmptyConstructor = constructors.stream().filter(constructor -> constructor.getParameterTypes().length == 0).findFirst().isPresent();
+            boolean hasEmptyConstructor = constructors.stream()
+                  .filter(constructor -> constructor.getParameterTypes().length == 0)
+                  .findFirst()
+                  .isPresent();
             if (!hasEmptyConstructor)
                packetTypesWithoutEmptyConstructor.add(packetType);
 
-            boolean hasNonEmptyConstructors = constructors.stream().filter(constructor -> constructor.getParameterTypes().length != 0).findFirst().isPresent();
+            boolean hasCopyConstructor = constructors.stream()
+                  .filter(constructor -> constructor.getParameterTypes().length == 1 && constructor.getParameterTypes()[0].equals(packetType))
+                  .findFirst()
+                  .isPresent();
+            if (!hasCopyConstructor)
+               packetTypesWithoutCopyConstructor.add(packetType);
+
+            boolean hasNonEmptyConstructors = constructors.stream()
+                  .filter(constructor -> constructor.getParameterTypes().length != 0)
+                  .filter(constructor -> constructor.getParameterTypes().length != 1 || !constructor.getParameterTypes()[0].equals(packetType))
+                  .findFirst().isPresent();
             if (hasNonEmptyConstructors)
                packetTypesWithNonEmptyConstructors.add(packetType);
 
@@ -63,13 +77,24 @@ public class PacketCodeQualityTest
 
       if (verbose)
       {
+         if (!packetTypesWithoutCopyConstructor.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet sub-types without a copy constructor:");
+            packetTypesWithoutCopyConstructor.forEach(type -> PrintTools.error(type.getSimpleName()));
+         }
          if (!packetTypesWithoutEmptyConstructor.isEmpty())
          {
+            System.out.println();
+            System.out.println();
             PrintTools.error("List of packet sub-types without an empty constructor:");
             packetTypesWithoutEmptyConstructor.forEach(type -> PrintTools.error(type.getSimpleName()));
          }
          if (!packetTypesWithNonEmptyConstructors.isEmpty())
          {
+            System.out.println();
+            System.out.println();
             PrintTools.error("List of packet sub-types with non-empty constructors:");
             packetTypesWithNonEmptyConstructors.forEach(type -> PrintTools.error(type.getSimpleName()));
          }
@@ -77,36 +102,6 @@ public class PacketCodeQualityTest
 
       assertFalse("Packet sub-types should implement an empty constructor.", packetTypesWithoutEmptyConstructor.isEmpty());
       assertTrue("Packet sub-types should not implement a non-empty constructor.", packetTypesWithNonEmptyConstructors.isEmpty());
-   }
-
-   @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 30000)
-   public void testNoCopyConstructor()
-   {
-      boolean printPacketTypesWithCopyConstructor = true;
-
-      Reflections reflections = new Reflections("us.ihmc");
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
-
-      Set<Class<? extends Packet>> packetTypesWithCopyConstructor = new HashSet<>();
-
-      for (Class<? extends Packet> packetType : allPacketTypes)
-      {
-         try
-         {
-            packetType.getConstructor(packetType);
-            // If we get here, that means the type implement a random constructor.
-            if (printPacketTypesWithCopyConstructor)
-               PrintTools.error("Found type that implements a copy constructor: " + packetType.getSimpleName());
-            packetTypesWithCopyConstructor.add(packetType);
-         }
-         catch (NoSuchMethodException | SecurityException e)
-         {
-         }
-      }
-
-      assertTrue("Packet sub-types should not implement a copy constructor.", packetTypesWithCopyConstructor.isEmpty());
    }
 
    @SuppressWarnings("rawtypes")
