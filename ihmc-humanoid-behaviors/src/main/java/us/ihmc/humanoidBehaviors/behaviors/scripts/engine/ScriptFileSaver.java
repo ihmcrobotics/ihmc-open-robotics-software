@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 import com.thoughtworks.xstream.XStream;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 
 public class ScriptFileSaver
 {
@@ -38,20 +38,34 @@ public class ScriptFileSaver
       outputStream = xStream.createObjectOutputStream(fileWriter);
    }
 
-   @SuppressWarnings("rawtypes")
+   /**
+    * @deprecated This method is highly inefficient. The whole scripting needs to be redone to better implement the transform.
+    */
    public void recordObject(long timestamp, Object object, RigidBodyTransform objectTransform) throws IOException
    {
 
       Object objectToWrite;
-      if (object instanceof TransformableDataObject)
+
+      try
       {
-         objectToWrite = ((TransformableDataObject) object).transform(objectTransform);
+         objectToWrite = object.getClass().getConstructor(object.getClass()).newInstance(object);
       }
-      else
+      catch (Exception e)
       {
-         objectToWrite = object;
+         try
+         {
+            objectToWrite = object.getClass().getConstructor().newInstance();
+            objectToWrite.getClass().getMethod("set", object.getClass()).invoke(objectToWrite, object);
+         }
+         catch (Exception e1)
+         {
+            String className = object.getClass().getSimpleName();
+            PrintTools.error("The class: " + className + " needs either a copy constructor: " + className + "(" + className + "), or a setter: " + className + "set(" + className + ").");
+            return;
+         }
       }
 
+      MessageTransformer.transform(objectToWrite, objectTransform);
       recordObject(timestamp, objectToWrite);
    }
 

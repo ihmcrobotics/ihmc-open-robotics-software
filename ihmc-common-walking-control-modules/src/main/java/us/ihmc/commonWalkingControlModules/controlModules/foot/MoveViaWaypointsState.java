@@ -92,9 +92,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      if (command.useCustomControlFrame())
+      if (command.getSE3Trajectory().useCustomControlFrame())
       {
-         command.getControlFramePose(controlFrameTransform);
+         command.getSE3Trajectory().getControlFramePose(controlFrameTransform);
          taskspaceControlState.setControlFramePose(controlFrameTransform);
       }
       else
@@ -105,7 +105,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       controlFrame = taskspaceControlState.getControlFrame();
       initialPose.setToZero(controlFrame);
 
-      if (!taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
+      if (!taskspaceControlState.handlePoseTrajectoryCommand(command.getSE3Trajectory(), initialPose))
       {
          taskspaceControlState.holdCurrent();
       }

@@ -3,18 +3,24 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajectoryMessage;
+import us.ihmc.communication.packets.QueueableMessage;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
-public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<SpineTrajectoryMessage>
+public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
 {
+   @RosExportedField(documentation = "Trajectories for each joint.")
+   public JointspaceTrajectoryMessage jointspaceTrajectory;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public SpineTrajectoryMessage()
    {
-      super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -23,7 +29,24 @@ public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<
     */
    public SpineTrajectoryMessage(Random random)
    {
-      super(random);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   /**
+    * Clone constructor.
+    * @param spineTrajectoryMessage message to clone.
+    */
+   public SpineTrajectoryMessage(SpineTrajectoryMessage spineTrajectoryMessage)
+   {
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(spineTrajectoryMessage.jointspaceTrajectory);
+      setUniqueId(spineTrajectoryMessage.getUniqueId());
+   }
+
+   public SpineTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   {
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
+      setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
    }
 
    /**
@@ -35,7 +58,8 @@ public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<
     */
    public SpineTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
    {
-      super(numberOfJoints, numberOfTrajectoryPoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -46,7 +70,8 @@ public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<
     */
    public SpineTrajectoryMessage(int numberOfJoints)
    {
-      super(numberOfJoints);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(numberOfJoints);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -57,7 +82,8 @@ public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<
     */
    public SpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds)
    {
-      super(trajectoryTime, jointDesireds);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, jointDesireds);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -69,6 +95,44 @@ public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<
     */
    public SpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds, double[] weights)
    {
-      super(trajectoryTime, jointDesireds, weights);
+      jointspaceTrajectory = new JointspaceTrajectoryMessage(trajectoryTime, jointDesireds, weights);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   @Override
+   public void setUniqueId(long uniqueId)
+   {
+      super.setUniqueId(uniqueId);
+      if (jointspaceTrajectory != null)
+         jointspaceTrajectory.setUniqueId(uniqueId);
+   }
+
+   public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)
+   {
+      this.jointspaceTrajectory = jointspaceTrajectory;
+   }
+
+   public JointspaceTrajectoryMessage getJointspaceTrajectory()
+   {
+      return jointspaceTrajectory;
+   }
+
+   public QueueableMessage getQueueingProperties()
+   {
+      return jointspaceTrajectory.getQueueingProperties();
+   }
+
+   @Override
+   public boolean epsilonEquals(SpineTrajectoryMessage other, double epsilon)
+   {
+      if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
+         return false;
+      return true;
+   }
+
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateSpineTrajectoryMessage(this);
    }
 }

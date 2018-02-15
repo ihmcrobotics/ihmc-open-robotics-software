@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket> implements VisualizablePacket
+public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
 {
 
    private static final boolean DEBUG = false;

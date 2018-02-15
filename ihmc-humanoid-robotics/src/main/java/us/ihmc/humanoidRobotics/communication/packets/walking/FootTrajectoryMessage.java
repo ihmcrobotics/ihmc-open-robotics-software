@@ -4,7 +4,6 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -14,8 +13,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
@@ -25,10 +24,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/foot_trajectory")
-public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTrajectoryMessage> implements VisualizablePacket
+public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public RobotSide robotSide;
+   @RosExportedField(documentation = "The position/orientation trajectory information.")
+   public SE3TrajectoryMessage se3Trajectory;
 
    /**
     * Empty constructor for serialization.
@@ -36,13 +37,14 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage()
    {
-      super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public FootTrajectoryMessage(Random random)
    {
-      super(random);
+      se3Trajectory = new SE3TrajectoryMessage(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -51,8 +53,17 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
-      super(footTrajectoryMessage);
+      se3Trajectory = new SE3TrajectoryMessage(footTrajectoryMessage.se3Trajectory);
       robotSide = footTrajectoryMessage.robotSide;
+      setUniqueId(footTrajectoryMessage.getUniqueId());
+      setDestination(footTrajectoryMessage.getDestination());
+   }
+
+   public FootTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage trajectoryMessage)
+   {
+      se3Trajectory = new SE3TrajectoryMessage(trajectoryMessage);
+      this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -65,8 +76,9 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
+      se3Trajectory = new SE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -78,25 +90,46 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
    {
-      super(numberOfTrajectoryPoints);
+      se3Trajectory = new SE3TrajectoryMessage(numberOfTrajectoryPoints);
       this.robotSide = robotSide;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose3D desiredPose)
    {
       this(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   @Override
    public void set(FootTrajectoryMessage other)
    {
-      super.set(other);
+      se3Trajectory = new SE3TrajectoryMessage(other.se3Trajectory);
       robotSide = other.robotSide;
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
    }
 
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public void setSe3Trajectory(SE3TrajectoryMessage se3Trajectory)
+   {
+      this.se3Trajectory = se3Trajectory;
+   }
+
+   public SE3TrajectoryMessage getSe3Trajectory()
+   {
+      return se3Trajectory;
+   }
+
+   @Override
+   public void setUniqueId(long uniqueId)
+   {
+      super.setUniqueId(uniqueId);
+      if (se3Trajectory != null)
+         se3Trajectory.setUniqueId(uniqueId);
    }
 
    @Override
@@ -105,15 +138,15 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
       if (robotSide != other.robotSide)
          return false;
 
-      return super.epsilonEquals(other, epsilon);
+      return se3Trajectory.epsilonEquals(other.se3Trajectory, epsilon);
    }
 
    @Override
    public String toString()
    {
       String ret = "";
-      if (taskspaceTrajectoryPoints != null)
-         ret = "Foot SE3 trajectory: number of SE3 trajectory points = " + getNumberOfTrajectoryPoints();
+      if (se3Trajectory.taskspaceTrajectoryPoints != null)
+         ret = "Foot SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.getNumberOfTrajectoryPoints();
       else
          ret = "Foot SE3 trajectory: no SE3 trajectory points";
 

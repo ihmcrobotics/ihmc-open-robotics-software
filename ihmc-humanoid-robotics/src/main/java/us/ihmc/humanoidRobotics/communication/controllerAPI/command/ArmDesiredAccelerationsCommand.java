@@ -1,11 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ArmDesiredAccelerationsCommand extends DesiredAccelerationCommand<ArmDesiredAccelerationsCommand, ArmDesiredAccelerationsMessage>
+public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAccelerationsCommand, ArmDesiredAccelerationsMessage>
 {
    private RobotSide robotSide;
+   private final DesiredAccelerationsCommand desiredAccelerations = new DesiredAccelerationsCommand();
 
    public ArmDesiredAccelerationsCommand()
    {
@@ -16,21 +18,21 @@ public class ArmDesiredAccelerationsCommand extends DesiredAccelerationCommand<A
    public void clear()
    {
       robotSide = null;
-      super.clear();
+      desiredAccelerations.clear();
    }
 
    @Override
    public void set(ArmDesiredAccelerationsMessage message)
    {
       robotSide = message.getRobotSide();
-      super.set(message);
+      desiredAccelerations.set(message.desiredAccelerations);
    }
 
    @Override
    public void set(ArmDesiredAccelerationsCommand other)
    {
       robotSide = other.robotSide;
-      super.set(other);
+      desiredAccelerations.set(other.desiredAccelerations);
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -43,6 +45,11 @@ public class ArmDesiredAccelerationsCommand extends DesiredAccelerationCommand<A
       return robotSide;
    }
 
+   public DesiredAccelerationsCommand getDesiredAccelerations()
+   {
+      return desiredAccelerations;
+   }
+
    @Override
    public Class<ArmDesiredAccelerationsMessage> getMessageClass()
    {
@@ -52,6 +59,36 @@ public class ArmDesiredAccelerationsCommand extends DesiredAccelerationCommand<A
    @Override
    public boolean isCommandValid()
    {
-      return robotSide != null && super.isCommandValid();
+      return robotSide != null && desiredAccelerations.isCommandValid();
+   }
+
+   @Override
+   public boolean isDelayedExecutionSupported()
+   {
+      return desiredAccelerations.isDelayedExecutionSupported();
+   }
+
+   @Override
+   public void setExecutionDelayTime(double delayTime)
+   {
+      desiredAccelerations.setExecutionDelayTime(delayTime);
+   }
+
+   @Override
+   public void setExecutionTime(double adjustedExecutionTime)
+   {
+      desiredAccelerations.setExecutionTime(adjustedExecutionTime);
+   }
+
+   @Override
+   public double getExecutionDelayTime()
+   {
+      return desiredAccelerations.getExecutionDelayTime();
+   }
+
+   @Override
+   public double getExecutionTime()
+   {
+      return desiredAccelerations.getExecutionTime();
    }
 }

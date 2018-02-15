@@ -118,7 +118,7 @@ public class KinematicsToolboxOutputConverter
       desiredHandPose.changeFrame(worldFrame);
       desiredHandPose.get(desiredPosition, desiredOrientation);
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, trajectoryFrame);
-      handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
       output.setHandTrajectoryMessage(handTrajectoryMessage);
    }
 

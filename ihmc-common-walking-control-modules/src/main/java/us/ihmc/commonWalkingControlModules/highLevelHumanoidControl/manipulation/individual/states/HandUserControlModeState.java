@@ -56,7 +56,7 @@ public class HandUserControlModeState extends HandControlState
    public boolean handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand command)
    {
       for (int i = 0; i < userControlledJoints.length; i++)
-         userDesiredJointAccelerations[i].set(command.getDesiredJointAcceleration(i));
+         userDesiredJointAccelerations[i].set(command.getDesiredAccelerations().getDesiredJointAcceleration(i));
       timeSinceLastUserMesage.set(0.0);
       timeOfLastUserMesage.set(yoTime.getDoubleValue());
 

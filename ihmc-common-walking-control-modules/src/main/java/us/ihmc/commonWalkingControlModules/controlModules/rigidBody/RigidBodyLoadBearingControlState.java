@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -251,7 +251,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       }
    }
 
-   public boolean handleLoadbearingCommand(AbstractLoadBearingCommand<?, ?> command)
+   public boolean handleLoadbearingCommand(LoadBearingCommand command)
    {
       setCoefficientOfFriction(command.getCoefficientOfFriction());
       setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
@@ -259,7 +259,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       return true;
    }
 
-   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   public boolean handleJointTrajectoryCommand(JointspaceTrajectoryCommand command, double[] initialJointPositions)
    {
       if (jointControlHelper == null)
       {

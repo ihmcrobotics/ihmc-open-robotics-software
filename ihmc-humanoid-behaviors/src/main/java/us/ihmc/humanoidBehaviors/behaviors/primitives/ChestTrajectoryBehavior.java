@@ -59,7 +59,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
          sendPacketToController(outgoingChestTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingChestTrajectoryMessage.getTrajectoryTime());
+         trajectoryTime.set(outgoingChestTrajectoryMessage.getSO3Trajectory().getTrajectoryTime());
       }
    }
 

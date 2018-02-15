@@ -356,10 +356,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       double trajectoryTime = 0.5;
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPose);
-      footTrajectoryMessage.setUseCustomControlFrame(true);
-      footTrajectoryMessage.setControlFrameOrientation(new Quaternion(controlFrameTransform.getRotationMatrix()));
-      footTrajectoryMessage.setControlFramePosition(new Point3D(controlFrameTransform.getTranslationVector()));
-      footTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
+      footTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
+      footTrajectoryMessage.getSe3Trajectory().setControlFrameOrientation(new Quaternion(controlFrameTransform.getRotationMatrix()));
+      footTrajectoryMessage.getSe3Trajectory().setControlFramePosition(new Point3D(controlFrameTransform.getTranslationVector()));
+      footTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
 
       drcSimulationTestHelper.send(footTrajectoryMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime));
@@ -486,7 +486,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, numberOfTrajectoryPointsPerMessage);
          footTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            footTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
          id++;
          double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 
@@ -504,7 +504,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
             sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
             scs.addStaticLinkGraphics(sphere);
 
-            footTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity,
+            footTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity,
                   desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
             FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
@@ -570,10 +570,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 5);
          footTrajectoryMessage.setUniqueId(100);
-         footTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, 500); //not the right ID
+         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, 500); //not the right ID
          for(int i = 0; i < 5; i++)
          {
-            footTrajectoryMessage.setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
+            footTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
          }
          drcSimulationTestHelper.send(footTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2);

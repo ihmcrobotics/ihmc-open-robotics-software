@@ -7,8 +7,8 @@
 # Specifies the side of the robot that will execute the trajectory.
 uint8 robot_side
 
-# Specifies the desired joint accelerations.
-float64[] desired_joint_accelerations
+# The desired joint acceleration information.
+ihmc_msgs/DesiredAccelerationsRosMessage desired_accelerations
 
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id
 # in the top level message is used, the unique id in nested messages is ignored. Use
