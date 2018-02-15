@@ -33,6 +33,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -46,6 +47,7 @@ import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
@@ -262,7 +264,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
             handTrajectories.add(trajectory);
             ConfigurationSpaceName[] handConfigurations = {};
-            RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
+            RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, handConfigurations);
 
             rigidBodyConfigurations.add(rigidBodyConfiguration);
 
@@ -272,7 +274,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          }
       }
 
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
 
       // run toolbox
       runTrajectoryTest(message, 100000);
@@ -321,7 +323,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
          handTrajectories.add(trajectory);
          ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW};
-         RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
+         RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, handConfigurations);
 
          rigidBodyConfigurations.add(rigidBodyConfiguration);
 
@@ -329,7 +331,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
 
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
 
       // run toolbox
       runTrajectoryTest(message, 100000);
@@ -381,11 +383,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
          ConfigurationSpaceName[] spaces = {YAW, PITCH, ROLL};
 
-         rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+         rigidBodyConfigurations.add(HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, spaces));
       }
 
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
 
       // run toolbox
       runTrajectoryTest(message, maxNumberOfIterations);
@@ -578,7 +580,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody hand = desiredFullRobotModel.getHand(robotSide);
-         KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(hand, desiredPositions.get(robotSide));
+         KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPositions.get(robotSide));
          message.setWeight(20.0);
          commandInputManager.submitMessage(message);
       }

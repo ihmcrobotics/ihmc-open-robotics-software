@@ -12,6 +12,7 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
@@ -47,7 +48,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
             IntrinsicParameters intrinsicParameters)
       {
-         VideoPacket videoPacket = new VideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, videoPacketDestination);
+         VideoPacket videoPacket = HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, videoPacketDestination);
 
          if(videoPacketDestination.equals(PacketDestination.CONTROLLER))
             sendPacketToController(videoPacket);

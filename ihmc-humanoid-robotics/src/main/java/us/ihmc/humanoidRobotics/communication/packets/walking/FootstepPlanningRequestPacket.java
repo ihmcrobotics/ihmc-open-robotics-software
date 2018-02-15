@@ -32,17 +32,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       // empty constructor for serialization
    }
 
-   public FootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose)
-   {
-      this(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
-   }
-
-   public FootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose,
-                                        FootstepPlannerType requestedPlannerType)
-   {
-      set(initialStanceFootPose, initialStanceSide, goalPose, requestedPlannerType);
-   }
-
    @Override
    public void set(FootstepPlanningRequestPacket other)
    {

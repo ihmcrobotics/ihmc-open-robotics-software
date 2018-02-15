@@ -30,20 +30,6 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 
    }
 
-   public BlackFlyParameterPacket(boolean fromUI, double gain, double exposure, double frameRate, double shutter, boolean autoExPosure, boolean autoGain,
-                                  boolean autoShutter, RobotSide side)
-   {
-      this.fromUI = fromUI;
-      this.exposure = exposure;
-      this.shutter = shutter;
-      this.gain = gain;
-      this.frameRate = frameRate;
-      this.autoExposure = autoExPosure;
-      this.autoGain = autoGain;
-      this.autoShutter = autoShutter;
-      this.side = side;
-   }
-
    @Override
    public void set(BlackFlyParameterPacket other)
    {

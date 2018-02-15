@@ -38,40 +38,11 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
 
    /**
     * Clone constructor.
-    * @param pelvisTrajectoryMessage message to clone.
+    * @param other message to clone.
     */
-   public PelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
+   public PelvisTrajectoryMessage(PelvisTrajectoryMessage other)
    {
-      se3Trajectory = new SE3TrajectoryMessage(pelvisTrajectoryMessage.se3Trajectory);
-      setEnableUserPelvisControl(pelvisTrajectoryMessage.isEnableUserPelvisControl());
-      setEnableUserPelvisControlDuringWalking(pelvisTrajectoryMessage.isEnableUserPelvisControlDuringWalking());
-      setDestination(pelvisTrajectoryMessage.getDestination());
-      setUniqueId(pelvisTrajectoryMessage.getUniqueId());
-   }
-
-   /**
-    * Use this constructor to execute a straight line trajectory in taskspace.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredPosition desired pelvis position expressed in world frame.
-    * @param desiredOrientation desired pelvis orientation expressed in world frame.
-    */
-   public PelvisTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
-   {
-      se3Trajectory = new SE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3DReadOnly, QuaternionReadOnly, Vector3DReadOnly, Vector3DReadOnly)} for each trajectory point afterwards.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
-    */
-   public PelvisTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      se3Trajectory = new SE3TrajectoryMessage(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      set(other);
    }
 
    @Override

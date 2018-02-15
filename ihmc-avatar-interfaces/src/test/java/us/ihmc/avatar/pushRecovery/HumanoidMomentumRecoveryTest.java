@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -187,7 +188,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    {
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      FootstepDataListMessage message = new FootstepDataListMessage(3.0, 0.3);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(3.0, 0.3);
       FootstepDataMessage footstepData = new FootstepDataMessage();
       RobotSide stepSide = RobotSide.LEFT;
 

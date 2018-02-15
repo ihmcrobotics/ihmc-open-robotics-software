@@ -21,12 +21,6 @@ public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelS
    {
       this.destination = (byte)PacketDestination.ROS_API.ordinal();
    }
-   
-   public HighLevelStateChangeStatusMessage(HighLevelControllerName initialState, HighLevelControllerName endState)
-   {
-      this.destination = (byte)PacketDestination.ROS_API.ordinal();
-      setStateChange(initialState, endState);
-   }
 
    public void setStateChange(HighLevelControllerName initialState, HighLevelControllerName endState)
    {

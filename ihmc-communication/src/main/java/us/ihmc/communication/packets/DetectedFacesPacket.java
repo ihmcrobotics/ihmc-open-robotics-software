@@ -11,13 +11,6 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
 
    public DetectedFacesPacket()
    {
-
-   }
-
-   public DetectedFacesPacket(String[] ids, Point3D[] positions)
-   {
-      this.ids = ids;
-      this.positions = positions;
    }
 
    @Override

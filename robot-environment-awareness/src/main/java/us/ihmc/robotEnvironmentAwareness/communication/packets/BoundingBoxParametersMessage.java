@@ -1,7 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.communication.packets;
 
-import java.util.Scanner;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 
@@ -14,24 +12,9 @@ public class BoundingBoxParametersMessage extends Packet<BoundingBoxParametersMe
    {
    }
 
-   public BoundingBoxParametersMessage(float minX, float minY, float minZ, float maxX, float maxY, float maxZ)
-   {
-      this.minX = minX;
-      this.minY = minY;
-      this.minZ = minZ;
-      this.maxX = maxX;
-      this.maxY = maxY;
-      this.maxZ = maxZ;
-   }
-
    public BoundingBoxParametersMessage(BoundingBoxParametersMessage other)
    {
-      minX = other.minX;
-      minY = other.minY;
-      minZ = other.minZ;
-      maxX = other.maxX;
-      maxY = other.maxY;
-      maxZ = other.maxZ;
+      set(other);
    }
 
    @Override
@@ -138,21 +121,5 @@ public class BoundingBoxParametersMessage extends Packet<BoundingBoxParametersMe
    public String toString()
    {
       return "min: (" + minX + ", " + minY + ", " + minZ + "), max: (" + maxX + ", " + maxY + ", " + maxZ + ")";
-   }
-
-   public static BoundingBoxParametersMessage parse(String boundingBoxAsString)
-   {
-      boundingBoxAsString = boundingBoxAsString.replace("(", "").replace(")", " ").replace(",", "");
-      Scanner scanner = new Scanner(boundingBoxAsString);
-      scanner.next();
-      float minX = scanner.nextFloat();
-      float minY = scanner.nextFloat();
-      float minZ = scanner.nextFloat();
-      scanner.next();
-      float maxX = scanner.nextFloat();
-      float maxY = scanner.nextFloat();
-      float maxZ = scanner.nextFloat();
-      scanner.close();
-      return new BoundingBoxParametersMessage(minX, minY, minZ, maxX, maxY, maxZ);
    }
 }

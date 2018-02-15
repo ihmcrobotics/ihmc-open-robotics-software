@@ -5,7 +5,6 @@ import java.util.Arrays;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
 
 /**
@@ -23,13 +22,6 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
    public ReachingManifoldMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public ReachingManifoldMessage(RigidBody rigidBody)
-   {
-      this.endEffectorNameBasedHashCode = rigidBody.getNameBasedHashCode();
-
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

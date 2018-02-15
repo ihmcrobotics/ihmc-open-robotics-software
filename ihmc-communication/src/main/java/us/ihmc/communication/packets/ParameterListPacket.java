@@ -13,11 +13,6 @@ public class ParameterListPacket extends Packet<ParameterListPacket>
    {
    }
 
-   public ParameterListPacket(List<Parameter> parameters)
-   {
-      this.parameters = parameters;
-   }
-
    @Override
    public void set(ParameterListPacket other)
    {

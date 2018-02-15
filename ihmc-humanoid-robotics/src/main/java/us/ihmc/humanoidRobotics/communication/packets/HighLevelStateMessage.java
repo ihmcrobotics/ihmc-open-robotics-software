@@ -18,12 +18,6 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HighLevelStateMessage(HighLevelControllerName highLevelControllerName)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.highLevelState = highLevelControllerName;
-   }
-
    public HighLevelControllerName getHighLevelControllerName()
    {
       return highLevelState;

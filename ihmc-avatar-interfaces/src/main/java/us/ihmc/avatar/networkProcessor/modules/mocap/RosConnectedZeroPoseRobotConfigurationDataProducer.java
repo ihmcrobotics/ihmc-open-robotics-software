@@ -28,6 +28,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -103,7 +104,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    {
       RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPose.get();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions, null, imuDefinitions);
+      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions, null, imuDefinitions);
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {

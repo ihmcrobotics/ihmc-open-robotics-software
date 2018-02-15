@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -11,14 +12,15 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
+import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.time.YoStopwatch;
 
 public class FindGoalBehavior extends AbstractBehavior
 {
@@ -96,7 +98,7 @@ public class FindGoalBehavior extends AbstractBehavior
 
    private void sendTextToSpeechPacket(String message)
    {
-      TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket(message);
+      TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket(message);
       textToSpeechPacket.setbeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
@@ -124,7 +126,7 @@ public class FindGoalBehavior extends AbstractBehavior
    private void sendHeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
 
       headTrajectoryMessage.setDestination(PacketDestination.UI);
       sendPacket(headTrajectoryMessage);

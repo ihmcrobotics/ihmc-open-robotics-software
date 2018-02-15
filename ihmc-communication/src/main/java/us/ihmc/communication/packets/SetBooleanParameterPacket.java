@@ -8,13 +8,6 @@ public class SetBooleanParameterPacket extends Packet<SetBooleanParameterPacket>
    // Empty constructor for serialization
    public SetBooleanParameterPacket()
    {
-      this(null, false);
-   }
-
-   public SetBooleanParameterPacket(String parameterName, boolean parameterValue)
-   {
-      this.parameterName = parameterName;
-      this.parameterValue = parameterValue;
    }
 
    @Override

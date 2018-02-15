@@ -14,16 +14,6 @@ public class OcTreeKeyMessage extends Packet<OcTreeKeyMessage> implements OcTree
    {
    }
 
-   public OcTreeKeyMessage(int k0, int k1, int k2)
-   {
-      set(k0, k1, k2);
-   }
-
-   public OcTreeKeyMessage(OcTreeKeyReadOnly other)
-   {
-      set(other);
-   }
-
    @Override
    public void set(OcTreeKeyMessage other)
    {

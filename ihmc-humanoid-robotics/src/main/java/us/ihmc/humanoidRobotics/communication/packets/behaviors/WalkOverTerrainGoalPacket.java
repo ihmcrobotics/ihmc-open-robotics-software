@@ -13,12 +13,6 @@ public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
    {
    }
 
-   public WalkOverTerrainGoalPacket(Point3D position, Quaternion orientation)
-   {
-      this.position = position;
-      this.orientation = orientation;
-   }
-
    @Override
    public void set(WalkOverTerrainGoalPacket other)
    {

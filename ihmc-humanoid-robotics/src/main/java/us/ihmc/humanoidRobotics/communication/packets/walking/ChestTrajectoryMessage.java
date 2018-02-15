@@ -3,10 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
@@ -28,12 +24,6 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public ChestTrajectoryMessage(SO3TrajectoryMessage so3Trajectory)
-   {
-      this.so3Trajectory = new SO3TrajectoryMessage(so3Trajectory);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    /**
     * Clone constructor.
     * 
@@ -44,55 +34,6 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
       so3Trajectory = new SO3TrajectoryMessage(chestTrajectoryMessage.so3Trajectory);
       setUniqueId(chestTrajectoryMessage.getUniqueId());
       setDestination(chestTrajectoryMessage.getDestination());
-   }
-
-   /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired
-    * orientation.
-    * 
-    * @param trajectoryTime how long it takes to reach the desired orientation.
-    * @param desiredOrientation desired chest orientation expressed in World.
-    */
-   public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameID)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameID);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired
-    * orientation.
-    * 
-    * @param trajectoryTime how long it takes to reach the desired orientation.
-    * @param desiredOrientation desired chest orientation expressed the supplied frame.
-    */
-   public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public ChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly quaternion, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
-   {
-      this(trajectoryTime, quaternion, trajectoryFrame);
-      so3Trajectory.getFrameInformation().setDataReferenceFrame(dataFrame);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. By default this
-    * constructor sets the trajectory frame to pelvis z up and the data frame to world This
-    * constructor only allocates memory for the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point
-    * afterwards. Sets the frame to control in to world
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public ChestTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

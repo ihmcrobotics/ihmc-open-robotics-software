@@ -25,24 +25,6 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
       // for serialization.
    }
 
-   public FootstepPlanRequestPacket(RequestType requestType, FootstepDataMessage startFootstep, double thetaStart, ArrayList<FootstepDataMessage> goals)
-   {
-      this.requestType = requestType;
-      this.startFootstep = startFootstep;
-      this.thetaStart = thetaStart;
-      this.goals = goals;
-   }
-
-   public FootstepPlanRequestPacket(RequestType requestType, FootstepDataMessage startFootstep, double thetaStart, ArrayList<FootstepDataMessage> goals,
-                                    double maxSuboptimality)
-   {
-      this.requestType = requestType;
-      this.startFootstep = startFootstep;
-      this.thetaStart = thetaStart;
-      this.goals = goals;
-      this.maxSuboptimality = maxSuboptimality;
-   }
-
    @Override
    public void set(FootstepPlanRequestPacket other)
    {

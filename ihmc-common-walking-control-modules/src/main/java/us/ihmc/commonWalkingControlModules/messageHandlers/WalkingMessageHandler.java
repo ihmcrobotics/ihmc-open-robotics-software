@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
@@ -898,6 +899,6 @@ public class WalkingMessageHandler
       comTrajectoryHandler.setPositionOffset(this.planOffsetInWorld);
 
       updateVisualization();
-      statusOutputManager.reportStatusMessage(new PlanOffsetStatus(planOffsetInWorld));
+      statusOutputManager.reportStatusMessage(HumanoidMessageTools.createPlanOffsetStatus(planOffsetInWorld));
    }
 }

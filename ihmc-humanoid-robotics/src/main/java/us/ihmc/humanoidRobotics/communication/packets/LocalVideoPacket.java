@@ -45,13 +45,6 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
       this.intrinsicParameters = intrinsicParameters;
    }
 
-   public LocalVideoPacket(long timeStamp, BufferedImage image, IntrinsicParameters intrinsicParameters)
-   {
-      this.timeStamp = timeStamp;
-      this.image = image;
-      this.intrinsicParameters = intrinsicParameters;
-   }
-
    @Override
    public boolean epsilonEquals(LocalVideoPacket other, double epsilon)
    {

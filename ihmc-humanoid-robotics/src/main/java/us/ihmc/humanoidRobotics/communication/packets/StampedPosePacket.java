@@ -14,13 +14,6 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
       // Empty constructor for deserialization
    }
 
-   public StampedPosePacket(String frameId, TimeStampedTransform3D transform, double confidenceFactor)
-   {
-      this.frameId = frameId;
-      this.transform = transform;
-      this.confidenceFactor = confidenceFactor;
-   }
-
    @Override
    public void set(StampedPosePacket other)
    {

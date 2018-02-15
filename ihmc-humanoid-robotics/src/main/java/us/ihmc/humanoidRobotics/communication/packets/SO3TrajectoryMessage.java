@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -53,35 +53,9 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public SO3TrajectoryMessage(SO3TrajectoryMessage so3TrajectoryMessage)
+   public SO3TrajectoryMessage(SO3TrajectoryMessage other)
    {
-      taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[so3TrajectoryMessage.getNumberOfTrajectoryPoints()];
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(so3TrajectoryMessage.taskspaceTrajectoryPoints[i]);
-
-      setUniqueId(so3TrajectoryMessage.getUniqueId());
-      setDestination(so3TrajectoryMessage.getDestination());
-      frameInformation.set(so3TrajectoryMessage.getFrameInformation());
-      queueingProperties.set(so3TrajectoryMessage.queueingProperties);
-   }
-
-   public SO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
-   {
-      this(trajectoryTime, desiredOrientation, trajectoryFrame.getNameBasedHashCode());
-   }
-
-   public SO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
-   {
-      Vector3D zeroAngularVelocity = new Vector3D();
-      taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {new SO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
-   }
-
-   public SO3TrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      set(other);
    }
 
    public void getTrajectoryPoints(FrameSO3TrajectoryPointList trajectoryPointListToPack)
@@ -125,7 +99,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = new SO3TrajectoryPointMessage(time, orientation, angularVelocity);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity);
    }
 
    /**
@@ -144,7 +118,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = new SO3TrajectoryPointMessage(time, orientation, angularVelocity);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity);
    }
 
    @Override
@@ -183,7 +157,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       if (this.selectionMatrix == null)
-         this.selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix);
+         this.selectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix);
       else
          this.selectionMatrix.set(selectionMatrix);
    }
@@ -206,7 +180,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
       if (this.weightMatrix == null)
-         this.weightMatrix = new WeightMatrix3DMessage(weightMatrix);
+         this.weightMatrix = MessageTools.createWeightMatrix3DMessage(weightMatrix);
       else
          this.weightMatrix.set(weightMatrix);
    }

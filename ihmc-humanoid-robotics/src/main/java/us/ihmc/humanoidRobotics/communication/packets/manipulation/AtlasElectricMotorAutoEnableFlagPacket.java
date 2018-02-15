@@ -13,13 +13,7 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
 
    public AtlasElectricMotorAutoEnableFlagPacket()
    {
-
-   }
-
-   public AtlasElectricMotorAutoEnableFlagPacket(boolean shouldAutoEnable)
-   {
       setDestination(PacketDestination.CONTROLLER.ordinal());
-      this.shouldAutoEnable = shouldAutoEnable;
    }
 
    @Override

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -23,7 +24,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Searching For The Door");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Searching For The Door");
       sendPacket(p1);
    }
 
@@ -56,7 +57,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
 
    private void recievedDoorLocation(DoorLocationPacket valveLocationPacket)
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Recieved Door Location From UI");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Recieved Door Location From UI");
       sendPacket(p1);
       doorTransformToWorld = valveLocationPacket.getValveTransformToWorld();
 

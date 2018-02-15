@@ -9,16 +9,11 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket>
       NO_BEHAVIOR_RUNNING, BEHAVIOS_RUNNING, BEHAVIOR_PAUSED;
    }
 
-   private CurrentBehaviorStatus currentStatus;
+   public CurrentBehaviorStatus currentStatus;
 
    // empty constructor for deserialization
    public BehaviorStatusPacket()
    {
-   }
-
-   public BehaviorStatusPacket(CurrentBehaviorStatus requestedControl)
-   {
-      this.currentStatus = requestedControl;
    }
 
    @Override

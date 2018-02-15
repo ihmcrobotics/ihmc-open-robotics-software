@@ -12,12 +12,6 @@ public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
       // for serialization
    }
 
-   public LocalizationStatusPacket(double overlap, String status)
-   {
-      this.overlap = overlap;
-      this.status = status;
-   }
-
    @Override
    public void set(LocalizationStatusPacket other)
    {

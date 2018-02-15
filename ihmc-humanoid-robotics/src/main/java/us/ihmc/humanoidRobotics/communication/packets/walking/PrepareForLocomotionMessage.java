@@ -12,13 +12,6 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public PrepareForLocomotionMessage(boolean prepareManipulation, boolean preparePelvis)
-   {
-      this.prepareManipulation = prepareManipulation;
-      this.preparePelvis = preparePelvis;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    @Override
    public void set(PrepareForLocomotionMessage other)
    {

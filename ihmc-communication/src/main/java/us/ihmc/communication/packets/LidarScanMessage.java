@@ -25,15 +25,6 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public LidarScanMessage(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scan)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.robotTimestamp = timestamp;
-      this.lidarPosition = lidarPosition;
-      this.lidarOrientation = lidarOrientation;
-      this.scan = scan;
-   }
-
    @Override
    public void set(LidarScanMessage other)
    {

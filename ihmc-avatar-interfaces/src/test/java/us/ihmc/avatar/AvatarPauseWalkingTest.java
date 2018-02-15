@@ -11,6 +11,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -79,11 +80,11 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       sendFootstepCommand(getNumberOfFoosteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForResuming()));
-      pauseWalkingMessage = new PauseWalkingMessage(false);
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFoosteps() * (getSwingTime() + getTransferTime())));
@@ -91,7 +92,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    private void sendFootstepCommand(int numberOfFootsteps)
    {
-      FootstepDataListMessage footstepMessage = new FootstepDataListMessage(getSwingTime(), getTransferTime());
+      FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(getSwingTime(), getTransferTime());
       RobotSide side = RobotSide.LEFT;
       Quaternion orientation = new Quaternion();
       for (int i = 1; i < numberOfFootsteps; i++)

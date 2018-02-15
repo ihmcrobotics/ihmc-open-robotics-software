@@ -36,11 +36,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    {
       set(weightMatrix);
    }
-   
-   public WeightMatrix3DMessage(WeightMatrix3D weightMatrix)
-   {
-      set(weightMatrix);
-   }
 
    /**
     * Sets this weight matrix message to {@code qpWeightMatrix}.
@@ -54,7 +49,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
       this.yWeight = weightMatrix.getYWeight();
       this.zWeight = weightMatrix.getZWeight();
    }
-   
+
    /**
     * Sets this weight matrix message to {@code weightMatrix}.
     * 
@@ -89,7 +84,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    /**
     * sets the frame the weights are expressed in
     * 
-    * @param weightFrame the new frame to which the weights are expressed in 
+    * @param weightFrame the new frame to which the weights are expressed in
     */
    public void setWeightFrame(ReferenceFrame weightFrame)
    {
@@ -100,8 +95,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    }
 
    /**
-    * Sets the ID of the weight frame to use. The weights refer to the
-    * axes of the weight frame.
+    * Sets the ID of the weight frame to use. The weights refer to the axes of the weight frame.
     * 
     * @param weightFrameID the ID of the new frame to which the weights are referring to.
     */
@@ -116,8 +110,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
     * Note that the weight frame can not be retrieved here, it has to be set afterwards.
     * </p>
     * 
-    * @param weightMatrix3D the weight matrix into which this message is being unpacked.
-    *           Modified.
+    * @param weightMatrix3D the weight matrix into which this message is being unpacked. Modified.
     */
    public void getWeightMatrix(WeightMatrix3D weightMatrix3D)
    {
@@ -137,6 +130,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
 
    /**
     * gets the x weight
+    * 
     * @return the x weight
     */
    public double getXWeight()
@@ -145,7 +139,9 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    }
 
    /**
-    * sets the x weight. If set to Double.NaN the controller will use the default weight for that axis
+    * sets the x weight. If set to Double.NaN the controller will use the default weight for that
+    * axis
+    * 
     * @return the new x weight
     */
    public void setXWeight(double xWeight)
@@ -155,6 +151,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
 
    /**
     * gets the y weight
+    * 
     * @return the y weight
     */
    public double getYWeight()
@@ -163,7 +160,9 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    }
 
    /**
-    * sets the y weight. If set to Double.NaN the controller will use the default weight for that axis
+    * sets the y weight. If set to Double.NaN the controller will use the default weight for that
+    * axis
+    * 
     * @return the new y weight
     */
    public void setYWeight(double yWeight)
@@ -173,6 +172,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
 
    /**
     * gets the z weight
+    * 
     * @return the z weight
     */
    public double getZWeight()
@@ -181,15 +181,16 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    }
 
    /**
-    * sets the z weight. If set to Double.NaN the controller will use the default weight for that axis
+    * sets the z weight. If set to Double.NaN the controller will use the default weight for that
+    * axis
+    * 
     * @return the new z weight
     */
    public void setZWeight(double zWeight)
    {
       this.zWeight = zWeight;
    }
-   
-   
+
    @Override
    public int hashCode()
    {
@@ -224,22 +225,22 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    {
       if (weightFrameId != other.weightFrameId)
          return false;
-      
-      if(Double.isNaN(xWeight) ^ Double.isNaN(other.xWeight)) // xor is correct
+
+      if (Double.isNaN(xWeight) ^ Double.isNaN(other.xWeight)) // xor is correct
       {
          return false;
       }
 
-      if(Double.isNaN(yWeight) ^ Double.isNaN(other.yWeight)) // xor is correct
+      if (Double.isNaN(yWeight) ^ Double.isNaN(other.yWeight)) // xor is correct
       {
          return false;
       }
-      
-      if(Double.isNaN(zWeight) ^ Double.isNaN(other.zWeight)) // xor is correct
+
+      if (Double.isNaN(zWeight) ^ Double.isNaN(other.zWeight)) // xor is correct
       {
          return false;
       }
-      
+
       if (!Double.isNaN(xWeight) && !Double.isNaN(other.xWeight) && xWeight != other.xWeight)
       {
          return false;

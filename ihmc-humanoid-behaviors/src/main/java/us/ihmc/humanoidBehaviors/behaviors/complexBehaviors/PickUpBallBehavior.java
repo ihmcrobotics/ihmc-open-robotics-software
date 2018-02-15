@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -36,6 +37,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
@@ -222,7 +224,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("LOOKING FOR BALL");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
@@ -264,7 +266,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To The Ball");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
@@ -284,7 +286,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       Quaternion desiredHeadQuat = new Quaternion();
       desiredHeadQuat.set(desiredAxisAngle);
 
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat, worldFrame, chestCoMFrame);
+      HeadTrajectoryMessage message = HumanoidMessageTools.createHeadTrajectoryMessage(1, desiredHeadQuat, worldFrame, chestCoMFrame);
 
       HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
@@ -307,7 +309,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       Quaternion desiredHeadUpQuat = new Quaternion();
       desiredHeadUpQuat.set(desiredAxisUpAngle);
 
-      HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(1, desiredHeadUpQuat, worldFrame, chestCoMFrame);
+      HeadTrajectoryMessage messageHeadUp = HumanoidMessageTools.createHeadTrajectoryMessage(1, desiredHeadUpQuat, worldFrame, chestCoMFrame);
 
       HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
@@ -358,7 +360,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Looking for the ball");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Looking for the ball");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
@@ -399,7 +401,7 @@ public class PickUpBallBehavior extends AbstractBehavior
                   initialSphereDetectionBehavior.getBallLocation().getY()+" "+
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
 
-            TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("I think i found the ball");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
             FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
@@ -456,33 +458,33 @@ public class PickUpBallBehavior extends AbstractBehavior
       //      };
 
       //RESET BODY POSITIONS *******************************************
-      GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 2);
+      GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.CHEST, 2);
       chestGoHomeBehavior.setInput(goHomeChestMessage);
       GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior);
 
-      GoHomeMessage goHomepelvisMessage = new GoHomeMessage(BodyPart.PELVIS, 2);
+      GoHomeMessage goHomepelvisMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.PELVIS, 2);
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior);
 
-      GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
+      GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
       GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior);
 
-      GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
+      GoHomeMessage goHomeRightArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
       armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
       GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior);
 
       double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874,
             -0.4780687104960028, -0.24919417978503655};
 
-      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
+      ArmTrajectoryMessage widerHome = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
 
       ArmTrajectoryTask rightArmHomeTask = new ArmTrajectoryTask(widerHome, armTrajectoryBehavior);
 
       double[] rightHandBucketLocation1 = new double[] {0.5489321822438367, 0.2899665391571677, 2.096340823983413, -1.2225333451166707, 0.1256161514011733,
             -1.3433026185064938, -1.1994258903111514};
 
-      ArmTrajectoryMessage rightHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation1);
+      ArmTrajectoryMessage rightHandBucketLocation1Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation1);
 
       ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, armTrajectoryBehavior)
       {
@@ -490,7 +492,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Putting The Ball In The Bucket");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Putting The Ball In The Bucket");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
          }
@@ -499,28 +501,28 @@ public class PickUpBallBehavior extends AbstractBehavior
       double[] leftHandBucketLocation1 = new double[] {-0.5609186812662719, -0.39273790125704305, 1.89931104400202, 1.8345084796174007, -1.9173410679363112,
             -0.7657081703756509, -0.7098631227127279};
 
-      ArmTrajectoryMessage leftHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation1);
+      ArmTrajectoryMessage leftHandBucketLocation1Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation1);
 
       ArmTrajectoryTask leftHandBucketLocation1Task = new ArmTrajectoryTask(leftHandBucketLocation1Message, armTrajectoryBehavior);
 
       double[] rightHandBucketLocation2 = new double[] {0.4765048070153984, 0.305694742754363, 2.173812006625049, -1.4970540590789951, 0.10321456673940527,
             -1.2120648871681976, -1.1591439074587626};
 
-      ArmTrajectoryMessage rightHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation2);
+      ArmTrajectoryMessage rightHandBucketLocation2Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation2);
 
       ArmTrajectoryTask rightHandBucketLocation2Task = new ArmTrajectoryTask(rightHandBucketLocation2Message, armTrajectoryBehavior);
 
       double[] leftHandBucketLocation2 = new double[] {-0.6312858675745908, -0.6560594198655715, 2.026449179186367, 2.0325182474649997, -1.4129369066719957,
             -0.33189990885720594, -1.1435699210219243};
 
-      ArmTrajectoryMessage leftHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation2);
+      ArmTrajectoryMessage leftHandBucketLocation2Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation2);
 
       ArmTrajectoryTask leftHandBucketLocation2Task = new ArmTrajectoryTask(leftHandBucketLocation2Message, armTrajectoryBehavior);
 
       double[] leftHandAfterGrabLocation = new double[] {-0.799566492522621, -0.8850712601496326, 1.1978163314288173, 0.9978871050058826, -0.22593401111949774,
             -0.2153318563363089, -1.2957848304397805};
 
-      ArmTrajectoryMessage leftHandAfterGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandAfterGrabLocation);
+      ArmTrajectoryMessage leftHandAfterGrabMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandAfterGrabLocation);
 
       ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior);
 
@@ -650,7 +652,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("YAY IM ALL DONE");
       sendPacket(p1);
 
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);

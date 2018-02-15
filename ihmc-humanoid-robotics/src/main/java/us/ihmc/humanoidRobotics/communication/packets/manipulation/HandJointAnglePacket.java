@@ -18,11 +18,6 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
       // Empty constructor for deserialization
    }
 
-   public HandJointAnglePacket(RobotSide robotSide, boolean connected, boolean calibrated, double[] jointAngles)
-   {
-      setAll(robotSide, connected, calibrated, jointAngles);
-   }
-
    public void setAll(RobotSide robotSide, boolean connected, boolean calibrated, double[] jointAngles)
    {
       this.robotSide = robotSide;

@@ -51,6 +51,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.PelvisTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.SleepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -1676,7 +1677,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void sequenceStepsInPlace()
    {
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       FramePose3D footstepPose = new FramePose3D();
 
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
@@ -1689,7 +1690,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             Point3D footLocation = new Point3D(footstepPose.getPosition());
             Quaternion footOrientation = new Quaternion(footstepPose.getOrientation());
 
-            FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
+            FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footLocation, footOrientation);
 
             footstepDataList.add(footstepData);
          }
@@ -1699,7 +1700,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void sequenceSquareUp()
    {
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       FramePose3D footstepPose = new FramePose3D();
 
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
@@ -1715,7 +1716,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          Point3D footLocation = new Point3D(footstepPose.getPosition());
          Quaternion footOrientation = new Quaternion(footstepPose.getOrientation());
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footLocation, footOrientation);
 
          footstepDataList.add(footstepData);
          pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList));
@@ -1781,7 +1782,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       for (RobotSide flyingSide : RobotSide.values)
       {
-         ArmTrajectoryMessage flyingMessage = new ArmTrajectoryMessage(flyingSide, numberOfArmJoints);
+         ArmTrajectoryMessage flyingMessage = HumanoidMessageTools.createArmTrajectoryMessage(flyingSide, numberOfArmJoints);
 
          for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
          {
@@ -1817,7 +1818,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             }
             calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
             calculator.computeTrajectoryPointVelocities(true);
-            flyingMessage.getJointspaceTrajectory().setTrajectory1DMessage(jointIndex, new OneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));
+            flyingMessage.getJointspaceTrajectory().setTrajectory1DMessage(jointIndex, HumanoidMessageTools.createOneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));
          }
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
@@ -1941,7 +1942,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitChestHomeCommand(boolean parallelize)
    {
-      GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.CHEST, trajectoryTime.getDoubleValue());
+      GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.CHEST, trajectoryTime.getDoubleValue());
       GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior);
       if (parallelize)
       {
@@ -2000,7 +2001,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitPelvisHomeCommand(boolean parallelize)
    {
-      GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.PELVIS, trajectoryTime.getDoubleValue());
+      GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.PELVIS, trajectoryTime.getDoubleValue());
       GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, pelvisGoHomeBehavior);
 
       if (parallelize)
@@ -2027,7 +2028,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FrameQuaternion desiredPelvisOrientation = new FrameQuaternion(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
       Quaternion desiredQuaternion = new Quaternion(desiredPelvisOrientation);
-      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
+      PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
       PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, pelvisOrientationTrajectoryBehavior);
 
       if (parallelize)
@@ -2059,7 +2060,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       Point3D position = new Point3D();
       Quaternion orientation = new Quaternion();
       desiredPelvisPose.get(position, orientation);
-      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(trajectoryTime.getDoubleValue(), position, orientation);
+      PelvisTrajectoryMessage message = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime.getDoubleValue(), position, orientation);
       PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, pelvisTrajectoryBehavior);
       if (parallelize)
       {
@@ -2079,7 +2080,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
+         GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
          GoHomeBehavior armGoHomeBehavior = armGoHomeBehaviors.get(robotSide);
          if (parallelize)
             pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior));
@@ -2132,7 +2133,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             System.out.println(msg);
          }
          ArmTrajectoryBehavior armTrajectoryBehavior = armTrajectoryBehaviors.get(robotSide);
-         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, trajectoryTime.getDoubleValue(), desiredJointAngles);
+         ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime.getDoubleValue(), desiredJointAngles);
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior));
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
 
@@ -2707,7 +2708,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             pelvisTransformWithOffset.multiply(offsetRotationTransform);
 
             TimeStampedTransform3D timeStampedTransform3D = new TimeStampedTransform3D(pelvisTransformWithOffset, timestamp);
-            StampedPosePacket stampedPosePacket = new StampedPosePacket("/pelvis", timeStampedTransform3D, 1.0);
+            StampedPosePacket stampedPosePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform3D, 1.0);
 
             communicationBridge.sendPacketToController(stampedPosePacket);
 

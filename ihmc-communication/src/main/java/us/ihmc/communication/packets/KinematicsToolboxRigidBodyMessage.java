@@ -91,115 +91,6 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * Creates a new rigid-body message for the given end-effector.
-    * <p>
-    * Before the message can be sent to the solver, you will need to provide at least a desired
-    * orientation and/or desired position.
-    * </p>
-    * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    */
-   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector)
-   {
-      endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Creates a new rigid-body message for the given end-effector.
-    * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
-    * </p>
-    * <p>
-    * Note that this constructor also sets up the selection matrix for linear control only.
-    * </p>
-    * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
-    *           should reach. The data is assumed to be expressed in world frame. Not modified.
-    */
-   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector, Point3DReadOnly desiredPosition)
-   {
-      endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      setDesiredPosition(desiredPosition);
-      setSelectionMatrixForLinearControl();
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Creates a new rigid-body message for the given end-effector.
-    * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
-    * </p>
-    * <p>
-    * Note that this constructor also sets up the selection matrix for angular control only.
-    * </p>
-    * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
-    */
-   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector, QuaternionReadOnly desiredOrientation)
-   {
-      endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      setDesiredOrientation(desiredOrientation);
-      setSelectionMatrixForAngularControl();
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Creates a new rigid-body message for the given end-effector.
-    * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
-    * </p>
-    * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
-    *           should reach. The data is assumed to be expressed in world frame. Not modified.
-    * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
-    */
-   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
-   {
-      endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      setDesiredPose(desiredPosition, desiredOrientation);
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Creates a new rigid-body message for the given end-effector.
-    * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
-    * </p>
-    * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
-    *           should reach. The data is assumed to be expressed in world frame. Not modified.
-    * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
-    */
-   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector, ReferenceFrame controlFrame, Point3DReadOnly desiredPosition,
-                                            QuaternionReadOnly desiredOrientation)
-   {
-      endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      setDesiredPose(desiredPosition, desiredOrientation);
-      RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
-      controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      setControlFramePose(transformToBodyFixedFrame.getTranslationVector(), transformToBodyFixedFrame.getRotationMatrix());
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
    @Override
    public void set(KinematicsToolboxRigidBodyMessage other)
    {
@@ -467,12 +358,12 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void setSelectionMatrix(SelectionMatrix6D selectionMatrix6D)
    {
       if (angularSelectionMatrix == null)
-         angularSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
+         angularSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
       else
          angularSelectionMatrix.set(selectionMatrix6D.getAngularPart());
 
       if (linearSelectionMatrix == null)
-         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
+         linearSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
       else
          linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }

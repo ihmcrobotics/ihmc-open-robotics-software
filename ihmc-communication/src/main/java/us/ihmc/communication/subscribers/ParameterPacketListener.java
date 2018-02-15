@@ -1,6 +1,7 @@
 package us.ihmc.communication.subscribers;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ParameterListPacket;
 import us.ihmc.communication.packets.RequestParameterListPacket;
 import us.ihmc.communication.packets.SetBooleanParameterPacket;
@@ -25,7 +26,7 @@ public class ParameterPacketListener
          @Override
          public void receivedPacket(RequestParameterListPacket packet)
          {
-            ParameterListPacket response = new ParameterListPacket(ParameterRegistry.getInstance().getParameters());
+            ParameterListPacket response = MessageTools.createParameterListPacket(ParameterRegistry.getInstance().getParameters());
             communicator.queueDataToSend(response);
          }
       });

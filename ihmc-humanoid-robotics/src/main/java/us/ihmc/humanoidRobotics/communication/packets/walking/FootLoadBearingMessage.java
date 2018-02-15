@@ -41,18 +41,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * Create a message to request one end-effector to switch to load bearing.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide refers to the side of the end-effector if necessary.
-    */
-   public FootLoadBearingMessage(RobotSide robotSide, LoadBearingRequest request)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.robotSide = robotSide;
-      this.request = request;
-   }
-
    @Override
    public void set(FootLoadBearingMessage other)
    {

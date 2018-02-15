@@ -23,14 +23,6 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public StereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.robotTimestamp = timestamp;
-      this.pointCloud = pointCloud;
-      this.colors = colors;
-   }
-
    @Override
    public void set(StereoVisionPointCloudMessage other)
    {

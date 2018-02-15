@@ -51,23 +51,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * Creates a new center of mass message.
-    * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
-    * </p>
-    * 
-    * @param desiredPosition the position that center of mass should reach. The data is assumed to
-    *           be expressed in world frame. Not modified.
-    */
-   public KinematicsToolboxCenterOfMassMessage(Point3DReadOnly desiredPosition)
-   {
-      setDesiredPosition(desiredPosition);
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
-
    @Override
    public void set(KinematicsToolboxCenterOfMassMessage other)
    {
@@ -162,7 +145,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       if (this.selectionMatrix == null)
-         this.selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix);
+         this.selectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix);
       else
          this.selectionMatrix.set(selectionMatrix);
    }

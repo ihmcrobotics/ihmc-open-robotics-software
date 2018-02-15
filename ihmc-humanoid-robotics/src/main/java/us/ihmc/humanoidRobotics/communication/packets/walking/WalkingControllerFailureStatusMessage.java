@@ -14,11 +14,6 @@ public class WalkingControllerFailureStatusMessage extends SettablePacket<Walkin
    {
    }
 
-   public WalkingControllerFailureStatusMessage(Vector2D fallingDirection)
-   {
-      this.fallingDirection = new Vector2D32(fallingDirection);
-   }
-
    public void setFallingDirection(Vector2D32 fallingDirection)
    {
       this.fallingDirection = fallingDirection;

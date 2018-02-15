@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,7 +29,7 @@ public class PartialFootholdBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(1.5, 0.5);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(1.5, 0.5);
       RobotSide side = RobotSide.LEFT;
 
       for (int i = 0; i < 10; i++)
@@ -54,7 +55,7 @@ public class PartialFootholdBehavior extends AbstractBehavior
             contactPoints.add(new Point2D(-0.1, 0.0));
          }
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, new Quaternion(0.0, 0.0, 0.0, 1.0), contactPoints);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, new Quaternion(0.0, 0.0, 0.0, 1.0), contactPoints);
          message.add(footstepData);
          side = side.getOppositeSide();
       }

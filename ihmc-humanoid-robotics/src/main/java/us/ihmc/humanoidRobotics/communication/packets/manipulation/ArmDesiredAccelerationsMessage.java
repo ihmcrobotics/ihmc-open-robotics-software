@@ -23,13 +23,6 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public ArmDesiredAccelerationsMessage(RobotSide robotSide, double[] armDesiredJointAccelerations)
-   {
-      desiredAccelerations = new DesiredAccelerationsMessage(armDesiredJointAccelerations);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    public RobotSide getRobotSide()
    {
       return robotSide;

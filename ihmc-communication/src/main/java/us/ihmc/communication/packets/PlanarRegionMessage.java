@@ -21,14 +21,6 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    {
    }
 
-   public PlanarRegionMessage(Point3D32 regionOrigin, Vector3D32 regionNormal, Point2D32[] concaveHullVertices, List<Point2D32[]> convexPolygonsVertices)
-   {
-      this.regionOrigin = regionOrigin;
-      this.regionNormal = regionNormal;
-      this.concaveHullVertices = concaveHullVertices;
-      this.convexPolygonsVertices = convexPolygonsVertices;
-   }
-
    @Override
    public void set(PlanarRegionMessage other)
    {

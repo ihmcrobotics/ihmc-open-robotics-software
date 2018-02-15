@@ -6,6 +6,7 @@ import java.util.Arrays;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
@@ -79,10 +80,10 @@ public class DRCLidar
       @Override
       public void scan(float[] scan, RigidBodyTransform lidarTransform, double time)
       {
-         final SimulatedLidarScanPacket lidarScan = new SimulatedLidarScanPacket(lidarSensorId,
-                                                                                 new LidarScanParameters(lidarScanParameters,
-                                                                                                         Conversions.secondsToNanoseconds(time)),
-                                                                                 Arrays.copyOf(scan, scan.length));
+         final SimulatedLidarScanPacket lidarScan = MessageTools.createSimulatedLidarScanPacket(lidarSensorId,
+                                                                                                        new LidarScanParameters(lidarScanParameters,
+                                                                                                                                Conversions.secondsToNanoseconds(time)),
+                                                                                                        Arrays.copyOf(scan, scan.length));
 
          objectCommunicator.consumeObject(lidarScan);
       }

@@ -20,18 +20,6 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       // empty constructor for serialization
    }
 
-   public FootstepPathPlanPacket(boolean goalsValid, FootstepDataMessage start, ArrayList<FootstepDataMessage> originalGoals,
-                                 ArrayList<FootstepDataMessage> ADStarPathPlan, ArrayList<Boolean> footstepUnknown, double subOptimality, double cost)
-   {
-      this.goalsValid = goalsValid;
-      this.start = start;
-      this.originalGoals = originalGoals;
-      this.pathPlan = ADStarPathPlan;
-      this.footstepUnknown = footstepUnknown;
-      this.subOptimality = subOptimality;
-      this.pathCost = cost;
-   }
-
    @Override
    public void set(FootstepPathPlanPacket other)
    {

@@ -11,6 +11,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -72,7 +73,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          }
       };
 
-      GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
+      GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
       GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior);
 
       BehaviorAction walkToBallTask = new BehaviorAction(walkToLocationBehavior)

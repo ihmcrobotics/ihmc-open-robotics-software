@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -131,7 +132,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       FootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator
             .predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime, stepTime);
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(Double.NaN, Double.NaN);
       footsteps.add(footstep);
       footsteps.add(nextFootstep);
       footsteps.add(nextNextFootstep);
@@ -198,7 +199,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
          }
          else
          {
-            commandInputManager.submitMessage(new PauseWalkingMessage(true));
+            commandInputManager.submitMessage(HumanoidMessageTools.createPauseWalkingMessage(true));
          }
       }
 

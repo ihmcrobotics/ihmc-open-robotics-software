@@ -13,12 +13,6 @@ public class ObjectDetectorResultPacket extends Packet<ObjectDetectorResultPacke
 
    }
 
-   public ObjectDetectorResultPacket(HeatMapPacket heatMap, BoundingBoxesPacket boundingBoxes)
-   {
-      this.heatMap = heatMap;
-      this.boundingBoxes = boundingBoxes;
-   }
-
    @Override
    public void set(ObjectDetectorResultPacket other)
    {

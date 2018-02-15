@@ -46,30 +46,20 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       angularVelocity = new Vector3D();
    }
 
-   public SE3TrajectoryPointMessage(SE3TrajectoryPointMessage se3TrajectoryPointMessage)
+   public SE3TrajectoryPointMessage(SE3TrajectoryPointMessage other)
    {
-      time = se3TrajectoryPointMessage.time;
-      if (se3TrajectoryPointMessage.position != null)
-         position = new Point3D(se3TrajectoryPointMessage.position);
-      if (se3TrajectoryPointMessage.orientation != null)
-         orientation = new Quaternion(se3TrajectoryPointMessage.orientation);
-      if (se3TrajectoryPointMessage.linearVelocity != null)
-         linearVelocity = new Vector3D(se3TrajectoryPointMessage.linearVelocity);
-      if (se3TrajectoryPointMessage.angularVelocity != null)
-         angularVelocity = new Vector3D(se3TrajectoryPointMessage.angularVelocity);
+      time = other.time;
+      if (other.position != null)
+         position = new Point3D(other.position);
+      if (other.orientation != null)
+         orientation = new Quaternion(other.orientation);
+      if (other.linearVelocity != null)
+         linearVelocity = new Vector3D(other.linearVelocity);
+      if (other.angularVelocity != null)
+         angularVelocity = new Vector3D(other.angularVelocity);
    }
 
-   public SE3TrajectoryPointMessage(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
-                                    Vector3DReadOnly angularVelocity)
-   {
-      this.time = time;
-      this.position = new Point3D(position);
-      this.orientation = new Quaternion(orientation);
-      this.linearVelocity = new Vector3D(linearVelocity);
-      this.angularVelocity = new Vector3D(angularVelocity);
-   }
-
-   //   @Override
+   @Override
    public void set(SE3TrajectoryPointMessage other)
    {
       time = other.time;

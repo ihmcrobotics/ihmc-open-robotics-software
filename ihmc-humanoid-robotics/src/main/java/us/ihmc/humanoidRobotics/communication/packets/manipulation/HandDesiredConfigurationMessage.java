@@ -24,20 +24,6 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * Creates a message with the desired grasp to be performed. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param robotSide refers to which hand will perform the grasp.
-    * @param handDesiredConfiguration refers to the desired grasp.
-    */
-   public HandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration handDesiredConfiguration)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.robotSide = robotSide;
-      this.handDesiredConfiguration = handDesiredConfiguration;
-   }
-
    @Override
    public void set(HandDesiredConfigurationMessage other)
    {

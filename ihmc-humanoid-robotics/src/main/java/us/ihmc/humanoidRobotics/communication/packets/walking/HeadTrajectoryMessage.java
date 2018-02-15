@@ -3,10 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
@@ -40,50 +36,6 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
       so3Trajectory = new SO3TrajectoryMessage(headTrajectoryMessage.so3Trajectory);
       setUniqueId(headTrajectoryMessage.getUniqueId());
       setDestination(headTrajectoryMessage.getDestination());
-   }
-
-   public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
-   {
-      this(trajectoryTime, desiredOrientation, trajectoryFrame);
-      so3Trajectory.getFrameInformation().setDataReferenceFrame(dataFrame);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param trajectoryTime how long it takes to reach the desired orientation.
-    * @param desiredOrientation desired head orientation expressed in world frame.
-    */
-   public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param trajectoryTime how long it takes to reach the desired orientation.
-    * @param desiredOrientation desired head orientation expressed in world frame.
-    */
-   public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameId);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point.
-    * By default this constructor sets the trajectory frame to chest Center of mass frame and the data frame to world
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
-    */
-   public HeadTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

@@ -13,20 +13,6 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
    public boolean autoExposure;
    public boolean autoWhiteBalance;
 
-   public MultisenseParameterPacket(boolean initialize, double gain, double motorSpeed, double dutyCycle, boolean ledEnable, boolean flashEnable,
-                                    boolean autoExposure, boolean autoWhiteBalance)
-   {
-      this.initialize = initialize;
-      this.gain = gain;
-      this.flashEnable = flashEnable;
-      this.motorSpeed = motorSpeed;
-      this.ledEnable = ledEnable;
-      this.dutyCycle = dutyCycle;
-      this.autoExposure = autoExposure;
-      this.autoWhiteBalance = autoWhiteBalance;
-
-   }
-
    public MultisenseParameterPacket()
    {
    }

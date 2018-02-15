@@ -1,7 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,14 +10,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TestICPOptimizationBehavior extends AbstractBehavior
 {
@@ -49,7 +50,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       if (!(timer.totalElapsed() > sleepTime.getDoubleValue()))
          return;
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       footsteps.setExecutionMode(ExecutionMode.OVERRIDE);
       footsteps.setDestination(PacketDestination.BROADCAST);
 
@@ -62,16 +63,16 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       if (Math.abs(rightFoot.getX()) > 0.1)
       {
-         sendPacket(new TextToSpeechPacket("Squaring up."));
+         sendPacket(MessageTools.createTextToSpeechPacket("Squaring up."));
       }
       else if (!stepInPlace.getBooleanValue())
       {
-         sendPacket(new TextToSpeechPacket("Step forward."));
+         sendPacket(MessageTools.createTextToSpeechPacket("Step forward."));
          stepPose.setX(stepLength.getDoubleValue());
       }
       else
       {
-         sendPacket(new TextToSpeechPacket("Step in place."));
+         sendPacket(MessageTools.createTextToSpeechPacket("Step in place."));
       }
 
       stepPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -80,7 +81,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       Quaternion orientation = new Quaternion();
       stepPose.get(location, orientation);
 
-      FootstepDataMessage footstepData = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footsteps.add(footstepData);
 
       sendPacket(footsteps);
@@ -92,7 +93,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    {
       abortBehavior.set(false);
       stepInPlace.set(true);
-      sendPacket(new TextToSpeechPacket("Starting to step forward and backward with the right foot."));
+      sendPacket(MessageTools.createTextToSpeechPacket("Starting to step forward and backward with the right foot."));
    }
 
    @Override

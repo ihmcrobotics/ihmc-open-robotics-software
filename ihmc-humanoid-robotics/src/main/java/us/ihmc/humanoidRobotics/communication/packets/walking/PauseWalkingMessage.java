@@ -21,18 +21,6 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * 
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param pause
-    */
-   public PauseWalkingMessage(boolean pause)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.pause = pause;
-   }
-
    @Override
    public void set(PauseWalkingMessage other)
    {

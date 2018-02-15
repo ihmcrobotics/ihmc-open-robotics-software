@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -95,34 +95,6 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
       queueingProperties.set(other.queueingProperties);
    }
 
-   public SE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      Vector3D zeroLinearVelocity = new Vector3D();
-      Vector3D zeroAngularVelocity = new Vector3D();
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {
-            new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
-      frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
-   }
-
-   public SE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
-                               ReferenceFrame trajectoryReferenceFrame)
-   {
-      this(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame.getNameBasedHashCode());
-   }
-
-   public SE3TrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfTrajectoryPoints];
-   }
-
-   public SE3TrajectoryMessage(int numberOfPoints, ReferenceFrame trajectoryFrame)
-   {
-      this(numberOfPoints);
-      getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
-   }
-
    @Override
    public void set(SE3TrajectoryMessage other)
    {
@@ -169,7 +141,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
    }
 
    /**
@@ -192,7 +164,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
    }
 
    @Override
@@ -231,12 +203,12 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    public void setSelectionMatrix(SelectionMatrix6D selectionMatrix6D)
    {
       if (angularSelectionMatrix == null)
-         angularSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
+         angularSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
       else
          angularSelectionMatrix.set(selectionMatrix6D.getAngularPart());
 
       if (linearSelectionMatrix == null)
-         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
+         linearSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
       else
          linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }
@@ -259,12 +231,12 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
       if (angularWeightMatrix == null)
-         angularWeightMatrix = new WeightMatrix3DMessage(weightMatrix.getAngularPart());
+         angularWeightMatrix = MessageTools.createWeightMatrix3DMessage(weightMatrix.getAngularPart());
       else
          angularWeightMatrix.set(weightMatrix.getAngularPart());
 
       if (linearWeightMatrix == null)
-         linearWeightMatrix = new WeightMatrix3DMessage(weightMatrix.getLinearPart());
+         linearWeightMatrix = MessageTools.createWeightMatrix3DMessage(weightMatrix.getLinearPart());
       else
          linearWeightMatrix.set(weightMatrix.getLinearPart());
    }

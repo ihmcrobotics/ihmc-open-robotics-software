@@ -3,13 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,48 +40,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
       robotSide = footTrajectoryMessage.robotSide;
       setUniqueId(footTrajectoryMessage.getUniqueId());
       setDestination(footTrajectoryMessage.getDestination());
-   }
-
-   public FootTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage trajectoryMessage)
-   {
-      se3Trajectory = new SE3TrajectoryMessage(trajectoryMessage);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the base for the control.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which foot is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredPosition desired foot position expressed in world frame.
-    * @param desiredOrientation desired foot orientation expressed in world frame.
-    */
-   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
-   {
-      se3Trajectory = new SE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which foot is performing the trajectory.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
-    */
-   public FootTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
-   {
-      se3Trajectory = new SE3TrajectoryMessage(numberOfTrajectoryPoints);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose3D desiredPose)
-   {
-      this(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

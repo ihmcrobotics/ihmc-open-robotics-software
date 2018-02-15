@@ -17,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -291,7 +292,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
          {
             icpTransformPoseBufferInWorldFrame.findTransform(timeStamp - 80, icpTimeStampedTransform3D);
-            StampedPosePacket newestStampedPosePacket = new StampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
+            StampedPosePacket newestStampedPosePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
             externalPelvisPoseCreator.setNewestPose(newestStampedPosePacket);
          }
 
@@ -359,7 +360,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
          {
             icpTransformPoseBufferInWorldFrame.findTransform(timeStamp - 80, icpTimeStampedTransform3D);
-            StampedPosePacket newestStampedPosePacket = new StampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
+            StampedPosePacket newestStampedPosePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
             externalPelvisPoseCreator.setNewestPose(newestStampedPosePacket);
             checkPacketHasBeenSentNextLoopIteration = true;
          }

@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ReachingManifoldMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
@@ -140,11 +141,11 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
 
       ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
 
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+      rigidBodyConfigurations.add(HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, spaces));
 
       // run test
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
@@ -194,7 +195,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
 
       ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
 
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+      rigidBodyConfigurations.add(HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, spaces));
 
       // keep sight on trajectory.
       RigidBody head = fullRobotModel.getHead();
@@ -212,7 +213,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
 
       // run test      
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, trajectories, null, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, trajectories, null, rigidBodyConfigurations);
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
@@ -259,14 +260,14 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
 
       ConfigurationSpaceName[] spaces = {ConfigurationSpaceName.YAW};
 
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, spaces));
+      rigidBodyConfigurations.add(HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, spaces));
 
       // to hold left hand.
       //rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getHand(RobotSide.LEFT)));
 
       // run test      
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null, rigidBodyConfigurations);
       runTrajectoryTest(message, maxNumberOfIterations);
    }
 
@@ -284,7 +285,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       RigidBody hand = fullRobotModel.getHand(RobotSide.RIGHT);
       List<ReachingManifoldMessage> reachingManifolds = new ArrayList<>();
 
-      ReachingManifoldMessage reachingManifold = new ReachingManifoldMessage(hand);
+      ReachingManifoldMessage reachingManifold = HumanoidMessageTools.createReachingManifoldMessage(hand);
 
       reachingManifold.setOrigin(new Point3D(0.7, -0.2, 1.0), new Quaternion());
 
@@ -306,10 +307,10 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       double[] explorationUpperLimits = {0.15, 0.05, 0.2};
       double[] explorationLowerLimits = {-0.0, -0.5, -0.2};
 
-      rigidBodyConfigurations.add(new RigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationUpperLimits, explorationLowerLimits));
+      rigidBodyConfigurations.add(HumanoidMessageTools.createRigidBodyExplorationConfigurationMessage(hand, explorationSpaces, explorationUpperLimits, explorationLowerLimits));
 
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, null, reachingManifolds, rigidBodyConfigurations);
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, null, reachingManifolds, rigidBodyConfigurations);
 
       // run toolbox
       runReachingTest(message, maxNumberOfIterations);
