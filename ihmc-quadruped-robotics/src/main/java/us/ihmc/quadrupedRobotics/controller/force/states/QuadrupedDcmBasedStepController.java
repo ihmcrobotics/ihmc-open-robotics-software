@@ -24,6 +24,8 @@ import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
@@ -112,7 +114,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final FrameQuaternion bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
    private final FramePoint3D stepGoalPosition;
-   private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
+   private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
 
    // inputs
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
@@ -174,15 +176,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       bodyOrientationReference = new FrameQuaternion();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
       stepGoalPosition = new FramePoint3D();
-      stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE,
-            new YoPreallocatedList.DefaultElementFactory<YoQuadrupedTimedStep>()
-            {
-               @Override
-               public YoQuadrupedTimedStep createDefaultElement(String prefix, YoVariableRegistry registry)
-               {
-                  return new YoQuadrupedTimedStep(prefix, registry);
-               }
-            });
+      stepSequence = new RecyclingArrayList<YoQuadrupedTimedStep>(MAXIMUM_STEP_QUEUE_SIZE, new GenericTypeBuilder<YoQuadrupedTimedStep>()
+      {
+         @Override
+         public YoQuadrupedTimedStep newInstance()
+         {
+            return new YoQuadrupedTimedStep("stepSequence" + stepSequence.size(), registry);
+         }
+      });
 
       parentRegistry.addChild(registry);
    }
@@ -354,12 +355,12 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       {
          if (!haltFlag.getBooleanValue() || stepStream.getSteps().get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
          {
-            stepSequence.add();
-            stepSequence.get(stepSequence.size() - 1).set(stepStream.getSteps().get(i));
-            stepSequence.get(stepSequence.size() - 1).getGoalPosition(stepGoalPosition);
+            YoQuadrupedTimedStep step = stepSequence.add();
+            step.set(stepStream.getSteps().get(i));
+            step.getGoalPosition(stepGoalPosition);
             stepGoalPosition.changeFrame(worldFrame);
             stepGoalPosition.add(accumulatedStepAdjustment);
-            stepSequence.get(stepSequence.size() - 1).setGoalPosition(stepGoalPosition);
+            step.setGoalPosition(stepGoalPosition);
          }
       }
    }
