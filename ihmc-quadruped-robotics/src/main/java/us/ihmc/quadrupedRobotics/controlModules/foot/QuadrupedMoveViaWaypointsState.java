@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
@@ -36,13 +37,13 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    private double taskStartTime;
 
-   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, ReferenceFrame bodyFrame, QuadrupedSolePositionController solePositionController,
-                                         QuadrupedFootControlModuleParameters parameters, YoDouble robotTimeStamp, YoVariableRegistry parentRegistry)
+   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox,
+                                         QuadrupedSolePositionController solePositionController, YoVariableRegistry parentRegistry)
    {
       this.robotQuadrant = robotQuadrant;
-      this.bodyFrame = bodyFrame;
-      this.parameters = parameters;
-      robotTime = robotTimeStamp;
+      this.bodyFrame = toolbox.getReferenceFrames().getBodyFrame();
+      this.parameters = toolbox.getFootControlModuleParameters();
+      robotTime = toolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       // Feedback controller
       this.solePositionController = solePositionController;
