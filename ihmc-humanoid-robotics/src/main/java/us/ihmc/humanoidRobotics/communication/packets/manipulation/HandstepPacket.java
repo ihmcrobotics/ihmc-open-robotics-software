@@ -7,15 +7,13 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandstepPacket extends Packet<HandstepPacket> implements TransformableDataObject<HandstepPacket>
+public class HandstepPacket extends Packet<HandstepPacket>
 {
    // Must be public for efficient serialization.
    public RobotSide robotSide;
@@ -141,18 +139,6 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       }
 
       return robotSideEquals && locationEquals && orientationEquals;
-   }
-
-   @Override
-   public HandstepPacket transform(RigidBodyTransform transform)
-   {
-      HandstepPacket ret = new HandstepPacket(this);
-
-      ret.location.applyTransform(transform);
-      ret.orientation.applyTransform(transform);
-      ret.surfaceNormal.applyTransform(transform);
-
-      return ret;
    }
 
    public HandstepPacket(Random random)

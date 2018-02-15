@@ -45,7 +45,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
 
    public FootstepPlanState(FootstepPlanState copy)
    {
-      this(copy.footstepData.clone(), copy.theta);
+      this(new FootstepDataMessage(copy.footstepData), copy.theta);
       this.terrainType = copy.terrainType;
    }
 

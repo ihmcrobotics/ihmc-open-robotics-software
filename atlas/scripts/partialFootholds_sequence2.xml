@@ -125,6 +125,7 @@
     <executionMode>OVERRIDE</executionMode>
     <swingTime>0.6</swingTime>
     <transferTime>0.0</transferTime>
+    <trustHeightOfFootsteps>true</trustHeightOfFootsteps>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
   <long>1462896128741</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>

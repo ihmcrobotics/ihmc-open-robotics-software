@@ -13,9 +13,7 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -24,7 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/footstep_list")
-public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>
+public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 {
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
@@ -70,6 +68,21 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    public FootstepDataListMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public FootstepDataListMessage(FootstepDataListMessage other)
+   {
+      for(FootstepDataMessage otherFootstep : other.footstepDataList)
+         footstepDataList.add(new FootstepDataMessage(otherFootstep));
+      executionTiming = other.executionTiming;
+      defaultSwingDuration = other.defaultSwingDuration;
+      defaultTransferDuration = other.defaultTransferDuration;
+      finalTransferDuration = other.finalTransferDuration;
+      trustHeightOfFootsteps = other.trustHeightOfFootsteps;
+      areFootstepsAdjustable = other.areFootstepsAdjustable;
+      offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
+      if (other.queueingProperties != null)
+         queueingProperties.set(other.queueingProperties);
    }
 
    public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double finalTransferDuration)
@@ -240,20 +253,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
                + "\tSwing Duration: " + this.defaultSwingDuration + "\n"
                + "\tSize: " + this.size() + " Footsteps");
       }
-   }
-
-   @Override
-   public FootstepDataListMessage transform(RigidBodyTransform transform)
-   {
-      FootstepDataListMessage ret = new FootstepDataListMessage(defaultSwingDuration, defaultTransferDuration, finalTransferDuration);
-
-      for (FootstepDataMessage footstepData : footstepDataList)
-      {
-         FootstepDataMessage transformedFootstepData = footstepData.transform(transform);
-         ret.add(transformedFootstepData);
-      }
-
-      return ret;
    }
 
    public void setDefaultSwingDuration(double defaultSwingDuration)
