@@ -1,20 +1,23 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadBearingCommand, HandLoadBearingMessage>
+public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, HandLoadBearingMessage>
 {
    private RobotSide robotSide;
 
    private boolean useJointspaceCommand = false;
 
-   private ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
+   private JointspaceTrajectoryCommand jointspaceTrajectory = new JointspaceTrajectoryCommand();
    
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero**/
    public double adjustedExecutionTime;
+
+   private final LoadBearingCommand loadBearingCommand = new LoadBearingCommand();
 
    public RobotSide getRobotSide()
    {
@@ -24,29 +27,29 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    @Override
    public void set(HandLoadBearingCommand other)
    {
-      super.set(other);
+      loadBearingCommand.set(other.loadBearingCommand);
       robotSide = other.robotSide;
       executionDelayTime = other.getExecutionDelayTime();
       useJointspaceCommand = other.isUseJointspaceCommand();
-      armTrajectoryCommand.set(other.getArmTrajectoryCommand());
+      jointspaceTrajectory.set(other.getJointspaceTrajectory());
    }
 
    @Override
    public void set(HandLoadBearingMessage message)
    {
-      super.set(message);
+      loadBearingCommand.set(message.loadBearingMessage);
       executionDelayTime = message.executionDelayTime;
       robotSide = message.robotSide;
       useJointspaceCommand = message.isUseJointspaceCommand();
-      if (message.getArmTrajectoryMessage() != null)
+      if (message.getJointspaceTrajectory() != null)
       {
-         armTrajectoryCommand.set(message.getArmTrajectoryMessage());
+         jointspaceTrajectory.set(message.getJointspaceTrajectory());
       }
    }
 
-   public ArmTrajectoryCommand getArmTrajectoryCommand()
+   public JointspaceTrajectoryCommand getJointspaceTrajectory()
    {
-      return armTrajectoryCommand;
+      return jointspaceTrajectory;
    }
 
    public boolean isUseJointspaceCommand()
@@ -54,13 +57,18 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
       return useJointspaceCommand;
    }
 
+   public LoadBearingCommand getLoadBearingCommand()
+   {
+      return loadBearingCommand;
+   }
+
    @Override
    public void clear()
    {
-      super.clear();
+      loadBearingCommand.clear();
       robotSide = null;
       useJointspaceCommand = false;
-      armTrajectoryCommand.clear();
+      jointspaceTrajectory.clear();
    }
 
    @Override
@@ -73,16 +81,16 @@ public class HandLoadBearingCommand extends AbstractLoadBearingCommand<HandLoadB
    public boolean isCommandValid()
    {
       boolean armTrajectoryValid = true;
-      if (useJointspaceCommand && armTrajectoryCommand == null)
+      if (useJointspaceCommand && jointspaceTrajectory == null)
       {
          armTrajectoryValid = false;
       }
       else if (useJointspaceCommand)
       {
-         armTrajectoryValid = armTrajectoryCommand.isCommandValid();
+         armTrajectoryValid = jointspaceTrajectory.isCommandValid();
       }
 
-      return armTrajectoryValid && robotSide != null && super.isCommandValid();
+      return armTrajectoryValid && robotSide != null && loadBearingCommand.isCommandValid();
    }
    
    /**

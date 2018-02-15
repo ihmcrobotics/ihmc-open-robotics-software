@@ -11,7 +11,6 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.avatar.sensors.DRCSimulatedIMUPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -59,7 +58,6 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithTorqueOffsets;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -243,14 +241,6 @@ public class AvatarSimulationFactory
       if (simulatedHandController != null)
       {
          threadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, false);
-      }
-      DRCRobotJointMap jointMap = robotModel.get().getJointMap();
-      if (jointMap.getHeadName() != null)
-      {
-         DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(humanoidGlobalDataProducer.get(),
-                                                                                          stateEstimationThread.getSimulatedIMUOutput(),
-                                                                                          jointMap.getHeadName());
-         threadedRobotController.addController(drcSimulatedIMUPublisher, slowPublisherTicksPerSimulationTick, false);
       }
    }
 

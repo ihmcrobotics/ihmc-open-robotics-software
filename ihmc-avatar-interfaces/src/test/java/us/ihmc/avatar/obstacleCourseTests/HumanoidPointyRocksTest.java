@@ -128,7 +128,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
          armTrajectoryMessage.robotSide = robotSide;
          double[] armConfig = straightArmConfigs.get(robotSide);
-         armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
+         armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
          for (int i = 0; i < armConfig.length; i++)
          {
             TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
@@ -136,7 +136,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
             trajectoryPoint.time = 1.0;
             OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
             jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
-            armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
+            armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages[i] = jointTrajectory;
          }
          drcSimulationTestHelper.send(armTrajectoryMessage);
       }
@@ -436,7 +436,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       footPosition.setZ(footPosition.getZ() + 0.1);
 
-      liftFootCommand.addTrajectoryPoint(1.0, new Point3D(footPosition), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+      liftFootCommand.getSE3Trajectory().addTrajectoryPoint(1.0, new Point3D(footPosition), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
       queuedControllerCommands.add(liftFootCommand);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);

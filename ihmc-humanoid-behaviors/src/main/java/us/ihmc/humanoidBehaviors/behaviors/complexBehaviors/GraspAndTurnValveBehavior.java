@@ -182,7 +182,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
                   point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
-            handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+            handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
          }
@@ -206,7 +206,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
             point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
-      handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
    }

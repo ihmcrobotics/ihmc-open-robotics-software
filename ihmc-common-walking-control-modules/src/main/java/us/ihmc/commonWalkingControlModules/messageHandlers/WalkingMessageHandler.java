@@ -21,8 +21,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
@@ -31,6 +37,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -278,7 +285,7 @@ public class WalkingMessageHandler
     * @param numberOfPoints the number of sampling points of the trajectory
     * @param trajectoryToPack the trajectory will be packed in here
     */
-   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<TrajectoryPoint3D> trajectoryToPack)
+   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<SimpleEuclideanTrajectoryPoint> trajectoryToPack)
    {
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }

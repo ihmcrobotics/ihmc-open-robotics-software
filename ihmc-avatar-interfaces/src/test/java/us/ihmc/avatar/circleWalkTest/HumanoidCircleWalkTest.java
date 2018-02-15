@@ -158,8 +158,8 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
             rightJointTrajectory.setTrajectoryPoint(trajectoryPointIndex, 2 * trajectoryPointIndex + 1,
                                                     getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex], fullRobotModel), 0);
          }
-         leftHandMessage.setTrajectory1DMessage(armJointIndex, leftJointTrajectory);
-         rightHandMessage.setTrajectory1DMessage(armJointIndex, rightJointTrajectory);
+         leftHandMessage.getJointspaceTrajectory().setTrajectory1DMessage(armJointIndex, leftJointTrajectory);
+         rightHandMessage.getJointspaceTrajectory().setTrajectory1DMessage(armJointIndex, rightJointTrajectory);
          leftArmTrajectory.add(leftJointTrajectory);
          rightArmTrajectory.add(rightJointTrajectory);
       }

@@ -1,15 +1,31 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
-import geometry_msgs.Point;
-import geometry_msgs.Transform;
-import geometry_msgs.Vector3;
-import ihmc_msgs.Point2dRosMessage;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
+
+import geometry_msgs.Point;
+import geometry_msgs.Transform;
+import geometry_msgs.Vector3;
+import ihmc_msgs.Point2dRosMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SettablePacket;
@@ -21,21 +37,21 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 
-import java.lang.reflect.*;
-import java.util.*;
-
 public class GenericROSTranslationTools
 {
    private static final MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
 
-   private static final Reflections ihmcPackageReflector = new Reflections("us.ihmc.humanoidRobotics.communication.packets");
+   private static final Reflections ihmcPackageReflector = new Reflections("us.ihmc.");
    private static Set<Class<?>> ihmcCoreAnnotatedPacket = null;
    private static Set<Class<?>> allAnnotatedPackets = null;
    private static Set<Class<?>> outputTopics;
@@ -197,7 +213,10 @@ public class GenericROSTranslationTools
             }
             else
             {
-               ihmcField.set(ihmcMessage, rosGetter.invoke(rosMessage));
+               Object rosField = rosGetter.invoke(rosMessage);
+               if (rosField instanceof Message)
+                  rosField = convertRosMessageToIHMCMessage((Message) rosField);
+               ihmcField.set(ihmcMessage, rosField);
             }
          }
 

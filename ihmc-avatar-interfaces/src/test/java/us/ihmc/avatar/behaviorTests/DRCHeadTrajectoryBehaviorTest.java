@@ -134,7 +134,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       double trajectoryTime = 4.0;
       Quaternion desiredHeadQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
-      message.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
+      message.getSo3Trajectory().getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -150,7 +150,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
 
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
-      message.getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
+      message.getSo3Trajectory().getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       return message;
    }
 
@@ -177,7 +177,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       }
 
       FramePose3D desiredHeadPose = new FramePose3D();
-      desiredHeadPose.set(initialHeadPose.getPosition(), headTrajectoryMessage.getLastTrajectoryPoint().orientation);
+      desiredHeadPose.set(initialHeadPose.getPosition(), headTrajectoryMessage.getSo3Trajectory().getLastTrajectoryPoint().orientation);
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
       assertTrue(headTrajectoryBehavior.isDone());
    }

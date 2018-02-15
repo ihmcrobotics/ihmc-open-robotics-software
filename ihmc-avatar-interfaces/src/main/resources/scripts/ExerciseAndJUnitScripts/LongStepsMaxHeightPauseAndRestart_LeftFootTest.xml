@@ -54,6 +54,7 @@
     <defaultSwingDuration>0.0</defaultSwingDuration>
     <defaultTransferDuration>0.0</defaultTransferDuration>
     <finalTransferDuration>0.0</finalTransferDuration>
+    <trustHeightOfFootsteps>true</trustHeightOfFootsteps>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
   <long>1492627391807</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
@@ -184,6 +185,7 @@
     <defaultSwingDuration>0.0</defaultSwingDuration>
     <defaultTransferDuration>0.0</defaultTransferDuration>
     <finalTransferDuration>0.0</finalTransferDuration>
+    <trustHeightOfFootsteps>true</trustHeightOfFootsteps>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
   <long>1492627391809</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>

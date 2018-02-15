@@ -93,12 +93,6 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
       this.dataReferenceFrameId = dataReferenceFrameId;
    }
 
-   public void set(FrameBasedMessage message)
-   {
-      this.trajectoryReferenceFrameId = message.getFrameInformation().trajectoryReferenceFrameId;
-      this.dataReferenceFrameId = message.getFrameInformation().dataReferenceFrameId;
-   }
-
    public void set(FrameInformation frameInformation)
    {
       this.trajectoryReferenceFrameId = frameInformation.getTrajectoryReferenceFrameId();

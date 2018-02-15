@@ -18,8 +18,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -198,7 +198,7 @@ public class RigidBodyControlManager
          hold();
    }
 
-   public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
+   public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
       if (command.useCustomControlFrame())
       {
@@ -224,7 +224,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
+   public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand command)
    {
       if (command.useCustomControlFrame())
       {
@@ -250,7 +250,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleJointspaceTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command)
+   public void handleJointspaceTrajectoryCommand(JointspaceTrajectoryCommand command)
    {
       computeDesiredJointPositions(initialJointPositions);
 
@@ -265,7 +265,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointSpaceCommand)
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand)
    {
       if (taskspaceCommand.useCustomControlFrame())
       {
@@ -291,7 +291,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
+   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointspaceCommand)
    {
       throw new RuntimeException("Should not send these messages anymore. Switch to SE3 message with selection matrix.");
 //      if (taskspaceCommand.useCustomControlFrame())
@@ -318,7 +318,7 @@ public class RigidBodyControlManager
 //      }
    }
 
-   public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
+   public void handleDesiredAccelerationsCommand(DesiredAccelerationsCommand command)
    {
       if (userControlState.handleDesiredAccelerationsCommand(command))
       {
@@ -395,7 +395,7 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
+   public void handleLoadBearingCommand(LoadBearingCommand command, JointspaceTrajectoryCommand jointspaceCommand)
    {
       if (loadBearingControlState == null)
       {

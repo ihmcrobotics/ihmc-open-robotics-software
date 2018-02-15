@@ -273,7 +273,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
          armTrajectoryMessage.robotSide = robotSide;
          double[] armConfig = straightArmConfigs.get(robotSide);
-         armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
+         armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
          for (int i = 0; i < armConfig.length; i++)
          {
             TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
@@ -281,7 +281,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             trajectoryPoint.time = 0.5;
             OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
             jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
-            armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
+            armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages[i] = jointTrajectory;
          }
          drcSimulationTestHelper.send(armTrajectoryMessage);
       }

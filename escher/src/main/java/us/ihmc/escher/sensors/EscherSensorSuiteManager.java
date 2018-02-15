@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
@@ -14,8 +15,6 @@ import us.ihmc.escher.parameters.EscherSensorInformation;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
-import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
-import us.ihmc.ihmcPerception.depthData.SCSPointCloudLidarReceiver;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -35,7 +34,7 @@ public class EscherSensorSuiteManager implements DRCSensorSuiteManager
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-   private final PointCloudDataReceiver pointCloudDataReceiver;
+   private final LidarScanPublisher lidarScanPublisher;
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
 
    public EscherSensorSuiteManager(FullHumanoidRobotModelFactory fullRobotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
@@ -46,12 +45,11 @@ public class EscherSensorSuiteManager implements DRCSensorSuiteManager
       this.sensorInformation = sensorInformation;
       if (sensorInformation.getPointCloudParameters().length > 0)
       {
-         this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, null, ppsTimestampOffsetProvider, contactPointParameters,
-               robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+         lidarScanPublisher = new LidarScanPublisher(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), fullRobotModelFactory, sensorSuitePacketCommunicator);
       }
       else
       {
-         this.pointCloudDataReceiver = null;
+         lidarScanPublisher = null;
       }
    }
 
@@ -63,7 +61,9 @@ public class EscherSensorSuiteManager implements DRCSensorSuiteManager
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), fullRobotModelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
+         lidarScanPublisher.receiveLidarFromSCS(scsSensorsCommunicator);
+         lidarScanPublisher.setScanFrameToLidarSensorFrame();
+         lidarScanPublisher.start();
       }
       cameraDataReceiver.start();
    }
@@ -88,6 +88,9 @@ public class EscherSensorSuiteManager implements DRCSensorSuiteManager
             rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, multisenseLeftEyeCameraParameters, multisenseLidarParameters,
             multisenseStereoParameters, shouldUseRosParameterSetters);
 
+      lidarScanPublisher.receiveLidarFromROS(multisenseLidarParameters.getRosTopic(), rosMainNode);
+      lidarScanPublisher.setScanFrameToWorldFrame();
+      lidarScanPublisher.start();
 
       multiSenseSensorManager.initializeParameterListeners();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
@@ -99,12 +102,5 @@ public class EscherSensorSuiteManager implements DRCSensorSuiteManager
    public void connect() throws IOException
    {
       sensorSuitePacketCommunicator.connect();
-      if (sensorInformation.getLidarParameters().length > 0 || sensorInformation.getPointCloudParameters().length > 0)
-      {
-         if(pointCloudDataReceiver != null)
-         {
-            pointCloudDataReceiver.start();
-         }
-      }
    }
 }
