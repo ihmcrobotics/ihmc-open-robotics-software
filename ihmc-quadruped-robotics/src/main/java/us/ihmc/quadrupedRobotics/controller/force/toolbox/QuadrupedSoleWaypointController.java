@@ -17,7 +17,7 @@ public class QuadrupedSoleWaypointController
    private final YoDouble robotTime;
 
    // SoleWaypoint variables
-   QuadrantDependentList<MultipleWaypointsPositionTrajectoryGenerator> quadrupedWaypointsPositionTrajectoryGenerator;
+   private final QuadrantDependentList<MultipleWaypointsPositionTrajectoryGenerator> quadrupedWaypointsPositionTrajectoryGenerator;
 
    // Feedback controller
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
