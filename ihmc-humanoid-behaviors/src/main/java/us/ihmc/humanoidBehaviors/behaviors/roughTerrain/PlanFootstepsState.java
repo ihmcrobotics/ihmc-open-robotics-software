@@ -61,7 +61,12 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
       this.communicationBridge = communicationBridge;
       this.swingTime = swingTime;
 
-      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.position, packet.orientation)));
+      communicationBridge.attachListener(WalkOverTerrainGoalPacket.class, (packet) ->
+      {
+         goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.position, packet.orientation));
+         PrintTools.info("received goal pose");
+      });
+
       communicationBridge.attachListener(PlanarRegionsListMessage.class, planarRegionsListMessage::set);
       communicationBridge.attachListener(FootstepPlanningToolboxOutputStatus.class, plannerOutputStatus::set);
 
@@ -101,6 +106,7 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
 
       if (planarRegionsListMessage.get() == null)
       {
+         PrintTools.info("waiting for planar regions");
          return;
       }
 
@@ -121,6 +127,7 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
       }
       else
       {
+         PrintTools.info("starting to plan...");
          planner.setPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage.get()));
          planner.setTimeout(swingTime.getValue() - 0.25);
 
@@ -146,9 +153,10 @@ class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkO
             nextSideToSwing.set(stanceSide);
             outputStatus.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(plan, 0.0, 0.0, ExecutionMode.OVERRIDE);
          }
-         this.plannerOutputStatus.set(outputStatus);
 
          PrintTools.info("Finished planning. Result: " + result);
+
+         this.plannerOutputStatus.set(outputStatus);
       }
    }
 
