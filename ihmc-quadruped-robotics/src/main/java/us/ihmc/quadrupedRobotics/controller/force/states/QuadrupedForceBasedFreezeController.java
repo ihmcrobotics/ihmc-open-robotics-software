@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -41,12 +42,13 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
    private final FullQuadrupedRobotModel fullRobotModel;
 
-   public QuadrupedForceBasedFreezeController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedForceBasedFreezeController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                              YoVariableRegistry parentRegistry)
    {
       // Yo variables
       yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
       // Feedback controller
-      feetManager = controllerToolbox.getFeetManager();
+      feetManager = controlManagerFactory.getOrCreateFeetManager();
 
       // Task space controller
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
@@ -54,8 +56,9 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
-      fullRobotModel = environment.getFullRobotModel();
-      environment.getParentRegistry().addChild(registry);
+      fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
+
+      parentRegistry.addChild(registry);
    }
 
    @Override

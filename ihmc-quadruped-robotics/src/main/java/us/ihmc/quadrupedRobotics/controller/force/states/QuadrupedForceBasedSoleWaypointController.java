@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -46,20 +47,20 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
 
    private final YoBoolean isDoneMoving = new YoBoolean("soleWaypointDoneMoving", registry);
 
-   public QuadrupedForceBasedSoleWaypointController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedSoleWaypointInputProvider inputProvider)
+   public QuadrupedForceBasedSoleWaypointController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                                    QuadrupedSoleWaypointInputProvider inputProvider, YoVariableRegistry parentRegistry)
    {
       soleWaypointInputProvider = inputProvider;
-      feetManager = controllerToolbox.getFeetManager();
+      feetManager = controlManagerFactory.getOrCreateFeetManager();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
-      fullRobotModel = environment.getFullRobotModel();
+      fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
 
-      environment.getParentRegistry().addChild(registry);
+      parentRegistry.addChild(registry);
    }
 
    @Override
