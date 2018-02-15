@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -22,13 +23,14 @@ public class QuadrupedSolePositionController
    private final YoFrameVector yoSoleLinearVelocitySetpoint;
    private final YoFrameVector yoSoleForceFeedforwardSetpoint;
 
-   public QuadrupedSolePositionController(RobotQuadrant robotQuadrant, ReferenceFrame soleFrame, double controlDT, YoVariableRegistry registry)
+   public QuadrupedSolePositionController(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, YoVariableRegistry registry)
    {
       String prefix = robotQuadrant.getPascalCaseName();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+      double controlDT = toolbox.getRuntimeEnvironment().getControlDT();
       this.robotQuadrant = robotQuadrant;
-      this.soleFrame = soleFrame;
+      this.soleFrame = toolbox.getReferenceFrames().getFootReferenceFrames().get(robotQuadrant);
       this.solePositionController = new EuclideanPositionController(prefix + "SolePosition", soleFrame, controlDT, registry);
       this.solePositionControllerGains = new DefaultYoPID3DGains(prefix + "SolePosition", GainCoupling.NONE, true, registry);
       this.yoSolePositionSetpoint = new YoFramePoint(prefix + "SolePositionSetpoint", worldFrame, registry);

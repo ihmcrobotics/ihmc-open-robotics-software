@@ -51,7 +51,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
       registry = new YoVariableRegistry(robotQuadrant.getShortName() + getClass().getSimpleName());
 
-      // Create waypoint trajectory for each quadrant
+      // Create waypoint trajectory
       quadrupedWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(robotQuadrant.getCamelCaseName() + "SoleTrajectory",
                                                                                                        bodyFrame, registry);
       parentRegistry.addChild(registry);
@@ -132,7 +132,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       soleForceCommand.setToZero();
    }
 
-   public void createSoleWaypointTrajectory()
+   private void createSoleWaypointTrajectory()
    {
       quadrupedWaypointsPositionTrajectoryGenerator.clear();
       for (int i = 0; i < quadrupedSoleWaypointList.size(); ++i)
