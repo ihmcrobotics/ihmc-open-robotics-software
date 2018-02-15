@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -115,8 +116,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider,
-         QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider)
+                                           QuadrupedControlManagerFactory controlManagerFactory, QuadrupedPostureInputProviderInterface postureProvider,
+                                           QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider)
    {
       this.postureProvider = postureProvider;
       this.planarVelocityProvider = planarVelocityProvider;
@@ -140,12 +141,16 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      timedStepController = new QuadrupedTimedStepController(controllerToolbox.getSolePositionController(), runtimeEnvironment.getRobotTimestamp(), registry,
-            runtimeEnvironment.getGraphicsListRegistry());
       mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(controllerToolbox.getDcmPositionEstimator(), NUMBER_OF_PREVIEW_STEPS, registry,
             runtimeEnvironment.getGraphicsListRegistry());
       mpcSettings = new QuadrupedMpcOptimizationWithLaneChangeSettings(mpcMaximumPreviewTimeParameter.get(), mpcStepAdjustmentCostParameter.get(),
             mpcCopAdjustmentCostParameter.get(), mpcMinimumNormalizedContactPressureParameter.get());
+
+      QuadrantDependentList<QuadrupedSolePositionController> solePositionControllers = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         solePositionControllers.set(robotQuadrant, controlManagerFactory.getOrCreateSolePositionController(robotQuadrant));
+      timedStepController = new QuadrupedTimedStepController(solePositionControllers, runtimeEnvironment.getRobotTimestamp(), registry,
+                                                             runtimeEnvironment.getGraphicsListRegistry());
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();

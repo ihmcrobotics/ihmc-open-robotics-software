@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -10,21 +11,17 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbo
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedDcmBasedStandController implements QuadrupedController
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
-   private final YoDouble robotTimestamp;
-   private final double controlDT;
    private final double gravity;
    private final double mass;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -81,15 +78,13 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
 
-   public QuadrupedDcmBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedPostureInputProviderInterface postureProvider)
+   public QuadrupedDcmBasedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                           QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry)
 
    {
       this.postureProvider = postureProvider;
-      this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
-      this.mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
+      this.mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
 
       // frames
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -106,7 +101,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
 
-      feetManager = controllerToolbox.getFeetManager();
+      feetManager = controlManagerFactory.getOrCreateFeetManager();
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
@@ -118,7 +113,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       // planning
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
-      runtimeEnvironment.getParentRegistry().addChild(registry);
+      parentRegistry.addChild(registry);
    }
 
    public YoVariableRegistry getYoVariableRegistry()

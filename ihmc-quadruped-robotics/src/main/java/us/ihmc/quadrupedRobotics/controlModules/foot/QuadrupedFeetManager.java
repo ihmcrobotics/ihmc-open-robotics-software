@@ -21,14 +21,18 @@ public class QuadrupedFeetManager
 
    private final QuadrantDependentList<QuadrupedFootControlModule> footControlModules = new QuadrantDependentList<>();
 
-   public QuadrupedFeetManager(QuadrupedForceControllerToolbox toolbox, QuadrantDependentList<QuadrupedSolePositionController> solePositionControllers,
-                               YoVariableRegistry parentRegistry)
+   public QuadrupedFeetManager(QuadrupedForceControllerToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         footControlModules.set(robotQuadrant, new QuadrupedFootControlModule(robotQuadrant, toolbox, solePositionControllers.get(robotQuadrant), registry));
+         footControlModules.set(robotQuadrant, new QuadrupedFootControlModule(robotQuadrant, toolbox, registry));
       }
       parentRegistry.addChild(registry);
+   }
+
+   public QuadrupedSolePositionController getSolePositionController(RobotQuadrant robotQuadrant)
+   {
+      return footControlModules.get(robotQuadrant).getSolePositionController();
    }
 
    public void attachStateChangedListener(FiniteStateMachineStateChangedListener stateChangedListener)
@@ -104,5 +108,11 @@ public class QuadrupedFeetManager
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footControlModules.get(robotQuadrant).requestSupport();
+   }
+
+   public void requestHoldAll()
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footControlModules.get(robotQuadrant).requestHold();
    }
 }
