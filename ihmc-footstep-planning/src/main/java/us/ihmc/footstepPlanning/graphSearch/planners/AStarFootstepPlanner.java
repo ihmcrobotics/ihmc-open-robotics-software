@@ -1,25 +1,15 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
-
 import org.apache.commons.math3.util.Precision;
-
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
@@ -42,6 +32,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+
 public class AStarFootstepPlanner implements FootstepPlanner
 {
    private static final boolean debug = false;
@@ -56,6 +51,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode endNode;
+   private PlanarRegionsList planarRegionsList;
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
@@ -139,6 +135,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
+      this.planarRegionsList = planarRegionsList;
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
    }
@@ -214,6 +211,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
          this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
+
+      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
+      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
 
       stack.add(startNode);
       expandedNodes = new HashSet<>();
