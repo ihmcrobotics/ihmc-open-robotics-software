@@ -177,9 +177,16 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
       });
    }
 
+   /**
+    * Note, that here the YoVariables are set twice:</br>
+    * First to the new value triggering the change listeners that will send the value to the server.</br>
+    * Second to the old value without sending it such that the value of the YoVariable will be updated properly once
+    * it received the change back from the server.
+    */
    private static void setYoVariableFromGuiParameter(YoVariable<?> yoVariable, GuiParameter guiParameter)
    {
       doChecks(guiParameter, yoVariable);
+      long oldValue = yoVariable.getValueAsLongBits();
 
       switch (yoVariable.getYoVariableType())
       {
@@ -199,13 +206,16 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
          yoBoolean.set(booleanValue);
          break;
       case ENUM:
-         YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
          TObjectIntMap<String> valueOptions = guiParameter.getValueOptions();
-         yoEnum.set(valueOptions.get(guiParameter.getCurrentValue()));
+         int ordinalValue = valueOptions.get(guiParameter.getCurrentValue());
+         YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+         yoEnum.set(ordinalValue);
          break;
       default:
          throw new RuntimeException("Unhandled parameter type: " + yoVariable.getYoVariableType());
       }
+
+      yoVariable.setValueFromLongBits(oldValue, false);
    }
 
    private static void setGuiParameterFromYoVariable(GuiParameter guiParameter, YoVariable<?> yoVariable)
