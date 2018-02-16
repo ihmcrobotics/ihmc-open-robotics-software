@@ -9,6 +9,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
@@ -47,6 +48,8 @@ public class GuiController
    private VBox tuningBox;
    @FXML
    private StackPane inputPane;
+   @FXML
+   private ChoiceBox<GuiParameterStatus> statusFilter;
 
    private final HashMap<String, GuiParameter> parameterMap = new HashMap<>();
    private ChangeCollector changeCollector;
@@ -57,6 +60,10 @@ public class GuiController
       searchFieldParameters.textProperty().addListener(observable -> updateTree());
       searchFieldNamespaces.textProperty().addListener(observable -> updateTree());
       tuningBoxManager = new TuningBoxManager(tuningBox);
+
+      statusFilter.getItems().addAll(GuiParameterStatus.values());
+      statusFilter.getSelectionModel().select(GuiParameterStatus.ANY);
+      statusFilter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> statusFilterChanged());
 
       tree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
       tree.setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -131,9 +138,14 @@ public class GuiController
       searchFieldNamespaces.setDisable(hideNamespaces.isSelected());
    }
 
+   private void statusFilterChanged()
+   {
+      updateTree();
+   }
+
    private void updateTree()
    {
-      tree.filterRegistries(hideNamespaces.isSelected(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
+      tree.filterRegistries(hideNamespaces.isSelected(), statusFilter.getValue(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
    }
 
    public void addInputNode(Node node)
