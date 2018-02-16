@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLoca
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -451,6 +452,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       if (drcStateEstimator != null)
          drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+   }
+
+   public void initializeEstimatorToActual(Point3D initialCoMPosition, Quaternion initialEstimationLinkOrientation, Vector3D initialCoMVelocity, Vector3D initialAngularVelocity)
+   {
+      if (drcStateEstimator != null)
+         drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialCoMVelocity, initialEstimationLinkOrientation, initialAngularVelocity);
    }
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)

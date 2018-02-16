@@ -11,7 +11,7 @@ public class CenterOfMassCalculator
 
    private final RigidBody[] rigidBodies;
    private double totalMass;
-   private final FramePoint3D centerOfMass = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FramePoint3D tempPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
    public CenterOfMassCalculator(RigidBody rootBody, ReferenceFrame desiredFrame)
@@ -37,7 +37,7 @@ public class CenterOfMassCalculator
 
    public void compute()
    {
-      centerOfMass.setToZero(desiredFrame);
+      centerOfMassPosition.setToZero(desiredFrame);
       totalMass = 0.0;
 
       for (RigidBody rigidBody : rigidBodies)
@@ -46,21 +46,21 @@ public class CenterOfMassCalculator
          double mass = rigidBody.getInertia().getMass();
          tempPoint.changeFrame(desiredFrame);
          tempPoint.scale(mass);
-         centerOfMass.add(tempPoint);
+         centerOfMassPosition.add(tempPoint);
          totalMass += mass;
       }
 
-      centerOfMass.scale(1.0 / totalMass);
+      centerOfMassPosition.scale(1.0 / totalMass);
    }
-
+   
    public FramePoint3D getCenterOfMass()
    {
-      return new FramePoint3D(centerOfMass);
+      return new FramePoint3D(centerOfMassPosition);
    }
 
    public void getCenterOfMass(FramePoint3D centerOfMassToPack)
    {
-      centerOfMassToPack.setIncludingFrame(this.centerOfMass);
+      centerOfMassToPack.setIncludingFrame(this.centerOfMassPosition);
    }
 
    public double getTotalMass()
