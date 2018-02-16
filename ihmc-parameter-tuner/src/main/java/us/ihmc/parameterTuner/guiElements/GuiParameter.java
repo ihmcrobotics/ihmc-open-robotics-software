@@ -1,5 +1,8 @@
 package us.ihmc.parameterTuner.guiElements;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gnu.trove.map.TObjectIntMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -15,7 +18,10 @@ public class GuiParameter extends GuiElement
    private final StringProperty max = new SimpleStringProperty();
    private final StringProperty description = new SimpleStringProperty();
 
+   private GuiParameter initialParameter;
    private GuiParameterStatus status;
+
+   private final List<ParameterChangeListener> listeners = new ArrayList<>();
 
    public GuiParameter(String name, String type, GuiRegistry parent)
    {
@@ -32,40 +38,57 @@ public class GuiParameter extends GuiElement
    public void addStatusUpdater()
    {
       // Only consider the parameter modified if the value changes for now.
-      // TODO: save original values to enable discarding changes.
-      value.addListener((observable, oldValue, newValue) -> {
-         status = GuiParameterStatus.MODIFIED;
-      });
+      value.addListener((observable, oldValue, newValue) -> status = GuiParameterStatus.MODIFIED);
    }
 
    public void setValue(String value)
    {
-      this.value.set(value);
+      if (!this.value.getValueSafe().equals(value))
+      {
+         this.value.set(value);
+         informListeners();
+      }
    }
 
    public void setMin(String min)
    {
-      this.min.set(min);
+      if (!this.min.getValueSafe().equals(min))
+      {
+         this.min.set(min);
+         informListeners();
+      }
    }
 
    public void setMax(String max)
    {
-      this.max.set(max);
+      if (!this.max.getValueSafe().equals(max))
+      {
+         this.max.set(max);
+         informListeners();
+      }
    }
 
    public void setDescription(String description)
    {
-      this.description.set(description);
+      if (!this.description.getValueSafe().equals(description))
+      {
+         this.description.set(description);
+         informListeners();
+      }
    }
 
    public void setLoadStatus(ParameterLoadStatus loadStatus)
    {
-      this.status = GuiParameterStatus.get(loadStatus);
+      setStatus(GuiParameterStatus.get(loadStatus));
    }
 
    public void setStatus(GuiParameterStatus status)
    {
-      this.status = status;
+      if (status != this.status)
+      {
+         this.status = status;
+         informListeners();
+      }
    }
 
    public String getType()
@@ -105,10 +128,12 @@ public class GuiParameter extends GuiElement
 
    public void addChangedListener(ParameterChangeListener listener)
    {
-      value.addListener((observable, oldValue, newValue) -> listener.changed(this));
-      min.addListener((observable, oldValue, newValue) -> listener.changed(this));
-      max.addListener((observable, oldValue, newValue) -> listener.changed(this));
-      description.addListener((observable, oldValue, newValue) -> listener.changed(this));
+      listeners.add(listener);
+   }
+
+   private void informListeners()
+   {
+      listeners.stream().forEach(listener -> listener.changed(this));
    }
 
    public GuiParameter createCopy()
@@ -120,10 +145,32 @@ public class GuiParameter extends GuiElement
 
    public void set(GuiParameter other)
    {
-      setValue(other.getCurrentValue());
-      setMin(other.getCurrentMin());
-      setMax(other.getCurrentMax());
-      setDescription(other.getCurrentDescription());
-      setStatus(other.getStatus());
+      value.set(other.getCurrentValue());
+      min.set(other.getCurrentMin());
+      max.set(other.getCurrentMax());
+      description.set(other.getCurrentDescription());
+      status = other.getStatus();
+      informListeners();
+   }
+
+   public void setValueAndStatus(GuiParameter other)
+   {
+      value.set(other.getCurrentValue());
+      status = other.getStatus();
+      informListeners();
+   }
+
+   public void reset()
+   {
+      if (initialParameter == null || status != GuiParameterStatus.MODIFIED)
+      {
+         throw new RuntimeException("Can not reset if the parameter was not modified.");
+      }
+      set(initialParameter);
+   }
+
+   public void saveStateForReset()
+   {
+      initialParameter = createCopy();
    }
 }
