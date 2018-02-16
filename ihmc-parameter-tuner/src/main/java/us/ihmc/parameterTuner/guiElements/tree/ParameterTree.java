@@ -50,7 +50,6 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
 
       treeItemMap.values().stream().forEach(item -> {
          item.getChildren().clear();
-         item.setExpanded(false);
       });
 
       ParameterTreeItem root = new ParameterTreeItem(null);
