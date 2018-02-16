@@ -3,6 +3,7 @@ package us.ihmc.parameterTuner.guiElements;
 import gnu.trove.map.TObjectIntMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 
 public class GuiParameter extends GuiElement
 {
@@ -14,6 +15,8 @@ public class GuiParameter extends GuiElement
    private final StringProperty max = new SimpleStringProperty();
    private final StringProperty description = new SimpleStringProperty();
 
+   private GuiParameterStatus status;
+
    public GuiParameter(String name, String type, GuiRegistry parent)
    {
       this(name, type, null, parent);
@@ -24,6 +27,15 @@ public class GuiParameter extends GuiElement
       super(name, parent);
       this.type = type;
       this.valueOptions = valueOptions;
+   }
+
+   public void addStatusUpdater()
+   {
+      // Only consider the parameter modified if the value changes for now.
+      // TODO: save original values to enable discarding changes.
+      value.addListener((observable, oldValue, newValue) -> {
+         status = GuiParameterStatus.MODIFIED;
+      });
    }
 
    public void setValue(String value)
@@ -44,6 +56,16 @@ public class GuiParameter extends GuiElement
    public void setDescription(String description)
    {
       this.description.set(description);
+   }
+
+   public void setLoadStatus(ParameterLoadStatus loadStatus)
+   {
+      this.status = GuiParameterStatus.get(loadStatus);
+   }
+
+   public void setStatus(GuiParameterStatus status)
+   {
+      this.status = status;
    }
 
    public String getType()
@@ -76,6 +98,11 @@ public class GuiParameter extends GuiElement
       return description.get();
    }
 
+   public GuiParameterStatus getStatus()
+   {
+      return status;
+   }
+
    public void addChangedListener(ParameterChangeListener listener)
    {
       value.addListener((observable, oldValue, newValue) -> listener.changed(this));
@@ -97,5 +124,6 @@ public class GuiParameter extends GuiElement
       setMin(other.getCurrentMin());
       setMax(other.getCurrentMax());
       setDescription(other.getCurrentDescription());
+      setStatus(other.getStatus());
    }
 }

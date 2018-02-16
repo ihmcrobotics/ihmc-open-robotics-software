@@ -17,6 +17,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 import us.ihmc.yoVariables.parameters.xml.Parameters;
 import us.ihmc.yoVariables.parameters.xml.Registry;
@@ -91,6 +92,7 @@ public class ParameterTuningTools
             guiParameter.setMin(xmlParameter.getMin());
             guiParameter.setMax(xmlParameter.getMax());
             guiParameter.setDescription(xmlParameter.getDescription());
+            guiParameter.setLoadStatus(ParameterLoadStatus.FILE);
             guiRegistry.addParameter(guiParameter);
          }
       }

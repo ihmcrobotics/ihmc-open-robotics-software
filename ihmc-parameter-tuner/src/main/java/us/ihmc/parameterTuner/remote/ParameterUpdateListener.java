@@ -216,6 +216,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
       guiParameter.setValue(yoParameter.getValueAsString());
       yoVariable.getManualScalingMin();
       guiParameter.setDescription(yoParameter.getDescription());
+      guiParameter.setLoadStatus(yoParameter.getLoadStatus());
 
       switch (yoVariable.getYoVariableType())
       {
