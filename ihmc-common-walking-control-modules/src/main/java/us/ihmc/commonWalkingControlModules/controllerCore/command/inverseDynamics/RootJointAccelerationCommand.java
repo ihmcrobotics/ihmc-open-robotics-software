@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
+import java.lang.ref.Reference;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 /**
@@ -19,7 +22,12 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
  */
 public class RootJointAccelerationCommand implements InverseDynamicsCommand<RootJointAccelerationCommand>
 {
-   private SpatialAccelerationVector rootJointAcceleration = new SpatialAccelerationVector();
+   private SpatialAccelerationVector rootJointAcceleration;
+   
+   public RootJointAccelerationCommand(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+   {
+      this.rootJointAcceleration = new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame);
+   }
    
    public void getRootJointSpatialAcceleration(SpatialAccelerationVector rootJointSpatialAccelerationToGet)
    {

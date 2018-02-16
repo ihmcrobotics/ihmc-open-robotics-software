@@ -51,7 +51,9 @@ public class CentroidalMomentumHandler
    {
       this.rootBody = rootBody;
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
-      this.rigidBodyList = ScrewTools.computeRigidBodiesAfterThisJoint(rootBody.getParentJoint());
+      if(rootBody.getChildrenJoints().size() != 1)
+         throw new RuntimeException("More than one root joint");
+      this.rigidBodyList = ScrewTools.computeRigidBodiesAfterThisJoint(rootBody.getChildrenJoints().get(0));
 
       int nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);

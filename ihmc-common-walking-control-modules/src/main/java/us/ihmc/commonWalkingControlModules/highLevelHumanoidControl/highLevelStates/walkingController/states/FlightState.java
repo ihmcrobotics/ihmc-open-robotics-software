@@ -1,41 +1,30 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JumpControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class FlightState extends AbstractJumpingState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.FLIGHT;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final CentroidalMomentumManager wholeBodyMomentumManager;
-   private final SpatialAccelerationVector zeroGravitationalAcceleration;
-   private final RigidBody rootBody;
+   private final GravityCompensationManager gravityCompensationManager;
    
    //private final FeetJumpManager feetJumpManager;
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
 
    
-   public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox, CentroidalMomentumManager wholeBodyMomentumManager, FeetJumpManager feetJumpManager)
+   public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox, JumpControlManagerFactory jumpControlManagerFactory)
    {
       super(stateEnum);
       this.controllerToolbox = controllerToolbox;
       this.controlCoreToolbox = controlCoreToolbox;
-      this.wholeBodyMomentumManager = wholeBodyMomentumManager;
+      this.wholeBodyMomentumManager = jumpControlManagerFactory.getOrCreateWholeBodyMomentumManager();
+      this.gravityCompensationManager = jumpControlManagerFactory.getOrCreateGravityCompensationManager();
       //this.feetJumpManager = feetJumpManager;
-      this.rootBody = controlCoreToolbox.getRootBody();
-      this.zeroGravitationalAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
    }
 
    @Override
@@ -47,12 +36,15 @@ public class FlightState extends AbstractJumpingState
    @Override
    public void doAction()
    {
-      wholeBodyMomentumManager.update(stateEnum);
+      updateManagerState();
       wholeBodyMomentumManager.compute();
-      //feetJumpManager.compute();
-      SpatialAccelerationCalculator spatialAccelerationCalculator = controlCoreToolbox.getInverseDynamicsCalculator().getSpatialAccelerationCalculator();
-      spatialAccelerationCalculator.setRootAcceleration(zeroGravitationalAcceleration);
-      spatialAccelerationCalculator.compute();
+      gravityCompensationManager.compute();
+   }
+
+   private void updateManagerState()
+   {
+      wholeBodyMomentumManager.updateState(stateEnum);
+      gravityCompensationManager.updateState(stateEnum);
    }
 
    @Override

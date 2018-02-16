@@ -6,12 +6,12 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.AbstractHighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -34,15 +34,16 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableRegistry momentumRegistry = new YoVariableRegistry("MomentumRegistry");
-   
+
    private final JumpControllerParameters jumpControllerParameters;
    private final MomentumOptimizationSettings momentumOptimizationSettings;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
-   
+
    private FeetJumpManager feetManager;
    private CentroidalMomentumManager momentumManager;
+   private GravityCompensationManager gravityCompensationManager;
    //private PlaneContactControlManager planeContactManager;
-   
+
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
@@ -51,7 +52,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
    private final Map<String, DoubleProvider> jointspaceWeightMap = new HashMap<>();
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, DoubleProvider> userModeWeightMap = new HashMap<>();
-   
+
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
 
    public JumpControlManagerFactory(JumpControllerParameters jumpControllerParameters, YoVariableRegistry parentRegistry)
@@ -64,32 +65,42 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       ParameterTools.extract3DGainMap("Position", jumpControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, registry);
       ParameterTools.extractJointWeightMap("JointspaceWeight", momentumOptimizationSettings.getJointspaceWeights(), jointspaceWeightMap, momentumRegistry);
       ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, momentumRegistry);
-      ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, momentumRegistry);
+      ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap,
+                                        momentumRegistry);
       ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, momentumRegistry);
 
       parentRegistry.addChild(momentumRegistry);
       parentRegistry.addChild(this.registry);
    }
-    
+
    public CentroidalMomentumManager getOrCreateWholeBodyMomentumManager()
    {
-      if (momentumManager == null)
-      {
-         momentumManager = new CentroidalMomentumManager(controllerToolbox, registry);
-      }
+      if (momentumManager != null)
+         return momentumManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(CentroidalMomentumManager.class))
+         return null;
+
+      momentumManager = new CentroidalMomentumManager(controllerToolbox, registry);
 
       return momentumManager;
    }
-
-//   public FeetJumpManager getOrCreateFeetJumpManager()
-//   {
-//      if (feetManager == null)
-//      {
-//         feetManager = new FeetJumpManager(controllerToolbox);
-//      }
-//      return feetManager;
-//   }
    
+   public GravityCompensationManager getOrCreateGravityCompensationManager()
+   {
+      if (gravityCompensationManager != null)
+         return gravityCompensationManager;
+      if(!hasHighLevelHumanoidControllerToolbox(GravityCompensationManager.class))
+         return null;
+      if(!hasJumpControllerParameters(GravityCompensationManager.class))
+         return null;
+      
+      this.gravityCompensationManager = new GravityCompensationManager(controllerToolbox, jumpControllerParameters, registry);
+
+      return gravityCompensationManager;
+   }
+   
+
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody baseBody, ReferenceFrame controlFrame,
                                                               ReferenceFrame baseFrame, Collection<ReferenceFrame> trajectoryFrames)
    {
@@ -108,7 +119,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
          return null;
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
-      if(!hasHighLevelHumanoidControllerToolbox(RigidBodyControlManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(RigidBodyControlManager.class))
          return null;
 
       // Gains
@@ -137,7 +148,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
    }
-   
+
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
    {
       if (controllerToolbox != null)
@@ -161,7 +172,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       missingObjectWarning(MomentumOptimizationSettings.class, managerClass);
       return false;
    }
-   
+
    private void missingObjectWarning(Class<?> missingObjectClass, Class<?> managerClass)
    {
       PrintTools.warn(this, missingObjectClass.getSimpleName() + " has not been set, cannot create: " + managerClass.getSimpleName());

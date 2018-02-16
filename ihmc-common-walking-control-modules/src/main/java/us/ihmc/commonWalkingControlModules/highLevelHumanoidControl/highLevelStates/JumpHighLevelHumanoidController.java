@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -31,12 +32,14 @@ public class JumpHighLevelHumanoidController
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
 
    private final JumpControllerParameters jumpControllerParameters;
+   private final JumpControlManagerFactory jumpControlManagerFactory;
    private final MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
+
    private final CentroidalMomentumManager wholeBodyMomentumManager;
-   //private final FeetJumpManager feetManager;
+   private final GravityCompensationManager gravityCompensationManager;
    
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(PlaneContactStateCommand.class);
    
@@ -54,9 +57,12 @@ public class JumpHighLevelHumanoidController
       
       this.controlCoreToolbox = controlCoreToolbox;
       this.controllerToolbox = controllerToolbox;
+      this.jumpControlManagerFactory = jumpingControlManagerFactory;
       this.wholeBodyMomentumManager = jumpingControlManagerFactory.getOrCreateWholeBodyMomentumManager();
       this.wholeBodyMomentumManager.setOptimizationWeights(momentumOptimizationSettings.getAngularMomentumWeight(), momentumOptimizationSettings.getLinearMomentumWeight());
       this.wholeBodyMomentumManager.setTotalRobotMass(controlCoreToolbox.getTotalRobotMass());
+      
+      this.gravityCompensationManager = jumpingControlManagerFactory.getOrCreateGravityCompensationManager();
       //this.feetManager = jumpingControlManagerFactory.getOrCreateFeetJumpManager();
       setupStateMachine();
    }
@@ -65,7 +71,7 @@ public class JumpHighLevelHumanoidController
    private void setupStateMachine()
    {
       //FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, feetManager);
-      FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, null);
+      FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, jumpControlManagerFactory);
       stateMachine.addState(flightState);
       stateMachine.setCurrentState(JumpStateEnum.FLIGHT);
    }
@@ -84,6 +90,9 @@ public class JumpHighLevelHumanoidController
    {
       planeContactStateCommandPool.clear();
       controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getCoMAccelerationCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(gravityCompensationManager.getRootJointAccelerationCommand());
+      
       //controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(RobotSide.LEFT));
       for (RobotSide robotSide : RobotSide.values)
       {

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 /**
@@ -14,8 +15,13 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class CoMAccelerationCommand implements InverseDynamicsCommand<CoMAccelerationCommand>
 {
-   private SpatialAccelerationVector comAcceleration = new SpatialAccelerationVector();
-
+   private SpatialAccelerationVector comAcceleration;
+   
+   public CoMAccelerationCommand(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+   {
+      comAcceleration = new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame);
+   }
+   
    public SpatialAccelerationVector getCoMSpatialAcceleration()
    {
       return comAcceleration;
