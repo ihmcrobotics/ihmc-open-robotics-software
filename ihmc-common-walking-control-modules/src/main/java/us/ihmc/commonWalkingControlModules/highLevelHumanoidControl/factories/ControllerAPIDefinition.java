@@ -39,7 +39,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLo
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -78,7 +77,6 @@ public abstract class ControllerAPIDefinition
       commands.add(AbortWalkingCommand.class);
       commands.add(PrepareForLocomotionCommand.class);
       commands.add(PauseWalkingCommand.class);
-      commands.add(WholeBodyTrajectoryCommand.class);
       commands.add(SpineDesiredAccelerationsCommand.class);
       commands.add(HandLoadBearingCommand.class);
       commands.add(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
