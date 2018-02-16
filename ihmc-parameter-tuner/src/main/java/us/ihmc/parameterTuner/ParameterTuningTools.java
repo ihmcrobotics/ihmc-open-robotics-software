@@ -92,7 +92,7 @@ public class ParameterTuningTools
             guiParameter.setMin(xmlParameter.getMin());
             guiParameter.setMax(xmlParameter.getMax());
             guiParameter.setDescription(xmlParameter.getDescription());
-            guiParameter.setLoadStatus(ParameterLoadStatus.FILE);
+            guiParameter.setLoadStatus(ParameterLoadStatus.LOADED);
             guiRegistry.addParameter(guiParameter);
          }
       }

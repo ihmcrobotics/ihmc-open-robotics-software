@@ -261,8 +261,8 @@ public class YoVariableHandShakeBuilder
             case DEFAULT:
                yoVariableDefinition.setLoadStatus(LoadStatus.Default);
                break;
-            case FILE:
-               yoVariableDefinition.setLoadStatus(LoadStatus.File);
+            case LOADED:
+               yoVariableDefinition.setLoadStatus(LoadStatus.Loaded);
                break;
             default:
                throw new RuntimeException("Unknown load status: " + loadStatus);

@@ -6,7 +6,7 @@ public enum GuiParameterStatus
 {
    ANY,
    DEFAULT,
-   FILE_LOADED,
+   LOADED,
    MODIFIED;
 
    public static GuiParameterStatus get(ParameterLoadStatus parameterLoadStatus)
@@ -15,8 +15,8 @@ public enum GuiParameterStatus
       {
       case DEFAULT:
          return GuiParameterStatus.DEFAULT;
-      case FILE:
-         return GuiParameterStatus.FILE_LOADED;
+      case LOADED:
+         return GuiParameterStatus.LOADED;
       default:
          throw new RuntimeException("Unknown parameter load status: " + parameterLoadStatus);
       }
