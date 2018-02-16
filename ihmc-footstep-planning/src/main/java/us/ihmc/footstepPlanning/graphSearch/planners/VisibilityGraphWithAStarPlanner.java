@@ -191,10 +191,6 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
             PrintTools.info("Starting to plan using )" + getClass().getSimpleName());
             PrintTools.info("Body start pose: " + startPos);
             PrintTools.info("Body goal pose:  " + goalPos);
-
-            String homePath = System.getProperty("user.home");
-            Path path = Paths.get(homePath, "footstepPlannerData", PlanarRegionFileTools.getDate() + "_PlannerData");
-            PlanarRegionFileTools.exportPlanarRegionData(path, planarRegionsList);
          }
 
          try

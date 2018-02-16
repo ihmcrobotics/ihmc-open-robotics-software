@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 class PlanFootstepsState extends State<WalkOverTerrainStateMachineBehavior.WalkOverTerrainState>
 {
    private static final boolean debug = true;
-   private static final boolean useToolbox = false;
+   private static final boolean useToolbox = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
