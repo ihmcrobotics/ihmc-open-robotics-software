@@ -421,7 +421,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       for (int i = 0; i < controllerTransitionFactories.size(); i++)
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
 
-      controllerFactory.setInitialState(HighLevelControllerName.JUMPING);
+      controllerFactory.setInitialState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
@@ -475,7 +475,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       
       if(jumpControlParameters != null)
       {
-         PrintTools.debug("Adding jumping transitions");
          controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, JUMPING);
          controllerFactory.addRequestableTransition(JUMPING, DO_NOTHING_BEHAVIOR);
       }

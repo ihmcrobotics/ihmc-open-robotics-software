@@ -63,7 +63,7 @@ public class JumpHighLevelHumanoidController
       this.wholeBodyMomentumManager.setTotalRobotMass(controlCoreToolbox.getTotalRobotMass());
       
       this.gravityCompensationManager = jumpingControlManagerFactory.getOrCreateGravityCompensationManager();
-      //this.feetManager = jumpingControlManagerFactory.getOrCreateFeetJumpManager();
+     
       setupStateMachine();
    }
 
