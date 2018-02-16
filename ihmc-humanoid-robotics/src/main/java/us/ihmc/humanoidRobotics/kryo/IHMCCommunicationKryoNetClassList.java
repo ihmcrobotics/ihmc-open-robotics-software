@@ -88,6 +88,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -134,7 +135,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceS
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
@@ -301,10 +301,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);
 
-      // Valkyrie specific
-      registerPacketClass(ValkyrieLowLevelControlModeMessage.class);
-      registerPacketField(ValkyrieLowLevelControlModeMessage.ControlMode.class);
-
       //Vehicle
       registerPacketClass(VehiclePosePacket.class);
 
@@ -438,7 +434,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(SnapFootstepPacket.class);
       registerPacketClass(BlackFlyParameterPacket.class);
       registerPacketClass(WalkToGoalBehaviorPacket.class);
-      registerPacketField(WalkToGoalBehaviorPacket.WalkToGoalAction.class);
+      registerPacketField(WalkToGoalAction.class);
       registerPacketClass(FootstepPlanRequestPacket.class);
       registerPacketField(FootstepDataMessage.class);
       registerPacketField(FootstepPlannerType.class);
