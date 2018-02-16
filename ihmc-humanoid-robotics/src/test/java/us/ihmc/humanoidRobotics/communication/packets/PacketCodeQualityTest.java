@@ -29,9 +29,57 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = 30000)
-   public void testOnlyEmptyAndCopyConstructor()
+   public void testPacketHaveNoEnum()
    {
       boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Set<Class<? extends Packet>> packetTypesWithEnumFields = new HashSet<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Field[] fields = packetType.getFields();
+            for (Field field : fields)
+            {
+               Class<?> typeToCheck = field.getType();
+               while (typeToCheck.isArray())
+                  typeToCheck = typeToCheck.getComponentType();
+               boolean isEnum = Enum.class.isAssignableFrom(typeToCheck);
+               if (isEnum)
+                  packetTypesWithEnumFields.add(packetType);
+            }
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithEnumFields.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet null fields after creation using empty constructor:");
+            packetTypesWithEnumFields.forEach(type -> PrintTools.error(type.getSimpleName()));
+         }
+      }
+
+      assertTrue("Packet sub-types should note have any enum field.", packetTypesWithEnumFields.isEmpty());
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
+   public void testOnlyEmptyAndCopyConstructor()
+   {
+      boolean verbose = false;
 
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
