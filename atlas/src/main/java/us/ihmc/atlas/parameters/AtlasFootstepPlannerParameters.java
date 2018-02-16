@@ -47,4 +47,15 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
       return 0.4;
    }
 
+   @Override
+   public double getCliffHeightToAvoid()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMinimumDistanceFromCliffBottoms()
+   {
+      return 0.5;
+   }
 }
