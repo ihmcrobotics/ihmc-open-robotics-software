@@ -24,6 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTree;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTreeParameter;
@@ -154,6 +155,7 @@ public class GuiController
       List<GuiParameter> allParameters = fullRegistry.getAllParameters();
       allParameters.stream().forEach(parameter -> {
          parameter.addChangedListener(changeCollector);
+         parameter.addStatusUpdater();
          parameterMap.put(parameter.getUniqueName(), parameter);
       });
    }
@@ -185,6 +187,7 @@ public class GuiController
          else
          {
             localParameter.setValue(externalParameter.getCurrentValue());
+            localParameter.setStatus(externalParameter.getStatus());
          }
       });
       changeCollector.startRecording();
