@@ -7,6 +7,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 
 public class ParameterTreeParameter implements ParameterTreeValue
 {
@@ -59,9 +60,24 @@ public class ParameterTreeParameter implements ParameterTreeValue
          getChildren().add(value);
          getChildren().add(name);
          value.setId("parameter-value-in-tree-view");
-         name.setId("parameter-name-in-tree-view");
 
-         parameter.addChangedListener(p -> value.setText(parameter.getCurrentValue()));
+         if (parameter.getStatus() == GuiParameterStatus.DEFAULT)
+         {
+            name.setId("default-parameter-name-in-tree-view");
+         }
+         else
+         {
+            name.setId("parameter-name-in-tree-view");
+         }
+
+         parameter.addChangedListener(p -> {
+            if (parameter.getStatus() == GuiParameterStatus.MODIFIED)
+            {
+               name.setId("modified-parameter-name-in-tree-view");
+            }
+            value.setText(parameter.getCurrentValue());
+         });
+
          name.setText(parameter.getName());
          value.setText(parameter.getCurrentValue());
 
