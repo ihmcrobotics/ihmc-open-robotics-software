@@ -111,6 +111,7 @@ public class DRCSimulationTestHelper
       if (testEnvironment != null)
          this.testEnvironment = testEnvironment;
       simulationStarter = new DRCSimulationStarter(robotModel, this.testEnvironment);
+      simulationStarter.setCreateYoVariableServer(false);
 
       fullRobotModel = robotModel.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -130,6 +131,7 @@ public class DRCSimulationTestHelper
    {
       this.testEnvironment = testEnvironment;
       simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
+      simulationStarter.setCreateYoVariableServer(false);
    }
 
    public void createSimulation(String name)
