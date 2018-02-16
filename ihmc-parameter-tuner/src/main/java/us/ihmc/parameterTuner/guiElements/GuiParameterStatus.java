@@ -5,7 +5,6 @@ import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 public enum GuiParameterStatus
 {
    ANY,
-   UNLOADED,
    DEFAULT,
    FILE_LOADED,
    MODIFIED;
@@ -14,8 +13,6 @@ public enum GuiParameterStatus
    {
       switch (parameterLoadStatus)
       {
-      case UNLOADED:
-         return GuiParameterStatus.UNLOADED;
       case DEFAULT:
          return GuiParameterStatus.DEFAULT;
       case FILE:
