@@ -116,7 +116,7 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = explorationMessage.degreesOfFreedomToExplore;
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.degreesOfFreedomToExplore);
          for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
          {
             if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
@@ -158,7 +158,7 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = explorationMessage.degreesOfFreedomToExplore;
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.degreesOfFreedomToExplore);
          for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
          {
             if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y

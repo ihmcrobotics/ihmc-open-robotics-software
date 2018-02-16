@@ -567,7 +567,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-      footstepData.setRobotSide(robotSide);
+      footstepData.setRobotSide(robotSide.toByte());
 
       return footstepData;
    }

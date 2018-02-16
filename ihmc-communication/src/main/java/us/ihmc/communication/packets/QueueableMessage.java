@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -22,7 +23,7 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
          + "\n - The very first message of a list of queued messages has to be an OVERRIDE message."
          + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
          + "\n - The controller will queue the joint trajectory messages as a per joint basis." + " The first trajectory point has to be greater than zero.")
-   public ExecutionMode executionMode = ExecutionMode.OVERRIDE;
+   public byte executionMode = ExecutionMode.OVERRIDE.toByte();
    @RosExportedField(documentation = "Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
          + " It is used by the controller to ensure that no message has been lost on the way."
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
@@ -57,7 +58,7 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
     * 
     * @param executionMode
     */
-   public void setExecutionMode(ExecutionMode executionMode)
+   public void setExecutionMode(byte executionMode)
    {
       this.executionMode = executionMode;
    }
@@ -85,7 +86,7 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
     * 
     * @return {@link #executionMode}
     */
-   public ExecutionMode getExecutionMode()
+   public byte getExecutionMode()
    {
       return executionMode;
    }
@@ -110,9 +111,11 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    @Override
    public boolean epsilonEquals(QueueableMessage other, double epsilon)
    {
-      if (getExecutionMode() != other.getExecutionMode())
+      if (executionMode != other.executionMode)
          return false;
-      if (getExecutionMode() == ExecutionMode.QUEUE && getPreviousMessageId() != other.getPreviousMessageId())
+      if (previousMessageId != other.previousMessageId)
+         return false;
+      if (!MathTools.epsilonCompare(executionDelayTime, other.executionDelayTime, epsilon))
          return false;
       return true;
    }

@@ -2,11 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket>
 {
-   public RobotSide robotSide;
+   public byte robotSide;
 
    public HandPowerCyclePacket()
    {
@@ -21,7 +20,7 @@ public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket>
       setPacketInformation(other);
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -35,8 +34,6 @@ public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket>
    @Override
    public boolean epsilonEquals(HandPowerCyclePacket other, double epsilon)
    {
-      boolean ret = getRobotSide().equals(other.getRobotSide());
-
-      return ret;
+      return robotSide == other.robotSide;
    }
 }

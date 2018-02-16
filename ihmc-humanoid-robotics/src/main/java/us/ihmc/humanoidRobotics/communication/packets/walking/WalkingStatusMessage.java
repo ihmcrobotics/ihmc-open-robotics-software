@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.SettablePacket;
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 
@@ -10,20 +9,8 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
       topic = "/output/walking_status")
 public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
 {
-   public enum Status
-   {
-      @RosEnumValueDocumentation(documentation = "The robot has begun its initial transfer/sway at the start of a walking plan")
-      STARTED,
-      @RosEnumValueDocumentation(documentation = "The robot has finished its final transfer/sway at the end of a walking plan")
-      COMPLETED,
-      @RosEnumValueDocumentation(documentation = "A walking abort has been requested")
-      ABORT_REQUESTED;
-
-      public static final Status[] values = values();
-   }
-
    @RosExportedField(documentation = "Status of walking. Either STARTED, COMPLETED, or ABORT_REQUESTED.")
-   public Status status;
+   public byte status;
 
    public WalkingStatusMessage()
    {
@@ -36,12 +23,12 @@ public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
       setPacketInformation(other);
    }
 
-   public void setWalkingStatus(Status status)
+   public void setWalkingStatus(byte status)
    {
       this.status = status;
    }
 
-   public Status getWalkingStatus()
+   public byte getWalkingStatus()
    {
       return status;
    }

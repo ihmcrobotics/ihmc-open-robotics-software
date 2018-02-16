@@ -2,9 +2,7 @@ package us.ihmc.communication.packets;
 
 public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
 {
-   public ToolboxState requestedState;
-
-   public enum ToolboxState {WAKE_UP, REINITIALIZE, SLEEP};
+   public byte requestedState;
 
    public ToolboxStateMessage()
    {
@@ -18,12 +16,12 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
       set(other);
    }
 
-   public void setRequestedState(ToolboxState requestedState)
+   public void setRequestedState(byte requestedState)
    {
       this.requestedState = requestedState;
    }
 
-   public ToolboxState getRequestedState()
+   public byte getRequestedState()
    {
       return requestedState;
    }

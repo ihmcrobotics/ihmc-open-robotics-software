@@ -24,6 +24,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -105,7 +106,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       mocapDataClient.registerRigidBodiesListener(this);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, this);
-      packetCommunicator.attachListener(FootstepStatus.class, walkingStatusManager);
+      packetCommunicator.attachListener(FootstepStatusMessage.class, walkingStatusManager);
 
       PeriodicThreadSchedulerFactory scheduler = new PeriodicNonRealtimeThreadSchedulerFactory();
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
@@ -334,15 +335,15 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       return listOfSteps;
    }
       
-   private class WalkingStatusManager implements PacketConsumer<FootstepStatus>
+   private class WalkingStatusManager implements PacketConsumer<FootstepStatusMessage>
    {
       private final YoInteger footstepsCompleted = new YoInteger("footstepsCompleted", registry);
       private final YoInteger numberOfFootstepsToTake = new YoInteger("numberOfFootstepsToTake", registry);
       
       @Override
-      public void receivedPacket(FootstepStatus packet)
+      public void receivedPacket(FootstepStatusMessage packet)
       {
-         if(packet.getStatus().equals(FootstepStatus.Status.COMPLETED))
+         if(packet.getStatus() == FootstepStatus.COMPLETED.toByte())
             footstepsCompleted.increment();
       }
       

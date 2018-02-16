@@ -5,17 +5,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
 {
-   public static enum WalkToGoalAction
-   {
-      FIND_PATH, EXECUTE, EXECUTE_UNKNOWN, STOP
-   };
-
-   public WalkToGoalAction action;
+   public byte action;
    public double xGoal;
    public double yGoal;
    public double thetaGoal;
 
-   public RobotSide goalSide;
+   public byte goalSide;
 
    public WalkToGoalBehaviorPacket()
    {
@@ -38,7 +33,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       return new double[] {xGoal, yGoal, thetaGoal};
    }
 
-   public RobotSide getGoalSide()
+   public byte getGoalSide()
    {
       return goalSide;
    }
@@ -65,7 +60,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       ret += "x: " + xGoal + "\n";
       ret += "y: " + yGoal + "\n";
       ret += "theta: " + thetaGoal + "\n";
-      ret += "side: " + goalSide.toString() + "\n";
+      ret += "side: " + RobotSide.fromByte(goalSide).toString() + "\n";
 
       return ret;
    }

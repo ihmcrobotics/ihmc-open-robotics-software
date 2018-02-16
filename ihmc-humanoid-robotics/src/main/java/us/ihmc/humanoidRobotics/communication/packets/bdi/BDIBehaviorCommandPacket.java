@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
 {
-   public BDIRobotBehavior atlasRobotBehavior;
+   public byte atlasRobotBehavior;
    public boolean stop = false;
 
    public BDIBehaviorCommandPacket()

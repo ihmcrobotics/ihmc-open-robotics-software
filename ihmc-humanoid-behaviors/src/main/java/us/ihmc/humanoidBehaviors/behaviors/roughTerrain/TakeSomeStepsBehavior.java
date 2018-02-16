@@ -17,6 +17,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -36,10 +38,10 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private final HumanoidReferenceFrames referenceFrames;
 
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>(40);
-   private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
+   private final ConcurrentListeningQueue<FootstepStatusMessage> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
 
-   private final SideDependentList<FootstepStatus> latestFootstepStatus;
-   private final SideDependentList<YoEnum<FootstepStatus.Status>> latestFootstepStatusEnum;
+   private final SideDependentList<FootstepStatusMessage> latestFootstepStatus;
+   private final SideDependentList<YoEnum<FootstepStatus>> latestFootstepStatusEnum;
    private final SideDependentList<YoFramePose> desiredFootStatusPoses;
    private final SideDependentList<YoFramePose> actualFootStatusPoses;
 
@@ -90,13 +92,13 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
       latestFootstepStatus = new SideDependentList<>();
 
-      YoEnum<FootstepStatus.Status> leftFootstepStatus = new YoEnum<FootstepStatus.Status>("leftFootstepStatus", registry,
-            FootstepStatus.Status.class);
-      YoEnum<FootstepStatus.Status> rightFootstepStatus = new YoEnum<FootstepStatus.Status>("rightFootstepStatus", registry,
-            FootstepStatus.Status.class);
+      YoEnum<FootstepStatus> leftFootstepStatus = new YoEnum<FootstepStatus>("leftFootstepStatus", registry,
+            FootstepStatus.class);
+      YoEnum<FootstepStatus> rightFootstepStatus = new YoEnum<FootstepStatus>("rightFootstepStatus", registry,
+            FootstepStatus.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
-     attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+     attachNetworkListeningQueue(footstepStatusQueue, FootstepStatusMessage.class);
      attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
    }
 
@@ -111,7 +113,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
       }
 
       WalkingStatusMessage walkingStatusLatestPacket = walkingStatusQueue.getLatestPacket();
-      if (walkingStatusLatestPacket != null && walkingStatusLatestPacket.getWalkingStatus() == WalkingStatusMessage.Status.COMPLETED)
+      if (walkingStatusLatestPacket != null && walkingStatusLatestPacket.getWalkingStatus() == WalkingStatus.COMPLETED.toByte())
       {
          doneTakingSteps.set(true);
       }
@@ -165,21 +167,22 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         FootstepStatus footstepStatus = footstepStatusQueue.getLatestPacket();
-         latestFootstepStatus.set(footstepStatus.getRobotSide(), footstepStatus);
-         nextSideToSwing.set(footstepStatus.getRobotSide().getOppositeSide());
+         FootstepStatusMessage footstepStatus = footstepStatusQueue.getLatestPacket();
+         RobotSide robotSide = RobotSide.fromByte(footstepStatus.getRobotSide());
+         latestFootstepStatus.set(robotSide, footstepStatus);
+         nextSideToSwing.set(robotSide.getOppositeSide());
       }
 
       currentlySwingingFoot.set(null);
 
       for (RobotSide side : RobotSide.values)
       {
-         FootstepStatus status = latestFootstepStatus.get(side);
+         FootstepStatusMessage status = latestFootstepStatus.get(side);
          if (status != null)
          {
             latestFootstepStatusEnum.get(side).set(status.getStatus());
 
-            if (status.getStatus() == FootstepStatus.Status.STARTED)
+            if (status.getStatus() == FootstepStatus.STARTED.toByte())
             {
                currentlySwingingFoot.set(side);
             }
@@ -188,7 +191,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
       for (RobotSide side : RobotSide.values)
       {
-         FootstepStatus status = latestFootstepStatus.get(side);
+         FootstepStatusMessage status = latestFootstepStatus.get(side);
          if (status != null)
          {
             Point3D desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();

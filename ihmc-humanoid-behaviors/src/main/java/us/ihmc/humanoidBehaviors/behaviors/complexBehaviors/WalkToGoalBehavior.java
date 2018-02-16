@@ -3,10 +3,12 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -17,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -176,7 +179,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
          if(newPacketAvailable)
          {
             FootstepPlanningToolboxOutputStatus latestPacket = planningOutputStatusQueue.getLatestPacket();
-            boolean validForExecution = latestPacket.planningResult.validForExecution();
+            boolean validForExecution = FootstepPlanningResult.fromByte(latestPacket.planningResult).validForExecution();
             if(validForExecution)
             {
                planToExecute = latestPacket.footstepDataList;
@@ -196,25 +199,26 @@ public class WalkToGoalBehavior extends AbstractBehavior
          planningOutputStatusQueue.clear();
          isDone.set(false);
 
-         ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
+         ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
          wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
 
          communicationBridge.sendPacket(wakeUp);
 
-         ToolboxStateMessage reinitialize = MessageTools.createToolboxStateMessage(ToolboxStateMessage.ToolboxState.REINITIALIZE);
+         ToolboxStateMessage reinitialize = MessageTools.createToolboxStateMessage(ToolboxState.REINITIALIZE);
          reinitialize.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
 
          communicationBridge.sendPacket(reinitialize);
 
          WalkToGoalBehaviorPacket walkToGoalBehaviorPacket = walkToGoalPacketQueue.poll();
          referenceFrames.updateFrames();
-         FramePose3D initialPose = new FramePose3D(referenceFrames.getSoleFrame(walkToGoalBehaviorPacket.goalSide));
+         RobotSide goalSide = RobotSide.fromByte(walkToGoalBehaviorPacket.goalSide);
+         FramePose3D initialPose = new FramePose3D(referenceFrames.getSoleFrame(goalSide));
          tempFinalPose.setToZero();
          tempFinalPose.setX(walkToGoalBehaviorPacket.xGoal);
          tempFinalPose.setY(walkToGoalBehaviorPacket.yGoal);
          tempFinalPose.setOrientationYawPitchRoll(walkToGoalBehaviorPacket.thetaGoal, 0.0, 0.0);
          FramePose3D finalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), tempFinalPose);
-         FootstepPlanningRequestPacket tempPlanningRequestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialPose, walkToGoalBehaviorPacket.goalSide, finalPose);
+         FootstepPlanningRequestPacket tempPlanningRequestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialPose, goalSide, finalPose);
          tempPlanningRequestPacket.setTimeout(3.0);
          tempPlanningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
 

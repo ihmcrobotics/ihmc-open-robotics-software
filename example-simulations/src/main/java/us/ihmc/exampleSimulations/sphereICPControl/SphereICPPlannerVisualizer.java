@@ -585,7 +585,7 @@ public class SphereICPPlannerVisualizer
          {
             for (FootstepDataMessage footstepData : footstepDataList.getDataList())
             {
-               RobotSide robotSide = footstepData.getRobotSide();
+               RobotSide robotSide = RobotSide.fromByte(footstepData.getRobotSide());
                Point3D position = footstepData.getLocation();
                Quaternion orientation = footstepData.getOrientation();
                footsteps.add(footstepTestHelper.createFootstep(robotSide, position, orientation));

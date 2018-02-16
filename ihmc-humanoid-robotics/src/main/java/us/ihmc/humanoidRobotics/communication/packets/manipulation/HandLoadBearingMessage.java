@@ -3,12 +3,11 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 {
    /** The robot side of that hand that will be load bearing. */
-   public RobotSide robotSide;
+   public byte robotSide;
 
    /** A boolean that determines whether hybrid load-bearing & jointspace control will be used. */
    public boolean useJointspaceCommand = false;

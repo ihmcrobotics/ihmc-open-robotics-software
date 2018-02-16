@@ -45,7 +45,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    @Override
    public void set(ArmTrajectoryMessage message)
    {
-      clear(message.getRobotSide());
+      clear(RobotSide.fromByte(message.getRobotSide()));
       jointspaceTrajectory.set(message.getJointspaceTrajectory());
    }
 

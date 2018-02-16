@@ -25,6 +25,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosImuPublisher;
@@ -244,8 +245,8 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
                   robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(), WORLD_FRAME);
 
-            robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
-            robotBehaviorPublisher.publish(robotConfigurationData.getRobotMotionStatus().getBehaviorId());
+            robotMotionStatusPublisher.publish(RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()).name());
+            robotBehaviorPublisher.publish(RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()).getBehaviorId());
 
             tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, jointMap.getUnsanitizedRootJointInSdf());
             if(staticTransforms != null)

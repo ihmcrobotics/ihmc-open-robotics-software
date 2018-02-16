@@ -25,7 +25,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
     */
    public float[] maxVelocityDeltas; //values in the order of AtlasJointId.getLegJoints()
 
-   public RobotSide robotSide;
+   public byte robotSide;
 
    public LegCompliancePacket()
    {
@@ -54,7 +54,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    public String toString()
    {
       StringBuilder s = new StringBuilder();
-      s.append("LegCompliancePacket: side " + robotSide.name());
+      s.append("LegCompliancePacket: side " + RobotSide.fromByte(robotSide).name());
 
       s.append(" maxVelocityDeltas ");
       for (int i = 0; i < maxVelocityDeltas.length; i++)

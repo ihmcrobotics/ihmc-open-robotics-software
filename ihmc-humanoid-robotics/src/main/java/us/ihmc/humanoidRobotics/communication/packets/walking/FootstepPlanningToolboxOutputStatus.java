@@ -9,13 +9,12 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlanningToolboxOutputStatus extends SettablePacket<FootstepPlanningToolboxOutputStatus>
 {
    public FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
-   public FootstepPlanningResult planningResult;
+   public byte planningResult;
    public int planId = FootstepPlanningRequestPacket.NO_PLAN_ID;
 
    public PlanarRegionsListMessage planarRegionsListMessage = null;
@@ -58,7 +57,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    @Override
    public boolean epsilonEquals(FootstepPlanningToolboxOutputStatus other, double epsilon)
    {
-      if (!planningResult.equals(other.planningResult))
+      if (planningResult != other.planningResult)
          return false;
       if (planId != other.planId)
          return false;

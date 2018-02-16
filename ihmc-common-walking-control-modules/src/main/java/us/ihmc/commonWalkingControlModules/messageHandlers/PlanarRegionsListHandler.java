@@ -4,7 +4,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -25,7 +25,7 @@ public class PlanarRegionsListHandler
    private final YoBoolean waitingOnNewPlanarRegions = new YoBoolean("waitingOnNewPlanarRegions", registry);
 
    private final StatusMessageOutputManager statusOutputManager;
-   private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = MessageTools.createRequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
+   private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.SINGLE_UPDATE);
 
    public PlanarRegionsListHandler(StatusMessageOutputManager requestOutputManager, YoVariableRegistry parentRegistry)
    {

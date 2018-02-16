@@ -219,7 +219,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          state.setAuxiliaryRobotData(sensorRawOutputMapReadOnly.getAuxiliaryRobotData());
       }
 
-      state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
+      state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus().toByte());
 
       LastPacket lastPacket = dataProducer.getLastPacket();
       if (lastPacket != null)

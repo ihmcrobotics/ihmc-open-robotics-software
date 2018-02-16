@@ -3,15 +3,8 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -23,7 +16,7 @@ import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
    public SE3TrajectoryMessage se3Trajectory;
 
@@ -56,12 +49,12 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
       setPacketInformation(other);
    }
 
-   public void setRobotSide(RobotSide robotSide)
+   public void setRobotSide(byte robotSide)
    {
       this.robotSide = robotSide;
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }

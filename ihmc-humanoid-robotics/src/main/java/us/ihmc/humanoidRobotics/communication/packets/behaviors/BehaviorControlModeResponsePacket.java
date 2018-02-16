@@ -1,11 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 
 public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlModeResponsePacket>
 {
-   public BehaviorControlModeEnum requestedControl;
+   public byte requestedControl;
 
    // empty constructor for deserialization
    public BehaviorControlModeResponsePacket()
@@ -19,7 +18,7 @@ public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlMod
       requestedControl = other.requestedControl;
    }
 
-   public BehaviorControlModeEnum getRequestedControl()
+   public byte getRequestedControl()
    {
       return requestedControl;
    }
@@ -27,6 +26,6 @@ public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlMod
    @Override
    public boolean epsilonEquals(BehaviorControlModeResponsePacket other, double epsilon)
    {
-      return this.requestedControl.equals(other.requestedControl);
+      return this.requestedControl == other.requestedControl;
    }
 }

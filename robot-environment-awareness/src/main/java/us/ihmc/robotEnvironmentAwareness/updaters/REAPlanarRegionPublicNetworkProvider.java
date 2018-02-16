@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 
 public class REAPlanarRegionPublicNetworkProvider
 {
@@ -63,7 +63,7 @@ public class REAPlanarRegionPublicNetworkProvider
       {
          RequestPlanarRegionsListMessage request = requestsToProcess.poll();
          PacketDestination source = PacketDestination.fromOrdinal(request.getSource());
-         RequestType requestType = request.getRequestType();
+         PlanarRegionsRequestType requestType = PlanarRegionsRequestType.fromByte(request.getRequestType());
          switch (requestType)
          {
          case CONTINUOUS_UPDATE:

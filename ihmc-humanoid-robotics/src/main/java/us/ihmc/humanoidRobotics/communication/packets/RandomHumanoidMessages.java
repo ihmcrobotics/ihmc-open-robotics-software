@@ -29,12 +29,12 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage.ControlMode;
+import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
@@ -69,21 +69,21 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPac
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -94,8 +94,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PrepareForLocomoti
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
@@ -119,7 +120,7 @@ public final class RandomHumanoidMessages
    {
       QueueableMessage next = new QueueableMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.setExecutionMode(RandomNumbers.nextEnum(random, ExecutionMode.class));
+      next.setExecutionMode(RandomNumbers.nextEnum(random, ExecutionMode.class).toByte());
       next.setPreviousMessageId(random.nextLong());
       next.executionDelayTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       return next;
@@ -214,7 +215,7 @@ public final class RandomHumanoidMessages
       ArmTrajectoryMessage next = new ArmTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.jointspaceTrajectory = RandomHumanoidMessages.nextJointspaceTrajectoryMessage(random);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       return next;
    }
 
@@ -275,7 +276,7 @@ public final class RandomHumanoidMessages
    {
       HandTrajectoryMessage next = new HandTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.se3Trajectory = nextSE3TrajectoryMessage(random);
       return next;
    }
@@ -284,7 +285,7 @@ public final class RandomHumanoidMessages
    {
       FootTrajectoryMessage next = new FootTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.se3Trajectory = nextSE3TrajectoryMessage(random);
       return next;
    }
@@ -293,7 +294,7 @@ public final class RandomHumanoidMessages
    {
       HandHybridJointspaceTaskspaceTrajectoryMessage next = new HandHybridJointspaceTaskspaceTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.taskspaceTrajectoryMessage = RandomHumanoidMessages.nextSE3TrajectoryMessage(random);
       next.jointspaceTrajectoryMessage = RandomHumanoidMessages.nextJointspaceTrajectoryMessage(random);
       next.jointspaceTrajectoryMessage.queueingProperties.set(next.taskspaceTrajectoryMessage.getQueueingProperties());
@@ -389,17 +390,17 @@ public final class RandomHumanoidMessages
       WholeBodyTrajectoryMessage next = new WholeBodyTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.leftHandTrajectoryMessage = RandomHumanoidMessages.nextHandTrajectoryMessage(random);
-      next.leftHandTrajectoryMessage.robotSide = RobotSide.LEFT;
+      next.leftHandTrajectoryMessage.robotSide = RobotSide.LEFT.toByte();
       next.rightHandTrajectoryMessage = RandomHumanoidMessages.nextHandTrajectoryMessage(random);
-      next.rightHandTrajectoryMessage.robotSide = RobotSide.RIGHT;
+      next.rightHandTrajectoryMessage.robotSide = RobotSide.RIGHT.toByte();
       next.leftArmTrajectoryMessage = RandomHumanoidMessages.nextArmTrajectoryMessage(random);
-      next.leftArmTrajectoryMessage.robotSide = RobotSide.LEFT;
+      next.leftArmTrajectoryMessage.robotSide = RobotSide.LEFT.toByte();
       next.rightArmTrajectoryMessage = RandomHumanoidMessages.nextArmTrajectoryMessage(random);
-      next.rightArmTrajectoryMessage.robotSide = RobotSide.RIGHT;
+      next.rightArmTrajectoryMessage.robotSide = RobotSide.RIGHT.toByte();
       next.leftFootTrajectoryMessage = RandomHumanoidMessages.nextFootTrajectoryMessage(random);
-      next.leftFootTrajectoryMessage.robotSide = RobotSide.LEFT;
+      next.leftFootTrajectoryMessage.robotSide = RobotSide.LEFT.toByte();
       next.rightFootTrajectoryMessage = RandomHumanoidMessages.nextFootTrajectoryMessage(random);
-      next.rightFootTrajectoryMessage.robotSide = RobotSide.RIGHT;
+      next.rightFootTrajectoryMessage.robotSide = RobotSide.RIGHT.toByte();
       next.chestTrajectoryMessage = RandomHumanoidMessages.nextChestTrajectoryMessage(random);
       next.pelvisTrajectoryMessage = RandomHumanoidMessages.nextPelvisTrajectoryMessage(random);
       next.headTrajectoryMessage = RandomHumanoidMessages.nextHeadTrajectoryMessage(random);
@@ -437,7 +438,7 @@ public final class RandomHumanoidMessages
    {
       HandLoadBearingMessage next = new HandLoadBearingMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RobotSide.generateRandomRobotSide(random);
+      next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.useJointspaceCommand = random.nextBoolean();
       next.jointspaceTrajectory = nextJointspaceTrajectoryMessage(random);
       next.executionDelayTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
@@ -449,9 +450,9 @@ public final class RandomHumanoidMessages
    {
       FootLoadBearingMessage next = new FootLoadBearingMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RobotSide.generateRandomRobotSide(random);
+      next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.executionDelayTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      next.request = RandomNumbers.nextEnum(random, LoadBearingRequest.class);
+      next.request = RandomNumbers.nextEnum(random, LoadBearingRequest.class).toByte();
       return next;
    }
 
@@ -459,20 +460,20 @@ public final class RandomHumanoidMessages
    {
       FootstepDataMessage next = new FootstepDataMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RobotSide.generateRandomRobotSide(random);
+      next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.location = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
       next.predictedContactPoints = new ArrayList<>();
       IntStream.range(0, random.nextInt(10)).forEach(i -> next.predictedContactPoints.add(EuclidCoreRandomTools.nextPoint2D(random)));
-      next.trajectoryType = RandomNumbers.nextEnum(random, TrajectoryType.class);
+      next.trajectoryType = RandomNumbers.nextEnum(random, TrajectoryType.class).toByte();
       next.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      if (next.trajectoryType == TrajectoryType.CUSTOM)
+      if (next.trajectoryType == TrajectoryType.CUSTOM.toByte())
       {
          next.positionWaypoints = new Point3D[2];
          next.positionWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
          next.positionWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
       }
-      else if (next.trajectoryType == TrajectoryType.WAYPOINTS)
+      else if (next.trajectoryType == TrajectoryType.WAYPOINTS.toByte())
       {
          next.swingTrajectory = nextSE3TrajectoryPointMessages(random);
       }
@@ -502,7 +503,7 @@ public final class RandomHumanoidMessages
       FootstepDataListMessage next = new FootstepDataListMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.footstepDataList = nextFootstepDataMessages(random);
-      next.executionTiming = RandomNumbers.nextEnum(random, ExecutionTiming.class);
+      next.executionTiming = RandomNumbers.nextEnum(random, ExecutionTiming.class).toByte();
       next.defaultSwingDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       next.defaultTransferDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       next.finalTransferDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
@@ -517,7 +518,7 @@ public final class RandomHumanoidMessages
    {
       HumanoidBehaviorTypePacket next = new HumanoidBehaviorTypePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.behaviorType = RandomNumbers.nextEnum(random, HumanoidBehaviorType.class);
+      next.behaviorType = RandomNumbers.nextEnum(random, HumanoidBehaviorType.class).toByte();
       return next;
    }
 
@@ -569,7 +570,7 @@ public final class RandomHumanoidMessages
       for (int i = 0; i < next.momentAndForceDataAllForceSensors.length; i++)
          next.momentAndForceDataAllForceSensors[i] = RandomNumbers.nextFloatArray(random, Wrench.SIZE, 1.0f);
       next.imuSensorData = nextIMUPackets(random);
-      next.robotMotionStatus = RandomNumbers.nextEnum(random, RobotMotionStatus.class);
+      next.robotMotionStatus = RandomNumbers.nextEnum(random, RobotMotionStatus.class).toByte();
       next.lastReceivedPacketTypeID = random.nextInt(1000);
       next.lastReceivedPacketUniqueId = random.nextLong();
       next.lastReceivedPacketRobotTimestamp = random.nextLong();
@@ -580,8 +581,8 @@ public final class RandomHumanoidMessages
    {
       HighLevelStateChangeStatusMessage next = new HighLevelStateChangeStatusMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.initialState = RandomNumbers.nextEnum(random, HighLevelControllerName.class);
-      next.endState = RandomNumbers.nextEnum(random, HighLevelControllerName.class);
+      next.initialState = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
+      next.endState = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
       return next;
    }
 
@@ -593,7 +594,7 @@ public final class RandomHumanoidMessages
       next.thetaStart = random.nextDouble();
       next.maxSuboptimality = random.nextDouble();
       next.goals = nextFootstepDataMessages(random);
-      next.requestType = RandomNumbers.nextEnum(random, RequestType.class);
+      next.requestType = RandomNumbers.nextEnum(random, FootstepPlanRequestType.class).toByte();
       return next;
    }
 
@@ -653,7 +654,7 @@ public final class RandomHumanoidMessages
    {
       AtlasLowLevelControlModeMessage next = new AtlasLowLevelControlModeMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.requestedControlMode = RandomNumbers.nextEnum(random, ControlMode.class);
+      next.requestedControlMode = RandomNumbers.nextEnum(random, AtlasLowLevelControlMode.class).toByte();
       return next;
    }
 
@@ -661,7 +662,7 @@ public final class RandomHumanoidMessages
    {
       BehaviorControlModeResponsePacket next = new BehaviorControlModeResponsePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.requestedControl = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class);
+      next.requestedControl = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte();
       return next;
    }
 
@@ -786,7 +787,7 @@ public final class RandomHumanoidMessages
    {
       AtlasWristSensorCalibrationRequestPacket next = new AtlasWristSensorCalibrationRequestPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       return next;
    }
 
@@ -804,7 +805,7 @@ public final class RandomHumanoidMessages
    {
       HandPowerCyclePacket next = new HandPowerCyclePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       return next;
    }
 
@@ -835,8 +836,8 @@ public final class RandomHumanoidMessages
    {
       HandDesiredConfigurationMessage next = new HandDesiredConfigurationMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      next.handDesiredConfiguration = RandomNumbers.nextEnum(random, HandConfiguration.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
+      next.handDesiredConfiguration = RandomNumbers.nextEnum(random, HandConfiguration.class).toByte();
       return next;
    }
 
@@ -844,7 +845,7 @@ public final class RandomHumanoidMessages
    {
       WalkingStatusMessage next = new WalkingStatusMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.status = RandomNumbers.nextEnum(random, Status.class);
+      next.status = RandomNumbers.nextEnum(random, WalkingStatus.class).toByte();
       return next;
    }
 
@@ -934,7 +935,7 @@ public final class RandomHumanoidMessages
    {
       ArmDesiredAccelerationsMessage next = new ArmDesiredAccelerationsMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.desiredAccelerations = nextDesiredAccelerationsMessage(random);
       return next;
    }
@@ -986,7 +987,7 @@ public final class RandomHumanoidMessages
       next.fromUI = random.nextBoolean();
       next.gain = random.nextDouble();
       next.shutter = random.nextDouble();
-      next.side = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.side = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       return next;
    }
 
@@ -994,7 +995,7 @@ public final class RandomHumanoidMessages
    {
       VideoPacket next = new VideoPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.videoSource = RandomNumbers.nextEnum(random, VideoSource.class);
+      next.videoSource = RandomNumbers.nextEnum(random, VideoSource.class).toByte();
       next.timeStamp = random.nextLong();
       next.data = new byte[random.nextInt((int) (Math.pow(2, 20) - 19))];
       random.nextBytes(next.data);
@@ -1017,8 +1018,8 @@ public final class RandomHumanoidMessages
    {
       GoHomeMessage next = new GoHomeMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.bodyPart = RandomNumbers.nextEnum(random, BodyPart.class);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.bodyPart = RandomNumbers.nextEnum(random, HumanoidBodyPart.class).toByte();
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.trajectoryTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
       return next;
    }
@@ -1054,7 +1055,7 @@ public final class RandomHumanoidMessages
    {
       BDIBehaviorStatusPacket next = new BDIBehaviorStatusPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.currentBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class);
+      next.currentBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte();
       return next;
    }
 
@@ -1069,7 +1070,7 @@ public final class RandomHumanoidMessages
    {
       AdjustFootstepMessage next = new AdjustFootstepMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.location = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
       next.predictedContactPoints = new ArrayList<>();
@@ -1084,7 +1085,7 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.footstepDataList = RandomHumanoidMessages.nextFootstepDataListMessage(random);
       int result = random.nextInt(FootstepPlanningResult.values.length);
-      next.planningResult = FootstepPlanningResult.values[result];
+      next.planningResult = FootstepPlanningResult.values[result].toByte();
       next.planId = random.nextInt();
 
       next.bodyPath = new Point2D[random.nextInt(10)];
@@ -1110,13 +1111,13 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static FootstepStatus nextFootstepStatus(Random random)
+   public static FootstepStatusMessage nextFootstepStatus(Random random)
    {
-      FootstepStatus next = new FootstepStatus();
+      FootstepStatusMessage next = new FootstepStatusMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.status = us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status.values()[random.nextInt(us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status.values().length)];
+      next.status = RandomNumbers.nextEnum(random, FootstepStatus.class).toByte();
       next.footstepIndex = RandomNumbers.nextIntWithEdgeCases(random, 0.1);
-      next.robotSide = RobotSide.generateRandomRobotSide(random);
+      next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.desiredFootPositionInWorld = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
       next.desiredFootOrientationInWorld = RandomGeometry.nextQuaternion(random);
       next.actualFootPositionInWorld = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
@@ -1136,7 +1137,7 @@ public final class RandomHumanoidMessages
    {
       BDIBehaviorCommandPacket next = new BDIBehaviorCommandPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.atlasRobotBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class);
+      next.atlasRobotBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte();
       next.stop = random.nextBoolean();
       return next;
    }
@@ -1146,7 +1147,7 @@ public final class RandomHumanoidMessages
       ObjectWeightPacket next = new ObjectWeightPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.weight = random.nextDouble();
-      next.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
+      next.robotSide = random.nextBoolean() ? RobotSide.LEFT.toByte() : RobotSide.RIGHT.toByte();
       return next;
    }
 
@@ -1154,7 +1155,7 @@ public final class RandomHumanoidMessages
    {
       LegCompliancePacket next = new LegCompliancePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.maxVelocityDeltas = RandomNumbers.nextFloatArray(random, random.nextInt(1000), 1.0f);
       return next;
    }
@@ -1163,7 +1164,7 @@ public final class RandomHumanoidMessages
    {
       HandJointAnglePacket next = new HandJointAnglePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.jointAngles = RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0);
       next.connected = random.nextBoolean();
       next.calibrated = random.nextBoolean();
@@ -1174,7 +1175,7 @@ public final class RandomHumanoidMessages
    {
       BehaviorControlModePacket next = new BehaviorControlModePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.requestedControl = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class);
+      next.requestedControl = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte();
       return next;
    }
 
@@ -1182,7 +1183,7 @@ public final class RandomHumanoidMessages
    {
       AtlasElectricMotorEnablePacket next = new AtlasElectricMotorEnablePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.motorEnableEnum = RandomNumbers.nextEnum(random, AtlasElectricMotorPacketEnum.class);
+      next.motorEnableEnum = RandomNumbers.nextEnum(random, AtlasElectricMotorPacketEnum.class).toByte();
       next.enable = random.nextBoolean();
       return next;
    }
@@ -1191,7 +1192,7 @@ public final class RandomHumanoidMessages
    {
       HighLevelStateMessage next = new HighLevelStateMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.highLevelState = RandomNumbers.nextEnum(random, HighLevelControllerName.class);
+      next.highLevelState = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
       return next;
    }
 
@@ -1224,7 +1225,7 @@ public final class RandomHumanoidMessages
    {
       ManualHandControlPacket next = new ManualHandControlPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.robotSide = RobotSide.generateRandomRobotSide(random);
+      next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       double[] angles = RandomNumbers.nextDoubleArray(random, 4, 0, 1);
 
       next.index = angles[0];

@@ -81,13 +81,13 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double finalTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
 
       FootstepDataListMessage footstepMessage1 = new FootstepDataListMessage();
-      footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
+      footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
       footstepMessage1.setExecutionMode(ExecutionMode.OVERRIDE);
       footstepMessage1.setUniqueId(1);
 
       FootstepDataListMessage footstepMessage2 = new FootstepDataListMessage();
-      footstepMessage2.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
-      footstepMessage2.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+      footstepMessage2.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
+      footstepMessage2.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       footstepMessage2.getQueueingProperties().setPreviousMessageId((long) 1);
       footstepMessage2.setUniqueId(2);
 
@@ -269,7 +269,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(0.6, 0.3, 0.1);
-      footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
+      footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
       double minimumTransferTime = getRobotModel().getWalkingControllerParameters().getMinimumTransferTime();
 
       // add very fast footstep:

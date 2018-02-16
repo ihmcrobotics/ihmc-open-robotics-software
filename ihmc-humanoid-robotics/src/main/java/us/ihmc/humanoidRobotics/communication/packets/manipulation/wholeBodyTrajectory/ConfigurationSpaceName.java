@@ -6,6 +6,8 @@ public enum ConfigurationSpaceName
 {
    X, Y, Z, ROLL, PITCH, YAW;
 
+   public static final ConfigurationSpaceName[] values = values();
+
    public double getDefaultExplorationLowerLimit()
    {
       return -getDefaultExplorationAmplitude();
@@ -60,5 +62,37 @@ public enum ConfigurationSpaceName
       }
 
       return ret;
+   }
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static ConfigurationSpaceName fromByte(byte enumAsByte)
+   {
+      if (enumAsByte == -1)
+         return null;
+      return values[enumAsByte];
+   }
+
+   public static byte[] toBytes(ConfigurationSpaceName[] enumArray)
+   {
+      if (enumArray == null)
+         return null;
+      byte[] byteArray = new byte[enumArray.length];
+      for (int i = 0; i < enumArray.length; i++)
+         byteArray[i] = enumArray[i].toByte();
+      return byteArray;
+   }
+   
+   public static ConfigurationSpaceName[] fromBytes(byte[] enumArrayAsBytes)
+   {
+      if (enumArrayAsBytes == null)
+         return null;
+      ConfigurationSpaceName[] enumArray = new ConfigurationSpaceName[enumArrayAsBytes.length];
+      for (int i = 0; i < enumArrayAsBytes.length; i++)
+         enumArray[i] = fromByte(enumArrayAsBytes[i]);
+      return enumArray;
    }
 }

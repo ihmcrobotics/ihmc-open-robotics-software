@@ -4,12 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
 {
-   public enum StateEstimatorMode
-   {
-      NORMAL, FROZEN
-   }
-
-   public StateEstimatorMode requestedOperatingMode;
+   public byte requestedOperatingMode;
 
    public StateEstimatorModePacket()
    {
@@ -22,12 +17,12 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
       setPacketInformation(other);
    }
 
-   public StateEstimatorMode getRequestedOperatingMode()
+   public byte getRequestedOperatingMode()
    {
       return requestedOperatingMode;
    }
 
-   public void setRequestedOperatingMode(StateEstimatorMode requestedOperatingMode)
+   public void setRequestedOperatingMode(byte requestedOperatingMode)
    {
       this.requestedOperatingMode = requestedOperatingMode;
    }

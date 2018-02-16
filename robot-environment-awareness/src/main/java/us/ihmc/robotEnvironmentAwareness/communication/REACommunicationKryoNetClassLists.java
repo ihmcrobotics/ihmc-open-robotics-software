@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -95,7 +95,7 @@ public class REACommunicationKryoNetClassLists
       publicNetClassList.registerPacketField(Vector3D32.class);
       publicNetClassList.registerPacketField(Quaternion32.class);
       publicNetClassList.registerPacketField(Point2D32[].class);
-      publicNetClassList.registerPacketField(RequestType.class);
+      publicNetClassList.registerPacketField(PlanarRegionsRequestType.class);
 
       publicNetClassList.registerPacketField(PlanarRegionMessage.class);
    }

@@ -1,11 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "This message commands the controller to start loading a foot that was unloaded to support the robot weight. "
       + " When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
@@ -14,20 +12,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
                   topic = "/control/foot_load_bearing")
 public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
 {
-   public enum LoadBearingRequest
-   {
-      @RosEnumValueDocumentation(documentation = "Request to load the given end-effector.")
-      LOAD,
-      @RosEnumValueDocumentation(documentation = "Request to unload the given end-effector.")
-      UNLOAD;
-
-      public static final LoadBearingRequest[] values = values();
-   }
-
    @RosExportedField(documentation = "Needed to identify a side dependent end-effector.")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "Wether the end-effector should be loaded or unloaded.")
-   public LoadBearingRequest request;
+   public byte request;
    
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
@@ -49,12 +37,12 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       setPacketInformation(other);
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
 
-   public LoadBearingRequest getRequest()
+   public byte getRequest()
    {
       return request;
    }

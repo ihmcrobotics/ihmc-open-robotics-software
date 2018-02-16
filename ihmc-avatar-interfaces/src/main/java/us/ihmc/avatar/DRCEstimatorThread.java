@@ -1,15 +1,15 @@
 package us.ihmc.avatar;
 
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
@@ -276,7 +276,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          if(globalDataProducer != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_READ, e.getMessage());
+            globalDataProducer.notifyControllerCrash(ControllerCrashLocation.ESTIMATOR_READ, e.getMessage());
          }
          throw new RuntimeException(e);
       }
@@ -301,7 +301,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          if (globalDataProducer != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_RUN, e.getMessage());
+            globalDataProducer.notifyControllerCrash(ControllerCrashLocation.ESTIMATOR_RUN, e.getMessage());
          }
          throw new RuntimeException(e);
       }
@@ -336,7 +336,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          if (globalDataProducer != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_WRITE, e.getMessage());
+            globalDataProducer.notifyControllerCrash(ControllerCrashLocation.ESTIMATOR_WRITE, e.getMessage());
          }
          throw new RuntimeException(e);
       }

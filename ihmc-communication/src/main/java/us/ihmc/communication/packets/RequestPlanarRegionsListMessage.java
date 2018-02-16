@@ -4,9 +4,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 
 public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
 {
-   public enum RequestType {SINGLE_UPDATE, CONTINUOUS_UPDATE, STOP_UPDATE, CLEAR};
-
-   public RequestType requestType;
+   public byte requestType;
    public BoundingBox3D boundingBoxInWorldForRequest;
 
    public RequestPlanarRegionsListMessage()
@@ -22,12 +20,12 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
       setPacketInformation(other);
    }
 
-   public RequestType getRequestType()
+   public byte getRequestType()
    {
       return requestType;
    }
 
-   public void setRequestType(RequestType requestType)
+   public void setRequestType(byte requestType)
    {
       this.requestType = requestType;
    }

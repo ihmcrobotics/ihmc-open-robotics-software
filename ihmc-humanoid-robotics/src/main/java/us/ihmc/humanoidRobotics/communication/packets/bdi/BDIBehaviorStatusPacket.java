@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
 {
-   public BDIRobotBehavior currentBehavior;
+   public byte currentBehavior;
 
    public BDIBehaviorStatusPacket()
    {
@@ -26,6 +26,6 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
    @Override
    public boolean epsilonEquals(BDIBehaviorStatusPacket other, double epsilon)
    {
-      return (other instanceof BDIBehaviorStatusPacket) && (other).currentBehavior == currentBehavior;
+      return other.currentBehavior == currentBehavior;
    }
 }

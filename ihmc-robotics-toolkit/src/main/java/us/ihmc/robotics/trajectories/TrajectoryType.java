@@ -23,4 +23,14 @@ public enum TrajectoryType
          throw new RuntimeException("Document this case.");
       }
    }
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static TrajectoryType fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

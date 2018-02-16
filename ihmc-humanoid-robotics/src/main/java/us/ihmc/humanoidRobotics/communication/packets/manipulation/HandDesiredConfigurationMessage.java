@@ -11,9 +11,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
 {
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "Specifies the grasp to perform")
-   public HandConfiguration handDesiredConfiguration;
+   public byte handDesiredConfiguration;
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -32,12 +32,12 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       setPacketInformation(other);
    }
 
-   public HandConfiguration getHandDesiredConfiguration()
+   public byte getHandDesiredConfiguration()
    {
       return handDesiredConfiguration;
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -51,14 +51,14 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    @Override
    public String toString()
    {
-      return robotSide.toString() + " State= " + handDesiredConfiguration.toString();
+      return RobotSide.fromByte(robotSide).toString() + " State= " + HandConfiguration.fromByte(handDesiredConfiguration).toString();
    }
 
    @Override
    public boolean epsilonEquals(HandDesiredConfigurationMessage other, double epsilon)
    {
       boolean ret = (this.getRobotSide() == other.getRobotSide());
-      ret &= (this.getHandDesiredConfiguration().equals(other.getHandDesiredConfiguration()));
+      ret &= (this.getHandDesiredConfiguration() == other.getHandDesiredConfiguration());
 
       return ret;
    }

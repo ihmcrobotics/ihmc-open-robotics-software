@@ -6,10 +6,10 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -19,6 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -27,7 +28,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -101,8 +104,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       stateMachine.addState(planFromDoubleSupportState);
       stateMachine.addState(planFromSingleSupportState);
 
-      StateTransitionCondition planFromDoubleSupportToWait = () -> plannerResult.get() != null && !plannerResult.get().planningResult.validForExecution();
-      StateTransitionCondition planFromDoubleSupportToWalking = () -> plannerResult.get() != null && plannerResult.get().planningResult.validForExecution();
+      StateTransitionCondition planFromDoubleSupportToWait = () -> plannerResult.get() != null && !FootstepPlanningResult.fromByte(plannerResult.get().planningResult).validForExecution();
+      StateTransitionCondition planFromDoubleSupportToWalking = () -> plannerResult.get() != null && FootstepPlanningResult.fromByte(plannerResult.get().planningResult).validForExecution();
 
       planFromDoubleSupportState.addStateTransition(WalkOverTerrainState.WAIT, planFromDoubleSupportToWait);
       planFromDoubleSupportState.addStateTransition(WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT, planFromDoubleSupportToWalking);
@@ -215,7 +218,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       private void clearPlanarRegionsList()
       {
-         RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(RequestType.CLEAR);
+         RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CLEAR);
          requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
          sendPacket(requestPlanarRegionsListMessage);
       }
@@ -280,7 +283,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
    class PlanFromSingleSupportState extends State<WalkOverTerrainState>
    {
-      private final AtomicReference<FootstepStatus> footstepStatus = new AtomicReference<>();
+      private final AtomicReference<FootstepStatusMessage> footstepStatus = new AtomicReference<>();
       private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
 
       private final FramePose3D touchdownPose = new FramePose3D();
@@ -289,15 +292,15 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       PlanFromSingleSupportState()
       {
          super(WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT);
-         communicationBridge.attachListener(FootstepStatus.class, footstepStatus::set);
+         communicationBridge.attachListener(FootstepStatusMessage.class, footstepStatus::set);
          communicationBridge.attachListener(WalkingStatusMessage.class, packet -> { walkingStatus.set(packet); waitState.hasWalkedBetweenWaiting.set(true);});
       }
 
       @Override
       public void doAction()
       {
-         FootstepStatus footstepStatus = this.footstepStatus.getAndSet(null);
-         if(footstepStatus != null && footstepStatus.status == FootstepStatus.Status.STARTED)
+         FootstepStatusMessage footstepStatus = this.footstepStatus.getAndSet(null);
+         if(footstepStatus != null && footstepStatus.status == FootstepStatus.STARTED.toByte())
          {
             Point3D touchdownPosition = footstepStatus.getDesiredFootPositionInWorld();
             Quaternion touchdownOrientation = footstepStatus.getDesiredFootOrientationInWorld();
@@ -307,7 +310,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          }
 
          FootstepPlanningToolboxOutputStatus plannerResult = WalkOverTerrainStateMachineBehavior.this.plannerResult.get();
-         if(plannerResult != null && plannerResult.planningResult.validForExecution())
+         if(plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.planningResult).validForExecution())
          {
             sendFootstepPlan();
          }
@@ -326,7 +329,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       boolean doneWalking()
       {
-         return (walkingStatus.get() != null) && (walkingStatus.get().status == WalkingStatusMessage.Status.COMPLETED);
+         return (walkingStatus.get() != null) && (walkingStatus.get().status == WalkingStatus.COMPLETED.toByte());
       }
    }
 
