@@ -119,8 +119,8 @@ public final class RandomHumanoidMessages
    {
       QueueableMessage next = new QueueableMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
-      next.previousMessageId = random.nextLong();
+      next.setExecutionMode(RandomNumbers.nextEnum(random, ExecutionMode.class));
+      next.setPreviousMessageId(random.nextLong());
       next.executionDelayTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       return next;
    }

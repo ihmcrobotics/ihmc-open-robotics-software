@@ -42,8 +42,8 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    @Override
    public void set(QueueableMessage other)
    {
-      executionMode = other.executionMode;
-      previousMessageId = other.previousMessageId;
+      setExecutionMode(other.getExecutionMode());
+      setPreviousMessageId(other.getPreviousMessageId());
       executionDelayTime = other.executionDelayTime;
       setPacketInformation(other);
    }
@@ -56,13 +56,27 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
     * previous messages are done.
     * 
     * @param executionMode
+    */
+   public void setExecutionMode(ExecutionMode executionMode)
+   {
+      this.executionMode = executionMode;
+   }
+
+   /**
+    * When the message is to be queued, the ID of the message this should be queued to has to be
+    * provided.
+    * 
     * @param previousMessageId when queuing, one needs to provide the ID of the message this message
     *           should be queued to.
     */
-   public void setExecutionMode(ExecutionMode executionMode, long previousMessageId)
+   public void setPreviousMessageId(long previousMessageId)
    {
-      this.executionMode = executionMode;
       this.previousMessageId = previousMessageId;
+   }
+
+   public void setExecutionDelayTime(double delayTime)
+   {
+      executionDelayTime = (float) delayTime;
    }
 
    /**
@@ -76,16 +90,6 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
       return executionMode;
    }
 
-   public void setExecutionDelayTime(double delayTime)
-   {
-      executionDelayTime = (float) delayTime;
-   }
-
-   public double getExecutionDelayTime()
-   {
-      return executionDelayTime;
-   }
-
    /**
     * Returns the previous message ID. If the message is queued this is used to verify that no
     * packets were dropped.
@@ -97,13 +101,18 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
       return previousMessageId;
    }
 
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+
    /** {@inheritDoc} */
    @Override
    public boolean epsilonEquals(QueueableMessage other, double epsilon)
    {
-      if (executionMode != other.getExecutionMode())
+      if (getExecutionMode() != other.getExecutionMode())
          return false;
-      if (executionMode == ExecutionMode.QUEUE && previousMessageId != other.getPreviousMessageId())
+      if (getExecutionMode() == ExecutionMode.QUEUE && getPreviousMessageId() != other.getPreviousMessageId())
          return false;
       return true;
    }
@@ -111,6 +120,6 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    @Override
    public String toString()
    {
-      return "Mode: " + executionMode + ", delay: " + executionDelayTime + ", previous ID: " + previousMessageId;
+      return "Mode: " + getExecutionMode() + ", delay: " + executionDelayTime + ", previous ID: " + getPreviousMessageId();
    }
 }

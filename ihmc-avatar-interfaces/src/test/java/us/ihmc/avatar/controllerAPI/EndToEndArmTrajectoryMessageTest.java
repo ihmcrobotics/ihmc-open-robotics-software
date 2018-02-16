@@ -277,7 +277,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          ArmTrajectoryMessage trajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
          trajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            trajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
+         {
+            trajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+            trajectoryMessage.getQueueingProperties().setPreviousMessageId(id - 1);
+         }
          id++;
 
          TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
@@ -404,7 +407,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                if (messageIndex == numberOfMessages - 1)
                   previousMessageId = id + 100; // Bad ID
 
-               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+               armTrajectoryMessage.getQueueingProperties().setPreviousMessageId(previousMessageId);
             }
             id++;
 
@@ -508,7 +512,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
             armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
-               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            {
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+               armTrajectoryMessage.getQueueingProperties().setPreviousMessageId(id - 1);
+            }
             id++;
 
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();

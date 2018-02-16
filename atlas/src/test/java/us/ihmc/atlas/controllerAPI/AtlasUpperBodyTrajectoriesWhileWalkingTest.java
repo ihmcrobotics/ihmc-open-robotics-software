@@ -163,7 +163,10 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
             armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
-               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            {
+               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+               armTrajectoryMessage.getQueueingProperties().setPreviousMessageId(id - 1);
+            }
             id++;
 
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();

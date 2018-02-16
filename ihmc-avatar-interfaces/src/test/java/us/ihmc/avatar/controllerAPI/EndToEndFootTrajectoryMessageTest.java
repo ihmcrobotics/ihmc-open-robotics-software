@@ -487,7 +487,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, numberOfTrajectoryPointsPerMessage);
          footTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
+         {
+            footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+            footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId(id - 1);
+         }
          id++;
          double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 
@@ -571,7 +574,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 5);
          footTrajectoryMessage.setUniqueId(100);
-         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, 500); //not the right ID
+         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId((long) 500); //not the right ID
          for(int i = 0; i < 5; i++)
          {
             footTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
