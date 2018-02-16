@@ -198,8 +198,11 @@ public class GuiController
          }
          else
          {
-            localParameter.setValue(externalParameter.getCurrentValue());
-            localParameter.setStatus(externalParameter.getStatus());
+            if (!localParameter.getCurrentValue().equals(externalParameter.getCurrentValue()))
+            {
+               localParameter.setValueAndStatus(externalParameter);
+               localParameter.saveStateForReset();
+            }
          }
       });
       changeCollector.startRecording();
