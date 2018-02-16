@@ -530,6 +530,11 @@ public class RigidBodyControlManager
       return ret;
    }
 
+   public String getControllerBodyName()
+   {
+      return bodyName;
+   }
+   
    public OneDoFJoint[] getControlledJoints()
    {
       return jointsToControl;

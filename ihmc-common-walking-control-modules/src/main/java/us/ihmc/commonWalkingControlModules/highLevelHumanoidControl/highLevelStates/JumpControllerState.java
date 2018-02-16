@@ -68,12 +68,13 @@ public class JumpControllerState extends HighLevelControllerState
                                                                  controllerCoreToolbox.getContactablePlaneBodies());
       }
 
+      jumpController = new JumpHighLevelHumanoidController(commandInputManager, statusOutputManager, controllerCoreToolbox, controllerToolbox, jumpingControlParameters,
+                                                           jumpingControlManagerFactory);
+
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledOneDofJoints);
       controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, jumpingControlManagerFactory.createFeedbackControlTemplate(),
                                                    lowLevelControllerOutput, registry);
 
-      jumpController = new JumpHighLevelHumanoidController(commandInputManager, statusOutputManager, controllerCoreToolbox, controllerToolbox, jumpingControlParameters,
-                                                           jumpingControlManagerFactory);
    }
 
    @Override

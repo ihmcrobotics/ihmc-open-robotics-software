@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -169,7 +170,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
       qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
-
+      
       double qdd_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDError.getDoubleValue();
       qdd_fb = MathTools.clamp(qdd_fb, maxFeedback.getDoubleValue());
       qDDFeedback.set(qdd_fb);

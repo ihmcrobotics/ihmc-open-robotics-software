@@ -25,6 +25,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -180,7 +181,14 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
-      return feedbackControlCommandList;
+      FeedbackControlCommandList templateFeedbackCommandList = new FeedbackControlCommandList();
+      Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
+      for (RigidBodyControlManager bodyManager : bodyManagers)
+      {
+         if (bodyManager != null)
+            templateFeedbackCommandList.addCommand(bodyManager.createFeedbackControlTemplate());
+      }
+      return templateFeedbackCommandList;
    }
 
    public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
