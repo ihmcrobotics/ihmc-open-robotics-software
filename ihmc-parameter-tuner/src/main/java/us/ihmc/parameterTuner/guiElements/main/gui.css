@@ -21,6 +21,14 @@
 	-fx-fill: black;
 }
 
+#modified-parameter-name-in-tree-view {
+	-fx-fill: orange;
+}
+
+#default-parameter-name-in-tree-view {
+	-fx-fill: darkred;
+}
+
 #parameter-name-in-tuner {
 	-fx-text-fill: -fx-text-inner-color;
 	-fx-font-weight: bold;
