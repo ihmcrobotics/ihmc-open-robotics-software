@@ -7,6 +7,8 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
@@ -55,6 +57,10 @@ public class ParameterTreeParameter implements ParameterTreeValue
       private final Label value = new Label();
       private final MenuItem discard = new MenuItem("Discard");
 
+      private final MenuItem copyName = new MenuItem("Copy Name");
+      private final Clipboard clipboard = Clipboard.getSystemClipboard();
+      private final ClipboardContent content = new ClipboardContent();
+
       public ParameterNode(GuiParameter parameter)
       {
          // Creating this using fxml causes crazy slow down since it is done a lot.
@@ -70,9 +76,12 @@ public class ParameterTreeParameter implements ParameterTreeValue
          discard.setDisable(true);
          contextMenu.getItems().add(discard);
          setOnContextMenuRequested((event) -> contextMenu.show(value, event.getScreenX(), event.getScreenY()));
-         discard.setOnAction(event -> {
-            parameter.reset();
-         });
+         discard.setOnAction(event -> parameter.reset());
+
+         // Setup context menu for copying name to system clipboard.
+         content.putString(parameter.getName());
+         contextMenu.getItems().add(copyName);
+         copyName.setOnAction((event) -> clipboard.setContent(content));
 
          // Set up the css styles for the parameter status.
          updateStyle(parameter);
