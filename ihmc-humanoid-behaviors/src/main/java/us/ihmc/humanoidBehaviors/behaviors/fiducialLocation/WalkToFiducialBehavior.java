@@ -8,6 +8,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -36,7 +37,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
       if (!sentPlanningRequest.getBooleanValue())
       {
          FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-         request.set(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose, plannerToUse);
+         request.set(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT.toByte(), goalPose, plannerToUse.toByte());
          request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
          sendPacket(request);
       }
@@ -44,7 +45,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
       if (!recievedPlan.getBooleanValue() && footstepPlanQueue.isNewPacketAvailable())
       {
          FootstepPlanningToolboxOutputStatus latestPacket = footstepPlanQueue.getLatestPacket();
-         planValid.set(latestPacket.planningResult.validForExecution());
+         planValid.set(FootstepPlanningResult.fromByte(latestPacket.planningResult).validForExecution());
 
          if (planValid.getBooleanValue())
          {

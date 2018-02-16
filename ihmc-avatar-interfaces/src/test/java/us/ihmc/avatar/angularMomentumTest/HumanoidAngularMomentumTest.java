@@ -103,7 +103,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       FootstepDataMessage footstepData = new FootstepDataMessage();
       footstepData.setLocation(stepLocation);
       footstepData.setOrientation(orient);
-      footstepData.setRobotSide(robotSide);
+      footstepData.setRobotSide(robotSide.toByte());
       footstepData.setSwingDuration(swingTime);
       footstepData.setTransferDuration(transferTime);
       message.add(footstepData);
@@ -208,7 +208,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
             fromPoint = footstepList.get(index - 2).getLocation();
             toPoint = footstepList.get(index).getLocation();
             supportPoint = footstepList.get(index - 1).getLocation();
-            robotSide = footstepList.get(index).getRobotSide();
+            robotSide = RobotSide.fromByte(footstepList.get(index).getRobotSide());
             entryFootCMP.set(entryCMP.getX(), robotSide.negateIfLeftSide(entryCMP.getY()), entryCMP.getZ());
             exitFootCMP.set(exitCMP.getX(), robotSide.negateIfLeftSide(exitCMP.getY()), exitCMP.getZ());
             

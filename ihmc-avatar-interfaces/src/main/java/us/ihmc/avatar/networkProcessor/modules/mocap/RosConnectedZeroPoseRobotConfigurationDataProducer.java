@@ -112,7 +112,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
          imuPacket.set(RandomGeometry.nextVector3D32(random), RandomGeometry.nextQuaternion32(random), RandomGeometry.nextVector3D32(random));
       }
       
-      robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING);
+      robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());
       
       robotConfigurationData.setTimestamp(totalNsecs);
       if(pelvisPoseInMocapFrame != null)

@@ -2,18 +2,7 @@ package us.ihmc.communication.packets;
 
 public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNotificationPacket>
 {
-   public enum CrashLocation
-   {
-      CONTROLLER_READ,
-      CONTROLLER_WRITE,
-      CONTROLLER_RUN, 
-      ESTIMATOR_READ,
-      ESTIMATOR_WRITE,
-      ESTIMATOR_RUN
-   }
-   
-   
-   public CrashLocation location;
+   public byte location;
    public String stacktrace;
    
    public ControllerCrashNotificationPacket()

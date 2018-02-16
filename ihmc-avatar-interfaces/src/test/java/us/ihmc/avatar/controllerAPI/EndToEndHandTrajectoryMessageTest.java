@@ -529,7 +529,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
          {
-            handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+            handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
             handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId(id - 1);
          }
          id++;
@@ -720,7 +720,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                if (messageIndex == numberOfMessages - 1)
                   previousMessageId = id + 100; // Bad ID
 
-               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
                handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId(previousMessageId);
             }
             id++;
@@ -835,7 +835,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             if (messageIndex > 0)
             {
-               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
                handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId(id - 1);
             }
             id++;

@@ -4,12 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage>
 {
-   public enum ControlMode
-   {
-      STAND_PREP, FREEZE;
-   }
-
-   public ControlMode requestedControlMode;
+   public byte requestedControlMode;
 
    public AtlasLowLevelControlModeMessage()
    {
@@ -22,24 +17,14 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
       requestedControlMode = other.requestedControlMode;
    }
 
-   public void setRequestedControlMode(ControlMode requestedControlMode)
+   public void setRequestedControlMode(byte requestedControlMode)
    {
       this.requestedControlMode = requestedControlMode;
    }
 
-   public ControlMode getRequestedControlMode()
+   public byte getRequestedControlMode()
    {
       return requestedControlMode;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      String errorMessage = null;
-      if (requestedControlMode == null)
-         errorMessage = "The field requestedControlMode is null.";
-      return errorMessage;
    }
 
    @Override

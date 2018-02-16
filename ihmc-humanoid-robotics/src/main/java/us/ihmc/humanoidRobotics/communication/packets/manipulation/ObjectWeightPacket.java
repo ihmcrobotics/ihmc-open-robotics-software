@@ -1,11 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
 {
-   public RobotSide robotSide;
+   public byte robotSide;
    public double weight;
 
    public ObjectWeightPacket()
@@ -21,7 +20,7 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
       setPacketInformation(other);
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -34,7 +33,7 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
    @Override
    public boolean epsilonEquals(ObjectWeightPacket other, double epsilon)
    {
-      boolean sameSide = robotSide.equals(other.getRobotSide());
+      boolean sameSide = robotSide == other.getRobotSide();
       boolean sameWeight = weight == other.getWeight();
       return sameSide && sameWeight;
    }

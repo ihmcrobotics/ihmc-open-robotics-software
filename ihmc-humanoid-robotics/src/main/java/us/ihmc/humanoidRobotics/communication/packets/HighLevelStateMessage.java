@@ -11,14 +11,14 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 {
    @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
-   public HighLevelControllerName highLevelState;
+   public byte highLevelState;
 
    public HighLevelStateMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HighLevelControllerName getHighLevelControllerName()
+   public byte getHighLevelControllerName()
    {
       return highLevelState;
    }
@@ -39,12 +39,12 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
    @Override
    public String toString()
    {
-      return "State= " + highLevelState.toString();
+      return "State= " + HighLevelControllerName.fromByte(highLevelState).toString();
    }
 
    @Override
    public boolean epsilonEquals(HighLevelStateMessage other, double epsilon)
    {
-      return this.getHighLevelControllerName().equals(other.getHighLevelControllerName());
+      return highLevelState == other.highLevelState;
    }
 }

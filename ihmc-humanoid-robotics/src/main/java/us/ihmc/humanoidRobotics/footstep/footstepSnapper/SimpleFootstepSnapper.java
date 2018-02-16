@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
  * Created by agrabertilton on 1/14/15.
@@ -90,7 +91,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
-      footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
+      footstep.setTrajectoryType(TrajectoryType.fromByte(originalFootstep.getTrajectoryType()));
 
       return type;
    }

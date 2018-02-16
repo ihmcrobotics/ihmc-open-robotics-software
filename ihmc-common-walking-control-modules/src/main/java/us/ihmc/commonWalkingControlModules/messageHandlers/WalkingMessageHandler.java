@@ -30,8 +30,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTraj
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -506,15 +508,15 @@ public class WalkingMessageHandler
    private final Quaternion actualFootOrientationInWorld = new Quaternion();
    private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
-   private final FootstepStatus footstepStatus = new FootstepStatus();
+   private final FootstepStatusMessage footstepStatus = new FootstepStatusMessage();
 
    public void reportFootstepStarted(RobotSide robotSide, FramePose3D desiredFootPoseInWorld, FramePose3D actualFootPoseInWorld)
    {
       desiredFootPoseInWorld.get(desiredFootPositionInWorld, desiredFootOrientationInWorld);
       actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
 
-      footstepStatus.setStatus(FootstepStatus.Status.STARTED);
-      footstepStatus.setRobotSide(robotSide);
+      footstepStatus.setStatus(FootstepStatus.STARTED.toByte());
+      footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
       footstepStatus.setActualFootOrientationInWorld(actualFootOrientationInWorld);
       footstepStatus.setActualFootPositionInWorld(actualFootPositionInWorld);
@@ -534,8 +536,8 @@ public class WalkingMessageHandler
       desiredFootOrientationInWorld.setToNaN();
       desiredFootPositionInWorld.setToNaN();
 
-      footstepStatus.setStatus(FootstepStatus.Status.COMPLETED);
-      footstepStatus.setRobotSide(robotSide);
+      footstepStatus.setStatus(FootstepStatus.COMPLETED.toByte());
+      footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
       footstepStatus.setActualFootOrientationInWorld(actualFootOrientationInWorld);
       footstepStatus.setActualFootPositionInWorld(actualFootPositionInWorld);
@@ -552,7 +554,7 @@ public class WalkingMessageHandler
 
    public void reportWalkingStarted()
    {
-      walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.STARTED);
+      walkingStatusMessage.setWalkingStatus(WalkingStatus.STARTED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING);
       statusOutputManager.reportStatusMessage(reusableSpeechPacket);
@@ -561,7 +563,7 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
-      walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.COMPLETED);
+      walkingStatusMessage.setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       isWalking.set(false);
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
@@ -571,7 +573,7 @@ public class WalkingMessageHandler
    public void reportWalkingAbortRequested()
    {
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
-      walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.ABORT_REQUESTED);
+      walkingStatusMessage.setWalkingStatus(WalkingStatus.ABORT_REQUESTED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING_ABORTED);
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);

@@ -536,7 +536,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       double zClearHeight = desiredFootsteps.get(0).getLocation().getZ() + 0.07;
       double swingHeightForClear = zClearHeight - desiredFootsteps.get(2).getLocation().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
       desiredFootsteps.get(1).setSwingHeight(swingHeightForClear);
-      desiredFootsteps.get(1).setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      desiredFootsteps.get(1).setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       return desiredFootsteps;
    }
 

@@ -16,7 +16,7 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
    public Point3D manifoldOriginPosition;
    public Quaternion manifoldOriginOrientation;
 
-   public ConfigurationSpaceName[] manifoldConfigurationSpaces;
+   public byte[] manifoldConfigurationSpaces;
    public double[] manifoldLowerLimits;
    public double[] manifoldUpperLimits;
 
@@ -45,19 +45,19 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
    public void setMenifoldAPoint()
    {
-      ConfigurationSpaceName[] configurations = {};
+      byte[] configurations = {};
       double[] lowerLimits = {};
       double[] upperLimits = {};
 
       setManifold(configurations, lowerLimits, upperLimits);
    }
 
-   public void setManifold(ConfigurationSpaceName[] configurationSpaces, double[] lowerLimits, double[] upperLimits)
+   public void setManifold(byte[] configurationSpaces, double[] lowerLimits, double[] upperLimits)
    {
       if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
          throw new RuntimeException("Inconsistent array lengths: configurationSpaces = " + configurationSpaces.length);
 
-      this.manifoldConfigurationSpaces = new ConfigurationSpaceName[configurationSpaces.length];
+      this.manifoldConfigurationSpaces = new byte[configurationSpaces.length];
       this.manifoldLowerLimits = new double[configurationSpaces.length];
       this.manifoldUpperLimits = new double[configurationSpaces.length];
 
@@ -109,7 +109,7 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       return manifoldConfigurationSpaces.length;
    }
 
-   public ConfigurationSpaceName getDegreeOfManifold(int i)
+   public byte getDegreeOfManifold(int i)
    {
       return manifoldConfigurationSpaces[i];
    }

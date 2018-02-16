@@ -36,14 +36,14 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    public void set(FootTrajectoryMessage message)
    {
       se3Trajectory.set(message.se3Trajectory);
-      robotSide = message.getRobotSide();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, FootTrajectoryMessage message)
    {
       se3Trajectory.set(resolver, message.se3Trajectory);
-      robotSide = message.getRobotSide();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
    @Override

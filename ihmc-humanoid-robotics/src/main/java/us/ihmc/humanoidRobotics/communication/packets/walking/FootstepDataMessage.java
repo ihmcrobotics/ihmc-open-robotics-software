@@ -25,7 +25,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 public class FootstepDataMessage extends Packet<FootstepDataMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "Specifies the position of the footstep (sole frame) in world frame.")
    public Point3D location;
    @RosExportedField(documentation = "Specifies the orientation of the footstep (sole frame) in world frame.")
@@ -39,7 +39,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    public ArrayList<Point2D> predictedContactPoints;
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.")
-   public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
+   public byte trajectoryType = TrajectoryType.DEFAULT.toByte();
    @RosExportedField(documentation = "Contains information on how high the robot should swing its foot. This affects trajectory types DEFAULT and OBSTACLE_CLEARANCE."
          + "If a value smaller then the minumal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.")
    public double swingHeight = 0.0;
@@ -171,7 +171,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       orientationToPack.set(this.orientation);
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -186,7 +186,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       return swingTrajectoryBlendDuration;
    }
 
-   public void setRobotSide(RobotSide robotSide)
+   public void setRobotSide(byte robotSide)
    {
       this.robotSide = robotSide;
    }
@@ -220,12 +220,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       this.predictedContactPoints = predictedContactPoints;
    }
 
-   public TrajectoryType getTrajectoryType()
+   public byte getTrajectoryType()
    {
       return trajectoryType;
    }
 
-   public void setTrajectoryType(TrajectoryType trajectoryType)
+   public void setTrajectoryType(byte trajectoryType)
    {
       this.trajectoryType = trajectoryType;
    }
@@ -333,7 +333,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
          ret += "null";
       }
 
-      ret += trajectoryType.name() + "\n";
+      ret += TrajectoryType.fromByte(trajectoryType).name() + "\n";
 
       if (positionWaypoints != null)
       {

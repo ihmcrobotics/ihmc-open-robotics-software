@@ -3,13 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 import java.util.Arrays;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
 
 public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyExplorationConfigurationMessage>
 {
    public long rigidBodyNameBasedHashCode;
-   public ConfigurationSpaceName[] degreesOfFreedomToExplore;
+   public byte[] degreesOfFreedomToExplore;
 
    public double[] explorationRangeUpperLimits;
    public double[] explorationRangeLowerLimits;
@@ -29,7 +28,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       degreesOfFreedomToExplore = Arrays.copyOf(other.degreesOfFreedomToExplore, other.degreesOfFreedomToExplore.length);
    }
 
-   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
+   public void setExplorationConfigurationSpaces(byte[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
    {
       if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
@@ -45,7 +44,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       }
    }
 
-   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeUpperLimits,
+   public void setExplorationConfigurationSpaces(byte[] degreesOfFreedomToExplore, double[] explorationRangeUpperLimits,
                                                  double[] explorationRangeLowerLimits)
    {
       if (degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length)
@@ -69,7 +68,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       return degreesOfFreedomToExplore.length;
    }
 
-   public ConfigurationSpaceName getDegreeOfFreedomToExplore(int i)
+   public byte getDegreeOfFreedomToExplore(int i)
    {
       return degreesOfFreedomToExplore[i];
    }

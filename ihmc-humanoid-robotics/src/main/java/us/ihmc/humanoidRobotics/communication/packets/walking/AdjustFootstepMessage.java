@@ -13,13 +13,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 {
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "Specifies the adjusted position of the footstep. It is expressed in world frame.")
    public Point3D location;
    @RosExportedField(documentation = "Specifies the adjusted orientation of the footstep. It is expressed in world frame.")
@@ -96,12 +95,12 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       orientationToPack.set(orientation);
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
 
-   public void setRobotSide(RobotSide robotSide)
+   public void setRobotSide(byte robotSide)
    {
       this.robotSide = robotSide;
    }

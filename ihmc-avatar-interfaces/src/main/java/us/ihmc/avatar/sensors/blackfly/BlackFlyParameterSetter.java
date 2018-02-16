@@ -76,7 +76,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
       if (dynamicReconfigureClient.isConnected())
       {
-         if (packet.isFromUI() && packet.getSide() == BlackFlyParameterSetter.this.side) //avoid hearing my own packet
+         if (packet.isFromUI() && packet.getSide() == BlackFlyParameterSetter.this.side.toByte()) //avoid hearing my own packet
          {
             new Thread("BlackflyDynamicReconfigureSetter")
             {

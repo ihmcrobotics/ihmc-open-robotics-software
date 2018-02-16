@@ -8,20 +8,18 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket>
 {
    public static final int NO_PLAN_ID = -1;
 
-   public RobotSide initialStanceSide;
+   public byte initialStanceSide;
    public Point3D32 stanceFootPositionInWorld;
    public Quaternion32 stanceFootOrientationInWorld;
    public Point3D32 goalPositionInWorld;
    public Quaternion32 goalOrientationInWorld;
-   public FootstepPlannerType requestedPlannerType;
+   public byte requestedPlannerType;
    public double timeout;
    public PlanarRegionsListMessage planarRegionsListMessage;
 
@@ -49,7 +47,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       setPacketInformation(other);
    }
 
-   public void set(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
+   public void set(FramePose3D initialStanceFootPose, byte initialStanceSide, FramePose3D goalPose, byte requestedPlannerType)
    {
       this.initialStanceSide = initialStanceSide;
 
@@ -95,7 +93,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    @Override
    public boolean epsilonEquals(FootstepPlanningRequestPacket other, double epsilon)
    {
-      if (!initialStanceSide.equals(other.initialStanceSide))
+      if (initialStanceSide != other.initialStanceSide)
          return false;
       if (!stanceFootPositionInWorld.epsilonEquals(other.stanceFootPositionInWorld, (float) epsilon))
          return false;

@@ -1,11 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPacket>
 {
-   public RobotSide robotSide;
+   public byte robotSide;
    public int collisionSeverityLevelOneToThree;
 
    public HandCollisionDetectedPacket()
@@ -20,7 +19,7 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
       setPacketInformation(other);
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }

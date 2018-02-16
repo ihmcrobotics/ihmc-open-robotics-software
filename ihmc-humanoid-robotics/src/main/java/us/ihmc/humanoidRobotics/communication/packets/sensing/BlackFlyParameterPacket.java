@@ -23,7 +23,7 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 
    public double shutter;
 
-   public RobotSide side;
+   public byte side;
 
    public BlackFlyParameterPacket()
    {
@@ -99,7 +99,7 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       return shutter;
    }
 
-   public RobotSide getSide()
+   public byte getSide()
    {
       return side;
    }
@@ -142,7 +142,7 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
    @Override
    public String toString()
    {
-      return " source(fromUI?)" + fromUI + " " + side.name() + " gain " + gain + " fps " + frameRate + " shutter " + shutter + " exposure " + exposure
+      return " source(fromUI?)" + fromUI + " " + RobotSide.fromByte(side).name() + " gain " + gain + " fps " + frameRate + " shutter " + shutter + " exposure " + exposure
             + " autoExposure/autoGain/autoShutter " + autoExposure + autoGain + autoShutter;
    }
 }

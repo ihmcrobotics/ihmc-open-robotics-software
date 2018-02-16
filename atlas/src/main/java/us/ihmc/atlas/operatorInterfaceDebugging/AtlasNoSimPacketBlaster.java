@@ -158,11 +158,11 @@ public class AtlasNoSimPacketBlaster implements Runnable
       
       HandJointAnglePacket leftHandJointAnglePacket = new HandJointAnglePacket();
       double[] leftFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.LEFT);
-      leftHandJointAnglePacket.setAll(RobotSide.LEFT, true, true, leftFingerJointAngles);
+      leftHandJointAnglePacket.setAll(RobotSide.LEFT.toByte(), true, true, leftFingerJointAngles);
       
       HandJointAnglePacket rightHandJointAnglePacket = new HandJointAnglePacket();
       double[] rightFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.RIGHT);
-      rightHandJointAnglePacket.setAll(RobotSide.RIGHT, true, true, rightFingerJointAngles);
+      rightHandJointAnglePacket.setAll(RobotSide.RIGHT.toByte(), true, true, rightFingerJointAngles);
       
       packetCommunicator.send(rightHandJointAnglePacket);
       packetCommunicator.send(leftHandJointAnglePacket);

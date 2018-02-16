@@ -12,7 +12,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEnablePacket>
 {
    @RosExportedField(documentation = "The Enum value of the motor to enable")
-   public AtlasElectricMotorPacketEnum motorEnableEnum;
+   public byte motorEnableEnum;
 
    @RosExportedField(documentation = "Boolean for enable state; true for enable, false for disable.")
    public boolean enable;
@@ -22,7 +22,7 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       setDestination(PacketDestination.CONTROLLER.ordinal());
    }
 
-   public AtlasElectricMotorPacketEnum getMotorEnableEnum()
+   public byte getMotorEnableEnum()
    {
       return motorEnableEnum;
    }

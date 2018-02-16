@@ -7,18 +7,13 @@ import us.ihmc.communication.packets.Packet;
 public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 {
 
-   public enum RequestType
-   {
-      START_SEARCH, STOP_SEARCH, UPDATE_START
-   };
-
    public FootstepDataMessage startFootstep;
    public double thetaStart;
    public double maxSuboptimality = 1;
 
    public ArrayList<FootstepDataMessage> goals = new ArrayList<FootstepDataMessage>();
 
-   public RequestType requestType;
+   public byte requestType;
 
    public FootstepPlanRequestPacket()
    {

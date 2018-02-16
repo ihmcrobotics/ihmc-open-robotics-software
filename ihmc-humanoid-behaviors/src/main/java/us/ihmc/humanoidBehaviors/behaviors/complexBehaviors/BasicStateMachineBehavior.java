@@ -9,8 +9,8 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -45,7 +45,7 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
          protected void setBehaviorInput()
          {
 
-            GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
+            GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.LEFT, 2);
             atlasPrimitiveActions.leftArmGoHomeBehavior.setInput(goHomeLeftArmMessage);
             FramePose2D poseToWalkTo = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0, 0), 0);
             atlasPrimitiveActions.walkToLocationBehavior.setTarget(poseToWalkTo);

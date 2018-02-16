@@ -1,9 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.planFootstepsToLocation;
 
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -20,22 +23,21 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 {
@@ -50,12 +52,12 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private final FramePose3D tempRightFootPose = new FramePose3D();
 
    private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue;
-   private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
+   private final ConcurrentListeningQueue<FootstepStatusMessage> footstepStatusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
-   private final SideDependentList<FootstepStatus> latestFootstepStatus;
-   private final SideDependentList<YoEnum<FootstepStatus.Status>> latestFootstepStatusEnum;
+   private final SideDependentList<FootstepStatusMessage> latestFootstepStatus;
+   private final SideDependentList<YoEnum<FootstepStatus>> latestFootstepStatusEnum;
    private final SideDependentList<YoFramePose> actualFootStatusPoses;
    private final SideDependentList<YoFramePose> desiredFootStatusPoses;
 
@@ -106,8 +108,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       footstepSentTimer.start();
 
       latestFootstepStatus = new SideDependentList<>();
-      YoEnum<FootstepStatus.Status> leftFootstepStatus = new YoEnum<FootstepStatus.Status>(prefix + "leftFootstepStatus", registry, FootstepStatus.Status.class);
-      YoEnum<FootstepStatus.Status> rightFootstepStatus = new YoEnum<FootstepStatus.Status>(prefix + "rightFootstepStatus", registry, FootstepStatus.Status.class);
+      YoEnum<FootstepStatus> leftFootstepStatus = new YoEnum<FootstepStatus>(prefix + "leftFootstepStatus", registry, FootstepStatus.class);
+      YoEnum<FootstepStatus> rightFootstepStatus = new YoEnum<FootstepStatus>(prefix + "rightFootstepStatus", registry, FootstepStatus.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
       YoFramePose desiredLeftFootstepStatusPose = new YoFramePose(prefix + "DesiredLeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
@@ -118,11 +120,11 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
 
-      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
+      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
       robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>(40);
       walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>(10);
       attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatusMessage.class);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
       
@@ -189,21 +191,22 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    {
       while(footstepStatusQueue.isNewPacketAvailable())
       {
-         FootstepStatus poll = footstepStatusQueue.poll();
-         latestFootstepStatus.set(poll.getRobotSide(), poll);
-         nextSideToSwing.set(poll.getRobotSide().getOppositeSide());
+         FootstepStatusMessage poll = footstepStatusQueue.poll();
+         RobotSide robotSide = RobotSide.fromByte(poll.getRobotSide());
+         latestFootstepStatus.set(robotSide, poll);
+         nextSideToSwing.set(robotSide.getOppositeSide());
       }
 
       currentlySwingingFoot.set(null);
 
       for (RobotSide side: RobotSide.values())
       {
-         FootstepStatus status = latestFootstepStatus.get(side);
+         FootstepStatusMessage status = latestFootstepStatus.get(side);
          if(status != null)
          {
             latestFootstepStatusEnum.get(side).set(status.getStatus());
 
-            if (status.getStatus() == FootstepStatus.Status.STARTED)
+            if (status.getStatus() == FootstepStatus.STARTED.toByte())
             {
                currentlySwingingFoot.set(side);
             }
@@ -212,7 +215,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
       for (RobotSide side : RobotSide.values)
       {
-         FootstepStatus status = latestFootstepStatus.get(side);
+         FootstepStatusMessage status = latestFootstepStatus.get(side);
          if (status != null)
          {
             us.ihmc.euclid.tuple3D.Point3D desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();
@@ -234,7 +237,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private void requestPlanarRegionsList()
    {
-      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(RequestPlanarRegionsListMessage.RequestType.SINGLE_UPDATE);
+      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.SINGLE_UPDATE);
       requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
       sendPacket(requestPlanarRegionsListMessage);
    }

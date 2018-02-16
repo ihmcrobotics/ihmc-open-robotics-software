@@ -2,9 +2,6 @@ package us.ihmc.communication.packets;
 
 import java.util.List;
 
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
-import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -316,10 +313,10 @@ public class MessageTools
       return message;
    }
 
-   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(CrashLocation location, String stackTrace)
+   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(ControllerCrashLocation location, String stackTrace)
    {
       ControllerCrashNotificationPacket message = new ControllerCrashNotificationPacket();
-      message.location = location;
+      message.location = location.toByte();
       message.stacktrace = stackTrace;
       return message;
    }
@@ -336,30 +333,30 @@ public class MessageTools
    public static ToolboxStateMessage createToolboxStateMessage(ToolboxState requestedState)
    {
       ToolboxStateMessage message = new ToolboxStateMessage();
-      message.requestedState = requestedState;
+      message.requestedState = requestedState.toByte();
       return message;
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(RequestType requestType)
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType)
    {
       return createRequestPlanarRegionsListMessage(requestType, null, null);
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(RequestType requestType, BoundingBox3D boundingBoxInWorldForRequest)
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, BoundingBox3D boundingBoxInWorldForRequest)
    {
       return createRequestPlanarRegionsListMessage(requestType, boundingBoxInWorldForRequest, null);
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(RequestType requestType, PacketDestination destination)
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, PacketDestination destination)
    {
       return createRequestPlanarRegionsListMessage(requestType, null, destination);
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(RequestType requestType, BoundingBox3D boundingBoxInWorldForRequest,
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, BoundingBox3D boundingBoxInWorldForRequest,
                                                                                        PacketDestination destination)
    {
       RequestPlanarRegionsListMessage message = new RequestPlanarRegionsListMessage();
-      message.requestType = requestType;
+      message.requestType = requestType.toByte();
       message.boundingBoxInWorldForRequest = boundingBoxInWorldForRequest;
       if (destination != null)
          message.setDestination(destination);
@@ -373,4 +370,8 @@ public class MessageTools
       return message;
    }
 
+   public static <T extends Enum<T>> T fromByteToEnum(byte value, Class<T> enumType)
+   {
+      return enumType.getEnumConstants()[(int) value];
+   }
 }

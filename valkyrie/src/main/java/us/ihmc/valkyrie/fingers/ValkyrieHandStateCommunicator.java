@@ -76,7 +76,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
          HandJointAnglePacket packet = buffer.next();
          if (packet != null)
          {
-            packet.robotSide = robotSide;
+            packet.robotSide = robotSide.toByte();
 
             for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
             {

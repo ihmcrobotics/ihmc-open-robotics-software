@@ -163,7 +163,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (handTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
          handTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
-      switch (handTrajectoryMessage.getRobotSide())
+      switch (RobotSide.fromByte(handTrajectoryMessage.getRobotSide()))
       {
       case LEFT:
          leftHandTrajectoryMessage = handTrajectoryMessage;
@@ -181,7 +181,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (armTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
          armTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
-      switch (armTrajectoryMessage.getRobotSide())
+      switch (RobotSide.fromByte(armTrajectoryMessage.getRobotSide()))
       {
       case LEFT:
          leftArmTrajectoryMessage = armTrajectoryMessage;
@@ -215,7 +215,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (footTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
          footTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
-      switch (footTrajectoryMessage.getRobotSide())
+      switch (RobotSide.fromByte(footTrajectoryMessage.getRobotSide()))
       {
       case LEFT:
          leftFootTrajectoryMessage = footTrajectoryMessage;
@@ -238,17 +238,17 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
    public boolean checkRobotSideConsistency()
    {
-      if (leftHandTrajectoryMessage != null && leftHandTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
+      if (leftHandTrajectoryMessage != null && RobotSide.fromByte(leftHandTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
          return false;
-      if (rightHandTrajectoryMessage != null && rightHandTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
+      if (rightHandTrajectoryMessage != null && RobotSide.fromByte(rightHandTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
          return false;
-      if (leftArmTrajectoryMessage != null && leftArmTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
+      if (leftArmTrajectoryMessage != null && leftArmTrajectoryMessage.getRobotSide() != RobotSide.LEFT.toByte())
          return false;
-      if (rightArmTrajectoryMessage != null && rightArmTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
+      if (rightArmTrajectoryMessage != null && rightArmTrajectoryMessage.getRobotSide() != RobotSide.RIGHT.toByte())
          return false;
-      if (leftFootTrajectoryMessage != null && leftFootTrajectoryMessage.getRobotSide() != RobotSide.LEFT)
+      if (leftFootTrajectoryMessage != null && leftFootTrajectoryMessage.getRobotSide() != RobotSide.LEFT.toByte())
          return false;
-      if (rightFootTrajectoryMessage != null && rightFootTrajectoryMessage.getRobotSide() != RobotSide.RIGHT)
+      if (rightFootTrajectoryMessage != null && rightFootTrajectoryMessage.getRobotSide() != RobotSide.RIGHT.toByte())
          return false;
 
       return true;

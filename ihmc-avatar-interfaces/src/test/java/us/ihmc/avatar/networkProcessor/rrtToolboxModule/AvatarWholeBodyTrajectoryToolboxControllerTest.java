@@ -685,7 +685,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          {
             configurationValues[j] = (reachingMessage.manifoldUpperLimits[j] - reachingMessage.manifoldLowerLimits[j]) / (configurationValueResolution - 1)
                   * configurationIndex[j] + reachingMessage.manifoldLowerLimits[j];
-            switch (reachingMessage.manifoldConfigurationSpaces[j])
+            switch (ConfigurationSpaceName.fromByte(reachingMessage.manifoldConfigurationSpaces[j]))
             {
             case X:
                originPose.appendTranslation(configurationValues[j], 0.0, 0.0);

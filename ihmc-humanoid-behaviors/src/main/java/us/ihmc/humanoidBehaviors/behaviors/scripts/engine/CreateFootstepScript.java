@@ -148,7 +148,7 @@ public class CreateFootstepScript
       Point2D[] contactPoints = contactPointMap.get(contactType);
 
       // set robot side
-      footstep.robotSide = robotSide;
+      footstep.robotSide = robotSide.toByte();
       // set pose
       footstep.location = new Point3D(x, y, ankleHeight);
       footstep.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));

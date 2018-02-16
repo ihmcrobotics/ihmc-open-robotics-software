@@ -264,7 +264,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
       footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(orientation);
-      footstepData.setRobotSide(robotSide);
+      footstepData.setRobotSide(robotSide.toByte());
 
       return footstepData;
    }

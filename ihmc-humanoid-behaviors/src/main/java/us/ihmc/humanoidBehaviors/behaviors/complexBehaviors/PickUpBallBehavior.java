@@ -41,8 +41,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
@@ -458,19 +458,19 @@ public class PickUpBallBehavior extends AbstractBehavior
       //      };
 
       //RESET BODY POSITIONS *******************************************
-      GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.CHEST, 2);
+      GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, 2);
       chestGoHomeBehavior.setInput(goHomeChestMessage);
       GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior);
 
-      GoHomeMessage goHomepelvisMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.PELVIS, 2);
+      GoHomeMessage goHomepelvisMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, 2);
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior);
 
-      GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
+      GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.LEFT, 2);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
       GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior);
 
-      GoHomeMessage goHomeRightArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
+      GoHomeMessage goHomeRightArmMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.RIGHT, 2);
       armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
       GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior);
 

@@ -104,7 +104,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-         footstepData.setRobotSide(robotSide);
+         footstepData.setRobotSide(robotSide.toByte());
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
@@ -166,7 +166,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-         footstepData.setRobotSide(robotSide);
+         footstepData.setRobotSide(robotSide.toByte());
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
@@ -272,7 +272,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       for (RobotSide robotSide : RobotSide.values)
       {
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-         armTrajectoryMessage.robotSide = robotSide;
+         armTrajectoryMessage.robotSide = robotSide.toByte();
          double[] armConfig = straightArmConfigs.get(robotSide);
          armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
          for (int i = 0; i < armConfig.length; i++)

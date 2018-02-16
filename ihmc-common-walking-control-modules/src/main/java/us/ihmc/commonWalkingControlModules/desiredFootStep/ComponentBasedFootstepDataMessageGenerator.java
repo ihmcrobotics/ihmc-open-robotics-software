@@ -15,16 +15,17 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesir
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -88,12 +89,12 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
 
    public void createFootstepStatusListener()
    {
-      StatusMessageListener<FootstepStatus> footstepStatusListener = new StatusMessageListener<FootstepStatus>()
+      StatusMessageListener<FootstepStatusMessage> footstepStatusListener = new StatusMessageListener<FootstepStatusMessage>()
       {
          @Override
-         public void receivedNewMessageStatus(FootstepStatus footstepStatus)
+         public void receivedNewMessageStatus(FootstepStatusMessage footstepStatus)
          {
-            switch (footstepStatus.status)
+            switch (FootstepStatus.fromByte(footstepStatus.status))
             {
             case COMPLETED:
                computeAndSubmitFootsteps();
@@ -102,14 +103,14 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
             }
          }
       };
-      statusOutputManager.attachStatusMessageListener(FootstepStatus.class, footstepStatusListener);
+      statusOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, footstepStatusListener);
 
       StatusMessageListener<WalkingStatusMessage> walkingStatusListener = new StatusMessageListener<WalkingStatusMessage>()
       {
          @Override
          public void receivedNewMessageStatus(WalkingStatusMessage walkingStatusListener)
          {
-            switch (walkingStatusListener.getWalkingStatus())
+            switch (WalkingStatus.fromByte(walkingStatusListener.getWalkingStatus()))
             {
             case ABORT_REQUESTED:
                walk.set(false);

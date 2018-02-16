@@ -17,8 +17,8 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -95,10 +95,10 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          }
       };
 
-      GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.CHEST, 2);
+      GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, 2);
       GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, atlasPrimitiveActions.chestGoHomeBehavior);
 
-      GoHomeMessage goHomepelvisMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.PELVIS, 2);
+      GoHomeMessage goHomepelvisMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, 2);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, atlasPrimitiveActions.pelvisGoHomeBehavior);
 
       pipeLine.submitSingleTaskStage(leftHandBeforeGrab);

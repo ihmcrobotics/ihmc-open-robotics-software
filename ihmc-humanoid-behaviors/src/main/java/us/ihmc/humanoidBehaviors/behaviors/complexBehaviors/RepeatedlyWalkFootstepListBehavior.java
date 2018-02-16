@@ -6,6 +6,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -43,7 +44,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final FootstepDataListMessage forwardFootstepList = new FootstepDataListMessage();
    private final FootstepDataListMessage backwardFootstepList = new FootstepDataListMessage();
 
-   private final AtomicReference<FootstepStatus> footstepStatusMessage = new AtomicReference<>(null);
+   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
    private final SideDependentList<MovingReferenceFrame> soleFrames;
    private final ReferenceFrame midFootZUpFrame;
 
@@ -54,7 +55,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       soleFrames = referenceFrames.getSoleFrames();
       midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      communicationBridge.attachListener(FootstepStatus.class, footstepStatusMessage::set);
+      communicationBridge.attachListener(FootstepStatusMessage.class, footstepStatusMessage::set);
 
       walkingForward.set(true);
       initialSwingSide.set(defaultInitialSwingSide);
@@ -129,7 +130,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       footstepDataMessage.setLocation(footstepPose.getPosition());
       footstepDataMessage.setOrientation(footstepPose.getOrientation());
-      footstepDataMessage.setRobotSide(side);
+      footstepDataMessage.setRobotSide(side.toByte());
 
       return footstepDataMessage;
    }
@@ -142,8 +143,8 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
          return;
       }
 
-      FootstepStatus footstepStatus = this.footstepStatusMessage.getAndSet(null);
-      if(footstepStatus != null && footstepStatus.status.equals(FootstepStatus.Status.COMPLETED))
+      FootstepStatusMessage footstepStatus = this.footstepStatusMessage.getAndSet(null);
+      if(footstepStatus != null && footstepStatus.status == FootstepStatus.COMPLETED.toByte())
       {
          stepsAlongPath.increment();
       }

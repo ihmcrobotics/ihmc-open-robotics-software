@@ -259,7 +259,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    {
       FootstepDataListMessage desiredFootsteps = HumanoidMessageTools.createFootstepDataListMessage(0.0, 0.0);
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.4, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
@@ -270,17 +270,17 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    {
       FootstepDataListMessage desiredFootsteps = HumanoidMessageTools.createFootstepDataListMessage(0.0, 0.0);
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.6, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, 0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(1.2, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
+      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
       return desiredFootsteps;

@@ -5,7 +5,6 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
 "This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -17,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
 {
    @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
    public SE3TrajectoryMessage se3Trajectory;
 
@@ -50,12 +49,12 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
       setPacketInformation(other);
    }
 
-   public void setRobotSide(RobotSide robotSide)
+   public void setRobotSide(byte robotSide)
    {
       this.robotSide = robotSide;
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }

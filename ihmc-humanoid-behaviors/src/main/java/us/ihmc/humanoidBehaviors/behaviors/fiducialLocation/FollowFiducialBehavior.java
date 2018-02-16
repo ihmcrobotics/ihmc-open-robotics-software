@@ -6,8 +6,8 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -56,12 +57,12 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final HumanoidReferenceFrames referenceFrames;
 
    //   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>(10);
-   private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
+   private final ConcurrentListeningQueue<FootstepStatusMessage> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
    //   private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>(10);
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
-   private final SideDependentList<FootstepStatus> latestFootstepStatus;
-   private final SideDependentList<YoEnum<FootstepStatus.Status>> latestFootstepStatusEnum;
+   private final SideDependentList<FootstepStatusMessage> latestFootstepStatus;
+   private final SideDependentList<YoEnum<FootstepStatus>> latestFootstepStatusEnum;
    private final SideDependentList<YoFramePose> desiredFootStatusPoses;
    private final SideDependentList<YoFramePose> actualFootStatusPoses;
 
@@ -123,14 +124,14 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       latestFootstepStatus = new SideDependentList<>();
 
-      YoEnum<FootstepStatus.Status> leftFootstepStatus = new YoEnum<FootstepStatus.Status>("leftFootstepStatus", registry,
-            FootstepStatus.Status.class);
-      YoEnum<FootstepStatus.Status> rightFootstepStatus = new YoEnum<FootstepStatus.Status>("rightFootstepStatus", registry,
-            FootstepStatus.Status.class);
+      YoEnum<FootstepStatus> leftFootstepStatus = new YoEnum<FootstepStatus>("leftFootstepStatus", registry,
+            FootstepStatus.class);
+      YoEnum<FootstepStatus> rightFootstepStatus = new YoEnum<FootstepStatus>("rightFootstepStatus", registry,
+            FootstepStatus.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatusMessage.class);
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
    }
@@ -276,21 +277,22 @@ public class FollowFiducialBehavior extends AbstractBehavior
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         FootstepStatus footstepStatus = footstepStatusQueue.getLatestPacket();
-         latestFootstepStatus.set(footstepStatus.getRobotSide(), footstepStatus);
-         nextSideToSwing.set(footstepStatus.getRobotSide().getOppositeSide());
+         FootstepStatusMessage footstepStatus = footstepStatusQueue.getLatestPacket();
+         RobotSide robotSide = RobotSide.fromByte(footstepStatus.getRobotSide());
+         latestFootstepStatus.set(robotSide, footstepStatus);
+         nextSideToSwing.set(robotSide.getOppositeSide());
       }
 
       currentlySwingingFoot.set(null);
 
       for (RobotSide side : RobotSide.values)
       {
-         FootstepStatus status = latestFootstepStatus.get(side);
+         FootstepStatusMessage status = latestFootstepStatus.get(side);
          if (status != null)
          {
             latestFootstepStatusEnum.get(side).set(status.getStatus());
 
-            if (status.getStatus() == FootstepStatus.Status.STARTED)
+            if (status.getStatus() == FootstepStatus.STARTED.toByte())
             {
                currentlySwingingFoot.set(side);
             }
@@ -299,7 +301,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       for (RobotSide side : RobotSide.values)
       {
-         FootstepStatus status = latestFootstepStatus.get(side);
+         FootstepStatusMessage status = latestFootstepStatus.get(side);
          if (status != null)
          {
             Point3D desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();
@@ -319,7 +321,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void requestPlanarRegionsList()
    {
-      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
+      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.SINGLE_UPDATE);
       requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
       sendPacket(requestPlanarRegionsListMessage);
    }

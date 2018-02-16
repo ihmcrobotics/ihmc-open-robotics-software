@@ -402,7 +402,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          footstepMessage.setTransferDuration(transferDuration);
          footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
          footstepMessage.setOrientation(new Quaternion());
-         footstepMessage.setRobotSide(robotSide);
+         footstepMessage.setRobotSide(robotSide.toByte());
 
          footstepListMessage.add(footstepMessage);
          robotSide = robotSide.getOppositeSide();
@@ -413,7 +413,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       footstepMessage.setTransferDuration(transferDuration);
       footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
       footstepMessage.setOrientation(new Quaternion());
-      footstepMessage.setRobotSide(robotSide);
+      footstepMessage.setRobotSide(robotSide.toByte());
 
       footstepListMessage.add(footstepMessage);
       footstepListMessage.setDefaultSwingDuration(swingDuration);
@@ -534,7 +534,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
       footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-      footstepData.setRobotSide(robotSide);
+      footstepData.setRobotSide(robotSide.toByte());
 
       if (setPredictedContactPoints && (contactPointsInAnkleFrame != null))
       {
