@@ -168,6 +168,7 @@ public class GuiController
       allParameters.stream().forEach(parameter -> {
          parameter.addChangedListener(changeCollector);
          parameter.addStatusUpdater();
+         parameter.saveStateForReset();
          parameterMap.put(parameter.getUniqueName(), parameter);
       });
    }
