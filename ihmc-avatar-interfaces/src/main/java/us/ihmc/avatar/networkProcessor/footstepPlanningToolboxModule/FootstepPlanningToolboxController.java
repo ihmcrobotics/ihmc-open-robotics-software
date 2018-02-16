@@ -265,31 +265,10 @@ public class FootstepPlanningToolboxController extends ToolboxController
          result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
       }
 
-      if (activePlanner.getEnumValue().equals(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR))
-      {
-         setOutputStatusOfVisibilityGraph(result);
-      }
-
       planarRegionsList.ifPresent(result::setPlanarRegionsList);
       result.setPlanId(planId.getIntegerValue());
       result.planningResult = status;
       return result;
-   }
-
-   private void setOutputStatusOfVisibilityGraph(FootstepPlanningToolboxOutputStatus result)
-   {
-      VisibilityGraphWithAStarPlanner visibilityGraphWithAStarPlanner = (VisibilityGraphWithAStarPlanner) plannerMap
-            .get(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
-      result.navigableExtrusions = visibilityGraphWithAStarPlanner.getNavigableRegions();
-      result.lowLevelPlannerGoal = visibilityGraphWithAStarPlanner.getLowLevelPlannerGoal();
-
-      List<Point2D> waypointList = visibilityGraphWithAStarPlanner.getBodyPathWaypoints();
-      Point2D[] waypoints = new Point2D[waypointList.size()];
-      for (int i = 0; i < waypointList.size(); i++)
-      {
-         waypoints[i] = waypointList.get(i);
-      }
-      result.bodyPath = waypoints;
    }
 
    private static SideDependentList<ConvexPolygon2D> createFootPolygonsFromContactPoints(RobotContactPointParameters contactPointParameters)

@@ -212,8 +212,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
          this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
 
-      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
-      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
+//      RigidBodyTransform snapTransform = snapper.snapFootstepNode(startNode).getSnapTransform();
+//      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, startNode, snapTransform, parameters.getIdealFootstepWidth(), 0.5, 0.2,  0.5);
 
       stack.add(startNode);
       expandedNodes = new HashSet<>();
