@@ -41,6 +41,15 @@ public class GuiParameter extends GuiElement
       value.addListener((observable, oldValue, newValue) -> status = GuiParameterStatus.MODIFIED);
    }
 
+   public void markAsModified()
+   {
+      if (status != GuiParameterStatus.MODIFIED)
+      {
+         status = GuiParameterStatus.MODIFIED;
+         informListeners();
+      }
+   }
+
    public void setValue(String value)
    {
       if (!this.value.getValueSafe().equals(value))
@@ -173,4 +182,5 @@ public class GuiParameter extends GuiElement
    {
       initialParameter = createCopy();
    }
+
 }

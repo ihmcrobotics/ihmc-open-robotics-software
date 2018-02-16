@@ -22,11 +22,11 @@
 }
 
 #modified-parameter-name-in-tree-view {
-	-fx-fill: blue;
+	-fx-fill: orange;
 }
 
 #default-parameter-name-in-tree-view {
-	-fx-fill: red;
+	-fx-fill: darkred;
 }
 
 #parameter-name-in-tuner {

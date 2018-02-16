@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -55,8 +56,10 @@ public class ParameterTreeParameter implements ParameterTreeValue
    {
       private final Text name = new Text();
       private final Label value = new Label();
-      private final MenuItem discard = new MenuItem("Discard");
 
+      private final ContextMenu contextMenu = new ContextMenu();
+      private final MenuItem discard = new MenuItem("Discard");
+      private final MenuItem markModified = new MenuItem("Mark as Modified");
       private final MenuItem copyName = new MenuItem("Copy Name");
       private final Clipboard clipboard = Clipboard.getSystemClipboard();
       private final ClipboardContent content = new ClipboardContent();
@@ -71,17 +74,21 @@ public class ParameterTreeParameter implements ParameterTreeValue
          getChildren().add(name);
          value.setId("parameter-value-in-tree-view");
 
+         // Setup context menu for copying name to system clipboard.
+         content.putString(parameter.getName());
+         contextMenu.getItems().add(copyName);
+         contextMenu.getItems().add(new SeparatorMenuItem());
+         copyName.setOnAction((event) -> clipboard.setContent(content));
+
          // Setup context menu for discarding changes.
-         ContextMenu contextMenu = new ContextMenu();
          discard.setDisable(true);
          contextMenu.getItems().add(discard);
          setOnContextMenuRequested((event) -> contextMenu.show(value, event.getScreenX(), event.getScreenY()));
          discard.setOnAction(event -> parameter.reset());
 
-         // Setup context menu for copying name to system clipboard.
-         content.putString(parameter.getName());
-         contextMenu.getItems().add(copyName);
-         copyName.setOnAction((event) -> clipboard.setContent(content));
+         // Setup context menu for marking a parameter as modified.
+         contextMenu.getItems().add(markModified);
+         markModified.setOnAction((event) -> parameter.markAsModified());
 
          // Set up the css styles for the parameter status.
          updateStyle(parameter);
@@ -117,6 +124,8 @@ public class ParameterTreeParameter implements ParameterTreeValue
             discard.setDisable(true);
             name.setId("parameter-name-in-tree-view");
          }
+
+         markModified.setDisable(!discard.isDisable());
       }
    }
 }
