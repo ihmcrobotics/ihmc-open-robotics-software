@@ -528,7 +528,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          handTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
-            handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
+         {
+            handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+            handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId(id - 1);
+         }
          id++;
          double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 
@@ -717,7 +720,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                if (messageIndex == numberOfMessages - 1)
                   previousMessageId = id + 100; // Bad ID
 
-               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
+               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId(previousMessageId);
             }
             id++;
             double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
@@ -830,7 +834,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             handTrajectoryMessage.setUniqueId(id);
 
             if (messageIndex > 0)
-               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE, id - 1);
+            {
+               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE);
+               handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId(id - 1);
+            }
             id++;
             double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 

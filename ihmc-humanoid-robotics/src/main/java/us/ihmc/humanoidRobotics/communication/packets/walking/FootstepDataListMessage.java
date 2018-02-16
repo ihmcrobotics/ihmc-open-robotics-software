@@ -226,7 +226,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
    public void setExecutionMode(ExecutionMode executionMode)
    {
-      queueingProperties.setExecutionMode(executionMode, VALID_MESSAGE_DEFAULT_ID);
+      queueingProperties.setExecutionMode(executionMode);
+      queueingProperties.setPreviousMessageId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public void setExecutionTiming(ExecutionTiming executionTiming)
