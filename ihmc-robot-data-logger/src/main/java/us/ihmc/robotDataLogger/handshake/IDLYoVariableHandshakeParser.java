@@ -30,15 +30,20 @@ import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.parameters.LongParameter;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
+import us.ihmc.yoVariables.parameters.SingleParameterReader;
 import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * Class to decode variable data from handshakes
@@ -77,6 +82,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       return 1 + handShake.getVariables().size() + jointStateVariables;
    }
 
+   @Override
    public void parseFrom(byte[] data) throws IOException
    {
       if(serializer == null)
@@ -87,6 +93,7 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       parseFrom(handshake);
    }
 
+   @Override
    public void parseFrom(Handshake handshake)
    {
       this.dt = handshake.getDt();
@@ -105,9 +112,6 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       addJointStates(handshake);
       addGraphicObjects(handshake);
 
-      DefaultParameterReader parameterReader = new DefaultParameterReader();
-      parameterReader.readParametersInRegistry(regs.get(0));
-      
       this.numberOfVariables = handshake.getVariables().size();
       this.numberOfJointStateVariables = getNumberOfJointStateVariables(handshake);
       this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
@@ -189,6 +193,21 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
    
             default:
                throw new RuntimeException("Unknown YoVariable type: " + type.name());
+            }
+
+            switch (yoVariableDefinition.getLoadStatus())
+            {
+            case Unloaded:
+               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.UNLOADED);
+               break;
+            case Default:
+               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.DEFAULT);
+               break;
+            case Loaded:
+               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.LOADED);
+               break;
+            default:
+               throw new RuntimeException("Unknown load status: " + yoVariableDefinition.getLoadStatus());
             }
             
             YoVariable<?> newVariable = parent.getYoVariable(parent.getNumberOfYoVariables() - 1);
