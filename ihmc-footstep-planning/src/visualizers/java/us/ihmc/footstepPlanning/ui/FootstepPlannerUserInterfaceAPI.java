@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
@@ -19,6 +20,7 @@ public class FootstepPlannerUserInterfaceAPI
    private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
    private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
    private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
+   private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
@@ -30,6 +32,11 @@ public class FootstepPlannerUserInterfaceAPI
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
+
+   private static final TypedTopicTheme<Double> NodeCheckerCliffHeight = apiFactory.createTypedTopicTheme("NodeCheckerCliffHeight");
+   private static final TypedTopicTheme<Double> NodeCheckerCliffMinDistance = apiFactory.createTypedTopicTheme("NodeCheckerCliffMinDistance");
+   private static final TypedTopicTheme<Boolean> ValidNode = apiFactory.createTypedTopicTheme("ValidNode");
+   private static final TypedTopicTheme<Pose3D> FootstepPose = apiFactory.createTypedTopicTheme("FootstepPose");
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
@@ -55,6 +62,14 @@ public class FootstepPlannerUserInterfaceAPI
    public static final Topic<Double> GoalOrientationTopic = Root.child(Goal).topic(Orientation);
 
    public static final Topic<Boolean> GlobalResetTopic = Root.topic(Reset);
+
+   public static final Topic<Boolean> EnableNodeChecking = Root.child(NodeChecking).topic(Enable);
+   public static final Topic<Point3D> NodeCheckingPosition = Root.child(NodeChecking).topic(Position);
+   public static final Topic<Double> NodeCheckingOrientation = Root.child(NodeChecking).topic(Orientation);
+   public static final Topic<Double> CliffHeight = Root.child(NodeChecking).topic(NodeCheckerCliffHeight);
+   public static final Topic<Double> MinDistanceToCliff = Root.child(NodeChecking).topic(NodeCheckerCliffMinDistance);
+   public static final Topic<Boolean> ValidNodeTopic = Root.child(NodeChecking).topic(ValidNode);
+   public static final Topic<Pose3D> FootstepPoseTopic = Root.child(NodeChecking).topic(FootstepPose);
 
    public static final API API = apiFactory.getAPIAndCloseFactory();
 }
