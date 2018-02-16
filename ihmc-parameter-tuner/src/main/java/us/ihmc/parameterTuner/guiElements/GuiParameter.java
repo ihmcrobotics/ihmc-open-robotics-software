@@ -18,7 +18,7 @@ public class GuiParameter extends GuiElement
    private final StringProperty max = new SimpleStringProperty();
    private final StringProperty description = new SimpleStringProperty();
 
-   private GuiParameter initialParameter;
+   private GuiParameter resetState;
    private GuiParameterStatus status;
 
    private final List<ParameterChangeListener> listeners = new ArrayList<>();
@@ -171,16 +171,16 @@ public class GuiParameter extends GuiElement
 
    public void reset()
    {
-      if (initialParameter == null || status != GuiParameterStatus.MODIFIED)
+      if (resetState == null || status != GuiParameterStatus.MODIFIED)
       {
          throw new RuntimeException("Can not reset if the parameter was not modified.");
       }
-      set(initialParameter);
+      set(resetState);
    }
 
    public void saveStateForReset()
    {
-      initialParameter = createCopy();
+      resetState = createCopy();
    }
 
 }
