@@ -101,15 +101,8 @@ public class AvatarSimulationFactory
 
    private void setupYoVariableServer()
    {
-      if (robotModel.get().getLogSettings().isLog())
-      {
-         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(),
-                                                 robotModel.get().getLogModelProvider(), robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
-      }
-      else
-      {
-         yoVariableServer = null;
-      }
+      yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), robotModel.get().getLogModelProvider(),
+                                              robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
    }
 
    private void setupSimulationConstructionSet()
