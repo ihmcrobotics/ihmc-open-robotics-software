@@ -203,8 +203,8 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             case Default:
                SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.DEFAULT);
                break;
-            case File:
-               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.FILE);
+            case Loaded:
+               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.LOADED);
                break;
             default:
                throw new RuntimeException("Unknown load status: " + yoVariableDefinition.getLoadStatus());

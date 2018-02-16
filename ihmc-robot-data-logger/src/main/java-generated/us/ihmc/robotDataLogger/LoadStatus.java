@@ -15,7 +15,7 @@ public enum LoadStatus
         
         	Default,
         
-        	File,
+        	Loaded,
         
 	;
 	

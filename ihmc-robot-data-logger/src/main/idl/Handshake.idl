@@ -27,7 +27,7 @@ module robotDataLogger{
 		NoParameter,
 		Unloaded,
 		Default,
-		File
+		Loaded
 	}
 	
 	struct YoVariableDefinition
