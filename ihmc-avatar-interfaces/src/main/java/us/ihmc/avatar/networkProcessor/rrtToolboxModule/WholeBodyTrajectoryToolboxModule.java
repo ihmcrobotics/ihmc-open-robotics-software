@@ -13,12 +13,12 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ReachingManifoldMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.util.MessageUnpackingTools;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -40,6 +40,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
       wholeBodyTrajectoryToolboxController = new WholeBodyTrajectoryToolboxController(drcRobotModel, fullRobotModel, commandInputManager, statusOutputManager,
                                                                                       registry, yoGraphicsListRegistry, startYoVariableServer);
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class, 10, MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
       commandInputManager.registerConversionHelper(new WholeBodyTrajectoryToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
@@ -59,7 +60,6 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    static List<Class<? extends Command<?, ?>>> supportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      commands.add(WholeBodyTrajectoryToolboxCommand.class);
       commands.add(WaypointBasedTrajectoryCommand.class);
       commands.add(RigidBodyExplorationConfigurationCommand.class);
       commands.add(ReachingManifoldCommand.class);
