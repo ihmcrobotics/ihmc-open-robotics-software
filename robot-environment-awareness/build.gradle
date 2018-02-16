@@ -30,7 +30,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
    compile group: 'us.ihmc', name: 'joctomap', version: '1.6.7'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    
    compile group: 'us.ihmc', name: 'ihmc-communication', version: "source"
    compile group: 'us.ihmc', name: 'ihmc-robotics-toolkit', version: "source"

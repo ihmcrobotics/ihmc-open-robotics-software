@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
    compile group: 'org.georegression', name: 'georegression', version: '0.11'
