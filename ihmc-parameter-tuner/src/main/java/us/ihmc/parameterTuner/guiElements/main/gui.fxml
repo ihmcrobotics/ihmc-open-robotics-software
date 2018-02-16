@@ -25,10 +25,11 @@
 								<TextField fx:id="searchFieldNamespaces" HBox.hgrow="ALWAYS" />
 							</children>
 						</HBox>
-						<CheckBox text="Hide Namespaces" fx:id="hideNamespaces" onAction="#handleNamespaceButton"
-							/>
 						<HBox spacing="10.0" alignment="CENTER_LEFT">
 							<children>
+								<Button text="Refresh" onAction="#updateTree" />
+								<CheckBox text="Hide Namespaces" fx:id="hideNamespaces" onAction="#updateTree"
+									/>
 								<ChoiceBox fx:id="statusFilter" />
 								<Text text="Status Filter" />
 							</children>

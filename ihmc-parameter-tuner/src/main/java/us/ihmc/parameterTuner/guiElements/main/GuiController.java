@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -63,7 +62,7 @@ public class GuiController
 
       statusFilter.getItems().addAll(GuiParameterStatus.values());
       statusFilter.getSelectionModel().select(GuiParameterStatus.ANY);
-      statusFilter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> statusFilterChanged());
+      statusFilter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateTree());
 
       tree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
       tree.setOnMouseClicked(new EventHandler<MouseEvent>()
@@ -132,20 +131,10 @@ public class GuiController
    }
 
    @FXML
-   protected void handleNamespaceButton(ActionEvent event)
-   {
-      updateTree();
-      searchFieldNamespaces.setDisable(hideNamespaces.isSelected());
-   }
-
-   private void statusFilterChanged()
-   {
-      updateTree();
-   }
-
    private void updateTree()
    {
       tree.filterRegistries(hideNamespaces.isSelected(), statusFilter.getValue(), searchFieldParameters.getText(), searchFieldNamespaces.getText());
+      searchFieldNamespaces.setDisable(hideNamespaces.isSelected());
    }
 
    public void addInputNode(Node node)
