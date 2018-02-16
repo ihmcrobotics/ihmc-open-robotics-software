@@ -67,7 +67,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParamete
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -806,15 +805,6 @@ public final class RandomHumanoidMessages
       HandPowerCyclePacket next = new HandPowerCyclePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      return next;
-   }
-
-   public static ValkyrieLowLevelControlModeMessage nextValkyrieLowLevelControlModeMessage(Random random)
-   {
-      ValkyrieLowLevelControlModeMessage next = new ValkyrieLowLevelControlModeMessage();
-      next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.requestedControlMode = RandomNumbers.nextEnum(random,
-                                                         us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage.ControlMode.class);
       return next;
    }
 
