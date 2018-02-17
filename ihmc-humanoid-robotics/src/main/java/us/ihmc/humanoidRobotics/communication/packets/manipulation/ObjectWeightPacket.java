@@ -4,6 +4,9 @@ import us.ihmc.communication.packets.Packet;
 
 public class ObjectWeightPacket extends Packet<ObjectWeightPacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    public byte robotSide;
    public double weight;
 

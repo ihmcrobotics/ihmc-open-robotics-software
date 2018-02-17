@@ -9,6 +9,10 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
       topic = "/output/walking_status")
 public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
 {
+   public static final byte STARTED = 0;
+   public static final byte COMPLETED = 1;
+   public static final byte ABORT_REQUESTED = 2;
+
    @RosExportedField(documentation = "Status of walking. Either STARTED, COMPLETED, or ABORT_REQUESTED.")
    public byte walkingStatus;
 

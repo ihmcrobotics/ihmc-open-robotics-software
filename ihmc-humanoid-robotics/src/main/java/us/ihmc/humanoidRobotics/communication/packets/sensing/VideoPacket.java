@@ -14,6 +14,14 @@ import us.ihmc.robotics.geometry.RotationTools;
 @HighBandwidthPacket
 public class VideoPacket extends Packet<VideoPacket>
 {
+   public static final byte VIDEO_SOURCE_MULTISENSE_LEFT_EYE = 0;
+   public static final byte VIDEO_SOURCE_MULTISENSE_RIGHT_EYE = 1;
+   public static final byte VIDEO_SOURCE_FISHEYE_LEFT = 2;
+   public static final byte VIDEO_SOURCE_FISHEYE_RIGHT = 3;
+   public static final byte VIDEO_SOURCE_CV_THRESHOLD = 4;
+   public static final byte VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR = 5;
+   public static final byte VIDEO_SOURCE_AWARE_FACE_TRACKER = 6;
+
    public byte videoSource;
    public long timeStamp;
    public byte[] data;

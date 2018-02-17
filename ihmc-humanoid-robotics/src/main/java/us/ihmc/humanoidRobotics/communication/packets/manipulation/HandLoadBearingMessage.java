@@ -6,6 +6,9 @@ import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
 
 public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    /** The robot side of that hand that will be load bearing. */
    public byte robotSide;
 

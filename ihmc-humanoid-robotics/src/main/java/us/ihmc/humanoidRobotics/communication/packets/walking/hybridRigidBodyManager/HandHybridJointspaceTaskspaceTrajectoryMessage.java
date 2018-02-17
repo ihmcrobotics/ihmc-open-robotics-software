@@ -12,6 +12,9 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
                   topic = "/control/hybrid_hand_trajectory")
 public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The taskspace trajectory information.")

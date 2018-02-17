@@ -9,6 +9,13 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
       + " It is useful to get back to a safe configuration before walking.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/go_home")
 public class GoHomeMessage extends Packet<GoHomeMessage>
 {
+   public static final byte HUMANOID_BODY_PART_ARM = 0;
+   public static final byte HUMANOID_BODY_PART_CHEST = 1;
+   public static final byte HUMANOID_BODY_PART_PELVIS = 2;
+
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "Specifies the part of the body the user wants to move back to it home configuration.")
    public byte humanoidBodyPart;
    @RosExportedField(documentation = "Needed to identify a side dependent end-effector.")

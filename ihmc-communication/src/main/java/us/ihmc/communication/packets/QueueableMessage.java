@@ -16,6 +16,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 @RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/queueable_properties")
 public final class QueueableMessage extends Packet<QueueableMessage> implements EpsilonComparable<QueueableMessage>
 {
+   public static final byte EXECUTION_MODE_OVERRIDE = 0;
+   public static final byte EXECUTION_MODE_QUEUE = 1;
+
    @RosExportedField(documentation = "When OVERRIDE is chosen:"
          + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
          + " Otherwise the controller will prepend a first trajectory point at the current desired position." + "\n When QUEUE is chosen:"

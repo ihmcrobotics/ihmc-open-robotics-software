@@ -4,6 +4,10 @@ import us.ihmc.communication.packets.Packet;
 
 public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlModeResponsePacket>
 {
+   public static final byte STOP = 0;
+   public static final byte PAUSE = 1;
+   public static final byte RESUME = 2;
+
    public byte behaviorControlModeEnumRequest;
 
    // empty constructor for deserialization

@@ -4,6 +4,11 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 
 public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
 {
+   public static final byte SINGLE_UPDATE = 0;
+   public static final byte CONTINUOUS_UPDATE = 1;
+   public static final byte STOP_UPDATE = 2;
+   public static final byte CLEAR = 3;
+
    public byte planarRegionsRequestType;
    public BoundingBox3D boundingBoxInWorldForRequest;
 

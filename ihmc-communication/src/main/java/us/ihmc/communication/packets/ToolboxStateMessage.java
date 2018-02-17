@@ -2,6 +2,10 @@ package us.ihmc.communication.packets;
 
 public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
 {
+   public static final byte WAKE_UP = 0;
+   public static final byte REINITIALIZE = 1;
+   public static final byte SLEEP = 2;
+
    public byte requestedToolboxState;
 
    public ToolboxStateMessage()

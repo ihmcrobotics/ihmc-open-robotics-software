@@ -17,6 +17,9 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public byte robotSide;
    @RosExportedField(documentation = "Specifies the adjusted position of the footstep. It is expressed in world frame.")

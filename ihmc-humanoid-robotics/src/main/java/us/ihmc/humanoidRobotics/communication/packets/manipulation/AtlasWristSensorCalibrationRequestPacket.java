@@ -10,6 +10,9 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
       topic = "/control/request_wrist_sensor_calibration")
 public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristSensorCalibrationRequestPacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "The robot side (left or right) for the wrist sensor you would like to request calibration for.")
    public byte robotSide;
 

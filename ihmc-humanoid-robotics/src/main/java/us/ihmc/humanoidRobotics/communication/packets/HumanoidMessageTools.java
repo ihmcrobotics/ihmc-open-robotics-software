@@ -361,7 +361,7 @@ public class HumanoidMessageTools
    public static BehaviorStatusPacket createBehaviorStatusPacket(CurrentBehaviorStatus requestedControl)
    {
       BehaviorStatusPacket message = new BehaviorStatusPacket();
-      message.currentStatus = requestedControl.toByte();
+      message.currentBehaviorStatus = requestedControl.toByte();
       return message;
    }
 

@@ -5,6 +5,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    public static final int VELOCITY = 0;
    public static final int POSITION = 1;
 

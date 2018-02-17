@@ -6,6 +6,9 @@ import us.ihmc.communication.packets.Packet;
 
 public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 {
+   public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_START_SEARCH = 0;
+   public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH = 1;
+   public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = 2;
 
    public FootstepDataMessage startFootstep;
    public double thetaStart;
